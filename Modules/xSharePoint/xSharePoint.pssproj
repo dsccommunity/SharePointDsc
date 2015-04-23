@@ -8,6 +8,28 @@
     <RootNamespace>MyApplication</RootNamespace>
     <AssemblyName>MyApplication</AssemblyName>
     <Name>xSharePoint</Name>
+    <ManifestFileName>xSharePoint.psd1</ManifestFileName>
+    <AliasesToExport />
+    <Author />
+    <ClrVersion />
+    <CmdletsToExport />
+    <CompanyName />
+    <Copyright />
+    <Description />
+    <FormatsToProcess />
+    <FunctionsToProcess />
+    <Guid />
+    <ModuleList />
+    <ModuleToProcess />
+    <NestedModules />
+    <PowerShellHostVersion />
+    <PowerShellVersion />
+    <ProcessorArchitecture />
+    <RequiredAssemblies />
+    <RequiredModules />
+    <ScriptsToProcess />
+    <TypesToProcess />
+    <VariablesToExport />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,6 +72,7 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
+    <Folder Include="DSCResources\MSFT_xSPClearRemoteSessions\" />
     <Folder Include="Modules\" />
     <Folder Include="Modules\xSharePoint.Util\" />
   </ItemGroup>
@@ -101,6 +124,10 @@
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psd1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="xSharePoint.psd1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.psm1" />
+    <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.schema.mof" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
