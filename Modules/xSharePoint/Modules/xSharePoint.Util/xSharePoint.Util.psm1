@@ -27,4 +27,26 @@ function Get-xSharePointAuthenticatedPSSession() {
 	}
 }
 
+function Rename-xSharePointParamValue() {
+	[CmdletBinding()]
+	param
+	(
+		[parameter(Mandatory = $true,Position=1)]
+		$params,
+
+		[parameter(Mandatory = $true,Position=2)]
+		[System.Boolean]
+		$oldName,
+
+		[parameter(Mandatory = $true,Position=3)]
+		$newName
+	)
+
+	if ($params.ContainsKey($oldName)) {
+		$params.Add($newName, $params.$oldName)
+		$params.Remove($oldName) | Out-Null
+	}
+	return $params
+}
+
 Export-ModuleMember -Function *
