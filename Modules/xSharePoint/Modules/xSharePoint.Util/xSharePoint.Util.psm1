@@ -13,9 +13,14 @@ function Get-xSharePointAuthenticatedPSSession() {
 
 	$session = Get-PSSession | ? { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName}
 
-	if ($session -ne $null -and $ForceNewSession -ne $true) { return $session }
+	if ($session -ne $null -and $ForceNewSession -ne $true) { 
+		$id = $session.InstanceId
+		Write-Verbose "Using existing PowerShell session '$id'"
+		return $session 
+	}
 	else
 	{
+		Write-Verbose "Creating new PowerShell session"
 		$session = New-PSSession -ComputerName "localhost" -Credential $Credential -Authentication CredSSP
 		Invoke-Command -Session $session -ScriptBlock {
 			if ((Get-PSSnapin "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue) -eq $null) 
@@ -35,7 +40,6 @@ function Rename-xSharePointParamValue() {
 		$params,
 
 		[parameter(Mandatory = $true,Position=2)]
-		[System.Boolean]
 		$oldName,
 
 		[parameter(Mandatory = $true,Position=3)]
