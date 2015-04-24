@@ -18,7 +18,9 @@ Pleaes refer to the [Contribution Guidelines](https://github.com/PowerShell/DscR
 
 To install the xSharePoint module:
 
-Unzip the content under $env:ProgramFiles\WindowsPowerShell\Modules folder To confirm installation:
+Unzip the content under $env:ProgramFiles\WindowsPowerShell\Modules folder 
+
+To confirm installation:
 
 Run Get-DSCResource to see that xSharePoint is among the DSC Resources listed. Requirements This module requires the latest version of PowerShell (v4.0, which ships in Windows 8.1 or Windows Server 2012R2). 
 To easily use PowerShell 4.0 on older operating systems, install WMF 4.0. 
