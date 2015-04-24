@@ -3,6 +3,14 @@ install:
 - cinst -y pester
 - git clone https://github.com/PowerShell/DscResource.Tests
 build: off
+test_script:
+    - ps: |
+        $testResultsFile = ".\TestsResults.xml"
+        $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
+        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
+        if ($res.FailedCount -gt 0) { 
+            throw "$($res.FailedCount) tests failed."
+        }
 on_finish:
 - ps: >-
     $stagingDirectory = (Resolve-Path ..).Path
