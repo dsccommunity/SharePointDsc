@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>6CAFC0C6-A428-4d30-A9F9-700E829FEA51</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MyApplication</RootNamespace>
+    <AssemblyName>MyApplication</AssemblyName>
+    <Name>xSharePoint</Name>
+    <ManifestFileName>xSharePoint.psd1</ManifestFileName>
+    <AliasesToExport />
+    <Author />
+    <ClrVersion />
+    <CmdletsToExport />
+    <CompanyName />
+    <Copyright />
+    <Description />
+    <FormatsToProcess />
+    <FunctionsToProcess />
+    <Guid />
+    <ModuleList />
+    <ModuleToProcess />
+    <NestedModules />
+    <PowerShellHostVersion />
+    <PowerShellVersion />
+    <ProcessorArchitecture />
+    <RequiredAssemblies />
+    <RequiredModules />
+    <ScriptsToProcess />
+    <TypesToProcess />
+    <VariablesToExport />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="DSCResources\" />
+    <Folder Include="DSCResources\MSFT_xSPBCSServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPCacheAccounts\" />
+    <Folder Include="DSCResources\MSFT_xSPCreateFarm\" />
+    <Folder Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPDistributedCacheService\" />
+    <Folder Include="DSCResources\MSFT_xSPFeature\" />
+    <Folder Include="DSCResources\MSFT_xSPInstallPrereqs\" />
+    <Folder Include="DSCResources\MSFT_xSPInstall\" />
+    <Folder Include="DSCResources\MSFT_xSPJoinFarm\" />
+    <Folder Include="DSCResources\MSFT_xSPManagedAccount\" />
+    <Folder Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPManagedPath\" />
+    <Folder Include="DSCResources\MSFT_xSPSearchServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPSecureStoreServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPServiceAppPool\" />
+    <Folder Include="DSCResources\MSFT_xSPServiceInstance\" />
+    <Folder Include="DSCResources\MSFT_xSPSite\" />
+    <Folder Include="DSCResources\MSFT_xSPStateServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPUsageApplication\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
+    <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
+    <Folder Include="DSCResources\MSFT_xSPClearRemoteSessions\" />
+    <Folder Include="Modules\" />
+    <Folder Include="Modules\xSharePoint.Util\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPCreateFarm\MSFT_xSPCreateFarm.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPCreateFarm\MSFT_xSPCreateFarm.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPDistributedCacheService\MSFT_xSPDistributedCacheService.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPDistributedCacheService\MSFT_xSPDistributedCacheService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPInstall\MSFT_xSPInstall.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPInstall\MSFT_xSPInstall.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPJoinFarm\MSFT_xSPJoinFarm.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPJoinFarm\MSFT_xSPJoinFarm.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPManagedAccount\MSFT_xSPManagedAccount.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPManagedAccount\MSFT_xSPManagedAccount.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\MSFT_xSPManagedMetaDataServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\MSFT_xSPManagedMetaDataServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPManagedPath\MSFT_xSPManagedPath.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPManagedPath\MSFT_xSPManagedPath.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPSearchServiceApp\MSFT_xSPSearchServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSearchServiceApp\MSFT_xSPSearchServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPSecureStoreServiceApp\MSFT_xSPSecureStoreServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSecureStoreServiceApp\MSFT_xSPSecureStoreServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPServiceAppPool\MSFT_xSPServiceAppPool.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPServiceAppPool\MSFT_xSPServiceAppPool.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPServiceInstance\MSFT_xSPServiceInstance.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPServiceInstance\MSFT_xSPServiceInstance.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPStateServiceApp\MSFT_xSPStateServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPStateServiceApp\MSFT_xSPStateServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPUsageApplication\MSFT_xSPUsageApplication.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUsageApplication\MSFT_xSPUsageApplication.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psd1" />
+    <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
+    <Compile Include="xSharePoint.psd1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.psm1" />
+    <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.schema.mof" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="Build" />
+</Project>
