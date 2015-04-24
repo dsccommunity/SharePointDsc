@@ -1,41 +1,41 @@
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$ApplicationPool,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ApplicationPool,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	Write-Verbose "Getting BCS service app '$Name'"
+    Write-Verbose "Getting BCS service app '$Name'"
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	$result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-		$serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-						Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
-		If ($serviceApp -eq $null)
+        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
+                        Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
+        If ($serviceApp -eq $null)
         {
             return @{}
         }
-		else
-		{
-			return @{
-				Name = $serviceApp.DisplayName
-				ApplicationPool = $serviceApp.ApplicationPool.Name
-			}
-		}
+        else
+        {
+            return @{
+                Name = $serviceApp.DisplayName
+                ApplicationPool = $serviceApp.ApplicationPool.Name
+            }
+        }
     }
     $result
 }
@@ -43,87 +43,87 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$ApplicationPool,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ApplicationPool,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseName,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseName,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseServer,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseServer,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	$result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
-	if ($result.Count -eq 0) { 
-		Write-Verbose "Creating BCS Service Application $Name"
-		Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-			$params = $args[0]
-			$params.Remove("InstallAccount") | Out-Null
-			New-SPBusinessDataCatalogServiceApplication @params | Out-Null
-		}
-	}
-	else {
-		if ($ApplicationPool -ne $result.ApplicationPool) {
-			Write-Verbose "Updating BCS Service Application $Name"
-			Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-				$params = $args[0]
-				$serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-						Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
-				$serviceApp | Set-SPBusinessDataCatalogServiceApplication -ApplicationPool (Get-SPServiceApplicationPool $params.ApplicationPool)
-			}
-		}
-	}
+    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    if ($result.Count -eq 0) { 
+        Write-Verbose "Creating BCS Service Application $Name"
+        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            $params.Remove("InstallAccount") | Out-Null
+            New-SPBusinessDataCatalogServiceApplication @params | Out-Null
+        }
+    }
+    else {
+        if ($ApplicationPool -ne $result.ApplicationPool) {
+            Write-Verbose "Updating BCS Service Application $Name"
+            Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+                $params = $args[0]
+                $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
+                        Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
+                $serviceApp | Set-SPBusinessDataCatalogServiceApplication -ApplicationPool (Get-SPServiceApplicationPool $params.ApplicationPool)
+            }
+        }
+    }
 }
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$ApplicationPool,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ApplicationPool,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseName,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseName,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseServer,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DatabaseServer,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
-	$result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-	
-	Write-Verbose "Testing for BCS Service Application '$Name'"
-	if ($result.Count -eq 0) { return $false }
-	else {
-		if ($ApplicationPool -ne $result.ApplicationPool) { return $false }
-	}
-	return $true
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
+    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
+    
+    Write-Verbose "Testing for BCS Service Application '$Name'"
+    if ($result.Count -eq 0) { return $false }
+    else {
+        if ($ApplicationPool -ne $result.ApplicationPool) { return $false }
+    }
+    return $true
 }
 
 Export-ModuleMember -Function *-TargetResource

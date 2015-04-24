@@ -1,33 +1,33 @@
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$WebAppUrl,
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$SuperUserAlias,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SuperUserAlias,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$SuperReaderAlias,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SuperReaderAlias,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	Write-Verbose "Getting cache accounts for $WebAppUrl"
+    Write-Verbose "Getting cache accounts for $WebAppUrl"
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	$result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-		$wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
 
         if ($wa -eq $null) { return @{} }
         
@@ -52,35 +52,35 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$WebAppUrl,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$SuperUserAlias,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SuperUserAlias,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$SuperReaderAlias,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SuperReaderAlias,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	Write-Verbose "Setting cache accounts for $WebAppUrl"
+    Write-Verbose "Setting cache accounts for $WebAppUrl"
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	$result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-		
-		$params = $args[0]
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        
+        $params = $args[0]
 
-		$wa = Get-SPWebApplication $params.WebAppUrl
+        $wa = Get-SPWebApplication $params.WebAppUrl
         
         if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
             $wa.Properties["portalsuperuseraccount"] = $params.SuperUserAlias
@@ -93,42 +93,42 @@ function Set-TargetResource
             $wa.Properties.Add("portalsuperreaderaccount", $params.SuperReaderAlias)
         }
         $wa.Update()
-	}
+    }
 }
 
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$WebAppUrl,
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$SuperUserAlias,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SuperUserAlias,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$SuperReaderAlias,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SuperReaderAlias,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	$result = Get-TargetResource -WebAppUrl $WebAppUrl -SuperUserAlias $SuperUserAlias -SuperReaderAlias $SuperReaderAlias -InstallAccount $InstallAccount
-	Write-Verbose "Testing cache accounts for $WebAppUrl"
+    $result = Get-TargetResource -WebAppUrl $WebAppUrl -SuperUserAlias $SuperUserAlias -SuperReaderAlias $SuperReaderAlias -InstallAccount $InstallAccount
+    Write-Verbose "Testing cache accounts for $WebAppUrl"
 
-	if ($result.Count -eq 0) { return $false }
-	else {
-		if ($SuperUserAlias -ne $result.portalsuperuseraccount) { return $false }
-		if ($SuperReaderAlias -ne $result.portalsuperreaderaccount) { return $false }
-	}
-	return $true
+    if ($result.Count -eq 0) { return $false }
+    else {
+        if ($SuperUserAlias -ne $result.portalsuperuseraccount) { return $false }
+        if ($SuperReaderAlias -ne $result.portalsuperreaderaccount) { return $false }
+    }
+    return $true
 }
 
 Export-ModuleMember -Function *-TargetResource

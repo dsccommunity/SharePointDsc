@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("xSPInstall")]
 class MSFT_xSPInstall : OMI_BaseResource
 {
-	[Key] String BinaryDir;
-	[Write] String ProductKey;
+    [Key] String BinaryDir;
+    [Write] String ProductKey;
 };
 

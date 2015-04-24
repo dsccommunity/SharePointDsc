@@ -1,41 +1,41 @@
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$FarmConfigDatabaseName,
-
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseServer,
-
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$FarmAccount,
-
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount,
-
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Passphrase,
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $FarmConfigDatabaseName,
 
         [parameter(Mandatory = $true)]
-		[System.String]
+        [System.String]
+        $DatabaseServer,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $FarmAccount,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Passphrase,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
         $AdminContentDatabaseName
-	)
+    )
 
-	Write-Verbose "Checking for local SP Farm"
+    Write-Verbose "Checking for local SP Farm"
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	$result = Invoke-Command -Session $session -ScriptBlock {
-		try {
-			$spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+    $result = Invoke-Command -Session $session -ScriptBlock {
+        try {
+            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
         } catch {}
         
         if ($spFarm -eq $null) {return @{ }}
@@ -44,54 +44,54 @@ function Get-TargetResource
             FarmName = $spFarm.Name
         }
         return $returnValue
-	}
+    }
     $result
 }
 
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$FarmConfigDatabaseName,
-
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseServer,
-
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$FarmAccount,
-
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount,
-
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Passphrase,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $FarmConfigDatabaseName,
 
         [parameter(Mandatory = $true)]
-		[System.String]
+        [System.String]
+        $DatabaseServer,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $FarmAccount,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Passphrase,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
         $AdminContentDatabaseName
-	)
+    )
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	Write-Verbose "Creating new configuration database"
-	Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-		$params = $args[0]
-		New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+    Write-Verbose "Creating new configuration database"
+    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+        New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
                                     -DatabaseServer $params.DatabaseServer `
                                     -Passphrase (ConvertTo-SecureString $params.Passphrase -AsPlainText -force) `
                                     -FarmCredentials $params.FarmAccount `
                                     -SkipRegisterAsDistributedCacheHost:$true `
                                     -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-	}
-	
+    }
+    
     Write-Verbose "Installing help collection"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPHelpCollection -All
@@ -126,39 +126,39 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$FarmConfigDatabaseName,
-
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$DatabaseServer,
-
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$FarmAccount,
-
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount,
-
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Passphrase,
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $FarmConfigDatabaseName,
 
         [parameter(Mandatory = $true)]
-		[System.String]
+        [System.String]
+        $DatabaseServer,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $FarmAccount,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Passphrase,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
         $AdminContentDatabaseName
-	)
+    )
 
-	$result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName
+    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName
 
-	if ($result.Count -eq 0) { return $false }
-	return $true
+    if ($result.Count -eq 0) { return $false }
+    return $true
 }
 
 

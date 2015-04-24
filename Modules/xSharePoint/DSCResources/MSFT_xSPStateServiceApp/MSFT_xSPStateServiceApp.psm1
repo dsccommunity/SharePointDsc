@@ -1,68 +1,68 @@
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	Write-Verbose "Getting state service application '$Name'"
+    Write-Verbose "Getting state service application '$Name'"
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	$result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
 
         if ($app -eq $null) { return @{} }
         
         return @{
             Name = $app.DisplayName
         }
-	}
+    }
     $result
 }
 
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[System.Management.Automation.PSCredential]
-		$DatabaseCredentials,
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
-		[System.String]
-		$DatabaseName,
+        [System.String]
+        $DatabaseName,
 
-		[System.String]
-		$DatabaseServer,
+        [System.String]
+        $DatabaseServer,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	Write-Verbose "Creating state service application $Name"
+    Write-Verbose "Creating state service application $Name"
 
-	$session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
 
-	$result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($app -eq $null) { 
             
             $dbParams = @{}
@@ -72,41 +72,41 @@ function Set-TargetResource
 
             New-SPStateServiceDatabase @dbParams| New-SPStateServiceApplication -Name $params.Name | New-SPStateServiceApplicationProxy -DefaultProxyGroup
         }
-	}
+    }
 }
 
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[System.Management.Automation.PSCredential]
-		$DatabaseCredentials,
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
 
-		[System.String]
-		$DatabaseName,
+        [System.String]
+        $DatabaseName,
 
-		[System.String]
-		$DatabaseServer,
+        [System.String]
+        $DatabaseServer,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$InstallAccount
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
+    )
 
-	$result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
-	Write-Verbose "Testing for state service application $Name"
-	if ($result.Count -eq 0) { return $false }
-	else {
-		
-	}
-	return $true
+    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
+    Write-Verbose "Testing for state service application $Name"
+    if ($result.Count -eq 0) { return $false }
+    else {
+        
+    }
+    return $true
 }
 
 

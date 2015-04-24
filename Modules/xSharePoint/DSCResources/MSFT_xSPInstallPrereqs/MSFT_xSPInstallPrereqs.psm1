@@ -1,15 +1,15 @@
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$InstallerPath
-	)
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $InstallerPath
+    )
     
-	$returnValue = @{}
+    $returnValue = @{}
 
     Write-Verbose "Getting installed windows features"
     $WindowsFeatures = Get-WindowsFeature Net-Framework-Features,Web-Server,Web-WebServer,Web-Common-Http,Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,Web-App-Dev,Web-Asp-Net,Web-Net-Ext,Web-ISAPI-Ext,Web-ISAPI-Filter,Web-Health,Web-Http-Logging,Web-Log-Libraries,Web-Request-Monitor,Web-Http-Tracing,Web-Security,Web-Basic-Auth,Web-Windows-Auth,Web-Filtering,Web-Digest-Auth,Web-Performance,Web-Stat-Compression,Web-Dyn-Compression,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Application-Server,AS-Web-Support,AS-TCP-Port-Sharing,AS-WAS-Support, AS-HTTP-Activation,AS-TCP-Activation,AS-Named-Pipes,AS-Net-Framework,WAS,WAS-Process-Model,WAS-NET-Environment,WAS-Config-APIs,Web-Lgcy-Scripting,Windows-Identity-Foundation,Server-Media-Foundation,Xps-Viewer
@@ -30,43 +30,43 @@ function Get-TargetResource
     $returnValue.Add("WCF Data Services 5.6.0 Runtime", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.6.0 Runtime"}) -ne $null))
     $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", (($installedItems | ? {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"}) -ne $null))
 
-	$returnValue
+    $returnValue
 }
 
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$InstallerPath,
-		[System.Boolean]
-		$OnlineMode,
-		[System.String]
-		$SQLNCli,
-		[System.String]
-		$PowerShell,
-		[System.String]
-		$NETFX,
-		[System.String]
-		$IDFX,
-		[System.String]
-		$Sync,
-		[System.String]
-		$AppFabric,
-		[System.String]
-		$IDFX11,
-		[System.String]
-		$MSIPCClient,
-		[System.String]
-		$WCFDataServices,
-		[System.String]
-		$KB2671763,
-		[System.String]
-		$WCFDataServices56
-	)
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $InstallerPath,
+        [System.Boolean]
+        $OnlineMode,
+        [System.String]
+        $SQLNCli,
+        [System.String]
+        $PowerShell,
+        [System.String]
+        $NETFX,
+        [System.String]
+        $IDFX,
+        [System.String]
+        $Sync,
+        [System.String]
+        $AppFabric,
+        [System.String]
+        $IDFX11,
+        [System.String]
+        $MSIPCClient,
+        [System.String]
+        $WCFDataServices,
+        [System.String]
+        $KB2671763,
+        [System.String]
+        $WCFDataServices56
+    )
 
     if ($OnlineMode -eq $false) {
         if ([string]::IsNullOrEmpty($SQLNCli)) { throw "In offline mode parameter SQLNCli is required" }
@@ -107,48 +107,48 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$InstallerPath,
-		[System.Boolean]
-		$OnlineMode,
-		[System.String]
-		$SQLNCli,
-		[System.String]
-		$PowerShell,
-		[System.String]
-		$NETFX,
-		[System.String]
-		$IDFX,
-		[System.String]
-		$Sync,
-		[System.String]
-		$AppFabric,
-		[System.String]
-		$IDFX11,
-		[System.String]
-		$MSIPCClient,
-		[System.String]
-		$WCFDataServices,
-		[System.String]
-		$KB2671763,
-		[System.String]
-		$WCFDataServices56
-	)
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $InstallerPath,
+        [System.Boolean]
+        $OnlineMode,
+        [System.String]
+        $SQLNCli,
+        [System.String]
+        $PowerShell,
+        [System.String]
+        $NETFX,
+        [System.String]
+        $IDFX,
+        [System.String]
+        $Sync,
+        [System.String]
+        $AppFabric,
+        [System.String]
+        $IDFX11,
+        [System.String]
+        $MSIPCClient,
+        [System.String]
+        $WCFDataServices,
+        [System.String]
+        $KB2671763,
+        [System.String]
+        $WCFDataServices56
+    )
 
 
-	$result = Get-TargetResource -InstallerPath $InstallerPath
-	Write-Verbose "Checking installation of SharePoint prerequisites"
-	if (($result.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
-		Write-Verbose "Prerequisites were detected as missing."
-		return $false
-	}
-	
-	return $true
+    $result = Get-TargetResource -InstallerPath $InstallerPath
+    Write-Verbose "Checking installation of SharePoint prerequisites"
+    if (($result.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
+        Write-Verbose "Prerequisites were detected as missing."
+        return $false
+    }
+    
+    return $true
 }
 
 Export-ModuleMember -Function *-TargetResource
