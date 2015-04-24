@@ -1,56 +1,56 @@
 function Get-xSharePointAuthenticatedPSSession() {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true,Position=1)]
-		[System.Management.Automation.PSCredential]
-		$Credential,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [System.Management.Automation.PSCredential]
+        $Credential,
 
-		[parameter(Mandatory = $false,Position=2)]
-		[System.Boolean]
-		$ForceNewSession
-	)
+        [parameter(Mandatory = $false,Position=2)]
+        [System.Boolean]
+        $ForceNewSession
+    )
 
-	$session = Get-PSSession | ? { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName}
+    $session = Get-PSSession | ? { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName}
 
-	if ($session -ne $null -and $ForceNewSession -ne $true) { 
-		$id = $session.InstanceId
-		Write-Verbose "Using existing PowerShell session '$id'"
-		return $session 
-	}
-	else
-	{
-		Write-Verbose "Creating new PowerShell session"
-		$session = New-PSSession -ComputerName "localhost" -Credential $Credential -Authentication CredSSP
-		Invoke-Command -Session $session -ScriptBlock {
-			if ((Get-PSSnapin "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue) -eq $null) 
-			{
-				Add-PSSnapin "Microsoft.SharePoint.PowerShell"
-			}
-		}
-		return $session
-	}
+    if ($session -ne $null -and $ForceNewSession -ne $true) { 
+        $id = $session.InstanceId
+        Write-Verbose "Using existing PowerShell session '$id'"
+        return $session 
+    }
+    else
+    {
+        Write-Verbose "Creating new PowerShell session"
+        $session = New-PSSession -ComputerName "localhost" -Credential $Credential -Authentication CredSSP
+        Invoke-Command -Session $session -ScriptBlock {
+            if ((Get-PSSnapin "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue) -eq $null) 
+            {
+                Add-PSSnapin "Microsoft.SharePoint.PowerShell"
+            }
+        }
+        return $session
+    }
 }
 
 function Rename-xSharePointParamValue() {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true,Position=1)]
-		$params,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $params,
 
-		[parameter(Mandatory = $true,Position=2)]
-		$oldName,
+        [parameter(Mandatory = $true,Position=2)]
+        $oldName,
 
-		[parameter(Mandatory = $true,Position=3)]
-		$newName
-	)
+        [parameter(Mandatory = $true,Position=3)]
+        $newName
+    )
 
-	if ($params.ContainsKey($oldName)) {
-		$params.Add($newName, $params.$oldName)
-		$params.Remove($oldName) | Out-Null
-	}
-	return $params
+    if ($params.ContainsKey($oldName)) {
+        $params.Add($newName, $params.$oldName)
+        $params.Remove($oldName) | Out-Null
+    }
+    return $params
 }
 
 Export-ModuleMember -Function *
