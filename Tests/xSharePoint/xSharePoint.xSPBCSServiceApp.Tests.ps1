@@ -41,7 +41,7 @@ Describe "xSPBCSServiceApp" {
             Mock Get-TargetResource { 
                 return @{ 
                     Name = $testParams.Name 
-                    ApplicationPool = "Wrong app pool "
+                    ApplicationPool = "Wrong app pool"
                 } 
             } -ModuleName MSFT_xSPBCSServiceApp
             Test-TargetResource @testParams | Should Be $false
