@@ -12,6 +12,7 @@ Please leave comments, feature requests, and bug reports in the Q & A tab for th
 If you would like to modify xSharePoint module, please feel free. 
 When modifying, please update the module name, resource friendly name, and MOF class name (instructions below). 
 As specified in the license, you may copy or modify this resource as long as they are used on the Windows Platform.
+Pleaes refer to the [Contribution Guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md) for information about style guides, testing and patterns for contributing to DSC resources.
 
 ## Installation
 
