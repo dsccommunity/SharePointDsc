@@ -73,8 +73,11 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPClearRemoteSessions\" />
+    <Folder Include="Examples\Small Farm\" />
+    <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
     <Folder Include="Modules\xSharePoint.Util\" />
+    <Folder Include="Examples\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.psm1" />
@@ -127,6 +130,10 @@
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.psm1" />
     <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.schema.mof" />
+    <Content Include="Examples\Single Server\SharePoint.ps1" />
+    <Content Include="Examples\Small Farm\AppServer.ps1" />
+    <Content Include="Examples\Small Farm\FirstServer.ps1" />
+    <Content Include="Examples\Small Farm\WFEServer.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
