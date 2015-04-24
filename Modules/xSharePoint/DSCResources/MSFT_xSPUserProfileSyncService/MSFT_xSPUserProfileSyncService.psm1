@@ -95,7 +95,7 @@ function Set-TargetResource
         
          # Start the Sync service if it should be running on this server
         if (($Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
-            $ups = Get-SPServiceApplication –Name $params.UserProfileServiceAppName
+            $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName
             $ups.SetSynchronizationMachine("$computerName", $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
             Start-SPServiceInstance -Identity $syncService.ID
             $desiredState = "Online"
