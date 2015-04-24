@@ -21,19 +21,19 @@ Describe 'xSharePoint Global Tests' {
 
         It "Doesn't have an InstallAccount required parameter" {
             $mofFilesWithNoInstallAccount = 0
-			$mofFiles | % {
-				$fileHasInstallAccount = $false
-				Get-Content $_.FullName | % {
-					if ($_.IndexOf("[Required, EmbeddedInstance(`"MSFT_Credential`")] String InstallAccount;") -gt 0) { $fileHasInstallAccount = $true }
-				}
-				if (-not $fileHasInstallAccount -and $_.Name -ne "MSFT_xSPInstall.schema.mof" `
-	                                            -and $_.Name -ne "MSFT_xSPClearRemoteSessions.schema.mof" `
-	                                            -and $_.Name -ne "MSFT_xSPInstallPrereqs.schema.mof") {
-					$mofFilesWithNoInstallAccount += 1
-					Write-Warning "File $($_.FullName) does not contain an InstallAccount parameter. All SharePoint specific resources should use this to impersonate as and access SharePoint resources"
-				}
-			}
-			$mofFilesWithNoInstallAccount | Should Be 0
+            $mofFiles | % {
+                $fileHasInstallAccount = $false
+                Get-Content $_.FullName | % {
+                    if ($_.IndexOf("[Required, EmbeddedInstance(`"MSFT_Credential`")] String InstallAccount;") -gt 0) { $fileHasInstallAccount = $true }
+                }
+                if (-not $fileHasInstallAccount -and $_.Name -ne "MSFT_xSPInstall.schema.mof" `
+                                                -and $_.Name -ne "MSFT_xSPClearRemoteSessions.schema.mof" `
+                                                -and $_.Name -ne "MSFT_xSPInstallPrereqs.schema.mof") {
+                    $mofFilesWithNoInstallAccount += 1
+                    Write-Warning "File $($_.FullName) does not contain an InstallAccount parameter. All SharePoint specific resources should use this to impersonate as and access SharePoint resources"
+                }
+            }
+            $mofFilesWithNoInstallAccount | Should Be 0
         }
     }
 }
