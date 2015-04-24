@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPFeature")]
+class MSFT_xSPFeature : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required, ValueMap{"Farm","WebApplication","Site","Web"}, Values{"Farm","WebApplication","Site","Web"}] string FeatureScope;
+    [Key] string Url;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+};
+

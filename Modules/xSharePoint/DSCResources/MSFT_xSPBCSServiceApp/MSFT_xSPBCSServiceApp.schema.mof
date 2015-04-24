@@ -1,0 +1,11 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPBCSServiceApp")]
+class MSFT_xSPBCSServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] String ApplicationPool;
+    [Write] string DatabaseName;
+    [Write] String DatabaseServer;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

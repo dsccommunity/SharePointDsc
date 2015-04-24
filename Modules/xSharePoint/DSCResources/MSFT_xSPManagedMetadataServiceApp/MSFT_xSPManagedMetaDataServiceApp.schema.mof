@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPManagedMetaDataServiceApp")]
+class MSFT_xSPManagedMetaDataServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write] string ApplicationPool;
+    [Write] string DatabaseServer;
+    [Write] string DatabaseName;
+};

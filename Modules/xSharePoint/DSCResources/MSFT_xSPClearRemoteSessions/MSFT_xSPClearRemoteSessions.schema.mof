@@ -1,0 +1,7 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPClearRemoteSessions")]
+class MSFT_xSPClearRemoteSessions : OMI_BaseResource
+{
+    [Key] Boolean ClearRemoteSessions;
+};
+

@@ -1,0 +1,19 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSite")]
+class MSFT_xSPSite : OMI_BaseResource
+{
+    [Key] string Url;
+    [Required] string OwnerAlias;
+    [Write] uint32 CompatibilityLevel;
+    [Write] string ContentDatabase;
+    [Write] string Description;
+    [Write] string HostHeaderWebApplication;
+    [Write] uint32 Language;
+    [Write] string Name;
+    [Write] string OwnerEmail;
+    [Write] string QuotaTemplate;
+    [Write] string SecondaryEmail;
+    [Write] string SecondaryOwnerAlias;
+    [Write] string Template;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

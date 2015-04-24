@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPCacheAccounts")]
+class MSFT_xSPCacheAccounts : OMI_BaseResource
+{
+    [Key] string WebAppUrl;
+    [Required] string SuperUserAlias;
+    [Required] string SuperReaderAlias;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

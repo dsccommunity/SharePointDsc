@@ -1,0 +1,25 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPDiagnosticLoggingSettings")]
+class MSFT_xSPDiagnosticLoggingSettings : OMI_BaseResource
+{
+    [Key] string LogPath;
+    [Required] uint32 LogSpaceInGB;
+    [Write] boolean AppAnalyticsAutomaticUploadEnabled;
+    [Write] boolean CustomerExperienceImprovementProgramEnabled;
+    [Write] boolean DaysToKeepLogs;
+    [Write] boolean DownloadErrorReportingUpdatesEnabled;
+    [Write] boolean ErrorReportingAutomaticUploadEnabled;
+    [Write] boolean ErrorReportingEnabled;
+    [Write] boolean EventLogFloodProtectionEnabled;
+    [Write] uint32 EventLogFloodProtectionNotifyInterval;
+    [Write] uint32 EventLogFloodProtectionQuietPeriod;
+    [Write] uint32 EventLogFloodProtectionThreshold;
+    [Write] uint32 EventLogFloodProtectionTriggerPeriod;
+    [Write] uint32 LogCutInterval;
+    [Write] boolean LogMaxDiskSpaceUsageEnabled;
+    [Write] uint32 ScriptErrorReportingDelay;
+    [Write] boolean ScriptErrorReportingEnabled;
+    [Write] boolean ScriptErrorReportingRequireAuth;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

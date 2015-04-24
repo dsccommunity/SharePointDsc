@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchServiceApp")]
+class MSFT_xSPSearchServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] string ApplicationPool;
+    [Write] string DatabaseName;
+    [Write] string DatabaseServer;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

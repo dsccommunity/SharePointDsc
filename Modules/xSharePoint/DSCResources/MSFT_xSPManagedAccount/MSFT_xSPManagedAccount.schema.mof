@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPManagedAccount")]
+class MSFT_xSPManagedAccount : OMI_BaseResource
+{
+    [Key] string AccountName;
+    [Required, EmbeddedInstance("MSFT_Credential")] String Account;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write] Uint32 EmailNotification;
+    [Write] Uint32 PreExpireDays;
+    [Write] string Schedule;
+};

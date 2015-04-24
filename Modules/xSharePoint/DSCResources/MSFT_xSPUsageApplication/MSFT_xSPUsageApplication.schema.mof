@@ -1,0 +1,15 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPUsageApplication")]
+class MSFT_xSPUsageApplication : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write] string DatabaseName;
+    [Write] string DatabasePassword;
+    [Write] string DatabaseServer;
+    [Write] string DatabaseUsername;
+    [Write] string FailoverDatabaseServer;
+    [Write] uint32 UsageLogCutTime;
+    [Write] string UsageLogLocation;
+    [Write] uint32 UsageLogMaxFileSizeKB;
+    [Write] uint32 UsageLogMaxSpaceGB;
+};

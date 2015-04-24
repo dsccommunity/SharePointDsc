@@ -1,0 +1,7 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPServiceInstance")]
+class MSFT_xSPServiceInstance : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+};

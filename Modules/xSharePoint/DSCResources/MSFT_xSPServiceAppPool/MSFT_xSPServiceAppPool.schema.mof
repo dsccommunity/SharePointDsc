@@ -1,0 +1,8 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPServiceAppPool")]
+class MSFT_xSPServiceAppPool : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] string ServiceAccount;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

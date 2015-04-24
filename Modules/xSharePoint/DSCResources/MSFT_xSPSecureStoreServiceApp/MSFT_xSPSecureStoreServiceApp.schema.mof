@@ -1,0 +1,18 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSecureStoreServiceApp")]
+class MSFT_xSPSecureStoreServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] string ApplicationPool;
+    [Required] boolean AuditingEnabled;
+    [Write] uint32 AuditlogMaxSize;
+    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
+    [Write] string DatabaseName;
+    [Write] string DatabasePassword;
+    [Write] string DatabaseServer;
+    [Write] string DatabaseUsername;
+    [Write] string FailoverDatabaseServer;
+    [Write] boolean PartitionMode;
+    [Write] boolean Sharing;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

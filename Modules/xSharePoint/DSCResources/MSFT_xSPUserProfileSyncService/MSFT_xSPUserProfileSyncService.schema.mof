@@ -1,0 +1,8 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSyncService")]
+class MSFT_xSPUserProfileSyncService : OMI_BaseResource
+{
+    [Key] string UserProfileServiceAppName;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Required, EmbeddedInstance("MSFT_Credential")] String FarmAccount;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};

@@ -1,0 +1,15 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileServiceApp")]
+class MSFT_xSPUserProfileServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] string ApplicationPool;
+    [Required, EmbeddedInstance("MSFT_Credential")] String FarmAccount;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write] string MySiteHostLocation;
+    [Write] string ProfileDBName;
+    [Write] string ProfileDBServer;
+    [Write] string SocialDBName;
+    [Write] string SocialDBServer;
+    [Write] string SyncDBName;
+    [Write] string SyncDBServer;
+};

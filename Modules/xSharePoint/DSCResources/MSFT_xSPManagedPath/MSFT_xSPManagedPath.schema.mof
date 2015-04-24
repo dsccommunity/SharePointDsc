@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPManagedPath")]
+class MSFT_xSPManagedPath : OMI_BaseResource
+{
+    [Key] string WebAppUrl;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key] string RelativeUrl;
+    [Required] boolean Explicit;
+    [Required] boolean HostHeader;
+};

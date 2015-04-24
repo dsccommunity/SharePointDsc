@@ -1,0 +1,18 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPInstallPrereqs")]
+class MSFT_xSPInstallPrereqs : OMI_BaseResource
+{
+    [Key] String InstallerPath;
+    [Write] Boolean OnlineMode;
+    [Write] String SQLNCli;
+    [Write] String PowerShell;
+    [Write] String NETFX;
+    [Write] String IDFX;
+    [Write] String Sync;
+    [Write] String AppFabric;
+    [Write] String IDFX11;
+    [Write] String MSIPCClient;
+    [Write] String WCFDataServices;
+    [Write] String KB2671763;
+    [Write] String WCFDataServices56;
+};
+

@@ -1,0 +1,17 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPWebApplication")]
+class MSFT_xSPWebApplication : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] string ApplicationPool;
+    [Required] string ApplicationPoolAccount;
+    [Required] string Url;
+    [Write] boolean AllowAnonymous;
+    [Write, ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] string AuthenticationMethod;
+    [Write] string DatabaseName;
+    [Write] string DatabaseServer;
+    [Write] string HostHeader;
+    [Write] string Path;
+    [Write] string Port;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

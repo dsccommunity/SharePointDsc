@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPStateServiceApp")]
+class MSFT_xSPStateServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
+    [Write] string DatabaseName;
+    [Write] string DatabaseServer;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};

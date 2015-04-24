@@ -1,0 +1,12 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPCreateFarm")]
+class MSFT_xSPCreateFarm : OMI_BaseResource
+{
+    [Key] String FarmConfigDatabaseName;
+    [Key] String DatabaseServer;
+    [Required, EmbeddedInstance("MSFT_Credential")] String FarmAccount;
+    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Required] String Passphrase;
+    [Required] String AdminContentDatabaseName;
+};
+
