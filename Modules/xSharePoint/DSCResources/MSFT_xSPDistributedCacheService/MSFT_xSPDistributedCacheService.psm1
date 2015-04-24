@@ -146,7 +146,7 @@ function Set-TargetResource
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 Import-Module NetSecurity
-                Disable-NetFirewallRule –DisplayName -DisplayName "SharePoint Distribute Cache"
+                Disable-NetFirewallRule -DisplayName -DisplayName "SharePoint Distribute Cache"
             }    
         }
         Write-Verbose "Distributed cache removed."
