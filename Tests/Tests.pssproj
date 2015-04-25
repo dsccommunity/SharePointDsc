@@ -31,6 +31,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="xSharePoint\xSharePoint.Global.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPDiagnosticLoggingSettings.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPCreateFarm.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPCacheAccounts.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPBCSServiceApp.Tests.ps1" />
   </ItemGroup>
