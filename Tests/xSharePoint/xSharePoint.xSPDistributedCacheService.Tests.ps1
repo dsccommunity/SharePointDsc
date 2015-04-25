@@ -18,11 +18,11 @@ Describe "xSPDistributedCacheService" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "AppFabricCache"
-			Ensure = "Present"
-			CacheSizeInMB = 1024
-			ServiceAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-			InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-			createFirewallRules = $true
+            Ensure = "Present"
+            CacheSizeInMB = 1024
+            ServiceAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            createFirewallRules = $true
         }
 
         Context "Validate test method" {
@@ -34,36 +34,36 @@ Describe "xSPDistributedCacheService" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
                         HostName = $env:COMPUTERNAME
-						Port = 22233
-						CacheSizeInMB = $testParams.CacheSizeInMB
+                        Port = 22233
+                        CacheSizeInMB = $testParams.CacheSizeInMB
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
             }
-			It "Fails when cache is present but size is not correct" {
+            It "Fails when cache is present but size is not correct" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
                         HostName = $env:COMPUTERNAME
-						Port = 22233
-						CacheSizeInMB = 1
+                        Port = 22233
+                        CacheSizeInMB = 1
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
             }
 
-			$testParams.ENsure = "Absent"
+            $testParams.ENsure = "Absent"
 
-			It "Fails when cache is present but not should be" {
+            It "Fails when cache is present but not should be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
                         HostName = $env:COMPUTERNAME
-						Port = 22233
-						CacheSizeInMB = 1
+                        Port = 22233
+                        CacheSizeInMB = 1
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
             }
-			It "Passes when cache is not present and should not be" {
+            It "Passes when cache is not present and should not be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ } 
                 } 

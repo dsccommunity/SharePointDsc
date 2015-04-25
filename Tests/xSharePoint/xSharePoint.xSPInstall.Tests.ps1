@@ -18,7 +18,7 @@ Describe "xSPInstall" {
     InModuleScope $ModuleName {
         $testParams = @{
             BinaryDir = "C:\SPInstall"
-			ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
         }
 
         Context "Validate test method" {
@@ -30,7 +30,7 @@ Describe "xSPInstall" {
                 } 
                 Test-TargetResource @testParams | Should Be $true
             }
-			It "Fails when SharePoint is not installed" {
+            It "Fails when SharePoint is not installed" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         SharePointInstalled = $false

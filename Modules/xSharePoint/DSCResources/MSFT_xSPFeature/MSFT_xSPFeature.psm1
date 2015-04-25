@@ -141,8 +141,8 @@ function Test-TargetResource
     Write-Verbose "Testing for feature $Name at $FeatureScope scope"
 
     if ($result.Count -eq 0) { 
-		throw "Unable to locate feature '$Name' in the current SharePoint farm, check that the name is correct and that the feature has been deployed to the file system."
-	} else {
+        throw "Unable to locate feature '$Name' in the current SharePoint farm, check that the name is correct and that the feature has been deployed to the file system."
+    } else {
         if ($Ensure -eq "Present" -and $result.Enabled -eq $false) { return $false }
         if ($Ensure -eq "Absent" -and $result.Enabled -eq $true) { return $false }
     }

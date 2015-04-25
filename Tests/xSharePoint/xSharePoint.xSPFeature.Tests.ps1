@@ -77,10 +77,10 @@ Describe "xSPFeature" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-			$testParams.Ensure = "Present"
-			$testParams.FeatureScope = "Site"
+            $testParams.Ensure = "Present"
+            $testParams.FeatureScope = "Site"
 
-			It "Passes when a site feature is enabaled and should be" {
+            It "Passes when a site feature is enabaled and should be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
