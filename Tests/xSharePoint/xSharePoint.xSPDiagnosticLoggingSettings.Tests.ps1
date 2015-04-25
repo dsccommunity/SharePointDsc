@@ -14,7 +14,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $ModuleName = "MSFT_xSPDiagnosticLoggingSettings"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Describe "xSPCreateFarm" {
+Describe "xSPDiagnosticLoggingSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             LogPath = "L:\ULSLogs"
