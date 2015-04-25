@@ -31,6 +31,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="xSharePoint\xSharePoint.Global.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPJoinFarm.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPInstallPrereqs.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPInstall.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPFeature.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPDistributedCacheService.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPDiagnosticLoggingSettings.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPCreateFarm.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPCacheAccounts.Tests.ps1" />
