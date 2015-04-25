@@ -5,7 +5,7 @@ Build status: [![Build status](https://ci.appveyor.com/api/projects/status/j44ik
 The xSharePoint PowerShell module provides DSC resources that can be used to deploy and manage a SharePoint farm. 
 
 This module is provided AS IS, and is not supported through any Microsoft standard support program or service. 
-The "x" in xComputerManagement stands for experimental, which means that these resources will be fix forward and monitored by the module owner(s).
+The "x" in xSharePoint stands for experimental, which means that these resources will be fix forward and monitored by the module owner(s).
 
 Please leave comments, feature requests, and bug reports in the Q & A tab for this module.
 
