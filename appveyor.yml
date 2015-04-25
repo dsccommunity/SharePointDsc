@@ -11,6 +11,7 @@ test_script:
         if ($res.FailedCount -gt 0) { 
             throw "$($res.FailedCount) tests failed."
         }
+deploy: off
 on_finish:
 - ps: >-
     $stagingDirectory = (Resolve-Path ..).Path
@@ -18,6 +19,10 @@ on_finish:
     $pwd = Join-Path $pwd "modules\xSharePoint"
 
     Remove-Item (Join-Path $pwd "xSharePoint.pssproj")
+
+    $manifest = Join-Path $pwd "xSharePoint.psd1"
+
+    (Get-Content $manifest -Raw).Replace("0.2.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
 
     $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
 
