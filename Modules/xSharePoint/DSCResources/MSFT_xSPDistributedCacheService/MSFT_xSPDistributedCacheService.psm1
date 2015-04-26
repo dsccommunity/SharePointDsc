@@ -112,7 +112,7 @@ function Set-TargetResource
         }
 
         if($createFirewallRules) {
-            Write-Verbose "Update the identity used by AppFabric"
+            Write-Verbose "Create a firewall rule for AppFabric"
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 Import-Module NetSecurity

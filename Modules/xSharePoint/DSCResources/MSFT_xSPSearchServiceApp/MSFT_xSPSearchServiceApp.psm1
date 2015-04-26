@@ -76,7 +76,7 @@ function Set-TargetResource
             Get-SPEnterpriseSearchServiceInstance -Local | Start-SPEnterpriseSearchServiceInstance -ErrorAction SilentlyContinue
             $app = New-SPEnterpriseSearchServiceApplication @params
             if ($app) {
-                New-SPEnterpriseSearchServiceApplicationProxy -Name "$Name Proxy" -SearchApplication $app
+                New-SPEnterpriseSearchServiceApplicationProxy -Name ($params.Name + " Proxy") -SearchApplication $app
             }
         }
     }
