@@ -31,7 +31,7 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-						Status = "Online"
+                        Status = "Online"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -40,19 +40,19 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-						Status = "Disabled"
+                        Status = "Disabled"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
             }
 
-			$testParams.Ensure = "Absent"
+            $testParams.Ensure = "Absent"
 
-			It "Fails when the service instance is running and it should not be" {
+            It "Fails when the service instance is running and it should not be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-						Status = "Online"
+                        Status = "Online"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -61,7 +61,7 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-						Status = "Disabled"
+                        Status = "Disabled"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true

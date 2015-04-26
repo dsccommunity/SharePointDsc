@@ -20,7 +20,7 @@ Describe "xSPUserProfileServiceApp" {
             Name = "Managed Metadata Service App"
             InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             ApplicationPool = "SharePoint Service Applications"
-			FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         }
 
         Context "Validate test method" {
