@@ -159,8 +159,8 @@ function Test-TargetResource
     Write-Verbose "Testing for User Profile Synchronization Service"
     if ($result.Count -eq 0) { return $false }
     else {
-        if (($syncService.Status -eq "Online") -and ($Ensure -ne "Present")) { return $false }
-        if (($syncService.Status -eq "Disabled") -and ($Ensure -ne "Absent")) { return $false }
+        if (($result.Status -eq "Online") -and ($Ensure -ne "Present")) { return $false }
+        if (($result.Status -eq "Disabled") -and ($Ensure -ne "Absent")) { return $false }
     }
     return $true
 }
