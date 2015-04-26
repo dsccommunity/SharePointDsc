@@ -31,6 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="xSharePoint\xSharePoint.Global.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPWebApplication.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPUserProfileSyncService.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPUserProfileServiceApp.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPusageApplication.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPStateServiceApp.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPSite.Tests.ps1" />

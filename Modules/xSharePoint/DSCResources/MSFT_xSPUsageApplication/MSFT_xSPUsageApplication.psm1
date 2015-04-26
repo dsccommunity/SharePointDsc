@@ -27,13 +27,13 @@ function Get-TargetResource
         }
         else
         {
-			$service = Get-SPUsageService
+            $service = Get-SPUsageService
             return @{
                 Name = $serviceApp.DisplayName
-				UsageLogCutTime = $service.UsageLogCutTime
-				UsageLogDir = $service.UsageLogDir
-				UsageLogMaxFileSize = $service.UsageLogMaxFileSize
-				UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
+                UsageLogCutTime = $service.UsageLogCutTime
+                UsageLogDir = $service.UsageLogDir
+                UsageLogMaxFileSize = $service.UsageLogMaxFileSize
+                UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
             }
         }
     }
@@ -163,11 +163,11 @@ function Test-TargetResource
     if ($result.Count -eq 0) { return $false }
     else {
         if ($PSBoundParameters.ContainsKey("UsageLogCutTime") -and $result.UsageLogCutTime -ne $UsageLogCutTime) { return $false }
-		if ($PSBoundParameters.ContainsKey("UsageLogLocation") -and $result.UsageLogDir -ne $UsageLogLocation) { return $false }
+        if ($PSBoundParameters.ContainsKey("UsageLogLocation") -and $result.UsageLogDir -ne $UsageLogLocation) { return $false }
         if ($PSBoundParameters.ContainsKey("UsageLogMaxFileSizeKB") -and $result.UsageLogMaxFileSize -ne $UsageLogMaxFileSizeKB) { return $false }
         if ($PSBoundParameters.ContainsKey("UsageLogMaxSpaceGB") -and $result.UsageLogMaxSpaceGB -ne $UsageLogMaxSpaceGB) { return $false }
     }
-	return $true
+    return $true
 }
 
 

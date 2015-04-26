@@ -31,7 +31,7 @@ Describe "xSPSite" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Url = $testParams.Url
-						OwnerAlias = $testParams.OwnerAlias
+                        OwnerAlias = $testParams.OwnerAlias
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
