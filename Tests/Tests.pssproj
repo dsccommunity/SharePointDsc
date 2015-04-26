@@ -31,6 +31,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="xSharePoint\xSharePoint.Global.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPusageApplication.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPStateServiceApp.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPSite.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPServiceInstance.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPServiceAppPool.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPSearchServiceApp.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPManagedPath.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPManagedMetadataServiceApp.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPManagedAccount.Tests.ps1" />

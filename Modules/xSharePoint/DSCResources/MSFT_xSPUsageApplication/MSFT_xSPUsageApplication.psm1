@@ -27,8 +27,13 @@ function Get-TargetResource
         }
         else
         {
+			$service = Get-SPUsageService
             return @{
                 Name = $serviceApp.DisplayName
+				UsageLogCutTime = $service.UsageLogCutTime
+				UsageLogDir = $service.UsageLogDir
+				UsageLogMaxFileSize = $service.UsageLogMaxFileSize
+				UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
             }
         }
     }
@@ -157,19 +162,12 @@ function Test-TargetResource
     Write-Verbose "Testing for usage application '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
-        $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
-        $returnVal = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-            $params = $args[0]
-
-            $service = Get-SPUsageService
-            if ($params.ContainsKey("UsageLogCutTime") -and $service.UsageLogCutTime -ne $params.UsageLogCutTime) { return $false }
-            if ($params.ContainsKey("UsageLogLocation") -and $service.UsageLogDir -ne $params.UsageLogLocation) { return $false }
-            if ($params.ContainsKey("UsageLogMaxFileSizeKB") -and $service.UsageLogMaxFileSize -ne $params.UsageLogMaxFileSizeKB) { return $false }
-            if ($params.ContainsKey("UsageLogMaxSpaceGB") -and $service.UsageLogMaxSpaceGB -ne $params.UsageLogMaxSpaceGB) { return $false }
-            return $true
-        }
-        return $returnVal
+        if ($PSBoundParameters.ContainsKey("UsageLogCutTime") -and $result.UsageLogCutTime -ne $UsageLogCutTime) { return $false }
+		if ($PSBoundParameters.ContainsKey("UsageLogLocation") -and $result.UsageLogDir -ne $UsageLogLocation) { return $false }
+        if ($PSBoundParameters.ContainsKey("UsageLogMaxFileSizeKB") -and $result.UsageLogMaxFileSize -ne $UsageLogMaxFileSizeKB) { return $false }
+        if ($PSBoundParameters.ContainsKey("UsageLogMaxSpaceGB") -and $result.UsageLogMaxSpaceGB -ne $UsageLogMaxSpaceGB) { return $false }
     }
+	return $true
 }
 
 
