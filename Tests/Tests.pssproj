@@ -31,6 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="xSharePoint\xSharePoint.Global.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPManagedPath.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPManagedMetadataServiceApp.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPManagedAccount.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPJoinFarm.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPInstallPrereqs.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPInstall.Tests.ps1" />
