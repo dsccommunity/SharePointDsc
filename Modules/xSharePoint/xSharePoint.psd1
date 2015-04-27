@@ -18,13 +18,13 @@ ModuleVersion = '0.2.0'
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
 
 # Author of this module
-Author = 'Brian Farnhill, Andrew Lynes, Cam Adams, Arian Nevjestic, Janhavi Antukar, Tarang Soni'
+Author = ''Microsoft Corporation'
 
 # Company or vendor of this module
-CompanyName = 'Microsoft'
+CompanyName = ''Microsoft Corporation'
 
 # Copyright statement for this module
-Copyright = '(c) 2015 Microsoft. All rights reserved.'
+Copyright = '(c) 2015 'Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'This DSC module is used to deploy and configure SharePoint Server 2013, and convers a wide range of areas including web apps, service apps and farm configuration.'
