@@ -13,7 +13,7 @@ function Add-xSharePointDistributedCacheServer() {
 
     Add-SPDistributedCacheServiceInstance
     Update-SPDistributedCacheSize -CacheSizeInMB $CacheSizeInMB
-	$farm = Get-SPFarm
+    $farm = Get-SPFarm
     $cacheService = $farm.Services | where {$_.Name -eq "AppFabricCachingService"}
     $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
     $cacheService.ProcessIdentity.ManagedAccount = (Get-SPManagedAccount -Identity $ServiceAccount)
@@ -22,7 +22,7 @@ function Add-xSharePointDistributedCacheServer() {
 }
 
 function Remove-xSharePointDistributedCacheServer() {
-	$farm = Get-SPFarm
+    $farm = Get-SPFarm
     $cacheClusterName = "SPDistributedCacheCluster_" + $farm.Id.ToString() 
     $cacheClusterManager = [Microsoft.SharePoint.DistributedCaching.Utilities.SPDistributedCacheClusterInfoManager]::Local 
     $cacheClusterInfo = $cacheClusterManager.GetSPDistributedCacheClusterInfo($cacheClusterName); 
