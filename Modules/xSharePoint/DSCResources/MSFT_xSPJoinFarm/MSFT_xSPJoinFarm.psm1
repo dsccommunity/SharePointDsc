@@ -134,11 +134,11 @@ function Set-TargetResource
     Write-Verbose "Starting timer service"
     Start-Service sptimerv4
 
-	Write-Verbose "Pausing for 5 minutes to allow the timer service to fully provision the server"
-	Start-Sleep -Seconds 300
-	Write-Verbose "Join farm complete. Restarting computer to allow configuration to continue"
+    Write-Verbose "Pausing for 5 minutes to allow the timer service to fully provision the server"
+    Start-Sleep -Seconds 300
+    Write-Verbose "Join farm complete. Restarting computer to allow configuration to continue"
 
-	$global:DSCMachineStatus = 1
+    $global:DSCMachineStatus = 1
 }
 
 
