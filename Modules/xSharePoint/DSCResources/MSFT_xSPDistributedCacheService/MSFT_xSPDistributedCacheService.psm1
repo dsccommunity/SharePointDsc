@@ -93,51 +93,44 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present") {
         Write-Verbose "Adding the distributed cache to the server"
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        $InstallSuccess = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            Add-SPDistributedCacheServiceInstance
-            Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB 
-        }
-
-        Write-Verbose "Update the identity used by AppFabric"
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-            $params = $args[0]
-            
-            $farm = Get-SPFarm
-            $cacheService = $farm.Services | where {$_.Name -eq "AppFabricCachingService"}
-            $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
-            $cacheService.ProcessIdentity.ManagedAccount = Get-SPManagedAccount -Identity $params.ServiceAccount
-            $cacheService.ProcessIdentity.Update() 
-            $cacheService.ProcessIdentity.Deploy()
-        }
-
-        if($createFirewallRules) {
-            Write-Verbose "Update the identity used by AppFabric"
-            Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
-                Import-Module NetSecurity
-
-                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
-                if($firewallRule -eq $null) {
-                    New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distribute Cache" -Protocol TCP -LocalPort 22233-22236
-                }
-                Enable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
+            try
+            {
+                Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
             }
-            Write-Verbose "Firewall rule added"
+            catch
+            {
+                try { Remove-xSharePointDistributedCacheServer } catch {}
+                return $false
+            }
+            return $true
+        }
+
+        if($InstallSuccess -eq $false) {
+            #Write-Verbose "Encountered error proivisioning Distribute Cache. Rebooting server to reattempt"
+            #$global:DSCMachineStatus = 1
+        } else {
+            if($createFirewallRules) {
+                Write-Verbose "Create a firewall rule for AppFabric"
+                Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+                    $params = $args[0]
+                    Import-Module NetSecurity
+
+                    $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
+                    if($firewallRule -eq $null) {
+                        New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distribute Cache" -Protocol TCP -LocalPort 22233-22236
+                    }
+                    Enable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
+                }
+                Write-Verbose "Firewall rule added"
+            }
         }
     } else {
         Write-Verbose "Removing distributed cache to the server"
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-
-            $farm = Get-SPFarm
-            $cacheClusterName = "SPDistributedCacheCluster_" + $farm.Id.ToString() 
-            $cacheClusterManager = [Microsoft.SharePoint.DistributedCaching.Utilities.SPDistributedCacheClusterInfoManager]::Local 
-            $cacheClusterInfo = $cacheClusterManager.GetSPDistributedCacheClusterInfo($cacheClusterName); 
-            $instanceName ="SPDistributedCacheService Name=AppFabricCachingService"
-            $serviceInstance = Get-SPServiceInstance | ? {($_.Service.Tostring()) -eq $instanceName -and ($_.Server.Name) -eq $env:computername}  
-            $serviceInstance.Delete() 
-            Remove-SPDistributedCacheServiceInstance  
+            Remove-xSharePointDistributedCacheServer
         }
 
         $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
