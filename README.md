@@ -1,6 +1,6 @@
 # xSharePoint
 
-Build status: [![Build status](https://ci.appveyor.com/api/projects/status/j44ikfads195663k/branch/master?svg=true)](https://ci.appveyor.com/project/BrianFarnhill/xsharepoint/branch/master)
+Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
 The xSharePoint PowerShell module provides DSC resources that can be used to deploy and manage a SharePoint farm. 
 
