@@ -1,8 +1,11 @@
 version: 0.2.0.{build}
+
 install:
 - cinst -y pester
 - git clone https://github.com/PowerShell/DscResource.Tests
+
 build: off
+
 test_script:
     - ps: |
         $testResultsFile = ".\TestsResults.xml"
@@ -13,23 +16,15 @@ test_script:
         }
 deploy: off
 on_finish:
-- ps: >-
-    $stagingDirectory = (Resolve-Path ..).Path
-
-    $pwd = Join-Path $pwd "modules\xSharePoint"
-
-    Remove-Item (Join-Path $pwd "xSharePoint.pssproj")
-
-    $manifest = Join-Path $pwd "xSharePoint.psd1"
-
-    (Get-Content $manifest -Raw).Replace("0.2.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
-
-    $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
-
-    Add-Type -assemblyname System.IO.Compression.FileSystem
-
-    [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFile)
-
-    @(
-        (ls $zipFile)
-    ) | % { Push-AppveyorArtifact $_.FullName }
+    - ps: |
+        $stagingDirectory = (Resolve-Path ..).Path
+        $pwd = Join-Path $pwd "modules\xSharePoint"
+        Remove-Item (Join-Path $pwd "xSharePoint.pssproj")
+        $manifest = Join-Path $pwd "xSharePoint.psd1"
+        (Get-Content $manifest -Raw).Replace("0.2.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
+        $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
+        Add-Type -assemblyname System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFile)
+        @(
+            (ls $zipFile)
+        ) | % { Push-AppveyorArtifact $_.FullName }
