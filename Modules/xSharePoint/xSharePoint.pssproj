@@ -76,6 +76,7 @@
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
+    <Folder Include="Modules\xSharePoint.DistributedCache\" />
     <Folder Include="Modules\xSharePoint.Util\" />
     <Folder Include="Examples\" />
   </ItemGroup>
@@ -134,6 +135,7 @@
     <Content Include="Examples\Small Farm\AppServer.ps1" />
     <Content Include="Examples\Small Farm\FirstServer.ps1" />
     <Content Include="Examples\Small Farm\WFEServer.ps1" />
+    <Content Include="Modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />

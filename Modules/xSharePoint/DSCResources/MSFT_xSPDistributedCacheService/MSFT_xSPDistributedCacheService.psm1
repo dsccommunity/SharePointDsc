@@ -93,38 +93,32 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present") {
         Write-Verbose "Adding the distributed cache to the server"
-        $InstallSuccess = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-            $params = $args[0]
-            try
-            {
-                Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
-            }
-            catch
-            {
-                try { Remove-xSharePointDistributedCacheServer } catch {}
-                return $false
-            }
-            return $true
-        }
+        if($createFirewallRules) {
+            Write-Verbose "Create a firewall rule for AppFabric"
+            Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+                $params = $args[0]
+                Import-Module NetSecurity
 
-        if($InstallSuccess -eq $false) {
-            #Write-Verbose "Encountered error proivisioning Distribute Cache. Rebooting server to reattempt"
-            #$global:DSCMachineStatus = 1
-        } else {
-            if($createFirewallRules) {
-                Write-Verbose "Create a firewall rule for AppFabric"
-                Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-                    $params = $args[0]
-                    Import-Module NetSecurity
-
-                    $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
-                    if($firewallRule -eq $null) {
-                        New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distribute Cache" -Protocol TCP -LocalPort 22233-22236
-                    }
-                    Enable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
+                $icmpRuleName = "File and Printer Sharing (Echo Request - ICMPv4-In)"
+                $icmpPingFirewallRule = Get-NetFirewallRule -DisplayName $icmpRuleName -ErrorAction SilentlyContinue
+                if($icmpPingFirewallRule) {
+                    Enable-NetFirewallRule -DisplayName $icmpRuleName
                 }
-                Write-Verbose "Firewall rule added"
+                else {
+                    New-NetFirewallRule -Name Allow_Ping -DisplayName $icmpRuleName -Description "Allow ICMPv4 ping" -Protocol ICMPv4 -IcmpType 8 -Enabled True -Profile Any -Action Allow 
+                }
+
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
+                if($firewallRule -eq $null) {
+                    New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distribute Cache" -Protocol TCP -LocalPort 22233-22236
+                }
+                Enable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
             }
+            Write-Verbose "Firewall rule added"
+        }
+        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
         }
     } else {
         Write-Verbose "Removing distributed cache to the server"
