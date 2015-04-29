@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{279294c4-e197-48cd-a1fb-263ce47dea4d}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MyApplication</RootNamespace>
+    <AssemblyName>MyApplication</AssemblyName>
+    <Name>Tests</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="xSharePoint\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="xSharePoint\xSharePoint.Global.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPWebApplication.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPUserProfileSyncService.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPUserProfileServiceApp.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPusageApplication.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPStateServiceApp.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPSite.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPServiceInstance.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPServiceAppPool.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPSearchServiceApp.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPManagedPath.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPManagedMetadataServiceApp.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPManagedAccount.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPJoinFarm.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPInstallPrereqs.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPInstall.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPFeature.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPDistributedCacheService.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPDiagnosticLoggingSettings.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPCreateFarm.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPCacheAccounts.Tests.ps1" />
+    <Content Include="xSharePoint\xSharePoint.xSPBCSServiceApp.Tests.ps1" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="Build" />
+</Project>

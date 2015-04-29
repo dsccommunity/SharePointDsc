@@ -227,7 +227,7 @@ function Test-TargetResource
     if ($ErrorReportingAutomaticUploadEnabled -ne $null -and $ErrorReportingAutomaticUploadEnabled -ne $result.ErrorReportingAutomaticUploadEnabled) { return $false }
     if ($ErrorReportingEnabled -ne $null -and $ErrorReportingEnabled -ne $result.ErrorReportingEnabled) { return $false }
     if ($EventLogFloodProtectionEnabled -ne $null -and $EventLogFloodProtectionEnabled -ne $result.EventLogFloodProtectionEnabled) { return $false }
-    if ($EventLogFloodProtectionNotifyInterval -gt 0 -and $EventLogFloodProtectionNotifyInterval -ne $result.EventLogFloodProtectionNotifyInterval) {} return $false  
+    if ($EventLogFloodProtectionNotifyInterval -gt 0 -and $EventLogFloodProtectionNotifyInterval -ne $result.EventLogFloodProtectionNotifyInterval) { return $false }   
     if ($EventLogFloodProtectionQuietPeriod -gt 0 -and $EventLogFloodProtectionQuietPeriod -ne $result.EventLogFloodProtectionQuietPeriod) { return $false } 
     if ($EventLogFloodProtectionThreshold -gt 0 -and $EventLogFloodProtectionThreshold -ne $result.EventLogFloodProtectionThreshold) { return $false } 
     if ($EventLogFloodProtectionTriggerPeriod -gt 0 -and $EventLogFloodProtectionTriggerPeriod -ne $result.EventLogFloodProtectionTriggerPeriod) { return $false } 

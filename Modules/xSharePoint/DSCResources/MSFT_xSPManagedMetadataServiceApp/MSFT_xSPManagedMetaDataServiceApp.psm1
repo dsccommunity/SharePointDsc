@@ -64,7 +64,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
+    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
     $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
     if ($result.Count -eq 0) { 
         Write-Verbose "Creating Managed Metadata Service Application $Name"
