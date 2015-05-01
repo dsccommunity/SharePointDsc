@@ -25,9 +25,9 @@ function Get-TargetResource
         $HostHeader
     )
 
-    Write-Verbose "Looking up the managed path $RelativeUrl in $WebAppUrl"
+    Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -39,7 +39,7 @@ function Get-TargetResource
             $path = Get-SPManagedPath -WebApplication $params.WebAppUrl -Identity $params.RelativeUrl -ErrorAction SilentlyContinue
         }
 
-        if ($path -eq $null) { return @{} }
+        if ($null -eq $path) { return @{} }
         
         return @{
             Name = $path.Name
@@ -76,53 +76,35 @@ function Set-TargetResource
         $HostHeader
     )
 
-    Write-Verbose "Creating the managed path $RelativeUrl in $WebAppUrl"
+    Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
 
-    $result = Invoke-Command -ComputerName localhost -Credential $InstallAccount -Authentication CredSSP -ArgumentList ($WebAppUrl,$RelativeUrl,$Explicit,$HostHeader) -ScriptBlock {
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-        $WebAppUrl = $args[0]
-        $RelativeUrl = $args[1]
-        $Explicit = $args[2]
-        $HostHeader = $args[3]
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
 
-        Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
-
-        if ($HostHeader) {
-            $path = Get-SPManagedPath -Identity $RelativeUrl -HostHeader -ErrorAction SilentlyContinue
+        if ($params.HostHeader) {
+            $path = Get-SPManagedPath -Identity $params.RelativeUrl -HostHeader -ErrorAction SilentlyContinue
         }
         else {
-            $path = Get-SPManagedPath -WebApplication $WebAppUrl -Identity $RelativeUrl -ErrorAction SilentlyContinue
+            $path = Get-SPManagedPath -WebApplication $params.WebAppUrl -Identity $params.RelativeUrl -ErrorAction SilentlyContinue
         }
 
-        if ($path -eq $null) { 
+        if ($null -eq $path) { 
             
             $newParams = @{}
-            if ($HostHeader) {
-                $newParams.Add("HostHeader", $HostHeader)
+            if ($params.HostHeader) {
+                $newParams.Add("HostHeader", $params.HostHeader)
             }
             else {
-                $newParams.Add("WebApplication", $WebAppUrl)
+                $newParams.Add("WebApplication", $params.WebAppUrl)
             }
-            $newParams.Add("RelativeURL", $RelativeUrl)
-            $newParams.Add("Explicit", $Explicit)
+            $newParams.Add("RelativeURL", $params.RelativeUrl)
+            $newParams.Add("Explicit", $params.Explicit)
 
             New-SPManagedPath @newParams
         }
-        
-        if ($Explicit) {
-            if ($path.Type -ne "ExplicitInclusion") { return $false }
-        }
-        else {
-            if ($path.Type -ne "WildcardInclusion") { return $false }
-        }
-
-        return $true
     }
-
-    if ($result -eq $false) { 
-        Write-Error "Unable to create the managed path $RelativeUrl in $WebAppUrl - ensure a managed path with the same URL does not already exist."
-    }
-    $result
 }
 
 
@@ -154,7 +136,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -WebAppUrl $WebAppUrl -InstallAccount $InstallAccount -RelativeUrl $RelativeUrl -Explicit $Explicit -HostHeader $HostHeader
-    Write-Verbose "Looking up the managed path $RelativeUrl in $WebAppUrl"
+    Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($Explicit) {

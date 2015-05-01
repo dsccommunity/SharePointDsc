@@ -17,12 +17,12 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting diagnostic configuration settings"
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    Write-Verbose -Message "Getting diagnostic configuration settings"
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
-        if ($dc -eq $null) { return @{} }
+        if ($null -eq $dc) { return @{} }
         
         return @{
             AllowLegacyTraceProviders = $dc.AllowLegacyTraceProviders
@@ -64,84 +64,69 @@ function Set-TargetResource
         $LogSpaceInGB,
 
         [System.Boolean]
-        $AppAnalyticsAutomaticUploadEnabled,
+        $AppAnalyticsAutomaticUploadEnabled = $true,
 
         [System.Boolean]
-        $CustomerExperienceImprovementProgramEnabled,
+        $CustomerExperienceImprovementProgramEnabled = $true,
 
         [System.Boolean]
-        $DaysToKeepLogs,
+        $DaysToKeepLogs = 14,
 
         [System.Boolean]
-        $DownloadErrorReportingUpdatesEnabled,
+        $DownloadErrorReportingUpdatesEnabled = $true,
 
         [System.Boolean]
-        $ErrorReportingAutomaticUploadEnabled,
+        $ErrorReportingAutomaticUploadEnabled = $true,
 
         [System.Boolean]
-        $ErrorReportingEnabled,
+        $ErrorReportingEnabled = $true,
 
         [System.Boolean]
-        $EventLogFloodProtectionEnabled,
+        $EventLogFloodProtectionEnabled = $true,
 
         [System.UInt32]
-        $EventLogFloodProtectionNotifyInterval,
+        $EventLogFloodProtectionNotifyInterval = 5,
 
         [System.UInt32]
-        $EventLogFloodProtectionQuietPeriod,
+        $EventLogFloodProtectionQuietPeriod = 2,
 
         [System.UInt32]
-        $EventLogFloodProtectionThreshold,
+        $EventLogFloodProtectionThreshold = 5,
 
         [System.UInt32]
-        $EventLogFloodProtectionTriggerPeriod,
+        $EventLogFloodProtectionTriggerPeriod = 2,
 
         [System.UInt32]
-        $LogCutInterval,
+        $LogCutInterval = 30,
 
         [System.Boolean]
-        $LogMaxDiskSpaceUsageEnabled,
+        $LogMaxDiskSpaceUsageEnabled = $true,
 
         [System.UInt32]
-        $ScriptErrorReportingDelay,
+        $ScriptErrorReportingDelay = 30,
 
         [System.Boolean]
-        $ScriptErrorReportingEnabled,
+        $ScriptErrorReportingEnabled = $true,
 
         [System.Boolean]
-        $ScriptErrorReportingRequireAuth,
+        $ScriptErrorReportingRequireAuth = $true,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose "Setting diagnostic configuration settings"
+    Write-Verbose -Message "Setting diagnostic configuration settings"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $params = @{}
-    $params.Add("LogLocation", $LogPath)
-    $params.Add("LogDiskSpaceUsageGB", $LogSpaceInGB)
-    if ([string]::IsNullOrEmpty($AppAnalyticsAutomaticUploadEnabled) -eq $false) { $params.Add("AppAnalyticsAutomaticUploadEnabled", $AppAnalyticsAutomaticUploadEnabled)}
-    if ([string]::IsNullOrEmpty($CustomerExperienceImprovementProgramEnabled) -eq $false) { $params.Add("CustomerExperienceImprovementProgramEnabled", $CustomerExperienceImprovementProgramEnabled)}
-    if ([string]::IsNullOrEmpty($DaysToKeepLogs) -eq $false   -ne $null) { $params.Add("DaysToKeepLogs", $DaysToKeepLogs)}
-    if ([string]::IsNullOrEmpty($DownloadErrorReportingUpdatesEnabled) -eq $false) { $params.Add("DownloadErrorReportingUpdatesEnabled", $DownloadErrorReportingUpdatesEnabled)}
-    if ([string]::IsNullOrEmpty($ErrorReportingAutomaticUploadEnabled) -eq $false) { $params.Add("ErrorReportingAutomaticUploadEnabled", $ErrorReportingAutomaticUploadEnabled)}
-    if ([string]::IsNullOrEmpty($ErrorReportingEnabled) -eq $false) { $params.Add("ErrorReportingEnabled", $ErrorReportingEnabled)}
-    if ([string]::IsNullOrEmpty($EventLogFloodProtectionEnabled) -eq $false) { $params.Add("EventLogFloodProtectionEnabled", $EventLogFloodProtectionEnabled)}
-    if ([string]::IsNullOrEmpty($EventLogFloodProtectionNotifyInterval) -eq $false) { $params.Add("EventLogFloodProtectionNotifyInterval", $EventLogFloodProtectionNotifyInterval)}
-    if ([string]::IsNullOrEmpty($EventLogFloodProtectionQuietPeriod) -eq $false) { $params.Add("EventLogFloodProtectionQuietPeriod", $EventLogFloodProtectionQuietPeriod)}
-    if ([string]::IsNullOrEmpty($EventLogFloodProtectionThreshold) -eq $false) { $params.Add("EventLogFloodProtectionThreshold", $EventLogFloodProtectionThreshold)}
-    if ([string]::IsNullOrEmpty($EventLogFloodProtectionTriggerPeriod) -eq $false) { $params.Add("EventLogFloodProtectionTriggerPeriod", $EventLogFloodProtectionTriggerPeriod)}
-    if ([string]::IsNullOrEmpty($LogCutInterval) -eq $false) { $params.Add("LogCutInterval", $LogCutInterval)}
-    if ([string]::IsNullOrEmpty($LogMaxDiskSpaceUsageEnabled) -eq $false) { $params.Add("LogMaxDiskSpaceUsageEnabled", $LogMaxDiskSpaceUsageEnabled)}
-    if ([string]::IsNullOrEmpty($ScriptErrorReportingDelay) -eq $false) { $params.Add("ScriptErrorReportingDelay", $ScriptErrorReportingDelay)}
-    if ([string]::IsNullOrEmpty($ScriptErrorReportingEnabled) -eq $false) { $params.Add("ScriptErrorReportingEnabled", $ScriptErrorReportingEnabled)}
-    if ([string]::IsNullOrEmpty($ScriptErrorReportingRequireAuth) -eq $false) { $params.Add("ScriptErrorReportingRequireAuth", $ScriptErrorReportingRequireAuth)}
-
-    $result = Invoke-Command -Session $session -ArgumentList $params -ScriptBlock {
+    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+		$params.Remove("InstallAccount") | Out-Null
+        $params = Rename-xSharePointParamValue -params $params -oldName "LogPath" -newName "LogLocation"
+        $params = Rename-xSharePointParamValue -params $params -oldName "LogSpaceInGB" -newName "LogDiskSpaceUsageGB"
+
         Set-SPDiagnosticConfig @params
     }
 }
@@ -162,80 +147,80 @@ function Test-TargetResource
         $LogSpaceInGB,
 
         [System.Boolean]
-        $AppAnalyticsAutomaticUploadEnabled,
+        $AppAnalyticsAutomaticUploadEnabled = $true,
 
         [System.Boolean]
-        $CustomerExperienceImprovementProgramEnabled,
+        $CustomerExperienceImprovementProgramEnabled = $true,
 
         [System.Boolean]
-        $DaysToKeepLogs,
+        $DaysToKeepLogs = 14,
 
         [System.Boolean]
-        $DownloadErrorReportingUpdatesEnabled,
+        $DownloadErrorReportingUpdatesEnabled = $true,
 
         [System.Boolean]
-        $ErrorReportingAutomaticUploadEnabled,
+        $ErrorReportingAutomaticUploadEnabled = $true,
 
         [System.Boolean]
-        $ErrorReportingEnabled,
+        $ErrorReportingEnabled = $true,
 
         [System.Boolean]
-        $EventLogFloodProtectionEnabled,
+        $EventLogFloodProtectionEnabled = $true,
 
         [System.UInt32]
-        $EventLogFloodProtectionNotifyInterval,
+        $EventLogFloodProtectionNotifyInterval = 5,
 
         [System.UInt32]
-        $EventLogFloodProtectionQuietPeriod,
+        $EventLogFloodProtectionQuietPeriod = 2,
 
         [System.UInt32]
-        $EventLogFloodProtectionThreshold,
+        $EventLogFloodProtectionThreshold = 5,
 
         [System.UInt32]
-        $EventLogFloodProtectionTriggerPeriod,
+        $EventLogFloodProtectionTriggerPeriod = 2,
 
         [System.UInt32]
-        $LogCutInterval,
+        $LogCutInterval = 30,
 
         [System.Boolean]
-        $LogMaxDiskSpaceUsageEnabled,
+        $LogMaxDiskSpaceUsageEnabled = $true,
 
         [System.UInt32]
-        $ScriptErrorReportingDelay,
+        $ScriptErrorReportingDelay = 30,
 
         [System.Boolean]
-        $ScriptErrorReportingEnabled,
+        $ScriptErrorReportingEnabled = $true,
 
         [System.Boolean]
-        $ScriptErrorReportingRequireAuth,
+        $ScriptErrorReportingRequireAuth = $true,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose "Getting diagnostic configuration settings"
+    Write-Verbose -Message "Getting diagnostic configuration settings"
 
     $result = Get-TargetResource -LogPath $LogPath -LogSpaceInGB $LogSpaceInGB -InstallAccount $InstallAccount 
     if ($LogPath -ne $result.LogLocation) { return $false }
     if ($LogSpaceInGB -ne $result.LogDiskSpaceUsageGB) { return $false }
 
-    if ($AppAnalyticsAutomaticUploadEnabled -ne $null -and $AppAnalyticsAutomaticUploadEnabled -ne $result.AppAnalyticsAutomaticUploadEnabled) { return $false }
-    if ($CustomerExperienceImprovementProgramEnabled -ne $null -and $CustomerExperienceImprovementProgramEnabled -ne $result.CustomerExperienceImprovementProgramEnabled) { return $false }
-    if ($DaysToKeepLogs -gt 0 -and $DaysToKeepLogs -ne $result.DaysToKeepLogs) { return $false } 
-    if ($DownloadErrorReportingUpdatesEnabled -ne $null -and $DownloadErrorReportingUpdatesEnabled -ne $result.DownloadErrorReportingUpdatesEnabled) { return $false }
-    if ($ErrorReportingAutomaticUploadEnabled -ne $null -and $ErrorReportingAutomaticUploadEnabled -ne $result.ErrorReportingAutomaticUploadEnabled) { return $false }
-    if ($ErrorReportingEnabled -ne $null -and $ErrorReportingEnabled -ne $result.ErrorReportingEnabled) { return $false }
-    if ($EventLogFloodProtectionEnabled -ne $null -and $EventLogFloodProtectionEnabled -ne $result.EventLogFloodProtectionEnabled) { return $false }
-    if ($EventLogFloodProtectionNotifyInterval -gt 0 -and $EventLogFloodProtectionNotifyInterval -ne $result.EventLogFloodProtectionNotifyInterval) { return $false }   
-    if ($EventLogFloodProtectionQuietPeriod -gt 0 -and $EventLogFloodProtectionQuietPeriod -ne $result.EventLogFloodProtectionQuietPeriod) { return $false } 
-    if ($EventLogFloodProtectionThreshold -gt 0 -and $EventLogFloodProtectionThreshold -ne $result.EventLogFloodProtectionThreshold) { return $false } 
-    if ($EventLogFloodProtectionTriggerPeriod -gt 0 -and $EventLogFloodProtectionTriggerPeriod -ne $result.EventLogFloodProtectionTriggerPeriod) { return $false } 
-    if ($LogCutInterval -gt 0 -and $LogCutInterval -ne $result.LogCutInterval) { return $false } 
-    if ($LogMaxDiskSpaceUsageEnabled -ne $null -and $LogMaxDiskSpaceUsageEnabled -ne $result.LogMaxDiskSpaceUsageEnabled) { return $false }
-    if ($ScriptErrorReportingDelay -gt 0 -and $ScriptErrorReportingDelay -ne $result.ScriptErrorReportingDelay) { return $false } 
-    if ($ScriptErrorReportingEnabled -ne $null -and $ScriptErrorReportingEnabled -ne $result.ScriptErrorReportingEnabled) { return $false }
-    if ($ScriptErrorReportingRequireAuth -ne $null -and $ScriptErrorReportingRequireAuth -ne $result.ScriptErrorReportingRequireAuth) { return $false }
+    if ($AppAnalyticsAutomaticUploadEnabled -ne $result.AppAnalyticsAutomaticUploadEnabled) { return $false }
+    if ($CustomerExperienceImprovementProgramEnabled -ne $result.CustomerExperienceImprovementProgramEnabled) { return $false }
+    if ($DaysToKeepLogs -ne $result.DaysToKeepLogs) { return $false } 
+    if ($DownloadErrorReportingUpdatesEnabled -ne $result.DownloadErrorReportingUpdatesEnabled) { return $false }
+    if ($ErrorReportingAutomaticUploadEnabled -ne $result.ErrorReportingAutomaticUploadEnabled) { return $false }
+    if ($ErrorReportingEnabled -ne $result.ErrorReportingEnabled) { return $false }
+    if ($EventLogFloodProtectionEnabled -ne $result.EventLogFloodProtectionEnabled) { return $false }
+    if ($EventLogFloodProtectionNotifyInterval -ne $result.EventLogFloodProtectionNotifyInterval) { return $false }   
+    if ($EventLogFloodProtectionQuietPeriod -ne $result.EventLogFloodProtectionQuietPeriod) { return $false } 
+    if ($EventLogFloodProtectionThreshold -ne $result.EventLogFloodProtectionThreshold) { return $false } 
+    if ($EventLogFloodProtectionTriggerPeriod -ne $result.EventLogFloodProtectionTriggerPeriod) { return $false } 
+    if ($LogCutInterval -ne $result.LogCutInterval) { return $false } 
+    if ($LogMaxDiskSpaceUsageEnabled -ne $result.LogMaxDiskSpaceUsageEnabled) { return $false }
+    if ($ScriptErrorReportingDelay -ne $result.ScriptErrorReportingDelay) { return $false } 
+    if ($ScriptErrorReportingEnabled -ne $result.ScriptErrorReportingEnabled) { return $false }
+    if ($ScriptErrorReportingRequireAuth -ne $result.ScriptErrorReportingRequireAuth) { return $false }
     return $true
 }
 

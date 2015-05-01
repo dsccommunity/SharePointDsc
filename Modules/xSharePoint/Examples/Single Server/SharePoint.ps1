@@ -1,4 +1,4 @@
-﻿Configuration SharePointServer
+Configuration SharePointServer
 {
     param (
         [Parameter(Mandatory=$true)] [ValidateNotNullorEmpty()] [string]       $CredSSPDelegates,

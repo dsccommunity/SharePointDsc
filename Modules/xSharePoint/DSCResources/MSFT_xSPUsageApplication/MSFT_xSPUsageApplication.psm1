@@ -13,15 +13,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting usage application '$Name'"
+    Write-Verbose -Message "Getting usage application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Usage and Health Data Collection Service Application" }
-        If ($serviceApp -eq $null)
+        If ($null -eq $serviceApp)
         {
             return @{}
         }
@@ -55,41 +55,42 @@ function Set-TargetResource
         $InstallAccount,
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [System.String]
-        $DatabasePassword,
+        $DatabasePassword = $null,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $DatabaseUsername,
+        $DatabaseUsername = $null,
 
         [System.String]
-        $FailoverDatabaseServer,
+        $FailoverDatabaseServer = $null,
 
         [System.UInt32]
-        $UsageLogCutTime,
+        $UsageLogCutTime = 5,
 
         [System.String]
-        $UsageLogLocation,
+        $UsageLogLocation = $null,
 
         [System.UInt32]
-        $UsageLogMaxFileSizeKB,
+        $UsageLogMaxFileSizeKB = 1024,
 
         [System.UInt32]
-        $UsageLogMaxSpaceGB
+        $UsageLogMaxSpaceGB = $null
     )
 
-    Write-Verbose "Setting usage application $Name"
+    Write-Verbose -Message "Setting usage application $Name"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        
         $app = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
-        if ($app -eq $null) { 
+        if ($null -eq $app) { 
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
@@ -102,9 +103,11 @@ function Set-TargetResource
         }
     }
 
-    Write-Verbose "Configuring usage application $Name"
+    Write-Verbose -Message "Configuring usage application $Name"
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        $params = Remove-xSharePointNullParamValues -Params $params
+
         $setParams = @{}
         $setParams.Add("LoggingEnabled", $true)
         if ($params.ContainsKey("UsageLogCutTime")) { $setParams.Add("UsageLogCutTime", $params.UsageLogCutTime) }
@@ -131,35 +134,35 @@ function Test-TargetResource
         $InstallAccount,
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [System.String]
-        $DatabasePassword,
+        $DatabasePassword = $null,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $DatabaseUsername,
+        $DatabaseUsername = $null,
 
         [System.String]
-        $FailoverDatabaseServer,
+        $FailoverDatabaseServer = $null,
 
         [System.UInt32]
-        $UsageLogCutTime,
+        $UsageLogCutTime = 5,
 
         [System.String]
-        $UsageLogLocation,
+        $UsageLogLocation = $null,
 
         [System.UInt32]
-        $UsageLogMaxFileSizeKB,
+        $UsageLogMaxFileSizeKB = 1024,
 
         [System.UInt32]
-        $UsageLogMaxSpaceGB
+        $UsageLogMaxSpaceGB = $null
     )
 
     $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
-    Write-Verbose "Testing for usage application '$Name'"
+    Write-Verbose -Message "Testing for usage application '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($PSBoundParameters.ContainsKey("UsageLogCutTime") -and $result.UsageLogCutTime -ne $UsageLogCutTime) { return $false }

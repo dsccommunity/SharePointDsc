@@ -1,4 +1,4 @@
-﻿Configuration SharePointWFEServer
+Configuration SharePointWFEServer
 {
     param (
         [Parameter(Mandatory=$true)] [ValidateNotNullorEmpty()] [string]       $CredSSPDelegates,

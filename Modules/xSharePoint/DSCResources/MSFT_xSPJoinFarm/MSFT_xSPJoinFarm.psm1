@@ -25,16 +25,18 @@ function Get-TargetResource
         $Passphrase
     )
 
-    Write-Verbose "Checking for local SP Farm"
+    Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount -ForceNewSession $true
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
-        } catch {}
+        } catch {
+            Write-Verbose -Message "Unable to detect local farm."
+        }
         
-        if ($spFarm -eq $null) {return @{ }}
+        if ($null -eq $spFarm) {return @{ }}
 
         $returnValue = @{
             FarmName = $spFarm.Name
@@ -71,21 +73,16 @@ function Set-TargetResource
         $Passphrase,
 
         [System.UInt32]
-        $WaitTime,
+        $WaitTime = 30,
 
         [System.UInt32]
-        $WaitCount
+        $WaitCount = 60
     )
 
-    Write-Verbose "Joining existing farm configuration database"
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount -ForceNewSession $true
+    Write-Verbose -Message "Joining existing farm configuration database"
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-
-        $WaitTime = 30
-        $WaitCount = 60
-        if ($PSBoundParameters.ContainsKey("WaitTime") -and $PSBoundParameters.WaitTime -gt 0) { $WaitTime = $PSBoundParameters.WaitTime } 
-        if ($PSBoundParameters.ContainsKey("WaitCount") -and $PSBoundParameters.WaitCount -gt 0) { $WaitCount = $PSBoundParameters.WaitCount } 
         
         $loopCount = 0    
 
@@ -94,49 +91,49 @@ function Set-TargetResource
             {
                 Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
                                                 -DatabaseServer $params.DatabaseServer `
-                                                -Passphrase (ConvertTo-SecureString $params.Passphrase -AsPlainText -force) `
+                                                -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
                                                 -SkipRegisterAsDistributedCacheHost:$true 
                 $loopCount = $WaitCount + 1
             }
             catch
             {
                 $loopCount = $loopCount + 1
-                Start-Sleep $WaitTime
+                Start-Sleep -Seconds $WaitTime
             }
         }
     }
 
-    Write-Verbose "Installing help collection"
+    Write-Verbose -Message "Installing help collection"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPHelpCollection -All
     }
 
-    Write-Verbose "Initialising farm resource security"
+    Write-Verbose -Message "Initialising farm resource security"
     Invoke-Command -Session $session -ScriptBlock {
         Initialize-SPResourceSecurity
     }
 
-    Write-Verbose "Installing farm services"
+    Write-Verbose -Message "Installing farm services"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPService
     }
 
-    Write-Verbose "Installing farm features"
+    Write-Verbose -Message "Installing farm features"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPFeature -AllExistingFeatures -Force
     }
 
-    Write-Verbose "Installing application content"
+    Write-Verbose -Message "Installing application content"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPApplicationContent
     }
 
-    Write-Verbose "Starting timer service"
-    Start-Service sptimerv4
+    Write-Verbose -Message "Starting timer service"
+    Start-Service -Name sptimerv4
 
-    Write-Verbose "Pausing for 5 minutes to allow the timer service to fully provision the server"
+    Write-Verbose -Message "Pausing for 5 minutes to allow the timer service to fully provision the server"
     Start-Sleep -Seconds 300
-    Write-Verbose "Join farm complete. Restarting computer to allow configuration to continue"
+    Write-Verbose -Message "Join farm complete. Restarting computer to allow configuration to continue"
 
     $global:DSCMachineStatus = 1
 }
@@ -169,10 +166,10 @@ function Test-TargetResource
         $Passphrase,
 
         [System.UInt32]
-        $WaitTime,
+        $WaitTime = 30,
 
         [System.UInt32]
-        $WaitCount
+        $WaitCount = 60
     )
 
     $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase

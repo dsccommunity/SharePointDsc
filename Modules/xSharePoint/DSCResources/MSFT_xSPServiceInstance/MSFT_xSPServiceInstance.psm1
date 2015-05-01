@@ -18,15 +18,15 @@ function Get-TargetResource
         $Ensure
     )
 
-    Write-Verbose "Getting service instance '$Name'"
+    Write-Verbose -Message "Getting service instance '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | ? { $_.TypeName -eq $params.Name }
-        if ($si -eq $null) { return @{} }
+        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+        if ($null -eq $si) { return @{} }
         
         return @{
             Name = $params.Name
@@ -56,26 +56,26 @@ function Set-TargetResource
         $Ensure
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     if ($Ensure -eq "Present") {
-        Write-Verbose "Provisioning service instance '$Name'"
+        Write-Verbose -Message "Provisioning service instance '$Name'"
 
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | ? { $_.TypeName -eq $params.Name }
-            if ($si -eq $null) { return $false }
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            if ($null -eq $si) { return $false }
             Start-SPServiceInstance $si
         }
     } else {
-        Write-Verbose "Deprovioning service instance '$Name'"
+        Write-Verbose -Message "Deprovioning service instance '$Name'"
 
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | ? { $_.TypeName -eq $params.Name }
-            if ($si -eq $null) { return $false }
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            if ($null -eq $si) { return $false }
             Stop-SPServiceInstance $si
         }
     }
@@ -103,7 +103,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount -Ensure $Ensure 
-    Write-Verbose "Getting service instance '$Name'"
+    Write-Verbose -Message "Getting service instance '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($Ensure -eq "Present" -and $result.Status -eq "Disabled") {
