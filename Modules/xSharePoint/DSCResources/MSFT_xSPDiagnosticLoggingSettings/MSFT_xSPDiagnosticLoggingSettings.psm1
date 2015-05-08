@@ -69,7 +69,7 @@ function Set-TargetResource
         [System.Boolean]
         $CustomerExperienceImprovementProgramEnabled = $true,
 
-        [System.Boolean]
+        [System.UInt32]
         $DaysToKeepLogs = 14,
 
         [System.Boolean]
@@ -152,7 +152,7 @@ function Test-TargetResource
         [System.Boolean]
         $CustomerExperienceImprovementProgramEnabled = $true,
 
-        [System.Boolean]
+        [System.UInt32]
         $DaysToKeepLogs = 14,
 
         [System.Boolean]
