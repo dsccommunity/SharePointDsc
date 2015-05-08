@@ -21,15 +21,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting secure store service application '$Name'"
+    Write-Verbose -Message "Getting secure store service application '$Name'"
     
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Secure Store Service Application" }
-        If ($serviceApp -eq $null)
+        If ($null -eq $serviceApp)
         {
             return @{}
         }
@@ -63,31 +63,31 @@ function Set-TargetResource
         $AuditingEnabled,
 
         [System.UInt32]
-        $AuditlogMaxSize,
+        $AuditlogMaxSize = 30,
 
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
+        $DatabaseCredentials = $null,
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [System.String]
-        $DatabasePassword,
+        $DatabasePassword = $null,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $DatabaseUsername,
+        $DatabaseUsername = $null,
 
         [System.String]
-        $FailoverDatabaseServer,
+        $FailoverDatabaseServer = $null,
 
         [System.Boolean]
-        $PartitionMode,
+        $PartitionMode = $false,
 
         [System.Boolean]
-        $Sharing,
+        $Sharing = $true,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -95,25 +95,26 @@ function Set-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -AuditingEnabled $AuditingEnabled -InstallAccount $InstallAccount
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
     if ($result.Count -eq 0) { 
-        Write-Verbose "Creating Secure Store Service Application $Name"
+        Write-Verbose -Message "Creating Secure Store Service Application $Name"
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            $params = Remove-xSharePointNullParamValues -Params $params
             $params.Remove("InstallAccount") | Out-Null
 
             $app = New-SPSecureStoreServiceApplication @params
-            if ($app -ne $null) {
+            if ($null -ne $app) {
                 New-SPSecureStoreServiceApplicationProxy -Name ($params.Name + " Proxy") -ServiceApplication $app
             }
         }
     }
     else {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose "Updating Secure Store Service Application $Name"
+            Write-Verbose -Message "Updating Secure Store Service Application $Name"
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-
+                $params = Remove-xSharePointNullParamValues -Params $params
                 $params.Remove("Name") | Out-Null
                 if ($params.ContainsKey("PartitionMode")) { $params.Remove("PartitionMode") | Out-Null }
 
@@ -145,31 +146,31 @@ function Test-TargetResource
         $AuditingEnabled,
 
         [System.UInt32]
-        $AuditlogMaxSize,
+        $AuditlogMaxSize = 30,
 
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
+        $DatabaseCredentials = $null,
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [System.String]
-        $DatabasePassword,
+        $DatabasePassword = $null,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $DatabaseUsername,
+        $DatabaseUsername = $null,
 
         [System.String]
-        $FailoverDatabaseServer,
+        $FailoverDatabaseServer = $null,
 
         [System.Boolean]
-        $PartitionMode,
+        $PartitionMode = $false,
 
         [System.Boolean]
-        $Sharing,
+        $Sharing = $true,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -177,7 +178,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -AuditingEnabled $AuditingEnabled -InstallAccount $InstallAccount
-    Write-Verbose "Testing secure store service application $Name"
+    Write-Verbose -Message "Testing secure store service application $Name"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($ApplicationPool -ne $result.ApplicationPool) { return $false }

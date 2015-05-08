@@ -27,15 +27,15 @@ function Get-TargetResource
         $Ensure
     )
 
-    Write-Verbose "Getting feature $Name at $FeatureScope scope"
+    Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $feature = Get-SPFeature $params.Name -ErrorAction SilentlyContinue
 
-        if ($feature -eq $null) { return @{} }
+        if ($null -eq $feature) { return @{} }
 
         $checkParams = @{}
         $checkParams.Add("Identity", $params.Name)
@@ -46,7 +46,7 @@ function Get-TargetResource
         }
         $checkParams.Add("ErrorAction", "SilentlyContinue")
         $featureAtScope = Get-SPFeature @checkParams
-        $enabled = ($featureAtScope -ne $null)
+        $enabled = ($null -ne $featureAtScope)
 
         return @{
             Name = $params.Name
@@ -87,7 +87,7 @@ function Set-TargetResource
         $Ensure
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -138,7 +138,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -FeatureScope $FeatureScope -Url $Url -InstallAccount $InstallAccount -Ensure $Ensure
-    Write-Verbose "Testing for feature $Name at $FeatureScope scope"
+    Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
 
     if ($result.Count -eq 0) { 
         throw "Unable to locate feature '$Name' in the current SharePoint farm, check that the name is correct and that the feature has been deployed to the file system."

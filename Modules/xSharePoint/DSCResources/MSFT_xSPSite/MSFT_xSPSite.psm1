@@ -17,15 +17,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting site collection $Url"
+    Write-Verbose -Message "Getting site collection $Url"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
 
-        if ($site -eq $null) { return @{} }
+        if ($null -eq $site) { return @{} }
         else {
             return @{
                 Url = $site.Url
@@ -51,54 +51,55 @@ function Set-TargetResource
         $OwnerAlias,
 
         [System.UInt32]
-        $CompatibilityLevel,
+        $CompatibilityLevel = $null,
 
         [System.String]
-        $ContentDatabase,
+        $ContentDatabase = $null,
 
         [System.String]
-        $Description,
+        $Description = $null,
 
         [System.String]
-        $HostHeaderWebApplication,
+        $HostHeaderWebApplication = $null,
 
         [System.UInt32]
-        $Language,
+        $Language = $null,
 
         [System.String]
-        $Name,
+        $Name = $null,
 
         [System.String]
-        $OwnerEmail,
+        $OwnerEmail = $null,
 
         [System.String]
-        $QuotaTemplate,
+        $QuotaTemplate = $null,
 
         [System.String]
-        $SecondaryEmail,
+        $SecondaryEmail = $null,
 
         [System.String]
-        $SecondaryOwnerAlias,
+        $SecondaryOwnerAlias = $null,
 
         [System.String]
-        $Template,
+        $Template = $null,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose "Creating site collection $Url"
+    Write-Verbose -Message "Creating site collection $Url"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        $params = Remove-xSharePointNullParamValues -Params $params
         $params.Remove("InstallAccount") | Out-Null
 
         $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
 
-        if ($site -eq $null) {
+        if ($null -eq $site) {
             New-SPSite @params | Out-Null
         }
     }
@@ -120,37 +121,37 @@ function Test-TargetResource
         $OwnerAlias,
 
         [System.UInt32]
-        $CompatibilityLevel,
+        $CompatibilityLevel = $null,
 
         [System.String]
-        $ContentDatabase,
+        $ContentDatabase = $null,
 
         [System.String]
-        $Description,
+        $Description = $null,
 
         [System.String]
-        $HostHeaderWebApplication,
+        $HostHeaderWebApplication = $null,
 
         [System.UInt32]
-        $Language,
+        $Language = $null,
 
         [System.String]
-        $Name,
+        $Name = $null,
 
         [System.String]
-        $OwnerEmail,
+        $OwnerEmail = $null,
 
         [System.String]
-        $QuotaTemplate,
+        $QuotaTemplate = $null,
 
         [System.String]
-        $SecondaryEmail,
+        $SecondaryEmail = $null,
 
         [System.String]
-        $SecondaryOwnerAlias,
+        $SecondaryOwnerAlias = $null,
 
         [System.String]
-        $Template,
+        $Template = $null,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -158,7 +159,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Url $Url -OwnerAlias $OwnerAlias -InstallAccount $InstallAccount
-    Write-Verbose "Testing site collection $Url"
+    Write-Verbose -Message "Testing site collection $Url"
     if ($result.Count -eq 0) { return $false }
     else {
         

@@ -11,14 +11,14 @@ function Get-TargetResource
     
     $returnValue = @{}
 
-    Write-Verbose "Getting installed windows features"
-    $WindowsFeatures = Get-WindowsFeature Net-Framework-Features,Web-Server,Web-WebServer,Web-Common-Http,Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,Web-App-Dev,Web-Asp-Net,Web-Net-Ext,Web-ISAPI-Ext,Web-ISAPI-Filter,Web-Health,Web-Http-Logging,Web-Log-Libraries,Web-Request-Monitor,Web-Http-Tracing,Web-Security,Web-Basic-Auth,Web-Windows-Auth,Web-Filtering,Web-Digest-Auth,Web-Performance,Web-Stat-Compression,Web-Dyn-Compression,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Application-Server,AS-Web-Support,AS-TCP-Port-Sharing,AS-WAS-Support, AS-HTTP-Activation,AS-TCP-Activation,AS-Named-Pipes,AS-Net-Framework,WAS,WAS-Process-Model,WAS-NET-Environment,WAS-Config-APIs,Web-Lgcy-Scripting,Windows-Identity-Foundation,Server-Media-Foundation,Xps-Viewer
+    Write-Verbose -Message "Getting installed windows features"
+    $WindowsFeatures = Get-WindowsFeature -Name Net-Framework-Features,Web-Server,Web-WebServer,Web-Common-Http,Web-Static-Content,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,Web-App-Dev,Web-Asp-Net,Web-Net-Ext,Web-ISAPI-Ext,Web-ISAPI-Filter,Web-Health,Web-Http-Logging,Web-Log-Libraries,Web-Request-Monitor,Web-Http-Tracing,Web-Security,Web-Basic-Auth,Web-Windows-Auth,Web-Filtering,Web-Digest-Auth,Web-Performance,Web-Stat-Compression,Web-Dyn-Compression,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,Application-Server,AS-Web-Support,AS-TCP-Port-Sharing,AS-WAS-Support, AS-HTTP-Activation,AS-TCP-Activation,AS-Named-Pipes,AS-Net-Framework,WAS,WAS-Process-Model,WAS-NET-Environment,WAS-Config-APIs,Web-Lgcy-Scripting,Windows-Identity-Foundation,Server-Media-Foundation,Xps-Viewer
     foreach ($feature in $WindowsFeatures) {
         $returnValue.Add($feature.Name, $feature.Installed)
     }
 
-    Write-Verbose "Checking windows packages"
-    $installedItems = Get-WmiObject -Class Win32_Product
+    Write-Verbose -Message "Checking windows packages"
+    $installedItems = Get-CimInstance -ClassName Win32_Product
     #TODO: Ensure this checks for all prereqs, believe this list is missing a couple
     #TODO: Check the list on other operating systems, this was tested on 2012 R2
     $returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.Name -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
@@ -45,29 +45,29 @@ function Set-TargetResource
         [System.String]
         $InstallerPath,
         [System.Boolean]
-        $OnlineMode,
+        $OnlineMode = $true,
         [System.String]
-        $SQLNCli,
+        $SQLNCli = [System.String]::Empty,
         [System.String]
-        $PowerShell,
+        $PowerShell = [System.String]::Empty,
         [System.String]
-        $NETFX,
+        $NETFX = [System.String]::Empty,
         [System.String]
-        $IDFX,
+        $IDFX = [System.String]::Empty,
         [System.String]
-        $Sync,
+        $Sync = [System.String]::Empty,
         [System.String]
-        $AppFabric,
+        $AppFabric = [System.String]::Empty,
         [System.String]
-        $IDFX11,
+        $IDFX11 = [System.String]::Empty,
         [System.String]
-        $MSIPCClient,
+        $MSIPCClient = [System.String]::Empty,
         [System.String]
-        $WCFDataServices,
+        $WCFDataServices = [System.String]::Empty,
         [System.String]
-        $KB2671763,
+        $KB2671763 = [System.String]::Empty,
         [System.String]
-        $WCFDataServices56
+        $WCFDataServices56 = [System.String]::Empty
     )
 
     if ($OnlineMode -eq $false) {
@@ -84,23 +84,23 @@ function Set-TargetResource
         if ([string]::IsNullOrEmpty($WCFDataServices56)) { throw "In offline mode parameter WCFDataServices56 is required" }
     }
     
-    Write-Verbose "Calling the SharePoint Pre-req installer"
+    Write-Verbose -Message "Calling the SharePoint Pre-req installer"
 
     if ($OnlineMode) {
         $args = "/unattended"
     } else {
         $args = "/unattended /SQLNCli:`"$SQLNCli`" /PowerShell:`"$PowerShell`" /NETFX:`"$NETFX`" /IDFX:`"$IDFX`" /Sync:`"$Sync`" /AppFabric:`"$AppFabric`" /IDFX11:`"$IDFX11`" /MSIPCClient:`"$MSIPCClient`" /WCFDataServices:`"$WCFDataServices`" /KB2671763:`"$KB2671763`" /WCFDataServices56:`"$WCFDataServices56`""
     }
-    Write-Verbose "Args for prereq installer are: $args"
+    Write-Verbose -Message "Args for prereq installer are: $args"
     $process = Start-Process -FilePath $InstallerPath -ArgumentList $args -Wait
 
     switch ($process.ExitCode) {
         0 {
-            Write-Verbose "Installer completed successfully"
+            Write-Verbose -Message "Installer completed successfully"
         }
         default {
             $code = $process.ExitCode
-            Write-Verbose "Machine needs reboot, exit code was $code"
+            Write-Verbose -Message "Machine needs reboot, exit code was $code"
             $global:DSCMachineStatus = 1
         }
     }
@@ -117,36 +117,36 @@ function Test-TargetResource
         [System.String]
         $InstallerPath,
         [System.Boolean]
-        $OnlineMode,
+        $OnlineMode = $true,
         [System.String]
-        $SQLNCli,
+        $SQLNCli = [System.String]::Empty,
         [System.String]
-        $PowerShell,
+        $PowerShell = [System.String]::Empty,
         [System.String]
-        $NETFX,
+        $NETFX = [System.String]::Empty,
         [System.String]
-        $IDFX,
+        $IDFX = [System.String]::Empty,
         [System.String]
-        $Sync,
+        $Sync = [System.String]::Empty,
         [System.String]
-        $AppFabric,
+        $AppFabric = [System.String]::Empty,
         [System.String]
-        $IDFX11,
+        $IDFX11 = [System.String]::Empty,
         [System.String]
-        $MSIPCClient,
+        $MSIPCClient = [System.String]::Empty,
         [System.String]
-        $WCFDataServices,
+        $WCFDataServices = [System.String]::Empty,
         [System.String]
-        $KB2671763,
+        $KB2671763 = [System.String]::Empty,
         [System.String]
-        $WCFDataServices56
+        $WCFDataServices56 = [System.String]::Empty
     )
 
 
     $result = Get-TargetResource -InstallerPath $InstallerPath
-    Write-Verbose "Checking installation of SharePoint prerequisites"
+    Write-Verbose -Message "Checking installation of SharePoint prerequisites"
     if (($result.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
-        Write-Verbose "Prerequisites were detected as missing."
+        Write-Verbose -Message "Prerequisites were detected as missing."
         return $false
     }
     

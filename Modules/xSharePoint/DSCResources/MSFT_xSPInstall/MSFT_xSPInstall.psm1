@@ -6,13 +6,17 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]
         [System.String]
-        $BinaryDir
+        $BinaryDir,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ProductKey
     )
 
-    Write-Verbose "Getting install status of SP binaries"
+    Write-Verbose -Message "Getting install status of SP binaries"
 
-    $spInstall = Get-WmiObject -Class Win32_Product | ? {$_.Name -like "Microsoft SharePoint Server*" }
-    $result = ($spInstall -ne $null)
+    $spInstall = Get-CimInstance -ClassName Win32_Product -Filter "Name like 'Microsoft SharePoint Server%'"
+    $result = ($null -ne $spInstall)
     $returnValue = @{
         SharePointInstalled = $result
     }
@@ -30,11 +34,12 @@ function Set-TargetResource
         [System.String]
         $BinaryDir,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $ProductKey
     )
 
-    Write-Verbose "Writing install config file"
+    Write-Verbose -Message "Writing install config file"
 
     $configPath = "$env:temp\SPInstallConfig.xml" 
 
@@ -54,15 +59,15 @@ function Set-TargetResource
     <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
     <Setting Id=`"SETUP_REBOOT`" Value=`"Never`" />
     <Setting Id=`"SETUPTYPE`" Value=`"CLEAN_INSTALL`"/>
-</Configuration>" | Out-File $configPath
+</Configuration>" | Out-File -FilePath $configPath
 
-    Write-Verbose "Begining installation of SharePoint"
+    Write-Verbose -Message "Begining installation of SharePoint"
     
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     
-    $process = Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait
+    Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait
 
-    Write-Verbose "SharePoint binary installation complete"
+    Write-Verbose -Message "SharePoint binary installation complete"
 }
 
 
@@ -76,12 +81,14 @@ function Test-TargetResource
         [System.String]
         $BinaryDir,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $ProductKey
     )
 
-    $result = Get-TargetResource -BinaryDir $BinaryDir
-    Write-Verbose "Testing for installation of SharePoint"
+    $result = Get-TargetResource -BinaryDir $BinaryDir -ProductKey $ProductKey
+    Write-Verbose -Message "Testing for installation of SharePoint"
     $result.SharePointInstalled
 }
+
 Export-ModuleMember -Function *-TargetResource

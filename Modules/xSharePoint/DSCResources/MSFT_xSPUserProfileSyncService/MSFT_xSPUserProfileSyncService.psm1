@@ -21,17 +21,17 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    Write-Verbose "Getting the local user profile sync service instance"
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    Write-Verbose -Message "Getting the local user profile sync service instance"
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $computerName = $env:COMPUTERNAME
 
         $syncService = Get-SPServiceInstance | 
-            where {$_.TypeName -match "User Profile Synchronization Service" -and  $_.Server -match "SPServer Name=$computerName" }
+            Where-Object {$_.TypeName -match "User Profile Synchronization Service" -and  $_.Server -match "SPServer Name=$computerName" }
         
-        if ($syncService -eq $null) { return @{} }
+        if ($null -eq $syncService) { return @{} }
 
         return @{
             Status = $syncService.Status
@@ -64,7 +64,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Setting User Profile Synchronization Service"
+    Write-Verbose -Message "Setting User Profile Synchronization Service"
     
 
     $domainName = $FarmAccount.UserName.Split('\')[0]
@@ -73,8 +73,8 @@ function Set-TargetResource
 
     # Add the FarmAccount to the local Admins group, if it's not already there
     $isLocalAdmin = ([ADSI]"WinNT://$computerName/Administrators,group").PSBase.Invoke("Members") | 
-        %{$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)} | 
-        ? { $_ -eq $userName }
+        ForEach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)} | 
+        Where-Object { $_ -eq $userName }
 
     if (!$isLocalAdmin)
     {
@@ -84,14 +84,14 @@ function Set-TargetResource
         Restart-Service -Name "SPTimerV4"
     }
 
-    $session = Get-xSharePointAuthenticatedPSSession $FarmAccount -ForceNewSession $true
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $FarmAccount -ForceNewSession $true
 
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $computerName = $env:COMPUTERNAME
         $syncService = Get-SPServiceInstance | 
-            where {$_.TypeName -match "User Profile Synchronization Service" -and  $_.Server -match "SPServer Name=$computerName" }
+            Where-Object {$_.TypeName -match "User Profile Synchronization Service" -and  $_.Server -match "SPServer Name=$computerName" }
         
          # Start the Sync service if it should be running on this server
         if (($Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
@@ -110,12 +110,12 @@ function Set-TargetResource
         $count = 0
         $maxCount = 10
         while ($wait) {
-            Start-Sleep 60
+            Start-Sleep -Seconds 60
 
             # Get the current status of the Sync service
             $syncService = $(Get-SPServiceInstance | 
-                    where {$_.TypeName -match "User Profile Synchronization Service" } | 
-                    where {$_.Server -match "SPServer Name=$computerName"})
+                    Where-Object {$_.TypeName -match "User Profile Synchronization Service" } | 
+                    Where-Object {$_.Server -match "SPServer Name=$computerName"})
 
             # Continue to wait if haven't reached $maxCount or $desiredState
             $wait = (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState))
@@ -156,7 +156,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -UserProfileServiceAppName $UserProfileServiceAppName -Ensure $Ensure -FarmAccount $FarmAccount -InstallAccount $InstallAccount
-    Write-Verbose "Testing for User Profile Synchronization Service"
+    Write-Verbose -Message "Testing for User Profile Synchronization Service"
     if ($result.Count -eq 0) { return $false }
     else {
         if (($result.Status -eq "Online") -and ($Ensure -ne "Present")) { return $false }

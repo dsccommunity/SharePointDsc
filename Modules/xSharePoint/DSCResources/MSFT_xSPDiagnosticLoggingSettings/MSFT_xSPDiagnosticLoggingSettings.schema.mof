@@ -6,7 +6,7 @@ class MSFT_xSPDiagnosticLoggingSettings : OMI_BaseResource
     [Required] uint32 LogSpaceInGB;
     [Write] boolean AppAnalyticsAutomaticUploadEnabled;
     [Write] boolean CustomerExperienceImprovementProgramEnabled;
-    [Write] boolean DaysToKeepLogs;
+    [Write] uint32 DaysToKeepLogs;
     [Write] boolean DownloadErrorReportingUpdatesEnabled;
     [Write] boolean ErrorReportingAutomaticUploadEnabled;
     [Write] boolean ErrorReportingEnabled;

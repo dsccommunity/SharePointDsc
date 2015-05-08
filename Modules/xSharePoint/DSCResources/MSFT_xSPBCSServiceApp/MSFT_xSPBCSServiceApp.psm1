@@ -17,15 +17,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting BCS service app '$Name'"
+    Write-Verbose -Message "Getting BCS service app '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
-        If ($serviceApp -eq $null)
+        If ($null -eq $serviceApp)
         {
             return @{}
         }
@@ -68,9 +68,9 @@ function Set-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
     if ($result.Count -eq 0) { 
-        Write-Verbose "Creating BCS Service Application $Name"
+        Write-Verbose -Message "Creating BCS Service Application $Name"
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             $params.Remove("InstallAccount") | Out-Null
@@ -79,7 +79,7 @@ function Set-TargetResource
     }
     else {
         if ($ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose "Updating BCS Service Application $Name"
+            Write-Verbose -Message "Updating BCS Service Application $Name"
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
@@ -118,7 +118,7 @@ function Test-TargetResource
     )
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
     
-    Write-Verbose "Testing for BCS Service Application '$Name'"
+    Write-Verbose -Message "Testing for BCS Service Application '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($ApplicationPool -ne $result.ApplicationPool) { return $false }

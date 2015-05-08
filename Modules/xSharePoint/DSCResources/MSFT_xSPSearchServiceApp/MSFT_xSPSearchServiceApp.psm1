@@ -17,15 +17,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting Search service application '$Name'"
+    Write-Verbose -Message "Getting Search service application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Search Service Application" }
-        If ($serviceApp -eq $null)
+        If ($null -eq $serviceApp)
         {
             return @{}
         }
@@ -55,10 +55,10 @@ function Set-TargetResource
         $ApplicationPool,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -66,11 +66,12 @@ function Set-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
     if ($result.Count -eq 0) { 
-        Write-Verbose "Creating Search Service Application $Name"
+        Write-Verbose -Message "Creating Search Service Application $Name"
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            $params = Remove-xSharePointNullParamValues -Params $params
             $params.Remove("InstallAccount") | Out-Null
 
             Get-SPEnterpriseSearchServiceInstance -Local | Start-SPEnterpriseSearchServiceInstance -ErrorAction SilentlyContinue
@@ -82,9 +83,10 @@ function Set-TargetResource
     }
     else {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose "Updating Search Service Application $Name"
+            Write-Verbose -Message "Updating Search Service Application $Name"
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
+                $params = Remove-xSharePointNullParamValues -Params $params
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Search Service Application" }
                 $serviceApp | Set-SPEnterpriseSearchServiceApplication -ApplicationPool (Get-SPServiceApplicationPool $params.ApplicationPool)
@@ -109,10 +111,10 @@ function Test-TargetResource
         $ApplicationPool,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -120,7 +122,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-    Write-Verbose "Testing Search service application '$Name'"
+    Write-Verbose -Message "Testing Search service application '$Name'"
     
     if ($result.Count -eq 0) { return $false }
     else {
