@@ -17,15 +17,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting service application pool '$Name'"
+    Write-Verbose -Message "Getting service application pool '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $sap = Get-SPServiceApplicationPool $params.Name -ErrorAction SilentlyContinue
-        if ($sap -eq $null) { return @{} }
+        if ($null -eq $sap) { return @{} }
         
         return @{
             Name = $sap.Name
@@ -54,14 +54,14 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Creating service application pool '$Name'"
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    Write-Verbose -Message "Creating service application pool '$Name'"
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $sap = Get-SPServiceApplicationPool $params.Name -ErrorAction SilentlyContinue
-        if ($sap -eq $null) { 
+        if ($null -eq $sap) { 
             New-SPServiceApplicationPool -Name $params.Name -Account $params.ServiceAccount
         } else {
             if ($sap.ProcessAccountName -ne $params.ServiceAccount) {  
@@ -92,7 +92,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ServiceAccount $ServiceAccount -InstallAccount $InstallAccount
-    Write-Verbose "Testing service application pool '$Name'"
+    Write-Verbose -Message "Testing service application pool '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($ServiceAccount -ne $result.ProcessAccountName) { return $false }

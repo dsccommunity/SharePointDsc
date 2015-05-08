@@ -30,18 +30,18 @@ function Get-TargetResource
         $CreateFirewallRules
     )
 
-    Write-Verbose "Getting the cache host information"
+    Write-Verbose -Message "Getting the cache host information"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try
         {
             Use-CacheCluster -ErrorAction SilentlyContinue
             $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
-            if ($cacheHost -eq $null) { return @{} }
+            if ($null -eq $cacheHost) { return @{} }
             $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $cacheHost.HostName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
-            if ($cacheHostConfig -eq $null) { return @{} }
+            if ($null -eq $cacheHostConfig) { return @{} }
 
             return @{
                 HostName = $cacheHost.HostName
@@ -89,15 +89,15 @@ function Set-TargetResource
         $CreateFirewallRules
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     if ($Ensure -eq "Present") {
-        Write-Verbose "Adding the distributed cache to the server"
+        Write-Verbose -Message "Adding the distributed cache to the server"
         if($createFirewallRules) {
-            Write-Verbose "Create a firewall rule for AppFabric"
+            Write-Verbose -Message "Create a firewall rule for AppFabric"
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                Import-Module NetSecurity
+                Import-Module -Name NetSecurity
 
                 $icmpRuleName = "File and Printer Sharing (Echo Request - ICMPv4-In)"
                 $icmpPingFirewallRule = Get-NetFirewallRule -DisplayName $icmpRuleName -ErrorAction SilentlyContinue
@@ -109,34 +109,34 @@ function Set-TargetResource
                 }
 
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
-                if($firewallRule -eq $null) {
+                if($null -eq $firewallRule) {
                     New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distribute Cache" -Protocol TCP -LocalPort 22233-22236
                 }
                 Enable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"
             }
-            Write-Verbose "Firewall rule added"
+            Write-Verbose -Message "Firewall rule added"
         }
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
         }
     } else {
-        Write-Verbose "Removing distributed cache to the server"
+        Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             Remove-xSharePointDistributedCacheServer
         }
 
         $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
-        if($firewallRule -eq $null) {
-            Write-Verbose "Disabling firewall rules."
+        if($null -eq $firewallRule) {
+            Write-Verbose -Message "Disabling firewall rules."
             Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                Import-Module NetSecurity
+                Import-Module -Name NetSecurity
                 Disable-NetFirewallRule -DisplayName -DisplayName "SharePoint Distribute Cache"
             }    
         }
-        Write-Verbose "Distributed cache removed."
+        Write-Verbose -Message "Distributed cache removed."
     }
 }
 

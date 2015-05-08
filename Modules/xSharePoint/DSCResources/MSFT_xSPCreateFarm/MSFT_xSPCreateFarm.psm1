@@ -29,16 +29,18 @@ function Get-TargetResource
         $AdminContentDatabaseName
     )
 
-    Write-Verbose "Checking for local SP Farm"
+    Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
-        } catch {}
+        } catch {
+            Write-Verbose -Message "Unable to detect local farm."
+        }
         
-        if ($spFarm -eq $null) {return @{ }}
+        if ($null -eq $spFarm) {return @{ }}
 
         $returnValue = @{
             FarmName = $spFarm.Name
@@ -79,45 +81,45 @@ function Set-TargetResource
         $AdminContentDatabaseName
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    Write-Verbose "Creating new configuration database"
+    Write-Verbose -Message "Creating new configuration database"
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
                                     -DatabaseServer $params.DatabaseServer `
-                                    -Passphrase (ConvertTo-SecureString $params.Passphrase -AsPlainText -force) `
+                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
                                     -FarmCredentials $params.FarmAccount `
                                     -SkipRegisterAsDistributedCacheHost:$true `
                                     -AdministrationContentDatabaseName $params.AdminContentDatabaseName
     }
     
-    Write-Verbose "Installing help collection"
+    Write-Verbose -Message "Installing help collection"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPHelpCollection -All
     }
 
-    Write-Verbose "Initialising farm resource security"
+    Write-Verbose -Message "Initialising farm resource security"
     Invoke-Command -Session $session -ScriptBlock {
         Initialize-SPResourceSecurity
     }
 
-    Write-Verbose "Installing farm services"
+    Write-Verbose -Message "Installing farm services"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPService
     }
 
-    Write-Verbose "Installing farm features"
+    Write-Verbose -Message "Installing farm features"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPFeature -AllExistingFeatures -Force
     }
 
-    Write-Verbose "Creating Central Administration Website"
+    Write-Verbose -Message "Creating Central Administration Website"
     Invoke-Command -Session $session -ScriptBlock {
         New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
     }
 
-    Write-Verbose "Installing application content"
+    Write-Verbose -Message "Installing application content"
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPApplicationContent
     }

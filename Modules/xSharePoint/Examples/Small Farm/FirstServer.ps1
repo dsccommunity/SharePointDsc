@@ -1,4 +1,4 @@
-﻿Configuration SharePointFarmServer
+Configuration SharePointFarmServer
 {
     param (
         [Parameter(Mandatory=$true)] [ValidateNotNullorEmpty()] [string]       $CredSSPDelegates,

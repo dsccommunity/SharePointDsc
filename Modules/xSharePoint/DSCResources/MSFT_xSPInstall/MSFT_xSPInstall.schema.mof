@@ -2,6 +2,6 @@
 class MSFT_xSPInstall : OMI_BaseResource
 {
     [Key] String BinaryDir;
-    [Write] String ProductKey;
+    [Required] String ProductKey;
 };
 

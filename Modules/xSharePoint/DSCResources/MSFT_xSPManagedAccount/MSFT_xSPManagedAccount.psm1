@@ -17,16 +17,16 @@ function Get-TargetResource
         $AccountName
     )
 
-    Write-Verbose "Checking for managed account $AccountName"
+    Write-Verbose -Message "Checking for managed account $AccountName"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {
             $ma = Get-SPManagedAccount $params.AccountName -ErrorAction SilentlyContinue
-            if ($ma -eq $null) { return @{ } }
+            if ($null -eq $ma) { return @{ } }
             return @{
                 AccountName = $ma.Userame
                 AutomaticChange = $ma.AutomaticChange
@@ -58,28 +58,28 @@ function Set-TargetResource
         $InstallAccount,
 
         [System.UInt32]
-        $EmailNotification,
+        $EmailNotification = 5,
 
         [System.UInt32]
-        $PreExpireDays,
+        $PreExpireDays = 2,
 
         [System.String]
-        $Schedule,
+        $Schedule = [System.String]::Empty,
 
         [parameter(Mandatory = $true)]
         [System.String]
         $AccountName
     )
+    
+    Write-Verbose -Message "Setting managed account $AccountName"
 
-    Write-Verbose "Setting managed account $AccountName"
-
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $ma = Get-SPManagedAccount $params.Account.UserName -ErrorAction SilentlyContinue
-        if ($ma -eq $null) {
+        if ($null -eq $ma) {
             $ma = New-SPManagedAccount $params.Account
         }
         $params.Add("Identity", $params.Account.UserName)
@@ -107,13 +107,13 @@ function Test-TargetResource
         $InstallAccount,
 
         [System.UInt32]
-        $EmailNotification,
+        $EmailNotification = 5,
 
         [System.UInt32]
-        $PreExpireDays,
+        $PreExpireDays = 2,
 
         [System.String]
-        $Schedule,
+        $Schedule = [System.String]::Empty,
 
         [parameter(Mandatory = $true)]
         [System.String]
@@ -121,7 +121,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Account $Account -InstallAccount $InstallAccount -AccountName $AccountName
-    Write-Verbose "Testing managed account $AccountName"
+    Write-Verbose -Message "Testing managed account $AccountName"
     if ($result.Count -eq 0) { return $false }
     else {
         if($result.AutomaticChange -eq $true) {

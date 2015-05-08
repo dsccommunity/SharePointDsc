@@ -25,13 +25,13 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting web application '$Name'"
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    Write-Verbose -Message "Getting web application '$Name'"
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $wa = Get-SPWebApplication $params.Name -ErrorAction SilentlyContinue
-        if ($wa -eq $null) { return @{} }
+        if ($null -eq $wa) { return @{} }
         
         return @{
             Name = $wa.DisplayName
@@ -65,52 +65,49 @@ function Set-TargetResource
         $Url,
 
         [System.Boolean]
-        $AllowAnonymous,
+        $AllowAnonymous = $false,
 
         [ValidateSet("NTLM","Kerberos")]
         [System.String]
-        $AuthenticationMethod,
+        $AuthenticationMethod = "NTLM",
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $HostHeader,
+        $HostHeader = $null,
 
         [System.String]
-        $Path,
+        $Path = $null,
 
         [System.String]
-        $Port,
+        $Port = $null,
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose "Creating web application '$Name'"
+    Write-Verbose -Message "Creating web application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        if ([string]::IsNullOrEmpty($params.AuthenticationMethod) -eq $false) 
-        {
-            if ($AuthenticationMethod -eq "NTLM") {
-                $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos
-                $params.Add("AuthenticationProvider", $ap)
-            } else {
-                $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
-                $params.Add("AuthenticationProvider", $ap)
-            }
+        if ($AuthenticationMethod -eq "NTLM") {
+            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos
+            $params.Add("AuthenticationProvider", $ap)
+        } else {
+            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
+            $params.Add("AuthenticationProvider", $ap)
         }
 
         $wa = Get-SPWebApplication $params.Name -ErrorAction SilentlyContinue
-        if ($wa -eq $null) { 
+        if ($null -eq $wa) { 
             $params.Remove("InstallAccount") | Out-Null
             if ($params.ContainsKey("AuthenticationMethod")) { $params.Remove("AuthenticationMethod") | Out-Null }
             if ($params.ContainsKey("AllowAnonymous")) { 
@@ -147,26 +144,26 @@ function Test-TargetResource
         $Url,
 
         [System.Boolean]
-        $AllowAnonymous,
+        $AllowAnonymous = $false,
 
         [ValidateSet("NTLM","Kerberos")]
         [System.String]
-        $AuthenticationMethod,
+        $AuthenticationMethod = "NTLM",
 
         [System.String]
-        $DatabaseName,
+        $DatabaseName = $null,
 
         [System.String]
-        $DatabaseServer,
+        $DatabaseServer = $null,
 
         [System.String]
-        $HostHeader,
+        $HostHeader = $null,
 
         [System.String]
-        $Path,
+        $Path = $null,
 
         [System.String]
-        $Port,
+        $Port = $null,
 
         [System.Management.Automation.PSCredential]
         [parameter(Mandatory = $true)]
@@ -174,7 +171,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -ApplicationPoolAccount $ApplicationPoolAccount -Url $Url -InstallAccount $InstallAccount
-    Write-Verbose "Testing for web application '$Name'"
+    Write-Verbose -Message "Testing for web application '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
         if ($result.ApplicationPool -ne $ApplicationPool) { return $false }

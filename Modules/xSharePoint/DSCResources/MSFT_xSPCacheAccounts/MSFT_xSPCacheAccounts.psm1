@@ -21,15 +21,15 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Getting cache accounts for $WebAppUrl"
+    Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
 
-        if ($wa -eq $null) { return @{} }
+        if ($null -eq $wa) { return @{} }
         
         $returnVal = @{}
         $returnVal.Add("WebAppUrl", $params.WebAppUrl)
@@ -72,9 +72,9 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose "Setting cache accounts for $WebAppUrl"
+    Write-Verbose -Message "Setting cache accounts for $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         
@@ -121,7 +121,7 @@ function Test-TargetResource
     )
 
     $result = Get-TargetResource -WebAppUrl $WebAppUrl -SuperUserAlias $SuperUserAlias -SuperReaderAlias $SuperReaderAlias -InstallAccount $InstallAccount
-    Write-Verbose "Testing cache accounts for $WebAppUrl"
+    Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
 
     if ($result.Count -eq 0) { return $false }
     else {
