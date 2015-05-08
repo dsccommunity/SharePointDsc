@@ -65,7 +65,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
+    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
     if ($result.Count -eq 0) { 
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
@@ -73,8 +73,11 @@ function Set-TargetResource
             $params = $args[0]
             $params = Remove-xSharePointNullParamValues -Params $params
             $params.Remove("InstallAccount") | Out-Null
-            New-SPMetadataServiceApplication @params | Out-Null
-            New-SPMetadataServiceApplicationProxy -Name ($params.Name + " Proxy") -ServiceApplication $params.Name -DefaultProxyGroup -ContentTypePushdownEnabled -DefaultKeywordTaxonomy -DefaultSiteCollectionTaxonomy
+            $app = New-SPMetadataServiceApplication @params 
+            if ($null -ne $app)
+            {
+                New-SPMetadataServiceApplicationProxy -Name ($params.Name + " Proxy") -ServiceApplication $app -DefaultProxyGroup -ContentTypePushdownEnabled -DefaultKeywordTaxonomy -DefaultSiteCollectionTaxonomy
+            }
         }
     }
     else {
