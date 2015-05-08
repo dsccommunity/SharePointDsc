@@ -65,7 +65,7 @@ function Remove-xSharePointNullParamValues() {
             $Params.Remove($key) | Out-Null
         }
     }
-	return $Params
+    return $Params
 }
 
 Export-ModuleMember -Function *

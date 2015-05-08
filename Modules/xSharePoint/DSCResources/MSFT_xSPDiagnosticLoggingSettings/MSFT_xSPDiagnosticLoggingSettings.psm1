@@ -123,7 +123,7 @@ function Set-TargetResource
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$params.Remove("InstallAccount") | Out-Null
+        $params.Remove("InstallAccount") | Out-Null
         $params = Rename-xSharePointParamValue -params $params -oldName "LogPath" -newName "LogLocation"
         $params = Rename-xSharePointParamValue -params $params -oldName "LogSpaceInGB" -newName "LogDiskSpaceUsageGB"
 
