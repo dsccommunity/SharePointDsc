@@ -68,4 +68,14 @@ function Remove-xSharePointNullParamValues() {
     return $Params
 }
 
+function Get-xSharePointAssemblyVerion() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $PathToAssembly
+    )
+    return (Get-Command $PathToAssembly).Version
+}
+
 Export-ModuleMember -Function *

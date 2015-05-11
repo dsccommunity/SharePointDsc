@@ -14,5 +14,7 @@ class MSFT_xSPInstallPrereqs : OMI_BaseResource
     [Write] String WCFDataServices;
     [Write] String KB2671763;
     [Write] String WCFDataServices56;
+    [Write] String KB2898850;
+    [Write] String MSVCRT12;
 };
 
