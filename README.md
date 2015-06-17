@@ -66,6 +66,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-v0.2.0
- - Initial public release of xSharePoint
+### 0.3.0.0
+* Fixed issue with detection of Identity Extensions in xSPInstallPrereqs resource
+* Changes to comply with PSScriptAnalyzer rules
+
+### 0.2.0
+* Initial public release of xSharePoint
  
