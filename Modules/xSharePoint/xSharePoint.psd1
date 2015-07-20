@@ -70,7 +70,11 @@ NestedModules = @("modules\xSharePoint.DistributedCache\xSharePoint.DistributedC
 FunctionsToExport = '*'
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
+                    "Remove-xSharePointDistributedCacheServer",
+                    "Get-xSharePointAuthenticatedPSSession",
+                    "Rename-xSharePointParamValue",
+                    "Remove-xSharePointNullParamValues")
 
 # Variables to export from this module
 VariablesToExport = '*'
