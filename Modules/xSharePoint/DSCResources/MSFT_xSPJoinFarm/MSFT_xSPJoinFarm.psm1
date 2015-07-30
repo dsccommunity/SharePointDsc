@@ -83,8 +83,13 @@ function Set-TargetResource
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
-        $loopCount = 0    
+     
+		$WaitTime = $PSBoundParameters.WaitTime
+		if ($WaitTime -lt 1) {$WaitTime = 30}
+		$WaitCount = $PSBoundParameters.WaitCount
+		if ($WaitCount -lt 1) {$WaitCount = 30}
+		   
+        $loopCount = 0
 
         while ($loopCount -le $WaitCount) {
             try
@@ -107,7 +112,7 @@ function Set-TargetResource
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPHelpCollection -All
     }
-
+	
     Write-Verbose -Message "Initialising farm resource security"
     Invoke-Command -Session $session -ScriptBlock {
         Initialize-SPResourceSecurity

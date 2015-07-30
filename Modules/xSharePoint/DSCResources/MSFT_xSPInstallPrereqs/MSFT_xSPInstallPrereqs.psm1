@@ -38,14 +38,14 @@ function Get-TargetResource
     $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | ? {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))
     $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", (($installedItems | ? {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"}) -ne $null))
     $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", (($installedItems | ? {$_.Name -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}) -ne $null))
-    $returnValue.Add("Active Directory Rights Management Services Client 2.0", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.0"}) -ne $null))
     $returnValue.Add("AppFabric 1.1 for Windows Server", (($installedItems | ? {$_.Name -eq "AppFabric 1.1 for Windows Server"}) -ne $null))
-    $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"}) -ne $null))
     $returnValue.Add("WCF Data Services 5.6.0 Runtime", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.6.0 Runtime"}) -ne $null))
 
     #SP2013 prereqs
     if ($majorVersion -eq 15) {
-        $returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.Name -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
+        $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"}) -ne $null))
+		$returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.Name -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
+		$returnValue.Add("Active Directory Rights Management Services Client 2.0", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.0"}) -ne $null))
     }
 
     #SP2016 prereqs
@@ -54,6 +54,7 @@ function Get-TargetResource
         $returnValue.Add("Microsoft Visual C++ 2013 x64 Minimum Runtime - 12.0.21005", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2013 x64 Minimum Runtime - 12.0.21005"}) -ne $null))    
         $returnValue.Add("Microsoft Visual C++ 2013 x64 Additional Runtime - 12.0.21005", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2013 x64 Additional Runtime - 12.0.21005"}) -ne $null))    
         $returnValue.Add("Microsoft SQL Server 2012 Native Client", (($installedItems | ? {$_.Name.Trim() -eq "Microsoft SQL Server 2012 Native Client"}) -ne $null))    
+		$returnValue.Add("Active Directory Rights Management Services Client 2.0", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.1"}) -ne $null))
     }
     $returnValue
 }
@@ -108,7 +109,7 @@ function Set-TargetResource
         $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56","KB2898850","MSVCRT12")
     }
     
-    $args = "/unattended"
+    $prereqArgs = "/unattended"
     if ($OnlineMode -eq $false) {
         $requiredParams | ForEach-Object {
             if($PSBoundParameters.ContainsKey($_) -and [string]::IsNullOrEmpty($PSBoundParameters.$_)) {
@@ -116,17 +117,18 @@ function Set-TargetResource
             }
         }
         $requiredParams | ForEach-Object {
-            $args += " /$_ `"$($PSBoundParameters.$_)`""
+            $prereqArgs += " /$_ `"$($PSBoundParameters.$_)`""
         }
     }
 
     Write-Verbose -Message "Calling the SharePoint Pre-req installer"
-    Write-Verbose -Message "Args for prereq installer are: $args"
-    $process = Start-Process -FilePath $InstallerPath -ArgumentList $args -Wait -PassThru
+    Write-Verbose -Message "Args for prereq installer are: $prereqArgs"
+    $process = Start-Process -FilePath $InstallerPath -ArgumentList $prereqArgs -Wait -PassThru
 
     switch ($process.ExitCode) {
         0 {
-            Write-Verbose -Message "Prerequisite installer completed successfully"
+            Write-Verbose -Message "Prerequisite installer completed successfully. Rebooting to finalise installations"
+			$global:DSCMachineStatus = 1
         }
         1 {
             throw "Another instance of the prerequisite installer is already running"
@@ -139,7 +141,7 @@ function Set-TargetResource
             $global:DSCMachineStatus = 1
         }
         3010 {
-            Write-Verbose -Message "The prerequisite installer has run correctly and needs to reboot the machine."
+            Write-Verbose -Message "The prerequisite installer has run correctly and needs to reboot the machine before continuing."
             $global:DSCMachineStatus = 1
         }
         default {

@@ -31,7 +31,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount 
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try {
@@ -81,47 +81,24 @@ function Set-TargetResource
         $AdminContentDatabaseName
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
 
-    Write-Verbose -Message "Creating new configuration database"
+    Write-Verbose -Message "Setting up farm"
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-        $params = $args[0]
-        New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                    -DatabaseServer $params.DatabaseServer `
-                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                    -FarmCredentials $params.FarmAccount `
-                                    -SkipRegisterAsDistributedCacheHost:$true `
-                                    -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-    }
-    
-    Write-Verbose -Message "Installing help collection"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPHelpCollection -All
-    }
+		$params = $args[0]
+		New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+									-DatabaseServer $params.DatabaseServer `
+									-Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+									-FarmCredentials $params.FarmAccount `
+									-SkipRegisterAsDistributedCacheHost:$true `
+									-AdministrationContentDatabaseName $params.AdminContentDatabaseName
 
-    Write-Verbose -Message "Initialising farm resource security"
-    Invoke-Command -Session $session -ScriptBlock {
-        Initialize-SPResourceSecurity
-    }
-
-    Write-Verbose -Message "Installing farm services"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPService
-    }
-
-    Write-Verbose -Message "Installing farm features"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPFeature -AllExistingFeatures -Force
-    }
-
-    Write-Verbose -Message "Creating Central Administration Website"
-    Invoke-Command -Session $session -ScriptBlock {
-        New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
-    }
-
-    Write-Verbose -Message "Installing application content"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPApplicationContent
+		Install-SPHelpCollection -All
+		Initialize-SPResourceSecurity
+		Install-SPService
+		Install-SPFeature -AllExistingFeatures -Force
+		New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
+		Install-SPApplicationContent
     }
 }
 
