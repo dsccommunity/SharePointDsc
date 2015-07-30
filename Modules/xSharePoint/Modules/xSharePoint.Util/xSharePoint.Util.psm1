@@ -10,12 +10,12 @@ function Get-xSharePointAuthenticatedPSSession() {
         [System.Boolean]
         $ForceNewSession = $false
     )
-
-    $session = @(Get-PSSession | Where-Object { $_.ComputerName -eq $env:COMPUTERNAME -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName})
     
+    $session = @(Get-PSSession | Where-Object { $_.ComputerName -eq "." -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName -and $_.State -eq "Open"})
+        
     if (($session.Count -eq 0) -or ($ForceNewSession -eq $true)) { 
         Write-Verbose -Message "Creating new PowerShell session"
-        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP
+        $session = New-PSSession -ComputerName "." -Credential $Credential -Authentication Credssp -SessionOption (New-PSSessionOption -OperationTimeout 600000 -SkipCACheck -SkipCNCheck -SkipRevocationCheck)
         Invoke-Command -Session $session -ScriptBlock {
             if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
             {
@@ -66,6 +66,16 @@ function Remove-xSharePointNullParamValues() {
         }
     }
     return $Params
+}
+
+function Get-xSharePointAssemblyVerion() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $PathToAssembly
+    )
+    return (Get-Command $PathToAssembly).Version
 }
 
 Export-ModuleMember -Function *
