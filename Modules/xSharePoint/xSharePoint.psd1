@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '0.2.0'
+ModuleVersion = '0.4.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -70,7 +70,11 @@ NestedModules = @("modules\xSharePoint.DistributedCache\xSharePoint.DistributedC
 FunctionsToExport = '*'
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
+                    "Remove-xSharePointDistributedCacheServer",
+                    "Get-xSharePointAuthenticatedPSSession",
+                    "Rename-xSharePointParamValue",
+                    "Remove-xSharePointNullParamValues")
 
 # Variables to export from this module
 VariablesToExport = '*'

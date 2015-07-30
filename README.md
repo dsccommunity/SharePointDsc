@@ -1,6 +1,6 @@
 # xSharePoint
 
-Build status: [![Build status](https://ci.appveyor.com/api/projects/status/j44ikfads195663k/branch/master?svg=true)](https://ci.appveyor.com/project/BrianFarnhill/xsharepoint/branch/master)
+Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
 The xSharePoint PowerShell module provides DSC resources that can be used to deploy and manage a SharePoint farm. 
 
@@ -66,6 +66,19 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-v0.2.0
- - Initial public release of xSharePoint
+### Unreleased
+
+
+### 0.4.0.0
+
+* Fixed issue with nested modules’ cmdlets not being found
+
+### 0.3.0.0
+
+* Fixed issue with detection of Identity Extensions in xSPInstallPrereqs resource
+* Changes to comply with PSScriptAnalyzer rules
+
+### 0.2.0
+
+* Initial public release of xSharePoint
  
