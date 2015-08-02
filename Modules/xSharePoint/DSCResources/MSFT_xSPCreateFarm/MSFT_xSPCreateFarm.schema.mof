@@ -8,5 +8,6 @@ class MSFT_xSPCreateFarm : OMI_BaseResource
     [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required] String Passphrase;
     [Required] String AdminContentDatabaseName;
+    [Write] uint32 CentralAdministrationPort;
 };
-
+S
