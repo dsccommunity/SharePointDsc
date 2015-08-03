@@ -22,7 +22,16 @@ function Get-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $InstallAccount,
+
+        [System.Boolean]
+        $UserDefinedWorkflowsEnabled,
+
+        [System.Boolean]
+        $EmailToNoPermissionWorkflowParticipantsEnabled,
+
+        [System.Boolean]
+        $ExternalWorkflowParticipantsEnabled
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
@@ -88,7 +97,16 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $InstallAccount,
+
+        [System.Boolean]
+        $UserDefinedWorkflowsEnabled = $true,
+
+        [System.Boolean]
+        $EmailToNoPermissionWorkflowParticipantsEnabled = $true,
+
+        [System.Boolean]
+        $ExternalWorkflowParticipantsEnabled = $false
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
@@ -97,6 +115,11 @@ function Set-TargetResource
 
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+        <# Workflow Settings #>
+        $ParamUserDefinedWorkflowsEnabled = $params.UserDefinedWorkflowsEnabled
+        $ParamEmailToNoPermissionWorkflowParticipantsEnabled = $params.EmailToNoPermissionWorkflowParticipantsEnabled
+        $ParamExternalWorkflowParticipantsEnabled = $params.ExternalWorkflowParticipantsEnabled
 
         if ($AuthenticationMethod -eq "NTLM") {
             $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos
@@ -109,14 +132,22 @@ function Set-TargetResource
         $wa = Get-SPWebApplication $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) { 
             $params.Remove("InstallAccount") | Out-Null
+            if ($params.ContainsKey("UserDefinedWorkflowsEnabled")) {$params.Remove("UserDefinedWorkflowsEnabled") | Out-Null}
+            if ($params.ContainsKey("EmailToNoPermissionWorkflowParticipantsEnabled")) {$params.Remove("EmailToNoPermissionWorkflowParticipantsEnabled") | Out-Null}
+            if ($params.ContainsKey("ExternalWorkflowParticipantsEnabled")) {$params.Remove("ExternalWorkflowParticipantsEnabled") | Out-Null}
             if ($params.ContainsKey("AuthenticationMethod")) { $params.Remove("AuthenticationMethod") | Out-Null }
             if ($params.ContainsKey("AllowAnonymous")) { 
                 $params.Remove("AllowAnonymous") | Out-Null 
                 $params.Add("AllowAnonymousAccess", $true)
             }
 
-            New-SPWebApplication @params
+            $wa = New-SPWebApplication @params
         }
+
+        $wa.UserDefinedWorkflowsEnabled = $ParamUserDefinedWorkflowsEnabled
+        $wa.EmailToNoPermissionWorkflowParticipantsEnabled = $ParamEmailToNoPermissionWorkflowParticipantsEnabled
+        $wa.ExternalWorkflowParticipantsEnabled = $ParamExternalWorkflowParticipantsEnabled
+        $wa.Update()
     }
 }
 
@@ -167,10 +198,19 @@ function Test-TargetResource
 
         [System.Management.Automation.PSCredential]
         [parameter(Mandatory = $true)]
-        $InstallAccount
+        $InstallAccount,
+
+        [System.Boolean]
+        $UserDefinedWorkflowsEnabled = $true,
+
+        [System.Boolean]
+        $EmailToNoPermissionWorkflowParticipantsEnabled = $true,
+
+        [System.Boolean]
+        $ExternalWorkflowParticipantsEnabled = $false
     )
 
-    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -ApplicationPoolAccount $ApplicationPoolAccount -Url $Url -InstallAccount $InstallAccount
+    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -ApplicationPoolAccount $ApplicationPoolAccount -Url $Url -InstallAccount $InstallAccount -UserDefinedWorkflowsEnabled $UserDefinedWorkflowsEnabled -EmailToNoPermissionWorkflowParticipantsEnabled $EmailToNoPermissionWorkflowParticipantsEnabled -ExternalWorkflowParticipantsEnabled $ExternalWorkflowParticipantsEnabled
     Write-Verbose -Message "Testing for web application '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
