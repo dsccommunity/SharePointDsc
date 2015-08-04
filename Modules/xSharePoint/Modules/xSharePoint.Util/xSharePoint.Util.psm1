@@ -11,24 +11,18 @@ function Get-xSharePointAuthenticatedPSSession() {
         $ForceNewSession = $false
     )
     
-    $session = @(Get-PSSession | Where-Object { $_.ComputerName -eq "." -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName -and $_.State -eq "Open"})
-        
-    if (($session.Count -eq 0) -or ($ForceNewSession -eq $true)) { 
-        Write-Verbose -Message "Creating new PowerShell session"
-        $session = New-PSSession -ComputerName "." -Credential $Credential -Authentication Credssp -SessionOption (New-PSSessionOption -OperationTimeout 600000 -SkipCACheck -SkipCNCheck -SkipRevocationCheck)
-        Invoke-Command -Session $session -ScriptBlock {
-            if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
-            {
-                Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
-            }
+	# Remove existing sessions to keep things clean
+	Get-PSSession | Where-Object { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName } | Remove-PSSession
+
+    Write-Verbose -Message "Creating new PowerShell session"
+    $session = New-PSSession -ComputerName "." -Credential $Credential -Authentication Credssp -SessionOption (New-PSSessionOption -OperationTimeout 600000 -SkipCACheck -SkipCNCheck -SkipRevocationCheck)
+    Invoke-Command -Session $session -ScriptBlock {
+        if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+        {
+            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
         }
-        return $session    
     }
-    else
-    {
-        Write-Verbose -Message "Using existing PowerShell session '$($session[0].InstanceId)'"
-        return $session[0] 
-    }
+	return $session
 }
 
 function Rename-xSharePointParamValue() {
