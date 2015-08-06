@@ -26,7 +26,10 @@ function Get-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $AdminContentDatabaseName
+        $AdminContentDatabaseName,
+
+        [System.UInt32]
+        $CentralAdministrationPort
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
@@ -78,7 +81,10 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $AdminContentDatabaseName
+        $AdminContentDatabaseName,
+
+        [System.UInt32]
+        $CentralAdministrationPort = 9999
     )
 
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
@@ -116,7 +122,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Creating Central Administration Website"
     Invoke-Command -Session $session -ScriptBlock {
-        New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
+        New-SPCentralAdministration -Port $params.CentralAdministrationPort -WindowsAuthProvider NTLM
     }
 
     Write-Verbose -Message "Installing application content"
@@ -154,10 +160,13 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $AdminContentDatabaseName
+        $AdminContentDatabaseName,
+
+        [System.UInt32]
+        $CentralAdministrationPort = 9999
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName
+    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName -CentralAdministrationPort $CentralAdministrationPort
 
     if ($result.Count -eq 0) { return $false }
     return $true
@@ -165,4 +174,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-
