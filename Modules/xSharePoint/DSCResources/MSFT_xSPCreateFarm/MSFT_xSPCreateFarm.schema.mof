@@ -10,4 +10,3 @@ class MSFT_xSPCreateFarm : OMI_BaseResource
     [Required] String AdminContentDatabaseName;
     [Write] uint32 CentralAdministrationPort;
 };
-S
