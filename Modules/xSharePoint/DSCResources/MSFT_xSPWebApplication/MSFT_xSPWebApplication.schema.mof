@@ -13,5 +13,20 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write] string Path;
     [Write] string Port;
     [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write] Boolean UserDefinedWorkflowsEnabled;
+    [Write] Boolean EmailToNoPermissionWorkflowParticipantsEnabled;
+    [Write] Boolean ExternalWorkflowParticipantsEnabled;    
+    [Write] uint32 MaxItemsPerThrottledOperation;
+    [Write] Boolean AllowOMCodeOverrideThrottleSettings;
+    [Write] uint32 MaxItemsPerThrottledOperationOverride;
+    [Write] uint32 MaxQueryLookupFields;
+    [Write] Boolean UnthrottledPrivilegedOperationWindowEnabled;
+    [Write] uint32 DailyStartUnthrottledPrivilegedOperationsHour;
+    [Write] uint32 DailyStartUnthrottledPrivilegedOperationsMinute;
+    [Write] uint32 DailyUnthrottledPrivilegedOperationsDuration;
+    [Write] uint32 MaxUniquePermScopesPerList;
+    [Write] Boolean EventHandlersEnabled;
+    [Write] boolean HttpThrottleEnabled;
+    [Write] Boolean ChangeLogExpirationEnabled;
+    [Write] uint32 ChangeLogRetentionPeriodInDays;
 };
-
