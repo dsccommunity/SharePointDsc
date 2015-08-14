@@ -84,20 +84,37 @@ function Set-TargetResource
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
      
-		$WaitTime = $PSBoundParameters.WaitTime
-		if ($WaitTime -lt 1) {$WaitTime = 30}
-		$WaitCount = $PSBoundParameters.WaitCount
-		if ($WaitCount -lt 1) {$WaitCount = 30}
-		   
+        $WaitTime = $PSBoundParameters.WaitTime
+        if ($WaitTime -lt 1) {$WaitTime = 30}
+        $WaitCount = $PSBoundParameters.WaitCount
+        if ($WaitCount -lt 1) {$WaitCount = 30}
+           
         $loopCount = 0
+
+        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
 
         while ($loopCount -le $WaitCount) {
             try
             {
-                Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                -DatabaseServer $params.DatabaseServer `
-                                                -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                -SkipRegisterAsDistributedCacheHost:$true 
+                if ($majorVersion -eq 15) {
+                    Write-Verbose -Message "Version: SharePoint 2013"
+
+                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                                    -DatabaseServer $params.DatabaseServer `
+                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                                    -SkipRegisterAsDistributedCacheHost:$true 
+                }
+                if ($majorVersion -eq 16) {
+                    Write-Verbose -Message "Version: SharePoint 2016"
+    
+                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                                    -DatabaseServer $params.DatabaseServer `
+                                                    -LocalServerRole Custom `
+                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                                    -SkipRegisterAsDistributedCacheHost:$true 
+                }
+
+
                 $loopCount = $WaitCount + 1
             }
             catch
@@ -112,7 +129,7 @@ function Set-TargetResource
     Invoke-Command -Session $session -ScriptBlock {
         Install-SPHelpCollection -All
     }
-	
+    
     Write-Verbose -Message "Initialising farm resource security"
     Invoke-Command -Session $session -ScriptBlock {
         Initialize-SPResourceSecurity

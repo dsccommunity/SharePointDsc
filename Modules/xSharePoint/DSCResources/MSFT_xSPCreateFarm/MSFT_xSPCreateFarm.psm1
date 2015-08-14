@@ -85,20 +85,39 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting up farm"
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-		$params = $args[0]
-		New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-									-DatabaseServer $params.DatabaseServer `
-									-Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-									-FarmCredentials $params.FarmAccount `
-									-SkipRegisterAsDistributedCacheHost:$true `
-									-AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        $params = $args[0]
 
-		Install-SPHelpCollection -All
-		Initialize-SPResourceSecurity
-		Install-SPService
-		Install-SPFeature -AllExistingFeatures -Force
-		New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
-		Install-SPApplicationContent
+        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
+        if ($majorVersion -eq 15) {
+            Write-Verbose -Message "Version: SharePoint 2013"
+
+            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                        -DatabaseServer $params.DatabaseServer `
+                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                        -FarmCredentials $params.FarmAccount `
+                                        -SkipRegisterAsDistributedCacheHost:$true `
+                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        }
+        if ($majorVersion -eq 16) {
+            Write-Verbose -Message "Version: SharePoint 2016"
+    
+            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                        -DatabaseServer $params.DatabaseServer `
+                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                        -FarmCredentials $params.FarmAccount `
+                                        -SkipRegisterAsDistributedCacheHost:$true `
+                                        -LocalServerRole Custom `
+                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        }
+
+
+
+        Install-SPHelpCollection -All
+        Initialize-SPResourceSecurity
+        Install-SPService
+        Install-SPFeature -AllExistingFeatures -Force
+        New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
+        Install-SPApplicationContent
     }
 }
 
