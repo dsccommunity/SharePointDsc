@@ -11,9 +11,9 @@ function Get-xSharePointAuthenticatedPSSession() {
         $ForceNewSession = $false
     )
 
-	# Remove existing sessions to keep things clean
-	Get-PSSession | Where-Object { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName } | Remove-PSSession
-	[GC]::Collect()
+    # Remove existing sessions to keep things clean
+    Get-PSSession | Where-Object { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName } | Remove-PSSession
+    [GC]::Collect()
     
         Write-Verbose -Message "Creating new PowerShell session"
         $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP
