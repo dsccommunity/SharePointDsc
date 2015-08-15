@@ -44,8 +44,8 @@ function Get-TargetResource
     #SP2013 prereqs
     if ($majorVersion -eq 15) {
         $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"}) -ne $null))
-		$returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.Name -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
-		$returnValue.Add("Active Directory Rights Management Services Client 2.0", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.0"}) -ne $null))
+        $returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.Name -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
+        $returnValue.Add("Active Directory Rights Management Services Client 2.0", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.0"}) -ne $null))
     }
 
     #SP2016 prereqs
@@ -54,7 +54,7 @@ function Get-TargetResource
         $returnValue.Add("Microsoft Visual C++ 2013 x64 Minimum Runtime - 12.0.21005", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2013 x64 Minimum Runtime - 12.0.21005"}) -ne $null))    
         $returnValue.Add("Microsoft Visual C++ 2013 x64 Additional Runtime - 12.0.21005", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2013 x64 Additional Runtime - 12.0.21005"}) -ne $null))    
         $returnValue.Add("Microsoft SQL Server 2012 Native Client", (($installedItems | ? {$_.Name.Trim() -eq "Microsoft SQL Server 2012 Native Client"}) -ne $null))    
-		$returnValue.Add("Active Directory Rights Management Services Client 2.1", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.1"}) -ne $null))
+        $returnValue.Add("Active Directory Rights Management Services Client 2.1", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.1"}) -ne $null))
     }
     $returnValue
 }
@@ -128,7 +128,7 @@ function Set-TargetResource
     switch ($process.ExitCode) {
         0 {
             Write-Verbose -Message "Prerequisite installer completed successfully. Rebooting to finalise installations"
-			$global:DSCMachineStatus = 1
+            $global:DSCMachineStatus = 1
         }
         1 {
             throw "Another instance of the prerequisite installer is already running"
