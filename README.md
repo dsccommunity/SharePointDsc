@@ -66,14 +66,15 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### Unreleased
+### 0.5.0
 
+* Added support for SharePoint 2016 prerequisites, binary installation, creation and joining of a farm
 
-### 0.4.0.0
+### 0.4.0
 
 * Fixed issue with nested modules’ cmdlets not being found
 
-### 0.3.0.0
+### 0.3.0
 
 * Fixed issue with detection of Identity Extensions in xSPInstallPrereqs resource
 * Changes to comply with PSScriptAnalyzer rules

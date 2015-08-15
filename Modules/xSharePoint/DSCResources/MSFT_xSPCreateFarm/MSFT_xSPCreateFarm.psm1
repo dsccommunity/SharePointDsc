@@ -31,7 +31,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount 
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try {
@@ -81,46 +81,42 @@ function Set-TargetResource
         $AdminContentDatabaseName
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
 
-    Write-Verbose -Message "Creating new configuration database"
+    Write-Verbose -Message "Setting up farm"
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                    -DatabaseServer $params.DatabaseServer `
-                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                    -FarmCredentials $params.FarmAccount `
-                                    -SkipRegisterAsDistributedCacheHost:$true `
-                                    -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-    }
+
+        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
+        if ($majorVersion -eq 15) {
+            Write-Verbose -Message "Version: SharePoint 2013"
+
+            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                        -DatabaseServer $params.DatabaseServer `
+                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                        -FarmCredentials $params.FarmAccount `
+                                        -SkipRegisterAsDistributedCacheHost:$true `
+                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        }
+        if ($majorVersion -eq 16) {
+            Write-Verbose -Message "Version: SharePoint 2016"
     
-    Write-Verbose -Message "Installing help collection"
-    Invoke-Command -Session $session -ScriptBlock {
+            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                        -DatabaseServer $params.DatabaseServer `
+                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                        -FarmCredentials $params.FarmAccount `
+                                        -SkipRegisterAsDistributedCacheHost:$true `
+                                        -LocalServerRole Custom `
+                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        }
+
+
+
         Install-SPHelpCollection -All
-    }
-
-    Write-Verbose -Message "Initialising farm resource security"
-    Invoke-Command -Session $session -ScriptBlock {
         Initialize-SPResourceSecurity
-    }
-
-    Write-Verbose -Message "Installing farm services"
-    Invoke-Command -Session $session -ScriptBlock {
         Install-SPService
-    }
-
-    Write-Verbose -Message "Installing farm features"
-    Invoke-Command -Session $session -ScriptBlock {
         Install-SPFeature -AllExistingFeatures -Force
-    }
-
-    Write-Verbose -Message "Creating Central Administration Website"
-    Invoke-Command -Session $session -ScriptBlock {
         New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
-    }
-
-    Write-Verbose -Message "Installing application content"
-    Invoke-Command -Session $session -ScriptBlock {
         Install-SPApplicationContent
     }
 }
