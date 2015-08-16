@@ -2,10 +2,7 @@ version: 0.5.0.{build}
 install:
 - cinst -y pester
 - git clone https://github.com/PowerShell/DscResource.Tests
-- ps: Push-Location
-- cd DscResource.Tests
-- ps: Import-Module .\TestHelper.psm1 -force
-- ps: Pop-Location
+- ps: Import-Module .\DscResource.Tests\TestHelper.psm1 -force
 
 build: off
 
