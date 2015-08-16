@@ -23,4 +23,7 @@ on_finish:
         (Get-Content $manifest -Raw).Replace("0.5.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
     - 7z a xSharePoint.zip %APPVEYOR_BUILD_FOLDER%\modules\xSharePoint
     - artifacts:
-        xSharePoint.zip
+      - path: xSharePoint.zip
+        name: PSModule
+        type: zip
+        
