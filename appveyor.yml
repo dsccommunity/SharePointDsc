@@ -3,6 +3,8 @@ version: 0.5.0.{build}
 install:
 - cinst -y pester
 - git clone https://github.com/PowerShell/DscResource.Tests
+    - ps: |
+        Import-Module .\DscResource.Tests\TestHelper.psm1 -force
 
 build: off
 
@@ -24,3 +26,8 @@ on_finish:
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint", "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip")
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
+        New-Nuspec -packageName $env:APPVEYOR_PROJECT_NAME -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription $env:APPVEYOR_PROJECT_NAME -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
+        nuget pack ".\$($env:APPVEYOR_PROJECT_NAME).nuspec" -outputdirectory .
+        $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
+        $nuGetPackagePath = (Get-ChildItem $nuGetPackageName).FullName
+        Get-ChildItem $nuGetPackagePath | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
