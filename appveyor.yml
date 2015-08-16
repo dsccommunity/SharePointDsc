@@ -16,8 +16,8 @@ test_script:
         if ($res.FailedCount -gt 0) { 
             throw "$($res.FailedCount) tests failed."
         }
-deploy: off
-after_build:
+
+before_deploy:
     - ps: |
         Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
