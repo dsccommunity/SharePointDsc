@@ -25,6 +25,6 @@ on_finish:
         $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
         Add-Type -assemblyname System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFile)
-        @(
-            (ls $zipFile)
-        ) | % { Push-AppveyorArtifact $_.FullName }
+        
+        
+        Push-AppveyorArtifact $zipFile
