@@ -65,9 +65,17 @@ function Set-TargetResource
     
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     
-    Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait
+    $setup = Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait -PassThru
 
-    Write-Verbose -Message "SharePoint binary installation complete"
+    if ($setup.ExitCode -eq 0) {
+        Write-Verbose -Message "SharePoint binary installation complete"
+        $global:DSCMachineStatus = 1
+    }
+    else
+    {
+        throw "SharePoint install failed, exit code was $($setup.ExitCode)"
+    }
+    
 }
 
 
