@@ -22,8 +22,5 @@ on_finish:
         $manifest = Join-Path $pwd "xSharePoint.psd1"
         (Get-Content $manifest -Raw).Replace("0.5.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
     - 7z a xSharePoint.zip %APPVEYOR_BUILD_FOLDER%\modules\xSharePoint
-    - artifacts:
-      - path: xSharePoint.zip
-        name: PSModule
-        type: zip
+    - ps: Get-ChildItem .\xSharePoint.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
