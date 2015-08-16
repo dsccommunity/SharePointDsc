@@ -14,7 +14,7 @@ install:
         
         New-Nuspec -packageName $env:APPVEYOR_PROJECT_NAME -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription $env:APPVEYOR_PROJECT_NAME -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
         nuget pack ".\$($env:APPVEYOR_PROJECT_NAME).nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
-        $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
+        $nuGetPackageName = "$env:APPVEYOR_PROJECT_NAME.$env:APPVEYOR_BUILD_VERSION.nupkg"
 
 build: off
 
