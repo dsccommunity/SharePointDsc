@@ -21,10 +21,12 @@ on_finish:
         # Creating project artifact
         $stagingDirectory = (Resolve-Path ..).Path
         $pwd = Join-Path $pwd "modules\xSharePoint"
+		$pwd
         Remove-Item (Join-Path $pwd "xSharePoint.pssproj")
         $manifest = Join-Path $pwd "xSharePoint.psd1"
         (Get-Content $manifest -Raw).Replace("0.5.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
         $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
+		$zipFile
         Add-Type -assemblyname System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFilePath)
       
