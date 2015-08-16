@@ -26,12 +26,15 @@ function Get-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $AdminContentDatabaseName
+        $AdminContentDatabaseName,
+
+        [System.UInt32]
+        $CentralAdministrationPort
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount 
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try {
@@ -78,7 +81,10 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $AdminContentDatabaseName
+        $AdminContentDatabaseName,
+
+        [System.UInt32]
+        $CentralAdministrationPort = 9999
     )
 
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
@@ -91,13 +97,13 @@ function Set-TargetResource
         if ($majorVersion -eq 15) {
             Write-Verbose -Message "Version: SharePoint 2013"
 
-            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                        -DatabaseServer $params.DatabaseServer `
-                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                        -FarmCredentials $params.FarmAccount `
-                                        -SkipRegisterAsDistributedCacheHost:$true `
-                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-        }
+        New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                    -DatabaseServer $params.DatabaseServer `
+                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                    -FarmCredentials $params.FarmAccount `
+                                    -SkipRegisterAsDistributedCacheHost:$true `
+                                    -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+    }
         if ($majorVersion -eq 16) {
             Write-Verbose -Message "Version: SharePoint 2016"
     
@@ -108,7 +114,7 @@ function Set-TargetResource
                                         -SkipRegisterAsDistributedCacheHost:$true `
                                         -LocalServerRole Custom `
                                         -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-        }
+    }
 
 
 
@@ -150,10 +156,13 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $AdminContentDatabaseName
+        $AdminContentDatabaseName,
+
+        [System.UInt32]
+        $CentralAdministrationPort = 9999
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName
+    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName -CentralAdministrationPort $CentralAdministrationPort
 
     if ($result.Count -eq 0) { return $false }
     return $true
@@ -161,4 +170,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-

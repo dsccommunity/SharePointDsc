@@ -2,6 +2,8 @@
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PowerShell/xSharePoint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 The xSharePoint PowerShell module provides DSC resources that can be used to deploy and manage a SharePoint farm. 
 
 This module is provided AS IS, and is not supported through any Microsoft standard support program or service. 
@@ -72,7 +74,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### 0.4.0
 
-* Fixed issue with nested modules’ cmdlets not being found
+* Fixed issue with nested modulesâ€™ cmdlets not being found
 
 ### 0.3.0
 
