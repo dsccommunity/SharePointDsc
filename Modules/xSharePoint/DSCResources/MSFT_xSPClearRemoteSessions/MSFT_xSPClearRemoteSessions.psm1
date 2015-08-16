@@ -9,7 +9,7 @@ function Get-TargetResource
         $ClearRemoteSessions
     )
 
-    return Get-PSSession
+    return Get-PSSession -ComputerName "localhost"
 }
 
 
@@ -23,7 +23,7 @@ function Set-TargetResource
         $ClearRemoteSessions
     )
 
-    Get-PSSession | Remove-PSSession
+    Get-PSSession -ComputerName "localhost" | Remove-PSSession
 }
 
 
