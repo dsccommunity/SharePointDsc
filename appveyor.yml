@@ -19,6 +19,9 @@ test_script:
 
 after_test:
     - ps: |
+
+        $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
         Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
         (Get-Content $manifest -Raw).Replace("0.5.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
@@ -30,3 +33,5 @@ after_test:
         nuget pack ".\$($env:APPVEYOR_PROJECT_NAME).nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
         $nuGetPackageName = $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$nuGetPackageName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+
+        
