@@ -6,8 +6,6 @@ install:
     - ps: |
         Import-Module .\DscResource.Tests\TestHelper.psm1 -force
 
-build: off
-
 test_script:
     - ps: |
         $testResultsFile = ".\TestsResults.xml"
@@ -17,18 +15,19 @@ test_script:
             throw "$($res.FailedCount) tests failed."
         }
 
-before_deploy:
+after_build:
     - ps: |
         Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
         (Get-Content $manifest -Raw).Replace("0.5.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
         Add-Type -assemblyname System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint", "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip")
-        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+        # Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
         New-Nuspec -packageName $env:APPVEYOR_PROJECT_NAME -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription $env:APPVEYOR_PROJECT_NAME -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
         nuget pack ".\$($env:APPVEYOR_PROJECT_NAME).nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
         $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
 
 artifacts:
-  - path: '**\*.nupkg'
+- path: '**\xSharePoint.zip'
+- path: '**\*.nupkg'
