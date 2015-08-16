@@ -1,7 +1,3 @@
-
-#---------------------------------# 
-#      environment configuration  # 
-#---------------------------------# 
 version: 0.5.0.{build}
 install:
 - cinst -y pester
@@ -11,15 +7,7 @@ install:
   - ps: Import-Module .\TestHelper.psm1 -force
   - ps: Pop-Location
 
-#---------------------------------# 
-#      build configuration        # 
-#---------------------------------# 
-
 build: false
-
-#---------------------------------# 
-#      test configuration         # 
-#---------------------------------# 
 
 test_script:
     - ps: |
@@ -29,10 +17,6 @@ test_script:
         if ($res.FailedCount -gt 0) { 
             throw "$($res.FailedCount) tests failed."
         }
-    
-#---------------------------------# 
-#      deployment configuration   # 
-#---------------------------------# 
 
 # scripts to run before deployment 
 before_deploy: 
