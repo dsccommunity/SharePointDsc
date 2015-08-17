@@ -93,18 +93,7 @@ function Set-TargetResource
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
-        if ($majorVersion -eq 15) {
-            Write-Verbose -Message "Version: SharePoint 2013"
-
-        New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                    -DatabaseServer $params.DatabaseServer `
-                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                    -FarmCredentials $params.FarmAccount `
-                                    -SkipRegisterAsDistributedCacheHost:$true `
-                                    -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-    }
-        if ($majorVersion -eq 16) {
+        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
             Write-Verbose -Message "Version: SharePoint 2016"
     
             New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
@@ -114,9 +103,16 @@ function Set-TargetResource
                                         -SkipRegisterAsDistributedCacheHost:$true `
                                         -LocalServerRole Custom `
                                         -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-    }
+        } else {
+            Write-Verbose -Message "Version: SharePoint 2013"
 
-
+            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
+                                        -DatabaseServer $params.DatabaseServer `
+                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
+                                        -FarmCredentials $params.FarmAccount `
+                                        -SkipRegisterAsDistributedCacheHost:$true `
+                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        }
 
         Install-SPHelpCollection -All
         Initialize-SPResourceSecurity
