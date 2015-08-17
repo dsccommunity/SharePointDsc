@@ -160,7 +160,7 @@ Configuration SharePointAppServer
         # Local configuration manager settings
         #
         # This section contains settings for the LCM of the host
-        # that this configuraiton is applied to
+        # that this configuration is applied to
         #**********************************************************
         LocalConfigurationManager
         {
