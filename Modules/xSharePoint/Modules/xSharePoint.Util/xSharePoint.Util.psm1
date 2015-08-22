@@ -11,12 +11,13 @@ function Get-xSharePointAuthenticatedPSSession() {
         $ForceNewSession = $false
     )
 
+	[GC]::Collect()
+
     # Remove existing sessions to keep things clean
-    Get-PSSession | Where-Object { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName } | Remove-PSSession
-    [GC]::Collect()
-    
+    $session = Get-PSSession -ComputerName localhost -Name "Microsoft.SharePoint.DSC"
+	if ($ForceNewSession -or $session -eq $null) {
         Write-Verbose -Message "Creating new PowerShell session"
-        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP
+        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000)
         Invoke-Command -Session $session -ScriptBlock {
             if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
             {
@@ -24,7 +25,11 @@ function Get-xSharePointAuthenticatedPSSession() {
             }
         }
         return $session    
-    }
+	} else {
+		Write-Verbose -Message "Using existing new PowerShell session"
+		return $session[0]
+	}
+}
 
 function Rename-xSharePointParamValue() {
     [CmdletBinding()]
