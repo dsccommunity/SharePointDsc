@@ -14,10 +14,6 @@ function Get-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
         $InstallAccount,
 
         [parameter(Mandatory = $true)]
@@ -27,7 +23,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     $result = Invoke-Command -Session $session -ScriptBlock {
         try {
@@ -43,6 +39,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
+	Remove-PSSession $session
     $result
 }
 
@@ -62,10 +59,6 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
         $InstallAccount,
 
         [parameter(Mandatory = $true)]
@@ -80,42 +73,38 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+
+	if ($PSBoundParameters.WaitTime -eq $null) { $PSBoundParameters.Add("WaitTime", $WaitTime) }
+	if ($PSBoundParameters.WaitCount -eq $null) { $PSBoundParameters.Add("WaitCount", $WaitCount) }
+
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-     
-        $WaitTime = $PSBoundParameters.WaitTime
-        if ($WaitTime -lt 1) {$WaitTime = 30}
-        $WaitCount = $PSBoundParameters.WaitCount
-        if ($WaitCount -lt 1) {$WaitCount = 30}
-           
         $loopCount = 0
 
-        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
+		$params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
+		$params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+		$params.Remove("InstallAccount")
 
+		$WaitTime = $params.WaitTime
+		$params.Remove("WaitTime")
+		$WaitCount = $params.WaitCount
+		$params.Remove("WaitCount")
+
+		if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
+            Write-Verbose -Message "Detected Version: SharePoint 2016"
+            $params.Add("LocalServerRole", "Custom")
+        } else {
+            Write-Verbose -Message "Detected Version: SharePoint 2013"
+        }
+
+		$success = $false
         while ($loopCount -le $WaitCount) {
             try
             {
-                if ($majorVersion -eq 15) {
-                    Write-Verbose -Message "Version: SharePoint 2013"
-
-                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                    -DatabaseServer $params.DatabaseServer `
-                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                    -SkipRegisterAsDistributedCacheHost:$true 
-                }
-                if ($majorVersion -eq 16) {
-                    Write-Verbose -Message "Version: SharePoint 2016"
-    
-                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                    -DatabaseServer $params.DatabaseServer `
-                                                    -LocalServerRole Custom `
-                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                    -SkipRegisterAsDistributedCacheHost:$true 
-                }
-
-
+				Connect-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true 
                 $loopCount = $WaitCount + 1
+				$success = $true
             }
             catch
             {
@@ -123,32 +112,16 @@ function Set-TargetResource
                 Start-Sleep -Seconds $WaitTime
             }
         }
+		if ($success) {
+			Install-SPHelpCollection -All
+			Initialize-SPResourceSecurity
+			Install-SPService
+			Install-SPFeature -AllExistingFeatures -Force
+			Install-SPApplicationContent
+		}
     }
 
-    Write-Verbose -Message "Installing help collection"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPHelpCollection -All
-    }
-    
-    Write-Verbose -Message "Initialising farm resource security"
-    Invoke-Command -Session $session -ScriptBlock {
-        Initialize-SPResourceSecurity
-    }
-
-    Write-Verbose -Message "Installing farm services"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPService
-    }
-
-    Write-Verbose -Message "Installing farm features"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPFeature -AllExistingFeatures -Force
-    }
-
-    Write-Verbose -Message "Installing application content"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPApplicationContent
-    }
+	Remove-PSSession $session
 
     Write-Verbose -Message "Starting timer service"
     Start-Service -Name sptimerv4
@@ -177,10 +150,6 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
         $InstallAccount,
 
         [parameter(Mandatory = $true)]
@@ -194,7 +163,7 @@ function Test-TargetResource
         $WaitCount = 60
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase
+    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -InstallAccount $InstallAccount -Passphrase $Passphrase
  
     if ($result.Count -eq 0) { return $false }
     return $true   

@@ -37,6 +37,7 @@ function Get-TargetResource
             }
         }
     }
+	Remove-PSSession $session
     $result
 }
 
@@ -116,6 +117,8 @@ function Set-TargetResource
         if ($params.ContainsKey("UsageLogMaxSpaceGB")) { $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) }
         Set-SPUsageService @setParams
     }
+
+	Remove-PSSession $session
 }
 
 

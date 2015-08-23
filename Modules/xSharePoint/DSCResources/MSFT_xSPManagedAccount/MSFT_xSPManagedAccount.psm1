@@ -40,6 +40,7 @@ function Get-TargetResource
             return @{ }
         }
     }
+	Remove-PSSession $session
     $result
 }
 
@@ -75,7 +76,7 @@ function Set-TargetResource
 
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $ma = Get-SPManagedAccount $params.Account.UserName -ErrorAction SilentlyContinue
@@ -89,6 +90,7 @@ function Set-TargetResource
 
         Set-SPManagedAccount @params
     }
+	Remove-PSSession $session
 }
 
 

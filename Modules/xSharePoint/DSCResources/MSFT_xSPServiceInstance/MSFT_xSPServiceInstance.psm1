@@ -33,6 +33,7 @@ function Get-TargetResource
             Status = $si.Status
         }
     }
+	Remove-PSSession $session
     $result
 }
 
@@ -79,6 +80,7 @@ function Set-TargetResource
             Stop-SPServiceInstance $si
         }
     }
+	Remove-PSSession $session
 }
 
 
