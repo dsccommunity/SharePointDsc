@@ -75,36 +75,36 @@ function Set-TargetResource
     Write-Verbose -Message "Joining existing farm configuration database"
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-	if ($PSBoundParameters.WaitTime -eq $null) { $PSBoundParameters.Add("WaitTime", $WaitTime) }
-	if ($PSBoundParameters.WaitCount -eq $null) { $PSBoundParameters.Add("WaitCount", $WaitCount) }
+    if ($PSBoundParameters.WaitTime -eq $null) { $PSBoundParameters.Add("WaitTime", $WaitTime) }
+    if ($PSBoundParameters.WaitCount -eq $null) { $PSBoundParameters.Add("WaitCount", $WaitCount) }
 
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $loopCount = 0
 
-		$params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
-		$params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
-		$params.Remove("InstallAccount")
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
+        $params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+        $params.Remove("InstallAccount")
 
-		$WaitTime = $params.WaitTime
-		$params.Remove("WaitTime")
-		$WaitCount = $params.WaitCount
-		$params.Remove("WaitCount")
+        $WaitTime = $params.WaitTime
+        $params.Remove("WaitTime")
+        $WaitCount = $params.WaitCount
+        $params.Remove("WaitCount")
 
-		if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
+        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
             Write-Verbose -Message "Detected Version: SharePoint 2016"
             $params.Add("LocalServerRole", "Custom")
         } else {
             Write-Verbose -Message "Detected Version: SharePoint 2013"
         }
 
-		$success = $false
+        $success = $false
         while ($loopCount -le $WaitCount) {
             try
             {
-				Connect-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true 
+                Connect-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true 
                 $loopCount = $WaitCount + 1
-				$success = $true
+                $success = $true
             }
             catch
             {
@@ -112,13 +112,13 @@ function Set-TargetResource
                 Start-Sleep -Seconds $WaitTime
             }
         }
-		if ($success) {
-			Install-SPHelpCollection -All
-			Initialize-SPResourceSecurity
-			Install-SPService
-			Install-SPFeature -AllExistingFeatures -Force
-			Install-SPApplicationContent
-		}
+        if ($success) {
+            Install-SPHelpCollection -All
+            Initialize-SPResourceSecurity
+            Install-SPService
+            Install-SPFeature -AllExistingFeatures -Force
+            Install-SPApplicationContent
+        }
     }
 
     Remove-PSSession $session

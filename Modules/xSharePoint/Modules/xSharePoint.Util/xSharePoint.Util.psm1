@@ -7,17 +7,17 @@ function Get-xSharePointAuthenticatedPSSession() {
         $Credential
     )
 
-	#Running garbage collection to resolve issues related to Azure DSC extention use
-	[GC]::Collect()
+    #Running garbage collection to resolve issues related to Azure DSC extention use
+    [GC]::Collect()
 
-	Write-Verbose -Message "Creating new PowerShell session"
+    Write-Verbose -Message "Creating new PowerShell session"
     $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000)
     Invoke-Command -Session $session -ScriptBlock {
         if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
         {
             Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
         }
-		$VerbosePreference = 'Continue'
+        $VerbosePreference = 'Continue'
     }
     return $session 
 }
