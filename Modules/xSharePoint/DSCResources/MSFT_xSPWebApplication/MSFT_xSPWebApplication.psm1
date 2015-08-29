@@ -39,6 +39,7 @@ function Get-TargetResource
             ApplicationPoolAccount = $wa.ApplicationPool.Username
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -118,6 +119,7 @@ function Set-TargetResource
             New-SPWebApplication @params
         }
     }
+    Remove-PSSession $session
 }
 
 

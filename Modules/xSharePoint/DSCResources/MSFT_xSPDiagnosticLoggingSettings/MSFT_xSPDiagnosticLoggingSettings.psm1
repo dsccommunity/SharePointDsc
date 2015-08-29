@@ -46,6 +46,7 @@ function Get-TargetResource
             ScriptErrorReportingDelay = $dc.ScriptErrorReportingDelay
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -120,7 +121,7 @@ function Set-TargetResource
 
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $params.Remove("InstallAccount") | Out-Null
@@ -129,6 +130,7 @@ function Set-TargetResource
 
         Set-SPDiagnosticConfig @params
     }
+    Remove-PSSession $session
 }
 
 

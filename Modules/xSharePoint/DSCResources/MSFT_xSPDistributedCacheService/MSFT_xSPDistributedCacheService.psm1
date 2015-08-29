@@ -40,7 +40,7 @@ function Get-TargetResource
             Use-CacheCluster -ErrorAction SilentlyContinue
             $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
             if ($null -eq $cacheHost) { return @{} }
-            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $cacheHost.HostName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
+            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName ([System.Net.Dns]::GetHostByName($env:computerName)).HostName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
             if ($null -eq $cacheHostConfig) { return @{} }
 
             return @{
@@ -53,7 +53,7 @@ function Get-TargetResource
             return @{}
         }
     }
-
+    Remove-PSSession $session
     $result
 }
 
@@ -138,6 +138,7 @@ function Set-TargetResource
         }
         Write-Verbose -Message "Distributed cache removed."
     }
+    Remove-PSSession $session
 }
 
 

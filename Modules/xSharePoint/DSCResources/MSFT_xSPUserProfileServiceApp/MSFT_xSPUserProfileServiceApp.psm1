@@ -39,6 +39,7 @@ function Get-TargetResource
             }
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -102,7 +103,7 @@ function Set-TargetResource
         ([ADSI]"WinNT://$computerName/Administrators,group").Add("WinNT://$domainName/$userName") | Out-Null
     }
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $FarmAccount -ForceNewSession $true
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $FarmAccount
     $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $params = Remove-xSharePointNullParamValues -Params $params
@@ -127,6 +128,7 @@ function Set-TargetResource
         Write-Verbose -Message "Removing $domainName\$userName from local admin group"
         ([ADSI]"WinNT://$computerName/Administrators,group").Remove("WinNT://$domainName/$userName") | Out-Null
     }
+    Remove-PSSession $session
 }
 
 
