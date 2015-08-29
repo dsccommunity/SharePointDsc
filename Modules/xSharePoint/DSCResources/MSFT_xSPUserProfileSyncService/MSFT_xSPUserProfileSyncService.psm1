@@ -37,7 +37,7 @@ function Get-TargetResource
             Status = $syncService.Status
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -129,7 +129,7 @@ function Set-TargetResource
     {
         ([ADSI]"WinNT://$computerName/Administrators,group").Remove("WinNT://$domainName/$userName") | Out-Null
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

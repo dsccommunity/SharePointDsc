@@ -46,7 +46,7 @@ function Get-TargetResource
             ScriptErrorReportingDelay = $dc.ScriptErrorReportingDelay
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -130,7 +130,7 @@ function Set-TargetResource
 
         Set-SPDiagnosticConfig @params
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

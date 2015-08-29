@@ -55,7 +55,7 @@ function Get-TargetResource
             Enabled = $enabled
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -106,7 +106,7 @@ function Set-TargetResource
             Disable-SPFeature @runParams
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

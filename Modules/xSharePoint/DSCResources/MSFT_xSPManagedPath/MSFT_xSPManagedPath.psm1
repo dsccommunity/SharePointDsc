@@ -46,7 +46,7 @@ function Get-TargetResource
             PathType = $path.Type
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -106,7 +106,7 @@ function Set-TargetResource
             New-SPManagedPath @newParams
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

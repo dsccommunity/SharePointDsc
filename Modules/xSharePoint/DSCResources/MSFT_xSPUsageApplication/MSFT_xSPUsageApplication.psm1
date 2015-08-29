@@ -37,7 +37,7 @@ function Get-TargetResource
             }
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -118,7 +118,7 @@ function Set-TargetResource
         Set-SPUsageService @setParams
     }
 
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

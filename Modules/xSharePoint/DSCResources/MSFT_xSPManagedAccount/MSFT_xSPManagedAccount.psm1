@@ -40,7 +40,7 @@ function Get-TargetResource
             return @{ }
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -90,7 +90,7 @@ function Set-TargetResource
 
         Set-SPManagedAccount @params
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

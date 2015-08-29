@@ -28,7 +28,7 @@ function Get-TargetResource
             Name = $app.DisplayName
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -75,7 +75,7 @@ function Set-TargetResource
             New-SPStateServiceDatabase @dbParams| New-SPStateServiceApplication -Name $params.Name | New-SPStateServiceApplicationProxy -DefaultProxyGroup
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

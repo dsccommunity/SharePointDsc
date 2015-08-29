@@ -46,7 +46,7 @@ function Get-TargetResource
 
         return $returnVal
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -95,7 +95,7 @@ function Set-TargetResource
         }
         $wa.Update()
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

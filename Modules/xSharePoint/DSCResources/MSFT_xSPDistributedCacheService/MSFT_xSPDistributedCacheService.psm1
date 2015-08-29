@@ -53,7 +53,7 @@ function Get-TargetResource
             return @{}
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -138,7 +138,7 @@ function Set-TargetResource
         }
         Write-Verbose -Message "Distributed cache removed."
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 

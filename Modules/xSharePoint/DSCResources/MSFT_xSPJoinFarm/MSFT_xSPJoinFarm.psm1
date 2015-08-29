@@ -39,7 +39,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -121,7 +121,7 @@ function Set-TargetResource
 		}
     }
 
-	Remove-PSSession $session
+    Remove-PSSession $session
 
     Write-Verbose -Message "Starting timer service"
     Start-Service -Name sptimerv4

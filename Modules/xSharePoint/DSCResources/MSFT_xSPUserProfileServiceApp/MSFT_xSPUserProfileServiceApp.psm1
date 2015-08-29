@@ -39,7 +39,7 @@ function Get-TargetResource
             }
         }
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -128,7 +128,7 @@ function Set-TargetResource
         Write-Verbose -Message "Removing $domainName\$userName from local admin group"
         ([ADSI]"WinNT://$computerName/Administrators,group").Remove("WinNT://$domainName/$userName") | Out-Null
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 
