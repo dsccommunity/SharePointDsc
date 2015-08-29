@@ -50,7 +50,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
     $result
 }
 
@@ -88,22 +88,24 @@ function Set-TargetResource
         $CentralAdministrationPort = 9999
     )
 
+    $VerbosePreference = 'Continue'
     $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    
+    if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
 
-	if ($PSBoundParameters.CentralAdministrationPort -eq $null) { $PSBoundParameters.Add("CentralAdministrationPort", $CentralAdministrationPort) }
+    Write-Verbose -Message "Setting up new SharePoint farm"
 
-    Write-Verbose -Message "Setting up farm"
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
-		$params = Rename-xSharePointParamValue -params $params -oldName "FarmAccount" -newName "FarmCredentials"
-		$params = Rename-xSharePointParamValue -params $params -oldName "AdminContentDatabaseName" -newName "AdministrationContentDatabaseName"
-		$params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
-		$params.Remove("InstallAccount")
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmAccount" -newName "FarmCredentials"
+        $params = Rename-xSharePointParamValue -params $params -oldName "AdminContentDatabaseName" -newName "AdministrationContentDatabaseName"
+        $params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+        $params.Remove("InstallAccount")
 
-		$caPort = $params.CentralAdministrationPort
-		$params.Remove("CentralAdministrationPort")
+        $caPort = $params.CentralAdministrationPort
+        $params.Remove("CentralAdministrationPort")
 
         if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
             Write-Verbose -Message "Detected Version: SharePoint 2016"
@@ -112,7 +114,7 @@ function Set-TargetResource
             Write-Verbose -Message "Detected Version: SharePoint 2013"
         }
 
-		New-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true
+        New-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true
         Install-SPHelpCollection -All
         Initialize-SPResourceSecurity
         Install-SPService
@@ -120,7 +122,7 @@ function Set-TargetResource
         New-SPCentralAdministration -Port $caPort -WindowsAuthProvider NTLM
         Install-SPApplicationContent
     }
-	Remove-PSSession $session
+    Remove-PSSession $session
 }
 
 
