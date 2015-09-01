@@ -22,6 +22,64 @@ function Get-xSharePointAuthenticatedPSSession() {
     return $session 
 }
 
+function Invoke-xSharePointCommand() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $Credential,
+
+        [parameter(Mandatory = $true)]
+        [string]
+        $ScriptBlock,
+
+        [parameter(Mandatory = $false)]
+        [System.Collections.Generic.Dictionary`2[System.String,System.Object]]
+        $Arguments
+    )
+
+
+    $invokeParams = @{}
+    $invokeParams.Add("ScriptBlock", $ScriptBlock)
+
+    $createdSession = $false
+
+    if ($PSBoundParameters.ContainsKey("Arguments")) {
+        $invokeParams.Add("ArgumentList", $Arguments)
+    }
+
+    if ($Credential -eq $null)
+    {
+        if ($env:USERNAME.Contains("$")) {
+            throw [Exception] "Either InstallAccount or PsDscRunAsCredential must be specified for the current resource"
+            return
+        }
+
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+        $VerbosePreference = 'Continue'
+    }
+    else
+    {
+        if ($env:USERNAME -eq $Credential.UserName) {
+            throw [Exception] "Either InstallAccount or PsDscRunAsCredential must be specified for the current resource, and currently both are used"
+            return
+        }
+
+        $session = Get-xSharePointAuthenticatedPSSession -Credential $Credential
+        $invokeParams.Add("Session", $session)
+        $createdSession = $true
+    }
+    
+    $returnVal = Invoke-Command @invokeParams
+
+    if ($createdSession) {
+        Remove-PSSession $invokeParams.Session
+    }
+
+    return $returnVal
+}
+
 function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
