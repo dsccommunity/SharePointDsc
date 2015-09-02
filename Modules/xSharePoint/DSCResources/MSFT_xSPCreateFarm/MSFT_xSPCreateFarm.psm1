@@ -16,7 +16,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $false)]
+        [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -34,7 +34,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+
+    $result = Invoke-Command -Session $session -ScriptBlock {
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
         } catch {
@@ -48,7 +50,8 @@ function Get-TargetResource
         }
         return $returnValue
     }
-    return $result
+    Remove-PSSession $session
+    $result
 }
 
 
@@ -69,7 +72,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $false)]
+        [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -84,12 +87,15 @@ function Set-TargetResource
         [System.UInt32]
         $CentralAdministrationPort = 9999
     )
-        
+
+    $VerbosePreference = 'Continue'
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
 
     Write-Verbose -Message "Setting up new SharePoint farm"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
@@ -116,6 +122,7 @@ function Set-TargetResource
         New-SPCentralAdministration -Port $caPort -WindowsAuthProvider NTLM
         Install-SPApplicationContent
     }
+    Remove-PSSession $session
 }
 
 
@@ -137,7 +144,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $false)]
+        [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
