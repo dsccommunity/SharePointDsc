@@ -16,7 +16,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -34,9 +34,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ScriptBlock {
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
         } catch {
@@ -50,7 +50,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
-    $result
+    return $result
 }
 
 
@@ -71,7 +71,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -86,39 +86,38 @@ function Set-TargetResource
         [System.UInt32]
         $CentralAdministrationPort = 9999
     )
+    
+    if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
+    Write-Verbose -Message "Setting up new SharePoint farm"
 
-    Write-Verbose -Message "Setting up farm"
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
 
-        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
-            Write-Verbose -Message "Version: SharePoint 2016"
-    
-            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                        -DatabaseServer $params.DatabaseServer `
-                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                        -FarmCredentials $params.FarmAccount `
-                                        -SkipRegisterAsDistributedCacheHost:$true `
-                                        -LocalServerRole Custom `
-                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-        } else {
-            Write-Verbose -Message "Version: SharePoint 2013"
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmAccount" -newName "FarmCredentials"
+        $params = Rename-xSharePointParamValue -params $params -oldName "AdminContentDatabaseName" -newName "AdministrationContentDatabaseName"
+        $params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+        $params.Remove("InstallAccount")
 
-            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                        -DatabaseServer $params.DatabaseServer `
-                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                        -FarmCredentials $params.FarmAccount `
-                                        -SkipRegisterAsDistributedCacheHost:$true `
-                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        $caPort = $params.CentralAdministrationPort
+        $params.Remove("CentralAdministrationPort")
+
+        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
+            Write-Verbose -Message "Detected Version: SharePoint 2016"
+            $params.Add("LocalServerRole", "Custom")
+        } else {
+            Write-Verbose -Message "Detected Version: SharePoint 2013"
         }
 
+        New-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true
         Install-SPHelpCollection -All
         Initialize-SPResourceSecurity
         Install-SPService
         Install-SPFeature -AllExistingFeatures -Force
-        New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
+        New-SPCentralAdministration -Port $caPort -WindowsAuthProvider NTLM
         Install-SPApplicationContent
     }
 }
@@ -142,7 +141,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 

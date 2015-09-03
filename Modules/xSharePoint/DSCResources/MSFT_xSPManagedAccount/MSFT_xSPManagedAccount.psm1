@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $Account,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
     
@@ -19,9 +19,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for managed account $AccountName"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {
@@ -53,7 +53,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $Account,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -73,9 +73,9 @@ function Set-TargetResource
     
     Write-Verbose -Message "Setting managed account $AccountName"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $ma = Get-SPManagedAccount $params.Account.UserName -ErrorAction SilentlyContinue
@@ -102,7 +102,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $Account,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 

@@ -20,15 +20,16 @@ function Get-TargetResource
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         $wa = Get-SPWebApplication $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return @{} }
@@ -86,16 +87,16 @@ function Set-TargetResource
         [System.String]
         $Port = $null,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($AuthenticationMethod -eq "NTLM") {
@@ -166,7 +167,7 @@ function Test-TargetResource
         $Port = $null,
 
         [System.Management.Automation.PSCredential]
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         $InstallAccount
     )
 

@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String]
         $ServiceAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting service application pool '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $sap = Get-SPServiceApplicationPool $params.Name -ErrorAction SilentlyContinue
@@ -49,15 +49,16 @@ function Set-TargetResource
         [System.String]
         $ServiceAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Creating service application pool '$Name'"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
 
         $sap = Get-SPServiceApplicationPool $params.Name -ErrorAction SilentlyContinue
@@ -86,7 +87,7 @@ function Test-TargetResource
         [System.String]
         $ServiceAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

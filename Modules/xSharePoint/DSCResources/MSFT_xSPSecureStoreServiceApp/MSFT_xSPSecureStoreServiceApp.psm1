@@ -16,16 +16,16 @@ function Get-TargetResource
         [System.Boolean]
         $AuditingEnabled,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting secure store service application '$Name'"
-    
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Secure Store Service Application" }
@@ -89,16 +89,18 @@ function Set-TargetResource
         [System.Boolean]
         $Sharing = $true,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -AuditingEnabled $AuditingEnabled -InstallAccount $InstallAccount
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+
     if ($result.Count -eq 0) { 
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
             $params = $args[0]
             $params = Remove-xSharePointNullParamValues -Params $params
             $params.Remove("InstallAccount") | Out-Null
@@ -112,7 +114,9 @@ function Set-TargetResource
     else {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
-            Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
                 $params = $args[0]
                 $params = Remove-xSharePointNullParamValues -Params $params
                 $params.Remove("Name") | Out-Null
@@ -172,7 +176,7 @@ function Test-TargetResource
         [System.Boolean]
         $Sharing = $true,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

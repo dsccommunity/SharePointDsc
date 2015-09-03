@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting BCS service app '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
@@ -62,16 +62,18 @@ function Set-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+
     if ($result.Count -eq 0) { 
         Write-Verbose -Message "Creating BCS Service Application $Name"
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
             $params = $args[0]
             $params.Remove("InstallAccount") | Out-Null
             New-SPBusinessDataCatalogServiceApplication @params | Out-Null
@@ -80,7 +82,9 @@ function Set-TargetResource
     else {
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating BCS Service Application $Name"
-            Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
                 $params = $args[0]
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application" }
@@ -112,7 +116,7 @@ function Test-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

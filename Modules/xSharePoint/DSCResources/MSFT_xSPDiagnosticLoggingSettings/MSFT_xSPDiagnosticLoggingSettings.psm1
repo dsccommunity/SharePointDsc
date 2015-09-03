@@ -12,15 +12,16 @@ function Get-TargetResource
         [System.UInt32]
         $LogSpaceInGB,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting diagnostic configuration settings"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
         if ($null -eq $dc) { return @{} }
         
@@ -111,16 +112,16 @@ function Set-TargetResource
         [System.Boolean]
         $ScriptErrorReportingRequireAuth = $true,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting diagnostic configuration settings"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $params.Remove("InstallAccount") | Out-Null
@@ -194,7 +195,7 @@ function Test-TargetResource
         [System.Boolean]
         $ScriptErrorReportingRequireAuth = $true,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

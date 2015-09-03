@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -27,9 +27,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.HostHeader) {
@@ -59,7 +59,7 @@ function Set-TargetResource
         [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -78,9 +78,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($params.HostHeader) {
@@ -118,7 +118,7 @@ function Test-TargetResource
         [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 

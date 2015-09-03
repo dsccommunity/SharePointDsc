@@ -3,8 +3,7 @@ class MSFT_xSPJoinFarm : OMI_BaseResource
 {
     [Key] string FarmConfigDatabaseName;
     [Key] string DatabaseServer;
-    [Required, EmbeddedInstance("MSFT_Credential")] String FarmAccount;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required] string Passphrase;
     [Write] uint32 WaitTime;
     [Write] uint32 WaitCount;

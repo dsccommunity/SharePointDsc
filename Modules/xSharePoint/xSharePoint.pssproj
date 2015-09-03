@@ -72,7 +72,6 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
-    <Folder Include="DSCResources\MSFT_xSPClearRemoteSessions\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -129,8 +128,6 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.psm1" />
-    <Content Include="DSCResources\MSFT_xSPClearRemoteSessions\MSFT_xSPClearRemoteSessions.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
     <Content Include="Examples\Small Farm\AppServer.ps1" />
     <Content Include="Examples\Small Farm\FirstServer.ps1" />
