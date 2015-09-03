@@ -61,7 +61,7 @@ function Set-TargetResource
     <Setting Id=`"SETUPTYPE`" Value=`"CLEAN_INSTALL`"/>
 </Configuration>" | Out-File -FilePath $configPath
 
-    Write-Verbose -Message "Begining installation of SharePoint"
+    Write-Verbose -Message "Beginning installation of SharePoint"
     
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
     
