@@ -37,6 +37,7 @@ function Get-TargetResource
             Status = $syncService.Status
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -84,7 +85,7 @@ function Set-TargetResource
         Restart-Service -Name "SPTimerV4"
     }
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $FarmAccount -ForceNewSession $true
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $FarmAccount
 
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -128,6 +129,7 @@ function Set-TargetResource
     {
         ([ADSI]"WinNT://$computerName/Administrators,group").Remove("WinNT://$domainName/$userName") | Out-Null
     }
+    Remove-PSSession $session
 }
 
 

@@ -50,6 +50,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -87,40 +88,41 @@ function Set-TargetResource
         $CentralAdministrationPort = 9999
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
+    $VerbosePreference = 'Continue'
+    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    
+    if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
 
-    Write-Verbose -Message "Setting up farm"
+    Write-Verbose -Message "Setting up new SharePoint farm"
+
     Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
-            Write-Verbose -Message "Version: SharePoint 2016"
-    
-            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                        -DatabaseServer $params.DatabaseServer `
-                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                        -FarmCredentials $params.FarmAccount `
-                                        -SkipRegisterAsDistributedCacheHost:$true `
-                                        -LocalServerRole Custom `
-                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
-        } else {
-            Write-Verbose -Message "Version: SharePoint 2013"
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
+        $params = Rename-xSharePointParamValue -params $params -oldName "FarmAccount" -newName "FarmCredentials"
+        $params = Rename-xSharePointParamValue -params $params -oldName "AdminContentDatabaseName" -newName "AdministrationContentDatabaseName"
+        $params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+        $params.Remove("InstallAccount")
 
-            New-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                        -DatabaseServer $params.DatabaseServer `
-                                        -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                        -FarmCredentials $params.FarmAccount `
-                                        -SkipRegisterAsDistributedCacheHost:$true `
-                                        -AdministrationContentDatabaseName $params.AdminContentDatabaseName
+        $caPort = $params.CentralAdministrationPort
+        $params.Remove("CentralAdministrationPort")
+
+        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
+            Write-Verbose -Message "Detected Version: SharePoint 2016"
+            $params.Add("LocalServerRole", "Custom")
+        } else {
+            Write-Verbose -Message "Detected Version: SharePoint 2013"
         }
 
+        New-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true
         Install-SPHelpCollection -All
         Initialize-SPResourceSecurity
         Install-SPService
         Install-SPFeature -AllExistingFeatures -Force
-        New-SPCentralAdministration -Port 9999 -WindowsAuthProvider NTLM
+        New-SPCentralAdministration -Port $caPort -WindowsAuthProvider NTLM
         Install-SPApplicationContent
     }
+    Remove-PSSession $session
 }
 
 

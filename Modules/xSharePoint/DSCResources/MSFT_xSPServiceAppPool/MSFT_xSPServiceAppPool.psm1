@@ -32,6 +32,7 @@ function Get-TargetResource
             ProcessAccountName = $sap.ProcessAccountName
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -69,6 +70,7 @@ function Set-TargetResource
             }
         }
     }
+    Remove-PSSession $session
 }
 
 

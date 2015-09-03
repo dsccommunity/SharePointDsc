@@ -33,6 +33,7 @@ function Get-TargetResource
             }
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -103,6 +104,7 @@ function Set-TargetResource
             New-SPSite @params | Out-Null
         }
     }
+    Remove-PSSession $session
 }
 
 

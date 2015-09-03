@@ -19,7 +19,6 @@ Describe "xSPJoinFarm" {
         $testParams = @{
             FarmConfigDatabaseName = "SP_Config"
             DatabaseServer = "DatabaseServer\Instance"
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Passphrase = "passphrase"
             WaitTime = 60

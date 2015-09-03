@@ -37,6 +37,7 @@ function Get-TargetResource
             }
         }
     }
+    Remove-PSSession $session
     $result
 }
 
@@ -88,6 +89,7 @@ function Set-TargetResource
             }
         }
     }
+    Remove-PSSession $session
 }
 
 function Test-TargetResource
