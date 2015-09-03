@@ -6,6 +6,6 @@ class MSFT_xSPBCSServiceApp : OMI_BaseResource
     [Required] String ApplicationPool;
     [Write] string DatabaseName;
     [Write] String DatabaseServer;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

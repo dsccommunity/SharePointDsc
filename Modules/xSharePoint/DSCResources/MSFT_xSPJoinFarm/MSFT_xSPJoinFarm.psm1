@@ -12,7 +12,7 @@ function Get-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -23,9 +23,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ScriptBlock {
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
         } catch {
@@ -39,7 +39,6 @@ function Get-TargetResource
         }
         return $returnValue
     }
-    Remove-PSSession $session
     $result
 }
 
@@ -57,7 +56,7 @@ function Set-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -73,12 +72,13 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
     if ($PSBoundParameters.WaitTime -eq $null) { $PSBoundParameters.Add("WaitTime", $WaitTime) }
     if ($PSBoundParameters.WaitCount -eq $null) { $PSBoundParameters.Add("WaitCount", $WaitCount) }
 
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         $loopCount = 0
 
@@ -121,8 +121,6 @@ function Set-TargetResource
         }
     }
 
-    Remove-PSSession $session
-
     Write-Verbose -Message "Starting timer service"
     Start-Service -Name sptimerv4
 
@@ -148,7 +146,7 @@ function Test-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 

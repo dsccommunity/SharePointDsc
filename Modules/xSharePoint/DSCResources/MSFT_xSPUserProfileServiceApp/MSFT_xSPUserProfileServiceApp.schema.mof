@@ -4,7 +4,7 @@ class MSFT_xSPUserProfileServiceApp : OMI_BaseResource
     [Key] string Name;
     [Required] string ApplicationPool;
     [Required, EmbeddedInstance("MSFT_Credential")] String FarmAccount;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Write] string MySiteHostLocation;
     [Write] string ProfileDBName;
     [Write] string ProfileDBServer;

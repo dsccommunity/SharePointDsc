@@ -16,14 +16,14 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting user profile service application $Name"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "User Profile Service Application" }
@@ -39,7 +39,6 @@ function Get-TargetResource
             }
         }
     }
-    Remove-PSSession $session
     $result
 }
 
@@ -82,7 +81,7 @@ function Set-TargetResource
         [System.String]
         $SyncDBServer = $null,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -103,8 +102,9 @@ function Set-TargetResource
         ([ADSI]"WinNT://$computerName/Administrators,group").Add("WinNT://$domainName/$userName") | Out-Null
     }
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $FarmAccount
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         $params = Remove-xSharePointNullParamValues -Params $params
         $params.Remove("InstallAccount") | Out-Null
@@ -128,7 +128,6 @@ function Set-TargetResource
         Write-Verbose -Message "Removing $domainName\$userName from local admin group"
         ([ADSI]"WinNT://$computerName/Administrators,group").Remove("WinNT://$domainName/$userName") | Out-Null
     }
-    Remove-PSSession $session
 }
 
 
@@ -171,7 +170,7 @@ function Test-TargetResource
         [System.String]
         $SyncDBServer = $null,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

@@ -11,7 +11,7 @@ function Get-TargetResource
     
     $returnValue = @{}
     Write-Verbose -Message "Detecting SharePoint version from binaries"
-    $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly $InstallerPath).Major
+    $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
         Write-Verbose -Message "Version: SharePoint 2013"
     }
@@ -99,7 +99,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"
-    $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly $InstallerPath).Major
+    $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
         Write-Verbose -Message "Version: SharePoint 2013"
         $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")

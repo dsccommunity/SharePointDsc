@@ -8,16 +8,16 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting usage application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "Usage and Health Data Collection Service Application" }
@@ -37,7 +37,6 @@ function Get-TargetResource
             }
         }
     }
-    Remove-PSSession $session
     $result
 }
 
@@ -51,7 +50,7 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -85,8 +84,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting usage application $Name"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         
         $app = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -105,7 +105,9 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message "Configuring usage application $Name"
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         $params = Remove-xSharePointNullParamValues -Params $params
 
@@ -117,8 +119,6 @@ function Set-TargetResource
         if ($params.ContainsKey("UsageLogMaxSpaceGB")) { $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) }
         Set-SPUsageService @setParams
     }
-
-    Remove-PSSession $session
 }
 
 
@@ -132,7 +132,7 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 

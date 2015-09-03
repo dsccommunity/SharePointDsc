@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String]
         $OwnerAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting site collection $Url"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
 
@@ -33,7 +33,6 @@ function Get-TargetResource
             }
         }
     }
-    Remove-PSSession $session
     $result
 }
 
@@ -84,16 +83,16 @@ function Set-TargetResource
         [System.String]
         $Template = $null,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Creating site collection $Url"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $params = Remove-xSharePointNullParamValues -Params $params
         $params.Remove("InstallAccount") | Out-Null
@@ -104,7 +103,6 @@ function Set-TargetResource
             New-SPSite @params | Out-Null
         }
     }
-    Remove-PSSession $session
 }
 
 
@@ -155,7 +153,7 @@ function Test-TargetResource
         [System.String]
         $Template = $null,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

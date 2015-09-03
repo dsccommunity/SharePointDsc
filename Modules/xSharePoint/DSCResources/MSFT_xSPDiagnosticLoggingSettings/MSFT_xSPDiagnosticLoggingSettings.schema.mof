@@ -20,6 +20,6 @@ class MSFT_xSPDiagnosticLoggingSettings : OMI_BaseResource
     [Write] uint32 ScriptErrorReportingDelay;
     [Write] boolean ScriptErrorReportingEnabled;
     [Write] boolean ScriptErrorReportingRequireAuth;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

@@ -13,6 +13,6 @@ class MSFT_xSPSecureStoreServiceApp : OMI_BaseResource
     [Write] string FailoverDatabaseServer;
     [Write] boolean PartitionMode;
     [Write] boolean Sharing;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

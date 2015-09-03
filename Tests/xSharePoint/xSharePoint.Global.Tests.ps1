@@ -24,7 +24,7 @@ Describe 'xSharePoint Global Tests' {
             $mofFiles | % {
                 $fileHasInstallAccount = $false
                 Get-Content $_.FullName | % {
-                    if ($_.IndexOf("[Required, EmbeddedInstance(`"MSFT_Credential`")] String InstallAccount;") -gt 0) { $fileHasInstallAccount = $true }
+                    if ($_.IndexOf("[Write, EmbeddedInstance(`"MSFT_Credential`")] String InstallAccount;") -gt 0) { $fileHasInstallAccount = $true }
                 }
                 if (-not $fileHasInstallAccount -and $_.Name -ne "MSFT_xSPInstall.schema.mof" `
                                                 -and $_.Name -ne "MSFT_xSPClearRemoteSessions.schema.mof" `

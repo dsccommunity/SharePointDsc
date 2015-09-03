@@ -16,16 +16,16 @@ function Get-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
 
@@ -46,7 +46,6 @@ function Get-TargetResource
 
         return $returnVal
     }
-    Remove-PSSession $session
     $result
 }
 
@@ -68,16 +67,15 @@ function Set-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting cache accounts for $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
         
         $params = $args[0]
 
@@ -95,7 +93,6 @@ function Set-TargetResource
         }
         $wa.Update()
     }
-    Remove-PSSession $session
 }
 
 
@@ -117,7 +114,7 @@ function Test-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

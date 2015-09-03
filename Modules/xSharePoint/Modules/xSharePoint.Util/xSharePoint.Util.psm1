@@ -1,25 +1,56 @@
-function Get-xSharePointAuthenticatedPSSession() {
+function Invoke-xSharePointCommand() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [parameter(Mandatory = $false)]
+        [System.Collections.Generic.Dictionary`2[System.String,System.Object]]
+        $Arguments,
+
+        [parameter(Mandatory = $true)]
+        [ScriptBlock]
+        $ScriptBlock
     )
 
-    #Running garbage collection to resolve issues related to Azure DSC extention use
-    [GC]::Collect()
+    $VerbosePreference = 'Continue'
 
-    Write-Verbose -Message "Creating new PowerShell session"
-    $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000)
-    Invoke-Command -Session $session -ScriptBlock {
-        if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
-        {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
-        }
-        $VerbosePreference = 'Continue'
+    $invokeArgs = @{
+        ScriptBlock = $ScriptBlock
     }
-    return $session 
+    if ($null -ne $Arguments) {
+        $invokeArgs.Add("ArgumentList", $Arguments)
+    }
+
+    if ($null -eq $Credential) {
+        if ($Env:USERNAME.Contains("$")) {
+            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
+            return
+        }
+        Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
+    } else {
+        if (-not $Env:USERNAME.Contains("$")) {
+            throw [Exception] "Unable to use both InstallAccount and PsDscRunAsCredential in a single resource. Remove one and try again."
+            return
+        }
+        Write-Verbose "Executing using a provided credential and local PSSession as user $($Credential.UserName)"
+
+        #Running garbage collection to resolve issues related to Azure DSC extention use
+        [GC]::Collect()
+
+        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000)
+        $invokeArgs.Add("Session", $session)
+    }
+
+    $result = Invoke-Command @invokeArgs
+
+    return $result
+
+    if ($invokeArgs.ContainsKey("Session")) {
+        Remove-PSSession $invokeArgs.Session
+    }
 }
 
 function Rename-xSharePointParamValue() {
@@ -66,7 +97,7 @@ function Get-xSharePointAssemblyVerion() {
         [parameter(Mandatory = $true,Position=1)]
         $PathToAssembly
     )
-    return (Get-Command $PathToAssembly).Version
+    return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
 Export-ModuleMember -Function *
