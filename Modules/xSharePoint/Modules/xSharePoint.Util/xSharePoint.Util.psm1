@@ -30,6 +30,9 @@ function Invoke-xSharePointCommand() {
             return
         }
         Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
+
+        $result = Invoke-Command @invokeArgs
+        return $result
     } else {
         if (-not $Env:USERNAME.Contains("$")) {
             throw [Exception] "Unable to use both InstallAccount and PsDscRunAsCredential in a single resource. Remove one and try again."
@@ -41,15 +44,11 @@ function Invoke-xSharePointCommand() {
         [GC]::Collect()
 
         $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000)
-        $invokeArgs.Add("Session", $session)
-    }
+        
+        $result = Invoke-Command @invokeArgs -Session $session
 
-    $result = Invoke-Command @invokeArgs
-
-    return $result
-
-    if ($invokeArgs.ContainsKey("Session")) {
-        Remove-PSSession $invokeArgs.Session
+        Remove-PSSession $session
+        return $result
     }
 }
 

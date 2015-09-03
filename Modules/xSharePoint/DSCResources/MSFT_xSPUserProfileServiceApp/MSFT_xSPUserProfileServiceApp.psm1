@@ -24,6 +24,8 @@ function Get-TargetResource
     Write-Verbose -Message "Getting user profile service application $Name"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+
         $params = $args[0]
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
                         Where-Object { $_.TypeName -eq "User Profile Service Application" }
