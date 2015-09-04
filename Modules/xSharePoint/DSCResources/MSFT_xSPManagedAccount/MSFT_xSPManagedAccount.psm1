@@ -12,15 +12,15 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $EmailNotification,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $PreExpireDays,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $Schedule,
 
@@ -65,15 +65,15 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $EmailNotification,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $PreExpireDays,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $Schedule,
 
@@ -87,19 +87,19 @@ function Set-TargetResource
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$current = Get-TargetResource @params
-		if ($current.Count -eq 0) {
-			Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedAccount" -Arguments @{ Credential = $params.Account } 
-		}
+        $current = Get-TargetResource @params
+        if ($current.Count -eq 0) {
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedAccount" -Arguments @{ Credential = $params.Account } 
+        }
 
-		$updateParams = @{ 
-			Identity = $params.Account.UserName 
-		}
-		if ($params.ContainsKey("EmailNotification")) { $updateParams.Add("EmailNotification", $params.EmailNotification) }
-		if ($params.ContainsKey("PreExpireDays")) { $updateParams.Add("PreExpireDays", $params.PreExpireDays) }
-		if ($params.ContainsKey("Schedule")) { $updateParams.Add("Schedule", $params.Schedule) }
+        $updateParams = @{ 
+            Identity = $params.Account.UserName 
+        }
+        if ($params.ContainsKey("EmailNotification")) { $updateParams.Add("EmailNotification", $params.EmailNotification) }
+        if ($params.ContainsKey("PreExpireDays")) { $updateParams.Add("PreExpireDays", $params.PreExpireDays) }
+        if ($params.ContainsKey("Schedule")) { $updateParams.Add("Schedule", $params.Schedule) }
 
-		Invoke-xSharePointSPCmdlet -CmdletName "Set-SPManagedAccount" -Arguments $updateParams
+        Invoke-xSharePointSPCmdlet -CmdletName "Set-SPManagedAccount" -Arguments $updateParams
     }
 }
 
@@ -118,15 +118,15 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $EmailNotification,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $PreExpireDays,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $Schedule,
 

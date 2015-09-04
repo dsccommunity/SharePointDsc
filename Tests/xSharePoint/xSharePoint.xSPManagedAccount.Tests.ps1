@@ -34,7 +34,7 @@ Describe "xSPManagedAccount" {
 
                 Assert-VerifiableMocks
             }
-		}
+        }
 
         Context "Validate test method" {
             It "Fails when managed account does not exist in the farm" {
@@ -79,27 +79,27 @@ Describe "xSPManagedAccount" {
             }
         }
 
-		Context "Validate set method" {
-			It "Creates a new account when none exists" {
-				Mock Get-TargetResource { return @{} }
+        Context "Validate set method" {
+            It "Creates a new account when none exists" {
+                Mock Get-TargetResource { return @{} }
                 Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPManagedAccount" }
-				Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
 
                 Set-TargetResource @testParams
 
                 Assert-VerifiableMocks
-			}
-			It "Modifies an existing account where it already exists" {
-				Mock Get-TargetResource { return @{}
-					AccountName = $testParams.Account.UserName
-					ChangeSchedule = $testParams.Schedule
-				}
-				Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
+            }
+            It "Modifies an existing account where it already exists" {
+                Mock Get-TargetResource { return @{}
+                    AccountName = $testParams.Account.UserName
+                    ChangeSchedule = $testParams.Schedule
+                }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
 
                 Set-TargetResource @testParams
 
                 Assert-VerifiableMocks
-			}
-		}
+            }
+        }
     }    
 }
