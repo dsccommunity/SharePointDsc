@@ -67,7 +67,7 @@ function Invoke-xSharePointSPCmdlet() {
 
     Write-Verbose "Preparing to execute SharePoint command - $CmdletName"
 
-    if ($null -ne $Arguments) {
+    if ($null -ne $Arguments -and $Arguments.Count -gt 0) {
         $argumentsString = ""
         $Arguments.Keys | ForEach-Object {
             $argumentsString += "$($_): $($Arguments.$_); "
@@ -75,10 +75,11 @@ function Invoke-xSharePointSPCmdlet() {
         Write-Verbose "Arguments for $CmdletName - $argumentsString"
     }
 
-    $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
     if ($null -eq $Arguments) {
+        $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; $CmdletName; `$params = `$null"))
         $result = Invoke-Command -ScriptBlock $script -NoNewScope
     } else {
+        $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
         $result = Invoke-Command -ScriptBlock $script -ArgumentList $Arguments -NoNewScope
     }
     return $result
