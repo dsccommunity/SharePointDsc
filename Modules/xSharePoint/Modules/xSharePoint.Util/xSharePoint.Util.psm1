@@ -7,7 +7,7 @@ function Invoke-xSharePointCommand() {
         $Credential,
 
         [parameter(Mandatory = $false)]
-        [System.Collections.Generic.Dictionary`2[System.String,System.Object]]
+        [HashTable]
         $Arguments,
 
         [parameter(Mandatory = $true)]
@@ -52,6 +52,46 @@ function Invoke-xSharePointCommand() {
     }
 }
 
+function Invoke-xSharePointSPCmdlet() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [string]
+        $CmdletName,
+
+        [parameter(Mandatory = $false,Position=2)]
+        [HashTable]
+        $Arguments
+    )
+
+    Write-Verbose "Preparing to execute SharePoint command - $CmdletName"
+
+    if ($null -ne $Arguments) {
+        $argumentsString = ""
+        $Arguments.Keys | ForEach-Object {
+            $argumentsString += "$($_): $($Arguments.$_); "
+        }
+        Write-Verbose "Arguments for $CmdletName - $argumentsString"
+    }
+
+    $script = ([scriptblock]::Create("Ensure-xSharePointSnapinLoaded; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
+    if ($null -eq $Arguments) {
+        $result = Invoke-Command -ScriptBlock $script -NoNewScope
+    } else {
+        $result = Invoke-Command -ScriptBlock $script -ArgumentList $Arguments -NoNewScope
+    }
+    return $result
+}
+
+function Ensure-xSharePointSnapinLoaded() {
+    if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+    {
+        Write-Verbose "Loading SharePoint PowerShell snapin"
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
+    }
+}
+
 function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
@@ -89,11 +129,18 @@ function Remove-xSharePointNullParamValues() {
     return $Params
 }
 
+function Get-xSharePointInstalledProductVersion() {
+    $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
+    $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
+    return (Get-Command $fullPath).FileVersionInfo
+}
+
 function Get-xSharePointAssemblyVerion() {
     [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true,Position=1)]
+        [string]
         $PathToAssembly
     )
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart

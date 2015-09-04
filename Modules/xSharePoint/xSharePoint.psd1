@@ -64,6 +64,7 @@ Description = 'This DSC module is used to deploy and configure SharePoint Server
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 NestedModules = @("modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1",
+                  "modules\xSharePoint.ServiceApplications\xSharePoint.ServiceApplications.psm1",
                   "modules\xSharePoint.Util\xSharePoint.Util.psm1")
 
 # Functions to export from this module
@@ -73,8 +74,12 @@ FunctionsToExport = '*'
 CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Remove-xSharePointDistributedCacheServer",
                     "Invoke-xSharePointCommand",
+                    "Ensure-xSharePointSnapinLoaded",
+                    "Get-xSharePointInstalledProductVersion",
+                    "Invoke-xSharePointSPCmdlet",
                     "Rename-xSharePointParamValue",
-                    "Remove-xSharePointNullParamValues")
+                    "Remove-xSharePointNullParamValues",
+                    "Get-xSharePointServiceApplication")
 
 # Variables to export from this module
 VariablesToExport = '*'
