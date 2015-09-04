@@ -12,6 +12,7 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
 $ModuleName = "MSFT_xSPCreateFarm"
+Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPCreateFarm" {
@@ -81,7 +82,7 @@ Describe "xSPCreateFarm" {
                 Assert-VerifiableMocks
             }
 
-			It "Throws an exception for unsupported SharePoint versions" {
+            It "Throws an exception for unsupported SharePoint versions" {
                 Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 1 } }
 
                 { Set-TargetResource @testParams } | Should throw
