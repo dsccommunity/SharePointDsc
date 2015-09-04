@@ -74,7 +74,7 @@ FunctionsToExport = '*'
 CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Remove-xSharePointDistributedCacheServer",
                     "Invoke-xSharePointCommand",
-                    "Ensure-xSharePointSnapinLoaded",
+                    "Initialize-xSharePointPSSnapin",
                     "Get-xSharePointInstalledProductVersion",
                     "Invoke-xSharePointSPCmdlet",
                     "Rename-xSharePointParamValue",

@@ -75,7 +75,7 @@ function Invoke-xSharePointSPCmdlet() {
         Write-Verbose "Arguments for $CmdletName - $argumentsString"
     }
 
-    $script = ([scriptblock]::Create("Ensure-xSharePointSnapinLoaded; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
+    $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
     if ($null -eq $Arguments) {
         $result = Invoke-Command -ScriptBlock $script -NoNewScope
     } else {
@@ -84,7 +84,7 @@ function Invoke-xSharePointSPCmdlet() {
     return $result
 }
 
-function Ensure-xSharePointSnapinLoaded() {
+function Initialize-xSharePointPSSnapin() {
     if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
     {
         Write-Verbose "Loading SharePoint PowerShell snapin"
