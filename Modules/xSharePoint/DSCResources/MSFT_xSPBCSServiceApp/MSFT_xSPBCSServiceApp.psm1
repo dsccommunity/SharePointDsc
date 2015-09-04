@@ -99,7 +99,7 @@ function Set-TargetResource
             Write-Verbose -Message "Updating BCS Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName BCS
+                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName "BCS"
                 $appPool = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" @{ 
                     Identity = $params.ApplicationPool 
                 }
