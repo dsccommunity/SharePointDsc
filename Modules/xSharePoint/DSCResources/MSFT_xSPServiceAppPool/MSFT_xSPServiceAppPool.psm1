@@ -60,15 +60,15 @@ function Set-TargetResource
         $sap = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $sap) { 
             Invoke-xSharePointSPCmdlet -CmdletName "New-SPServiceApplicationPool" -Arguments @{
-				Name = $params.Name 
-				Account = $params.ServiceAccount
-			}
+                Name = $params.Name 
+                Account = $params.ServiceAccount
+            }
         } else {
             if ($sap.ProcessAccountName -ne $params.ServiceAccount) {  
                 Invoke-xSharePointSPCmdlet -CmdletName "Set-SPServiceApplicationPool" -Arguments @{
-					Identity = $params.Name 
-					Account = $params.ServiceAccount
-				}
+                    Identity = $params.Name 
+                    Account = $params.ServiceAccount
+                }
             }
         }
     }

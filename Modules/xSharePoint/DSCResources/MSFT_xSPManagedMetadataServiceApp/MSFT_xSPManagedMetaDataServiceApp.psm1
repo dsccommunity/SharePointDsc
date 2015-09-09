@@ -12,11 +12,11 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
@@ -68,11 +68,11 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
@@ -94,13 +94,13 @@ function Set-TargetResource
             if ($null -ne $app)
             {
                 Invoke-xSharePointSPCmdlet -CmdletName "New-SPMetadataServiceApplicationProxy" -Arguments @{ 
-					Name = ($params.Name + " Proxy") 
-					ServiceApplication = $app 
-					DefaultProxyGroup = $true
-					ContentTypePushdownEnabled = $true
-					DefaultKeywordTaxonomy = $true
-					DefaultSiteCollectionTaxonomy = $true
-				}
+                    Name = ($params.Name + " Proxy") 
+                    ServiceApplication = $app 
+                    DefaultProxyGroup = $true
+                    ContentTypePushdownEnabled = $true
+                    DefaultKeywordTaxonomy = $true
+                    DefaultSiteCollectionTaxonomy = $true
+                }
             }
         }
     }
@@ -110,11 +110,11 @@ function Set-TargetResource
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
 
-				$serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
-				Invoke-xSharePointSPCmdlet -CmdletName "Set-SPMetadataServiceApplication" -Arguments @{
-					Identity = $serviceApp
-					ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
-				}
+                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
+                Invoke-xSharePointSPCmdlet -CmdletName "Set-SPMetadataServiceApplication" -Arguments @{
+                    Identity = $serviceApp
+                    ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
+                }
             }
         }
     }
@@ -139,11 +139,11 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
         
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName
     )

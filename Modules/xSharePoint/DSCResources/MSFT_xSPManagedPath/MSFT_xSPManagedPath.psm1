@@ -29,13 +29,13 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-		$getParams = @{
-			Identity = $params.RelativeUrl 
-		}
+        $getParams = @{
+            Identity = $params.RelativeUrl 
+        }
         if ($params.HostHeader) {
             $getParams.Add("HostHeader", $true)
         }
-		$path = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedPath" -Arguments $getParams -ErrorAction SilentlyContinue
+        $path = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedPath" -Arguments $getParams -ErrorAction SilentlyContinue
         if ($null -eq $path) { return @{} }
         
         return @{

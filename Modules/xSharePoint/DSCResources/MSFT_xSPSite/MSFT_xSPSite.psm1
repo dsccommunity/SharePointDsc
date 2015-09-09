@@ -11,48 +11,48 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $OwnerAlias,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $CompatibilityLevel,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $ContentDatabase,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $Description,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $HostHeaderWebApplication,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $Language,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $Name,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $OwnerEmail,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $QuotaTemplate,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $SecondaryEmail,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $SecondaryOwnerAlias,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $Template,
 
@@ -91,48 +91,48 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $OwnerAlias,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $CompatibilityLevel,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $ContentDatabase,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $Description,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $HostHeaderWebApplication,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $Language,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $Name,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $OwnerEmail,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $QuotaTemplate,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $SecondaryEmail,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $SecondaryOwnerAlias,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $Template,
 
@@ -170,48 +170,48 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $OwnerAlias,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $CompatibilityLevel,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $ContentDatabase,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $Description,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $HostHeaderWebApplication,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $Language,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $Name,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $OwnerEmail,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $QuotaTemplate,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $SecondaryEmail,
-		
-		[parameter(Mandatory = $false)]
+        
+        [parameter(Mandatory = $false)]
         [System.String]
         $SecondaryOwnerAlias,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $Template,
 

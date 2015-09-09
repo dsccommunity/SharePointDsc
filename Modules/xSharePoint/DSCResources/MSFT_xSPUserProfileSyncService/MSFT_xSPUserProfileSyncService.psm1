@@ -88,12 +88,12 @@ function Set-TargetResource
         
          # Start the Sync service if it should be running on this server
         if (($Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
-			$ups = Get-xSharePointServiceApplication -Name $params.UserProfileServiceAppName -TypeName UserProfile
+            $ups = Get-xSharePointServiceApplication -Name $params.UserProfileServiceAppName -TypeName UserProfile
             $ups.SetSynchronizationMachine($env:COMPUTERNAME, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
             
-			Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $syncService.ID }
+            Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $syncService.ID }
             
-			$desiredState = "Online"
+            $desiredState = "Online"
         }
         # Stop the Sync service in all other cases
         else {

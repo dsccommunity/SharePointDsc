@@ -8,15 +8,15 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
@@ -51,15 +51,15 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
@@ -82,8 +82,8 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseCredentials")) { $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) }
 
             Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceDatabase" -Arguments $dbParams | `
-			    Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplication" -Arguments @{ Name = $params.Name } | `
-			    Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplicationProxy" -Arguments @{ DefaultProxyGroup = $true }
+                Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplication" -Arguments @{ Name = $params.Name } | `
+                Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplicationProxy" -Arguments @{ DefaultProxyGroup = $true }
         }
     }
 }
@@ -99,15 +99,15 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 

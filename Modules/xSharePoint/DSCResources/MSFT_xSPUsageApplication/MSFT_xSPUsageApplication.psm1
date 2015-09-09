@@ -12,49 +12,49 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabasePassword,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseUsername,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $FailoverDatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogCutTime,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $UsageLogLocation,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogMaxFileSizeKB,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogMaxSpaceGB
     )
 
     Write-Verbose -Message "Getting usage application '$Name'"
 
-	$result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Usage
+        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Usage
 
         If ($null -eq $serviceApp)
         {
@@ -89,39 +89,39 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabasePassword,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseUsername,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $FailoverDatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogCutTime,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $UsageLogLocation,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogMaxFileSizeKB,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogMaxSpaceGB
     )
@@ -155,7 +155,7 @@ function Set-TargetResource
         if ($params.ContainsKey("UsageLogLocation")) { $setParams.Add("UsageLogLocation", $params.UsageLogLocation) }
         if ($params.ContainsKey("UsageLogMaxFileSizeKB")) { $setParams.Add("UsageLogMaxFileSizeKB", $params.UsageLogMaxFileSizeKB) }
         if ($params.ContainsKey("UsageLogMaxSpaceGB")) { $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) }
-		Invoke-xSharePointSPCmdlet -CmdletName "Set-SPUsageService" -Arguments $setParams
+        Invoke-xSharePointSPCmdlet -CmdletName "Set-SPUsageService" -Arguments $setParams
     }
 }
 
@@ -174,39 +174,39 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabasePassword,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseUsername,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $FailoverDatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogCutTime,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $UsageLogLocation,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogMaxFileSizeKB,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.UInt32]
         $UsageLogMaxSpaceGB
     )

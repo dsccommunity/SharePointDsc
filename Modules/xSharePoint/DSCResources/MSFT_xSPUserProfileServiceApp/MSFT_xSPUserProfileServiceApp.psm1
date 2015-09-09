@@ -16,31 +16,31 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $MySiteHostLocation,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $ProfileDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $ProfileDBServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SocialDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SocialDBServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SyncDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SyncDBServer,
 
@@ -54,7 +54,7 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
+        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
 
         If ($null -eq $serviceApp)
         {
@@ -89,31 +89,31 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $MySiteHostLocation,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $ProfileDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $ProfileDBServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SocialDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SocialDBServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SyncDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SyncDBServer,
 
@@ -151,10 +151,10 @@ function Set-TargetResource
             $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplication" -Arguments $params
             if ($null -ne $app) {
                 Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplicationProxy" -Arguments @{
-					Name = "$($params.Name) Proxy"
-					ServiceApplication = $app 
-					DefaultProxyGroup = $true
-				}
+                    Name = "$($params.Name) Proxy"
+                    ServiceApplication = $app 
+                    DefaultProxyGroup = $true
+                }
             }
         }
     }
@@ -186,31 +186,31 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $MySiteHostLocation,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $ProfileDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $ProfileDBServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SocialDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SocialDBServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SyncDBName,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $SyncDBServer,
 

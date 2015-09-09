@@ -12,11 +12,11 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
@@ -30,7 +30,7 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Search
+        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Search
 
         If ($null -eq $serviceApp)
         {
@@ -61,11 +61,11 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 
@@ -80,16 +80,16 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Search Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-			if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
-			$serviceInstance = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPEnterpriseSearchServiceInstance" -Arguments @{ Local = $true }
+            $serviceInstance = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPEnterpriseSearchServiceInstance" -Arguments @{ Local = $true }
             $serviceInstance | Invoke-xSharePointSPCmdlet -CmdletName "Start-SPEnterpriseSearchServiceInstance" -ErrorAction SilentlyContinue
             $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPEnterpriseSearchServiceApplication" -Arguments $params
             if ($app) {
                 Invoke-xSharePointSPCmdlet -CmdletName "New-SPEnterpriseSearchServiceApplicationProxy" -Arguments @{ 
-					Name = "$($params.Name) Proxy"
-					SearchApplication = $app
-				}
+                    Name = "$($params.Name) Proxy"
+                    SearchApplication = $app
+                }
             }
         }
     }
@@ -99,11 +99,11 @@ function Set-TargetResource
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
 
-				$serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Search
-				Invoke-xSharePointSPCmdlet -CmdletName "Set-SPEnterpriseSearchServiceApplication" -Arguments @{
-					Identity = $serviceApp
-					ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
-				}
+                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Search
+                Invoke-xSharePointSPCmdlet -CmdletName "Set-SPEnterpriseSearchServiceApplication" -Arguments @{
+                    Identity = $serviceApp
+                    ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
+                }
             }
         }
     }
@@ -124,11 +124,11 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseServer,
 
-		[parameter(Mandatory = $false)]
+        [parameter(Mandatory = $false)]
         [System.String]
         $DatabaseName,
 

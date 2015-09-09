@@ -60,32 +60,23 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Passphrase,
-
-        [System.UInt32]
-        $WaitTime = 30,
-
-        [System.UInt32]
-        $WaitCount = 60
+        $Passphrase
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
-
-    if ($PSBoundParameters.WaitTime -eq $null) { $PSBoundParameters.Add("WaitTime", $WaitTime) }
-    if ($PSBoundParameters.WaitCount -eq $null) { $PSBoundParameters.Add("WaitCount", $WaitCount) }
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $loopCount = 0
 
-		$joinFarmArgs = @{
+        $joinFarmArgs = @{
             DatabaseServer = $params.DatabaseServer
             DatabaseName = $params.FarmConfigDatabaseName
             Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
             SkipRegisterAsDistributedCacheHost = $true
         }
         
-		switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+        switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
@@ -98,30 +89,12 @@ function Set-TargetResource
             }
         }
 
-        $WaitTime = $params.WaitTime
-        $WaitCount = $params.WaitCount
-		
-        $success = $false
-        while ($loopCount -le $WaitCount) {
-            try
-            {
-                Invoke-xSharePointSPCmdlet -CmdletName "Connect-SPConfigurationDatabase" -Arguments $joinFarmArgs
-                $loopCount = $WaitCount + 1
-                $success = $true
-            }
-            catch
-            {
-                $loopCount = $loopCount + 1
-                Start-Sleep -Seconds $WaitTime
-            }
-        }
-        if ($success) {
-			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPHelpCollection" -Arguments @{ All = $true }
-			Invoke-xSharePointSPCmdlet -CmdletName "Initialize-SPResourceSecurity"
-			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPService"
-			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPFeature" -Arguments @{ AllExistingFeatures = $true; Force = $true }
-			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPApplicationContent"
-        }
+        Invoke-xSharePointSPCmdlet -CmdletName "Connect-SPConfigurationDatabase" -Arguments $joinFarmArgs
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPHelpCollection" -Arguments @{ All = $true }
+        Invoke-xSharePointSPCmdlet -CmdletName "Initialize-SPResourceSecurity"
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPService"
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPFeature" -Arguments @{ AllExistingFeatures = $true; Force = $true }
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPApplicationContent"
     }
 
     Write-Verbose -Message "Starting timer service"
@@ -155,13 +128,7 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Passphrase,
-
-        [System.UInt32]
-        $WaitTime = 30,
-
-        [System.UInt32]
-        $WaitCount = 60
+        $Passphrase
     )
 
     $result = Get-TargetResource @PSBoundParameters

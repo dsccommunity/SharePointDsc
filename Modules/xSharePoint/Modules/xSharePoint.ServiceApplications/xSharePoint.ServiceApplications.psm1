@@ -27,12 +27,12 @@ function Get-xSharePointServiceApplicationName() {
     )
     Switch($Name) {
         "BCS" { return "Business Data Connectivity Service Application" }
-		"MMS" { return "Managed Metadata Service" }
-		"Search" { return "Search Service Application" }
-		"SecureStore" { return "Secure Store Service Application" }
-		"Usage" { return "Usage and Health Data Collection Service Application" }
-		"UserProfile" { return "User Profile Service Application" }
-		"UserProfileSync" { return "User Profile Synchronization Service" }
+        "MMS" { return "Managed Metadata Service" }
+        "Search" { return "Search Service Application" }
+        "SecureStore" { return "Secure Store Service Application" }
+        "Usage" { return "Usage and Health Data Collection Service Application" }
+        "UserProfile" { return "User Profile Service Application" }
+        "UserProfileSync" { return "User Profile Synchronization Service" }
     }
 }
 
