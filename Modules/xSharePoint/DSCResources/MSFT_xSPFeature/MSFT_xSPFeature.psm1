@@ -30,10 +30,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
-        $feature = Get-SPFeature $params.Name -ErrorAction SilentlyContinue
+
+        $feature = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
 
         if ($null -eq $feature) { return @{} }
 
@@ -45,7 +44,7 @@ function Get-TargetResource
             $checkParams.Add($params.FeatureScope, $params.Url)
         }
         $checkParams.Add("ErrorAction", "SilentlyContinue")
-        $featureAtScope = Get-SPFeature @checkParams
+        $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams
         $enabled = ($null -ne $featureAtScope)
 
         return @{
@@ -55,7 +54,7 @@ function Get-TargetResource
             Enabled = $enabled
         }
     }
-    $result
+    return $result
 }
 
 
@@ -88,8 +87,6 @@ function Set-TargetResource
     )
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
 
         $runParams = @{}
@@ -99,10 +96,10 @@ function Set-TargetResource
         }
 
         if ($params.Ensure -eq "Present") {
-            Enable-SPFeature @runParams
+            Invoke-xSharePointSPCmdlet -CmdletName "Enable-SPFeature" -Arguments $runParams
         } else {
             $runParams.Add("Confirm", $false)    
-            Disable-SPFeature @runParams
+            Invoke-xSharePointSPCmdlet -CmdletName "Disable-SPFeature" -Arguments $runParams
         }
     }
 }
@@ -137,7 +134,7 @@ function Test-TargetResource
         $Ensure
     )
 
-    $result = Get-TargetResource -Name $Name -FeatureScope $FeatureScope -Url $Url -InstallAccount $InstallAccount -Ensure $Ensure
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
 
     if ($result.Count -eq 0) { 

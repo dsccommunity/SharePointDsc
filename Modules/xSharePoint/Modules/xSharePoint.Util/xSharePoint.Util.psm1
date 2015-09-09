@@ -97,7 +97,7 @@ function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)]
         $params,
 
         [parameter(Mandatory = $true,Position=2)]

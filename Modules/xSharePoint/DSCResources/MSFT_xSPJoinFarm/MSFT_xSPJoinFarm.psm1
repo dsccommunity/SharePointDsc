@@ -23,11 +23,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
         try {
-            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+            $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm" -ErrorAction SilentlyContinue
         } catch {
             Write-Verbose -Message "Unable to detect local farm."
         }
@@ -39,7 +37,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
-    $result
+    return $result
 }
 
 
@@ -77,32 +75,37 @@ function Set-TargetResource
     if ($PSBoundParameters.WaitCount -eq $null) { $PSBoundParameters.Add("WaitCount", $WaitCount) }
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
         $loopCount = 0
 
-        $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
-        $params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
-        $params.Remove("InstallAccount")
-
-        $WaitTime = $params.WaitTime
-        $params.Remove("WaitTime")
-        $WaitCount = $params.WaitCount
-        $params.Remove("WaitCount")
-
-        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
-            Write-Verbose -Message "Detected Version: SharePoint 2016"
-            $params.Add("LocalServerRole", "Custom")
-        } else {
-            Write-Verbose -Message "Detected Version: SharePoint 2013"
+		$joinFarmArgs = @{
+            DatabaseServer = $params.DatabaseServer
+            DatabaseName = $params.FarmConfigDatabaseName
+            Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+            SkipRegisterAsDistributedCacheHost = $true
+        }
+        
+		switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+            15 {
+                Write-Verbose -Message "Detected Version: SharePoint 2013"
+            }
+            16 {
+                Write-Verbose -Message "Detected Version: SharePoint 2016"
+                $joinFarmArgs.Add("LocalServerRole", "Custom")
+            }
+            Default {
+                throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
+            }
         }
 
+        $WaitTime = $params.WaitTime
+        $WaitCount = $params.WaitCount
+		
         $success = $false
         while ($loopCount -le $WaitCount) {
             try
             {
-                Connect-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true 
+                Invoke-xSharePointSPCmdlet -CmdletName "Connect-SPConfigurationDatabase" -Arguments $joinFarmArgs
                 $loopCount = $WaitCount + 1
                 $success = $true
             }
@@ -113,11 +116,11 @@ function Set-TargetResource
             }
         }
         if ($success) {
-            Install-SPHelpCollection -All
-            Initialize-SPResourceSecurity
-            Install-SPService
-            Install-SPFeature -AllExistingFeatures -Force
-            Install-SPApplicationContent
+			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPHelpCollection" -Arguments @{ All = $true }
+			Invoke-xSharePointSPCmdlet -CmdletName "Initialize-SPResourceSecurity"
+			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPService"
+			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPFeature" -Arguments @{ AllExistingFeatures = $true; Force = $true }
+			Invoke-xSharePointSPCmdlet -CmdletName "Install-SPApplicationContent"
         }
     }
 
@@ -161,7 +164,7 @@ function Test-TargetResource
         $WaitCount = 60
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -InstallAccount $InstallAccount -Passphrase $Passphrase
+    $result = Get-TargetResource @PSBoundParameters
  
     if ($result.Count -eq 0) { return $false }
     return $true   

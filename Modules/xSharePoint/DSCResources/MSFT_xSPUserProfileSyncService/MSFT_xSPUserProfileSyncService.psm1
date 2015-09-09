@@ -24,13 +24,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting the local user profile sync service instance"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
-        $computerName = $env:COMPUTERNAME
 
-        $syncService = Get-SPServiceInstance | 
-            Where-Object {$_.TypeName -match "User Profile Synchronization Service" -and  $_.Server -match "SPServer Name=$computerName" }
+        $syncService = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfileSync
         
         if ($null -eq $syncService) { return @{} }
 
@@ -38,7 +34,7 @@ function Get-TargetResource
             Status = $syncService.Status
         }
     }
-    $result
+    return $result
 }
 
 
@@ -85,25 +81,23 @@ function Set-TargetResource
         Restart-Service -Name "SPTimerV4"
     }
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
+    Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $computerName = $env:COMPUTERNAME
-        $syncService = Get-SPServiceInstance | 
-            Where-Object {$_.TypeName -match "User Profile Synchronization Service" -and  $_.Server -match "SPServer Name=$computerName" }
+        $syncService = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfileSync
         
          # Start the Sync service if it should be running on this server
         if (($Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
-            $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName
-            $ups.SetSynchronizationMachine("$computerName", $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
-            Start-SPServiceInstance -Identity $syncService.ID
-            $desiredState = "Online"
+			$ups = Get-xSharePointServiceApplication -Name $params.UserProfileServiceAppName -TypeName UserProfile
+            $ups.SetSynchronizationMachine($env:COMPUTERNAME, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
+            
+			Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $syncService.ID }
+            
+			$desiredState = "Online"
         }
         # Stop the Sync service in all other cases
         else {
-            Stop-SPServiceInstance -Identity $syncService.ID -Confirm:$false
+            Invoke-xSharePointSPCmdlet -CmdletName "Stop-SPServiceInstance" -Arguments @{ Identity = $syncService.ID; Confirm = $false }
             $desiredState = "Disabled"
         }
 
@@ -114,9 +108,7 @@ function Set-TargetResource
             Start-Sleep -Seconds 60
 
             # Get the current status of the Sync service
-            $syncService = $(Get-SPServiceInstance | 
-                    Where-Object {$_.TypeName -match "User Profile Synchronization Service" } | 
-                    Where-Object {$_.Server -match "SPServer Name=$computerName"})
+            $syncService = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfileSync
 
             # Continue to wait if haven't reached $maxCount or $desiredState
             $wait = (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState))

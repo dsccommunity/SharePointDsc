@@ -35,7 +35,7 @@ function Get-TargetResource
         $params = $args[0]
 
         try {
-            $ma = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedAccount" -Arguments @{ Identity = $params.Account.UserName } 
+            $ma = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedAccount" -Arguments @{ Identity = $params.Account.UserName } -ErrorAction SilentlyContinue
             if ($null -eq $ma) { return @{ } }
             return @{
                 AccountName = $ma.Userame
@@ -50,7 +50,6 @@ function Get-TargetResource
     }
     return $result
 }
-
 
 function Set-TargetResource
 {

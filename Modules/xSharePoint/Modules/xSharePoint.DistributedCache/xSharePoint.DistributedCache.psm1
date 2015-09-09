@@ -11,9 +11,10 @@ function Add-xSharePointDistributedCacheServer() {
         $ServiceAccount
     )
 
-    Add-SPDistributedCacheServiceInstance
-    Update-SPDistributedCacheSize -CacheSizeInMB $CacheSizeInMB
-    $farm = Get-SPFarm
+    Invoke-xSharePointSPCmdlet -CmdletName "Add-SPDistributedCacheServiceInstance"
+    Invoke-xSharePointSPCmdlet -CmdletName "Update-SPDistributedCacheSize" -Arguments @{ CacheSizeInMB = $CacheSizeInMB }
+
+    $farm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
     $cacheService = $farm.Services | Where-Object {$_.Name -eq "AppFabricCachingService"}
     $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
     $cacheService.ProcessIdentity.ManagedAccount = (Get-SPManagedAccount -Identity $ServiceAccount)
@@ -23,9 +24,9 @@ function Add-xSharePointDistributedCacheServer() {
 
 function Remove-xSharePointDistributedCacheServer() {
     $instanceName ="SPDistributedCacheService Name=AppFabricCachingService"
-    $serviceInstance = Get-SPServiceInstance | Where-Object {($_.Service.Tostring()) -eq $instanceName -and ($_.Server.Name) -eq $env:computername}  
+    $serviceInstance = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" | Where-Object {($_.Service.Tostring()) -eq $instanceName -and ($_.Server.Name) -eq $env:computername}  
     $serviceInstance.Delete() 
-    Remove-SPDistributedCacheServiceInstance 
+    Invoke-xSharePointSPCmdlet -CmdletName "Remove-SPDistributedCacheServiceInstance"
 }
 
 Export-ModuleMember -Function *

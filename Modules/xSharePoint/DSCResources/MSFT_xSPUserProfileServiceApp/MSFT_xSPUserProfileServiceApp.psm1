@@ -16,6 +16,34 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $MySiteHostLocation,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $ProfileDBName,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $ProfileDBServer,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $SocialDBName,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $SocialDBServer,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $SyncDBName,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $SyncDBServer,
+
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -24,11 +52,10 @@ function Get-TargetResource
     Write-Verbose -Message "Getting user profile service application $Name"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
-        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-                        Where-Object { $_.TypeName -eq "User Profile Service Application" }
+
+		$serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
+
         If ($null -eq $serviceApp)
         {
             return @{}
@@ -41,7 +68,7 @@ function Get-TargetResource
             }
         }
     }
-    $result
+    return $result
 }
 
 
@@ -62,26 +89,33 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $MySiteHostLocation = $null,
+        $MySiteHostLocation,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $ProfileDBName = $null,
+        $ProfileDBName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $ProfileDBServer = $null,
+        $ProfileDBServer,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SocialDBName = $null,
+        $SocialDBName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SocialDBServer = $null,
+        $SocialDBServer,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SyncDBName = $null,
+        $SyncDBName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SyncDBServer = $null,
+        $SyncDBServer,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
@@ -104,22 +138,23 @@ function Set-TargetResource
         ([ADSI]"WinNT://$computerName/Administrators,group").Add("WinNT://$domainName/$userName") | Out-Null
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
+    $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $params = Remove-xSharePointNullParamValues -Params $params
-        $params.Remove("InstallAccount") | Out-Null
+        if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
         $params.Remove("FarmAccount") | Out-Null
 
         $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
         $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
-        $app = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
         if ($null -eq $app) { 
-            $app = New-SPProfileServiceApplication @params
+            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplication" -Arguments $params
             if ($null -ne $app) {
-                New-SPProfileServiceApplicationProxy -Name ($params.Name + " Proxy") -ServiceApplication $app -DefaultProxyGroup
+                Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplicationProxy" -Arguments @{
+					Name = "$($params.Name) Proxy"
+					ServiceApplication = $app 
+					DefaultProxyGroup = $true
+				}
             }
         }
     }
@@ -151,33 +186,40 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $FarmAccount,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $MySiteHostLocation = $null,
+        $MySiteHostLocation,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $ProfileDBName = $null,
+        $ProfileDBName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $ProfileDBServer = $null,
+        $ProfileDBServer,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SocialDBName = $null,
+        $SocialDBName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SocialDBServer = $null,
+        $SocialDBServer,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SyncDBName = $null,
+        $SyncDBName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $SyncDBServer = $null,
+        $SyncDBServer,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -FarmAccount $FarmAccount -InstallAccount $InstallAccount
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
 
     if ($result.Count -eq 0) { return $false }

@@ -8,6 +8,18 @@ function Get-TargetResource
         [System.String]
         $Name,
 
+		[parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+
+		[parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -16,11 +28,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting state service application '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
 
-        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
 
         if ($null -eq $app) { return @{} }
         
@@ -41,14 +51,17 @@ function Set-TargetResource
         [System.String]
         $Name,
 
+		[parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials = $null,
+        $DatabaseCredentials,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
@@ -58,12 +71,9 @@ function Set-TargetResource
     Write-Verbose -Message "Creating state service application $Name"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
-        $params = Remove-xSharePointNullParamValues -Params $params
 
-        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $app) { 
             
             $dbParams = @{}
@@ -71,7 +81,9 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseServer")) { $dbParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseCredentials")) { $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) }
 
-            New-SPStateServiceDatabase @dbParams| New-SPStateServiceApplication -Name $params.Name | New-SPStateServiceApplicationProxy -DefaultProxyGroup
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceDatabase" -Arguments $dbParams | `
+			    Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplication" -Arguments @{ Name = $params.Name } | `
+			    Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplicationProxy" -Arguments @{ DefaultProxyGroup = $true }
         }
     }
 }
@@ -87,14 +99,17 @@ function Test-TargetResource
         [System.String]
         $Name,
 
+		[parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials = $null,
+        $DatabaseCredentials,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
+		[parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]

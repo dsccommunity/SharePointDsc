@@ -21,11 +21,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting service instance '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
 
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+        $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
         if ($null -eq $si) { return @{} }
         
         return @{
@@ -60,25 +58,21 @@ function Set-TargetResource
         Write-Verbose -Message "Provisioning service instance '$Name'"
 
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
             $params = $args[0]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
             if ($null -eq $si) { return $false }
-            Start-SPServiceInstance $si
+            Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $si }
         }
     } else {
         Write-Verbose -Message "Deprovioning service instance '$Name'"
 
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
             $params = $args[0]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
             if ($null -eq $si) { return $false }
-            Stop-SPServiceInstance $si
+			Invoke-xSharePointSPCmdlet -CmdletName "Stop-SPServiceInstance" -Arguments @{ Identity = $si }
         }
     }
 }
@@ -104,7 +98,7 @@ function Test-TargetResource
         $Ensure
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount -Ensure $Ensure 
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Getting service instance '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {

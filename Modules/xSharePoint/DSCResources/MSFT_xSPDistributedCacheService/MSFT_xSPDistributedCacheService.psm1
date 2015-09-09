@@ -32,9 +32,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the cache host information"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
         try
         {
             Use-CacheCluster -ErrorAction SilentlyContinue
@@ -92,7 +90,7 @@ function Set-TargetResource
         Write-Verbose -Message "Adding the distributed cache to the server"
         if($createFirewallRules) {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
                 $params = $args[0]
                 Import-Module -Name NetSecurity
 
@@ -114,25 +112,19 @@ function Set-TargetResource
             Write-Verbose -Message "Firewall rule added"
         }
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
             $params = $args[0]
             Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
         }
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
-            $params = $args[0]
+        Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
             Remove-xSharePointDistributedCacheServer
         }
 
         $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
         if($null -eq $firewallRule) {
             Write-Verbose -Message "Disabling firewall rules."
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
+            Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
                 Import-Module -Name NetSecurity
                 Disable-NetFirewallRule -DisplayName -DisplayName "SharePoint Distribute Cache"
             }    
@@ -174,7 +166,7 @@ function Test-TargetResource
         $createFirewallRules
     )
 
-    $result = Get-TargetResource -Name $Name -Ensure $Ensure -CacheSizeInMB $CacheSizeInMB -ServiceAccount $ServiceAccount -InstallAccount $InstallAccount -CreateFirewallRules $createFirewallRules
+    $result = Get-TargetResource @PSBoundParameters
     
     if ($Ensure -eq "Present") {
         if ($result.Count -eq 0) { return $false }
