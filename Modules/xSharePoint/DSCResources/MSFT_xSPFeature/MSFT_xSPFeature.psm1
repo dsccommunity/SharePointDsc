@@ -43,8 +43,7 @@ function Get-TargetResource
         } else {
             $checkParams.Add($params.FeatureScope, $params.Url)
         }
-        $checkParams.Add("ErrorAction", "SilentlyContinue")
-        $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams
+        $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
 
         return @{

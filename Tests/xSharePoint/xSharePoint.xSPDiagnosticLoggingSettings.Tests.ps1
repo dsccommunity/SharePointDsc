@@ -35,7 +35,14 @@ Describe "xSPDiagnosticLoggingSettings" {
             ScriptErrorReportingEnabled = $true
             ScriptErrorReportingRequireAuth = $true
             ScriptErrorReportingDelay = 5
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+        }
+
+        Context "Validate get method" {
+            It "Calls the correct function to retrieve settings" {
+                Mock Invoke-xSharePointSPCmdlet { return @{}} -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPDiagnosticConfig" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -117,6 +124,14 @@ Describe "xSPDiagnosticLoggingSettings" {
                     }
                 }
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Calls the correct function to retrieve settings" {
+                Mock Invoke-xSharePointSPCmdlet { return @{}} -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPDiagnosticConfig" -and $Arguments.ContainsKey("InstallAccount") -eq $false }
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

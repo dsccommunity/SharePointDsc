@@ -21,7 +21,7 @@ function Get-TargetResource
         SharePointInstalled = $result
     }
 
-    $returnValue
+    return $returnValue
 }
 
 

@@ -9,6 +9,9 @@ function Set-xSharePointCacheReaderPolicy() {
         [string]
         $UserName
     )
+    $VerbosePreference = "Continue"
+        Write-Verbose "WHY NO MOCK!"
+
     $policy = $WebApplication.Policies.Add($UserName, $UserName)
     $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
     $policy.PolicyRoleBindings.Add($policyRole)

@@ -136,7 +136,7 @@ function Get-xSharePointInstalledProductVersion() {
     return (Get-Command $fullPath).FileVersionInfo
 }
 
-function Get-xSharePointAssemblyVerion() {
+function Get-xSharePointAssemblyVersion() {
     [CmdletBinding()]
     param
     (
@@ -145,6 +145,17 @@ function Get-xSharePointAssemblyVerion() {
         $PathToAssembly
     )
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
+}
+
+function Update-xSharePointObject() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [object]
+        $InputObject
+    )
+    $InputObject.Update()
 }
 
 Export-ModuleMember -Function *

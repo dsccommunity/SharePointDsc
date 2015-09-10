@@ -19,7 +19,7 @@ Describe 'xSharePoint Global Tests' {
     
     Context 'MOF schemas use InstallAccount' {
 
-        It "Doesn't have an InstallAccount required parameter" {
+        It "Doesn't have InstallAccount as a required parameter" {
             $mofFilesWithNoInstallAccount = 0
             $mofFiles | % {
                 $fileHasInstallAccount = $false
@@ -34,15 +34,6 @@ Describe 'xSharePoint Global Tests' {
                 }
             }
             $mofFilesWithNoInstallAccount | Should Be 0
-        }
-    }
-
-    Context 'Files have valid text structure' {
-        It 'Passes test file checks for DSC resources' {
-            $DSCTestsPath = (Get-Item (Join-Path $RepoRoot "..\**\DSCResource.Tests\TestHelper.psm1" -Resolve)).FullName
-            if ($null -ne $DSCTestsPath) {
-
-            }
         }
     }
 }
@@ -88,10 +79,7 @@ if ($null -ne $DSCTestsPath) {
 
 Describe 'PowerShell DSC resource modules' {
     
-    # Force convert to array
     $psm1Files = @(ls $RepoRoot -Recurse -Filter "*.psm1" -File | ? {
-        # Ignore Composite configurations
-        # They requires additional resources to be installed on the box
         ($_.FullName -like "*\DscResources\*") -and (-not ($_.Name -like "*.schema.psm1"))
     })
 
@@ -119,11 +107,11 @@ Describe 'PowerShell DSC resource modules' {
 
             It 'all .psm1 files don''t have parse errors' {
                 $errors = @()
-                $psm1Files | %{ 
+                $psm1Files | ForEach-Object { 
                     $localErrors = Get-ParseErrors $_.FullName
                     if ($localErrors) {
                         Write-Warning "There are parsing errors in $($_.FullName)"
-                        Write-Warning ($localErrors | fl | Out-String)
+                        Write-Warning ($localErrors | Format-List | Out-String)
                     }
                     $errors += $localErrors
                 }

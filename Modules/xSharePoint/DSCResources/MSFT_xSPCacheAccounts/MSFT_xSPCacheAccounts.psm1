@@ -25,7 +25,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $wa = Invoke-xSharePointSPCmdlet "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }  -ErrorAction SilentlyContinue
+        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }  -ErrorAction SilentlyContinue
 
         if ($null -eq $wa) { return @{} }
         
@@ -75,7 +75,7 @@ function Set-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $wa = Invoke-xSharePointSPCmdlet "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }
+        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }
         
         if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
             $wa.Properties["portalsuperuseraccount"] = $params.SuperUserAlias
@@ -87,11 +87,11 @@ function Set-TargetResource
         } else {
             $wa.Properties.Add("portalsuperreaderaccount", $params.SuperReaderAlias)
         }
-
+        
         Set-xSharePointCacheReaderPolicy -WebApplication $wa -UserName $params.SuperReaderAlias
         Set-xSharePointCacheOwnerPolicy -WebApplication $wa -UserName $params.SuperUserAlias
 
-        $wa.Update() 
+        Update-xSharePointObject -InputObject $wa
     }
 }
 

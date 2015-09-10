@@ -77,11 +77,16 @@ CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Initialize-xSharePointPSSnapin",
                     "Get-xSharePointInstalledProductVersion",
                     "Invoke-xSharePointSPCmdlet",
+                    "Invoke-xSharePointDCCmdlet",
                     "Rename-xSharePointParamValue",
                     "Remove-xSharePointNullParamValues",
+                    "Update-xSharePointObject",
                     "Get-xSharePointServiceApplication",
                     "Set-xSharePointCacheReaderPolicy",
-                    "Set-xSharePointCacheOwnerPolicy")
+                    "Set-xSharePointCacheOwnerPolicy",
+                    "Enable-xSharePointDCIcmpFireWallRule",
+                    "Enable-xSharePointDCFireWallRule",
+                    "Disable-xSharePointDCFireWallRule")
 
 # Variables to export from this module
 VariablesToExport = '*'
