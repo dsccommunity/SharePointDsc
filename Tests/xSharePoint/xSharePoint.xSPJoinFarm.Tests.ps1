@@ -56,6 +56,7 @@ Describe "xSPJoinFarm" {
                 Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPApplicationContent" }
 
                 Mock Invoke-Command { return $null }
+                Mock Start-Service { return $null } -Verifiable
 
                 Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 16 } }
 
@@ -73,6 +74,7 @@ Describe "xSPJoinFarm" {
                 Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPApplicationContent" }
 
                 Mock Invoke-Command { return $null }
+                Mock Start-Service { return $null } -Verifiable
 
                 Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15 } }
 
