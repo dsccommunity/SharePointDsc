@@ -25,7 +25,7 @@ after_test:
 
         Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
-        (Get-Content $manifest -Raw).Replace("0.5.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
+        (Get-Content $manifest -Raw).Replace("0.5.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
         Add-Type -assemblyname System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint", "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip")
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
