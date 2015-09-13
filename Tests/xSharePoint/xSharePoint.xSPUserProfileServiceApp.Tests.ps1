@@ -17,10 +17,17 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPUserProfileServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Managed Metadata Service App"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            Name = "User Profile Service App"
             ApplicationPool = "SharePoint Service Applications"
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+        }
+
+        Context "Validate get method" {
+            It "Retrieves the data from SharePoint" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -45,6 +52,38 @@ Describe "xSPUserProfileServiceApp" {
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new service app where none exists, adding user to the local admin group" {
+                Mock Test-xSharePointUserIsLocalAdmin { return $false } -Verifiable 
+                Mock Add-xSharePointUserToLocalAdmin -Verifiable
+                Mock Remove-xSharePointUserToLocalAdmin -Verifiable
+
+                Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+                
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPProfileServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPProfileServiceApplicationProxy" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
+            }
+
+            It "Creates a new service app where none exists, without adding user to the local admin group" {
+                Mock Test-xSharePointUserIsLocalAdmin { return $true } -Verifiable 
+                
+                Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPProfileServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPProfileServiceApplicationProxy" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
             }
         }
     }    

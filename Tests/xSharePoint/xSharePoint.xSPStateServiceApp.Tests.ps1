@@ -18,7 +18,14 @@ Describe "xSPStateServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "State Service App"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+        }
+
+        Context "Validate get method" {
+            It "Calls the right functions to retrieve SharePoint data" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPStateServiceApplication" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -33,6 +40,18 @@ Describe "xSPStateServiceApp" {
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new service app where none exists" {
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPStateServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPStateServiceDatabase" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPStateServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPStateServiceApplicationProxy" }
+
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

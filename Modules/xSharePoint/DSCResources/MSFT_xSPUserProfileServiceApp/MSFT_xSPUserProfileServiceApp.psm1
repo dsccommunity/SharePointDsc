@@ -123,19 +123,13 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Creating user profile service application $Name"
-    $domainName = $FarmAccount.UserName.Split('\')[0]
-    $userName = $FarmAccount.UserName.Split('\')[1]
-    $computerName = "$env:computername"
 
     # Add the FarmAccount to the local Administrators group, if it's not already there
-    $isLocalAdmin = ([ADSI]"WinNT://$computerName/Administrators,group").PSBase.Invoke("Members") | 
-        ForEach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)} | 
-        Where-Object { $_ -eq $userName }
+    $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $FarmAccount.UserName
 
     if (!$isLocalAdmin)
     {
-        Write-Verbose -Message "Adding $domainName\$userName to local admin group"
-        ([ADSI]"WinNT://$computerName/Administrators,group").Add("WinNT://$domainName/$userName") | Out-Null
+        Add-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
     }
 
     $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -147,7 +141,7 @@ function Set-TargetResource
         $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
         $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
-        if ($null -eq $app) { 
+        if ($null -eq $serviceApp) { 
             $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplication" -Arguments $params
             if ($null -ne $app) {
                 Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplicationProxy" -Arguments @{
@@ -162,8 +156,7 @@ function Set-TargetResource
     # Remove the FarmAccount from the local Administrators group, if it was added above
     if (!$isLocalAdmin)
     {
-        Write-Verbose -Message "Removing $domainName\$userName from local admin group"
-        ([ADSI]"WinNT://$computerName/Administrators,group").Remove("WinNT://$domainName/$userName") | Out-Null
+        Remove-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
     }
 }
 

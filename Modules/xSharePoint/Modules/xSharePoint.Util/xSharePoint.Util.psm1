@@ -34,20 +34,24 @@ function Invoke-xSharePointCommand() {
         $result = Invoke-Command @invokeArgs
         return $result
     } else {
-        if (-not $Env:USERNAME.Contains("$")) {
-            throw [Exception] "Unable to use both InstallAccount and PsDscRunAsCredential in a single resource. Remove one and try again."
-            return
+        if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) { 
+            if (-not $Env:USERNAME.Contains("$")) {
+                throw [Exception] "Unable to use both InstallAccount and PsDscRunAsCredential in a single resource. Remove one and try again."
+                return
+            }
         }
         Write-Verbose "Executing using a provided credential and local PSSession as user $($Credential.UserName)"
 
         #Running garbage collection to resolve issues related to Azure DSC extention use
         [GC]::Collect()
 
-        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000)
+        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000) -ErrorAction Continue
         
-        $result = Invoke-Command @invokeArgs -Session $session
+        if ($session) { $invokeArgs.Add("Session", $session) }
 
-        Remove-PSSession $session
+        $result = Invoke-Command @invokeArgs
+
+        if ($session) { Remove-PSSession $session } 
         return $result
     }
 }

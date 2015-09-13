@@ -18,8 +18,15 @@ Describe "xSPSite" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "http://site.sharepoint.com"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             OwnerAlias = "DEMO\User"
+        }
+
+        Context "Validate get method" {
+            It "Calls the right functions to retrieve SharePoint data" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPSite" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -35,6 +42,15 @@ Describe "xSPSite" {
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new site when none exists" {
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPSite" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPSite" }
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

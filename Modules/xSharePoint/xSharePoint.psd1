@@ -63,8 +63,10 @@ Description = 'This DSC module is used to deploy and configure SharePoint Server
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-NestedModules = @("modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1",
+NestedModules = @("modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1",
+                  "modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1",
                   "modules\xSharePoint.ServiceApplications\xSharePoint.ServiceApplications.psm1",
+                  "modules\xSharePoint.UserProfileService\xSharePoint.UserProfileService.psm1",
                   "modules\xSharePoint.Util\xSharePoint.Util.psm1")
 
 # Functions to export from this module
@@ -86,7 +88,11 @@ CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Set-xSharePointCacheOwnerPolicy",
                     "Enable-xSharePointDCIcmpFireWallRule",
                     "Enable-xSharePointDCFireWallRule",
-                    "Disable-xSharePointDCFireWallRule")
+                    "Disable-xSharePointDCFireWallRule",
+                    "Add-xSharePointUserToLocalAdmin",
+                    "Remove-xSharePointUserToLocalAdmin",
+                    "Test-xSharePointUserIsLocalAdmin",
+                    "Set-xSharePointUserProfileSyncMachine")
 
 # Variables to export from this module
 VariablesToExport = '*'

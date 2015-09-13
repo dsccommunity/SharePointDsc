@@ -18,8 +18,15 @@ Describe "xSPServiceAppPool" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Service pool"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             ServiceAccount = "DEMO\svcSPServiceApps"
+        }
+
+        Context "Validate get method" {
+            It "Calls the right functions to retrieve SharePoint data" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplicationPool" -and $Arguments.Identity -eq $testParams.Name }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -44,6 +51,24 @@ Describe "xSPServiceAppPool" {
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new service app pool when none exists" {
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplicationPool" -and $Arguments.Identity -eq $testParams.Name }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPServiceApplicationPool" -and $Arguments.Name -eq $testParams.Name }
+
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
+
+            It "Updates the service account of the pool when it is wrong" {
+                Mock Invoke-xSharePointSPCmdlet { return @{ ProcessAccountName = "wrong name" } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplicationPool" -and $Arguments.Identity -eq $testParams.Name }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPServiceApplicationPool" }
+
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

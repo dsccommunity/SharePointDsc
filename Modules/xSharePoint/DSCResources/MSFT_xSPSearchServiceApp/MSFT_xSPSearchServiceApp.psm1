@@ -83,7 +83,7 @@ function Set-TargetResource
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
             $serviceInstance = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPEnterpriseSearchServiceInstance" -Arguments @{ Local = $true }
-            $serviceInstance | Invoke-xSharePointSPCmdlet -CmdletName "Start-SPEnterpriseSearchServiceInstance" -ErrorAction SilentlyContinue
+            Invoke-xSharePointSPCmdlet -CmdletName "Start-SPEnterpriseSearchServiceInstance" -Arguments @{ Identity = $serviceInstance } -ErrorAction SilentlyContinue
             $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPEnterpriseSearchServiceApplication" -Arguments $params
             if ($app) {
                 Invoke-xSharePointSPCmdlet -CmdletName "New-SPEnterpriseSearchServiceApplicationProxy" -Arguments @{ 

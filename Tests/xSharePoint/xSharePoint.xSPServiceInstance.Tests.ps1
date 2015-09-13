@@ -18,8 +18,15 @@ Describe "xSPServiceInstance" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Service pool"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
+        }
+
+        Context "Validate get method" {
+            It "Calls the right functions to retrieve SharePoint data" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -65,6 +72,29 @@ Describe "xSPServiceInstance" {
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "Validate set method" {
+
+            $testParams.Ensure = "Present"
+
+            It "Starts a service that should be running" {
+                Mock Invoke-xSharePointSPCmdlet { return @( @{ TypeName = $testParams.Name } ) } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Start-SPServiceInstance" }
+
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
+
+            $testParams.Ensure = "Absent"
+
+            It "Stops a service that should be stopped" {
+                Mock Invoke-xSharePointSPCmdlet { return @( @{ TypeName = $testParams.Name } ) } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Stop-SPServiceInstance" }
+
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

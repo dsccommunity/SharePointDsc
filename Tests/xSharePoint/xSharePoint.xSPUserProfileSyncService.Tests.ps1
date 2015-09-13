@@ -17,10 +17,17 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPUserProfileSyncService" {
     InModuleScope $ModuleName {
         $testParams = @{
-            UserProfileServiceAppName = "Managed Metadata Service App"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            UserProfileServiceAppName = "User Profile Service Service App"
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
+        }
+
+        Context "Validate get method" {
+            It "Retrieves the data from SharePoint" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -63,7 +70,59 @@ Describe "xSPUserProfileSyncService" {
                 } 
                 Test-TargetResource @testParams | Should Be $true
             }
-            
+        }
+
+        $testParams.Ensure = "Present"
+        $Global:xSharePointUPACheck = $false
+
+        Context "Validate set method" {
+            It "Povisions the user profile sync service where it should be running" {
+                Mock Test-xSharePointUserIsLocalAdmin { return $false } -Verifiable 
+                Mock Add-xSharePointUserToLocalAdmin -Verifiable
+                Mock Remove-xSharePointUserToLocalAdmin -Verifiable
+
+                Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+                Mock Restart-Service { return $null }
+
+                Mock Set-xSharePointUserProfileSyncMachine { return $null } -Verifiable
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Start-SPServiceInstance" }
+                Mock Invoke-xSharePointSPCmdlet { if ($Global:xSharePointUPACheck -eq $false) {
+                        $Global:xSharePointUPACheck = $true
+                        return @( @{ Status = "Offline"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" }) 
+                    } else {
+                        return @( @{ Status = "Online"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" })
+                    } 
+                } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
+            }
+
+            $testParams.Ensure = "Absent"
+            $Global:xSharePointUPACheck = $false
+
+            It "Stops the user profile sync service where it should not be running" {
+                Mock Test-xSharePointUserIsLocalAdmin { return $false } -Verifiable 
+                Mock Add-xSharePointUserToLocalAdmin -Verifiable
+                Mock Remove-xSharePointUserToLocalAdmin -Verifiable
+
+                Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+                Mock Restart-Service { return $null }
+
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Stop-SPServiceInstance" }
+                Mock Invoke-xSharePointSPCmdlet { if ($Global:xSharePointUPACheck -eq $false) {
+                        $Global:xSharePointUPACheck = $true
+                        return @( @{ Status = "Online"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" }) 
+                    } else {
+                        return @( @{ Status = "Disabled"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" })
+                    } 
+                } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
+            }
         }
     }    
 }

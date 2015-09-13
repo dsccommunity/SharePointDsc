@@ -50,7 +50,7 @@ function Get-TargetResource
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $Sharing = $true,
+        $Sharing,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
@@ -131,7 +131,7 @@ function Set-TargetResource
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $Sharing = $true,
+        $Sharing,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
@@ -154,8 +154,7 @@ function Set-TargetResource
                 }
             }
         }
-    }
-    else {
+    } else {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -166,26 +165,6 @@ function Set-TargetResource
                     Identity = $serviceApp
                     ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
                 }
-            }
-        }
-    }
-
-
-
-    else {
-        if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose -Message "Updating Secure Store Service Application $Name"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
-                $params = $args[0]
-                $params = Remove-xSharePointNullParamValues -Params $params
-                $params.Remove("Name") | Out-Null
-                if ($params.ContainsKey("PartitionMode")) { $params.Remove("PartitionMode") | Out-Null }
-
-                $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-                        Where-Object { $_.TypeName -eq "Secure Store Service Application" }
-                $serviceApp | Set-SPSecureStoreServiceApplication @params
             }
         }
     }
@@ -244,7 +223,7 @@ function Test-TargetResource
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $Sharing = $true,
+        $Sharing,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]

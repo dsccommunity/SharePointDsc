@@ -11,17 +11,15 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-$ModuleName = "MSFT_xSPManagedMetaDataServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.Util\xSharePoint.Util.psm1")
+$ModuleName = "MSFT_xSPSecureStoreServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPManagedMetaDataServiceApp" {
+Describe "xSPSecureStoreServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Managed Metadata Service App"
-            ApplicationPool = "SharePoint Service Applications"
-            DatabaseServer = "databaseserver\instance"
-            DatabaseName = "SP_MMS"
+            Name = "Secure Store Service Application"
+            ApplicationPool = "SharePoint Search Services"
+            AuditingEnabled = $false
         }
 
         Context "Validate get method" {
@@ -33,25 +31,25 @@ Describe "xSPManagedMetaDataServiceApp" {
         }
 
         Context "Validate test method" {
-            It "Fails when MMS service app doesn't exist" {
+            It "Fails when service app is not found" {
                 Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when the app exists and uses the correct app pool" {
+            It "Passes when the path is found and is the correct type" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
                         ApplicationPool = $testParams.ApplicationPool
-                    } 
+                    }
                 } 
                 Test-TargetResource @testParams | Should Be $true
             }
-            It "Fails when the app exists but uses the wrong app pool" {
+            It "Fails when the service app is found but uses the wrong app pool" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        ApplicationPool = "wrong pool"
-                    } 
+                        ApplicationPool = "Wrong App Pool"
+                    }
                 } 
                 Test-TargetResource @testParams | Should Be $false
             }
@@ -60,8 +58,8 @@ Describe "xSPManagedMetaDataServiceApp" {
         Context "Validate set method" {
             It "Creates a new service app where none exists" {
                 Mock Get-TargetResource { return @{} } -Verifiable
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPMetadataServiceApplication" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPMetadataServiceApplicationProxy" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPSecureStoreServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPSecureStoreServiceApplicationProxy" }
 
                 Set-TargetResource @testParams
 
@@ -71,7 +69,7 @@ Describe "xSPManagedMetaDataServiceApp" {
             It "Updates an existing service app" {
                 Mock Get-TargetResource { return @{ ApplicationPool = "Invalid"} } -Verifiable
                 Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPMetadataServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPSecureStoreServiceApplication" }
                 Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplicationPool" }
 
                 Set-TargetResource @testParams

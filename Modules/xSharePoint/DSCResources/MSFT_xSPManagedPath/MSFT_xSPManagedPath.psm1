@@ -91,7 +91,7 @@ function Set-TargetResource
             $newParams.Add("RelativeURL", $params.RelativeUrl)
             $newParams.Add("Explicit", $params.Explicit)
 
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedPath" -Arguements $newParams
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedPath" -Arguments $newParams
         }
     }
 }

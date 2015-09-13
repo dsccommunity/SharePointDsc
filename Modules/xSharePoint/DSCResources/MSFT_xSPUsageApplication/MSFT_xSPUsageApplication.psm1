@@ -62,7 +62,7 @@ function Get-TargetResource
         }
         else
         {
-            $service = Invoke-xSharePointCommand -CmdletName "Get-SPUsageService"
+            $service = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPUsageService"
             return @{
                 Name = $serviceApp.DisplayName
                 UsageLogCutTime = $service.UsageLogCutTime
