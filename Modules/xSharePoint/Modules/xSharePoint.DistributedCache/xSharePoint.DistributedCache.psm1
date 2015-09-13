@@ -17,7 +17,8 @@ function Add-xSharePointDistributedCacheServer() {
     $farm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
     $cacheService = $farm.Services | Where-Object {$_.Name -eq "AppFabricCachingService"}
     $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
-    $cacheService.ProcessIdentity.ManagedAccount = (Get-SPManagedAccount -Identity $ServiceAccount)
+	$account = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedAccount" -Arguments @{ Identity = $ServiceAccount }
+    $cacheService.ProcessIdentity.ManagedAccount = $account
     $cacheService.ProcessIdentity.Update() 
     $cacheService.ProcessIdentity.Deploy()
 }
