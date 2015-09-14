@@ -4,17 +4,9 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ServiceAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting service application pool '$Name'"
@@ -27,7 +19,8 @@ function Get-TargetResource
         
         return @{
             Name = $sap.Name
-            ProcessAccountName = $sap.ProcessAccountName
+            ServiceAccount = $sap.ProcessAccountName
+            InstallAccount = $params.InstallAccount
         }
     }
     return $result
@@ -39,17 +32,9 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ServiceAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating service application pool '$Name'"
@@ -81,26 +66,14 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ServiceAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing service application pool '$Name'"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($ServiceAccount -ne $result.ProcessAccountName) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount")
 }
 
 

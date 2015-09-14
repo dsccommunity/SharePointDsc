@@ -38,7 +38,7 @@ Describe "xSPServiceAppPool" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        ProcessAccountName = $testParams.ServiceAccount
+                        ServiceAccount = $testParams.ServiceAccount
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -47,7 +47,7 @@ Describe "xSPServiceAppPool" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        ProcessAccountName = "Wrong account name"
+                        ServiceAccount = "Wrong account name"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
