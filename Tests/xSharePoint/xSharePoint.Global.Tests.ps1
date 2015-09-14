@@ -77,10 +77,10 @@ if ($null -ne $DSCTestsPath) {
 }
 
 
-Describe 'PowerShell DSC resource modules' {
+Describe 'PowerShell Modules' {
     
     $psm1Files = @(ls $RepoRoot -Recurse -Filter "*.psm1" -File | ? {
-        ($_.FullName -like "*\DscResources\*") -and (-not ($_.Name -like "*.schema.psm1"))
+        ($_.FullName -like "*\DscResources\*" -or  $_.FullName -like "*\Modules\xSharePoint.*") -and (-not ($_.Name -like "*.schema.psm1"))
     })
 
     if (-not $psm1Files) {
@@ -116,6 +116,34 @@ Describe 'PowerShell DSC resource modules' {
                     $errors += $localErrors
                 }
                 $errors.Count | Should Be 0
+            }
+        }
+
+        Context "SharePoint Cmdlet use" {
+            function Get-SPCmdletCalls
+            {
+                param(
+                    [Parameter(ValueFromPipeline=$True,Mandatory=$True)]
+                    [string]$fileName
+                )    
+
+                $tokens = $null 
+                $errors = $null
+                $ast = [System.Management.Automation.Language.Parser]::ParseFile($fileName, [ref] $tokens, [ref] $errors)
+                return $tokens | Where-Object { $_.TokenFlags -contains "CommandName" -and $_.Value -like "*-SP*"} | ft
+            }
+
+            It "doesn't call SharePoint PowerShell cmdlets directly" {
+                $tokens = @()
+                $psm1Files | ForEach-Object { 
+                    $localCmdletCalls = Get-SPCmdletCalls $_.FullName
+                    if ($localCmdletCalls) {
+                        Write-Warning "There are calls to SharePoint cmdlets in $($_.FullName) - use Invoke-xSharePointSPCmdlet instead to mock and test these calls"
+                        Write-Warning ($localCmdletCalls | Format-List | Out-String)
+                    }
+                    $tokens += $localCmdletCalls
+                }
+                $tokens.Count | Should Be 0
             }
         }
     }
