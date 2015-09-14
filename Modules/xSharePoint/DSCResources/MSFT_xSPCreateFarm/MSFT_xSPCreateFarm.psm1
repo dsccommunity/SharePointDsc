@@ -16,6 +16,8 @@ function Get-TargetResource
     Write-Verbose -Message "Checking for local SP Farm"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+
         try {
             $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
         } catch {
@@ -27,10 +29,16 @@ function Get-TargetResource
         $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
         $centralAdminSite = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" | Where-Object { $_.IsAdministrationWebApplication })[0]
 
+        if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
+            $farmAccount = $params.FarmAccount
+        } else {
+            $farmAccount = $spFarm.DefaultServiceAccount.Name
+        }
+
         $returnValue = @{
             FarmConfigDatabaseName = $spFarm.Name
             DatabaseServer = $configDb.Server.Name
-            FarmAccount = $spFarm.DefaultServiceAccount.Name
+            FarmAccount = $farmAccount
             InstallAccount = $params.InstallAccount
             Passphrase = $params.Passphrase
             AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Server

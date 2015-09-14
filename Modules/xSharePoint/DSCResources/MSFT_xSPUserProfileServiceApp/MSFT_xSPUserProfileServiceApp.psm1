@@ -4,49 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MySiteHostLocation,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $ProfileDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $ProfileDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SocialDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SocialDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SyncDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SyncDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
+        [parameter(Mandatory = $false)] [System.String] $ProfileDBName,
+        [parameter(Mandatory = $false)] [System.String] $ProfileDBServer,
+        [parameter(Mandatory = $false)] [System.String] $SocialDBName,
+        [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
+        [parameter(Mandatory = $false)] [System.String] $SyncDBName,
+        [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting user profile service application $Name"
@@ -62,9 +30,37 @@ function Get-TargetResource
         }
         else
         {
+            $propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
+
+            $socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
+            $socialDB = $socialProp.GetValue($serviceApp)
+
+            $profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
+            $profileDB = $profileProp.GetValue($serviceApp)
+
+            $syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
+            $syncDB = $syncProp.GetValue($serviceApp)
+
+            $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
+
+            if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
+                $farmAccount = $params.FarmAccount
+            } else {
+                $farmAccount = $spFarm.DefaultServiceAccount.Name
+            }
+
             return @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
+                FarmAccount = $farmAccount
+                MySiteHostLocation = $params.MySiteHostLocation
+                ProfileDBName = $profileProp.Name
+                ProfileDBServer = $profileProp.Server.Name
+                SocialDBName = $socialDB.Name
+                SocialDBServer = $socialDB.Server.Name
+                SyncDBName = $syncDB.Name
+                SyncDBServer = $syncDB.Server.Name
+                InstallAccount = $params.InstallAccount
             }
         }
     }
@@ -77,49 +73,17 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MySiteHostLocation,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $ProfileDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $ProfileDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SocialDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SocialDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SyncDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SyncDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
+        [parameter(Mandatory = $false)] [System.String] $ProfileDBName,
+        [parameter(Mandatory = $false)] [System.String] $ProfileDBServer,
+        [parameter(Mandatory = $false)] [System.String] $SocialDBName,
+        [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
+        [parameter(Mandatory = $false)] [System.String] $SyncDBName,
+        [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating user profile service application $Name"
@@ -167,59 +131,22 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MySiteHostLocation,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $ProfileDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $ProfileDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SocialDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SocialDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SyncDBName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SyncDBServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
+        [parameter(Mandatory = $false)] [System.String] $ProfileDBName,
+        [parameter(Mandatory = $false)] [System.String] $ProfileDBServer,
+        [parameter(Mandatory = $false)] [System.String] $SocialDBName,
+        [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
+        [parameter(Mandatory = $false)] [System.String] $SyncDBName,
+        [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
-
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($ApplicationPool -ne $result.ApplicationPool) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 
 Export-ModuleMember -Function *-TargetResource
