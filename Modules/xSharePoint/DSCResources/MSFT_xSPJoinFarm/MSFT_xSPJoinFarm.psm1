@@ -4,26 +4,16 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
         try {
             $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm" -ErrorAction SilentlyContinue
         } catch {
@@ -32,10 +22,14 @@ function Get-TargetResource
         
         if ($null -eq $spFarm) {return @{ }}
 
-        $returnValue = @{
-            FarmName = $spFarm.Name
+        $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+
+        return @{
+            FarmConfigDatabaseName = $spFarm.Name
+            DatabaseServer = $configDb.Server.Name
+            InstallAccount = $params.InstallAccount
+            Passphrase = $params.Passphrase
         }
-        return $returnValue
     }
     return $result
 }
@@ -46,21 +40,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
@@ -114,27 +97,15 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
- 
-    if ($result.Count -eq 0) { return $false }
-    return $true   
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose "Checking for local farm presence"
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName") 
 }
 
 

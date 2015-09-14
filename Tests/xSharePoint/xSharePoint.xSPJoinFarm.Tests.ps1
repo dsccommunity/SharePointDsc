@@ -26,7 +26,6 @@ Describe "xSPJoinFarm" {
             It "Calls SP Farm to find the local environment settings" {
                 Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter {$CmdletName -eq "Get-SPFarm"}
                 $results = Get-TargetResource @testParams
-                $results.Count | Should Be 0
                 Assert-VerifiableMocks
             }
         }
@@ -39,7 +38,7 @@ Describe "xSPJoinFarm" {
             It "Passes when local server is in a farm" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        FarmName = "SP_Config"
+                        FarmConfigDatabaseName = "SP_Config"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
