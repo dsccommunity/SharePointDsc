@@ -30,7 +30,6 @@ Describe "xSPManagedAccount" {
                 Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPManagedAccount" -and $Arguments.Identity -eq $testParams.Account.UserName }
                 
                 $results = Get-TargetResource @testParams
-                $results.Count | Should Be 0
 
                 Assert-VerifiableMocks
             }
@@ -45,10 +44,9 @@ Describe "xSPManagedAccount" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         AccountName = $testParams.AccountName
-                        AutomaticChange = $false
-                        DaysBeforeChangeToEmail = $testParams.EmailNotification
-                        DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                        ChangeSchedule = $testParams.Schedule
+                        EmailNotification = $testParams.EmailNotification
+                        PreExpireDays = $testParams.PreExpireDays
+                        Schedule = $testParams.Schedule
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -57,10 +55,9 @@ Describe "xSPManagedAccount" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         AccountName = $testParams.AccountName
-                        AutomaticChange = $true
-                        DaysBeforeChangeToEmail = $testParams.EmailNotification
-                        DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                        ChangeSchedule = "Weekly Friday between 01:00 and 02:00"
+                        EmailNotification = $testParams.EmailNotification
+                        PreExpireDays = $testParams.PreExpireDays
+                        Schedule = "Weekly Friday between 01:00 and 02:00"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -69,10 +66,9 @@ Describe "xSPManagedAccount" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         AccountName = $testParams.AccountName
-                        AutomaticChange = $true
-                        DaysBeforeChangeToEmail = 0
-                        DaysBeforeExpiryToChange = 0
-                        ChangeSchedule = $testParams.Schedule
+                        EmailNotification = 0
+                        PreExpireDays = 0
+                        Schedule = $testParams.Schedule
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -92,7 +88,7 @@ Describe "xSPManagedAccount" {
             It "Modifies an existing account where it already exists" {
                 Mock Get-TargetResource { return @{}
                     AccountName = $testParams.Account.UserName
-                    ChangeSchedule = $testParams.Schedule
+                    Schedule = $testParams.Schedule
                 }
                 Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
 

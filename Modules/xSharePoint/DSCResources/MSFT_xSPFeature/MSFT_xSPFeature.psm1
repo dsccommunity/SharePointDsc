@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-		[parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
@@ -55,7 +55,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-		[parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
@@ -87,7 +87,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-		[parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
