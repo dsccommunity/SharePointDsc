@@ -37,12 +37,11 @@ Describe "xSPDistributedCacheService" {
                     Size = $testParams.CacheSizeInMB
                 } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-AFCacheHostConfiguration" }
 
+                Mock Get-WmiObject { @{ StartName = $testParams.ServiceAccount.UserName } } -Verifiable
+                Mock Get-NetFirewallRule { @{} } -Verifiable
+
                 $result = Get-TargetResource @testParams
 
-                $result.HostName | Should Be ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-                $result.Port | Should Be 22233
-                $result.CacheSizeInMB | Should Be $testParams.CacheSizeInMB
-                
                 Assert-VerifiableMocks
             }
 
@@ -65,9 +64,10 @@ Describe "xSPDistributedCacheService" {
             It "Passes when cache is present and size is correct" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        HostName = $env:COMPUTERNAME
-                        Port = 22233
                         CacheSizeInMB = $testParams.CacheSizeInMB
+                        ServiceAccount = $testParams.ServiceAccount.UserName
+                        CreateFirewallRules = $testParams.CreateFirewallRules
+                        Ensure = "Present"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -75,10 +75,11 @@ Describe "xSPDistributedCacheService" {
             It "Fails when cache is present but size is not correct" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        HostName = $env:COMPUTERNAME
-                        Port = 22233
                         CacheSizeInMB = 1
-                    } 
+                        ServiceAccount = $testParams.ServiceAccount.UserName
+                        CreateFirewallRules = $testParams.CreateFirewallRules
+                        Ensure = "Present"
+                    }
                 } 
                 Test-TargetResource @testParams | Should Be $false
             }
@@ -88,16 +89,22 @@ Describe "xSPDistributedCacheService" {
             It "Fails when cache is present but not should be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        HostName = $env:COMPUTERNAME
-                        Port = 22233
-                        CacheSizeInMB = 1
-                    } 
+                        CacheSizeInMB = $testParams.CacheSizeInMB
+                        ServiceAccount = $testParams.ServiceAccount.UserName
+                        CreateFirewallRules = $testParams.CreateFirewallRules
+                        Ensure = "Present"
+                    }
                 } 
                 Test-TargetResource @testParams | Should Be $false
             }
             It "Passes when cache is not present and should not be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ } 
+                    return @{ 
+                        CacheSizeInMB = $testParams.CacheSizeInMB
+                        ServiceAccount = $testParams.ServiceAccount.UserName
+                        CreateFirewallRules = $testParams.CreateFirewallRules
+                        Ensure = "Absent"
+                    } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
             }
