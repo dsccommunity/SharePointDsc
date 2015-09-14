@@ -34,7 +34,13 @@ function Get-TargetResource
 
         $feature = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
 
-        if ($null -eq $feature) { return @{} }
+        if ($null -eq $feature) { return @{
+            Name = $params.Name
+            FeatureScope = $params.FeatureScope
+            Url = $params.Url
+            InstalAcount = $params.InstallAccount
+            Ensure = "Absent"
+        } }
 
         $checkParams = @{}
         $checkParams.Add("Identity", $params.Name)
@@ -45,12 +51,14 @@ function Get-TargetResource
         }
         $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
+        if ($enabled) { $currentState = "Present" } else { $currentState = "Absent" }
 
         return @{
             Name = $params.Name
-            Id = $feature.Id
-            Version = $feature.Version
-            Enabled = $enabled
+            FeatureScope = $params.FeatureScope
+            Url = $params.Url
+            InstalAcount = $params.InstallAccount
+            Ensure = $currentState
         }
     }
     return $result
@@ -133,15 +141,8 @@ function Test-TargetResource
         $Ensure
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
-
-    if ($result.Count -eq 0) { 
-        throw "Unable to locate feature '$Name' in the current SharePoint farm, check that the name is correct and that the feature has been deployed to the file system."
-    } else {
-        if ($Ensure -eq "Present" -and $result.Enabled -eq $false) { return $false }
-        if ($Ensure -eq "Absent" -and $result.Enabled -eq $true) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 Export-ModuleMember -Function *-TargetResource

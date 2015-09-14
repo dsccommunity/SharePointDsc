@@ -37,7 +37,7 @@ Describe "xSPFeature" {
 
                 $result = Get-TargetResource @testParams
 
-                $result.Enabled | Should be $false
+                $result.Ensure | Should be "Absent"
 
                 Assert-VerifiableMocks
             }
@@ -48,7 +48,7 @@ Describe "xSPFeature" {
 
                 $result = Get-TargetResource @testParams
 
-                $result.Enabled | Should be $false
+                $result.Ensure | Should be "Absent"
 
                 Assert-VerifiableMocks
             }
@@ -58,7 +58,7 @@ Describe "xSPFeature" {
 
                 $result = Get-TargetResource @testParams
 
-                $result.Enabled | Should be $true
+                $result.Ensure | Should be "Present"
 
                 Assert-VerifiableMocks
             }
@@ -69,24 +69,18 @@ Describe "xSPFeature" {
 
                 $result = Get-TargetResource @testParams
 
-                $result.Enabled | Should be $true
+                $result.Ensure | Should be "Present"
 
                 Assert-VerifiableMocks
             }
         }
 
         Context "Validate test method" {
-            It "Throws when a feature is not installed in the farm" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
-                { Test-TargetResource @testParams } | Should Throw "Unable to locate feature"
-            }
             It "Passes when a farm feature is enabaled and should be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $true
+                        Ensure = "Present"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -95,9 +89,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $false
+                        Ensure = "Absent"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -109,9 +101,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $false
+                        Ensure = "Absent"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -120,9 +110,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $true
+                        Ensure = "Present"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -135,9 +123,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $true
+                        Ensure = "Present"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -146,9 +132,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $false
+                        Ensure = "Absent"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -160,9 +144,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $false
+                        Ensure = "Absent"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -171,9 +153,7 @@ Describe "xSPFeature" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Id = [Guid]::NewGuid()
-                        Version = "1.0"
-                        Enabled = $true
+                        Ensure = "Present"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
