@@ -4,33 +4,13 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AdminContentDatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $CentralAdministrationPort
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
+        [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
@@ -66,33 +46,13 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AdminContentDatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $CentralAdministrationPort
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
+        [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort
     )
     
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
@@ -138,33 +98,13 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AdminContentDatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $CentralAdministrationPort
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
+        [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
