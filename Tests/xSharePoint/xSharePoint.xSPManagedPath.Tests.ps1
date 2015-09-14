@@ -39,8 +39,10 @@ Describe "xSPManagedPath" {
             It "Passes when the path is found and is the correct type" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        Name = $testParams.RelativeUrl
-                        PathType = "WildcardInclusion"
+                        RelativeUrl = $testParams.RelativeUrl
+                        Explicit = $testParams.Explicit
+                        HostHeader = $testParams.HostHeader
+                        WebAppUrl = $testParams.WebAppUrl
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -48,8 +50,10 @@ Describe "xSPManagedPath" {
             It "Fails when the path is found and is not the correct type" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        Name = $testParams.RelativeUrl
-                        PathType = "ExplicitInclusion"
+                        RelativeUrl = $testParams.RelativeUrl
+                        Explicit = (-not $testParams.Explicit)
+                        HostHeader = $testParams.HostHeader
+                        WebAppUrl = $testParams.WebAppUrl
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false

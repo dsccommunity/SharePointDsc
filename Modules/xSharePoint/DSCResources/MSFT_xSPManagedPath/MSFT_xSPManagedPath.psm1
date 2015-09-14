@@ -4,25 +4,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $WebAppUrl,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RelativeUrl,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $Explicit,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $HostHeader
+        [parameter(Mandatory = $true)]  [System.String]  $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
+        [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
@@ -39,8 +25,11 @@ function Get-TargetResource
         if ($null -eq $path) { return @{} }
         
         return @{
-            Name = $path.Name
-            PathType = $path.Type
+            RelativeUrl = $path.Name
+            Explicit = ($path.Type -eq "ExplicitInclusion")
+            WebAppUrl = $params.WebAppUrl
+            HostHeader = $params.HostHeader
+            InstallAccount = $params.InstallAccount
         }
     }
     return $result
@@ -52,25 +41,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $WebAppUrl,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RelativeUrl,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $Explicit,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $HostHeader
+        [parameter(Mandatory = $true)]  [System.String]  $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
+        [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
@@ -103,39 +78,16 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $WebAppUrl,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RelativeUrl,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $Explicit,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $HostHeader
+        [parameter(Mandatory = $true)]  [System.String]  $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
+        [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($Explicit) {
-            if ($result.PathType -ne "ExplicitInclusion") { return $false }
-        }
-        else {
-            if ($result.PathType -ne "WildcardInclusion") { return $false }
-        }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader")
 }
 
 
