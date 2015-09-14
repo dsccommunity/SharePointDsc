@@ -38,7 +38,7 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Status = "Online"
+                        Ensure = "Present"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -47,7 +47,7 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Status = "Disabled"
+                        Ensure = "Absent"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -59,7 +59,7 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Status = "Online"
+                        Ensure = "Present"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -68,7 +68,7 @@ Describe "xSPServiceInstance" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         Name = $testParams.Name
-                        Status = "Disabled"
+                        Ensure = "Absent"
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
