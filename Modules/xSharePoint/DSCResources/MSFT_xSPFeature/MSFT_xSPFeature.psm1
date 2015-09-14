@@ -4,27 +4,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
-        [System.String]
-        $FeatureScope,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+		[parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
@@ -70,27 +54,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
-        [System.String]
-        $FeatureScope,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+		[parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -118,27 +86,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
-        [System.String]
-        $FeatureScope,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+		[parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
