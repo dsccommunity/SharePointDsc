@@ -1,36 +1,107 @@
-function Get-xSharePointAuthenticatedPSSession() {
+function Invoke-xSharePointCommand() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $Credential,
+
+        [parameter(Mandatory = $false)]
+        [HashTable]
+        $Arguments,
+
+        [parameter(Mandatory = $true)]
+        [ScriptBlock]
+        $ScriptBlock
+    )
+
+    $VerbosePreference = 'Continue'
+
+    $invokeArgs = @{
+        ScriptBlock = $ScriptBlock
+    }
+    if ($null -ne $Arguments) {
+        $invokeArgs.Add("ArgumentList", $Arguments)
+    }
+
+    if ($null -eq $Credential) {
+        if ($Env:USERNAME.Contains("$")) {
+            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
+            return
+        }
+        Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
+
+        $result = Invoke-Command @invokeArgs
+        return $result
+    } else {
+        if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) { 
+            if (-not $Env:USERNAME.Contains("$")) {
+                throw [Exception] "Unable to use both InstallAccount and PsDscRunAsCredential in a single resource. Remove one and try again."
+                return
+            }
+        }
+        Write-Verbose "Executing using a provided credential and local PSSession as user $($Credential.UserName)"
+
+        #Running garbage collection to resolve issues related to Azure DSC extention use
+        [GC]::Collect()
+
+        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000) -ErrorAction Continue
+        
+        if ($session) { $invokeArgs.Add("Session", $session) }
+
+        $result = Invoke-Command @invokeArgs
+
+        if ($session) { Remove-PSSession $session } 
+        return $result
+    }
+}
+
+function Invoke-xSharePointSPCmdlet() {
     [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true,Position=1)]
-        [System.Management.Automation.PSCredential]
-        $Credential,
+        [string]
+        $CmdletName,
 
         [parameter(Mandatory = $false,Position=2)]
-        [System.Boolean]
-        $ForceNewSession = $false
+        [HashTable]
+        $Arguments
     )
 
-    # Remove existing sessions to keep things clean
-    Get-PSSession | Where-Object { $_.ComputerName -eq "localhost" -and $_.Runspace.OriginalConnectionInfo.Credential.UserName -eq $Credential.UserName } | Remove-PSSession
-    [GC]::Collect()
-    
-        Write-Verbose -Message "Creating new PowerShell session"
-        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP
-        Invoke-Command -Session $session -ScriptBlock {
-            if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
-            {
-                Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
-            }
+    Write-Verbose "Preparing to execute SharePoint command - $CmdletName"
+
+    if ($null -ne $Arguments -and $Arguments.Count -gt 0) {
+        $argumentsString = ""
+        $Arguments.Keys | ForEach-Object {
+            $argumentsString += "$($_): $($Arguments.$_); "
         }
-        return $session    
+        Write-Verbose "Arguments for $CmdletName - $argumentsString"
     }
+
+    if ($null -eq $Arguments) {
+        $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; $CmdletName; `$params = `$null"))
+        $result = Invoke-Command -ScriptBlock $script -NoNewScope
+    } else {
+        $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
+        $result = Invoke-Command -ScriptBlock $script -ArgumentList $Arguments -NoNewScope
+    }
+    return $result
+}
+
+function Initialize-xSharePointPSSnapin() {
+    if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+    {
+        Write-Verbose "Loading SharePoint PowerShell snapin"
+        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
+    }
+}
 
 function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)]
         $params,
 
         [parameter(Mandatory = $true,Position=2)]
@@ -63,14 +134,32 @@ function Remove-xSharePointNullParamValues() {
     return $Params
 }
 
-function Get-xSharePointAssemblyVerion() {
+function Get-xSharePointInstalledProductVersion() {
+    $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
+    $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
+    return (Get-Command $fullPath).FileVersionInfo
+}
+
+function Get-xSharePointAssemblyVersion() {
     [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true,Position=1)]
+        [string]
         $PathToAssembly
     )
-    return (Get-Command $PathToAssembly).Version
+    return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
+}
+
+function Update-xSharePointObject() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [object]
+        $InputObject
+    )
+    $InputObject.Update()
 }
 
 Export-ModuleMember -Function *

@@ -12,17 +12,28 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
 $ModuleName = "MSFT_xSPManagedAccount"
+Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPManagedAccount" {
     InModuleScope $ModuleName {
         $testParams = @{
             Account = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             EmailNotification = 7
             PreExpireDays = 7
             Schedule = ""
             AccountName = "username"
+        }
+
+        Context "Validate get method" {
+            It "Calls the service application picker with the appropriate type name" {
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPManagedAccount" -and $Arguments.Identity -eq $testParams.Account.UserName }
+                
+                $results = Get-TargetResource @testParams
+                $results.Count | Should Be 0
+
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -65,6 +76,29 @@ Describe "xSPManagedAccount" {
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new account when none exists" {
+                Mock Get-TargetResource { return @{} }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPManagedAccount" }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
+            }
+            It "Modifies an existing account where it already exists" {
+                Mock Get-TargetResource { return @{}
+                    AccountName = $testParams.Account.UserName
+                    ChangeSchedule = $testParams.Schedule
+                }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPManagedAccount" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
             }
         }
     }    

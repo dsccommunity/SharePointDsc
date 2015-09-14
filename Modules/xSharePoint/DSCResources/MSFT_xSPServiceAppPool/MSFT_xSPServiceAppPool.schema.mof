@@ -3,6 +3,6 @@ class MSFT_xSPServiceAppPool : OMI_BaseResource
 {
     [Key] string Name;
     [Required] string ServiceAccount;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

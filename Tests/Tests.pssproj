@@ -53,6 +53,9 @@
     <Content Include="xSharePoint\xSharePoint.xSPCacheAccounts.Tests.ps1" />
     <Content Include="xSharePoint\xSharePoint.xSPBCSServiceApp.Tests.ps1" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
 </Project>

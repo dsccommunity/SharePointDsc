@@ -5,5 +5,5 @@ class MSFT_xSPStateServiceApp : OMI_BaseResource
     [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
     [Write] string DatabaseName;
     [Write] string DatabaseServer;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

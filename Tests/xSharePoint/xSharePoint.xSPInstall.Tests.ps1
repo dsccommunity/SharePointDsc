@@ -21,6 +21,23 @@ Describe "xSPInstall" {
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
         }
 
+        Context "Validate get method" {
+
+            It "Returns false when SharePoint is not detected" {
+                Mock Get-CimInstance { return $null } -Verifiable
+                $result = Get-TargetResource @testParams
+                $result.SharePointInstalled | Should Be $false
+                Assert-VerifiableMocks
+            }
+
+            It "Returns true when SharePoint is detected" {
+                Mock Get-CimInstance { return @{} } -Verifiable
+                $result = Get-TargetResource @testParams
+                $result.SharePointInstalled | Should Be $true
+                Assert-VerifiableMocks
+            }
+        }
+
         Context "Validate test method" {
             It "Passes when SharePoint is installed" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
@@ -37,6 +54,25 @@ Describe "xSPInstall" {
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Reboots the server after a successful install" {
+                Mock Start-Process { @{ ExitCode = 0 }} -Verifiable
+
+                Set-TargetResource @testParams
+
+                $global:DSCMachineStatus | Should Be 1
+
+                Assert-VerifiableMocks
+            }
+            It "Throws an error on unknown exit code" {
+                Mock Start-Process { @{ ExitCode = -1 }} -Verifiable
+
+                { Set-TargetResource @testParams } | Should Throw
+
+                Assert-VerifiableMocks
             }
         }
     }    

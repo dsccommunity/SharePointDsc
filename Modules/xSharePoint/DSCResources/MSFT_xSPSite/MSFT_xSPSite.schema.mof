@@ -14,6 +14,6 @@ class MSFT_xSPSite : OMI_BaseResource
     [Write] string SecondaryEmail;
     [Write] string SecondaryOwnerAlias;
     [Write] string Template;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

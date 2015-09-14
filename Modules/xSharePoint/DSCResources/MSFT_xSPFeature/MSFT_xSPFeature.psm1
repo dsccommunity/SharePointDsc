@@ -17,7 +17,7 @@ function Get-TargetResource
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -29,11 +29,10 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $feature = Get-SPFeature $params.Name -ErrorAction SilentlyContinue
+
+        $feature = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
 
         if ($null -eq $feature) { return @{} }
 
@@ -44,8 +43,7 @@ function Get-TargetResource
         } else {
             $checkParams.Add($params.FeatureScope, $params.Url)
         }
-        $checkParams.Add("ErrorAction", "SilentlyContinue")
-        $featureAtScope = Get-SPFeature @checkParams
+        $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
 
         return @{
@@ -55,7 +53,7 @@ function Get-TargetResource
             Enabled = $enabled
         }
     }
-    $result
+    return $result
 }
 
 
@@ -77,7 +75,7 @@ function Set-TargetResource
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -87,9 +85,7 @@ function Set-TargetResource
         $Ensure
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $runParams = @{}
@@ -99,10 +95,10 @@ function Set-TargetResource
         }
 
         if ($params.Ensure -eq "Present") {
-            Enable-SPFeature @runParams
+            Invoke-xSharePointSPCmdlet -CmdletName "Enable-SPFeature" -Arguments $runParams
         } else {
             $runParams.Add("Confirm", $false)    
-            Disable-SPFeature @runParams
+            Invoke-xSharePointSPCmdlet -CmdletName "Disable-SPFeature" -Arguments $runParams
         }
     }
 }
@@ -127,7 +123,7 @@ function Test-TargetResource
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -137,7 +133,7 @@ function Test-TargetResource
         $Ensure
     )
 
-    $result = Get-TargetResource -Name $Name -FeatureScope $FeatureScope -Url $Url -InstallAccount $InstallAccount -Ensure $Ensure
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
 
     if ($result.Count -eq 0) { 

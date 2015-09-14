@@ -19,18 +19,47 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Url,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $AllowAnonymous,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("NTLM","Kerberos")]
+        [System.String]
+        $AuthenticationMethod,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $HostHeader,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Path,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Port,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
 
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $wa = Get-SPWebApplication $params.Name -ErrorAction SilentlyContinue
+        
+        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return @{} }
         
         return @{
@@ -39,7 +68,7 @@ function Get-TargetResource
             ApplicationPoolAccount = $wa.ApplicationPool.Username
         }
     }
-    $result
+    return $result
 }
 
 
@@ -63,59 +92,68 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Url,
-
+        
+        [parameter(Mandatory = $false)]
         [System.Boolean]
-        $AllowAnonymous = $false,
-
+        $AllowAnonymous,
+        
+        [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos")]
         [System.String]
-        $AuthenticationMethod = "NTLM",
-
+        $AuthenticationMethod,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
-
+        $DatabaseName,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
-
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $HostHeader = $null,
-
+        $HostHeader,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Path = $null,
-
+        $Path,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Port = $null,
+        $Port,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         if ($AuthenticationMethod -eq "NTLM") {
-            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos
-            $params.Add("AuthenticationProvider", $ap)
+            $ap = Invoke-xSharePointSPCmdlet -CmdletName "New-SPAuthenticationProvider" -Arguments @{ 
+                UseWindowsIntegratedAuthentication = $true
+                DisableKerberos = $true
+            }
         } else {
-            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
-            $params.Add("AuthenticationProvider", $ap)
+            $ap = Invoke-xSharePointSPCmdlet -CmdletName "New-SPAuthenticationProvider" -Arguments @{ 
+                UseWindowsIntegratedAuthentication = $true
+            }
         }
+        $params.Add("AuthenticationProvider", $ap)
 
-        $wa = Get-SPWebApplication $params.Name -ErrorAction SilentlyContinue
+        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $wa) { 
-            $params.Remove("InstallAccount") | Out-Null
+            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
             if ($params.ContainsKey("AuthenticationMethod")) { $params.Remove("AuthenticationMethod") | Out-Null }
             if ($params.ContainsKey("AllowAnonymous")) { 
                 $params.Remove("AllowAnonymous") | Out-Null 
                 $params.Add("AllowAnonymousAccess", $true)
             }
 
-            New-SPWebApplication @params
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPWebApplication" -Arguments $params
         }
     }
 }
@@ -142,31 +180,38 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Url,
-
+        
+        [parameter(Mandatory = $false)]
         [System.Boolean]
-        $AllowAnonymous = $false,
-
+        $AllowAnonymous,
+        
+        [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos")]
         [System.String]
-        $AuthenticationMethod = "NTLM",
-
+        $AuthenticationMethod,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
-
+        $DatabaseName,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
-
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $HostHeader = $null,
-
+        $HostHeader,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Path = $null,
-
+        $Path,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Port = $null,
+        $Port,
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        [parameter(Mandatory = $true)]
         $InstallAccount
     )
 

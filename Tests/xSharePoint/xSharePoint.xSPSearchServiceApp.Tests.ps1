@@ -18,8 +18,15 @@ Describe "xSPSearchServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Search Service Application"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             ApplicationPool = "SharePoint Search Services"
+        }
+
+        Context "Validate get method" {
+            It "Retrieves the data from SharePoint" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -44,6 +51,31 @@ Describe "xSPSearchServiceApp" {
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new service app where none exists" {
+                Mock Get-TargetResource { return @{} } -Verifiable
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPEnterpriseSearchServiceInstance" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Start-SPEnterpriseSearchServiceInstance" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPEnterpriseSearchServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPEnterpriseSearchServiceApplicationProxy" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
+            }
+
+            It "Updates an existing service app" {
+                Mock Get-TargetResource { return @{ ApplicationPool = "Invalid"} } -Verifiable
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPEnterpriseSearchServiceApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplicationPool" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
             }
         }
     }    

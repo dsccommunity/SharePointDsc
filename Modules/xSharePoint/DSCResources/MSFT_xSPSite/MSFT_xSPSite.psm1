@@ -11,19 +11,61 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $OwnerAlias,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $CompatibilityLevel,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $ContentDatabase,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Description,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $HostHeaderWebApplication,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $Language,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $OwnerEmail,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $QuotaTemplate,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $SecondaryEmail,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $SecondaryOwnerAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Template,
+
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting site collection $Url"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
+        $site = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPSite" -Arguments @{ Identity = $params.Url } -ErrorAction SilentlyContinue
 
         if ($null -eq $site) { return @{} }
         else {
@@ -49,58 +91,67 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $OwnerAlias,
-
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $CompatibilityLevel = $null,
-
+        $CompatibilityLevel,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $ContentDatabase = $null,
-
+        $ContentDatabase,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Description = $null,
-
+        $Description,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $HostHeaderWebApplication = $null,
-
+        $HostHeaderWebApplication,
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $Language = $null,
-
+        $Language,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Name = $null,
-
+        $Name,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $OwnerEmail = $null,
-
+        $OwnerEmail,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $QuotaTemplate = $null,
-
+        $QuotaTemplate,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $SecondaryEmail = $null,
-
+        $SecondaryEmail,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $SecondaryOwnerAlias = $null,
+        $SecondaryOwnerAlias,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Template = $null,
+        $Template,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Creating site collection $Url"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $params = Remove-xSharePointNullParamValues -Params $params
         $params.Remove("InstallAccount") | Out-Null
 
-        $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
+        $site = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPSite" -Arguments @{ Identity = $params.Url } -ErrorAction SilentlyContinue
 
         if ($null -eq $site) {
-            New-SPSite @params | Out-Null
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPSite" -Arguments $params | Out-Null
         }
     }
 }
@@ -119,46 +170,57 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $OwnerAlias,
-
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $CompatibilityLevel = $null,
-
+        $CompatibilityLevel,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $ContentDatabase = $null,
-
+        $ContentDatabase,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Description = $null,
-
+        $Description,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $HostHeaderWebApplication = $null,
-
+        $HostHeaderWebApplication,
+        
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $Language = $null,
-
+        $Language,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Name = $null,
-
+        $Name,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $OwnerEmail = $null,
-
+        $OwnerEmail,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $QuotaTemplate = $null,
-
+        $QuotaTemplate,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $SecondaryEmail = $null,
-
+        $SecondaryEmail,
+        
+        [parameter(Mandatory = $false)]
         [System.String]
-        $SecondaryOwnerAlias = $null,
+        $SecondaryOwnerAlias,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $Template = $null,
+        $Template,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    $result = Get-TargetResource -Url $Url -OwnerAlias $OwnerAlias -InstallAccount $InstallAccount
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing site collection $Url"
     if ($result.Count -eq 0) { return $false }
     else {

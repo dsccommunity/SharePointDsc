@@ -18,10 +18,17 @@ Describe "xSPWebApplication" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Managed Metadata Service App"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             ApplicationPool = "SharePoint Web Apps"
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
+        }
+
+        Context "Validate get method" {
+            It "Calls the right functions to retrieve SharePoint data" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -48,6 +55,16 @@ Describe "xSPWebApplication" {
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new site when none exists" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPAuthenticationProvider" }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPWebApplication" }
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

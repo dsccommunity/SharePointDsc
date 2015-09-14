@@ -5,6 +5,6 @@ class MSFT_xSPSearchServiceApp : OMI_BaseResource
     [Required] string ApplicationPool;
     [Write] string DatabaseName;
     [Write] string DatabaseServer;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

@@ -12,11 +12,7 @@ function Get-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -27,11 +23,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
-
-    $result = Invoke-Command -Session $session -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
         try {
-            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+            $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm" -ErrorAction SilentlyContinue
         } catch {
             Write-Verbose -Message "Unable to detect local farm."
         }
@@ -43,7 +37,7 @@ function Get-TargetResource
         }
         return $returnValue
     }
-    $result
+    return $result
 }
 
 
@@ -60,101 +54,54 @@ function Set-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Passphrase,
-
-        [System.UInt32]
-        $WaitTime = 30,
-
-        [System.UInt32]
-        $WaitCount = 60
+        $Passphrase
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-     
-        $WaitTime = $PSBoundParameters.WaitTime
-        if ($WaitTime -lt 1) {$WaitTime = 30}
-        $WaitCount = $PSBoundParameters.WaitCount
-        if ($WaitCount -lt 1) {$WaitCount = 30}
-           
         $loopCount = 0
 
-        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
-
-        while ($loopCount -le $WaitCount) {
-            try
-            {
-                if ($majorVersion -eq 15) {
-                    Write-Verbose -Message "Version: SharePoint 2013"
-
-                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                    -DatabaseServer $params.DatabaseServer `
-                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                    -SkipRegisterAsDistributedCacheHost:$true 
-                }
-                if ($majorVersion -eq 16) {
-                    Write-Verbose -Message "Version: SharePoint 2016"
-    
-                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                    -DatabaseServer $params.DatabaseServer `
-                                                    -LocalServerRole Custom `
-                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                    -SkipRegisterAsDistributedCacheHost:$true 
-                }
-
-
-                $loopCount = $WaitCount + 1
+        $joinFarmArgs = @{
+            DatabaseServer = $params.DatabaseServer
+            DatabaseName = $params.FarmConfigDatabaseName
+            Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+            SkipRegisterAsDistributedCacheHost = $true
+        }
+        
+        switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+            15 {
+                Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
-            catch
-            {
-                $loopCount = $loopCount + 1
-                Start-Sleep -Seconds $WaitTime
+            16 {
+                Write-Verbose -Message "Detected Version: SharePoint 2016"
+                $joinFarmArgs.Add("LocalServerRole", "Custom")
+            }
+            Default {
+                throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
             }
         }
-    }
 
-    Write-Verbose -Message "Installing help collection"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPHelpCollection -All
-    }
-    
-    Write-Verbose -Message "Initialising farm resource security"
-    Invoke-Command -Session $session -ScriptBlock {
-        Initialize-SPResourceSecurity
-    }
-
-    Write-Verbose -Message "Installing farm services"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPService
-    }
-
-    Write-Verbose -Message "Installing farm features"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPFeature -AllExistingFeatures -Force
-    }
-
-    Write-Verbose -Message "Installing application content"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPApplicationContent
+        Invoke-xSharePointSPCmdlet -CmdletName "Connect-SPConfigurationDatabase" -Arguments $joinFarmArgs
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPHelpCollection" -Arguments @{ All = $true }
+        Invoke-xSharePointSPCmdlet -CmdletName "Initialize-SPResourceSecurity"
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPService"
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPFeature" -Arguments @{ AllExistingFeatures = $true; Force = $true }
+        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPApplicationContent"
     }
 
     Write-Verbose -Message "Starting timer service"
     Start-Service -Name sptimerv4
 
     Write-Verbose -Message "Pausing for 5 minutes to allow the timer service to fully provision the server"
-    Start-Sleep -Seconds 300
+    Invoke-Command -ScriptBlock { Start-Sleep -Seconds 300 } -NoNewScope
     Write-Verbose -Message "Join farm complete. Restarting computer to allow configuration to continue"
 
     $global:DSCMachineStatus = 1
@@ -175,26 +122,16 @@ function Test-TargetResource
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Passphrase,
-
-        [System.UInt32]
-        $WaitTime = 30,
-
-        [System.UInt32]
-        $WaitCount = 60
+        $Passphrase
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase
+    $result = Get-TargetResource @PSBoundParameters
  
     if ($result.Count -eq 0) { return $false }
     return $true   

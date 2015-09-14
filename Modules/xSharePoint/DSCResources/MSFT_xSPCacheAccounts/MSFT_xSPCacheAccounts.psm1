@@ -16,18 +16,16 @@ function Get-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
+        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }  -ErrorAction SilentlyContinue
 
         if ($null -eq $wa) { return @{} }
         
@@ -46,7 +44,7 @@ function Get-TargetResource
 
         return $returnVal
     }
-    $result
+    return $result
 }
 
 
@@ -67,20 +65,17 @@ function Set-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting cache accounts for $WebAppUrl"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
-        
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $wa = Get-SPWebApplication $params.WebAppUrl
+        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }
         
         if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
             $wa.Properties["portalsuperuseraccount"] = $params.SuperUserAlias
@@ -92,7 +87,11 @@ function Set-TargetResource
         } else {
             $wa.Properties.Add("portalsuperreaderaccount", $params.SuperReaderAlias)
         }
-        $wa.Update()
+        
+        Set-xSharePointCacheReaderPolicy -WebApplication $wa -UserName $params.SuperReaderAlias
+        Set-xSharePointCacheOwnerPolicy -WebApplication $wa -UserName $params.SuperUserAlias
+
+        Update-xSharePointObject -InputObject $wa
     }
 }
 
@@ -115,12 +114,12 @@ function Test-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    $result = Get-TargetResource -WebAppUrl $WebAppUrl -SuperUserAlias $SuperUserAlias -SuperReaderAlias $SuperReaderAlias -InstallAccount $InstallAccount
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
 
     if ($result.Count -eq 0) { return $false }

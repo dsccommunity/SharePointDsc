@@ -18,10 +18,17 @@ Describe "xSPManagedPath" {
     InModuleScope $ModuleName {
         $testParams = @{
             WebAppUrl = "http://sites.sharepoint.com"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             RelativeUrl = "teams"
             Explicit = $false
             HostHeader = $false
+        }
+
+        Context "Validate get method" {
+            It "Calls the data from SharePoint" {
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPManagedPath" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -46,6 +53,24 @@ Describe "xSPManagedPath" {
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Creates a new web application managed path" {
+                Mock Get-TargetResource { return $null } -Verifiable
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPManagedPath" -and $Arguments.WebApplication -eq $testParams.WebAppUrl }
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
+            
+            $testParams.HostHeader = $true
+
+            It "Creates a new host header managed path" {
+                Mock Get-TargetResource { return $null } -Verifiable
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPManagedPath" -and $Arguments.HostHeader -eq $true }
+                Set-TargetResource @testParams
+                Assert-VerifiableMocks
             }
         }
     }    

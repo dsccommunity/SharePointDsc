@@ -2,7 +2,7 @@
 class MSFT_xSPUsageApplication : OMI_BaseResource
 {
     [Key] string Name;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Write] string DatabaseName;
     [Write] string DatabasePassword;
     [Write] string DatabaseServer;

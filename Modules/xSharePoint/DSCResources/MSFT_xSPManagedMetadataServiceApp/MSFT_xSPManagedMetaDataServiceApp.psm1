@@ -9,35 +9,49 @@ function Get-TargetResource
         $Name,
 
         [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-        
-        [parameter(Mandatory = $true)]
         [System.String]
-        $ApplicationPool        
+        $ApplicationPool,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount      
     )
 
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-                        Where-Object { $_.TypeName -eq "Managed Metadata Service" }
-        If ($null -eq $serviceApp)
+
+        try 
         {
-            return @{}
-        }
-        else
-        {
-            return @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
+            $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
+
+            If ($null -eq $serviceApp)
+            {
+                return @{}
             }
+            else
+            {
+                return @{
+                    Name = $serviceApp.DisplayName
+                    ApplicationPool = $serviceApp.ApplicationPool.Name
+                }
+            }
+        } 
+        catch
+        {
+            return @{ } 
         }
     }
-    $result
+    return $result
 }
 
 
@@ -54,41 +68,53 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -InstallAccount $InstallAccount
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
+    $result = Get-TargetResource @PSBoundParameters
+
     if ($result.Count -eq 0) { 
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            $params = Remove-xSharePointNullParamValues -Params $params
-            $params.Remove("InstallAccount") | Out-Null
-            $app = New-SPMetadataServiceApplication @params 
+
+            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+
+            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPMetadataServiceApplication" -Arguments $params 
             if ($null -ne $app)
             {
-                New-SPMetadataServiceApplicationProxy -Name ($params.Name + " Proxy") -ServiceApplication $app -DefaultProxyGroup -ContentTypePushdownEnabled -DefaultKeywordTaxonomy -DefaultSiteCollectionTaxonomy
+                Invoke-xSharePointSPCmdlet -CmdletName "New-SPMetadataServiceApplicationProxy" -Arguments @{ 
+                    Name = ($params.Name + " Proxy") 
+                    ServiceApplication = $app 
+                    DefaultProxyGroup = $true
+                    ContentTypePushdownEnabled = $true
+                    DefaultKeywordTaxonomy = $true
+                    DefaultSiteCollectionTaxonomy = $true
+                }
             }
         }
     }
     else {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Managed Metadata Service Application $Name"
-            Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                $params = Remove-xSharePointNullParamValues -Params $params
-                $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-                        Where-Object { $_.TypeName -eq "Managed Metadata Service" }
-                $serviceApp | Set-SPMetadataServiceApplication -ApplicationPool (Get-SPServiceApplicationPool $params.ApplicationPool)
+
+                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
+                Invoke-xSharePointSPCmdlet -CmdletName "Set-SPMetadataServiceApplication" -Arguments @{
+                    Identity = $serviceApp
+                    ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
+                }
             }
         }
     }
@@ -105,7 +131,7 @@ function Test-TargetResource
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
         
@@ -113,14 +139,16 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
         
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null
+        $DatabaseName
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount -ApplicationPool $ApplicationPool
+    $result = Get-TargetResource @PSBoundParameters
     
     Write-Verbose -Message "Testing for Managed Metadata Service Application '$Name'"
     if ($result.Count -eq 0) { return $false }

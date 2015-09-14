@@ -17,12 +17,20 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPUsageApplication" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Managed Metadata Service App"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            Name = "Usage Service App"
             UsageLogCutTime = 60
             UsageLogLocation = "L:\UsageLogs"
             UsageLogMaxFileSize = 1024
             UsageLogMaxSpaceGB = 10
+        }
+
+        Context "Validate get method" {
+            It "Calls the right functions to retrieve SharePoint data" {
+                Mock Invoke-xSharePointSPCmdlet { return @(@{ TypeName = "Usage and Health Data Collection Service Application" }) } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPUsageService" }
+                Get-TargetResource @testParams
+                Assert-VerifiableMocks
+            }
         }
 
         Context "Validate test method" {
@@ -83,6 +91,18 @@ Describe "xSPUsageApplication" {
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "Validate set method" {
+            It "Sets the usage values correctly" {
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPUsageApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPUsageService" }
+
+                Set-TargetResource @testParams
+
+                Assert-VerifiableMocks
             }
         }
     }    

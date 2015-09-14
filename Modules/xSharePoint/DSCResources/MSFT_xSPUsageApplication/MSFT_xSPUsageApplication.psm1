@@ -8,26 +8,61 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $InstallAccount
+        $InstallAccount,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabasePassword,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseUsername,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $FailoverDatabaseServer,
+
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogCutTime,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $UsageLogLocation,
+
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxFileSizeKB,
+
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxSpaceGB
     )
 
     Write-Verbose -Message "Getting usage application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue |
-                        Where-Object { $_.TypeName -eq "Usage and Health Data Collection Service Application" }
+
+        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Usage
+
         If ($null -eq $serviceApp)
         {
             return @{}
         }
         else
         {
-            $service = Get-SPUsageService
+            $service = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPUsageService"
             return @{
                 Name = $serviceApp.DisplayName
                 UsageLogCutTime = $service.UsageLogCutTime
@@ -37,7 +72,7 @@ function Get-TargetResource
             }
         }
     }
-    $result
+    return $result
 }
 
 
@@ -50,45 +85,53 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabasePassword = $null,
+        $DatabasePassword,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseUsername = $null,
+        $DatabaseUsername,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $FailoverDatabaseServer = $null,
+        $FailoverDatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $UsageLogCutTime = 5,
+        $UsageLogCutTime,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $UsageLogLocation = $null,
+        $UsageLogLocation,
 
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $UsageLogMaxFileSizeKB = 1024,
+        $UsageLogMaxFileSizeKB,
 
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $UsageLogMaxSpaceGB = $null
+        $UsageLogMaxSpaceGB
     )
 
     Write-Verbose -Message "Setting usage application $Name"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $app = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplication" -Arguments @{ Name = $params.Name } -ErrorAction SilentlyContinue
 
         if ($null -eq $app) { 
             $newParams = @{}
@@ -99,22 +142,20 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseUsername")) { $newParams.Add("DatabaseUsername", $params.DatabaseUsername) }
             if ($params.ContainsKey("FailoverDatabaseServer")) { $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) }
 
-            New-SPUsageApplication @newParams
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPUsageApplication" -Arguments $newParams
         }
     }
 
     Write-Verbose -Message "Configuring usage application $Name"
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $params = Remove-xSharePointNullParamValues -Params $params
-
         $setParams = @{}
         $setParams.Add("LoggingEnabled", $true)
         if ($params.ContainsKey("UsageLogCutTime")) { $setParams.Add("UsageLogCutTime", $params.UsageLogCutTime) }
         if ($params.ContainsKey("UsageLogLocation")) { $setParams.Add("UsageLogLocation", $params.UsageLogLocation) }
         if ($params.ContainsKey("UsageLogMaxFileSizeKB")) { $setParams.Add("UsageLogMaxFileSizeKB", $params.UsageLogMaxFileSizeKB) }
         if ($params.ContainsKey("UsageLogMaxSpaceGB")) { $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) }
-        Set-SPUsageService @setParams
+        Invoke-xSharePointSPCmdlet -CmdletName "Set-SPUsageService" -Arguments $setParams
     }
 }
 
@@ -129,39 +170,48 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabasePassword = $null,
+        $DatabasePassword,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseUsername = $null,
+        $DatabaseUsername,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $FailoverDatabaseServer = $null,
+        $FailoverDatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $UsageLogCutTime = 5,
+        $UsageLogCutTime,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $UsageLogLocation = $null,
+        $UsageLogLocation,
 
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $UsageLogMaxFileSizeKB = 1024,
+        $UsageLogMaxFileSizeKB,
 
+        [parameter(Mandatory = $false)]
         [System.UInt32]
-        $UsageLogMaxSpaceGB = $null
+        $UsageLogMaxSpaceGB
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for usage application '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {

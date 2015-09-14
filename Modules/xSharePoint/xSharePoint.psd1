@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '0.5.0.0'
+ModuleVersion = '0.6.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -63,7 +63,10 @@ Description = 'This DSC module is used to deploy and configure SharePoint Server
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-NestedModules = @("modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1",
+NestedModules = @("modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1",
+                  "modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1",
+                  "modules\xSharePoint.ServiceApplications\xSharePoint.ServiceApplications.psm1",
+                  "modules\xSharePoint.UserProfileService\xSharePoint.UserProfileService.psm1",
                   "modules\xSharePoint.Util\xSharePoint.Util.psm1")
 
 # Functions to export from this module
@@ -72,9 +75,24 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Remove-xSharePointDistributedCacheServer",
-                    "Get-xSharePointAuthenticatedPSSession",
+                    "Invoke-xSharePointCommand",
+                    "Initialize-xSharePointPSSnapin",
+                    "Get-xSharePointInstalledProductVersion",
+                    "Invoke-xSharePointSPCmdlet",
+                    "Invoke-xSharePointDCCmdlet",
                     "Rename-xSharePointParamValue",
-                    "Remove-xSharePointNullParamValues")
+                    "Remove-xSharePointNullParamValues",
+                    "Update-xSharePointObject",
+                    "Get-xSharePointServiceApplication",
+                    "Set-xSharePointCacheReaderPolicy",
+                    "Set-xSharePointCacheOwnerPolicy",
+                    "Enable-xSharePointDCIcmpFireWallRule",
+                    "Enable-xSharePointDCFireWallRule",
+                    "Disable-xSharePointDCFireWallRule",
+                    "Add-xSharePointUserToLocalAdmin",
+                    "Remove-xSharePointUserToLocalAdmin",
+                    "Test-xSharePointUserIsLocalAdmin",
+                    "Set-xSharePointUserProfileSyncMachine")
 
 # Variables to export from this module
 VariablesToExport = '*'

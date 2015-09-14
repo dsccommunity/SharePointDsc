@@ -5,6 +5,6 @@ class MSFT_xSPDistributedCacheService : OMI_BaseResource
     [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Required] UInt32 CacheSizeInMB;
     [Required] String ServiceAccount;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required] Boolean CreateFirewallRules;
 };

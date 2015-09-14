@@ -8,19 +8,29 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting state service application '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
 
         if ($null -eq $app) { return @{} }
         
@@ -41,29 +51,29 @@ function Set-TargetResource
         [System.String]
         $Name,
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials = $null,
+        $DatabaseCredentials,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Creating state service application $Name"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $params = Remove-xSharePointNullParamValues -Params $params
 
-        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $app) { 
             
             $dbParams = @{}
@@ -71,7 +81,9 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseServer")) { $dbParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseCredentials")) { $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) }
 
-            New-SPStateServiceDatabase @dbParams| New-SPStateServiceApplication -Name $params.Name | New-SPStateServiceApplicationProxy -DefaultProxyGroup
+            $database = Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceDatabase" -Arguments $dbParams
+            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplication" -Arguments @{ Name = $params.Name; Database = $database }
+            Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplicationProxy" -Arguments @{ ServiceApplication = $app; DefaultProxyGroup = $true }
         }
     }
 }
@@ -87,16 +99,19 @@ function Test-TargetResource
         [System.String]
         $Name,
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $DatabaseCredentials = $null,
+        $DatabaseCredentials,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseName = $null,
+        $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String]
-        $DatabaseServer = $null,
+        $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

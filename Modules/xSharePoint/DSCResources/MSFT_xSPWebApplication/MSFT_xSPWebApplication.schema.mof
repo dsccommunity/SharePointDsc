@@ -12,6 +12,6 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write] string HostHeader;
     [Write] string Path;
     [Write] string Port;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

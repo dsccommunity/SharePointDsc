@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -20,12 +20,10 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting service instance '$Name'"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
-    $result = Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+        $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
         if ($null -eq $si) { return @{} }
         
         return @{
@@ -46,7 +44,7 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -56,27 +54,25 @@ function Set-TargetResource
         $Ensure
     )
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount
-
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Provisioning service instance '$Name'"
 
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
             if ($null -eq $si) { return $false }
-            Start-SPServiceInstance $si
+            Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $si }
         }
     } else {
         Write-Verbose -Message "Deprovioning service instance '$Name'"
 
-        Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
             if ($null -eq $si) { return $false }
-            Stop-SPServiceInstance $si
+            Invoke-xSharePointSPCmdlet -CmdletName "Stop-SPServiceInstance" -Arguments @{ Identity = $si }
         }
     }
 }
@@ -92,7 +88,7 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount,
 
@@ -102,7 +98,7 @@ function Test-TargetResource
         $Ensure
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount -Ensure $Ensure 
+    $result = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Getting service instance '$Name'"
     if ($result.Count -eq 0) { return $false }
     else {
