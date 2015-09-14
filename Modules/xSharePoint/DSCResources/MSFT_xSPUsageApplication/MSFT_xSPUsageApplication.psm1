@@ -4,49 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabasePassword,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseUsername,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $FailoverDatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogCutTime,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $UsageLogLocation,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogMaxFileSizeKB,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogMaxSpaceGB
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabasePassword,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
+        [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxFileSizeKB,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxSpaceGB
     )
 
     Write-Verbose -Message "Getting usage application '$Name'"
@@ -65,9 +33,15 @@ function Get-TargetResource
             $service = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPUsageService"
             return @{
                 Name = $serviceApp.DisplayName
+                InstallAccount = $params.InstallAccount
+                DatabaseName = $serviceApp.Applications.UsageDatabase.Name
+                DatabaseServer = $serviceApp.Applications.UsageDatabase.Server.Name
+                DatabasePassword = $serviceApp.Applications.UsageDatabase.Password
+                DatabaseUsername = $serviceApp.Applications.UsageDatabase.Username
+                FailoverDatabaseServer = $serviceApp.Applications.UsageDatabase.FailoverServer
                 UsageLogCutTime = $service.UsageLogCutTime
-                UsageLogDir = $service.UsageLogDir
-                UsageLogMaxFileSize = $service.UsageLogMaxFileSize
+                UsageLogLocation = $service.UsageLogDir
+                UsageLogMaxFileSizeKB = $service.UsageLogMaxFileSize
                 UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
             }
         }
@@ -81,49 +55,17 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabasePassword,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseUsername,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $FailoverDatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogCutTime,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $UsageLogLocation,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogMaxFileSizeKB,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogMaxSpaceGB
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabasePassword,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
+        [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxFileSizeKB,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxSpaceGB
     )
 
     Write-Verbose -Message "Setting usage application $Name"
@@ -166,61 +108,22 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabasePassword,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseUsername,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $FailoverDatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogCutTime,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $UsageLogLocation,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogMaxFileSizeKB,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $UsageLogMaxSpaceGB
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabasePassword,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
+        [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxFileSizeKB,
+        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxSpaceGB
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for usage application '$Name'"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($PSBoundParameters.ContainsKey("UsageLogCutTime") -and $result.UsageLogCutTime -ne $UsageLogCutTime) { return $false }
-        if ($PSBoundParameters.ContainsKey("UsageLogLocation") -and $result.UsageLogDir -ne $UsageLogLocation) { return $false }
-        if ($PSBoundParameters.ContainsKey("UsageLogMaxFileSizeKB") -and $result.UsageLogMaxFileSize -ne $UsageLogMaxFileSizeKB) { return $false }
-        if ($PSBoundParameters.ContainsKey("UsageLogMaxSpaceGB") -and $result.UsageLogMaxSpaceGB -ne $UsageLogMaxSpaceGB) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("UsageLogCutTime", "UsageLogLocation", "UsageLogMaxFileSizeKB", "UsageLogMaxSpaceGB")
 }
 
 

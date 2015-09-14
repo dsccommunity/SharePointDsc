@@ -20,7 +20,7 @@ Describe "xSPUsageApplication" {
             Name = "Usage Service App"
             UsageLogCutTime = 60
             UsageLogLocation = "L:\UsageLogs"
-            UsageLogMaxFileSize = 1024
+            UsageLogMaxFileSizeKB = 1024
             UsageLogMaxSpaceGB = 10
         }
 
@@ -43,8 +43,8 @@ Describe "xSPUsageApplication" {
                     return @{
                         Name = $testParams.Name
                         UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogDir = $testParams.UsageLogLocation
-                        UsageLogMaxFileSize = $testParams.UsageLogMaxFileSize
+                        UsageLogLocation = $testParams.UsageLogLocation
+                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
                         UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
                     } 
                 } 
@@ -55,8 +55,8 @@ Describe "xSPUsageApplication" {
                     return @{
                         Name = $testParams.Name
                         UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogDir = "C:\WrongPath"
-                        UsageLogMaxFileSize = $testParams.UsageLogMaxFileSize
+                        UsageLogLocation = "C:\WrongPath"
+                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
                         UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
                     } 
                 } 
@@ -65,8 +65,8 @@ Describe "xSPUsageApplication" {
                     return @{
                         Name = $testParams.Name
                         UsageLogCutTime = 0
-                        UsageLogDir = $testParams.UsageLogLocation
-                        UsageLogMaxFileSize = $testParams.UsageLogMaxFileSize
+                        UsageLogLocation = $testParams.UsageLogLocation
+                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
                         UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
                     } 
                 } 
@@ -75,8 +75,8 @@ Describe "xSPUsageApplication" {
                     return @{
                         Name = $testParams.Name
                         UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogDir = $testParams.UsageLogLocation
-                        UsageLogMaxFileSize = 0
+                        UsageLogLocation = $testParams.UsageLogLocation
+                        UsageLogMaxFileSizeKB = 0
                         UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
                     } 
                 } 
@@ -85,8 +85,8 @@ Describe "xSPUsageApplication" {
                     return @{
                         Name = $testParams.Name
                         UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogDir = $testParams.UsageLogLocation
-                        UsageLogMaxFileSize = $testParams.UsageLogMaxFileSize
+                        UsageLogLocation = $testParams.UsageLogLocation
+                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
                         UsageLogMaxSpaceGB = 0
                     } 
                 } 
