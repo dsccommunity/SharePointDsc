@@ -12,7 +12,7 @@ function Get-xSharePointServiceApplication() {
         $TypeName
     )
 
-    $serviceApps = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplication" -Arguments @{ Name = $Name }
+    $serviceApps = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplication" -Arguments @{ Name = $Name } -ErrorAction SilentlyContinue
     $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq (Get-xSharePointServiceApplicationName -Name $TypeName) }
     return $serviceApp
 }
