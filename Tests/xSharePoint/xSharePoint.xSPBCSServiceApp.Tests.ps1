@@ -12,7 +12,6 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
 $ModuleName = "MSFT_xSPBCSServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPBCSServiceApp" {
@@ -32,7 +31,7 @@ Describe "xSPBCSServiceApp" {
                 } } -Verifiable -ParameterFilter {$Name -eq $testParams.Name -and $TypeName -eq "BCS"}
                 
                 $results = Get-TargetResource @testParams
-                $results.Count | Should Be 2
+                $results | Should Not BeNullOrEmpty
 
                 Assert-VerifiableMocks
             }
