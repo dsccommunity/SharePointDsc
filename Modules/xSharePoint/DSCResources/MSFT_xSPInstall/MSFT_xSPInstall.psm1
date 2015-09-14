@@ -39,7 +39,7 @@ function Set-TargetResource
     )
 
     if ($Ensure -eq "Absent") {
-        throw [Exception] "xSharePoint does not support uninstalling SharePoint. Please remove this manually."
+        throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
         return
     }
 
@@ -95,7 +95,7 @@ function Test-TargetResource
     )
 
     if ($Ensure -eq "Absent") {
-        throw [Exception] "xSharePoint does not support uninstalling SharePoint. Please remove this manually."
+        throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
         return
     }
 
@@ -103,7 +103,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing for installation of SharePoint"
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -59,8 +59,8 @@ Describe "xSPInstall" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-			$testParams.Ensure = "Absent"
-			It "Throws an error if SharePoint should be absent" {
+            $testParams.Ensure = "Absent"
+            It "Throws an error if SharePoint should be absent" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
                         BinaryDir = $null
@@ -70,7 +70,7 @@ Describe "xSPInstall" {
                 } 
                 { Test-TargetResource @testParams } | Should Throw
             }
-			$testParams.Ensure = "Present"
+            $testParams.Ensure = "Present"
         }
 
         Context "Validate set method" {
@@ -90,11 +90,11 @@ Describe "xSPInstall" {
 
                 Assert-VerifiableMocks
             }
-			$testParams.Ensure = "Absent"
-			It "Throws an error when SharePoint should be absent" {
+            $testParams.Ensure = "Absent"
+            It "Throws an error when SharePoint should be absent" {
                 { Set-TargetResource @testParams } | Should Throw
-			}
-			$testParams.Ensure = "Present"
+            }
+            $testParams.Ensure = "Present"
         }
     }    
 }
