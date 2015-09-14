@@ -28,13 +28,13 @@ Describe "xSPCacheAccounts" {
             It "Calls the service application picker with the appropriate type name" {
                 Mock Invoke-xSharePointSPCmdlet { return @{
                     Properties = @{
-                        portalsuperuseraccount = $testParams.SuperUserAlias
-                        portalsuperreaderaccount = $testParams.SuperReaderAlias
+                        SuperUserAlias = $testParams.SuperUserAlias
+                        SuperReaderAlias = $testParams.SuperReaderAlias
                     }
                 }} -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
                 
                 $results = Get-TargetResource @testParams
-                $results.Count | Should Be 3
+                $results.Count | Should Not BeNullOrEmpty
 
                 Assert-VerifiableMocks
             }
@@ -48,8 +48,8 @@ Describe "xSPCacheAccounts" {
             It "Passes when the correct accounts are assigned" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        portalsuperuseraccount = $testParams.SuperUserAlias
-                        portalsuperreaderaccount = $testParams.SuperReaderAlias
+                        SuperUserAlias = $testParams.SuperUserAlias
+                        SuperReaderAlias = $testParams.SuperReaderAlias
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -57,8 +57,8 @@ Describe "xSPCacheAccounts" {
             It "Fails when the wrong super reader is defined" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        portalsuperuseraccount = $testParams.SuperUserAlias
-                        portalsuperreaderaccount = "DEMO\WrongUser"
+                        SuperUserAlias = $testParams.SuperUserAlias
+                        SuperReaderAlias = "DEMO\WrongUser"
                     } 
                 }
                 Test-TargetResource @testParams | Should Be $false
@@ -66,8 +66,8 @@ Describe "xSPCacheAccounts" {
             It "Fails when the wrong super user is defined" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{ 
-                        portalsuperuseraccount = "DEMO\WrongUser"
-                        portalsuperreaderaccount = $testParams.SuperReaderAlias
+                        SuperUserAlias = "DEMO\WrongUser"
+                        SuperReaderAlias = $testParams.SuperReaderAlias
                     } 
                 }
                 Test-TargetResource @testParams | Should Be $false
@@ -91,8 +91,8 @@ Describe "xSPCacheAccounts" {
             It "Sets accounts when existing accounts are set" {
                 Mock Invoke-xSharePointSPCmdlet { return @{
                     Properties = @{
-                        portalsuperuseraccount = $testParams.SuperUserAlias
-                        portalsuperreaderaccount = $testParams.SuperReaderAlias
+                        SuperUserAlias = $testParams.SuperUserAlias
+                        SuperReaderAlias = $testParams.SuperReaderAlias
                     }
                 } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
                 Mock Set-xSharePointCacheReaderPolicy { return $null } -Verifiable

@@ -32,16 +32,16 @@ function Get-TargetResource
         $returnVal = @{}
         $returnVal.Add("WebAppUrl", $params.WebAppUrl)
         if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
-            $returnVal.Add("portalsuperuseraccount", $wa.Properties["portalsuperuseraccount"])
+            $returnVal.Add("SuperUserAlias", $wa.Properties["portalsuperuseraccount"])
         } else {
-            $returnVal.Add("portalsuperuseraccount", "")
+            $returnVal.Add("SuperUserAlias", "")
         }
         if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) { 
-            $returnVal.Add("portalsuperreaderaccount", $wa.Properties["portalsuperreaderaccount"])
+            $returnVal.Add("SuperReaderAlias", $wa.Properties["portalsuperreaderaccount"])
         } else {
-            $returnVal.Add("portalsuperreaderaccount", "")
+            $returnVal.Add("SuperReaderAlias", "")
         }
-
+        $returnVal.Add("InstallAccount", $params.InstallAccount)
         return $returnVal
     }
     return $result
@@ -119,15 +119,9 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
-
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($SuperUserAlias -ne $result.portalsuperuseraccount) { return $false }
-        if ($SuperReaderAlias -ne $result.portalsuperreaderaccount) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SuperUserAlias", "SuperReaderAlias")
 }
 
 Export-ModuleMember -Function *-TargetResource
