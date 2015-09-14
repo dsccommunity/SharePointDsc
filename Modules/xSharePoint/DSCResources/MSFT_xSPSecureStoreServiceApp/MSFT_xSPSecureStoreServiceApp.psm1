@@ -4,57 +4,19 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $AuditingEnabled,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $AuditlogMaxSize,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabasePassword,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseUsername,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $FailoverDatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $PartitionMode,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $Sharing,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
+        [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String]  $DatabasePassword,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.String]  $FailoverDatabaseServer,
+        [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
+        [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting secure store service application '$Name'"
@@ -73,6 +35,9 @@ function Get-TargetResource
             return @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
+                DatabaseName = $serviceApp.Database.Name
+                DatabaseServer = $serviceApp.Database.Server.Name
+                InstallAccount = $params.InstallAccount
             }
         }
     }
@@ -85,57 +50,19 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $AuditingEnabled,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $AuditlogMaxSize,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabasePassword,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseUsername,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $FailoverDatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $PartitionMode,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $Sharing,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
+        [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String]  $DatabasePassword,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.String]  $FailoverDatabaseServer,
+        [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
+        [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $result = Get-TargetResource @PSBoundParameters
@@ -177,66 +104,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $AuditingEnabled,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $AuditlogMaxSize,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabasePassword,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseUsername,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $FailoverDatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $PartitionMode,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $Sharing,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
+        [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String]  $DatabasePassword,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.String]  $FailoverDatabaseServer,
+        [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
+        [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing secure store service application $Name"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($ApplicationPool -ne $result.ApplicationPool) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 
 
