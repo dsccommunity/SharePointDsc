@@ -27,11 +27,6 @@ Describe "xSPDiagnosticLoggingSettings" {
             DaysToKeepLogs = 7
             LogMaxDiskSpaceUsageEnabled = $true
             LogCutInterval = 30
-            EventLogFloodProtectionEnabled = $true
-            EventLogFloodProtectionThreshold = 10
-            EventLogFloodProtectionTriggerPeriod = 10
-            EventLogFloodProtectionQuietPeriod = 10
-            EventLogFloodProtectionNotifyInterval = 10
             ScriptErrorReportingEnabled = $true
             ScriptErrorReportingRequireAuth = $true
             ScriptErrorReportingDelay = 5
@@ -60,17 +55,13 @@ Describe "xSPDiagnosticLoggingSettings" {
                         DownloadErrorReportingUpdatesEnabled = $testParams.DownloadErrorReportingUpdatesEnabled
                         DaysToKeepLogs = $testParams.DaysToKeepLogs
                         LogMaxDiskSpaceUsageEnabled = $testParams.LogMaxDiskSpaceUsageEnabled
-                        LogDiskSpaceUsageGB = $testParams.LogSpaceInGB
-                        LogLocation = $testParams.LogPath
+                        LogSpaceInGB = $testParams.LogSpaceInGB
+                        LogPath = $testParams.LogPath
                         LogCutInterval = $testParams.LogCutInterval
-                        EventLogFloodProtectionEnabled = $testParams.EventLogFloodProtectionEnabled
-                        EventLogFloodProtectionThreshold = $testParams.EventLogFloodProtectionThreshold
-                        EventLogFloodProtectionTriggerPeriod = $testParams.EventLogFloodProtectionTriggerPeriod
-                        EventLogFloodProtectionQuietPeriod = $testParams.EventLogFloodProtectionQuietPeriod
-                        EventLogFloodProtectionNotifyInterval = $testParams.EventLogFloodProtectionNotifyInterval
                         ScriptErrorReportingEnabled = $testParams.ScriptErrorReportingEnabled
                         ScriptErrorReportingRequireAuth = $testParams.ScriptErrorReportingRequireAuth
                         ScriptErrorReportingDelay = $testParams.ScriptErrorReportingDelay
+                        InstallAccount = $null
                     }
                 }
                 Test-TargetResource @testParams | Should Be $true
@@ -85,8 +76,8 @@ Describe "xSPDiagnosticLoggingSettings" {
                         DownloadErrorReportingUpdatesEnabled = $testParams.DownloadErrorReportingUpdatesEnabled
                         DaysToKeepLogs = $testParams.DaysToKeepLogs
                         LogMaxDiskSpaceUsageEnabled = $testParams.LogMaxDiskSpaceUsageEnabled
-                        LogDiskSpaceUsageGB = $testParams.LogSpaceInGB
-                        LogLocation = "C:\logs"
+                        LogSpaceInGB = $testParams.LogSpaceInGB
+                        LogPath = "C:\logs"
                         LogCutInterval = $testParams.LogCutInterval
                         EventLogFloodProtectionEnabled = $testParams.EventLogFloodProtectionEnabled
                         EventLogFloodProtectionThreshold = $testParams.EventLogFloodProtectionThreshold
@@ -110,8 +101,8 @@ Describe "xSPDiagnosticLoggingSettings" {
                         DownloadErrorReportingUpdatesEnabled = $testParams.DownloadErrorReportingUpdatesEnabled
                         DaysToKeepLogs = $testParams.DaysToKeepLogs
                         LogMaxDiskSpaceUsageEnabled = $testParams.LogMaxDiskSpaceUsageEnabled
-                        LogDiskSpaceUsageGB = 1
-                        LogLocation = $testParams.LogPath
+                        LogSpaceInGB = 1
+                        LogPath = $testParams.LogPath
                         LogCutInterval = $testParams.LogCutInterval
                         EventLogFloodProtectionEnabled = $testParams.EventLogFloodProtectionEnabled
                         EventLogFloodProtectionThreshold = $testParams.EventLogFloodProtectionThreshold
