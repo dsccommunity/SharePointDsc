@@ -44,8 +44,17 @@ function Get-TargetResource
         
         if ($null -eq $spFarm) {return @{ }}
 
+        $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+        $centralAdminSite = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" | Where-Object { $_.IsAdministrationWebApplication })[0]
+
         $returnValue = @{
-            FarmName = $spFarm.Name
+            FarmConfigDatabaseName = $spFarm.Name
+            DatabaseServer = $configDb.Server.Name
+            FarmAccount = $spFarm.DefaultServiceAccount.Name
+            InstallAccount = $params.InstallAccount
+            Passphrase = $params.Passphrase
+            AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Server
+            CentralAdministrationPort = [Uri]::new($centralAdminSite.Url).Port
         }
         return $returnValue
     }
@@ -158,10 +167,9 @@ function Test-TargetResource
         $CentralAdministrationPort
     )
 
-    $result = Get-TargetResource @PSBoundParameters
-
-    if ($result.Count -eq 0) { return $false }
-    return $true
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose "Checking for local farm presence"
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName")
 }
 
 Export-ModuleMember -Function *-TargetResource
