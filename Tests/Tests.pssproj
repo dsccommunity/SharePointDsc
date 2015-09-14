@@ -54,6 +54,7 @@
     <Content Include="xSharePoint\xSharePoint.xSPBCSServiceApp.Tests.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

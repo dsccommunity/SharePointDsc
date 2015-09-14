@@ -26,14 +26,14 @@ Describe "xSPInstall" {
             It "Returns false when SharePoint is not detected" {
                 Mock Get-CimInstance { return $null } -Verifiable
                 $result = Get-TargetResource @testParams
-                $result.SharePointInstalled | Should Be $false
+                $result.BinaryDir | Should BeNullOrEmpty
                 Assert-VerifiableMocks
             }
 
             It "Returns true when SharePoint is detected" {
                 Mock Get-CimInstance { return @{} } -Verifiable
                 $result = Get-TargetResource @testParams
-                $result.SharePointInstalled | Should Be $true
+                $result.BinaryDir | Should Not BeNullOrEmpty 
                 Assert-VerifiableMocks
             }
         }
@@ -42,7 +42,8 @@ Describe "xSPInstall" {
             It "Passes when SharePoint is installed" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        SharePointInstalled = $true
+                        BinaryDir = $testParams.BinaryDir
+                        ProductKey = $testParams.ProductKey
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -50,7 +51,8 @@ Describe "xSPInstall" {
             It "Fails when SharePoint is not installed" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        SharePointInstalled = $false
+                        BinaryDir = $null
+                        ProductKey = $testParams.ProductKey
                     }
                 } 
                 Test-TargetResource @testParams | Should Be $false

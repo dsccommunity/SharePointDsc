@@ -16,12 +16,17 @@ function Get-TargetResource
     Write-Verbose -Message "Getting install status of SP binaries"
 
     $spInstall = Get-CimInstance -ClassName Win32_Product -Filter "Name like 'Microsoft SharePoint Server%'"
-    $result = ($null -ne $spInstall)
-    $returnValue = @{
-        SharePointInstalled = $result
+    if ($spInstall) {
+        return @{
+            BinaryDir = $BinaryDir
+            ProductKey = $ProductKey
+        }
+    } else {
+        return @{
+            BinaryDir = $null
+            ProductKey = $ProductKey
+        }
     }
-
-    return $returnValue
 }
 
 
@@ -94,9 +99,11 @@ function Test-TargetResource
         $ProductKey
     )
 
-    $result = Get-TargetResource -BinaryDir $BinaryDir -ProductKey $ProductKey
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     Write-Verbose -Message "Testing for installation of SharePoint"
-    $result.SharePointInstalled
+
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

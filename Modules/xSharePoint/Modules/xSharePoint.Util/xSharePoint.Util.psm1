@@ -118,22 +118,6 @@ function Rename-xSharePointParamValue() {
     return $params
 }
 
-function Remove-xSharePointNullParamValues() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=1)]
-        $Params
-    )
-    $keys = $Params.Keys
-    ForEach ($key in $keys) {
-        if ($null -eq $Params.$key) {
-            $Params.Remove($key) | Out-Null
-        }
-    }
-    return $Params
-}
-
 function Get-xSharePointInstalledProductVersion() {
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
@@ -160,6 +144,39 @@ function Update-xSharePointObject() {
         $InputObject
     )
     $InputObject.Update()
+}
+
+function Test-xSharePointSpecificParameters() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [HashTable]
+        $CurrentValues,
+
+        [parameter(Mandatory = $true,Position=2)]
+        [HashTable]
+        $DesiredValues,
+
+        [parameter(Mandatory = $false,Position=3)]
+        [Array]
+        $ValuesToCheck
+    )
+
+    $returnValue = $true
+
+    if (($ValuesToCheck -eq $null) -or ($ValuesToCheck.Count -lt 1)) {
+        $KeyList = $DesiredValues.Keys
+    } else {
+        $KeyList = $ValuesToCheck
+    }
+
+    $KeyList | ForEach-Object {
+        if ((-not $CurrentValues.ContainsKey($_)) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
+            $returnValue = $false
+        }
+    }
+    return $returnValue
 }
 
 Export-ModuleMember -Function *
