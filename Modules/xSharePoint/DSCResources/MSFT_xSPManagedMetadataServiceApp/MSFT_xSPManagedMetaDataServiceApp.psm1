@@ -4,32 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount      
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount      
     )
 
     Write-Verbose -Message "Getting managed metadata service application $Name"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-
         try 
         {
             $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
@@ -43,6 +28,9 @@ function Get-TargetResource
                 return @{
                     Name = $serviceApp.DisplayName
                     ApplicationPool = $serviceApp.ApplicationPool.Name
+                    DatabaseName = $serviceApp.Database.Name
+                    DatabaseServer = $serviceApp.Database.Server.Name
+                    InstallAccount = $params.InstallAccount
                 }
             }
         } 
@@ -60,25 +48,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount      
     )
 
     $result = Get-TargetResource @PSBoundParameters
@@ -127,36 +101,16 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-        
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-        
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount      
     )
 
-    $result = Get-TargetResource @PSBoundParameters
-    
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for Managed Metadata Service Application '$Name'"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) { return $false }
-    }
-    return $true
-    
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 
 
