@@ -3,5 +3,6 @@ class MSFT_xSPInstall : OMI_BaseResource
 {
     [Key] String BinaryDir;
     [Required] String ProductKey;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
 
