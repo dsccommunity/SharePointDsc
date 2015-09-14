@@ -38,7 +38,7 @@ Describe "xSPUserProfileSyncService" {
             It "Passes when the user profile sync service is running and should be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        Status = "Online"
+                        Ensure = "Present"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true
@@ -46,7 +46,7 @@ Describe "xSPUserProfileSyncService" {
             It "Fails when the user profile sync service is not running and should be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        Status = "Disabled"
+                        Ensure = "Absent"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -57,7 +57,7 @@ Describe "xSPUserProfileSyncService" {
             It "Fails when the user profile sync service is running and should not be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        Status = "Online"
+                        Ensure = "Present"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $false
@@ -65,7 +65,7 @@ Describe "xSPUserProfileSyncService" {
             It "Passes when the user profile sync service is not running and should not be" {
                 Mock -ModuleName $ModuleName Get-TargetResource { 
                     return @{
-                        Status = "Disabled"
+                        Ensure = "Absent"
                     } 
                 } 
                 Test-TargetResource @testParams | Should Be $true

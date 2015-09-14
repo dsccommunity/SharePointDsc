@@ -4,22 +4,10 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileServiceAppName,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     Write-Verbose -Message "Getting the local user profile sync service instance"
 
@@ -27,10 +15,27 @@ function Get-TargetResource
         $params = $args[0]
 
         $syncService = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq (Get-xSharePointServiceApplicationName -Name UserProfileSync) }
-        
+
+        if ($syncService.UserProfileApplicationGuid -ne [Guid]::Empty) {
+            $upa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Identity = $syncService.UserProfileApplicationGuid } -ErrorAction SilentlyContinue
+        }        
         if ($null -eq $syncService) { return @{} }
 
+        if ($syncService.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
+
+        $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
+
+            if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
+                $farmAccount = $params.FarmAccount
+            } else {
+                $farmAccount = $spFarm.DefaultServiceAccount.Name
+            }
+
         return @{
+            UserProfileServiceAppName = $upa.Name
+            Ensure = $localEnsure
+            FarmAccount = $farmAccount
+            InstallAccount = $params.InstallAccount
             Status = $syncService.Status
         }
     }
@@ -43,22 +48,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileServiceAppName,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Setting User Profile Synchronization Service"
@@ -120,32 +113,15 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileServiceAppName,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if (($result.Status -eq "Online") -and ($Ensure -ne "Present")) { return $false }
-        if (($result.Status -eq "Disabled") -and ($Ensure -ne "Absent")) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 
