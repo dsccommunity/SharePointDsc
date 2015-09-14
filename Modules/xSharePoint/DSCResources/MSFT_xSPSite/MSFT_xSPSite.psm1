@@ -30,22 +30,18 @@ function Get-TargetResource
         else {
             if ($site.HostHeaderIsSiteName) { $HostHeaderWebApplication = $site.Url } 
 
-            if ($site.Owner.UserLogin.Contains("#")) {
-                # Claims based authentication user
+            if ($site.WebApplication.UseClaimsAuthentication) {
                 $owner = Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.Owner.UserLogin; IdentityType = "EncodedClaim" }
             } else {
-                # Classic authentication user
                 $owner = $site.Owner.UserLogin
             }
 
             if ($null -eq $site.SecondaryContact) {
                 $secondaryOwner = $null
             } else {
-                if ($site.SecondaryContact.UserLogin.Contains("#")) {
-                    # Claims based authentication user
+                if ($site.WebApplication.UseClaimsAuthentication) {
                     $secondaryOwner = Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.SecondaryContact.UserLogin; IdentityType = "EncodedClaim" }
                 } else {
-                    # Classic authentication user
                     $secondaryOwner = $site.SecondaryContact.UserLogin
                 }
             }
