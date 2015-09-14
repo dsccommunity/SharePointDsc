@@ -4,25 +4,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting state service application '$Name'"
@@ -35,10 +21,13 @@ function Get-TargetResource
         if ($null -eq $app) { return @{} }
         
         return @{
-            Name = $app.DisplayName
+            Name = $serviceApp.DisplayName
+            DatabaseName = $serviceApp.Database.Name
+            DatabaseServer = $serviceApp.Database.Server.Name
+            InstallAccount = $params.InstallAccount
         }
     }
-    $result
+    return $result
 }
 
 
@@ -47,25 +36,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating state service application $Name"
@@ -95,31 +70,16 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
+    $CurrentValues = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
     Write-Verbose -Message "Testing for state service application $Name"
-    if ($result.Count -eq 0) { return $false }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
 }
 
 
