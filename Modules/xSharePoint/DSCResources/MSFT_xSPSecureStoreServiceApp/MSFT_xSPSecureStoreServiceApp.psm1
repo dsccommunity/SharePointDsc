@@ -150,7 +150,7 @@ function Set-TargetResource
             if ($app) {
                 Invoke-xSharePointSPCmdlet -CmdletName "New-SPSecureStoreServiceApplicationProxy" -Arguments @{ 
                     Name = "$($params.Name) Proxy"
-                    SearchApplication = $app
+                    ServiceApplication = $app
                 }
             }
         }
