@@ -130,7 +130,7 @@ Describe 'PowerShell Modules' {
                 $tokens = $null 
                 $errors = $null
                 $ast = [System.Management.Automation.Language.Parser]::ParseFile($fileName, [ref] $tokens, [ref] $errors)
-                return $tokens | Where-Object { $_.TokenFlags -contains "CommandName" -and $_.Value -like "*-SP*"} | ft
+                return $tokens | Where-Object { $_.TokenFlags -contains "CommandName" -and $_.Text -like "*-SP*"} | ft
             }
 
             It "doesn't call SharePoint PowerShell cmdlets directly" {

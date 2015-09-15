@@ -4,54 +4,18 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPoolAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-        
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $AllowAnonymous,
-        
-        [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
-        [System.String]
-        $AuthenticationMethod,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $HostHeader,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Path,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Port,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPoolAccount,
+        [parameter(Mandatory = $true)]  [System.String]  $Url,
+        [parameter(Mandatory = $false)] [System.Boolean] $AllowAnonymous,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $HostHeader,
+        [parameter(Mandatory = $false)] [System.String]  $Path,
+        [parameter(Mandatory = $false)] [System.String]  $Port,
+        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
@@ -61,11 +25,24 @@ function Get-TargetResource
         
         $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return @{} }
-        
+
+        $authProvider = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ WebApplication = $wa.Url; Zone = "Default" }
+
+        if ($authProvider.DisableKerberos -eq $true) { $localAuthMode = "NTLM" } else { $localAuthMode = "Kerberos" }
+
         return @{
             Name = $wa.DisplayName
             ApplicationPool = $wa.ApplicationPool.Name
             ApplicationPoolAccount = $wa.ApplicationPool.Username
+            Url = $wa.Url
+            AllowAnonymous = $authProvider.AllowAnonymous
+            DatabaseName = $wa.ContentDatabases[0].Name
+            DatabaseServer = $wa.ContentDatabases[0].Server
+            HostHeader = [Uri]::New($wa.Url).Host
+            Path = $wa.IisSettings[0].Path
+            Port = [Uri]::New($wa.Url).Port
+            AuthenticationMethod = $localAuthMode
+            InstallAccount = $params.InstallAccount
         }
     }
     return $result
@@ -77,54 +54,18 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPoolAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-        
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $AllowAnonymous,
-        
-        [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
-        [System.String]
-        $AuthenticationMethod,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $HostHeader,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Path,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Port,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPoolAccount,
+        [parameter(Mandatory = $true)]  [System.String]  $Url,
+        [parameter(Mandatory = $false)] [System.Boolean] $AllowAnonymous,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $HostHeader,
+        [parameter(Mandatory = $false)] [System.String]  $Path,
+        [parameter(Mandatory = $false)] [System.String]  $Port,
+        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
@@ -165,64 +106,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPool,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ApplicationPoolAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-        
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $AllowAnonymous,
-        
-        [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
-        [System.String]
-        $AuthenticationMethod,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseName,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $DatabaseServer,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $HostHeader,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Path,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Port,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPoolAccount,
+        [parameter(Mandatory = $true)]  [System.String]  $Url,
+        [parameter(Mandatory = $false)] [System.Boolean] $AllowAnonymous,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $HostHeader,
+        [parameter(Mandatory = $false)] [System.String]  $Path,
+        [parameter(Mandatory = $false)] [System.String]  $Port,
+        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -ApplicationPool $ApplicationPool -ApplicationPoolAccount $ApplicationPoolAccount -Url $Url -InstallAccount $InstallAccount
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($result.ApplicationPool -ne $ApplicationPool) { return $false }
-        if ($result.ApplicationPoolAccount -ne $ApplicationPoolAccount) { return $false  }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 
 

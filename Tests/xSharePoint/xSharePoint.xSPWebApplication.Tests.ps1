@@ -25,7 +25,7 @@ Describe "xSPWebApplication" {
 
         Context "Validate get method" {
             It "Calls the right functions to retrieve SharePoint data" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
+                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
                 Get-TargetResource @testParams
                 Assert-VerifiableMocks
             }
