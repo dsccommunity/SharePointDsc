@@ -16,7 +16,7 @@ function Get-TargetResource
 
         $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
         if ($null -eq $si) { return @{} }
-        if ($si.Status) { $localEnsure = "Present" } else { $localEnsure = "Absent" }
+        if ($si.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
         
         return @{
             Name = $params.Name
