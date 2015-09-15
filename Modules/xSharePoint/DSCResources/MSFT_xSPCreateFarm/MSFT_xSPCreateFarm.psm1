@@ -26,8 +26,8 @@ function Get-TargetResource
         
         if ($null -eq $spFarm) {return @{ }}
 
-        $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
-        $centralAdminSite = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" | Where-Object { $_.IsAdministrationWebApplication })[0]
+        $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+        $centralAdminSite = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.IsAdministrationWebApplication })[0]
 
         if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
             $farmAccount = $params.FarmAccount
