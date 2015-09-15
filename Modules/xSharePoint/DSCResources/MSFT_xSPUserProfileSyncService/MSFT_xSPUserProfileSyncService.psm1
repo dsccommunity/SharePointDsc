@@ -73,7 +73,7 @@ function Set-TargetResource
         $syncService = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq (Get-xSharePointServiceApplicationName -Name UserProfileSync) }
         
          # Start the Sync service if it should be running on this server
-        if (($Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
+        if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
 
             Set-xSharePointUserProfileSyncMachine -UserProfileServiceAppName $params.UserProfileServiceAppName -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount            
             Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $syncService.ID }
