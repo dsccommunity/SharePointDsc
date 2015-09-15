@@ -10,6 +10,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+Import-Module "$PSScriptRoot\xSharePoint.TestHelpers.psm1"
 
 Describe 'xSharePoint Global Tests' {
 
@@ -17,9 +18,9 @@ Describe 'xSharePoint Global Tests' {
         ($_.FullName -like "*\DscResources\*")
     })
     
-    Context 'MOF schemas use InstallAccount' {
+    Context 'MOF schemas' {
 
-        It "Doesn't have InstallAccount as a required parameter" {
+        It "Don't have InstallAccount as a required parameter" {
             $mofFilesWithNoInstallAccount = 0
             $mofFiles | % {
                 $fileHasInstallAccount = $false
@@ -34,6 +35,17 @@ Describe 'xSharePoint Global Tests' {
                 }
             }
             $mofFilesWithNoInstallAccount | Should Be 0
+        }
+
+        
+
+        It "Has MOF schemas that match properties on PowerShell functions" {
+            $filesWithErrors = 0
+            $WarningPreference = "Continue"
+            $mofFiles | % {
+                if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
+            }
+            $filesWithErrors | Should Be 0
         }
     }
 }
