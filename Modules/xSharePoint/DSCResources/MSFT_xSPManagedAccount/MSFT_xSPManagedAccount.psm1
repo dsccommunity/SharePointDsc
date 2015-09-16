@@ -21,7 +21,7 @@ function Get-TargetResource
             $ma = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedAccount" -Arguments @{ Identity = $params.Account.UserName } -ErrorAction SilentlyContinue
             if ($null -eq $ma) { return @{ } }
             return @{
-                AccountName = $ma.Userame
+                AccountName = $ma.Username
                 EmailNotification = $ma.DaysBeforeChangeToEmail
                 PreExpireDays = $ma.DaysBeforeExpiryToChange
                 Schedule = $ma.ChangeSchedule
