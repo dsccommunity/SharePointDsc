@@ -173,7 +173,24 @@ function Test-xSharePointSpecificParameters() {
 
     $KeyList | ForEach-Object {
         if ((-not $CurrentValues.ContainsKey($_)) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
-            $returnValue = $false
+            if ($DesiredValues.ContainsKey($_)) {
+                $desiredType = $DesiredValues.$_.GetType()
+                switch ($desiredType.Name) {
+                    "String" {
+                        if ([string]::IsNullOrEmpty($CurrentValues.$_) -ne [string]::IsNullOrEmpty($DesiredValues.$_)) {
+                            $returnValue = $false
+                        }
+                    }
+                    "Int32" {
+                        if (($DesiredValues.$_ -eq 0) -and ($CurrentValues.$_ -eq $null)) {} else {
+                            $returnValue = $false
+                        }
+                    }
+                    default {
+                        $returnValue = $false
+                    }
+                }
+            }            
         }
     }
     return $returnValue
