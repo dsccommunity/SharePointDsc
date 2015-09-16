@@ -86,7 +86,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Schedule","PreExpireDays","EmailNotification") 
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification") 
 }
 
 
