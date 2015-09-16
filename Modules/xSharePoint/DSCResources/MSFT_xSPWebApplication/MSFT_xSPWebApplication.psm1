@@ -26,7 +26,7 @@ function Get-TargetResource
         $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return @{} }
 
-        $authProvider = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ WebApplication = $wa.Url; Zone = "Default" }
+        $authProvider = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPAuthenticationProvider" -Arguments @{ WebApplication = $wa.Url; Zone = "Default" }
 
         if ($authProvider.DisableKerberos -eq $true) { $localAuthMode = "NTLM" } else { $localAuthMode = "Kerberos" }
 
