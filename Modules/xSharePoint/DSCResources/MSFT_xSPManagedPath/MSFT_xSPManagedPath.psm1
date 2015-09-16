@@ -22,7 +22,7 @@ function Get-TargetResource
             $getParams.Add("HostHeader", $true)
         }
         $path = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedPath" -Arguments $getParams -ErrorAction SilentlyContinue
-        if ($null -eq $path) { return @{} }
+        if ($null -eq $path) { return $null }
         
         return @{
             RelativeUrl = $path.Name
@@ -52,9 +52,11 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
         $path = Get-TargetResource @params -ErrorAction SilentlyContinue
+
+        if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+
         if ($null -eq $path) { 
             
             $newParams = @{}
@@ -88,6 +90,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
+	if ($CurrentValues -eq $null) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader")
 }
 
