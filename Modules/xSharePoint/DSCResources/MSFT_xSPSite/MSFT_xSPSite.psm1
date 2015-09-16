@@ -26,21 +26,26 @@ function Get-TargetResource
         $params = $args[0]
         $site = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPSite" -Arguments @{ Identity = $params.Url } -ErrorAction SilentlyContinue
         
-        if ($null -eq $site) { return @{} }
-        else {
-            if ($site.HostHeaderIsSiteName) { $HostHeaderWebApplication = $site.Url } 
+        if ($null -eq $site) { 
+            return @{} 
+        } else {
+            if ($site.HostHeaderIsSiteName) { $HostHeaderWebApplication = $site.WebApplication.Url } 
 
-            if ($site.WebApplication.UseClaimsAuthentication) {
-                $owner = Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.Owner.UserLogin; IdentityType = "EncodedClaim" }
+            if ($null -eq $site.Owner) {
+                $owner = $null
             } else {
-                $owner = $site.Owner.UserLogin
+                if ($site.WebApplication.UseClaimsAuthentication) {
+                    $owner = (Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.Owner.UserLogin; IdentityType = "EncodedClaim" }).Value
+                } else {
+                    $owner = $site.Owner.UserLogin
+                }
             }
-
+            
             if ($null -eq $site.SecondaryContact) {
                 $secondaryOwner = $null
             } else {
                 if ($site.WebApplication.UseClaimsAuthentication) {
-                    $secondaryOwner = Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.SecondaryContact.UserLogin; IdentityType = "EncodedClaim" }
+                    $secondaryOwner = (Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.SecondaryContact.UserLogin; IdentityType = "EncodedClaim" }).Value
                 } else {
                     $secondaryOwner = $site.SecondaryContact.UserLogin
                 }
