@@ -41,7 +41,7 @@ function Get-TargetResource
                 FailoverDatabaseServer = $serviceApp.UsageDatabase.FailoverServer
                 UsageLogCutTime = $service.UsageLogCutTime
                 UsageLogLocation = $service.UsageLogDir
-                UsageLogMaxFileSizeKB = $service.UsageLogMaxFileSize
+                UsageLogMaxFileSizeKB = $service.UsageLogMaxFileSize / 1024
                 UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
             }
         }
