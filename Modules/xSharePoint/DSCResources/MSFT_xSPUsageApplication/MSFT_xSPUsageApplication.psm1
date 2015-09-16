@@ -34,11 +34,11 @@ function Get-TargetResource
             return @{
                 Name = $serviceApp.DisplayName
                 InstallAccount = $params.InstallAccount
-                DatabaseName = $serviceApp.Applications.UsageDatabase.Name
-                DatabaseServer = $serviceApp.Applications.UsageDatabase.Server.Name
-                DatabasePassword = $serviceApp.Applications.UsageDatabase.Password
-                DatabaseUsername = $serviceApp.Applications.UsageDatabase.Username
-                FailoverDatabaseServer = $serviceApp.Applications.UsageDatabase.FailoverServer
+                DatabaseName = $serviceApp.UsageDatabase.Name
+                DatabaseServer = $serviceApp.UsageDatabase.Server.Name
+                DatabasePassword = $serviceApp.UsageDatabase.Password
+                DatabaseUsername = $serviceApp.UsageDatabase.Username
+                FailoverDatabaseServer = $serviceApp.UsageDatabase.FailoverServer
                 UsageLogCutTime = $service.UsageLogCutTime
                 UsageLogLocation = $service.UsageLogDir
                 UsageLogMaxFileSizeKB = $service.UsageLogMaxFileSize
