@@ -16,14 +16,14 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
+        $serviceApp = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
 
-        if ($null -eq $app) { return @{} }
+        if ($null -eq $serviceApp) { return @{} }
         
         return @{
             Name = $serviceApp.DisplayName
-            DatabaseName = $serviceApp.Database.Name
-            DatabaseServer = $serviceApp.Database.Server.Name
+            DatabaseName = $serviceApp.Databases.Name
+            DatabaseServer = $serviceApp.Databases.Server.Name
             InstallAccount = $params.InstallAccount
         }
     }
@@ -77,7 +77,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for state service application $Name"
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
 }
