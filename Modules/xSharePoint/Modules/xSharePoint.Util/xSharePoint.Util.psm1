@@ -175,14 +175,15 @@ function Test-xSharePointSpecificParameters() {
         if ((-not $CurrentValues.ContainsKey($_)) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
             if ($DesiredValues.ContainsKey($_)) {
                 $desiredType = $DesiredValues.$_.GetType()
+                $fieldName = $_
                 switch ($desiredType.Name) {
                     "String" {
-                        if ([string]::IsNullOrEmpty($CurrentValues.$_) -ne [string]::IsNullOrEmpty($DesiredValues.$_)) {
+                        if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and [string]::IsNullOrEmpty($DesiredValues.$fieldName)) {} else {
                             $returnValue = $false
                         }
                     }
                     "Int32" {
-                        if (($DesiredValues.$_ -eq 0) -and ($CurrentValues.$_ -eq $null)) {} else {
+                        if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
                             $returnValue = $false
                         }
                     }
