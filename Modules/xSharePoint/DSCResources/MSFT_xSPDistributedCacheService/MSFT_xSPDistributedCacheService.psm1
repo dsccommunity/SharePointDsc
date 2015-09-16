@@ -39,7 +39,7 @@ function Get-TargetResource
                 Name = $params.Name
                 CacheSizeInMB = $cacheHostConfig.Size
                 ServiceAccount = $windowsService.StartName
-                CreateFirewallRules = (-not $firewallRule)
+                CreateFirewallRules = ($firewallRule -ne $null)
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }

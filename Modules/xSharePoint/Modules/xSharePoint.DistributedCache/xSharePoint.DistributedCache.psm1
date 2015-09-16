@@ -78,7 +78,7 @@ function Enable-xSharePointDCFireWallRule() {
 
     $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
     if($null -eq $firewallRule) {
-        New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distributed Cache" -Protocol TCP -LocalPort 22233-22236
+        New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distributed Cache" -Protocol TCP -LocalPort 22233-22236 -Group "SharePoint"
     }
     Enable-NetFirewallRule -DisplayName "SharePoint Distributed Cache"
 }
