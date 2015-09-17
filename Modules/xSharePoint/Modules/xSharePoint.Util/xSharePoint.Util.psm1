@@ -172,27 +172,30 @@ function Test-xSharePointSpecificParameters() {
     }
 
     $KeyList | ForEach-Object {
-        if ((-not $CurrentValues.ContainsKey($_)) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
-            if ($DesiredValues.ContainsKey($_)) {
-                $desiredType = $DesiredValues.$_.GetType()
-                $fieldName = $_
-                switch ($desiredType.Name) {
-                    "String" {
-                        if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and [string]::IsNullOrEmpty($DesiredValues.$fieldName)) {} else {
+        if ($_ -ne "Verbose") {
+            if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
+                if ($DesiredValues.ContainsKey($_)) {
+                    $desiredType = $DesiredValues.$_.GetType()
+                    $fieldName = $_
+                    switch ($desiredType.Name) {
+                        "String" {
+                            if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and [string]::IsNullOrEmpty($DesiredValues.$fieldName)) {} else {
+                                $returnValue = $false
+                            }
+                        }
+                        "Int32" {
+                            if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                $returnValue = $false
+                            }
+                        }
+                        default {
                             $returnValue = $false
                         }
                     }
-                    "Int32" {
-                        if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
-                            $returnValue = $false
-                        }
-                    }
-                    default {
-                        $returnValue = $false
-                    }
-                }
-            }            
+                }            
+            }
         }
+        
     }
     return $returnValue
 }

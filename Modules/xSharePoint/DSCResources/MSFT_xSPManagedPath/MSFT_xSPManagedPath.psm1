@@ -90,7 +90,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
-	if ($CurrentValues -eq $null) { return $false }
+    if ($CurrentValues -eq $null) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader")
 }
 
