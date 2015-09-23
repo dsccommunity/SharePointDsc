@@ -15,7 +15,6 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPBCSServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.Util\xSharePoint.Util.psm1")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPBCSServiceApp" {
@@ -28,6 +27,8 @@ Describe "xSPBCSServiceApp" {
         }
 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+		Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+
         Mock Initialize-xSharePointPSSnapin { }
 
         Context "When no service application exists in the current farm" {
