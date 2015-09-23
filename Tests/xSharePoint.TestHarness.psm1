@@ -18,13 +18,13 @@ function Invoke-xSharePointTests() {
 
     $results = Invoke-Pester -Script @(
         @{
-            'Path' = $repoDir
+            'Path' = "$repoDir\Tests"
             'Parameters' = @{ 
                 'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1")
             }
         },
         @{
-            'Path' = $repoDir
+            'Path' = "$repoDir\Tests"
             'Parameters' = @{ 
                 'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\16.0.4316.1217\Microsoft.SharePoint.PowerShell.psm1") 
             }
