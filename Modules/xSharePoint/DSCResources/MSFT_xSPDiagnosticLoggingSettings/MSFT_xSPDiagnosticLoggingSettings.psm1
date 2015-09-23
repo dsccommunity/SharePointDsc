@@ -28,12 +28,13 @@ function Get-TargetResource
     Write-Verbose -Message "Getting diagnostic configuration settings"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $dc = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDiagnosticConfig" -ErrorAction SilentlyContinue
-        if ($null -eq $dc) { return @{} }
+        $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
+        if ($null -eq $dc) { return $null }
         
         return @{
-            AllowLegacyTraceProviders = $dc.AllowLegacyTraceProviders
             AppAnalyticsAutomaticUploadEnabled = $dc.AppAnalyticsAutomaticUploadEnabled
             CustomerExperienceImprovementProgramEnabled = $dc.CustomerExperienceImprovementProgramEnabled
             ErrorReportingEnabled = $dc.ErrorReportingEnabled
@@ -52,9 +53,9 @@ function Get-TargetResource
             ScriptErrorReportingEnabled = $dc.ScriptErrorReportingEnabled
             ScriptErrorReportingRequireAuth = $dc.ScriptErrorReportingRequireAuth
             ScriptErrorReportingDelay = $dc.ScriptErrorReportingDelay
+            InstallAccount = $params.InstallAccount
         }
     }
-    $result.Add("InstallAccount", $InstallAccount)
     return $result
 }
 
@@ -89,12 +90,13 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null } 
         $params = $params | Rename-xSharePointParamValue -oldName "LogPath" -newName "LogLocation" `
                           | Rename-xSharePointParamValue -oldName "LogSpaceInGB" -newName "LogDiskSpaceUsageGB"
 
-        Invoke-xSharePointSPCmdlet -CmdletName "Set-SPDiagnosticConfig" -Arguments $params
+        Set-SPDiagnosticConfig @params
     }
 }
 
@@ -126,10 +128,9 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Getting diagnostic configuration settings"
-
+    Write-Verbose -Message "Testing diagnostic configuration settings"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 

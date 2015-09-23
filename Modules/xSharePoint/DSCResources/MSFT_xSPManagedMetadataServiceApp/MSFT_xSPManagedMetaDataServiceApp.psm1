@@ -15,13 +15,19 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
+
         try 
         {
-            $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
+            $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+            if ($null -eq $serviceApps) { 
+                return $null 
+            }
+            $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Managed Metadata Service" }
 
             If ($null -eq $serviceApp)
             {
-                return @{}
+                return $null
             }
             else
             {
@@ -36,7 +42,7 @@ function Get-TargetResource
         } 
         catch
         {
-            return @{ } 
+            return $null 
         }
     }
     return $result
@@ -61,20 +67,19 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            Initialize-xSharePointPSSnapin
 
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
-            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPMetadataServiceApplication" -Arguments $params 
+            $app = New-SPMetadataServiceApplication @params 
             if ($null -ne $app)
             {
-                Invoke-xSharePointSPCmdlet -CmdletName "New-SPMetadataServiceApplicationProxy" -Arguments @{ 
-                    Name = ($params.Name + " Proxy") 
-                    ServiceApplication = $app 
-                    DefaultProxyGroup = $true
-                    ContentTypePushdownEnabled = $true
-                    DefaultKeywordTaxonomy = $true
-                    DefaultSiteCollectionTaxonomy = $true
-                }
+                New-SPMetadataServiceApplicationProxy -Name ($params.Name + " Proxy") `
+                                                      -ServiceApplication $app `
+                                                      -DefaultProxyGroup $true `
+                                                      -ContentTypePushdownEnabled $true `
+                                                      -DefaultKeywordTaxonomy = $true `
+                                                      -DefaultSiteCollectionTaxonomy = $true
             }
         }
     }
@@ -83,12 +88,11 @@ function Set-TargetResource
             Write-Verbose -Message "Updating Managed Metadata Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
+                Initialize-xSharePointPSSnapin
 
-                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName MMS
-                Invoke-xSharePointSPCmdlet -CmdletName "Set-SPMetadataServiceApplication" -Arguments @{
-                    Identity = $serviceApp
-                    ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
-                }
+                $serviceApp = Get-SPServiceApplication -Name $params.Name  | Where-Object { $_.TypeName -eq "Managed Metadata Service" }
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+                Set-SPMetadataServiceApplication -Identity $serviceApp -ApplicationPool $appPool
             }
         }
     }
@@ -110,6 +114,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for Managed Metadata Service Application '$Name'"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 

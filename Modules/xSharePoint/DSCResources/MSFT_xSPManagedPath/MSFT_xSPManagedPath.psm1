@@ -15,13 +15,17 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
+
         $getParams = @{
             Identity = $params.RelativeUrl 
         }
         if ($params.HostHeader) {
             $getParams.Add("HostHeader", $true)
+        } else {
+            $getParams.Add("WebApplication", $params.WebAppUrl)
         }
-        $path = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedPath" -Arguments $getParams -ErrorAction SilentlyContinue
+        $path = Get-SPManagedPath @getParams -ErrorAction SilentlyContinue
         if ($null -eq $path) { return $null }
         
         return @{
@@ -52,6 +56,7 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         $path = Get-TargetResource @params -ErrorAction SilentlyContinue
 
@@ -69,7 +74,7 @@ function Set-TargetResource
             $newParams.Add("RelativeURL", $params.RelativeUrl)
             $newParams.Add("Explicit", $params.Explicit)
 
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedPath" -Arguments $newParams
+            New-SPManagedPath @newParams
         }
     }
 }

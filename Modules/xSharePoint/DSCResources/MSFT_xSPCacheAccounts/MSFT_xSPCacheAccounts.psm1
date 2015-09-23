@@ -14,7 +14,9 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }  -ErrorAction SilentlyContinue
+        Initialize-xSharePointPSSnapin
+
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
         if ($null -eq $wa) { return @{} }
         
@@ -42,9 +44,9 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)] [System.String] $SuperUserAlias,
-        [parameter(Mandatory = $true)] [System.String] $SuperReaderAlias,
+        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String] $SuperUserAlias,
+        [parameter(Mandatory = $true)]  [System.String] $SuperReaderAlias,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -52,8 +54,12 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.WebAppUrl }
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        if ($null -eq $wa) { 
+            throw [Exception] "The web applications $($params.WebAppUrl) can not be found to set cache accounts"
+        }
         
         if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
             $wa.Properties["portalsuperuseraccount"] = $params.SuperUserAlias
@@ -88,6 +94,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
+    if ($null -eq $CurrentValues) {return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SuperUserAlias", "SuperReaderAlias")
 }
 

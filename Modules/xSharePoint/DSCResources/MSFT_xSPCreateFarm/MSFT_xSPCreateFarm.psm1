@@ -17,17 +17,18 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         try {
-            $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
+            $spFarm = Get-SPFarm
         } catch {
             Write-Verbose -Message "Unable to detect local farm."
         }
         
-        if ($null -eq $spFarm) {return @{ }}
+        if ($null -eq $spFarm) { return $null }
 
-        $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
-        $centralAdminSite = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.IsAdministrationWebApplication })[0]
+        $configDb = Get-SPDatabase | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+        $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object { $_.IsAdministrationWebApplication -eq $true }
 
         if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
             $farmAccount = $params.FarmAccount
@@ -41,7 +42,7 @@ function Get-TargetResource
             FarmAccount = $farmAccount
             InstallAccount = $params.InstallAccount
             Passphrase = $params.Passphrase
-            AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Server
+            AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
             CentralAdministrationPort = [Uri]::new($centralAdminSite.Url).Port
         }
         return $returnValue
@@ -67,6 +68,7 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         $newFarmArgs = @{
             DatabaseServer = $params.DatabaseServer
@@ -90,13 +92,13 @@ function Set-TargetResource
             }
         }
 
-        Invoke-xSharePointSPCmdlet -CmdletName "New-SPConfigurationDatabase" -Arguments $newFarmArgs
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPHelpCollection" -Arguments @{ All = $true }
-        Invoke-xSharePointSPCmdlet -CmdletName "Initialize-SPResourceSecurity"
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPService"
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPFeature" -Arguments @{ AllExistingFeatures = $true; Force = $true }
-        Invoke-xSharePointSPCmdlet -CmdletName "New-SPCentralAdministration" -Arguments @{ Port = $params.CentralAdministrationPort; WindowsAuthProvider = "NTLM" }
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPApplicationContent"
+        New-SPConfigurationDatabase @newFarmArgs
+        Install-SPHelpCollection -All
+        Initialize-SPResourceSecurity
+        Install-SPService
+        Install-SPFeature -AllExistingFeatures -Force 
+        New-SPCentralAdministration -Port $params.CentralAdministrationPort -WindowsAuthProvider "NTLM"
+        Install-SPApplicationContent
     }
 }
 
@@ -117,6 +119,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose "Checking for local farm presence"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName")
 }
 

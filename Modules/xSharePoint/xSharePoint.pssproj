@@ -77,7 +77,6 @@
     <Folder Include="Modules\" />
     <Folder Include="Modules\xSharePoint.UserProfileService\" />
     <Folder Include="Modules\xSharePoint.CacheAccounts\" />
-    <Folder Include="Modules\xSharePoint.ServiceApplications\" />
     <Folder Include="Modules\xSharePoint.DistributedCache\" />
     <Folder Include="Modules\xSharePoint.Util\" />
     <Folder Include="Examples\" />
@@ -128,7 +127,6 @@
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
     <Compile Include="Modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1" />
-    <Compile Include="Modules\xSharePoint.ServiceApplications\xSharePoint.ServiceApplications.psm1" />
     <Compile Include="Modules\xSharePoint.UserProfileService\xSharePoint.UserProfileService.psm1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="xSharePoint.psd1" />

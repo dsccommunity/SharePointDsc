@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
 {
@@ -10,6 +12,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPBCSServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -23,67 +26,76 @@ Describe "xSPBCSServiceApp" {
             DatabaseServer = "TestServer\Instance"
         }
 
-        Context "Validate get method" {
-            It "Calls the service application picker with the appropriate type name" {
-                Mock Get-xSharePointServiceApplication { return @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                } } -Verifiable -ParameterFilter {$Name -eq $testParams.Name -and $TypeName -eq "BCS"}
-                
-                $results = Get-TargetResource @testParams
-                $results | Should Not BeNullOrEmpty
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
 
-                Assert-VerifiableMocks
+        Context "When no service application exists in the current farm" {
+
+            Mock Get-SPServiceApplication { return $null }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "creates a new service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPBusinessDataCatalogServiceApplication 
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when no service app exists" {
-                Mock Get-TargetResource { return @{} }
-                Test-TargetResource @testParams | Should Be $false
+        Context "When a service application exists and is configured correctly" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Business Data Connectivity Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
             }
-            It "Passes when the service app exists" {
-                Mock Get-TargetResource { 
-                    return @{ 
-                        Name = $testParams.Name 
-                        ApplicationPool = $testParams.ApplicationPool
-                    } 
-                } 
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
-            It "Fails when the service app exists but has the wrong app pool" {
-                Mock Get-TargetResource { 
-                    return @{ 
-                        Name = $testParams.Name 
-                        ApplicationPool = "Wrong app pool"
-                    } 
-                }
-                Test-TargetResource @testParams | Should Be $false
-            }
         }
 
-        Context "Validate set method" {
-            It "Creates a new service application" {
-                Mock Get-TargetResource { return @{} }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPBusinessDataCatalogServiceApplication" }
+        Context "When a service application exists and the app pool is not configured correctly" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Business Data Connectivity Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Set-SPBusinessDataCatalogServiceApplication { }
 
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Updates an existing service application" {
-                Mock Get-TargetResource { return @{ Name = $testParams.Name; ApplicationPool = "Wrong app pool" } }
-                Mock Get-xSharePointServiceApplication { return @{
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                } } -Verifiable -ParameterFilter {$Name -eq $testParams.Name -and $TypeName -eq "BCS"}
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.ApplicationPool } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplicationPool" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPBusinessDataCatalogServiceApplication" }
-
+            It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
-                Assert-VerifiableMocks
+                Assert-MockCalled Get-SPServiceApplicationPool
+                Assert-MockCalled Set-SPBusinessDataCatalogServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
             }
         }
     }

@@ -63,7 +63,11 @@ function Set-xSharePointUserProfileSyncMachine() {
         [PSCredential]
         $FarmAccount
     )
-    $ups = Get-xSharePointServiceApplication -Name $UserProfileServiceAppName -TypeName UserProfile
+    $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+    if ($null -eq $serviceApps) { 
+        return $null 
+    }
+    $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
     $ups.SetSynchronizationMachine($env:COMPUTERNAME, $SyncServiceId, $FarmAccount.UserName, $FarmAccount.GetNetworkCredential().Password)
 }
 

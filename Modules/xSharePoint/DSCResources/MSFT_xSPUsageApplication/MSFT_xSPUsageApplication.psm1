@@ -21,16 +21,21 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName Usage
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        if ($null -eq $serviceApps) { 
+            return $null 
+        }
+        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Service Application" }
 
         If ($null -eq $serviceApp)
         {
-            return @{}
+            return $null
         }
         else
         {
-            $service = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPUsageService"
+            $service = Get-SPUsageService
             return @{
                 Name = $serviceApp.DisplayName
                 InstallAccount = $params.InstallAccount
@@ -70,12 +75,13 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting usage application $Name"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        $params = $args[0]
-        
-        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplication" -Arguments @{ Name = $params.Name } -ErrorAction SilentlyContinue
+    $CurrentState = Get-TargetResource @PSBoundParameters
 
-        if ($null -eq $app) { 
+    if ($null -eq $CurrentState) {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            Initialize-xSharePointPSSnapin
+        
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
@@ -84,20 +90,22 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseUsername")) { $newParams.Add("DatabaseUsername", $params.DatabaseUsername) }
             if ($params.ContainsKey("FailoverDatabaseServer")) { $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) }
 
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPUsageApplication" -Arguments $newParams
+            New-SPUsageApplication @newParams
         }
     }
 
     Write-Verbose -Message "Configuring usage application $Name"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
+
         $setParams = @{}
         $setParams.Add("LoggingEnabled", $true)
         if ($params.ContainsKey("UsageLogCutTime")) { $setParams.Add("UsageLogCutTime", $params.UsageLogCutTime) }
         if ($params.ContainsKey("UsageLogLocation")) { $setParams.Add("UsageLogLocation", $params.UsageLogLocation) }
         if ($params.ContainsKey("UsageLogMaxFileSizeKB")) { $setParams.Add("UsageLogMaxFileSizeKB", $params.UsageLogMaxFileSizeKB) }
         if ($params.ContainsKey("UsageLogMaxSpaceGB")) { $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) }
-        Invoke-xSharePointSPCmdlet -CmdletName "Set-SPUsageService" -Arguments $setParams
+        Set-SPUsageService @setParams
     }
 }
 
@@ -123,6 +131,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for usage application '$Name'"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("UsageLogCutTime", "UsageLogLocation", "UsageLogMaxFileSizeKB", "UsageLogMaxSpaceGB")
 }
 

@@ -27,6 +27,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Stubs\" />
+    <Folder Include="Stubs\DistributedCache\" />
+    <Folder Include="Stubs\SharePoint\" />
+    <Folder Include="Stubs\SharePoint\15.0.4693.1000\" />
+    <Folder Include="Stubs\SharePoint\16.0.4316.1217\" />
     <Folder Include="xSharePoint\" />
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +59,10 @@
     <Content Include="xSharePoint\xSharePoint.xSPBCSServiceApp.Tests.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Stubs\DistributedCache\DistributedCache.psm1" />
+    <Compile Include="Stubs\SharePoint\16.0.4316.1217\Microsoft.SharePoint.PowerShell.psm1" />
+    <Compile Include="Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" />
+    <Compile Include="xSharePoint.TestHarness.psm1" />
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />

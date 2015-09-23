@@ -49,7 +49,7 @@ function Get-TargetResource
     $installedItems = Get-CimInstance -ClassName Win32_Product
     
     #Common prereqs
-    $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | ? {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))
+    $returnValue.Add("Microsoft Identity Extensions", (Check-xSharePointInstalledProductRegistryKey -RegKeysCollection (Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse) -ProductName "Microsoft Identity Extensions").Count -gt 0)
     $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", (($installedItems | ? {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"}) -ne $null))
     $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", (($installedItems | ? {$_.Name -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}) -ne $null))
     $returnValue.Add("AppFabric 1.1 for Windows Server", (($installedItems | ? {$_.Name -eq "AppFabric 1.1 for Windows Server"}) -ne $null))
@@ -79,6 +79,17 @@ function Get-TargetResource
     }
     
     return $results
+}
+
+function Check-xSharePointInstalledProductRegistryKey() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $false)] [object] $RegKeysCollection,
+        [parameter(Mandatory = $true)]  [string] $ProductName
+    )
+    if ($RegKeysCollection -eq $null) { return $null }
+    return @($RegKeysCollection | ? {$_.GetValue("DisplayName") -eq $ProductName })
 }
 
 

@@ -15,8 +15,9 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $feature = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
+        $feature = Get-SPFeature -Identity $params.Name -ErrorAction SilentlyContinue
 
         if ($null -eq $feature) { return @{
             Name = $params.Name
@@ -33,7 +34,7 @@ function Get-TargetResource
         } else {
             $checkParams.Add($params.FeatureScope, $params.Url)
         }
-        $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams -ErrorAction SilentlyContinue
+        $featureAtScope = Get-SPFeature @checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
         if ($enabled) { $currentState = "Present" } else { $currentState = "Absent" }
 
@@ -63,6 +64,7 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         $runParams = @{}
         $runParams.Add("Identity", $params.Name)
@@ -71,10 +73,10 @@ function Set-TargetResource
         }
 
         if ($params.Ensure -eq "Present") {
-            Invoke-xSharePointSPCmdlet -CmdletName "Enable-SPFeature" -Arguments $runParams
+            Enable-SPFeature @runParams
         } else {
             $runParams.Add("Confirm", $false)    
-            Invoke-xSharePointSPCmdlet -CmdletName "Disable-SPFeature" -Arguments $runParams
+            Disable-SPFeature @runParams
         }
     }
 }
@@ -97,4 +99,5 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
+
 Export-ModuleMember -Function *-TargetResource

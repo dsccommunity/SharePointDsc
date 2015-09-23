@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPSite"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -21,36 +19,86 @@ Describe "xSPSite" {
             OwnerAlias = "DEMO\User"
         }
 
-        Context "Validate get method" {
-            It "Calls the right functions to retrieve SharePoint data" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPSite" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock New-SPSite { }
+
+        Context "The site doesn't exist yet and should" {
+            Mock Get-SPSite { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "creates a new site from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPSite
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when site collection isn't found" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
-                Test-TargetResource @testParams | Should Be $false
+        Context "The site exists and is a host named site collection" {
+            Mock Get-SPSite { return @{
+                HostHeaderIsSiteName = $true
+                WebApplication = @{ 
+                    Url = $testParams.Url 
+                    UseClaimsAuthentication = $false
+                }
+                Url = $testParams.Url
+                Owner = @{ UserLogin = "DEMO\owner" }
+            }}
+
+            It "returns the site data from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
-            It "Passes when the site collection is found" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Url = $testParams.Url
-                        OwnerAlias = $testParams.OwnerAlias
-                    }
-                } 
+
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Validate set method" {
-            It "Creates a new site when none exists" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPSite" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPSite" }
-                Set-TargetResource @testParams
-                Assert-VerifiableMocks
+        Context "The site exists and uses claims authentication" {
+            Mock Get-SPSite { return @{
+                HostHeaderIsSiteName = $false
+                WebApplication = @{ 
+                    Url = $testParams.Url 
+                    UseClaimsAuthentication = $true
+                }
+                Url = $testParams.Url
+                Owner = @{ UserLogin = "DEMO\owner" }
+            }}
+            Mock New-SPClaimsPrincipal { return @{ Value = $testParams.OwnerAlias }}
+
+            It "returns the site data from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "The site exists and uses classic authentication" {
+            Mock Get-SPSite { return @{
+                HostHeaderIsSiteName = $false
+                WebApplication = @{ 
+                    Url = $testParams.Url 
+                    UseClaimsAuthentication = $false
+                }
+                Url = $testParams.Url
+                Owner = @{ UserLogin = "DEMO\owner" }
+            }}
+
+            It "returns the site data from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

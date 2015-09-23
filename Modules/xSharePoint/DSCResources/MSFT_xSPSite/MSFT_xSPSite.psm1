@@ -24,10 +24,12 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $site = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPSite" -Arguments @{ Identity = $params.Url } -ErrorAction SilentlyContinue
+        Initialize-xSharePointPSSnapin
+
+        $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
         
         if ($null -eq $site) { 
-            return @{} 
+            return $null 
         } else {
             if ($site.HostHeaderIsSiteName) { $HostHeaderWebApplication = $site.WebApplication.Url } 
 
@@ -35,7 +37,7 @@ function Get-TargetResource
                 $owner = $null
             } else {
                 if ($site.WebApplication.UseClaimsAuthentication) {
-                    $owner = (Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.Owner.UserLogin; IdentityType = "EncodedClaim" }).Value
+                    $owner = (New-SPClaimsPrincipal -Identity $site.Owner.UserLogin -IdentityType "EncodedClaim").Value
                 } else {
                     $owner = $site.Owner.UserLogin
                 }
@@ -45,7 +47,7 @@ function Get-TargetResource
                 $secondaryOwner = $null
             } else {
                 if ($site.WebApplication.UseClaimsAuthentication) {
-                    $secondaryOwner = (Invoke-xSharePointSPCmdlet -CmdletName "New-SPClaimsPrincipal" -Arguments @{ Identity = $site.SecondaryContact.UserLogin; IdentityType = "EncodedClaim" }).Value
+                    $secondaryOwner = (New-SPClaimsPrincipal -Identity $site.SecondaryContact.UserLogin -IdentityType "EncodedClaim").Value
                 } else {
                     $secondaryOwner = $site.SecondaryContact.UserLogin
                 }
@@ -98,12 +100,14 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
+
         $params.Remove("InstallAccount") | Out-Null
 
-        $site = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPSite" -Arguments @{ Identity = $params.Url } -ErrorAction SilentlyContinue
+        $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $site) {
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPSite" -Arguments $params | Out-Null
+            New-SPSite @params | Out-Null
         }
     }
 }
@@ -133,6 +137,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing site collection $Url"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Url")
 }
 

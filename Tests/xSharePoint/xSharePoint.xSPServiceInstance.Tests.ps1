@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPServiceInstance"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -21,80 +19,106 @@ Describe "xSPServiceInstance" {
             Ensure = "Present"
         }
 
-        Context "Validate get method" {
-            It "Calls the right functions to retrieve SharePoint data" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock Start-SPServiceInstance { }
+        Mock Stop-SPServiceInstance { }
+
+        Context "The service instance is not running but should be" {
+            Mock Get-SPServiceInstance { return @(
+                @{
+                    TypeName = $testParams.Name
+                    Status = "Disabled"
+                })
+            }
+
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "returns false from the set method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the start service call from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Start-SPServiceInstance
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when service instance is not found at all" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
-                Test-TargetResource @testParams | Should Be $false
-            }
-            It "Passes when the service instance is running and it should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when the service instance isn't running and it should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Absent"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
+        Context "The service instance is running and should be" {
+            Mock Get-SPServiceInstance { return @(
+                @{
+                    TypeName = $testParams.Name
+                    Status = "Online"
+                })
             }
 
-            $testParams.Ensure = "Absent"
-
-            It "Fails when the service instance is running and it should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            It "Passes when the service instance isn't running and it should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Absent"
-                    }
-                } 
+
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Validate set method" {
+        Context "An invalid service application is specified to start" {
+            Mock Get-SPServiceInstance  { return $null }
 
-            $testParams.Ensure = "Present"
+            It "throws when the set method is called" {
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
 
-            It "Starts a service that should be running" {
-                Mock Invoke-xSharePointSPCmdlet { return @( @{ TypeName = $testParams.Name } ) } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Start-SPServiceInstance" }
+        $testParams.Ensure = "Absent"
 
-                Set-TargetResource @testParams
-                Assert-VerifiableMocks
+        Context "The service instance is not running and should not be" {
+            Mock Get-SPServiceInstance { return @(
+                @{
+                    TypeName = $testParams.Name
+                    Status = "Disabled"
+                })
             }
 
-            $testParams.Ensure = "Absent"
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
 
-            It "Stops a service that should be stopped" {
-                Mock Invoke-xSharePointSPCmdlet { return @( @{ TypeName = $testParams.Name } ) } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Stop-SPServiceInstance" }
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
 
+        Context "The service instance is running and should not be" {
+            Mock Get-SPServiceInstance { return @(
+                @{
+                    TypeName = $testParams.Name
+                    Status = "Online"
+                })
+            }
+
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "returns false from the set method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the stop service call from the set method" {
                 Set-TargetResource @testParams
-                Assert-VerifiableMocks
+
+                Assert-MockCalled Stop-SPServiceInstance
+            }
+        }
+
+        Context "An invalid service application is specified to stop" {
+            Mock Get-SPServiceInstance  { return $null }
+
+            It "throws when the set method is called" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    

@@ -13,9 +13,14 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
-        if ($null -eq $si) { return @{} }
+        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+        if ($null -eq $si) { return @{
+            Name = $params.Name
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        } }
         if ($si.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
         
         return @{
@@ -43,20 +48,26 @@ function Set-TargetResource
 
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            Initialize-xSharePointPSSnapin
 
-            $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
-            if ($null -eq $si) { return $false }
-            Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $si }
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            if ($null -eq $si) { 
+                throw [Exception] "Unable to locate service application '$($params.Name)'"
+            }
+            Start-SPServiceInstance -Identity $si 
         }
     } else {
         Write-Verbose -Message "Deprovioning service instance '$Name'"
 
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            Initialize-xSharePointPSSnapin
 
-            $si = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq $params.Name }
-            if ($null -eq $si) { return $false }
-            Invoke-xSharePointSPCmdlet -CmdletName "Stop-SPServiceInstance" -Arguments @{ Identity = $si }
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            if ($null -eq $si) {
+                throw [Exception] "Unable to locate service application '$($params.Name)'"
+            }
+            Stop-SPServiceInstance -Identity $si
         }
     }
 }

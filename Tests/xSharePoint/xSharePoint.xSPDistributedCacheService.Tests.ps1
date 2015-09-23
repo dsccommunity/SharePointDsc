@@ -1,19 +1,17 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPDistributedCacheService"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1")
 
 Describe "xSPDistributedCacheService" {
     InModuleScope $ModuleName {
@@ -21,129 +19,93 @@ Describe "xSPDistributedCacheService" {
             Name = "AppFabricCache"
             Ensure = "Present"
             CacheSizeInMB = 1024
-            ServiceAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            ServiceAccount = "DOMAIN\user"
             CreateFirewallRules = $true
         }
         
-        Context "Validate get method" {
-            It "Returns local cache settings correctly when it exists" {
-                Mock Invoke-xSharePointDCCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Use-CacheCluster" }
-                Mock Invoke-xSharePointDCCmdlet { return @{
-                    PortNo = 22233
-                } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-CacheHost" }
-                Mock Invoke-xSharePointDCCmdlet { return @{
-                    HostName = $env:COMPUTERNAME
-                    Port = 22233
-                    Size = $testParams.CacheSizeInMB
-                } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-AFCacheHostConfiguration" }
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+        Import-Module "$RepoRoot\Tests\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
 
-                Mock Get-WmiObject { @{ StartName = $testParams.ServiceAccount.UserName } } -Verifiable
-                Mock Get-NetFirewallRule { @{} } -Verifiable
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.DistributedCache"
+        Mock Use-CacheCluster { }
+        Mock Get-WmiObject { return @{ StartName = $testParams.ServiceAccount } }
+        Mock Get-NetFirewallRule { return @{} }
+        Mock Get-NetFirewallRule { return @{} } -ModuleName "xSharePoint.DistributedCache"
+        Mock Enable-NetFirewallRule { }  -ModuleName "xSharePoint.DistributedCache"
+        Mock New-NetFirewallRule { }  -ModuleName "xSharePoint.DistributedCache"
+        Mock Disable-NetFirewallRule { } -ModuleName "xSharePoint.DistributedCache"
+        Mock Add-SPDistributedCacheServiceInstance { } -ModuleName "xSharePoint.DistributedCache"
+        Mock Update-SPDistributedCacheSize { } -ModuleName "xSharePoint.DistributedCache"
+        Mock Get-SPManagedAccount { return @{} } -ModuleName "xSharePoint.DistributedCache"
+        Mock Get-SPFarm { return @{ 
+            Services = @(@{ 
+                Name = "AppFabricCachingService"
+                ProcessIdentity = @{ ManagedAccount = $null }
+            }) 
+        } }  -ModuleName "xSharePoint.DistributedCache"
+        Mock Update-xSharePointDistributedCacheService { } -ModuleName "xSharePoint.DistributedCache"
 
-                $result = Get-TargetResource @testParams
 
-                Assert-VerifiableMocks
+        Context "Distributed cache is not configured" {
+            Mock Get-CacheHost { return $null }
+
+            It "returns null from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "Returns local cache settings correctly when it does not exist" {
-                Mock Invoke-xSharePointDCCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Use-CacheCluster" }
-                Mock Invoke-xSharePointDCCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-CacheHost" }
-                $result = Get-TargetResource @testParams
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
 
-                $result | Should BeNullOrEmpty 
-                
-                Assert-VerifiableMocks
+            It "Sets up the cache correctly" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Add-SPDistributedCacheServiceInstance -ModuleName "xSharePoint.DistributedCache"
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when no cache is present locally but should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
-                Test-TargetResource @testParams | Should Be $false
-            }
-            It "Passes when cache is present and size is correct" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        CacheSizeInMB = $testParams.CacheSizeInMB
-                        ServiceAccount = $testParams.ServiceAccount.UserName
-                        CreateFirewallRules = $testParams.CreateFirewallRules
-                        Ensure = "Present"
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when cache is present but size is not correct" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        CacheSizeInMB = 1
-                        ServiceAccount = $testParams.ServiceAccount.UserName
-                        CreateFirewallRules = $testParams.CreateFirewallRules
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
+        Context "Distributed cache is configured correctly and running as required" {
+            Mock Get-AFCacheHostConfiguration { return @{
+                Size = $testParams.CacheSizeInMB
+            }}
+            Mock Get-CacheHost { return @{ PortNo = 22233 } }
 
-            $testParams.Ensure = "Absent"
-
-            It "Fails when cache is present but not should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        CacheSizeInMB = $testParams.CacheSizeInMB
-                        ServiceAccount = $testParams.ServiceAccount.UserName
-                        CreateFirewallRules = $testParams.CreateFirewallRules
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
-            It "Passes when cache is not present and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        CacheSizeInMB = $testParams.CacheSizeInMB
-                        ServiceAccount = $testParams.ServiceAccount.UserName
-                        CreateFirewallRules = $testParams.CreateFirewallRules
-                        Ensure = "Absent"
-                    } 
-                } 
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Validate set method" {
+        Context "Distributed cache is configured but the required firewall rules are not deployed" {
+            Mock Get-NetFirewallRule { return $null }
 
-            $testParams.Ensure = "Present"
-
-            It "Provisions distributed cache locally when is should be present, installing firewall when asked for" {
-                Mock Enable-xSharePointDCIcmpFireWallRule { return $null } -Verifiable
-                Mock Enable-xSharePointDCFireWallRule { return $null } -Verifiable
-
-                Mock Add-xSharePointDistributedCacheServer { return $null } -Verifiable -ParameterFilter { $CacheSizeInMB -eq $testParams.CacheSizeInMB }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
             }
 
-            $testParams.CreateFirewallRules = $false
-
-            It "Provisions distributed cache locally when is should be present, not installing firewall" {
-                Mock Add-xSharePointDistributedCacheServer { return $null } -Verifiable -ParameterFilter { $CacheSizeInMB -eq $testParams.CacheSizeInMB }
-
+            It "shuts down the distributed cache service" {
                 Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+                Assert-MockCalled Enable-NetFirewallRule -ModuleName "xSharePoint.DistributedCache"
             }
+        }
 
+        Context "Distributed cache is confgured but should not be running on this machine" {
             $testParams.Ensure = "Absent"
+            Mock Get-AFCacheHostConfiguration { return @{
+                Size = $testParams.CacheSizeInMB
+            }}
+            Mock Get-CacheHost { return @{ PortNo = 22233 } }
+            Mock Remove-xSharePointDistributedCacheServer { }
+            Mock Get-NetFirewallRule { return @{} } -ModuleName "xSharePoint.DistributedCache"
 
-            It "Removes distributed cache locally when is should not be present" {
-                Mock Remove-xSharePointDistributedCacheServer { return $null } -Verifiable -ParameterFilter { $CacheSizeInMB -eq $testParams.CacheSizeInMB }
-                Mock Disable-xSharePointDCFireWallRule { return $null } -Verifiable
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
 
+            It "shuts down the distributed cache service" {
                 Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+                Assert-MockCalled Remove-xSharePointDistributedCacheServer
+                Assert-MockCalled Disable-NetFirewallRule -ModuleName "xSharePoint.DistributedCache"
             }
         }
     }    

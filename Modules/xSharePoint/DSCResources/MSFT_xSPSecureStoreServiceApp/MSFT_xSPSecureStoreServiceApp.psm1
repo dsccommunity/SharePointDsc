@@ -23,22 +23,25 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName SecureStore
-
-        If ($null -eq $serviceApp)
-        {
-            return @{}
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        if ($null -eq $serviceApps) { 
+            return $null 
         }
-        else
-        {
-            return @{
+        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Secure Store Service Application" }
+
+        If ($null -eq $serviceApp) { 
+            return $null 
+        } else {
+            $returnVal =  @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Database.Name
                 DatabaseServer = $serviceApp.Database.Server.Name
                 InstallAccount = $params.InstallAccount
             }
+            return $returnVal
         }
     }
     return $result
@@ -71,14 +74,23 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            Initialize-xSharePointPSSnapin
+
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
-            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPSecureStoreServiceApplication" -Arguments $params
-            if ($app) {
-                Invoke-xSharePointSPCmdlet -CmdletName "New-SPSecureStoreServiceApplicationProxy" -Arguments @{ 
-                    Name = "$($params.Name) Proxy"
-                    ServiceApplication = $app
+            switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+                15 {
+                    $app = New-SPSecureStoreServiceApplication @params
                 }
+                16 {
+                    $app = New-SPSecureStoreServiceApplication @params -EnableMinDB:$false
+                }
+                Default {
+                    throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
+                }
+            }
+            if ($app) {
+                New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app
             }
         }
     } else {
@@ -86,11 +98,20 @@ function Set-TargetResource
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
+                Initialize-xSharePointPSSnapin
 
-                $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName SecureStore
-                Invoke-xSharePointSPCmdlet -CmdletName "Set-SPSecureStoreServiceApplication" -Arguments @{
-                    Identity = $serviceApp
-                    ApplicationPool = (Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.ApplicationPool } )
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Secure Store Service Application" }
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
+                switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+                    15 {
+                        Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool
+                    }
+                    16 {
+                        Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool -EnableMinDB:$false
+                    }
+                    Default {
+                        throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
+                    }
                 }
             }
         }
@@ -121,6 +142,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing secure store service application $Name"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 

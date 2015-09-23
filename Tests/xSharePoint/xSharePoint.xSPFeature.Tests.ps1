@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
 {
@@ -10,6 +12,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPFeature"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -23,164 +26,121 @@ Describe "xSPFeature" {
             Ensure = "Present"
         }
 
-        Context "Validate get method" {
-            It "Returns as empty where a feature is not installed in the farm" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 1 }
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock Enable-SPFeature {}
+        Mock Disable-SPFeature {}
 
-                Get-TargetResource @testParams
+        Context "A feature that is not installed in the farm should be turned on" {
+            Mock Get-SPFeature { return $null } -ParameterFilter { $Farm -ne $true }
 
-                Assert-VerifiableMocks
+            It "returns null from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            It "Returns a disabled state when an installed feature is not found at a farm scope" {
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.Name } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 1 }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 2 }
 
-                $result = Get-TargetResource @testParams
-
-                $result.Ensure | Should be "Absent"
-
-                Assert-VerifiableMocks
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
             }
-            $testParams.FeatureScope = "Site"
-            It "Returns a disabled state when an installed feature is not found at a site scope" {
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.Name } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 1 }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 2 }
+        }
 
-                $result = Get-TargetResource @testParams
-
-                $result.Ensure | Should be "Absent"
-
-                Assert-VerifiableMocks
-            }
-            It "Returns an enabled state when an installed feature is found at a site scope" {
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.Name } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 1 }
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.Name } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 2 }
-
-                $result = Get-TargetResource @testParams
-
-                $result.Ensure | Should be "Present"
-
-                Assert-VerifiableMocks
-            }
+        Context "A farm scoped feature is not enabled and should be" {
+            Mock Get-SPFeature { return $null } -ParameterFilter { $Farm -eq $true }
             $testParams.FeatureScope = "Farm"
-            It "Returns an enabled state when an installed feature is found at a farm scope" {
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.Name } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 1 }
-                Mock Invoke-xSharePointSPCmdlet { return @{ Name = $testParams.Name } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPFeature" -and $Arguments.Count -eq 2 }
 
-                $result = Get-TargetResource @testParams
+            It "returns null from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
 
-                $result.Ensure | Should be "Present"
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
 
-                Assert-VerifiableMocks
+            It "enables the feature in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Enable-SPFeature
             }
         }
 
-        Context "Validate test method" {
-            It "Passes when a farm feature is enabaled and should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when a farm feature is not enabaled and should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Absent"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            $testParams.Ensure = "Absent"
-
-            It "Passes when a farm feature is not enabaled and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Absent"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when a farm feature is enabaled and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            $testParams.Ensure = "Present"
+        Context "A site collection scoped feature is not enabled and should be" {
+            Mock Get-SPFeature { return $null } -ParameterFilter { $Site -eq $true }
             $testParams.FeatureScope = "Site"
 
-            It "Passes when a site feature is enabaled and should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
+            It "returns null from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            It "Fails when a site feature is not enabaled and should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Absent"
-                    }
-                } 
+
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $testParams.Ensure = "Absent"
+            It "enables the feature in the set method" {
+                Set-TargetResource @testParams
 
-            It "Passes when a site feature is not enabaled and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Absent"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when a site feature is enabaled and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        Ensure = "Present"
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
+                Assert-MockCalled Enable-SPFeature
             }
         }
 
-        Context "Validate set method" {
+        Context "A farm scoped feature is enabled and should not be" {
+            Mock Get-SPFeature { return @{} } 
+            Mock Get-SPFeature { return @{} } -ParameterFilter { $Farm -eq $true }
+            $testParams.FeatureScope = "Farm"
+            $testParams.Ensure = "Absent"
 
+            It "returns null from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "enables the feature in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Disable-SPFeature
+            }
+        }
+
+        Context "A site collection scoped feature is enabled and should not be" {
+            Mock Get-SPFeature { return @{} } 
+            Mock Get-SPFeature { return @{} } -ParameterFilter { $Site -eq $true }
+            $testParams.FeatureScope = "Site"
+
+            It "returns null from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "enables the feature in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Disable-SPFeature
+            }
+        }
+
+        Context "A farm scoped feature is enabled and should be" {
+            Mock Get-SPFeature { return @{} }
+            Mock Get-SPFeature { return @{} } -ParameterFilter { $Farm -eq $true }
+            $testParams.FeatureScope = "Farm"
             $testParams.Ensure = "Present"
 
-            It "Enables a feature that should be on" {
-                Mock Invoke-xSharePointSPCmdlet { return $false } -Verifiable -ParameterFilter { $CmdletName -eq "Enable-SPFeature" }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
-            }
-
-            $testParams.Ensure = "Absent"
-
-            It "Disables a feature that should be turned off" {
-                Mock Invoke-xSharePointSPCmdlet { return $false } -Verifiable -ParameterFilter { $CmdletName -eq "Disable-SPFeature" }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+
+        Context "A site collection scoped feature is enabled and should be" {
+            Mock Get-SPFeature { return @{} }
+            Mock Get-SPFeature { return @{} } -ParameterFilter { $Site -eq $testParams.Url }
+            $testParams.FeatureScope = "Site"
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+    }
 }

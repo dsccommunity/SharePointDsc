@@ -14,15 +14,17 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
+
         try {
-            $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm" -ErrorAction SilentlyContinue
+            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
         } catch {
             Write-Verbose -Message "Unable to detect local farm."
         }
         
         if ($null -eq $spFarm) {return @{ }}
 
-        $configDb = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPDatabase" -Arguments @{ IncludeCentralAdministration = $true } | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+        $configDb = Get-SPDatabase | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
 
         return @{
             FarmConfigDatabaseName = $spFarm.Name
@@ -50,7 +52,7 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $loopCount = 0
+        Initialize-xSharePointPSSnapin
 
         $joinFarmArgs = @{
             DatabaseServer = $params.DatabaseServer
@@ -72,12 +74,12 @@ function Set-TargetResource
             }
         }
 
-        Invoke-xSharePointSPCmdlet -CmdletName "Connect-SPConfigurationDatabase" -Arguments $joinFarmArgs
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPHelpCollection" -Arguments @{ All = $true }
-        Invoke-xSharePointSPCmdlet -CmdletName "Initialize-SPResourceSecurity"
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPService"
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPFeature" -Arguments @{ AllExistingFeatures = $true; Force = $true }
-        Invoke-xSharePointSPCmdlet -CmdletName "Install-SPApplicationContent"
+        Connect-SPConfigurationDatabase @joinFarmArgs
+        Install-SPHelpCollection -All
+        Initialize-SPResourceSecurity
+        Install-SPService
+        Install-SPFeature -AllExistingFeatures -Force 
+        Install-SPApplicationContent
     }
 
     Write-Verbose -Message "Starting timer service"

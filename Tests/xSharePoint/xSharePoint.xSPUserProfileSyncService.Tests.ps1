@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPUserProfileSyncService"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -22,106 +20,130 @@ Describe "xSPUserProfileSyncService" {
             Ensure = "Present"
         }
 
-        Context "Validate get method" {
-            It "Retrieves the data from SharePoint" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock Get-SPFarm { return @{
+            DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
+        }}
+        Mock Start-SPServiceInstance { }
+        Mock Stop-SPServiceInstance { }
+        Mock Restart-Service { }
+        Mock Add-xSharePointUserToLocalAdmin { } 
+        Mock Test-xSharePointUserIsLocalAdmin { return $false }
+        Mock Remove-xSharePointUserToLocalAdmin { }
+        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+
+        Context "User profile sync service is not running and should be" {
+            Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
+                    $Global:xSharePointUPACheck = $true
+                    return @( @{ 
+                        Status = "Disabled"
+                        ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        UserProfileApplicationGuid = [Guid]::Empty
+                        TypeName = "User Profile Synchronization Service" 
+                    }) 
+                } else {
+                    return @( @{ 
+                        Status = "Online"
+                        ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        UserProfileApplicationGuid = [Guid]::NewGuid()
+                        TypeName = "User Profile Synchronization Service" 
+                    })
+                }
+            } 
+
+            It "returns absent from the get method" {
+                $Global:xSharePointUPACheck = $false
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "returns false from the test method" {
+                $Global:xSharePointUPACheck = $false
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the start service cmdlet from the set method" {
+                $Global:xSharePointUPACheck = $false
+                Mock Set-xSharePointUserProfileSyncMachine { } 
+                Set-TargetResource @testParams 
+
+                Assert-MockCalled Start-SPServiceInstance
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when user profile sync service doesn't exist" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
-                Test-TargetResource @testParams | Should Be $false
-            }
-            It "Passes when the user profile sync service is running and should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Ensure = "Present"
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when the user profile sync service is not running and should be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Ensure = "Absent"
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $false
+        Context "User profile sync service is running and should be" {
+            Mock Get-SPServiceInstance { return @( @{ 
+                        Status = "Online"
+                        ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        UserProfileApplicationGuid = [Guid]::NewGuid()
+                        TypeName = "User Profile Synchronization Service" 
+                    })
+            } 
+        
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            $testParams.Ensure = "Absent"
-
-            It "Fails when the user profile sync service is running and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Ensure = "Present"
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
-            It "Passes when the user profile sync service is not running and should not be" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Ensure = "Absent"
-                    } 
-                } 
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        $testParams.Ensure = "Present"
-        $Global:xSharePointUPACheck = $false
+        $testParams.Ensure = "Absent"
 
-        Context "Validate set method" {
-            It "Povisions the user profile sync service where it should be running" {
-                Mock Test-xSharePointUserIsLocalAdmin { return $false } -Verifiable 
-                Mock Add-xSharePointUserToLocalAdmin -Verifiable
-                Mock Remove-xSharePointUserToLocalAdmin -Verifiable
+        Context "User profile sync service is running and shouldn't be" {
+            Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
+                    $Global:xSharePointUPACheck = $true
+                    return @( @{ 
+                        Status = "Online"
+                        ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        UserProfileApplicationGuid = [Guid]::NewGuid()
+                        TypeName = "User Profile Synchronization Service" 
+                    }) 
+                } else {
+                    return @( @{ 
+                        Status = "Disabled"
+                        ID = [Guid]::Empty
+                        UserProfileApplicationGuid = [Guid]::Empty
+                        TypeName = "User Profile Synchronization Service" 
+                    })
+                }
+            } 
 
-                Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
-                Mock Restart-Service { return $null }
-
-                Mock Set-xSharePointUserProfileSyncMachine { return $null } -Verifiable
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Start-SPServiceInstance" }
-                Mock Invoke-xSharePointSPCmdlet { if ($Global:xSharePointUPACheck -eq $false) {
-                        $Global:xSharePointUPACheck = $true
-                        return @( @{ Status = "Offline"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" }) 
-                    } else {
-                        return @( @{ Status = "Online"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" })
-                    } 
-                } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+            It "returns present from the get method" {
+                $Global:xSharePointUPACheck = $false
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            $testParams.Ensure = "Absent"
-            $Global:xSharePointUPACheck = $false
+            It "returns false from the test method" {
+                $Global:xSharePointUPACheck = $false
+                Test-TargetResource @testParams | Should Be $false
+            }
 
-            It "Stops the user profile sync service where it should not be running" {
-                Mock Test-xSharePointUserIsLocalAdmin { return $false } -Verifiable 
-                Mock Add-xSharePointUserToLocalAdmin -Verifiable
-                Mock Remove-xSharePointUserToLocalAdmin -Verifiable
+            It "calls the start service cmdlet from the set method" {
+                $Global:xSharePointUPACheck = $false
+                Mock Set-xSharePointUserProfileSyncMachine { } -ModuleName "xSharePoint.UserProfileService"
+                Set-TargetResource @testParams 
 
-                Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
-                Mock Restart-Service { return $null }
+                Assert-MockCalled Stop-SPServiceInstance
+            }
+        }
 
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Stop-SPServiceInstance" }
-                Mock Invoke-xSharePointSPCmdlet { if ($Global:xSharePointUPACheck -eq $false) {
-                        $Global:xSharePointUPACheck = $true
-                        return @( @{ Status = "Online"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" }) 
-                    } else {
-                        return @( @{ Status = "Disabled"; ID = [Guid]::NewGuid(); TypeName = "User Profile Synchronization Service" })
-                    } 
-                } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceInstance" }
+        Context "User profile sync service is not running and shouldn't be" {
+            Mock Get-SPServiceInstance { return @( @{ 
+                        Status = "Disabled"
+                        ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        UserProfileApplicationGuid = [Guid]::Empty
+                        TypeName = "User Profile Synchronization Service" 
+                    })
+            } 
 
-                Set-TargetResource @testParams
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
 
-                Assert-VerifiableMocks
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

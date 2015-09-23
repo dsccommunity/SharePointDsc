@@ -16,10 +16,11 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         try {
-            $ma = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedAccount" -Arguments @{ Identity = $params.Account.UserName } -ErrorAction SilentlyContinue
-            if ($null -eq $ma) { return @{ } }
+            $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
+            if ($null -eq $ma) { return $null }
             return @{
                 AccountName = $ma.Username
                 EmailNotification = $ma.DaysBeforeChangeToEmail
@@ -29,7 +30,7 @@ function Get-TargetResource
                 InstallAccount = $params.InstallAccount
             }
         } catch {
-            return @{ }
+            return $null
         }
     }
     return $result
@@ -52,10 +53,11 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
         $current = Get-TargetResource @params
         if ($current.Count -eq 0) {
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedAccount" -Arguments @{ Credential = $params.Account } 
+            New-SPManagedAccount -Credential $params.Account
         }
 
         $updateParams = @{ 
@@ -65,7 +67,7 @@ function Set-TargetResource
         if ($params.ContainsKey("PreExpireDays")) { $updateParams.Add("PreExpireDays", $params.PreExpireDays) }
         if ($params.ContainsKey("Schedule")) { $updateParams.Add("Schedule", $params.Schedule) }
 
-        Invoke-xSharePointSPCmdlet -CmdletName "Set-SPManagedAccount" -Arguments $updateParams
+        Set-SPManagedAccount @updateParams
     }
 }
 
@@ -86,6 +88,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification") 
 }
 

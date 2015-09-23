@@ -31,7 +31,7 @@ function Invoke-xSharePointCommand() {
         }
         Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
 
-        $result = Invoke-Command @invokeArgs
+        $result = Invoke-Command @invokeArgs -Verbose
         return $result
     } else {
         if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) { 
@@ -49,7 +49,7 @@ function Invoke-xSharePointCommand() {
         
         if ($session) { $invokeArgs.Add("Session", $session) }
 
-        $result = Invoke-Command @invokeArgs
+        $result = Invoke-Command @invokeArgs -Verbose
 
         if ($session) { Remove-PSSession $session } 
         return $result

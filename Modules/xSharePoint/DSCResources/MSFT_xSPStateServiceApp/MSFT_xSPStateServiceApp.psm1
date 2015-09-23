@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -15,10 +15,11 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $serviceApp = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
+        $serviceApp = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
 
-        if ($null -eq $serviceApp) { return @{} }
+        if ($null -eq $serviceApp) { return $null }
         
         return @{
             Name = $serviceApp.DisplayName
@@ -37,7 +38,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -47,8 +48,9 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $app = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPStateServiceApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
+        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $app) { 
             
             $dbParams = @{}
@@ -56,9 +58,9 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseServer")) { $dbParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseCredentials")) { $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) }
 
-            $database = Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceDatabase" -Arguments $dbParams
-            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplication" -Arguments @{ Name = $params.Name; Database = $database }
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPStateServiceApplicationProxy" -Arguments @{ ServiceApplication = $app; DefaultProxyGroup = $true }
+            $database = New-SPStateServiceDatabase @dbParams
+            $app = New-SPStateServiceApplication -Name $params.Name -Database $database 
+            New-SPStateServiceApplicationProxy -ServiceApplication $app -DefaultProxyGroup | Out-Null
         }
     }
 }
@@ -71,7 +73,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -79,6 +81,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for state service application $Name"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
 }
 

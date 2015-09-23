@@ -13,9 +13,10 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $sap = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
-        if ($null -eq $sap) { return @{} }
+        $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
+        if ($null -eq $sap) { return $null }
         
         return @{
             Name = $sap.Name
@@ -41,19 +42,14 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $sap = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceApplicationPool" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
+        $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $sap) { 
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPServiceApplicationPool" -Arguments @{
-                Name = $params.Name 
-                Account = $params.ServiceAccount
-            }
+            New-SPServiceApplicationPool -Name $params.Name  -Account $params.ServiceAccount
         } else {
             if ($sap.ProcessAccountName -ne $params.ServiceAccount) {  
-                Invoke-xSharePointSPCmdlet -CmdletName "Set-SPServiceApplicationPool" -Arguments @{
-                    Identity = $params.Name 
-                    Account = $params.ServiceAccount
-                }
+                Set-SPServiceApplicationPool -Identity $params.Name  -Account $params.ServiceAccount
             }
         }
     }
@@ -73,6 +69,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing service application pool '$Name'"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount")
 }
 

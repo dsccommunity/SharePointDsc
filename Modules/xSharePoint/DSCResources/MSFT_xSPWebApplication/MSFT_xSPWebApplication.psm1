@@ -22,11 +22,12 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
         
-        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
-        if ($null -eq $wa) { return @{} }
+        $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        if ($null -eq $wa) { return $null }
 
-        $authProvider = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPAuthenticationProvider" -Arguments @{ WebApplication = $wa.Url; Zone = "Default" }
+        $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
 
         if ($authProvider.DisableKerberos -eq $true) { $localAuthMode = "NTLM" } else { $localAuthMode = "Kerberos" }
 
@@ -72,29 +73,27 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        if ($AuthenticationMethod -eq "NTLM") {
-            $ap = Invoke-xSharePointSPCmdlet -CmdletName "New-SPAuthenticationProvider" -Arguments @{ 
-                UseWindowsIntegratedAuthentication = $true
-                DisableKerberos = $true
+        $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        if ($null -eq $wa) {
+            if ($params.ContainsKey("AuthenticationMethod") -eq $true) {
+                if ($params.AuthenticationMethod -eq "NTLM") {
+                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos 
+                } else {
+                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
+                }
+                $params.Remove("AuthenticationMethod")
+                $params.Add("AuthenticationProvider", $ap)
             }
-        } else {
-            $ap = Invoke-xSharePointSPCmdlet -CmdletName "New-SPAuthenticationProvider" -Arguments @{ 
-                UseWindowsIntegratedAuthentication = $true
-            }
-        }
-        $params.Add("AuthenticationProvider", $ap)
-
-        $wa = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPWebApplication" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
-        if ($null -eq $wa) { 
+             
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
-            if ($params.ContainsKey("AuthenticationMethod")) { $params.Remove("AuthenticationMethod") | Out-Null }
             if ($params.ContainsKey("AllowAnonymous")) { 
                 $params.Remove("AllowAnonymous") | Out-Null 
                 $params.Add("AllowAnonymousAccess", $true)
             }
 
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPWebApplication" -Arguments $params
+            New-SPWebApplication @params
         }
     }
 }
@@ -122,6 +121,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
+    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
 }
 

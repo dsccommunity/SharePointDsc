@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPManagedPath"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -23,58 +21,59 @@ Describe "xSPManagedPath" {
             HostHeader = $false
         }
 
-        Context "Validate get method" {
-            It "Calls the data from SharePoint" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPManagedPath" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
-            }
-        }
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock New-SPManagedPath { }
 
-        Context "Validate test method" {
-            It "Fails when path is not found" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
+        Context "The managed path does not exist and should" {
+            Mock Get-SPManagedPath { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when the path is found and is the correct type" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        RelativeUrl = $testParams.RelativeUrl
-                        Explicit = $testParams.Explicit
-                        HostHeader = $testParams.HostHeader
-                        WebAppUrl = $testParams.WebAppUrl
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when the path is found and is not the correct type" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        RelativeUrl = $testParams.RelativeUrl
-                        Explicit = (-not $testParams.Explicit)
-                        HostHeader = $testParams.HostHeader
-                        WebAppUrl = $testParams.WebAppUrl
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
-        }
 
-        Context "Validate set method" {
-            It "Creates a new web application managed path" {
-                Mock Get-TargetResource { return $null } -Verifiable
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPManagedPath" -and $Arguments.WebApplication -eq $testParams.WebAppUrl }
+            It "creates a host header path in the set method" {
                 Set-TargetResource @testParams
-                Assert-VerifiableMocks
+
+                Assert-MockCalled New-SPManagedPath
             }
-            
+
             $testParams.HostHeader = $true
-
-            It "Creates a new host header managed path" {
-                Mock Get-TargetResource { return $null } -Verifiable
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPManagedPath" -and $Arguments.HostHeader -eq $true }
+            It "creates a host header path in the set method" {
                 Set-TargetResource @testParams
-                Assert-VerifiableMocks
+
+                Assert-MockCalled New-SPManagedPath
+            }
+            $testParams.HostHeader = $false
+        }
+
+        Context "The path exists but is of the wrong type" {
+            Mock Get-SPManagedPath { return @{
+                Name = $testParams.RelativeUrl
+                Type = "ExplicitInclusion"
+            } }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context "The path exists and is the correct type" {
+            Mock Get-SPManagedPath { return @{
+                Name = $testParams.RelativeUrl
+                Type = "WildcardInclusion"
+            } }
+
+            It "returns results from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

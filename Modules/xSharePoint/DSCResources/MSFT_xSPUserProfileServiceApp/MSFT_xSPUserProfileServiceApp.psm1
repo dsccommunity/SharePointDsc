@@ -21,27 +21,22 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
 
-        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        if ($null -eq $serviceApps) { 
+            return $null 
+        }
+        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
 
         If ($null -eq $serviceApp)
         {
-            return @{}
+            return $null
         }
         else
         {
-            $propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
-
-            $socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
-            $socialDB = $socialProp.GetValue($serviceApp)
-
-            $profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
-            $profileDB = $profileProp.GetValue($serviceApp)
-
-            $syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
-            $syncDB = $syncProp.GetValue($serviceApp)
-
-            $spFarm = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFarm"
+            $databases = Get-UserProfileServiceProperties $serviceApp
+            $spFarm = Get-SPFarm
 
             if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
                 $farmAccount = $params.FarmAccount
@@ -54,12 +49,12 @@ function Get-TargetResource
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 FarmAccount = $farmAccount
                 MySiteHostLocation = $params.MySiteHostLocation
-                ProfileDBName = $profileProp.Name
-                ProfileDBServer = $profileProp.Server.Name
-                SocialDBName = $socialDB.Name
-                SocialDBServer = $socialDB.Server.Name
-                SyncDBName = $syncDB.Name
-                SyncDBServer = $syncDB.Server.Name
+                ProfileDBName = $databases.ProfileDatabase.Name
+                ProfileDBServer = $databases.ProfileDatabase.Server.Name
+                SocialDBName = $databases.SocialDatabase.Name
+                SocialDBServer = $databases.SocialDatabase.Server.Name
+                SyncDBName = $databases.SynchronizationDatabase.Name
+                SyncDBServer = $databases.SynchronizationDatabase.Server.Name
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -67,6 +62,27 @@ function Get-TargetResource
     return $result
 }
 
+function Get-UserProfileServiceProperties() {
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]  [System.String] $serviceApp
+    )
+    $results = @{}
+    $propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
+
+    $socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
+    $results.Add("SocialDatabase", $socialProp.GetValue($serviceApp)) 
+
+    $profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
+    $results.Add("ProfileDatabase", $profileProp.GetValue($serviceApp))
+
+    $syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
+    $results.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
+
+    return $results
+}
 
 function Set-TargetResource
 {
@@ -98,21 +114,19 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        Initialize-xSharePointPSSnapin
+
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
         $params.Remove("FarmAccount") | Out-Null
 
         $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
         $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
-        $serviceApp = Get-xSharePointServiceApplication -Name $params.Name -TypeName UserProfile
-        if ($null -eq $serviceApp) { 
-            $app = Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplication" -Arguments $params
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        if ($null -eq $serviceApps) { 
+            $app = New-SPProfileServiceApplication @params
             if ($null -ne $app) {
-                Invoke-xSharePointSPCmdlet -CmdletName "New-SPProfileServiceApplicationProxy" -Arguments @{
-                    Name = "$($params.Name) Proxy"
-                    ServiceApplication = $app 
-                    DefaultProxyGroup = $true
-                }
+                New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
             }
         }
     }
@@ -146,7 +160,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
 }
 
 Export-ModuleMember -Function *-TargetResource

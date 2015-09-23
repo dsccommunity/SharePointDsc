@@ -1,20 +1,16 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPCacheAccounts"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1")
 
 Describe "xSPCacheAccounts" {
     InModuleScope $ModuleName {
@@ -24,84 +20,104 @@ Describe "xSPCacheAccounts" {
             SuperReaderAlias = "DEMO\SuperReader"
         }
 
-        Context "Validate get method" {
-            It "Calls the service application picker with the appropriate type name" {
-                Mock Invoke-xSharePointSPCmdlet { return @{
-                    Properties = @{
-                        SuperUserAlias = $testParams.SuperUserAlias
-                        SuperReaderAlias = $testParams.SuperReaderAlias
-                    }
-                }} -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
-                
-                $results = Get-TargetResource @testParams
-                $results.Count | Should Not BeNullOrEmpty
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock Set-xSharePointCacheReaderPolicy {}
+        Mock Set-xSharePointCacheOwnerPolicy {}
+        Mock Update-xSharePointObject {}
 
-                Assert-VerifiableMocks
+        Context "The web application specified does not exist" {
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "throws and exception where set is called" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when no cache accounts exist" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
+        Context "The specified cache accounts have not been configured" {
+            Mock Get-SPWebApplication { return @{
+                Properties = @{ }
+            }}
+
+            It "returns empty strings from the Get method" {
+                $results = Get-TargetResource @testParams
+                $results.SuperUserAlias | Should BeNullOrEmpty
+                $results.SuperReaderAlias | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when the correct accounts are assigned" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        SuperUserAlias = $testParams.SuperUserAlias
-                        SuperReaderAlias = $testParams.SuperReaderAlias
-                    } 
-                } 
+
+            It "Updates the accounts when set is called" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Set-xSharePointCacheReaderPolicy
+                Assert-MockCalled Set-xSharePointCacheOwnerPolicy
+                Assert-MockCalled Update-xSharePointObject
+            }
+        }
+
+        Context "The cache accounts have been configured correctly" {
+            Mock Get-SPWebApplication { return @{
+                Properties = @{
+                    portalsuperuseraccount = $testParams.SuperUserAlias
+                    portalsuperreaderaccount = $testParams.SuperReaderAlias
+                }
+            }}
+
+            It "returns the values from the get method" {
+                $results = Get-TargetResource @testParams
+                $results.SuperUserAlias | Should Not BeNullOrEmpty
+                $results.SuperReaderAlias | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-            It "Fails when the wrong super reader is defined" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        SuperUserAlias = $testParams.SuperUserAlias
-                        SuperReaderAlias = "DEMO\WrongUser"
-                    } 
+        }
+
+        Context "Cache accounts have been configured, but the reader account is wrong" {
+            Mock Get-SPWebApplication { return @{
+                Properties = @{
+                    SuperUserAlias = $testParams.SuperUserAlias
+                    SuperReaderAlias = "WRONG\AccountName"
                 }
+            }}
+
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Fails when the wrong super user is defined" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        SuperUserAlias = "DEMO\WrongUser"
-                        SuperReaderAlias = $testParams.SuperReaderAlias
-                    } 
-                }
-                Test-TargetResource @testParams | Should Be $false
+
+            It "sets the correct accounts to the web app again" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Update-xSharePointObject
             }
         }
 
-        Context "Validate set method" {
-            It "Sets accounts when no existing account is set" {
-                Mock Invoke-xSharePointSPCmdlet { return @{
-                    Properties = @{}
-                } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
-                Mock Set-xSharePointCacheReaderPolicy { return $null } -Verifiable 
-                Mock Set-xSharePointCacheOwnerPolicy { return $null } -Verifiable 
-                Mock Update-xSharePointObject { return $null } -Verifiable
+        Context "Cache accounts have been configured, but the super account is wrong" {
+            Mock Get-SPWebApplication { return @{
+                Properties = @{
+                    SuperUserAlias = "WRONG\AccountName"
+                    SuperReaderAlias = $testParams.SuperReaderAlias
+                }
+            }}
 
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Sets accounts when existing accounts are set" {
-                Mock Invoke-xSharePointSPCmdlet { return @{
-                    Properties = @{
-                        SuperUserAlias = $testParams.SuperUserAlias
-                        SuperReaderAlias = $testParams.SuperReaderAlias
-                    }
-                } } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
-                Mock Set-xSharePointCacheReaderPolicy { return $null } -Verifiable
-                Mock Set-xSharePointCacheOwnerPolicy { return $null } -Verifiable
-                Mock Update-xSharePointObject { return $null } -Verifiable
-
+            It "sets the correct accounts to the web app again" {
                 Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+                Assert-MockCalled Update-xSharePointObject
             }
         }
     }    

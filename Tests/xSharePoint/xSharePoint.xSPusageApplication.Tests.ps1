@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPUsageApplication"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -24,85 +22,113 @@ Describe "xSPUsageApplication" {
             UsageLogMaxSpaceGB = 10
         }
 
-        Context "Validate get method" {
-            It "Calls the right functions to retrieve SharePoint data" {
-                Mock Invoke-xSharePointSPCmdlet { return @(@{ TypeName = "Usage and Health Data Collection Service Application" }) } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name } -ModuleName "xSharePoint.ServiceApplications"
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPUsageService" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Initialize-xSharePointPSSnapin { }
+        Mock New-SPUsageApplication { }
+        Mock Set-SPUsageService { }
+        Mock Get-SPUsageService { return @{
+            UsageLogCutTime = $testParams.UsageLogCutTime
+            UsageLogDir = $testParams.UsageLogLocation
+            UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
+            UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
+        }}
+
+        Context "When no service application exists in the current farm" {
+
+            Mock Get-SPServiceApplication { return $null }
+
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "creates a new service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPUsageApplication
             }
         }
 
-        Context "Validate test method" {
-            It "Fails when state service app doesn't exist" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
-                Test-TargetResource @testParams | Should Be $false
+        Context "When a service application exists and is configured correctly" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Usage and Health Data Collection Service Application"
+                    DisplayName = $testParams.Name
+                    UsageDatabase = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
             }
-            It "Passes when the state service app exists and settings are corrent" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogLocation = $testParams.UsageLogLocation
-                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
-                        UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
-                    } 
-                } 
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
-            It "Fails when the state service app exists and settings are wrong" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogLocation = "C:\WrongPath"
-                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
-                        UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
-                    } 
-                } 
+        }
+
+        Context "When a service application exists and log path are not configured correctly" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Usage and Health Data Collection Service Application"
+                    DisplayName = $testParams.Name
+                    UsageDatabase = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPUsageService { return @{
+                UsageLogCutTime = $testParams.UsageLogCutTime
+                UsageLogDir = "C:\Wrong\Location"
+                UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
+                UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
+            }}
+
+            It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        UsageLogCutTime = 0
-                        UsageLogLocation = $testParams.UsageLogLocation
-                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
-                        UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $false
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogLocation = $testParams.UsageLogLocation
-                        UsageLogMaxFileSizeKB = 0
-                        UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $false
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        UsageLogCutTime = $testParams.UsageLogCutTime
-                        UsageLogLocation = $testParams.UsageLogLocation
-                        UsageLogMaxFileSizeKB = $testParams.UsageLogMaxFileSizeKB
-                        UsageLogMaxSpaceGB = 0
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the update service app cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Set-SPUsageService
             }
         }
 
-        Context "Validate set method" {
-            It "Sets the usage values correctly" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPServiceApplication" -and $Arguments.Name -eq $testParams.Name }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPUsageApplication" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Set-SPUsageService" }
+        Context "When a service application exists and log size is not configured correctly" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Usage and Health Data Collection Service Application"
+                    DisplayName = $testParams.Name
+                    UsageDatabase = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPUsageService { return @{
+                UsageLogCutTime = $testParams.UsageLogCutTime
+                UsageLogDir = $testParams.UsageLogLocation
+                UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
+                UsageLogMaxSpaceGB = 1
+            }}
 
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
-                Assert-VerifiableMocks
+                Assert-MockCalled Set-SPUsageService
             }
         }
     }    
