@@ -39,9 +39,9 @@ function Get-TargetResource
             AllowAnonymous = $authProvider.AllowAnonymous
             DatabaseName = $wa.ContentDatabases[0].Name
             DatabaseServer = $wa.ContentDatabases[0].Server
-            HostHeader = [Uri]::New($wa.Url).Host
+            HostHeader = (New-Object System.Uri $wa.Url).Host
             Path = $wa.IisSettings[0].Path
-            Port = [Uri]::New($wa.Url).Port
+            Port = (New-Object System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
             InstallAccount = $params.InstallAccount
         }
