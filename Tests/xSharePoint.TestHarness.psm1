@@ -11,9 +11,10 @@ function Invoke-xSharePointTests() {
 
     $testResultSettings = @{ }
     if ([string]::IsNullOrEmpty($testResultsFile) -eq $false) {
-		$testResultSettings.Add("OutputFormat", "NUnitXml" )
+        $testResultSettings.Add("OutputFormat", "NUnitXml" )
         $testResultSettings.Add("OutputFile", $testResultsFile)
     }
+    Import-Module "$repoDir\modules\xSharePoint"
 
     $results = Invoke-Pester -Script @(
         @{
