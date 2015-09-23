@@ -1,8 +1,19 @@
 function Invoke-xSharePointTests() {
+    param
+    (
+        [parameter(Mandatory = $false)] [System.String] $testResultsFile
+    )
+
     $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 
     $testCoverageFiles = @()
     Get-ChildItem "$repoDir\modules\xSharePoint\**\*.psm1" -Recurse | ForEach-Object { $testCoverageFiles += $_.FullName }
+
+    $testResultSettings = @{ }
+    if ([string]::IsNullOrEmpty($testResultsFile) -eq $false) {
+		$testResultSettings.Add("OutputFormat", "NUnitXml" )
+        $testResultSettings.Add("OutputFile", $testResultsFile)
+    }
 
     $results = Invoke-Pester -Script @(
         @{
@@ -17,7 +28,9 @@ function Invoke-xSharePointTests() {
                 'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\16.0.4316.1217\Microsoft.SharePoint.PowerShell.psm1") 
             }
         }
-    ) -CodeCoverage $testCoverageFiles -PassThru
+    ) -CodeCoverage $testCoverageFiles -PassThru @testResultSettings
+
+    return $results
 }
 
 function Write-xSharePointStubFiles() {
