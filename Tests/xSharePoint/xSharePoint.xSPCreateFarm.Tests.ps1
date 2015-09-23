@@ -36,8 +36,6 @@ Describe "xSPCreateFarm" {
 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-
         Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
 
         Context "no farm is configured locally and a supported version of SharePoint is installed" {
