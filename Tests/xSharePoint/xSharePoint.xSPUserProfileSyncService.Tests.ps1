@@ -21,6 +21,7 @@ Describe "xSPUserProfileSyncService" {
         }
 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { }
         Mock Get-SPFarm { return @{
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }

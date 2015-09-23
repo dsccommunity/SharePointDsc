@@ -36,6 +36,7 @@ Describe "xSPDiagnosticLoggingSettings" {
         }
 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { }
 
         Context "Diagnostic configuration can not be loaded" {

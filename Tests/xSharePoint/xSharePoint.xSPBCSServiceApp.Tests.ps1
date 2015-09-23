@@ -27,7 +27,7 @@ Describe "xSPBCSServiceApp" {
         }
 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-		Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
 
         Mock Initialize-xSharePointPSSnapin { }
 

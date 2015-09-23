@@ -21,6 +21,7 @@ Describe "xSPInstallPrereqs" {
         }
 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
 

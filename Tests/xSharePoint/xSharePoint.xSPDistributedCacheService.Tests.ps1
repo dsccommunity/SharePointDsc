@@ -24,6 +24,7 @@ Describe "xSPDistributedCacheService" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
         Import-Module "$RepoRoot\Tests\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
 

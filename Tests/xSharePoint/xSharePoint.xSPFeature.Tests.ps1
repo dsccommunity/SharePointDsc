@@ -27,6 +27,7 @@ Describe "xSPFeature" {
         }
 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { }
         Mock Enable-SPFeature {}
         Mock Disable-SPFeature {}
