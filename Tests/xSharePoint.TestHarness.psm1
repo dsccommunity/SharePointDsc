@@ -14,7 +14,7 @@ function Invoke-xSharePointTests() {
         $testResultSettings.Add("OutputFormat", "NUnitXml" )
         $testResultSettings.Add("OutputFile", $testResultsFile)
     }
-    Import-Module "$repoDir\modules\xSharePoint"
+    Import-Module "$repoDir\modules\xSharePoint\xSharePoint.psd1"
 
     $results = Invoke-Pester -Script @(
         @{
