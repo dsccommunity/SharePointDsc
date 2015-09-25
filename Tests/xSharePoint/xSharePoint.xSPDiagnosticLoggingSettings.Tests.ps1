@@ -35,9 +35,12 @@ Describe "xSPDiagnosticLoggingSettings" {
             EventLogFloodProtectionNotifyInterval = 5
         }
 
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Mock Initialize-xSharePointPSSnapin { }
+        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Context "Diagnostic configuration can not be loaded" {
             Mock Get-SPDiagnosticConfig { return $null }

@@ -76,10 +76,10 @@ function Set-TargetResource
             {
                 New-SPMetadataServiceApplicationProxy -Name ($params.Name + " Proxy") `
                                                       -ServiceApplication $app `
-                                                      -DefaultProxyGroup $true `
-                                                      -ContentTypePushdownEnabled $true `
-                                                      -DefaultKeywordTaxonomy = $true `
-                                                      -DefaultSiteCollectionTaxonomy = $true
+                                                      -DefaultProxyGroup `
+                                                      -ContentTypePushdownEnabled `
+                                                      -DefaultKeywordTaxonomy `
+                                                      -DefaultSiteCollectionTaxonomy
             }
         }
     }

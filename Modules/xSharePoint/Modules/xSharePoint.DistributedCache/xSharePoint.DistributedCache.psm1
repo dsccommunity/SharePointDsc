@@ -10,7 +10,7 @@ function Add-xSharePointDistributedCacheServer() {
         [System.String]
         $ServiceAccount
     )
-    
+    Initialize-xSharePointPSSnapin    
 
     Add-SPDistributedCacheServiceInstance
     Update-SPDistributedCacheSize -CacheSizeInMB $CacheSizeInMB

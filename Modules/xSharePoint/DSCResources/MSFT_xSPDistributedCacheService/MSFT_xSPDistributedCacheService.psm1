@@ -23,8 +23,6 @@ function Get-TargetResource
         }
         try
         {
-            
-
             Use-CacheCluster -ErrorAction SilentlyContinue
             $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
 

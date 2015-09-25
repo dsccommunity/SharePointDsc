@@ -18,7 +18,12 @@ Describe "xSPInstall" {
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Context "SharePoint binaries are not installed but should be" {
             Mock Get-CimInstance { return $null }

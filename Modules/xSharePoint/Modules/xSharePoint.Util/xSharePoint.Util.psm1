@@ -31,7 +31,7 @@ function Invoke-xSharePointCommand() {
         }
         Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
 
-        $result = Invoke-Command @invokeArgs -Verbose -NoNewScope
+        $result = Invoke-Command @invokeArgs -Verbose
         return $result
     } else {
         if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) { 

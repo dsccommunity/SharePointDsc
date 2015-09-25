@@ -22,9 +22,12 @@ Describe "xSPUsageApplication" {
             UsageLogMaxSpaceGB = 10
         }
 
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Mock Initialize-xSharePointPSSnapin { }
+        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         Mock New-SPUsageApplication { }
         Mock Set-SPUsageService { }
         Mock Get-SPUsageService { return @{

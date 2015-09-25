@@ -23,13 +23,15 @@ Describe "xSPDistributedCacheService" {
             CreateFirewallRules = $true
         }
         
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
+        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.DistributedCache"
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
         Import-Module "$RepoRoot\Tests\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
-
-        Mock Initialize-xSharePointPSSnapin { }
-        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.DistributedCache"
         Mock Use-CacheCluster { }
         Mock Get-WmiObject { return @{ StartName = $testParams.ServiceAccount } }
         Mock Get-NetFirewallRule { return @{} }
