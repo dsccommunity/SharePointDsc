@@ -108,10 +108,9 @@ function Set-TargetResource
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
-            $instanceName ="SPDistributedCacheService Name=AppFabricCachingService"
-            $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq $instanceName -and ($_.Server.Name) -eq $env:computername }
-            $serviceInstance.Delete() 
-            Initialize-xSharePointPSSnapin
+            $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $env:computername }
+            Delete-DCacheService $serviceInstance 
+            
             Remove-SPDistributedCacheServiceInstance
         }
         if ($CreateFirewallRules -eq $true) {
@@ -139,6 +138,16 @@ function Update-DCacheService() {
     $CacheService.ProcessIdentity.Deploy()
 }
 
+function Delete-DCacheService() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [object]
+        $CacheService
+    )
+    $CacheService.Delete() 
+}
 
 function Test-TargetResource
 {

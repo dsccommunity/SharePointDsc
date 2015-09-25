@@ -86,7 +86,7 @@ function Set-TargetResource
             }
             $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
 
-            Set-UserProfileSyncMachine -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount            
+            Set-UserProfileSyncMachine -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount -Ups $ups            
             Start-SPServiceInstance -Identity $syncService.ID 
             
             $desiredState = "Online"

@@ -11,7 +11,6 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPDistributedCacheService"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1")
 
 Describe "xSPDistributedCacheService" {
     InModuleScope $ModuleName {
@@ -24,7 +23,6 @@ Describe "xSPDistributedCacheService" {
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
-        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.DistributedCache"
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
@@ -35,20 +33,20 @@ Describe "xSPDistributedCacheService" {
         Mock Use-CacheCluster { }
         Mock Get-WmiObject { return @{ StartName = $testParams.ServiceAccount } }
         Mock Get-NetFirewallRule { return @{} }
-        Mock Get-NetFirewallRule { return @{} } -ModuleName "xSharePoint.DistributedCache"
-        Mock Enable-NetFirewallRule { }  -ModuleName "xSharePoint.DistributedCache"
-        Mock New-NetFirewallRule { }  -ModuleName "xSharePoint.DistributedCache"
-        Mock Disable-NetFirewallRule { } -ModuleName "xSharePoint.DistributedCache"
-        Mock Add-SPDistributedCacheServiceInstance { } -ModuleName "xSharePoint.DistributedCache"
-        Mock Update-SPDistributedCacheSize { } -ModuleName "xSharePoint.DistributedCache"
-        Mock Get-SPManagedAccount { return @{} } -ModuleName "xSharePoint.DistributedCache"
+        Mock Get-NetFirewallRule { return @{} } 
+        Mock Enable-NetFirewallRule { }  
+        Mock New-NetFirewallRule { }  
+        Mock Disable-NetFirewallRule { } 
+        Mock Add-SPDistributedCacheServiceInstance { } 
+        Mock Update-SPDistributedCacheSize { } 
+        Mock Get-SPManagedAccount { return @{} } 
         Mock Get-SPFarm { return @{ 
             Services = @(@{ 
                 Name = "AppFabricCachingService"
                 ProcessIdentity = @{ ManagedAccount = $null }
             }) 
-        } }  -ModuleName "xSharePoint.DistributedCache"
-        Mock Update-xSharePointDistributedCacheService { } -ModuleName "xSharePoint.DistributedCache"
+        } }  
+        Mock Update-DCacheService { } 
 
 
         Context "Distributed cache is not configured" {
@@ -64,7 +62,7 @@ Describe "xSPDistributedCacheService" {
 
             It "Sets up the cache correctly" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Add-SPDistributedCacheServiceInstance -ModuleName "xSharePoint.DistributedCache"
+                Assert-MockCalled Add-SPDistributedCacheServiceInstance 
             }
         }
 
@@ -88,7 +86,7 @@ Describe "xSPDistributedCacheService" {
 
             It "shuts down the distributed cache service" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Enable-NetFirewallRule -ModuleName "xSharePoint.DistributedCache"
+                Assert-MockCalled Enable-NetFirewallRule 
             }
         }
 
@@ -98,8 +96,13 @@ Describe "xSPDistributedCacheService" {
                 Size = $testParams.CacheSizeInMB
             }}
             Mock Get-CacheHost { return @{ PortNo = 22233 } }
-            Mock Remove-xSharePointDistributedCacheServer { }
-            Mock Get-NetFirewallRule { return @{} } -ModuleName "xSharePoint.DistributedCache"
+            Mock Get-NetFirewallRule { return @{} } 
+            Mock Get-SPServiceInstance { return @(@{
+                Service = "SPDistributedCacheService Name=AppFabricCachingService"
+                Server = @{ Name = $env:COMPUTERNAME }
+            })}
+            Mock Delete-DCacheService { }
+            Mock Remove-SPDistributedCacheServiceInstance { }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -107,8 +110,8 @@ Describe "xSPDistributedCacheService" {
 
             It "shuts down the distributed cache service" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Remove-xSharePointDistributedCacheServer
-                Assert-MockCalled Disable-NetFirewallRule -ModuleName "xSharePoint.DistributedCache"
+                Assert-MockCalled Remove-SPDistributedCacheServiceInstance
+                Assert-MockCalled Disable-NetFirewallRule 
             }
         }
     }    
