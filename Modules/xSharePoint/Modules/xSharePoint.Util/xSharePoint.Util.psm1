@@ -57,18 +57,18 @@ function Invoke-xSharePointCommand() {
 }
 
 function Initialize-xSharePointPSSnapin() {
-	Write-Verbose "Checking for the powershell snapin"
-		if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
-		{
-			Write-Verbose "Loading SharePoint PowerShell snapin"
-			try
-			{
-				Add-PSSnapin "Microsoft.SharePoint.PowerShell"
-			} catch {
-				Write-Verbose ( $_ | Format-List | Out-String )
-			}
-			
-		}
+    Write-Verbose "Checking for the powershell snapin"
+        if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+        {
+            Write-Verbose "Loading SharePoint PowerShell snapin"
+            try
+            {
+                Add-PSSnapin "Microsoft.SharePoint.PowerShell"
+            } catch {
+                Write-Verbose ( $_ | Format-List | Out-String )
+            }
+            
+        }
 }
 
 function Rename-xSharePointParamValue() {
