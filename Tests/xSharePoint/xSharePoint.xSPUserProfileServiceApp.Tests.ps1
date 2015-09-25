@@ -19,13 +19,14 @@ Describe "xSPUserProfileServiceApp" {
             ApplicationPool = "SharePoint Service Applications"
             FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         }
-
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        
         Mock Get-UserProfileServiceProperties { return @{
             ProfileDatabase = @{
                 Name = "SP_ProfileDB"

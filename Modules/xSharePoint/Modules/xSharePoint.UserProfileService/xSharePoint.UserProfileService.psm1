@@ -63,6 +63,7 @@ function Set-xSharePointUserProfileSyncMachine() {
         [PSCredential]
         $FarmAccount
     )
+    Initialize-xSharePointPSSnapin
     $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
     if ($null -eq $serviceApps) { 
         return $null 

@@ -19,13 +19,14 @@ Describe "xSPUserProfileSyncService" {
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
-
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        
         Mock Get-SPFarm { return @{
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}

@@ -22,7 +22,7 @@ Describe "xSPDistributedCacheService" {
             ServiceAccount = "DOMAIN\user"
             CreateFirewallRules = $true
         }
-        
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
         Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.DistributedCache"
         Mock Invoke-xSharePointCommand { 

@@ -41,6 +41,7 @@ function Remove-xSharePointDistributedCacheServer() {
     $instanceName ="SPDistributedCacheService Name=AppFabricCachingService"
     $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq $instanceName -and ($_.Server.Name) -eq $env:computername }
     $serviceInstance.Delete() 
+    Initialize-xSharePointPSSnapin
     Remove-SPDistributedCacheServiceInstance
 }
 
