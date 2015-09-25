@@ -80,7 +80,13 @@ function Set-TargetResource
         
          # Start the Sync service if it should be running on this server
         if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
-            Set-xSharePointUserProfileSyncMachine -UserProfileServiceAppName $params.UserProfileServiceAppName -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount            
+            $serviceApps = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
+            if ($null -eq $serviceApps) { 
+                throw [Exception] "No user profile service was found named $($params.UserProfileServiceAppName)"
+            }
+            $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
+
+            Set-UserProfileSyncMachine -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount            
             Start-SPServiceInstance -Identity $syncService.ID 
             
             $desiredState = "Online"
@@ -111,6 +117,25 @@ function Set-TargetResource
     }
 }
 
+function Set-UserProfileSyncMachine() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=2)]
+        [Guid]
+        $SyncServiceId,
+
+        [parameter(Mandatory = $true,Position=3)]
+        [PSCredential]
+        $FarmAccount,
+
+        [parameter(Mandatory = $true,Position=4)]
+        [object]
+        $Ups
+    )
+    
+    $Ups.SetSynchronizationMachine($env:COMPUTERNAME, $SyncServiceId, $FarmAccount.UserName, $FarmAccount.GetNetworkCredential().Password)
+}
 
 function Test-TargetResource
 {

@@ -72,8 +72,17 @@ function Set-TargetResource
         if($createFirewallRules -eq $true) {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
             Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
-                Enable-xSharePointDCIcmpFireWallRule
-                Enable-xSharePointDCFireWallRule
+                $icmpFirewallRule = Get-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -ErrorAction SilentlyContinue
+                if($null -eq $icmpFirewallRule ) {
+                    New-NetFirewallRule -Name Allow_Ping -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -Description "Allow ICMPv4 ping" -Protocol ICMPv4 -IcmpType 8 -Enabled True -Profile Any -Action Allow 
+                }
+                Enable-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)"
+
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
+                if($null -eq $firewallRule) {
+                    New-NetFirewallRule -Name "SPDistCache" -DisplayName "SharePoint Distributed Cache" -Protocol TCP -LocalPort 22233-22236 -Group "SharePoint"
+                }
+                Enable-NetFirewallRule -DisplayName "SharePoint Distributed Cache"
             }
             Write-Verbose -Message "Firewall rule added"
         }
@@ -83,22 +92,51 @@ function Set-TargetResource
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
-                Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
+                Add-SPDistributedCacheServiceInstance
+                Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB
+
+                $farm = Get-SPFarm
+                $cacheService = $farm.Services | Where-Object { $_.Name -eq "AppFabricCachingService" }
+                $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
+
+                $account = Get-SPManagedAccount -Identity $params.ServiceAccount
+                $cacheService.ProcessIdentity.ManagedAccount = $account
+
+                Update-DCacheService $cacheService
             }
         }
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
-            
-            Remove-xSharePointDistributedCacheServer
+            $instanceName ="SPDistributedCacheService Name=AppFabricCachingService"
+            $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq $instanceName -and ($_.Server.Name) -eq $env:computername }
+            $serviceInstance.Delete() 
+            Initialize-xSharePointPSSnapin
+            Remove-SPDistributedCacheServiceInstance
         }
         if ($CreateFirewallRules -eq $true) {
             Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
-                Disable-xSharePointDCFireWallRule
+                $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
+                if($null -ne $firewallRule) {
+                    Write-Verbose -Message "Disabling firewall rules."
+                    Disable-NetFirewallRule -DisplayName "SharePoint Distribute Cache"    
+                }
             }  
         }
         Write-Verbose -Message "Distributed cache removed."
     }
+}
+
+function Update-DCacheService() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [object]
+        $CacheService
+    )
+    $CacheService.ProcessIdentity.Update() 
+    $CacheService.ProcessIdentity.Deploy()
 }
 
 
