@@ -15,7 +15,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         try 
         {
@@ -67,7 +67,7 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            Initialize-xSharePointPSSnapin
+            
 
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
@@ -88,7 +88,7 @@ function Set-TargetResource
             Write-Verbose -Message "Updating Managed Metadata Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                Initialize-xSharePointPSSnapin
+                
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name  | Where-Object { $_.TypeName -eq "Managed Metadata Service" }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool

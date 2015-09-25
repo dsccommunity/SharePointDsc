@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '0.6.0.0'
+ModuleVersion = '0.7.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -75,9 +75,7 @@ FunctionsToExport = '*'
 CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Remove-xSharePointDistributedCacheServer",
                     "Invoke-xSharePointCommand",
-                    "Initialize-xSharePointPSSnapin",
                     "Get-xSharePointInstalledProductVersion",
-                    "Invoke-xSharePointSPCmdlet",
                     "Rename-xSharePointParamValue",
                     "Update-xSharePointObject",
                     "Set-xSharePointCacheReaderPolicy",
@@ -89,7 +87,8 @@ CmdletsToExport = @("Add-xSharePointDistributedCacheServer",
                     "Remove-xSharePointUserToLocalAdmin",
                     "Test-xSharePointUserIsLocalAdmin",
                     "Set-xSharePointUserProfileSyncMachine",
-                    "Test-xSharePointSpecificParameters")
+                    "Test-xSharePointSpecificParameters",
+                    "Initialize-xSharePointPSSnapin")
 
 # Variables to export from this module
 VariablesToExport = '*'

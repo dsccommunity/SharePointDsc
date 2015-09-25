@@ -16,7 +16,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         try {
             $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
@@ -53,7 +53,7 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $current = Get-TargetResource @params
         if ($current.Count -eq 0) {

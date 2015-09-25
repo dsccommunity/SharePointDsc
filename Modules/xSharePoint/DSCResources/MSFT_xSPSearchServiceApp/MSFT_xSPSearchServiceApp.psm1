@@ -15,7 +15,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
         if ($null -eq $serviceApps) { 
@@ -57,7 +57,7 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Search Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            Initialize-xSharePointPSSnapin
+            
 
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
@@ -73,7 +73,7 @@ function Set-TargetResource
             Write-Verbose -Message "Updating Search Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                Initialize-xSharePointPSSnapin
+                
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 

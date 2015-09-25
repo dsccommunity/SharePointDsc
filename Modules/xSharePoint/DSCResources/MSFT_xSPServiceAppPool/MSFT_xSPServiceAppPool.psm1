@@ -13,7 +13,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $sap) { return $null }
@@ -42,7 +42,7 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $sap) { 

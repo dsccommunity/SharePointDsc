@@ -14,7 +14,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
         if ($null -eq $serviceApps) { 
@@ -57,7 +57,7 @@ function Set-TargetResource
         Write-Verbose -Message "Creating BCS Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            Initialize-xSharePointPSSnapin
+            
 
             New-SPBusinessDataCatalogServiceApplication -Name $params.Name `
                                                         -ApplicationPool $params.ApplicationPool `
@@ -70,7 +70,7 @@ function Set-TargetResource
             Write-Verbose -Message "Updating BCS Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                Initialize-xSharePointPSSnapin
+                
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 

@@ -18,7 +18,7 @@ function Invoke-xSharePointCommand() {
     $VerbosePreference = 'Continue'
 
     $invokeArgs = @{
-        ScriptBlock = $ScriptBlock
+        ScriptBlock = [ScriptBlock]::Create("Initialize-xSharePointPSSnapin; " + $ScriptBlock.ToString())
     }
     if ($null -ne $Arguments) {
         $invokeArgs.Add("ArgumentList", $Arguments)
@@ -31,7 +31,7 @@ function Invoke-xSharePointCommand() {
         }
         Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
 
-        $result = Invoke-Command @invokeArgs -Verbose
+        $result = Invoke-Command @invokeArgs -Verbose -NoNewScope
         return $result
     } else {
         if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) { 
@@ -56,45 +56,19 @@ function Invoke-xSharePointCommand() {
     }
 }
 
-function Invoke-xSharePointSPCmdlet() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=1)]
-        [string]
-        $CmdletName,
-
-        [parameter(Mandatory = $false,Position=2)]
-        [HashTable]
-        $Arguments
-    )
-
-    Write-Verbose "Preparing to execute SharePoint command - $CmdletName"
-
-    if ($null -ne $Arguments -and $Arguments.Count -gt 0) {
-        $argumentsString = ""
-        $Arguments.Keys | ForEach-Object {
-            $argumentsString += "$($_): $($Arguments.$_); "
-        }
-        Write-Verbose "Arguments for $CmdletName - $argumentsString"
-    }
-
-    if ($null -eq $Arguments) {
-        $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; $CmdletName; `$params = `$null"))
-        $result = Invoke-Command -ScriptBlock $script -NoNewScope
-    } else {
-        $script = ([scriptblock]::Create("Initialize-xSharePointPSSnapin; `$params = `$args[0]; $CmdletName @params; `$params = `$null"))
-        $result = Invoke-Command -ScriptBlock $script -ArgumentList $Arguments -NoNewScope
-    }
-    return $result
-}
-
 function Initialize-xSharePointPSSnapin() {
-    if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
-    {
-        Write-Verbose "Loading SharePoint PowerShell snapin"
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell"
-    }
+	Write-Verbose "Checking for the powershell snapin"
+		if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+		{
+			Write-Verbose "Loading SharePoint PowerShell snapin"
+			try
+			{
+				Add-PSSnapin "Microsoft.SharePoint.PowerShell"
+			} catch {
+				Write-Verbose ( $_ | Format-List | Out-String )
+			}
+			
+		}
 }
 
 function Rename-xSharePointParamValue() {

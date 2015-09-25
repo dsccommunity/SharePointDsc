@@ -23,7 +23,7 @@ function Get-TargetResource
         }
         try
         {
-            Initialize-xSharePointPSSnapin
+            
 
             Use-CacheCluster -ErrorAction SilentlyContinue
             $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
@@ -84,14 +84,14 @@ function Set-TargetResource
             Write-Verbose -Message "Enabling distributed cache service"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                Initialize-xSharePointPSSnapin
+                
                 Add-xSharePointDistributedCacheServer -CacheSizeInMB $params.CacheSizeInMB -ServiceAccount $params.ServiceAccount
             }
         }
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
-            Initialize-xSharePointPSSnapin
+            
             Remove-xSharePointDistributedCacheServer
         }
         if ($CreateFirewallRules -eq $true) {

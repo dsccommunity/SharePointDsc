@@ -21,7 +21,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
         if ($null -eq $serviceApps) { 
@@ -80,7 +80,7 @@ function Set-TargetResource
     if ($null -eq $CurrentState) {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            Initialize-xSharePointPSSnapin
+            
         
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
@@ -97,7 +97,7 @@ function Set-TargetResource
     Write-Verbose -Message "Configuring usage application $Name"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $setParams = @{}
         $setParams.Add("LoggingEnabled", $true)

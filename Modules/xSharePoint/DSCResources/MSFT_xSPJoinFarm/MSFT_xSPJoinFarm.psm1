@@ -14,7 +14,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
@@ -52,7 +52,7 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $joinFarmArgs = @{
             DatabaseServer = $params.DatabaseServer

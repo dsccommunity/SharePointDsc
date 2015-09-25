@@ -29,7 +29,7 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
         if ($null -eq $dc) { return $null }
@@ -90,7 +90,7 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        Initialize-xSharePointPSSnapin
+        
 
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null } 
         $params = $params | Rename-xSharePointParamValue -oldName "LogPath" -newName "LogLocation" `
