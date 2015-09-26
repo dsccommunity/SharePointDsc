@@ -56,10 +56,14 @@ Describe "xSPUserProfileSyncService" {
                     })
                 }
             }
-            Mock Get-SPServiceApplication { return @{
-                ID = [Guid]::NewGuid()
-                TypeName = "User Profile Service Application"
-            } } 
+            Mock Get-SPServiceApplication { return @(
+                New-Object Object |            
+                    Add-Member NoteProperty ID ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) -PassThru |
+                    Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
+                    Add-Member ScriptMethod SetSynchronizationMachine {
+                        param($computerName, $syncServiceID, $FarmUserName, $FarmPassword)
+                    } -PassThru      
+            )} 
 
             It "returns absent from the get method" {
                 $Global:xSharePointUPACheck = $false
@@ -73,7 +77,6 @@ Describe "xSPUserProfileSyncService" {
 
             It "calls the start service cmdlet from the set method" {
                 $Global:xSharePointUPACheck = $false
-                Mock Set-UserProfileSyncMachine { } 
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled Start-SPServiceInstance
@@ -131,7 +134,6 @@ Describe "xSPUserProfileSyncService" {
 
             It "calls the start service cmdlet from the set method" {
                 $Global:xSharePointUPACheck = $false
-                Mock Set-UserProfileSyncMachine { }
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled Stop-SPServiceInstance

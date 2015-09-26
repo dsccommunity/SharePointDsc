@@ -10,6 +10,7 @@ function Invoke-xSharePointCommand() {
         [HashTable]
         $Arguments,
 
+
         [parameter(Mandatory = $true)]
         [ScriptBlock]
         $ScriptBlock
@@ -18,7 +19,7 @@ function Invoke-xSharePointCommand() {
     $VerbosePreference = 'Continue'
 
     $invokeArgs = @{
-        ScriptBlock = [ScriptBlock]::Create("Initialize-xSharePointPSSnapin; " + $ScriptBlock.ToString())
+        ScriptBlock = [ScriptBlock]::Create("Initialize-xSharePointPSSnapin -Verbose; " + $ScriptBlock.ToString())
     }
     if ($null -ne $Arguments) {
         $invokeArgs.Add("ArgumentList", $Arguments)
@@ -45,7 +46,7 @@ function Invoke-xSharePointCommand() {
         #Running garbage collection to resolve issues related to Azure DSC extention use
         [GC]::Collect()
 
-        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -OperationTimeout 0 -IdleTimeout 60000) -ErrorAction Continue
+        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -OperationTimeout 0 -IdleTimeout 60000) -ErrorAction Continue
         
         if ($session) { $invokeArgs.Add("Session", $session) }
 
@@ -57,18 +58,19 @@ function Invoke-xSharePointCommand() {
 }
 
 function Initialize-xSharePointPSSnapin() {
+    $VerbosePreference = "Continue"
     Write-Verbose "Checking for the powershell snapin"
-        if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+    if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
+    {
+        Write-Verbose "Loading SharePoint PowerShell snapin"
+        try
         {
-            Write-Verbose "Loading SharePoint PowerShell snapin"
-            try
-            {
-                Add-PSSnapin "Microsoft.SharePoint.PowerShell"
-            } catch {
-                Write-Verbose ( $_ | Format-List | Out-String )
-            }
-            
+            Add-PSSnapin "Microsoft.SharePoint.PowerShell"
+        } catch {
+            Write-Verbose ( $_ | Format-List | Out-String )
         }
+            
+    }
 }
 
 function Rename-xSharePointParamValue() {

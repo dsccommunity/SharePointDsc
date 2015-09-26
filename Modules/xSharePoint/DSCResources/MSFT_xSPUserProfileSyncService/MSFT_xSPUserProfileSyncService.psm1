@@ -85,8 +85,8 @@ function Set-TargetResource
                 throw [Exception] "No user profile service was found named $($params.UserProfileServiceAppName)"
             }
             $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
+            $ups.SetSynchronizationMachine($env:COMPUTERNAME, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
 
-            Set-UserProfileSyncMachine -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount -Ups $ups            
             Start-SPServiceInstance -Identity $syncService.ID 
             
             $desiredState = "Online"
@@ -115,26 +115,6 @@ function Set-TargetResource
     {
         Remove-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
     }
-}
-
-function Set-UserProfileSyncMachine() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=2)]
-        [Guid]
-        $SyncServiceId,
-
-        [parameter(Mandatory = $true,Position=3)]
-        [PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true,Position=4)]
-        [object]
-        $Ups
-    )
-    
-    $Ups.SetSynchronizationMachine($env:COMPUTERNAME, $SyncServiceId, $FarmAccount.UserName, $FarmAccount.GetNetworkCredential().Password)
 }
 
 function Test-TargetResource

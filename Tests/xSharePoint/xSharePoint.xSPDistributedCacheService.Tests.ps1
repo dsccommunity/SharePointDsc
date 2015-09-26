@@ -43,11 +43,13 @@ Describe "xSPDistributedCacheService" {
         Mock Get-SPFarm { return @{ 
             Services = @(@{ 
                 Name = "AppFabricCachingService"
-                ProcessIdentity = @{ ManagedAccount = $null }
+                ProcessIdentity = New-Object Object |            
+                                    Add-Member NoteProperty ManagedAccount $null -PassThru |
+                                    Add-Member NoteProperty CurrentIdentityType $null -PassThru |             
+                                    Add-Member ScriptMethod Update {} -PassThru | 
+                                    Add-Member ScriptMethod Deploy {} -PassThru  
             }) 
-        } }  
-        Mock Update-DCacheService { } 
-
+        } }    
 
         Context "Distributed cache is not configured" {
             Mock Get-CacheHost { return $null }
@@ -97,11 +99,11 @@ Describe "xSPDistributedCacheService" {
             }}
             Mock Get-CacheHost { return @{ PortNo = 22233 } }
             Mock Get-NetFirewallRule { return @{} } 
-            Mock Get-SPServiceInstance { return @(@{
-                Service = "SPDistributedCacheService Name=AppFabricCachingService"
-                Server = @{ Name = $env:COMPUTERNAME }
-            })}
-            Mock Delete-DCacheService { }
+            Mock Get-SPServiceInstance { return @(New-Object Object |            
+                                                    Add-Member NoteProperty Service "SPDistributedCacheService Name=AppFabricCachingService" -PassThru |
+                                                    Add-Member NoteProperty Server @{ Name = $env:COMPUTERNAME } -PassThru |             
+                                                    Add-Member ScriptMethod Delete {} -PassThru
+            )}
             Mock Remove-SPDistributedCacheServiceInstance { }
 
             It "returns false from the test method" {

@@ -101,15 +101,15 @@ function Set-TargetResource
 
                 $account = Get-SPManagedAccount -Identity $params.ServiceAccount
                 $cacheService.ProcessIdentity.ManagedAccount = $account
-
-                Update-DCacheService $cacheService
+                $cacheService.ProcessIdentity.Update() 
+                $cacheService.ProcessIdentity.Deploy()
             }
         }
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
             $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $env:computername }
-            Delete-DCacheService $serviceInstance 
+            $serviceInstance.Delete() 
             
             Remove-SPDistributedCacheServiceInstance
         }
@@ -124,29 +124,6 @@ function Set-TargetResource
         }
         Write-Verbose -Message "Distributed cache removed."
     }
-}
-
-function Update-DCacheService() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=1)]
-        [object]
-        $CacheService
-    )
-    $CacheService.ProcessIdentity.Update() 
-    $CacheService.ProcessIdentity.Deploy()
-}
-
-function Delete-DCacheService() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=1)]
-        [object]
-        $CacheService
-    )
-    $CacheService.Delete() 
 }
 
 function Test-TargetResource
