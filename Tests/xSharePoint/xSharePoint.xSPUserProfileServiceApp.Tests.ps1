@@ -20,7 +20,7 @@ Describe "xSPUserProfileServiceApp" {
             FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
+        
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }

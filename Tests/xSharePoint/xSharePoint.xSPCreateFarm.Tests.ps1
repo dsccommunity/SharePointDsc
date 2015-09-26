@@ -23,7 +23,7 @@ Describe "xSPCreateFarm" {
             CentralAdministrationPort = 1234
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Mock Initialize-xSharePointPSSnapin { } -ModuleName "xSharePoint.Util"
+        
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }

@@ -19,7 +19,7 @@ function Invoke-xSharePointCommand() {
     $VerbosePreference = 'Continue'
 
     $invokeArgs = @{
-        ScriptBlock = [ScriptBlock]::Create("Initialize-xSharePointPSSnapin -Verbose; " + $ScriptBlock.ToString())
+        ScriptBlock = [ScriptBlock]::Create("if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue)) {Add-PSSnapin Microsoft.SharePoint.PowerShell}; " + $ScriptBlock.ToString())
     }
     if ($null -ne $Arguments) {
         $invokeArgs.Add("ArgumentList", $Arguments)
@@ -54,22 +54,6 @@ function Invoke-xSharePointCommand() {
 
         if ($session) { Remove-PSSession $session } 
         return $result
-    }
-}
-
-function Initialize-xSharePointPSSnapin() {
-    $VerbosePreference = "Continue"
-    Write-Verbose "Checking for the powershell snapin"
-    if ($null -eq (Get-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue)) 
-    {
-        Write-Verbose "Loading SharePoint PowerShell snapin"
-        try
-        {
-            Add-PSSnapin "Microsoft.SharePoint.PowerShell"
-        } catch {
-            Write-Verbose ( $_ | Format-List | Out-String )
-        }
-            
     }
 }
 
