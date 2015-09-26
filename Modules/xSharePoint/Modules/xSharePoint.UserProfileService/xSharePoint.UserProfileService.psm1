@@ -47,24 +47,4 @@ function Remove-xSharePointUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
-function Set-xSharePointUserProfileSyncMachine() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=1)]
-        [string]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true,Position=2)]
-        [Guid]
-        $SyncServiceId,
-
-        [parameter(Mandatory = $true,Position=3)]
-        [PSCredential]
-        $FarmAccount
-    )
-    $ups = Get-xSharePointServiceApplication -Name $UserProfileServiceAppName -TypeName UserProfile
-    $ups.SetSynchronizationMachine($env:COMPUTERNAME, $SyncServiceId, $FarmAccount.UserName, $FarmAccount.GetNetworkCredential().Password)
-}
-
 Export-ModuleMember -Function *

@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPStateServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -18,40 +16,47 @@ Describe "xSPStateServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "State Service App"
+            DatabaseName = "SP_StateService"
         }
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        
+        Mock New-SPStateServiceDatabase { return @{} }
+        Mock New-SPStateServiceApplication { return @{} }
+        Mock New-SPStateServiceApplicationProxy { return @{} }
 
-        Context "Validate get method" {
-            It "Calls the right functions to retrieve SharePoint data" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPStateServiceApplication" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
+        Context "the service app doesn't exist and should" {
+            Mock Get-SPStateServiceApplication { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
-        }
 
-        Context "Validate test method" {
-            It "Fails when state service app doesn't exist" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
+            It "returns false from the get method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when the state service app exists" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $true
+
+            It "creates a state service app from the set method" {
+                Set-TargetResource @testParams 
+
+                Assert-MockCalled New-SPStateServiceApplication
             }
         }
 
-        Context "Validate set method" {
-            It "Creates a new service app where none exists" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPStateServiceApplication" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPStateServiceDatabase" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPStateServiceApplication" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPStateServiceApplicationProxy" }
+        Context "the service app exists and should" {
+            Mock Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
 
-                Set-TargetResource @testParams
-                Assert-VerifiableMocks
+            It "returns the current info from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

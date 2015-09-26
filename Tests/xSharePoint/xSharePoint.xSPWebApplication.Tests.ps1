@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPWebApplication"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -21,50 +19,84 @@ Describe "xSPWebApplication" {
             ApplicationPool = "SharePoint Web Apps"
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
+            AuthenticationMethod = "NTLM"
         }
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        
+        Mock New-SPAuthenticationProvider { }
+        Mock New-SPWebApplication { }
 
-        Context "Validate get method" {
-            It "Calls the right functions to retrieve SharePoint data" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
-                Get-TargetResource @testParams
-                Assert-VerifiableMocks
+        Context "The web application that uses NTLM doesn't exist but should" {
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
-        }
 
-        Context "Validate test method" {
-            It "Fails when web app doesn't exist" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when the web app exists and has correct settings" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        ApplicationPool = $testParams.ApplicationPool
-                        ApplicationPoolAccount = $testParams.ApplicationPoolAccount
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $true
-            }
-            It "Fails when the web app exists and has the wrong app pool" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                        ApplicationPool = "Wrong app pool"
-                        ApplicationPoolAccount = $testParams.ApplicationPoolAccount
-                    } 
-                } 
-                Test-TargetResource @testParams | Should Be $false
-            }
-        }
 
-        Context "Validate set method" {
-            It "Creates a new site when none exists" {
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPAuthenticationProvider" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Get-SPWebApplication" }
-                Mock Invoke-xSharePointSPCmdlet { return @{} } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPWebApplication" }
+            It "calls the new cmdlet from the set method" {
                 Set-TargetResource @testParams
-                Assert-VerifiableMocks
+
+                Assert-MockCalled New-SPWebApplication
+                Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
+            }
+        }
+
+        $testParams.AuthenticationMethod = "Kerberos"
+
+        Context "The web application that uses Kerberos doesn't exist but should" {
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the new cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPWebApplication
+            }
+        }
+
+        Context "The web appliation does exist and should" {
+            Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
+            Mock Get-SPWebApplication { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+            })}
+
+            It "returns the current data from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

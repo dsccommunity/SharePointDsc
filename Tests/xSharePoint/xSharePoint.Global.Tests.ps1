@@ -1,53 +1,55 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+Import-Module "$PSScriptRoot\xSharePoint.TestHelpers.psm1"
 
-Describe 'xSharePoint Global Tests' {
+Describe 'xSharePoint whole of module tests' {
 
     $mofFiles = @(Get-ChildItem $RepoRoot -Recurse -Filter "*.schema.mof" -File | ? {
         ($_.FullName -like "*\DscResources\*")
     })
     
-    Context 'MOF schemas use InstallAccount' {
+    Context "Validate the MOF schemas for the DSC resources" {
 
-        It "Doesn't have InstallAccount as a required parameter" {
+        It "should not list InstallAccount as required if it does have that attribute" {
             $mofFilesWithNoInstallAccount = 0
-            $mofFiles | % {
+            $mofFiles | ForEach-Object {
                 $fileHasInstallAccount = $false
-                Get-Content $_.FullName | % {
-                    if ($_.IndexOf("[Write, EmbeddedInstance(`"MSFT_Credential`")] String InstallAccount;") -gt 0) { $fileHasInstallAccount = $true }
-                }
-                if (-not $fileHasInstallAccount -and $_.Name -ne "MSFT_xSPInstall.schema.mof" `
-                                                -and $_.Name -ne "MSFT_xSPClearRemoteSessions.schema.mof" `
-                                                -and $_.Name -ne "MSFT_xSPInstallPrereqs.schema.mof") {
+
+                $mofSchema = Get-MofSchemaObject $_.FullName
+                $installAccount = $mofSchema.Attributes | Where-Object { $_.Name -eq "InstallAccount" }
+                if (($null -ne $installAccount) -and ($installAccount.State -eq "Required")) {
                     $mofFilesWithNoInstallAccount += 1
-                    Write-Warning "File $($_.FullName) does not contain an InstallAccount parameter. All SharePoint specific resources should use this to impersonate as and access SharePoint resources"
+                    Write-Warning "File $($_.FullName) has InstallAccount listed as a required parameter. After v0.6 of xSharePoint this should be changed to 'write' instead of 'required'"
                 }
             }
             $mofFilesWithNoInstallAccount | Should Be 0
         }
+
+        It "uses MOF schemas that match the functions used in the corresponding PowerShell module for each resource" {
+            $filesWithErrors = 0
+            $WarningPreference = "Continue"
+            $mofFiles | % {
+                if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
+            }
+            $filesWithErrors | Should Be 0
+        }
     }
-}
 
-$DSCTestsPath = (Get-Item (Join-Path $RepoRoot "..\**\DSCResource.Tests\MetaFixers.psm1" -Resolve)).FullName
-if ($null -ne $DSCTestsPath) {
-    Import-Module $DSCTestsPath
+    $DSCTestsPath = (Get-Item (Join-Path $RepoRoot "..\**\DSCResource.Tests\MetaFixers.psm1" -Resolve)).FullName
+    if ($null -ne $DSCTestsPath) {
+        Import-Module $DSCTestsPath
+        Context "Validate the format and structure of all text files in the module" {
 
-    Describe 'Text files formatting' {
-        $allTextFiles = Get-TextFilesList $RepoRoot
-    
-        Context 'Files encoding' {
+            $allTextFiles = Get-TextFilesList $RepoRoot
 
-            It "Doesn't use Unicode encoding" {
+            It "has no files that aren't in UTF-8 encoding" {
                 $unicodeFilesCount = 0
                 $allTextFiles | %{
                     if (Test-FileUnicode $_) {
@@ -57,11 +59,8 @@ if ($null -ne $DSCTestsPath) {
                 }
                 $unicodeFilesCount | Should Be 0
             }
-        }
 
-        Context 'Indentations' {
-
-            It "Uses spaces for indentation, not tabs" {
+            It "has no files with tabs in the content" {
                 $totalTabsCount = 0
                 $allTextFiles | %{
                     $fileName = $_.FullName
@@ -74,78 +73,23 @@ if ($null -ne $DSCTestsPath) {
             }
         }
     }
-}
 
+    Context "Validate the PowerShell modules used throughout the module" {
+        $psm1Files = @(ls $RepoRoot -Recurse -Filter "*.psm1" -File | ? {
+            ($_.FullName -like "*\DscResources\*" -or  $_.FullName -like "*\Modules\xSharePoint.*") -and (-not ($_.Name -like "*.schema.psm1"))
+        })
 
-Describe 'PowerShell Modules' {
-    
-    $psm1Files = @(ls $RepoRoot -Recurse -Filter "*.psm1" -File | ? {
-        ($_.FullName -like "*\DscResources\*" -or  $_.FullName -like "*\Modules\xSharePoint.*") -and (-not ($_.Name -like "*.schema.psm1"))
-    })
-
-    if (-not $psm1Files) {
-        Write-Verbose -Verbose "There are no resource files to analyze"
-    } else {
-
-        Write-Verbose -Verbose "Analyzing $($psm1Files.Count) files"
-
-        Context 'Correctness' {
-
-            function Get-ParseErrors
-            {
-                param(
-                    [Parameter(ValueFromPipeline=$True,Mandatory=$True)]
-                    [string]$fileName
-                )    
-
-                $tokens = $null 
-                $errors = $null
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($fileName, [ref] $tokens, [ref] $errors)
-                return $errors
-            }
-
-
-            It 'all .psm1 files don''t have parse errors' {
-                $errors = @()
-                $psm1Files | ForEach-Object { 
-                    $localErrors = Get-ParseErrors $_.FullName
-                    if ($localErrors) {
-                        Write-Warning "There are parsing errors in $($_.FullName)"
-                        Write-Warning ($localErrors | Format-List | Out-String)
-                    }
-                    $errors += $localErrors
+        It 'has valid PowerShell syntax in all module files' {
+            $errors = @()
+            $psm1Files | ForEach-Object { 
+                $localErrors = Get-ParseErrors $_.FullName
+                if ($localErrors) {
+                    Write-Warning "There are parsing errors in $($_.FullName)"
+                    Write-Warning ($localErrors | Format-List | Out-String)
                 }
-                $errors.Count | Should Be 0
+                $errors += $localErrors
             }
-        }
-
-        Context "SharePoint Cmdlet use" {
-            function Get-SPCmdletCalls
-            {
-                param(
-                    [Parameter(ValueFromPipeline=$True,Mandatory=$True)]
-                    [string]$fileName
-                )    
-
-                $tokens = $null 
-                $errors = $null
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($fileName, [ref] $tokens, [ref] $errors)
-                return $tokens | Where-Object { $_.TokenFlags -contains "CommandName" -and $_.Value -like "*-SP*"} | ft
-            }
-
-            It "doesn't call SharePoint PowerShell cmdlets directly" {
-                $tokens = @()
-                $psm1Files | ForEach-Object { 
-                    $localCmdletCalls = Get-SPCmdletCalls $_.FullName
-                    if ($localCmdletCalls) {
-                        Write-Warning "There are calls to SharePoint cmdlets in $($_.FullName) - use Invoke-xSharePointSPCmdlet instead to mock and test these calls"
-                        Write-Warning ($localCmdletCalls | Format-List | Out-String)
-                    }
-                    $tokens += $localCmdletCalls
-                }
-                $tokens.Count | Should Be 0
-            }
+            $errors.Count | Should Be 0
         }
     }
 }
-

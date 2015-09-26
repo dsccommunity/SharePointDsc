@@ -4,43 +4,36 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $WebAppUrl,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RelativeUrl,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $Explicit,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $HostHeader
+        [parameter(Mandatory = $true)]  [System.String]  $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
+        [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        
+
         $getParams = @{
             Identity = $params.RelativeUrl 
         }
         if ($params.HostHeader) {
             $getParams.Add("HostHeader", $true)
+        } else {
+            $getParams.Add("WebApplication", $params.WebAppUrl)
         }
-        $path = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPManagedPath" -Arguments $getParams -ErrorAction SilentlyContinue
-        if ($null -eq $path) { return @{} }
+        $path = Get-SPManagedPath @getParams -ErrorAction SilentlyContinue
+        if ($null -eq $path) { return $null }
         
         return @{
-            Name = $path.Name
-            PathType = $path.Type
+            RelativeUrl = $path.Name
+            Explicit = ($path.Type -eq "ExplicitInclusion")
+            WebAppUrl = $params.WebAppUrl
+            HostHeader = $params.HostHeader
+            InstallAccount = $params.InstallAccount
         }
     }
     return $result
@@ -52,33 +45,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $WebAppUrl,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RelativeUrl,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $Explicit,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $HostHeader
+        [parameter(Mandatory = $true)]  [System.String]  $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
+        [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        
 
-        $path = Get-TargetResource @params
+        $path = Get-TargetResource @params -ErrorAction SilentlyContinue
+
+        if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+
         if ($null -eq $path) { 
             
             $newParams = @{}
@@ -91,7 +74,7 @@ function Set-TargetResource
             $newParams.Add("RelativeURL", $params.RelativeUrl)
             $newParams.Add("Explicit", $params.Explicit)
 
-            Invoke-xSharePointSPCmdlet -CmdletName "New-SPManagedPath" -Arguments $newParams
+            New-SPManagedPath @newParams
         }
     }
 }
@@ -103,39 +86,17 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $WebAppUrl,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RelativeUrl,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $Explicit,
-
-        [parameter(Mandatory = $true)]
-        [System.Boolean]
-        $HostHeader
+        [parameter(Mandatory = $true)]  [System.String]  $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
+        [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($Explicit) {
-            if ($result.PathType -ne "ExplicitInclusion") { return $false }
-        }
-        else {
-            if ($result.PathType -ne "WildcardInclusion") { return $false }
-        }
-    }
-    return $true
+    if ($CurrentValues -eq $null) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader")
 }
 
 

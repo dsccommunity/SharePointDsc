@@ -1,18 +1,15 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPCreateFarm"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPCreateFarm" {
@@ -23,102 +20,95 @@ Describe "xSPCreateFarm" {
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Passphrase = "passphrase"
             AdminContentDatabaseName = "Admin_Content"
+            CentralAdministrationPort = 1234
         }
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        Mock New-SPConfigurationDatabase {}
+        Mock Install-SPHelpCollection {}
+        Mock Initialize-SPResourceSecurity {}
+        Mock Install-SPService {}
+        Mock Install-SPFeature {}
+        Mock New-SPCentralAdministration {}
+        Mock Install-SPApplicationContent {}
 
-        Context "Validate get method" {
-            It "Calls SP Farm to find the local environment settings" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter {$CmdletName -eq "Get-SPFarm"}
-                $results = Get-TargetResource @testParams
-                $results.Count | Should Be 0
-                Assert-VerifiableMocks
+        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
+        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
+
+        Context "no farm is configured locally and a supported version of SharePoint is installed" {
+            Mock Get-SPFarm { return $null }
+
+            It "the get method returns null when the farm is not configured" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
-        }
 
-        Context "Validate test method" {
-            It "Fails when local server is not in a farm" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when local server is in a farm" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{ 
-                        FarmName = "SP_Config"
-                    } 
-                } 
+
+            It "calls the appropriate cmdlets in the set method" {
+                Set-TargetResource @testParams
+                switch ($majorBuildNumber)
+                {
+                    15 {
+                        Assert-MockCalled New-SPConfigurationDatabase
+                    }
+                    16 {
+                        Assert-MockCalled New-SPConfigurationDatabase -ParameterFilter { $LocalServerRole -ne $null }
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+                
+            }
+        }
+
+        Context "no farm is configured locally and an unsupported version of SharePoint is installed on the server" {
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
+
+            It "throws when an unsupported version is installed and set is called" {
+                { Set-TargetResource @testParams } | Should throw
+            }
+        }
+
+        Context "a farm exists locally" {
+            Mock Get-SPFarm { return @{ 
+                DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
+                Name = $testParams.FarmConfigDatabaseName
+            }}
+            Mock Get-SPDatabase { return @(@{ 
+                Name = $testParams.FarmConfigDatabaseName
+                Type = "Configuration Database"
+                Server = @{ Name = $testParams.DatabaseServer }
+            })} 
+            Mock Get-SPWebApplication { return @(@{
+                IsAdministrationWebApplication = $true
+                ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
+                Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+            })}
+
+            It "the get method returns values when the farm is configured" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Validate set method" {
-            It "Creates a new SharePoint 2016 farm" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPConfigurationDatabase" -and $Arguments.ContainsKey("LocalServerRole") }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPHelpCollection" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Initialize-SPResourceSecurity" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPService" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPFeature" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPCentralAdministration" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPApplicationContent" }
+        Context "no farm is configured locally, a supported version is installed and no central admin port is specified" {
+            $testParams.Remove("CentralAdministrationPort")
 
-                Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 16 } }
-
+            It "uses a default value for the central admin port" {
                 Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
-            }
-
-            It "Creates a new SharePoint 2013 farm" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPConfigurationDatabase" -and (-not $Arguments.ContainsKey("LocalServerRole")) }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPHelpCollection" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Initialize-SPResourceSecurity" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPService" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPFeature" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPCentralAdministration" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPApplicationContent" }
-
-                Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15 } }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
-            }
-
-            It "Throws an exception for unsupported SharePoint versions" {
-                Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 1 } }
-
-                { Set-TargetResource @testParams } | Should throw
-            }
-
-            It "Uses a default port for central admin when none is provided" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPConfigurationDatabase" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPHelpCollection" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Initialize-SPResourceSecurity" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPService" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPFeature" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPCentralAdministration" -and $Arguments.Port -eq 9999 }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPApplicationContent" }
-
-                Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15 } }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
-            }
-
-            $testParams.Add("CentralAdministrationPort", 1234)
-            It "Uses a the specified port for central admin when it is provided" {
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPConfigurationDatabase" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPHelpCollection" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Initialize-SPResourceSecurity" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPService" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPFeature" }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "New-SPCentralAdministration" -and $Arguments.Port -eq 1234 }
-                Mock Invoke-xSharePointSPCmdlet { return $null } -Verifiable -ParameterFilter { $CmdletName -eq "Install-SPApplicationContent" }
-
-                Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15 } }
-
-                Set-TargetResource @testParams
-
-                Assert-VerifiableMocks
+                Assert-MockCalled New-SPCentralAdministration -ParameterFilter { $Port -eq 9999 }
             }
         }
     }    

@@ -2,7 +2,7 @@
 class MSFT_xSPInstallPrereqs : OMI_BaseResource
 {
     [Key] String InstallerPath;
-    [Write] Boolean OnlineMode;
+    [Required] Boolean OnlineMode;
     [Write] String SQLNCli;
     [Write] String PowerShell;
     [Write] String NETFX;
@@ -16,5 +16,6 @@ class MSFT_xSPInstallPrereqs : OMI_BaseResource
     [Write] String WCFDataServices56;
     [Write] String KB2898850;
     [Write] String MSVCRT12;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
 

@@ -4,65 +4,22 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $InstallerPath,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $OnlineMode = $true,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SQLNCli,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $PowerShell,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $NETFX,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $IDFX,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Sync,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $AppFabric,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $IDFX11,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MSIPCClient,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $WCFDataServices,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $KB2671763,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $WCFDataServices56,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $KB2898850,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MSVCRT12
+        [parameter(Mandatory = $true)]  [System.String]  $InstallerPath,
+        [parameter(Mandatory = $true)]  [System.Boolean] $OnlineMode,
+        [parameter(Mandatory = $false)] [System.String]  $SQLNCli,        
+        [parameter(Mandatory = $false)] [System.String]  $PowerShell,        
+        [parameter(Mandatory = $false)] [System.String]  $NETFX,        
+        [parameter(Mandatory = $false)] [System.String]  $IDFX,        
+        [parameter(Mandatory = $false)] [System.String]  $Sync,        
+        [parameter(Mandatory = $false)] [System.String]  $AppFabric,        
+        [parameter(Mandatory = $false)] [System.String]  $IDFX11,        
+        [parameter(Mandatory = $false)] [System.String]  $MSIPCClient,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices,        
+        [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
+        [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
     
     $returnValue = @{}
@@ -92,7 +49,7 @@ function Get-TargetResource
     $installedItems = Get-CimInstance -ClassName Win32_Product
     
     #Common prereqs
-    $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | ? {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))
+    $returnValue.Add("Microsoft Identity Extensions", (Check-xSharePointInstalledProductRegistryKey -RegKeysCollection (Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse) -ProductName "Microsoft Identity Extensions").Count -gt 0)
     $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", (($installedItems | ? {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"}) -ne $null))
     $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", (($installedItems | ? {$_.Name -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}) -ne $null))
     $returnValue.Add("AppFabric 1.1 for Windows Server", (($installedItems | ? {$_.Name -eq "AppFabric 1.1 for Windows Server"}) -ne $null))
@@ -113,7 +70,26 @@ function Get-TargetResource
         $returnValue.Add("Microsoft SQL Server 2012 Native Client", (($installedItems | ? {$_.Name -ne $null -and $_.Name.Trim() -eq "Microsoft SQL Server 2012 Native Client"}) -ne $null))    
         $returnValue.Add("Active Directory Rights Management Services Client 2.1", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.1"}) -ne $null))
     }
-    $returnValue
+    
+    $results = $PSBoundParameters
+    if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
+        $results.Ensure = "Absent"
+    } else {
+        $results.Ensure = "Present"
+    }
+    
+    return $results
+}
+
+function Check-xSharePointInstalledProductRegistryKey() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $false)] [object] $RegKeysCollection,
+        [parameter(Mandatory = $true)]  [string] $ProductName
+    )
+    if ($RegKeysCollection -eq $null) { return $null }
+    return @($RegKeysCollection | ? {$_.GetValue("DisplayName") -eq $ProductName })
 }
 
 
@@ -122,66 +98,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $InstallerPath,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $OnlineMode = $true,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SQLNCli,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $PowerShell,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $NETFX,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $IDFX,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Sync,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $AppFabric,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $IDFX11,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MSIPCClient,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $WCFDataServices,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $KB2671763,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $WCFDataServices56,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $KB2898850,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MSVCRT12
+        [parameter(Mandatory = $true)]  [System.String]  $InstallerPath,
+        [parameter(Mandatory = $true)]  [System.Boolean] $OnlineMode,
+        [parameter(Mandatory = $false)] [System.String]  $SQLNCli,        
+        [parameter(Mandatory = $false)] [System.String]  $PowerShell,        
+        [parameter(Mandatory = $false)] [System.String]  $NETFX,        
+        [parameter(Mandatory = $false)] [System.String]  $IDFX,        
+        [parameter(Mandatory = $false)] [System.String]  $Sync,        
+        [parameter(Mandatory = $false)] [System.String]  $AppFabric,        
+        [parameter(Mandatory = $false)] [System.String]  $IDFX11,        
+        [parameter(Mandatory = $false)] [System.String]  $MSIPCClient,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices,        
+        [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
+        [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
+
+    if ($Ensure -eq "Absent") {
+        throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
+        return
+    }
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = (Get-xSharePointAssemblyVersion -PathToAssembly $InstallerPath)
@@ -242,76 +180,34 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $InstallerPath,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $OnlineMode = $true,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $SQLNCli,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $PowerShell,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $NETFX,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $IDFX,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $Sync,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $AppFabric,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $IDFX11,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MSIPCClient,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $WCFDataServices,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $KB2671763,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $WCFDataServices56,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $KB2898850,
-        
-        [parameter(Mandatory = $false)]
-        [System.String]
-        $MSVCRT12
+        [parameter(Mandatory = $true)]  [System.String]  $InstallerPath,
+        [parameter(Mandatory = $true)]  [System.Boolean] $OnlineMode,
+        [parameter(Mandatory = $false)] [System.String]  $SQLNCli,        
+        [parameter(Mandatory = $false)] [System.String]  $PowerShell,        
+        [parameter(Mandatory = $false)] [System.String]  $NETFX,        
+        [parameter(Mandatory = $false)] [System.String]  $IDFX,        
+        [parameter(Mandatory = $false)] [System.String]  $Sync,        
+        [parameter(Mandatory = $false)] [System.String]  $AppFabric,        
+        [parameter(Mandatory = $false)] [System.String]  $IDFX11,        
+        [parameter(Mandatory = $false)] [System.String]  $MSIPCClient,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices,        
+        [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
+        [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
-
-    $result = Get-TargetResource -InstallerPath $InstallerPath
-    Write-Verbose -Message "Checking installation of SharePoint prerequisites"
-    if (($result.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
-        Write-Verbose -Message "Prerequisites were detected as missing."
-        return $false
+    if ($Ensure -eq "Absent") {
+        throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
+        return
     }
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Checking installation of SharePoint prerequisites"
     
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -1,10 +1,7 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
@@ -19,60 +16,68 @@ Describe "xSPInstall" {
         $testParams = @{
             BinaryDir = "C:\SPInstall"
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            Ensure = "Present"
         }
-
-        Context "Validate get method" {
-
-            It "Returns false when SharePoint is not detected" {
-                Mock Get-CimInstance { return $null } -Verifiable
-                $result = Get-TargetResource @testParams
-                $result.SharePointInstalled | Should Be $false
-                Assert-VerifiableMocks
-            }
-
-            It "Returns true when SharePoint is detected" {
-                Mock Get-CimInstance { return @{} } -Verifiable
-                $result = Get-TargetResource @testParams
-                $result.SharePointInstalled | Should Be $true
-                Assert-VerifiableMocks
-            }
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Context "Validate test method" {
-            It "Passes when SharePoint is installed" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        SharePointInstalled = $true
-                    }
-                } 
-                Test-TargetResource @testParams | Should Be $true
+        Context "SharePoint binaries are not installed but should be" {
+            Mock Get-CimInstance { return $null }
+
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            It "Fails when SharePoint is not installed" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        SharePointInstalled = $false
-                    }
-                } 
+
+            It "returns false from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "Validate set method" {
-            It "Reboots the server after a successful install" {
-                Mock Start-Process { @{ ExitCode = 0 }} -Verifiable
+        Context "SharePoint binaries are installed and should be" {
+            Mock Get-CimInstance { return @{} } 
 
-                Set-TargetResource @testParams
-
-                $global:DSCMachineStatus | Should Be 1
-
-                Assert-VerifiableMocks
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            It "Throws an error on unknown exit code" {
-                Mock Start-Process { @{ ExitCode = -1 }} -Verifiable
 
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "SharePoint installation executes as expected" {
+            Mock Start-Process { @{ ExitCode = 0 }}
+
+            It "reboots the server after a successful installation" {
+                Set-TargetResource @testParams
+                $global:DSCMachineStatus | Should Be 1
+            }
+        }
+
+        Context "SharePoint installation fails" {
+            Mock Start-Process { @{ ExitCode = -1 }}
+
+            It "throws an exception on an unknown exit code" {
                 { Set-TargetResource @testParams } | Should Throw
+            }
+        }
 
-                Assert-VerifiableMocks
+        $testParams.Ensure = "Absent"
+
+        Context "SharePoint binaries are installed and should not be" {
+            Mock Get-CimInstance { return @{} } 
+
+            It "throws in the test method because uninstall is unsupported" {
+                { Test-TargetResource @testParams } | Should Throw
+            }
+
+            It "throws in the set method because uninstall is unsupported" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    

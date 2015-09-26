@@ -4,37 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
-        [System.String]
-        $FeatureScope,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        
 
-        $feature = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments @{ Identity = $params.Name } -ErrorAction SilentlyContinue
+        $feature = Get-SPFeature -Identity $params.Name -ErrorAction SilentlyContinue
 
-        if ($null -eq $feature) { return @{} }
+        if ($null -eq $feature) { return @{
+            Name = $params.Name
+            FeatureScope = $params.FeatureScope
+            Url = $params.Url
+            InstalAcount = $params.InstallAccount
+            Ensure = "Absent"
+        } }
 
         $checkParams = @{}
         $checkParams.Add("Identity", $params.Name)
@@ -43,14 +34,16 @@ function Get-TargetResource
         } else {
             $checkParams.Add($params.FeatureScope, $params.Url)
         }
-        $featureAtScope = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPFeature" -Arguments $checkParams -ErrorAction SilentlyContinue
+        $featureAtScope = Get-SPFeature @checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
+        if ($enabled) { $currentState = "Present" } else { $currentState = "Absent" }
 
         return @{
             Name = $params.Name
-            Id = $feature.Id
-            Version = $feature.Version
-            Enabled = $enabled
+            FeatureScope = $params.FeatureScope
+            Url = $params.Url
+            InstalAcount = $params.InstallAccount
+            Ensure = $currentState
         }
     }
     return $result
@@ -62,31 +55,16 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
-        [System.String]
-        $FeatureScope,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        
 
         $runParams = @{}
         $runParams.Add("Identity", $params.Name)
@@ -95,10 +73,10 @@ function Set-TargetResource
         }
 
         if ($params.Ensure -eq "Present") {
-            Invoke-xSharePointSPCmdlet -CmdletName "Enable-SPFeature" -Arguments $runParams
+            Enable-SPFeature @runParams
         } else {
             $runParams.Add("Confirm", $false)    
-            Invoke-xSharePointSPCmdlet -CmdletName "Disable-SPFeature" -Arguments $runParams
+            Disable-SPFeature @runParams
         }
     }
 }
@@ -110,38 +88,16 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Farm","WebApplication","Site","Web")]
-        [System.String]
-        $FeatureScope,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Url,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $Url,
+        [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
-
-    if ($result.Count -eq 0) { 
-        throw "Unable to locate feature '$Name' in the current SharePoint farm, check that the name is correct and that the feature has been deployed to the file system."
-    } else {
-        if ($Ensure -eq "Present" -and $result.Enabled -eq $false) { return $false }
-        if ($Ensure -eq "Absent" -and $result.Enabled -eq $true) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
+
 Export-ModuleMember -Function *-TargetResource

@@ -92,6 +92,7 @@ Configuration SharePointFarmServer
         {
             BinaryDir  = "C:\SPInstall"
             ProductKey = $ProductKey
+            Ensure     = "Present"
             DependsOn  = "[xSPInstallPrereqs]InstallPrerequisites"
         }
 

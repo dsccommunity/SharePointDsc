@@ -92,6 +92,7 @@ Configuration SharePointServer
         {
             BinaryDir  = "C:\SPInstall"
             ProductKey = $ProductKey
+            Ensure     = "Present"
             DependsOn  = "[xSPInstallPrereqs]InstallPrerequisites"
         }
 

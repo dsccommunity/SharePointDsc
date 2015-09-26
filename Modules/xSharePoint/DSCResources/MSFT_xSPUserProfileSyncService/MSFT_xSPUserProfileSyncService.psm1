@@ -4,33 +4,43 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileServiceAppName,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     Write-Verbose -Message "Getting the local user profile sync service instance"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-
-        $syncService = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq (Get-xSharePointServiceApplicationName -Name UserProfileSync) }
         
-        if ($null -eq $syncService) { return @{} }
+
+        $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+
+        if ($null -eq $syncService) { return @{
+            UserProfileServiceAppName = $params.UserProfileServiceAppName
+            Ensure = "Absent"
+            FarmAccount = $params.FarmAccount
+            InstallAccount = $params.InstallAccount
+        } }
+        if ($syncService.UserProfileApplicationGuid -ne $null -and $syncService.UserProfileApplicationGuid -ne [Guid]::Empty) {
+            $upa = Get-SPServiceInstance -Identity $syncService.UserProfileApplicationGuid -ErrorAction SilentlyContinue
+        }
+        if ($syncService.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
+
+        $spFarm = Get-SPFarm
+
+        if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
+            $farmAccount = $params.FarmAccount
+        } else {
+            $farmAccount = $spFarm.DefaultServiceAccount.Name
+        }
 
         return @{
+            UserProfileServiceAppName = $upa.Name
+            Ensure = $localEnsure
+            FarmAccount = $farmAccount
+            InstallAccount = $params.InstallAccount
             Status = $syncService.Status
         }
     }
@@ -43,22 +53,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileServiceAppName,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Setting User Profile Synchronization Service"
@@ -76,20 +74,26 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+        
 
-        $syncService = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq (Get-xSharePointServiceApplicationName -Name UserProfileSync) }
+        $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
         
          # Start the Sync service if it should be running on this server
-        if (($Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
+        if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
+            $serviceApps = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
+            if ($null -eq $serviceApps) { 
+                throw [Exception] "No user profile service was found named $($params.UserProfileServiceAppName)"
+            }
+            $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
+            $ups.SetSynchronizationMachine($env:COMPUTERNAME, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
 
-            Set-xSharePointUserProfileSyncMachine -UserProfileServiceAppName $params.UserProfileServiceAppName -SyncServiceId $syncService.ID -FarmAccount $params.FarmAccount            
-            Invoke-xSharePointSPCmdlet -CmdletName "Start-SPServiceInstance" -Arguments @{ Identity = $syncService.ID }
+            Start-SPServiceInstance -Identity $syncService.ID 
             
             $desiredState = "Online"
         }
         # Stop the Sync service in all other cases
         else {
-            Invoke-xSharePointSPCmdlet -CmdletName "Stop-SPServiceInstance" -Arguments @{ Identity = $syncService.ID; Confirm = $false }
+            Stop-SPServiceInstance -Identity $syncService.ID -Confirm:$false
             $desiredState = "Disabled"
         }
 
@@ -99,7 +103,7 @@ function Set-TargetResource
 
         while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState)) {
             # Get the current status of the Sync service
-            $syncService = Invoke-xSharePointSPCmdlet -CmdletName "Get-SPServiceInstance" -Arguments @{ Server = $env:COMPUTERNAME } | Where-Object { $_.TypeName -eq (Get-xSharePointServiceApplicationName -Name UserProfileSync) }
+            $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
 
             if ($syncService.Status -ne $desiredState) { Start-Sleep -Seconds 60 }
             $count++
@@ -113,39 +117,21 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $UserProfileServiceAppName,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileServiceAppName,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if (($result.Status -eq "Online") -and ($Ensure -ne "Present")) { return $false }
-        if (($result.Status -eq "Disabled") -and ($Ensure -ne "Absent")) { return $false }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 
