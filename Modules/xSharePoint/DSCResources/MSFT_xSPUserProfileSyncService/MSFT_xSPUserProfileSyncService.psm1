@@ -9,6 +9,11 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
+
+    if ((Get-xSharePointInstalledProductVersion).FileMajorPart -ne 15) {
+        throw [Exception] "Only SharePoint 2013 is supported to deploy the user profile sync service via DSC, as 2016 does not use the FIM based sync service."
+    }
+
     Write-Verbose -Message "Getting the local user profile sync service instance"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -58,6 +63,10 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
+
+    if ((Get-xSharePointInstalledProductVersion).FileMajorPart -ne 15) {
+        throw [Exception] "Only SharePoint 2013 is supported to deploy the user profile sync service via DSC, as 2016 does not use the FIM based sync service."
+    }
 
     Write-Verbose -Message "Setting User Profile Synchronization Service"
 
@@ -128,6 +137,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
+
+    if ((Get-xSharePointInstalledProductVersion).FileMajorPart -ne 15) {
+        throw [Exception] "Only SharePoint 2013 is supported to deploy the user profile sync service via DSC, as 2016 does not use the FIM based sync service."
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
