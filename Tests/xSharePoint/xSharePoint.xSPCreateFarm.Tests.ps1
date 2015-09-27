@@ -42,7 +42,7 @@ Describe "xSPCreateFarm" {
         Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
 
         Context "no farm is configured locally and a supported version of SharePoint is installed" {
-            Mock Get-SPFarm { return $null }
+            Mock Get-SPFarm { throw "Unable to detect local farm" }
 
             It "the get method returns null when the farm is not configured" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -101,6 +101,22 @@ Describe "xSPCreateFarm" {
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+        }
+
+		Context "a farm exists locally with the wrong farm account" {
+			Mock Get-SPFarm { return @{ 
+                DefaultServiceAccount = @{ Name = "WRONG\account" }
+                Name = $testParams.FarmConfigDatabaseName
+            }}
+
+			It "the get method returns current values" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method as changing the farm account isn't supported so set shouldn't be called" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+
         }
 
         Context "no farm is configured locally, a supported version is installed and no central admin port is specified" {
