@@ -103,13 +103,13 @@ Describe "xSPCreateFarm" {
             }
         }
 
-		Context "a farm exists locally with the wrong farm account" {
-			Mock Get-SPFarm { return @{ 
+        Context "a farm exists locally with the wrong farm account" {
+            Mock Get-SPFarm { return @{ 
                 DefaultServiceAccount = @{ Name = "WRONG\account" }
                 Name = $testParams.FarmConfigDatabaseName
             }}
 
-			It "the get method returns current values" {
+            It "the get method returns current values" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
