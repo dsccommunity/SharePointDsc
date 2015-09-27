@@ -27,20 +27,6 @@ Describe "xSPUserProfileServiceApp" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock Get-UserProfileServiceProperties { return @{
-            ProfileDatabase = @{
-                Name = "SP_ProfileDB"
-                Server = @{ Name = "SQL.domain.local" }
-            }
-            SocialDatabase = @{
-                Name = "SP_SocialDB"
-                Server = @{ Name = "SQL.domain.local" }
-            }
-            SynchronizationDatabase = @{
-                Name = "SP_SyncDB"
-                Server = @{ Name = "SQL.domain.local" }
-            }
-        }}
         Mock Get-SPFarm { return @{
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}
@@ -72,11 +58,48 @@ Describe "xSPUserProfileServiceApp" {
 
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "User Profile Service Application"
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                return @(
+                    New-Object Object |            
+                        Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
+                        Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                        Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
+                        Add-Member ScriptMethod GetType {
+                            New-Object Object |
+                                Add-Member ScriptMethod GetProperties {
+                                    param($x)
+                                    return @(
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "SocialDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                param($x)
+                                                return @{
+                                                    Name = "SP_SocialDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        ),
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "ProfileDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                return @{
+                                                    Name = "SP_ProfileDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        ),
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "SynchronizationDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                return @{
+                                                    Name = "SP_ProfileSyncDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        )
+                                    )
+                                } -PassThru
+                    } -PassThru -Force 
+                )
             }
 
             It "returns values from the get method" {

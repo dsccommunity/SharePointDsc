@@ -35,7 +35,18 @@ function Get-TargetResource
         }
         else
         {
-            $databases = Get-UserProfileServiceProperties $serviceApp
+            $databases = @{}
+            $propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
+
+            $socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
+            $databases.Add("SocialDatabase", $socialProp.GetValue($serviceApp)) 
+
+            $profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
+            $databases.Add("ProfileDatabase", $profileProp.GetValue($serviceApp))
+
+            $syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
+            $databases.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
+
             $spFarm = Get-SPFarm
 
             if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
@@ -60,28 +71,6 @@ function Get-TargetResource
         }
     }
     return $result
-}
-
-function Get-UserProfileServiceProperties() {
-    [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
-    param
-    (
-        [parameter(Mandatory = $true)]  [System.String] $serviceApp
-    )
-    $results = @{}
-    $propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
-
-    $socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
-    $results.Add("SocialDatabase", $socialProp.GetValue($serviceApp)) 
-
-    $profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
-    $results.Add("ProfileDatabase", $profileProp.GetValue($serviceApp))
-
-    $syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
-    $results.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
-
-    return $results
 }
 
 function Set-TargetResource

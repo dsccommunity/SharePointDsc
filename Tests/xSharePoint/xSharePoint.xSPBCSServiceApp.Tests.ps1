@@ -34,7 +34,7 @@ Describe "xSPBCSServiceApp" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
-        Context "When no service application exists in the current farm" {
+        Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPBusinessDataCatalogServiceApplication { }
@@ -52,6 +52,19 @@ Describe "xSPBCSServiceApp" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPBusinessDataCatalogServiceApplication 
             }
+        }
+
+        Context "When service applications exist in the current farm but the specific BCS app does not" {
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
         }
 
         Context "When a service application exists and is configured correctly" {

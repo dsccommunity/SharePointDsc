@@ -69,36 +69,36 @@ function Set-TargetResource
     )
 
     $result = Get-TargetResource @PSBoundParameters
+    $params = $PSBoundParameters
 
-    if ($result.Count -eq 0) { 
+    switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+        16 {
+            $hasOptionalParams = $false
+            @("AuditlogMaxSize","DatabaseName","DatabasePassword","DatabaseServer","DatabaseUsername", `
+              "FailoverDatabaseServer","PartitionMode","Sharing","DatabaseCredentials") | ForEach-Object {
+                if ($PSBoundParameters.ContainsKey($_) -eq $true) { $hasOptionalParams = $true }
+            }
+            if ($hasOptionalParams -eq $false) {
+                # Add the MinDB param to ensure that the cmdlet call gets differentiated without the optional params being set
+                $params.Add("EnableMinDB", $false)
+            }
+        }
+    }
+
+    if ($null -eq $result) { 
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $params -ScriptBlock {
             $params = $args[0]
             
-
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
-            switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
-                15 {
-                    $app = New-SPSecureStoreServiceApplication @params
-                }
-                16 {
-                    $app = New-SPSecureStoreServiceApplication @params -EnableMinDB:$false
-                }
-                Default {
-                    throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
-                }
-            }
-            if ($app) {
-                New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app
-            }
+            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy"
         }
     } else {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Secure Store Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Secure Store Service Application" }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
