@@ -4,90 +4,71 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $Account,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-    
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AccountName
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Account,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
+        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
+        [parameter(Mandatory = $false)] [System.String] $Schedule,
+        [parameter(Mandatory = $true)]  [System.String] $AccountName
     )
 
     Write-Verbose -Message "Checking for managed account $AccountName"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
+        
 
         try {
-            $ma = Get-SPManagedAccount $params.AccountName -ErrorAction SilentlyContinue
-            if ($null -eq $ma) { return @{ } }
+            $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
+            if ($null -eq $ma) { return $null }
             return @{
-                AccountName = $ma.Userame
-                AutomaticChange = $ma.AutomaticChange
-                DaysBeforeChangeToEmail = $ma.DaysBeforeChangeToEmail
-                DaysBeforeExpiryToChange = $ma.DaysBeforeExpiryToChange
-                PasswordLastChanged = $ma.PasswordLastChanged
-                PasswordExpiration = $ma.PasswordExpiration
-                ChangeSchedule = $ma.ChangeSchedule
+                AccountName = $ma.Username
+                EmailNotification = $ma.DaysBeforeChangeToEmail
+                PreExpireDays = $ma.DaysBeforeExpiryToChange
+                Schedule = $ma.ChangeSchedule
+                Account = $params.Account
+                InstallAccount = $params.InstallAccount
             }
         } catch {
-            return @{ }
+            return $null
         }
     }
-    $result
+    return $result
 }
-
 
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $Account,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [System.UInt32]
-        $EmailNotification = 5,
-
-        [System.UInt32]
-        $PreExpireDays = 2,
-
-        [System.String]
-        $Schedule = [System.String]::Empty,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AccountName
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Account,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
+        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
+        [parameter(Mandatory = $false)] [System.String] $Schedule,
+        [parameter(Mandatory = $true)]  [System.String] $AccountName
     )
-    
-    Write-Verbose -Message "Setting managed account $AccountName"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
-        $params = $args[0]
-
-        $ma = Get-SPManagedAccount $params.Account.UserName -ErrorAction SilentlyContinue
-        if ($null -eq $ma) {
-            $ma = New-SPManagedAccount $params.Account
+    if ($null -eq (Get-TargetResource @PSBoundParameters)) {
+        Write-Verbose "Creating a new managed account"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            New-SPManagedAccount -Credential $params.Account
         }
-        $params.Add("Identity", $params.Account.UserName)
-        $params.Remove("Account") | Out-Null
-        $params.Remove("AccountName") | Out-Null
-        $params.Remove("InstallAccount") | Out-Null
+    }
 
-        Set-SPManagedAccount @params
+    Write-Verbose -Message "Updating settings for managed account"
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+        
+        $updateParams = @{ 
+            Identity = $params.Account.UserName 
+        }
+        if ($params.ContainsKey("EmailNotification")) { $updateParams.Add("EmailNotification", $params.EmailNotification) }
+        if ($params.ContainsKey("PreExpireDays")) { $updateParams.Add("PreExpireDays", $params.PreExpireDays) }
+        if ($params.ContainsKey("Schedule")) { $updateParams.Add("Schedule", $params.Schedule) }
+
+        Set-SPManagedAccount @updateParams
     }
 }
 
@@ -98,39 +79,18 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $Account,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [System.UInt32]
-        $EmailNotification = 5,
-
-        [System.UInt32]
-        $PreExpireDays = 2,
-
-        [System.String]
-        $Schedule = [System.String]::Empty,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AccountName
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Account,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
+        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
+        [parameter(Mandatory = $false)] [System.String] $Schedule,
+        [parameter(Mandatory = $true)]  [System.String] $AccountName
     )
 
-    $result = Get-TargetResource -Account $Account -InstallAccount $InstallAccount -AccountName $AccountName
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if($result.AutomaticChange -eq $true) {
-            if($result.ChangeSchedule -ne $Schedule) { return $false }
-            if($result.DaysBeforeExpiryToChange -ne $PreExpireDays) { return $false }
-            if($result.DaysBeforeChangeToEmail -ne $EmailNotification) { return $false }
-        }
-    }
-    return $true
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification") 
 }
 
 

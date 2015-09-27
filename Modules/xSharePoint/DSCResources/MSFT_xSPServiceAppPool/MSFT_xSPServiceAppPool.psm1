@@ -4,35 +4,27 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ServiceAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting service application pool '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
+        
 
-        $sap = Get-SPServiceApplicationPool $params.Name -ErrorAction SilentlyContinue
-        if ($null -eq $sap) { return @{} }
+        $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
+        if ($null -eq $sap) { return $null }
         
         return @{
             Name = $sap.Name
-            ProcessAccountName = $sap.ProcessAccountName
+            ServiceAccount = $sap.ProcessAccountName
+            InstallAccount = $params.InstallAccount
         }
     }
-    $result
+    return $result
 }
 
 
@@ -41,32 +33,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ServiceAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating service application pool '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
+        
 
-        $sap = Get-SPServiceApplicationPool $params.Name -ErrorAction SilentlyContinue
+        $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $sap) { 
-            New-SPServiceApplicationPool -Name $params.Name -Account $params.ServiceAccount
+            New-SPServiceApplicationPool -Name $params.Name  -Account $params.ServiceAccount
         } else {
             if ($sap.ProcessAccountName -ne $params.ServiceAccount) {  
-                Set-SPServiceApplicationPool -Identity $params.Name -Account $params.ServiceAccount
+                Set-SPServiceApplicationPool -Identity $params.Name  -Account $params.ServiceAccount
             }
         }
     }
@@ -79,26 +62,15 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ServiceAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $ServiceAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -ServiceAccount $ServiceAccount -InstallAccount $InstallAccount
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing service application pool '$Name'"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($ServiceAccount -ne $result.ProcessAccountName) { return $false }
-    }
-    return $true
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount")
 }
 
 

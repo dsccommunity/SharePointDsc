@@ -7,18 +7,17 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPManagedMetaDataServiceApp"
+$ModuleName = "MSFT_xSPSecureStoreServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPManagedMetaDataServiceApp" {
+Describe "xSPSecureStoreServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Managed Metadata Service App"
-            ApplicationPool = "SharePoint Service Applications"
-            DatabaseServer = "databaseserver\instance"
-            DatabaseName = "SP_MMS"
+            Name = "Secure Store Service Application"
+            ApplicationPool = "SharePoint Search Services"
+            AuditingEnabled = $false
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -27,12 +26,16 @@ Describe "xSPManagedMetaDataServiceApp" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
+        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+
+        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
 
         Context "When no service application exists in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPMetadataServiceApplication { return @{} }
-            Mock New-SPMetadataServiceApplicationProxy { return @{} }
+            Mock New-SPSecureStoreServiceApplication { }
+            Mock New-SPSecureStoreServiceApplicationProxy { }
 
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -45,14 +48,14 @@ Describe "xSPManagedMetaDataServiceApp" {
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPMetadataServiceApplication
+                Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
         }
 
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Managed Metadata Service"
+                    TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
@@ -75,7 +78,7 @@ Describe "xSPManagedMetaDataServiceApp" {
         Context "When a service application exists and the app pool is not configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Managed Metadata Service"
+                    TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
@@ -85,7 +88,7 @@ Describe "xSPManagedMetaDataServiceApp" {
                 })
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPMetadataServiceApplication { }
+            Mock Set-SPSecureStoreServiceApplication { }
 
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -95,7 +98,7 @@ Describe "xSPManagedMetaDataServiceApp" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
-                Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
+                Assert-MockCalled Set-SPSecureStoreServiceApplication
             }
         }
     }    

@@ -1,15 +1,13 @@
 [CmdletBinding()]
-param()
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
-}
+param(
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+)
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPStateServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -18,20 +16,46 @@ Describe "xSPStateServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "State Service App"
-            InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            DatabaseName = "SP_StateService"
         }
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        
+        Mock Invoke-xSharePointCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        
+        Mock New-SPStateServiceDatabase { return @{} }
+        Mock New-SPStateServiceApplication { return @{} }
+        Mock New-SPStateServiceApplicationProxy { return @{} }
 
-        Context "Validate test method" {
-            It "Fails when state service app doesn't exist" {
-                Mock -ModuleName $ModuleName Get-TargetResource { return @{} }
+        Context "the service app doesn't exist and should" {
+            Mock Get-SPStateServiceApplication { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the get method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Passes when the state service app exists" {
-                Mock -ModuleName $ModuleName Get-TargetResource { 
-                    return @{
-                        Name = $testParams.Name
-                    } 
-                } 
+
+            It "creates a state service app from the set method" {
+                Set-TargetResource @testParams 
+
+                Assert-MockCalled New-SPStateServiceApplication
+            }
+        }
+
+        Context "the service app exists and should" {
+            Mock Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
+
+            It "returns the current info from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

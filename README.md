@@ -1,4 +1,4 @@
-# xSharePoint
+﻿# xSharePoint
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
@@ -68,9 +68,19 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### 0.5.0
+### 0.6.0.0
 
-* Added support for SharePoint 2016 prerequisites, binary installation, creation and joining of a farm
+ * Added support for PsDscRunAsCredential in PowerShell 5 resource use
+ * Expanded automated unit testing
+ * Removed timeout loop in xSPJoinFarm in favour of WaitForAll resource in PowerShell 5
+
+### 0.5.0.0
+
+* Fixed bug with detection of version in create farm
+* Minor fixes
+* Added support for SharePoint 2016 installation
+* MSFT_xSPCreateFarm: Added CentraladministrationPort parameter
+* Fixed issue with PowerShell session timeouts
 
 ### 0.4.0
 

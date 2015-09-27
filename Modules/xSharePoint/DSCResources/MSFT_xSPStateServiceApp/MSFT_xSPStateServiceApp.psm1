@@ -4,31 +4,31 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting state service application '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
+        
 
-        $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
+        $serviceApp = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
 
-        if ($null -eq $app) { return @{} }
+        if ($null -eq $serviceApp) { return $null }
         
         return @{
-            Name = $app.DisplayName
+            Name = $serviceApp.DisplayName
+            DatabaseName = $serviceApp.Databases.Name
+            DatabaseServer = $serviceApp.Databases.Server.Name
+            InstallAccount = $params.InstallAccount
         }
     }
-    $result
+    return $result
 }
 
 
@@ -37,31 +37,18 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials = $null,
-
-        [System.String]
-        $DatabaseName = $null,
-
-        [System.String]
-        $DatabaseServer = $null,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating state service application $Name"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
-        $params = Remove-xSharePointNullParamValues -Params $params
+        
 
         $app = Get-SPStateServiceApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $app) { 
@@ -71,7 +58,9 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseServer")) { $dbParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseCredentials")) { $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) }
 
-            New-SPStateServiceDatabase @dbParams| New-SPStateServiceApplication -Name $params.Name | New-SPStateServiceApplicationProxy -DefaultProxyGroup
+            $database = New-SPStateServiceDatabase @dbParams
+            $app = New-SPStateServiceApplication -Name $params.Name -Database $database 
+            New-SPStateServiceApplicationProxy -ServiceApplication $app -DefaultProxyGroup | Out-Null
         }
     }
 }
@@ -83,28 +72,17 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [System.Management.Automation.PSCredential]
-        $DatabaseCredentials = $null,
-
-        [System.String]
-        $DatabaseName = $null,
-
-        [System.String]
-        $DatabaseServer = $null,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for state service application $Name"
-    if ($result.Count -eq 0) { return $false }
-    return $true
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
 }
 
 

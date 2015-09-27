@@ -75,7 +75,8 @@
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
-    <Folder Include="Modules\xSharePoint.DistributedCache\" />
+    <Folder Include="Modules\xSharePoint.UserProfileService\" />
+    <Folder Include="Modules\xSharePoint.CacheAccounts\" />
     <Folder Include="Modules\xSharePoint.Util\" />
     <Folder Include="Examples\" />
   </ItemGroup>
@@ -124,6 +125,8 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="Modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1" />
+    <Compile Include="Modules\xSharePoint.UserProfileService\xSharePoint.UserProfileService.psm1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
@@ -132,7 +135,6 @@
     <Content Include="Examples\Small Farm\AppServer.ps1" />
     <Content Include="Examples\Small Farm\FirstServer.ps1" />
     <Content Include="Examples\Small Farm\WFEServer.ps1" />
-    <Content Include="Modules\xSharePoint.DistributedCache\xSharePoint.DistributedCache.psm1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />

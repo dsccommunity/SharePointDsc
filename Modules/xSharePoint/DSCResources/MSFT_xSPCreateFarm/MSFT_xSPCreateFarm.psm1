@@ -4,124 +4,101 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AdminContentDatabaseName,
-
-        [System.UInt32]
-        $CentralAdministrationPort
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
+        [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
+        $params = $args[0]
 
         try {
-            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+            $spFarm = Get-SPFarm
         } catch {
             Write-Verbose -Message "Unable to detect local farm."
         }
         
-        if ($null -eq $spFarm) {return @{ }}
+        if ($null -eq $spFarm) { return $null }
+
+        $configDb = Get-SPDatabase | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+        $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object { $_.IsAdministrationWebApplication -eq $true }
+
+        if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) {
+            $farmAccount = $params.FarmAccount
+        } else {
+            $farmAccount = $spFarm.DefaultServiceAccount.Name
+        }
 
         $returnValue = @{
-            FarmName = $spFarm.Name
+            FarmConfigDatabaseName = $spFarm.Name
+            DatabaseServer = $configDb.Server.Name
+            FarmAccount = $farmAccount
+            InstallAccount = $params.InstallAccount
+            Passphrase = $params.Passphrase
+            AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
+            CentralAdministrationPort = (New-Object System.Uri $centralAdminSite.Url).Port
         }
         return $returnValue
     }
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AdminContentDatabaseName,
-
-        [System.UInt32]
-        $CentralAdministrationPort = 9999
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
+        [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort
     )
     
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
 
-    Write-Verbose -Message "Setting up new SharePoint farm"
-
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
 
-        $params = Rename-xSharePointParamValue -params $params -oldName "FarmConfigDatabaseName" -newName "DatabaseName"
-        $params = Rename-xSharePointParamValue -params $params -oldName "FarmAccount" -newName "FarmCredentials"
-        $params = Rename-xSharePointParamValue -params $params -oldName "AdminContentDatabaseName" -newName "AdministrationContentDatabaseName"
-        $params.Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
-        $params.Remove("InstallAccount")
-
-        $caPort = $params.CentralAdministrationPort
-        $params.Remove("CentralAdministrationPort")
-
-        if (Test-Path -Path "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll") {
-            Write-Verbose -Message "Detected Version: SharePoint 2016"
-            $params.Add("LocalServerRole", "Custom")
-        } else {
-            Write-Verbose -Message "Detected Version: SharePoint 2013"
+        $newFarmArgs = @{
+            DatabaseServer = $params.DatabaseServer
+            DatabaseName = $params.FarmConfigDatabaseName
+            FarmCredentials = $params.FarmAccount
+            AdministrationContentDatabaseName = $params.AdminContentDatabaseName
+            Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+            SkipRegisterAsDistributedCacheHost = $true
+        }
+        
+        switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+            15 {
+                Write-Verbose -Message "Detected Version: SharePoint 2013"
+            }
+            16 {
+                Write-Verbose -Message "Detected Version: SharePoint 2016"
+                $newFarmArgs.Add("LocalServerRole", "Custom")
+            }
+            Default {
+                throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
+            }
         }
 
-        New-SPConfigurationDatabase @params -SkipRegisterAsDistributedCacheHost:$true
+        New-SPConfigurationDatabase @newFarmArgs
         Install-SPHelpCollection -All
         Initialize-SPResourceSecurity
         Install-SPService
-        Install-SPFeature -AllExistingFeatures -Force
-        New-SPCentralAdministration -Port $caPort -WindowsAuthProvider NTLM
+        Install-SPFeature -AllExistingFeatures -Force 
+        New-SPCentralAdministration -Port $params.CentralAdministrationPort -WindowsAuthProvider "NTLM"
         Install-SPApplicationContent
     }
 }
-
 
 function Test-TargetResource
 {
@@ -129,39 +106,19 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $AdminContentDatabaseName,
-
-        [System.UInt32]
-        $CentralAdministrationPort = 9999
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
+        [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase -AdminContentDatabaseName $AdminContentDatabaseName -CentralAdministrationPort $CentralAdministrationPort
-
-    if ($result.Count -eq 0) { return $false }
-    return $true
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose "Checking for local farm presence"
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName")
 }
-
 
 Export-ModuleMember -Function *-TargetResource

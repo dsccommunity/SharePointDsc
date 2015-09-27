@@ -4,36 +4,32 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     Write-Verbose -Message "Getting service instance '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
         $params = $args[0]
+        
 
         $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
-        if ($null -eq $si) { return @{} }
+        if ($null -eq $si) { return @{
+            Name = $params.Name
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        } }
+        if ($si.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
         
         return @{
             Name = $params.Name
-            Status = $si.Status
+            Ensure = $localEnsure
+            InstallAccount = $params.InstallAccount
         }
     }
-    $result
+    return $result
 }
 
 
@@ -42,43 +38,36 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Provisioning service instance '$Name'"
 
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
             $params = $args[0]
+            
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
-            if ($null -eq $si) { return $false }
-            Start-SPServiceInstance $si
+            if ($null -eq $si) { 
+                throw [Exception] "Unable to locate service application '$($params.Name)'"
+            }
+            Start-SPServiceInstance -Identity $si 
         }
     } else {
         Write-Verbose -Message "Deprovioning service instance '$Name'"
 
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            Add-PSSnapin -Name "Microsoft.SharePoint.PowerShell" -ErrorAction SilentlyContinue
-
             $params = $args[0]
+            
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
-            if ($null -eq $si) { return $false }
-            Stop-SPServiceInstance $si
+            if ($null -eq $si) {
+                throw [Exception] "Unable to locate service application '$($params.Name)'"
+            }
+            Stop-SPServiceInstance -Identity $si
         }
     }
 }
@@ -90,32 +79,14 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [ValidateSet("Present","Absent")]
-        [System.String]
-        $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
-    $result = Get-TargetResource -Name $Name -InstallAccount $InstallAccount -Ensure $Ensure 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Getting service instance '$Name'"
-    if ($result.Count -eq 0) { return $false }
-    else {
-        if ($Ensure -eq "Present" -and $result.Status -eq "Disabled") {
-            return $false
-        }
-        if ($Ensure -eq "Absent" -and $result.Status -eq "Online") {
-            return $false
-        }
-    }
-    return $true
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
 }
 
 
