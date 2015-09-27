@@ -70,7 +70,7 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Count -eq 0) { 
+    if ($null -eq $result) { 
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -80,17 +80,14 @@ function Set-TargetResource
 
             switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
                 15 {
-                    $app = New-SPSecureStoreServiceApplication @params
+                    New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy"
                 }
                 16 {
-                    $app = New-SPSecureStoreServiceApplication @params -EnableMinDB:$false
+                    $app = New-SPSecureStoreServiceApplication @params -EnableMinDB:$false | New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy"
                 }
                 Default {
                     throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
                 }
-            }
-            if ($app) {
-                New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app
             }
         }
     } else {
