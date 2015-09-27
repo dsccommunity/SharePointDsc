@@ -49,15 +49,15 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $AccountName
     )
 
-	if ($null -eq (Get-TargetResource @PSBoundParameters)) {
-		Write-Verbose "Creating a new managed account"
-		Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-			$params = $args[0]
-			New-SPManagedAccount -Credential $params.Account
-		}
-	}
+    if ($null -eq (Get-TargetResource @PSBoundParameters)) {
+        Write-Verbose "Creating a new managed account"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            New-SPManagedAccount -Credential $params.Account
+        }
+    }
 
-	Write-Verbose -Message "Updating settings for managed account"
+    Write-Verbose -Message "Updating settings for managed account"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
