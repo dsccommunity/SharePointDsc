@@ -21,31 +21,24 @@ function Get-TargetResource
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         }
-        try
-        {
-            Use-CacheCluster -ErrorAction SilentlyContinue
-            $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
 
-            if ($null -eq $cacheHost) { return $nullReturnValue }
-            $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
-            
-            if ($null -eq $cacheHostConfig) { return $nullReturnValue }
+        Use-CacheCluster -ErrorAction SilentlyContinue
+        $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
 
-            $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
-            $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
+        if ($null -eq $cacheHost) { return $nullReturnValue }
+        $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+        $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
+
+        $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
+        $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
             
-            return @{
-                Name = $params.Name
-                CacheSizeInMB = $cacheHostConfig.Size
-                ServiceAccount = $windowsService.StartName
-                CreateFirewallRules = ($firewallRule -ne $null)
-                Ensure = "Present"
-                InstallAccount = $params.InstallAccount
-            }
-        }
-        catch{
-            return $nullReturnValue
+        return @{
+            Name = $params.Name
+            CacheSizeInMB = $cacheHostConfig.Size
+            ServiceAccount = $windowsService.StartName
+            CreateFirewallRules = ($firewallRule -ne $null)
+            Ensure = "Present"
+            InstallAccount = $params.InstallAccount
         }
     }
     return $result
@@ -142,7 +135,6 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for distributed cache configuration"
-    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }
 

@@ -108,7 +108,7 @@ Describe "xSPCreateFarm" {
                 DefaultServiceAccount = @{ Name = "WRONG\account" }
                 Name = $testParams.FarmConfigDatabaseName
             }}
-			Mock Get-SPWebApplication { return @(@{
+            Mock Get-SPWebApplication { return @(@{
                 IsAdministrationWebApplication = $true
                 ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
                 Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
