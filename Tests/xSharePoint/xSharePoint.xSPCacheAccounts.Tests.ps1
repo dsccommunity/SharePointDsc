@@ -92,8 +92,8 @@ Describe "xSPCacheAccounts" {
         Context "Cache accounts have been configured, but the reader account is wrong" {
             Mock Get-SPWebApplication { return @{
                 Properties = @{
-                    SuperUserAlias = $testParams.SuperUserAlias
-                    SuperReaderAlias = "WRONG\AccountName"
+                    portalsuperuseraccount = $testParams.SuperUserAlias
+                    portalsuperreaderaccount = "WRONG\AccountName"
                 }
             }}
 
@@ -110,8 +110,8 @@ Describe "xSPCacheAccounts" {
         Context "Cache accounts have been configured, but the super account is wrong" {
             Mock Get-SPWebApplication { return @{
                 Properties = @{
-                    SuperUserAlias = "WRONG\AccountName"
-                    SuperReaderAlias = $testParams.SuperReaderAlias
+                    portalsuperuseraccount = "WRONG\AccountName"
+                    portalsuperreaderaccount = $testParams.SuperReaderAlias
                 }
             }}
 

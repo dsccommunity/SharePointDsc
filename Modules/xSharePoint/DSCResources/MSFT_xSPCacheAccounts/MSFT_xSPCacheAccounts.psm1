@@ -18,7 +18,7 @@ function Get-TargetResource
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
-        if ($null -eq $wa) { return @{} }
+        if ($null -eq $wa) { return $null }
         
         $returnVal = @{}
         $returnVal.Add("WebAppUrl", $params.WebAppUrl)
