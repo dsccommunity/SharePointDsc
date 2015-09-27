@@ -36,16 +36,16 @@ function Get-TargetResource
         else
         {
             $databases = @{}
-			$propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
+            $propData = $serviceApp.GetType().GetProperties([System.Reflection.BindingFlags]::Instance -bor [System.Reflection.BindingFlags]::NonPublic)
 
-			$socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
-			$databases.Add("SocialDatabase", $socialProp.GetValue($serviceApp)) 
+            $socialProp = $propData | Where-Object {$_.Name -eq "SocialDatabase"}
+            $databases.Add("SocialDatabase", $socialProp.GetValue($serviceApp)) 
 
-			$profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
-			$databases.Add("ProfileDatabase", $profileProp.GetValue($serviceApp))
+            $profileProp = $propData | Where-Object {$_.Name -eq "ProfileDatabase"}
+            $databases.Add("ProfileDatabase", $profileProp.GetValue($serviceApp))
 
-			$syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
-			$databases.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
+            $syncProp = $propData | Where-Object {$_.Name -eq "SynchronizationDatabase"}
+            $databases.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
 
             $spFarm = Get-SPFarm
 
