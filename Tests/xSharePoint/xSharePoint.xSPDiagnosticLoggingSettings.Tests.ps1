@@ -145,5 +145,40 @@ Describe "xSPDiagnosticLoggingSettings" {
                 Assert-MockCalled Set-SPDiagnosticConfig
             }
         }
+
+        Context "Diagnostic configuration needs updating and the InstallAccount option is used" {
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))) )
+
+            Mock Get-SPDiagnosticConfig { return @{
+                AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
+                CustomerExperienceImprovementProgramEnabled = $testParams.CustomerExperienceImprovementProgramEnabled
+                ErrorReportingEnabled = $testParams.ErrorReportingEnabled
+                ErrorReportingAutomaticUploadEnabled = $testParams.ErrorReportingAutomaticUploadEnabled
+                DownloadErrorReportingUpdatesEnabled = $testParams.DownloadErrorReportingUpdatesEnabled
+                DaysToKeepLogs = $testParams.DaysToKeepLogs
+                LogMaxDiskSpaceUsageEnabled = $testParams.LogMaxDiskSpaceUsageEnabled
+                LogDiskSpaceUsageGB = 1
+                LogLocation = $testParams.LogPath
+                LogCutInterval = $testParams.LogCutInterval
+                EventLogFloodProtectionEnabled = $testParams.EventLogFloodProtectionEnabled
+                EventLogFloodProtectionThreshold = $testParams.EventLogFloodProtectionThreshold
+                EventLogFloodProtectionTriggerPeriod = $testParams.EventLogFloodProtectionTriggerPeriod
+                EventLogFloodProtectionQuietPeriod = $testParams.EventLogFloodProtectionQuietPeriod
+                EventLogFloodProtectionNotifyInterval = $testParams.EventLogFloodProtectionNotifyInterval
+                ScriptErrorReportingEnabled = $testParams.ScriptErrorReportingEnabled
+                ScriptErrorReportingRequireAuth = $testParams.ScriptErrorReportingRequireAuth
+                ScriptErrorReportingDelay = $testParams.ScriptErrorReportingDelay
+            } }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "repairs the diagnostic configuration" {
+                Mock Set-SPDiagnosticConfig {}
+                Set-TargetResource @testParams
+                Assert-MockCalled Set-SPDiagnosticConfig
+            }
+        }
     }    
 }

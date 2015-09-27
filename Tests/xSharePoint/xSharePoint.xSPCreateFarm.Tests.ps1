@@ -108,6 +108,11 @@ Describe "xSPCreateFarm" {
                 DefaultServiceAccount = @{ Name = "WRONG\account" }
                 Name = $testParams.FarmConfigDatabaseName
             }}
+			Mock Get-SPWebApplication { return @(@{
+                IsAdministrationWebApplication = $true
+                ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
+                Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+            })}
 
             It "the get method returns current values" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
