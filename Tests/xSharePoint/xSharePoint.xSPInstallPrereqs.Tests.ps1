@@ -24,18 +24,22 @@ Describe "xSPInstallPrereqs" {
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
+
+        if ($null -eq (Get-Command Get-WindowsFeature -ErrorAction SilentlyContinue)) {
+            function Get-WindowsFeature() { }
+        }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
 
         Mock Get-xSharePointAssemblyVersion { return $majorBuildNumber } 
-        Mock Check-xSharePointInstalledProductRegistryKey { return $null }
+        Mock Get-ChildItem { return $null }
 
-        Context "Prerequisites are not installed but should be" {
-            Mock Invoke-Command { @( @{ Name = "ExampleFeature"; Installed = $false}) } -ParameterFilter { $ScriptBlock.ToString().Contains("Get-WindowsFeature") -eq $true }
+        Context "Prerequisites are not installed but should be and are to be installed in online mode" {
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-CimInstance { return @() }
-            Mock Get-ChildItem { return $null }
+            Mock Get-ChildItem { return @() }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -86,7 +90,7 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are installed and should be" {
-            Mock Invoke-Command { return @( @{ Name = "ExampleFeature"; Installed = $true }) } -ParameterFilter { $ScriptBlock.ToString().Contains("Get-WindowsFeature") -eq $true }
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
             if ($majorBuildNumber -eq 15) {
                 Mock Get-CimInstance { return @(
                     @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
@@ -112,7 +116,10 @@ Describe "xSPInstallPrereqs" {
                 )}
             }
             Mock Get-ChildItem { return $null }
-            Mock Check-xSharePointInstalledProductRegistryKey { return @( @{Example = $true } ) }
+            Mock Get-ChildItem { return @(
+                (New-Object Object | 
+                    Add-Member ScriptMethod GetValue { return "Microsoft Identity Extensions" } -PassThru)
+            ) }
             
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -126,8 +133,40 @@ Describe "xSPInstallPrereqs" {
         Context "Prerequisites are installed but should not be" {
             $testParams.Ensure = "Absent"
 
+			It "throws an exception from the set method" {
+                {Test-TargetResource @testParams} | Should Throw
+            }
+
             It "throws an exception from the set method" {
                 {Set-TargetResource @testParams} | Should Throw
+            }
+        }
+
+        Context "Prerequisites are not installed but should be and are to be installed in offline mode" {
+            $testParams.OnlineMode = $false
+			$testParams.Ensure = "Present"
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
+            Mock Get-CimInstance { return @() }
+            Mock Get-ChildItem { return @() }
+
+            It "throws an exception in the set method if required parameters are not set" {
+                {Set-TargetResource @testParams} | Should Throw
+            }
+
+            if ($majorBuildNumber -eq 15) {
+                $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+            }
+            if ($majorBuildNumber -eq 16) {
+                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56","KB2898850","MSVCRT12")
+            }
+            $requiredParams | ForEach-Object {
+                $testParams.Add($_, "C:\fake\value.exe")
+            }
+
+            It "does not throw an exception where the required parameters are included" {
+                Mock Start-Process { return @{ ExitCode = 0 } }
+
+                {Set-TargetResource @testParams} | Should Not Throw
             }
         }
     }    
