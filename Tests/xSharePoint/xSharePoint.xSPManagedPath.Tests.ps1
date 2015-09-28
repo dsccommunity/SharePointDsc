@@ -53,6 +53,14 @@ Describe "xSPManagedPath" {
                 Assert-MockCalled New-SPManagedPath
             }
             $testParams.HostHeader = $false
+
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            It "creates a host header path in the set method where InstallAccount is used" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPManagedPath
+            }
+            $testParams.Remove("InstallAccount")
         }
 
         Context "The path exists but is of the wrong type" {
