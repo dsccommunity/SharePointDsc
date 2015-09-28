@@ -22,23 +22,29 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         }
 
-        Use-CacheCluster -ErrorAction SilentlyContinue
-        $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+        try
+        {
+            Use-CacheCluster -ErrorAction SilentlyContinue
+            $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
 
-        if ($null -eq $cacheHost) { return $nullReturnValue }
-        $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-        $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
+            if ($null -eq $cacheHost) { return $nullReturnValue }
+            $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
 
-        $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
-        $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
-            
-        return @{
-            Name = $params.Name
-            CacheSizeInMB = $cacheHostConfig.Size
-            ServiceAccount = $windowsService.StartName
-            CreateFirewallRules = ($firewallRule -ne $null)
-            Ensure = "Present"
-            InstallAccount = $params.InstallAccount
+            $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
+            $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
+
+            return @{
+                Name = $params.Name
+                CacheSizeInMB = $cacheHostConfig.Size
+                ServiceAccount = $windowsService.StartName
+                CreateFirewallRules = ($firewallRule -ne $null)
+                Ensure = "Present"
+                InstallAccount = $params.InstallAccount
+            }
+        }
+        catch {
+            return $nullReturnValue
         }
     }
     return $result
