@@ -133,7 +133,7 @@ Describe "xSPInstallPrereqs" {
         Context "Prerequisites are installed but should not be" {
             $testParams.Ensure = "Absent"
 
-			It "throws an exception from the set method" {
+            It "throws an exception from the set method" {
                 {Test-TargetResource @testParams} | Should Throw
             }
 
@@ -144,7 +144,7 @@ Describe "xSPInstallPrereqs" {
 
         Context "Prerequisites are not installed but should be and are to be installed in offline mode" {
             $testParams.OnlineMode = $false
-			$testParams.Ensure = "Present"
+            $testParams.Ensure = "Present"
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-CimInstance { return @() }
             Mock Get-ChildItem { return @() }
