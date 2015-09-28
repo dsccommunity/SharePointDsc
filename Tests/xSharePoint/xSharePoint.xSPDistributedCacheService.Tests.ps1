@@ -52,7 +52,7 @@ Describe "xSPDistributedCacheService" {
         } }    
 
         Context "Distributed cache is not configured" {
-            Mock Get-CacheHost { return $null }
+            Mock Use-CacheCluster { throw [Exception] "ERRPS001 Error in reading provider and connection string values." }
 
             It "returns null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
