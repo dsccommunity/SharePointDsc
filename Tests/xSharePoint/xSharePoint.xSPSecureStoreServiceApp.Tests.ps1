@@ -50,6 +50,35 @@ Describe "xSPSecureStoreServiceApp" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
+
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            It "creates a new service application in the set method where InstallAccount is used" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPSecureStoreServiceApplication 
+            }
+            $testParams.Remove("InstallAccount")
+
+			$testParams.Add("DatabaseName", "SP_SecureStore")
+            It "creates a new service application in the set method where parameters beyond the minimum required set" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPSecureStoreServiceApplication 
+            }
+            $testParams.Remove("DatabaseName")
+        }
+
+        Context "When service applications exist in the current farm but the specific search app does not" {
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+        
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
         }
 
         Context "When a service application exists and is configured correctly" {
@@ -99,6 +128,27 @@ Describe "xSPSecureStoreServiceApp" {
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPSecureStoreServiceApplication
+            }
+        }
+
+		Context "When an unsupported version of SharePoint is installed" {
+			Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Secure Store Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Set-SPSecureStoreServiceApplication { }
+
+            It "the set method throws an exception" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    
