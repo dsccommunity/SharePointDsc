@@ -28,7 +28,7 @@ Describe "xSPManagedMetaDataServiceApp" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Context "When no service application exists in the current farm" {
+        Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPMetadataServiceApplication { return @{} }
@@ -46,6 +46,29 @@ Describe "xSPManagedMetaDataServiceApp" {
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPMetadataServiceApplication
+            }
+
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            It "creates a new service application in the set method where InstallAccount is used" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPMetadataServiceApplication
+            }
+            $testParams.Remove("InstallAccount")
+        }
+
+        Context "When service applications exist in the current farm but the specific MMS app does not" {
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 

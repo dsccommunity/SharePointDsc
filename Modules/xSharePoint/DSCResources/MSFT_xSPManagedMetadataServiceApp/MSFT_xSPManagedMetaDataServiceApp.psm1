@@ -16,33 +16,25 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-
-        try 
-        {
-            $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
-            if ($null -eq $serviceApps) { 
-                return $null 
-            }
-            $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Managed Metadata Service" }
-
-            If ($null -eq $serviceApp)
-            {
-                return $null
-            }
-            else
-            {
-                return @{
-                    Name = $serviceApp.DisplayName
-                    ApplicationPool = $serviceApp.ApplicationPool.Name
-                    DatabaseName = $serviceApp.Database.Name
-                    DatabaseServer = $serviceApp.Database.Server.Name
-                    InstallAccount = $params.InstallAccount
-                }
-            }
-        } 
-        catch
-        {
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        if ($null -eq $serviceApps) { 
             return $null 
+        }
+        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Managed Metadata Service" }
+
+        If ($null -eq $serviceApp)
+        {
+            return $null
+        }
+        else
+        {
+            return @{
+                Name = $serviceApp.DisplayName
+                ApplicationPool = $serviceApp.ApplicationPool.Name
+                DatabaseName = $serviceApp.Database.Name
+                DatabaseServer = $serviceApp.Database.Server.Name
+                InstallAccount = $params.InstallAccount
+            }
         }
     }
     return $result
