@@ -86,7 +86,7 @@ function Set-TargetResource
     Start-Service -Name sptimerv4
 
     Write-Verbose -Message "Pausing for 5 minutes to allow the timer service to fully provision the server"
-    Invoke-Command -ScriptBlock { Start-Sleep -Seconds 300 } -NoNewScope
+    Start-Sleep -Seconds 300
     Write-Verbose -Message "Join farm complete. Restarting computer to allow configuration to continue"
 
     $global:DSCMachineStatus = 1
