@@ -40,6 +40,9 @@ Describe "xSPDistributedCacheService" {
         Mock Add-SPDistributedCacheServiceInstance { } 
         Mock Update-SPDistributedCacheSize { } 
         Mock Get-SPManagedAccount { return @{} } 
+        Mock Add-xSharePointUserToLocalAdmin { } 
+        Mock Test-xSharePointUserIsLocalAdmin { return $false }
+        Mock Remove-xSharePointUserToLocalAdmin { }
         Mock Get-SPFarm { return @{ 
             Services = @(@{ 
                 Name = "AppFabricCachingService"

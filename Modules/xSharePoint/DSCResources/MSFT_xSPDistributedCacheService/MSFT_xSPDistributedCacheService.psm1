@@ -13,7 +13,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting the cache host information"
-
+    
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
@@ -66,6 +66,13 @@ function Set-TargetResource
 
     $CurrentState = Get-TargetResource @PSBoundParameters
     
+    $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $ServiceAccount
+
+    if (!$isLocalAdmin)
+    {
+        Add-xSharePointUserToLocalAdmin -UserName $ServiceAccount
+    }
+
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Adding the distributed cache to the server"
         if($createFirewallRules -eq $true) {
@@ -122,6 +129,12 @@ function Set-TargetResource
             }  
         }
         Write-Verbose -Message "Distributed cache removed."
+    }
+
+    # Remove the FarmAccount from the local Administrators group, if it was added above
+    if (!$isLocalAdmin)
+    {
+        Remove-xSharePointUserToLocalAdmin -UserName $ServiceAccount
     }
 }
 

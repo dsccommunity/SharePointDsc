@@ -64,7 +64,6 @@ Description = 'This DSC module is used to deploy and configure SharePoint Server
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 NestedModules = @("modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1",
-                  "modules\xSharePoint.UserProfileService\xSharePoint.UserProfileService.psm1",
                   "modules\xSharePoint.Util\xSharePoint.Util.psm1")
 
 # Functions to export from this module
