@@ -30,14 +30,14 @@ Describe "xSPUserProfileServiceApp" {
         Mock Get-SPFarm { return @{
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}
-        Mock New-SPProfileServiceApplication { }
+        Mock New-SPProfileServiceApplication { return @{} }
         Mock New-SPProfileServiceApplicationProxy { }
         Mock Add-xSharePointUserToLocalAdmin { } 
         Mock Test-xSharePointUserIsLocalAdmin { return $false }
         Mock Remove-xSharePointUserToLocalAdmin { }
         Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
 
-        Context "When no service application exists in the current farm" {
+        Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
 
@@ -53,6 +53,29 @@ Describe "xSPUserProfileServiceApp" {
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPProfileServiceApplication
+            }
+
+			$testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+			It "creates a new service application in the set method when InstallAccount is used" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPProfileServiceApplication
+            }
+			$testParams.Remove("InstallAccount")
+        }
+
+        Context "When service applications exist in the current farm but not the specific user profile service app" {
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 
@@ -109,6 +132,15 @@ Describe "xSPUserProfileServiceApp" {
 
             It "returns true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+
+            Mock Get-SPFarm { return @{
+                DefaultServiceAccount = @{ Name = "WRONG\account" }
+            }}
+
+            It "returns values from the get method where the farm account doesn't match" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
         }
     }    
