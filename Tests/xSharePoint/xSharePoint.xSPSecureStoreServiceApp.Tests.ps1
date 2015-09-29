@@ -58,7 +58,7 @@ Describe "xSPSecureStoreServiceApp" {
             }
             $testParams.Remove("InstallAccount")
 
-			$testParams.Add("DatabaseName", "SP_SecureStore")
+            $testParams.Add("DatabaseName", "SP_SecureStore")
             It "creates a new service application in the set method where parameters beyond the minimum required set" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
@@ -131,8 +131,8 @@ Describe "xSPSecureStoreServiceApp" {
             }
         }
 
-		Context "When an unsupported version of SharePoint is installed" {
-			Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
+        Context "When an unsupported version of SharePoint is installed" {
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
