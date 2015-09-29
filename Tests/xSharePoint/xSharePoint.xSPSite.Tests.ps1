@@ -85,6 +85,35 @@ Describe "xSPSite" {
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+
+			Mock Get-SPSite { return @{
+                HostHeaderIsSiteName = $false
+                WebApplication = @{ 
+                    Url = $testParams.Url 
+                    UseClaimsAuthentication = $true
+                }
+                Url = $testParams.Url
+                Owner = $null
+            }}
+
+			It "returns the site data from the get method where a valid site collection admin does not exist" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+			
+			Mock Get-SPSite { return @{
+                HostHeaderIsSiteName = $false
+                WebApplication = @{ 
+                    Url = $testParams.Url 
+                    UseClaimsAuthentication = $true
+                }
+                Url = $testParams.Url
+                Owner = @{ UserLogin = "DEMO\owner" }
+				SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+            }}
+
+			It "returns the site data from the get method where a secondary site contact exists" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
         }
 
         Context "The site exists and uses classic authentication" {
@@ -104,6 +133,21 @@ Describe "xSPSite" {
 
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+
+			Mock Get-SPSite { return @{
+                HostHeaderIsSiteName = $false
+                WebApplication = @{ 
+                    Url = $testParams.Url 
+                    UseClaimsAuthentication = $false
+                }
+                Url = $testParams.Url
+                Owner = @{ UserLogin = "DEMO\owner" }
+				SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+            }}
+
+			It "returns the site data from the get method where a secondary site contact exists" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
         }
     }    
