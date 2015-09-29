@@ -86,7 +86,7 @@ Describe "xSPSite" {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-			Mock Get-SPSite { return @{
+            Mock Get-SPSite { return @{
                 HostHeaderIsSiteName = $false
                 WebApplication = @{ 
                     Url = $testParams.Url 
@@ -96,11 +96,11 @@ Describe "xSPSite" {
                 Owner = $null
             }}
 
-			It "returns the site data from the get method where a valid site collection admin does not exist" {
+            It "returns the site data from the get method where a valid site collection admin does not exist" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
-			
-			Mock Get-SPSite { return @{
+            
+            Mock Get-SPSite { return @{
                 HostHeaderIsSiteName = $false
                 WebApplication = @{ 
                     Url = $testParams.Url 
@@ -108,10 +108,10 @@ Describe "xSPSite" {
                 }
                 Url = $testParams.Url
                 Owner = @{ UserLogin = "DEMO\owner" }
-				SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+                SecondaryContact = @{ UserLogin = "DEMO\secondary" }
             }}
 
-			It "returns the site data from the get method where a secondary site contact exists" {
+            It "returns the site data from the get method where a secondary site contact exists" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
         }
@@ -135,7 +135,7 @@ Describe "xSPSite" {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-			Mock Get-SPSite { return @{
+            Mock Get-SPSite { return @{
                 HostHeaderIsSiteName = $false
                 WebApplication = @{ 
                     Url = $testParams.Url 
@@ -143,10 +143,10 @@ Describe "xSPSite" {
                 }
                 Url = $testParams.Url
                 Owner = @{ UserLogin = "DEMO\owner" }
-				SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+                SecondaryContact = @{ UserLogin = "DEMO\secondary" }
             }}
 
-			It "returns the site data from the get method where a secondary site contact exists" {
+            It "returns the site data from the get method where a secondary site contact exists" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
         }

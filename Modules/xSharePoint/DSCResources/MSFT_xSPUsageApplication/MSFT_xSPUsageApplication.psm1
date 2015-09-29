@@ -80,12 +80,11 @@ function Set-TargetResource
     if ($null -eq $CurrentState) {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            
         
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
-            if ($params.ContainsKey("DatabasePassword")) { $newParams.Add("DatabasePassword", $params.DatabasePassword) }
+            if ($params.ContainsKey("DatabasePassword")) { $newParams.Add("DatabasePassword", (ConvertTo-SecureString -String $params.DatabasePassword -AsPlainText -force)) }
             if ($params.ContainsKey("DatabaseServer")) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseUsername")) { $newParams.Add("DatabaseUsername", $params.DatabaseUsername) }
             if ($params.ContainsKey("FailoverDatabaseServer")) { $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) }
