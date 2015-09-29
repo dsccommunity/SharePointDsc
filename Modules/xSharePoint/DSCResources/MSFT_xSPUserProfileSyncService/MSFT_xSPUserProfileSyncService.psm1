@@ -111,10 +111,9 @@ function Set-TargetResource
         $maxCount = 10
 
         while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState)) {
-            # Get the current status of the Sync service
-            $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
-
             if ($syncService.Status -ne $desiredState) { Start-Sleep -Seconds 60 }
+			# Get the current status of the Sync service
+            $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
             $count++
         }
     }
