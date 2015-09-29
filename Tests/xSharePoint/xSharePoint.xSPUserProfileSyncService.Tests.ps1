@@ -42,152 +42,152 @@ Describe "xSPUserProfileSyncService" {
         Mock Test-xSharePointUserIsLocalAdmin { return $false }
         Mock Remove-xSharePointUserToLocalAdmin { }
         Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
-		Mock Start-Sleep { }
+        Mock Start-Sleep { }
 
         switch ($majorBuildNumber) {
             15 {
-				Context "User profile sync service is not found locally" {
-					Mock Get-SPServiceInstance { return $null }
+                Context "User profile sync service is not found locally" {
+                    Mock Get-SPServiceInstance { return $null }
 
-					It "returns absent from the get method" {
-						$Global:xSharePointUPACheck = $false
-						(Get-TargetResource @testParams).Ensure | Should Be "Absent"
-					}
-				}
+                    It "returns absent from the get method" {
+                        $Global:xSharePointUPACheck = $false
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
+                }
 
                 Context "User profile sync service is not running and should be" {
-					Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
-							$Global:xSharePointUPACheck = $true
-							return @( @{ 
-								Status = "Disabled"
-								ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-								UserProfileApplicationGuid = [Guid]::Empty
-								TypeName = "User Profile Synchronization Service" 
-							}) 
-						} else {
-							return @( @{ 
-								Status = "Online"
-								ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-								UserProfileApplicationGuid = [Guid]::NewGuid()
-								TypeName = "User Profile Synchronization Service" 
-							})
-						}
-					}
-					Mock Get-SPServiceApplication { return @(
-						New-Object Object |            
-							Add-Member NoteProperty ID ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) -PassThru |
-							Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-							Add-Member ScriptMethod SetSynchronizationMachine {
-								param($computerName, $syncServiceID, $FarmUserName, $FarmPassword)
-							} -PassThru      
-					)} 
+                    Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
+                            $Global:xSharePointUPACheck = $true
+                            return @( @{ 
+                                Status = "Disabled"
+                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                                UserProfileApplicationGuid = [Guid]::Empty
+                                TypeName = "User Profile Synchronization Service" 
+                            }) 
+                        } else {
+                            return @( @{ 
+                                Status = "Online"
+                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                                UserProfileApplicationGuid = [Guid]::NewGuid()
+                                TypeName = "User Profile Synchronization Service" 
+                            })
+                        }
+                    }
+                    Mock Get-SPServiceApplication { return @(
+                        New-Object Object |            
+                            Add-Member NoteProperty ID ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) -PassThru |
+                            Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
+                            Add-Member ScriptMethod SetSynchronizationMachine {
+                                param($computerName, $syncServiceID, $FarmUserName, $FarmPassword)
+                            } -PassThru      
+                    )} 
 
-					It "returns absent from the get method" {
-						$Global:xSharePointUPACheck = $false
-						(Get-TargetResource @testParams).Ensure | Should Be "Absent"
-					}
+                    It "returns absent from the get method" {
+                        $Global:xSharePointUPACheck = $false
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
 
-					It "returns false from the test method" {
-						$Global:xSharePointUPACheck = $false
-						Test-TargetResource @testParams | Should Be $false
-					}
+                    It "returns false from the test method" {
+                        $Global:xSharePointUPACheck = $false
+                        Test-TargetResource @testParams | Should Be $false
+                    }
 
-					It "calls the start service cmdlet from the set method" {
-						$Global:xSharePointUPACheck = $false
-						Set-TargetResource @testParams 
+                    It "calls the start service cmdlet from the set method" {
+                        $Global:xSharePointUPACheck = $false
+                        Set-TargetResource @testParams 
 
-						Assert-MockCalled Start-SPServiceInstance
-					}
+                        Assert-MockCalled Start-SPServiceInstance
+                    }
 
-					Mock Get-SPFarm { return @{
-						DefaultServiceAccount = @{ Name = "WRONG\account" }
-					}}
+                    Mock Get-SPFarm { return @{
+                        DefaultServiceAccount = @{ Name = "WRONG\account" }
+                    }}
 
-					It "returns values from the get method where the farm account doesn't match" {
-						Get-TargetResource @testParams | Should Not BeNullOrEmpty
-					}
+                    It "returns values from the get method where the farm account doesn't match" {
+                        Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                    }
 
-					$Global:xSharePointUPACheck = $false
-					Mock Get-SPServiceApplication { return $null } 
-					It "throws in the set method if the user profile service app can't be found" {
-						{ Set-TargetResource @testParams } | Should Throw
-					}
-				}
+                    $Global:xSharePointUPACheck = $false
+                    Mock Get-SPServiceApplication { return $null } 
+                    It "throws in the set method if the user profile service app can't be found" {
+                        { Set-TargetResource @testParams } | Should Throw
+                    }
+                }
 
-				Context "User profile sync service is running and should be" {
-					Mock Get-SPServiceInstance { return @( @{ 
-								Status = "Online"
-								ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-								UserProfileApplicationGuid = [Guid]::NewGuid()
-								TypeName = "User Profile Synchronization Service" 
-							})
-					} 
+                Context "User profile sync service is running and should be" {
+                    Mock Get-SPServiceInstance { return @( @{ 
+                                Status = "Online"
+                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                                UserProfileApplicationGuid = [Guid]::NewGuid()
+                                TypeName = "User Profile Synchronization Service" 
+                            })
+                    } 
         
-					It "returns present from the get method" {
-						(Get-TargetResource @testParams).Ensure | Should Be "Present"
-					}
+                    It "returns present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    }
 
-					It "returns true from the test method" {
-						Test-TargetResource @testParams | Should Be $true
-					}
-				}
+                    It "returns true from the test method" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
 
-				$testParams.Ensure = "Absent"
+                $testParams.Ensure = "Absent"
 
-				Context "User profile sync service is running and shouldn't be" {
-					Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
-							$Global:xSharePointUPACheck = $true
-							return @( @{ 
-								Status = "Online"
-								ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-								UserProfileApplicationGuid = [Guid]::NewGuid()
-								TypeName = "User Profile Synchronization Service" 
-							}) 
-						} else {
-							return @( @{ 
-								Status = "Disabled"
-								ID = [Guid]::Empty
-								UserProfileApplicationGuid = [Guid]::Empty
-								TypeName = "User Profile Synchronization Service" 
-							})
-						}
-					} 
+                Context "User profile sync service is running and shouldn't be" {
+                    Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
+                            $Global:xSharePointUPACheck = $true
+                            return @( @{ 
+                                Status = "Online"
+                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                                UserProfileApplicationGuid = [Guid]::NewGuid()
+                                TypeName = "User Profile Synchronization Service" 
+                            }) 
+                        } else {
+                            return @( @{ 
+                                Status = "Disabled"
+                                ID = [Guid]::Empty
+                                UserProfileApplicationGuid = [Guid]::Empty
+                                TypeName = "User Profile Synchronization Service" 
+                            })
+                        }
+                    } 
 
-					It "returns present from the get method" {
-						$Global:xSharePointUPACheck = $false
-						(Get-TargetResource @testParams).Ensure | Should Be "Present"
-					}
+                    It "returns present from the get method" {
+                        $Global:xSharePointUPACheck = $false
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    }
 
-					It "returns false from the test method" {
-						$Global:xSharePointUPACheck = $false
-						Test-TargetResource @testParams | Should Be $false
-					}
+                    It "returns false from the test method" {
+                        $Global:xSharePointUPACheck = $false
+                        Test-TargetResource @testParams | Should Be $false
+                    }
 
-					It "calls the start service cmdlet from the set method" {
-						$Global:xSharePointUPACheck = $false
-						Set-TargetResource @testParams 
+                    It "calls the start service cmdlet from the set method" {
+                        $Global:xSharePointUPACheck = $false
+                        Set-TargetResource @testParams 
 
-						Assert-MockCalled Stop-SPServiceInstance
-					}
-				}
+                        Assert-MockCalled Stop-SPServiceInstance
+                    }
+                }
 
-				Context "User profile sync service is not running and shouldn't be" {
-					Mock Get-SPServiceInstance { return @( @{ 
-								Status = "Disabled"
-								ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-								UserProfileApplicationGuid = [Guid]::Empty
-								TypeName = "User Profile Synchronization Service" 
-							})
-					} 
+                Context "User profile sync service is not running and shouldn't be" {
+                    Mock Get-SPServiceInstance { return @( @{ 
+                                Status = "Disabled"
+                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                                UserProfileApplicationGuid = [Guid]::Empty
+                                TypeName = "User Profile Synchronization Service" 
+                            })
+                    } 
 
-					It "returns absent from the get method" {
-						(Get-TargetResource @testParams).Ensure | Should Be "Absent"
-					}
+                    It "returns absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
 
-					It "returns true from the test method" {
-						Test-TargetResource @testParams | Should Be $true
-					}
-				}
+                    It "returns true from the test method" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
             }
             16 {
                 Context "All methods throw exceptions as user profile sync doesn't exist in 2016" {

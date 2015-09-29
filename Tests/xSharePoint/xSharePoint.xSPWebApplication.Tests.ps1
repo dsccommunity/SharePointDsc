@@ -50,23 +50,23 @@ Describe "xSPWebApplication" {
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
 
-			$testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-			It "calls the new cmdlet from the set method where InstallAccount is used" {
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            It "calls the new cmdlet from the set method where InstallAccount is used" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
-			$testParams.Remove("InstallAccount")
+            $testParams.Remove("InstallAccount")
 
-			$testParams.Add("AllowAnonymous", $true)
-			It "calls the new cmdlet from the set where anonymous authentication is requested" {
+            $testParams.Add("AllowAnonymous", $true)
+            It "calls the new cmdlet from the set where anonymous authentication is requested" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
-			$testParams.Remove("AllowAnonymous")
+            $testParams.Remove("AllowAnonymous")
         }
 
         $testParams.AuthenticationMethod = "Kerberos"
@@ -89,7 +89,7 @@ Describe "xSPWebApplication" {
             }
         }
 
-		$testParams.AuthenticationMethod = "NTLM"
+        $testParams.AuthenticationMethod = "NTLM"
 
         Context "The web appliation does exist and should that uses NTLM" {
             Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
@@ -120,9 +120,9 @@ Describe "xSPWebApplication" {
             }
         }
 
-		$testParams.AuthenticationMethod = "Kerberos"
+        $testParams.AuthenticationMethod = "Kerberos"
 
-		Context "The web appliation does exist and should that uses Kerberos" {
+        Context "The web appliation does exist and should that uses Kerberos" {
             Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $false; AllowAnonymous = $false } }
             Mock Get-SPWebApplication { return @(@{
                 DisplayName = $testParams.Name

@@ -55,12 +55,12 @@ Describe "xSPUserProfileServiceApp" {
                 Assert-MockCalled New-SPProfileServiceApplication
             }
 
-			$testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-			It "creates a new service application in the set method when InstallAccount is used" {
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            It "creates a new service application in the set method when InstallAccount is used" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPProfileServiceApplication
             }
-			$testParams.Remove("InstallAccount")
+            $testParams.Remove("InstallAccount")
         }
 
         Context "When service applications exist in the current farm but not the specific user profile service app" {
