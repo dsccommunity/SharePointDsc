@@ -17,6 +17,8 @@ Describe "xSPStateServiceApp" {
         $testParams = @{
             Name = "State Service App"
             DatabaseName = "SP_StateService"
+			DatabaseServer = "SQL.test.domain"
+			DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
