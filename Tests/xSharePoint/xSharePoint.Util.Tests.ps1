@@ -12,6 +12,35 @@ $ModuleName = "xSharePoint.Util"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 
 Describe "xSharePoint.Util" {
+    Context "Validate Get-xSharePointAssemblyVersion" {
+        It "returns the version number of a given executable" {
+            Get-xSharePointAssemblyVersion -PathToAssembly "C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe" | Should Not Be 0
+        }
+    }
+
+    Context "Validate Invoke-xSharePointCommand" {
+        Mock Invoke-Command { return $null } -ModuleName "xSharePoint.Util"
+        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+        Mock Get-PSSnapin { return $null } -ModuleName "xSharePoint.Util"
+        Mock Add-PSSnapin { return $null } -ModuleName "xSharePoint.Util"
+
+        It "executes a command as the local run as user" {
+            Invoke-xSharePointCommand -ScriptBlock { return "value" } 
+        }
+
+        It "executes a command as the local run as user with additional arguments" {
+            Invoke-xSharePointCommand -ScriptBlock { return "value" } -Arguments @{ Something = "42" }
+        }
+
+        It "executes a command as the specified InstallAccount user where it is different to the current user" {
+            Invoke-xSharePointCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))) 
+        }
+
+        It "throws an exception when the run as user is the same as the InstallAccount user" {
+            { Invoke-xSharePointCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", (ConvertTo-SecureString "password" -AsPlainText -Force)))} | Should Throw
+        }
+    }
+
     Context "Validate Test-xSharePointSpecificParameters" {
         It "Returns true for two identical tables" {
             $desired = @{ Example = "test" }

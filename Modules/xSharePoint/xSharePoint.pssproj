@@ -75,7 +75,6 @@
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
-    <Folder Include="Modules\xSharePoint.CacheAccounts\" />
     <Folder Include="Modules\xSharePoint.Util\" />
     <Folder Include="Examples\" />
   </ItemGroup>
@@ -124,7 +123,6 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
-    <Compile Include="Modules\xSharePoint.CacheAccounts\xSharePoint.CacheAccounts.psm1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
