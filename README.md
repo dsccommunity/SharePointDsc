@@ -68,10 +68,13 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
+### 0.7.0.0
+
+ * Bug fixes and stability improvements
+
 ### 0.6.0.0
 
  * Added support for PsDscRunAsCredential in PowerShell 5 resource use
- * Expanded automated unit testing
  * Removed timeout loop in xSPJoinFarm in favour of WaitForAll resource in PowerShell 5
 
 ### 0.5.0.0
