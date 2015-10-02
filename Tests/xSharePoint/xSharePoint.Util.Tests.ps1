@@ -39,6 +39,30 @@ Describe "xSharePoint.Util" {
         It "throws an exception when the run as user is the same as the InstallAccount user" {
             { Invoke-xSharePointCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", (ConvertTo-SecureString "password" -AsPlainText -Force)))} | Should Throw
         }
+
+        It "throws normal exceptions when triggered in the script block" {
+            Mock Invoke-Command { throw [Exception] "A random exception" } -ModuleName "xSharePoint.Util"
+
+            { Invoke-xSharePointCommand -ScriptBlock { return "value" } } | Should Throw
+        }
+
+        It "throws normal exceptions when triggered in the script block using InstallAccount" {
+            Mock Invoke-Command { throw [Exception] "A random exception" } -ModuleName "xSharePoint.Util"
+
+            { Invoke-xSharePointCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force)))} | Should Throw
+        }
+
+        It "handles a SharePoint update conflict exception by rebooting the server to retry" {
+            Mock Invoke-Command { throw [Exception] "An update conflict has occurred, and you must re-try this action." } -ModuleName "xSharePoint.Util"
+
+            { Invoke-xSharePointCommand -ScriptBlock { return "value" } } | Should Not Throw
+        }
+
+        It "handles a SharePoint update conflict exception by rebooting the server to retry using InstallAccount" {
+            Mock Invoke-Command { throw [Exception] "An update conflict has occurred, and you must re-try this action." } -ModuleName "xSharePoint.Util"
+
+            { Invoke-xSharePointCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force)))} | Should Not Throw
+        }
     }
 
     Context "Validate Test-xSharePointSpecificParameters" {

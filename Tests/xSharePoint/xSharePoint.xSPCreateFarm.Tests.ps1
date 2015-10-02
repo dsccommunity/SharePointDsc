@@ -52,7 +52,7 @@ Describe "xSPCreateFarm" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the appropriate cmdlets in the set method" {
+            It "calls the new configuration database cmdlet in the set method" {
                 Set-TargetResource @testParams
                 switch ($majorBuildNumber)
                 {
@@ -60,7 +60,7 @@ Describe "xSPCreateFarm" {
                         Assert-MockCalled New-SPConfigurationDatabase
                     }
                     16 {
-                        Assert-MockCalled New-SPConfigurationDatabase -ParameterFilter { $LocalServerRole -ne $null }
+                        Assert-MockCalled New-SPConfigurationDatabase -ParameterFilter { $ServerRoleOptional -eq $true }
                     }
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
@@ -68,6 +68,35 @@ Describe "xSPCreateFarm" {
                 }
                 
             }
+
+            if ($majorBuildNumber -eq 16) {
+                $testParams.Add("ServerRole", "WebFrontEnd")
+                It "creates a farm with a specific server role" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled New-SPConfigurationDatabase -ParameterFilter { $LocalServerRole -eq "WebFrontEnd" }
+                }
+                $testParams.Remove("ServerRole")
+            }
+        }
+
+        if ($majorBuildNumber -eq 15) {
+            $testParams.Add("ServerRole", "WebFrontEnd")
+
+            Context "only valid parameters for SharePoint 2013 are used" {
+                It "throws if server role is used in the get method" {
+                    { Get-TargetResource @testParams } | Should Throw
+                }
+
+                It "throws if server role is used in the test method" {
+                    { Test-TargetResource @testParams } | Should Throw
+                }
+
+                It "throws if server role is used in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw
+                }
+            }
+
+            $testParams.Remove("ServerRole")
         }
 
         Context "no farm is configured locally and an unsupported version of SharePoint is installed on the server" {

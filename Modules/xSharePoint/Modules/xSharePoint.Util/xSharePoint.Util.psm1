@@ -58,7 +58,17 @@ function Invoke-xSharePointCommand() {
         }
         Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
 
-        $result = Invoke-Command @invokeArgs -Verbose
+        try {
+            $result = Invoke-Command @invokeArgs -Verbose
+        } catch {
+            if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action")) {
+                Write-Verbose "Detected an update conflict, restarting server to allow DSC to resume and retry"
+                $global:DSCMachineStatus = 1
+            } else {
+                throw $_
+            }
+        }
+        
         return $result
     } else {
         if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) { 
@@ -76,7 +86,16 @@ function Invoke-xSharePointCommand() {
         
         if ($session) { $invokeArgs.Add("Session", $session) }
 
-        $result = Invoke-Command @invokeArgs -Verbose
+        try {
+            $result = Invoke-Command @invokeArgs -Verbose
+        } catch {
+            if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action")) {
+                Write-Verbose "Detected an update conflict, restarting server to allow DSC to resume and retry"
+                $global:DSCMachineStatus = 1
+            } else {
+                throw $_
+            }
+        }
 
         if ($session) { Remove-PSSession $session } 
         return $result
