@@ -24,12 +24,18 @@ Describe "xSPCacheAccounts" {
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
+
+        try { [Microsoft.SharePoint.Administration.SPThingType] }
+        catch {
+            Add-Type @"
+namespace Microsoft.SharePoint.Administration {
+    public enum SPPolicyRoleType { FullRead, FullControl };
+}        
+"@
+        }    
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock Set-xSharePointCacheReaderPolicy {}
-        Mock Set-xSharePointCacheOwnerPolicy {}
-        Mock Update-xSharePointObject {}
-
+        
         Context "The web application specified does not exist" {
             Mock Get-SPWebApplication { return $null }
 
@@ -47,9 +53,23 @@ Describe "xSPCacheAccounts" {
         }
 
         Context "The specified cache accounts have not been configured" {
-            Mock Get-SPWebApplication { return @{
-                Properties = @{ }
-            }}
+            Mock Get-SPWebApplication { return New-Object Object |
+                Add-Member NoteProperty Properties @{} -PassThru |
+                Add-Member NoteProperty Policies (
+                    New-Object Object |
+                    Add-Member ScriptMethod Add { return New-Object Object |
+                        Add-Member NoteProperty PolicyRoleBindings (
+                            New-Object Object |
+                            Add-Member ScriptMethod Add {} -PassThru
+                        ) -PassThru
+                    } -PassThru
+                ) -PassThru |
+                Add-Member NoteProperty PolicyRoles (
+                    New-Object Object |
+                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                ) -PassThru |
+                Add-Member ScriptMethod Update {} -PassThru
+            }
 
             It "returns empty strings from the Get method" {
                 $results = Get-TargetResource @testParams
@@ -63,20 +83,30 @@ Describe "xSPCacheAccounts" {
 
             It "Updates the accounts when set is called" {
                 Set-TargetResource @testParams
-
-                Assert-MockCalled Set-xSharePointCacheReaderPolicy
-                Assert-MockCalled Set-xSharePointCacheOwnerPolicy
-                Assert-MockCalled Update-xSharePointObject
             }
         }
 
         Context "The cache accounts have been configured correctly" {
-            Mock Get-SPWebApplication { return @{
-                Properties = @{
+            Mock Get-SPWebApplication { return New-Object Object |
+                Add-Member NoteProperty Properties @{
                     portalsuperuseraccount = $testParams.SuperUserAlias
                     portalsuperreaderaccount = $testParams.SuperReaderAlias
-                }
-            }}
+                } -PassThru |
+                Add-Member NoteProperty Policies (
+                    New-Object Object |
+                    Add-Member ScriptMethod Add { return New-Object Object |
+                        Add-Member NoteProperty PolicyRoleBindings (
+                            New-Object Object |
+                            Add-Member ScriptMethod Add {} -PassThru
+                        ) -PassThru
+                    } -PassThru
+                ) -PassThru |
+                Add-Member NoteProperty PolicyRoles (
+                    New-Object Object |
+                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                ) -PassThru |
+                Add-Member ScriptMethod Update {} -PassThru
+            }
 
             It "returns the values from the get method" {
                 $results = Get-TargetResource @testParams
@@ -90,12 +120,26 @@ Describe "xSPCacheAccounts" {
         }
 
         Context "Cache accounts have been configured, but the reader account is wrong" {
-            Mock Get-SPWebApplication { return @{
-                Properties = @{
-                    SuperUserAlias = $testParams.SuperUserAlias
-                    SuperReaderAlias = "WRONG\AccountName"
-                }
-            }}
+            Mock Get-SPWebApplication { return New-Object Object |
+                Add-Member NoteProperty Properties @{
+                    portalsuperuseraccount = $testParams.SuperUserAlias
+                    portalsuperreaderaccount = "WRONG\AccountName"
+                } -PassThru |
+                Add-Member NoteProperty Policies (
+                    New-Object Object |
+                    Add-Member ScriptMethod Add { return New-Object Object |
+                        Add-Member NoteProperty PolicyRoleBindings (
+                            New-Object Object |
+                            Add-Member ScriptMethod Add {} -PassThru
+                        ) -PassThru
+                    } -PassThru
+                ) -PassThru |
+                Add-Member NoteProperty PolicyRoles (
+                    New-Object Object |
+                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                ) -PassThru |
+                Add-Member ScriptMethod Update {} -PassThru
+            }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -103,17 +147,30 @@ Describe "xSPCacheAccounts" {
 
             It "sets the correct accounts to the web app again" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Update-xSharePointObject
             }
         }
 
         Context "Cache accounts have been configured, but the super account is wrong" {
-            Mock Get-SPWebApplication { return @{
-                Properties = @{
-                    SuperUserAlias = "WRONG\AccountName"
-                    SuperReaderAlias = $testParams.SuperReaderAlias
-                }
-            }}
+            Mock Get-SPWebApplication { return New-Object Object |
+                Add-Member NoteProperty Properties @{
+                    portalsuperuseraccount = "WRONG\AccountName"
+                    portalsuperreaderaccount = $testParams.SuperReaderAlias
+                } -PassThru |
+                Add-Member NoteProperty Policies (
+                    New-Object Object |
+                    Add-Member ScriptMethod Add { return New-Object Object |
+                        Add-Member NoteProperty PolicyRoleBindings (
+                            New-Object Object |
+                            Add-Member ScriptMethod Add {} -PassThru
+                        ) -PassThru
+                    } -PassThru
+                ) -PassThru |
+                Add-Member NoteProperty PolicyRoles (
+                    New-Object Object |
+                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                ) -PassThru |
+                Add-Member ScriptMethod Update {} -PassThru
+            }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -121,7 +178,6 @@ Describe "xSPCacheAccounts" {
 
             It "sets the correct accounts to the web app again" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Update-xSharePointObject
             }
         }
     }    

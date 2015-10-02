@@ -17,20 +17,15 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-
-        try {
-            $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
-            if ($null -eq $ma) { return $null }
-            return @{
-                AccountName = $ma.Username
-                EmailNotification = $ma.DaysBeforeChangeToEmail
-                PreExpireDays = $ma.DaysBeforeExpiryToChange
-                Schedule = $ma.ChangeSchedule
-                Account = $params.Account
-                InstallAccount = $params.InstallAccount
-            }
-        } catch {
-            return $null
+        $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
+        if ($null -eq $ma) { return $null }
+        return @{
+            AccountName = $ma.Username
+            EmailNotification = $ma.DaysBeforeChangeToEmail
+            PreExpireDays = $ma.DaysBeforeExpiryToChange
+            Schedule = $ma.ChangeSchedule
+            Account = $params.Account
+            InstallAccount = $params.InstallAccount
         }
     }
     return $result

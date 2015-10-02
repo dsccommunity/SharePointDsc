@@ -15,28 +15,16 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
-        $feature = Get-SPFeature -Identity $params.Name -ErrorAction SilentlyContinue
-
-        if ($null -eq $feature) { return @{
-            Name = $params.Name
-            FeatureScope = $params.FeatureScope
-            Url = $params.Url
-            InstalAcount = $params.InstallAccount
-            Ensure = "Absent"
-        } }
-
-        $checkParams = @{}
-        $checkParams.Add("Identity", $params.Name)
-        if ($FeatureScope -eq "Farm") {
+        $checkParams = @{ Identity = $params.Name }
+        if ($params.FeatureScope -eq "Farm") {
             $checkParams.Add($params.FeatureScope, $true)
         } else {
             $checkParams.Add($params.FeatureScope, $params.Url)
         }
         $featureAtScope = Get-SPFeature @checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
-        if ($enabled) { $currentState = "Present" } else { $currentState = "Absent" }
+        if ($enabled -eq $true) { $currentState = "Present" } else { $currentState = "Absent" }
 
         return @{
             Name = $params.Name

@@ -18,7 +18,7 @@ function Get-TargetResource
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
-        if ($null -eq $wa) { return @{} }
+        if ($null -eq $wa) { return $null }
         
         $returnVal = @{}
         $returnVal.Add("WebAppUrl", $params.WebAppUrl)
@@ -54,7 +54,6 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa) { 
@@ -72,10 +71,15 @@ function Set-TargetResource
             $wa.Properties.Add("portalsuperreaderaccount", $params.SuperReaderAlias)
         }
         
-        Set-xSharePointCacheReaderPolicy -WebApplication $wa -UserName $params.SuperReaderAlias
-        Set-xSharePointCacheOwnerPolicy -WebApplication $wa -UserName $params.SuperUserAlias
+        $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, $params.SuperReaderAlias)
+        $readPolicyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
+        $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
 
-        Update-xSharePointObject -InputObject $wa
+        $policy = $wa.Policies.Add($params.SuperUserAlias, $params.SuperUserAlias)
+        $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+        $policy.PolicyRoleBindings.Add($policyRole)
+        
+        $wa.Update()
     }
 }
 

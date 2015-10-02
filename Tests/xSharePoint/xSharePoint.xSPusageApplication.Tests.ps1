@@ -20,6 +20,11 @@ Describe "xSPUsageApplication" {
             UsageLogLocation = "L:\UsageLogs"
             UsageLogMaxFileSizeKB = 1024
             UsageLogMaxSpaceGB = 10
+            DatabaseName = "SP_Usage"
+            DatabaseServer = "sql.test.domain"
+            DatabaseUsername = "user"
+            DatabasePassword = "password"
+            FailoverDatabaseServer = "anothersql.test.domain"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -38,7 +43,7 @@ Describe "xSPUsageApplication" {
             UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
         }}
 
-        Context "When no service application exists in the current farm" {
+        Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
 
@@ -54,6 +59,22 @@ Describe "xSPUsageApplication" {
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPUsageApplication
+            }
+        }
+
+        Context "When service applications exist in the current farm but not the specific usage service app" {
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 

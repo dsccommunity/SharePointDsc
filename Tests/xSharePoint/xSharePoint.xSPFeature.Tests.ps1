@@ -36,7 +36,7 @@ Describe "xSPFeature" {
         Mock Disable-SPFeature {}
 
         Context "A feature that is not installed in the farm should be turned on" {
-            Mock Get-SPFeature { return $null } -ParameterFilter { $Farm -ne $true }
+            Mock Get-SPFeature { return $null } 
 
             It "returns null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -48,7 +48,7 @@ Describe "xSPFeature" {
         }
 
         Context "A farm scoped feature is not enabled and should be" {
-            Mock Get-SPFeature { return $null } -ParameterFilter { $Farm -eq $true }
+            Mock Get-SPFeature { return $null } 
             $testParams.FeatureScope = "Farm"
 
             It "returns null from the get method" {
@@ -67,7 +67,7 @@ Describe "xSPFeature" {
         }
 
         Context "A site collection scoped feature is not enabled and should be" {
-            Mock Get-SPFeature { return $null } -ParameterFilter { $Site -eq $true }
+            Mock Get-SPFeature { return $null } 
             $testParams.FeatureScope = "Site"
 
             It "returns null from the get method" {
@@ -87,7 +87,7 @@ Describe "xSPFeature" {
 
         Context "A farm scoped feature is enabled and should not be" {
             Mock Get-SPFeature { return @{} } 
-            Mock Get-SPFeature { return @{} } -ParameterFilter { $Farm -eq $true }
+
             $testParams.FeatureScope = "Farm"
             $testParams.Ensure = "Absent"
 
@@ -108,7 +108,7 @@ Describe "xSPFeature" {
 
         Context "A site collection scoped feature is enabled and should not be" {
             Mock Get-SPFeature { return @{} } 
-            Mock Get-SPFeature { return @{} } -ParameterFilter { $Site -eq $true }
+
             $testParams.FeatureScope = "Site"
 
             It "returns null from the get method" {
@@ -128,7 +128,7 @@ Describe "xSPFeature" {
 
         Context "A farm scoped feature is enabled and should be" {
             Mock Get-SPFeature { return @{} }
-            Mock Get-SPFeature { return @{} } -ParameterFilter { $Farm -eq $true }
+
             $testParams.FeatureScope = "Farm"
             $testParams.Ensure = "Present"
 
@@ -139,7 +139,7 @@ Describe "xSPFeature" {
 
         Context "A site collection scoped feature is enabled and should be" {
             Mock Get-SPFeature { return @{} }
-            Mock Get-SPFeature { return @{} } -ParameterFilter { $Site -eq $testParams.Url }
+
             $testParams.FeatureScope = "Site"
 
             It "returns true from the test method" {

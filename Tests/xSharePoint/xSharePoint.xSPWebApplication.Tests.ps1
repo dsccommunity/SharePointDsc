@@ -49,6 +49,24 @@ Describe "xSPWebApplication" {
                 Assert-MockCalled New-SPWebApplication
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
+
+            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            It "calls the new cmdlet from the set method where InstallAccount is used" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPWebApplication
+                Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
+            }
+            $testParams.Remove("InstallAccount")
+
+            $testParams.Add("AllowAnonymous", $true)
+            It "calls the new cmdlet from the set where anonymous authentication is requested" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPWebApplication
+                Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
+            }
+            $testParams.Remove("AllowAnonymous")
         }
 
         $testParams.AuthenticationMethod = "Kerberos"
@@ -71,8 +89,41 @@ Describe "xSPWebApplication" {
             }
         }
 
-        Context "The web appliation does exist and should" {
+        $testParams.AuthenticationMethod = "NTLM"
+
+        Context "The web appliation does exist and should that uses NTLM" {
             Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
+            Mock Get-SPWebApplication { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+            })}
+
+            It "returns the current data from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        $testParams.AuthenticationMethod = "Kerberos"
+
+        Context "The web appliation does exist and should that uses Kerberos" {
+            Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $false; AllowAnonymous = $false } }
             Mock Get-SPWebApplication { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 

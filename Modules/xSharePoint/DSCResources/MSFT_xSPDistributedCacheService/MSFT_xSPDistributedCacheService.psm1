@@ -13,7 +13,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting the cache host information"
-
+    
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
@@ -21,6 +21,7 @@ function Get-TargetResource
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         }
+
         try
         {
             Use-CacheCluster -ErrorAction SilentlyContinue
@@ -29,12 +30,10 @@ function Get-TargetResource
             if ($null -eq $cacheHost) { return $nullReturnValue }
             $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
             $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
-            
-            if ($null -eq $cacheHostConfig) { return $nullReturnValue }
 
             $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
-            
+
             return @{
                 Name = $params.Name
                 CacheSizeInMB = $cacheHostConfig.Size
@@ -44,7 +43,7 @@ function Get-TargetResource
                 InstallAccount = $params.InstallAccount
             }
         }
-        catch{
+        catch {
             return $nullReturnValue
         }
     }
@@ -67,6 +66,13 @@ function Set-TargetResource
 
     $CurrentState = Get-TargetResource @PSBoundParameters
     
+    $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $ServiceAccount
+
+    if (!$isLocalAdmin)
+    {
+        Add-xSharePointUserToLocalAdmin -UserName $ServiceAccount
+    }
+
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Adding the distributed cache to the server"
         if($createFirewallRules -eq $true) {
@@ -124,6 +130,12 @@ function Set-TargetResource
         }
         Write-Verbose -Message "Distributed cache removed."
     }
+
+    # Remove the FarmAccount from the local Administrators group, if it was added above
+    if (!$isLocalAdmin)
+    {
+        Remove-xSharePointUserToLocalAdmin -UserName $ServiceAccount
+    }
 }
 
 function Test-TargetResource
@@ -142,7 +154,6 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for distributed cache configuration"
-    if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }
 

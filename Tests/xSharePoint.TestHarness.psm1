@@ -37,8 +37,7 @@ function Invoke-xSharePointTests() {
 function Write-xSharePointStubFiles() {
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $SharePointStubPath,
-        [parameter(Mandatory = $true)] [System.String] $DCacheStubPath
+        [parameter(Mandatory = $true)] [System.String] $SharePointStubPath
     )
 
     Add-PSSnapin Microsoft.SharePoint.PowerShell 
@@ -67,30 +66,4 @@ function Write-xSharePointStubFiles() {
         
         $line | Out-File $SharePointStubPath -Encoding utf8 -Append
     }
-   
-
-    Use-CacheCluster
-
-    $dcacheStubContent = ((Get-Command | Where-Object { $_.Source -match "DistributedCache*" } )  |  ForEach-Object -Process {
-        $signature = $null
-        $command = $_
-        $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData -ArgumentList $command 
-        $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
-        foreach ($line in $definition -split "`n")
-        {
-            if ($line.Trim() -eq 'begin')
-            {
-                break
-            }
-            $signature += $line
-        }
-        "function $($command.Name) { `n  $signature `n } `n"
-    }) | Out-String
-
-   foreach ($line in $dcacheStubContent.Split([Environment]::NewLine)) {
-        $line = $line -replace "\[System.Nullable\[Microsoft.*]]", "[System.Nullable[object]]"
-        $line = $line -replace "\[Microsoft.*.\]", "[object]"
-        
-        $line | Out-File $DCacheStubPath -Encoding utf8 -Append
-   }
 }

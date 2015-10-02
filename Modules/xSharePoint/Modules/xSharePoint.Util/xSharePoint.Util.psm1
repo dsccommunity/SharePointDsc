@@ -1,19 +1,45 @@
+function Add-xSharePointUserToLocalAdmin() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)] [string] $UserName
+    )
+
+    if ($UserName.Contains("\") -eq $false) {
+        throw [Exception] "Usernames should be formatted as domain\username"
+    }
+
+    $domainName = $UserName.Split('\')[0]
+    $accountName = $UserName.Split('\')[1]
+
+    Write-Verbose -Message "Adding $domainName\$userName to local admin group"
+    ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
+}
+
+function Get-xSharePointAssemblyVersion() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        [string]
+        $PathToAssembly
+    )
+    return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
+}
+
+function Get-xSharePointInstalledProductVersion() {
+    $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
+    $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
+    return (Get-Command $fullPath).FileVersionInfo
+}
+
 function Invoke-xSharePointCommand() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential]
-        $Credential,
-
-        [parameter(Mandatory = $false)]
-        [HashTable]
-        $Arguments,
-
-
-        [parameter(Mandatory = $true)]
-        [ScriptBlock]
-        $ScriptBlock
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential,
+        [parameter(Mandatory = $false)] [HashTable]   $Arguments,
+        [parameter(Mandatory = $true)]  [ScriptBlock] $ScriptBlock
     )
 
     $VerbosePreference = 'Continue'
@@ -61,14 +87,9 @@ function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)]
-        $params,
-
-        [parameter(Mandatory = $true,Position=2)]
-        $oldName,
-
-        [parameter(Mandatory = $true,Position=3)]
-        $newName
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] $params,
+        [parameter(Mandatory = $true,Position=2)] $oldName,
+        [parameter(Mandatory = $true,Position=3)] $newName
     )
 
     if ($params.ContainsKey($oldName)) {
@@ -78,49 +99,31 @@ function Rename-xSharePointParamValue() {
     return $params
 }
 
-function Get-xSharePointInstalledProductVersion() {
-    $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
-    $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
-    return (Get-Command $fullPath).FileVersionInfo
-}
-
-function Get-xSharePointAssemblyVersion() {
+function Remove-xSharePointUserToLocalAdmin() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
-        [string]
-        $PathToAssembly
+        [parameter(Mandatory = $true,Position=1)] [string] $UserName
     )
-    return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
-}
 
-function Update-xSharePointObject() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true,Position=1)]
-        [object]
-        $InputObject
-    )
-    $InputObject.Update()
+    if ($UserName.Contains("\") -eq $false) {
+        throw [Exception] "Usernames should be formatted as domain\username"
+    }
+
+    $domainName = $UserName.Split('\')[0]
+    $accountName = $UserName.Split('\')[1]
+
+    Write-Verbose -Message "Removing $domainName\$userName from local admin group"
+    ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
 function Test-xSharePointSpecificParameters() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
-        [HashTable]
-        $CurrentValues,
-
-        [parameter(Mandatory = $true,Position=2)]
-        [HashTable]
-        $DesiredValues,
-
-        [parameter(Mandatory = $false,Position=3)]
-        [Array]
-        $ValuesToCheck
+        [parameter(Mandatory = $true,Position=1)]  [HashTable] $CurrentValues,
+        [parameter(Mandatory = $true,Position=2)]  [HashTable] $DesiredValues,
+        [parameter(Mandatory = $false,Position=3)] [Array]     $ValuesToCheck
     )
 
     $returnValue = $true
@@ -158,6 +161,25 @@ function Test-xSharePointSpecificParameters() {
         
     }
     return $returnValue
+}
+
+function Test-xSharePointUserIsLocalAdmin() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)] [string] $UserName
+    )
+
+    if ($UserName.Contains("\") -eq $false) {
+        throw [Exception] "Usernames should be formatted as domain\username"
+    }
+
+    $domainName = $UserName.Split('\')[0]
+    $accountName = $UserName.Split('\')[1]
+
+    return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | 
+        ForEach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)} | 
+        Where-Object { $_ -eq $accountName }
 }
 
 Export-ModuleMember -Function *

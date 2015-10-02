@@ -34,7 +34,7 @@ Describe "xSPJoinFarm" {
         Mock New-SPCentralAdministration {}
         Mock Install-SPApplicationContent {}
         Mock Start-Service {}
-        Mock Invoke-Command {} -ParameterFilter { $ScriptBlock.ToString().Contains("Start-Sleep") -eq $true }
+        Mock Start-Sleep {}
 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
@@ -43,7 +43,7 @@ Describe "xSPJoinFarm" {
 
 
         Context "no farm is configured locally and a supported version of SharePoint is installed" {
-            Mock Get-SPFarm { return $null }
+            Mock Get-SPFarm { throw "Unable to detect local farm" }
 
             It "the get method returns null when the farm is not configured" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty

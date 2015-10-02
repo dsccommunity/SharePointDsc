@@ -40,6 +40,9 @@ Describe "xSPDistributedCacheService" {
         Mock Add-SPDistributedCacheServiceInstance { } 
         Mock Update-SPDistributedCacheSize { } 
         Mock Get-SPManagedAccount { return @{} } 
+        Mock Add-xSharePointUserToLocalAdmin { } 
+        Mock Test-xSharePointUserIsLocalAdmin { return $false }
+        Mock Remove-xSharePointUserToLocalAdmin { }
         Mock Get-SPFarm { return @{ 
             Services = @(@{ 
                 Name = "AppFabricCachingService"
@@ -52,7 +55,7 @@ Describe "xSPDistributedCacheService" {
         } }    
 
         Context "Distributed cache is not configured" {
-            Mock Get-CacheHost { return $null }
+            Mock Use-CacheCluster { throw [Exception] "ERRPS001 Error in reading provider and connection string values." }
 
             It "returns null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
