@@ -5,6 +5,10 @@ function Add-xSharePointUserToLocalAdmin() {
         [parameter(Mandatory = $true,Position=1)] [string] $UserName
     )
 
+    if ($UserName.Contains("\") -eq $false) {
+        throw [Exception] "Usernames should be formatted as domain\username"
+    }
+
     $domainName = $UserName.Split('\')[0]
     $accountName = $UserName.Split('\')[1]
 
@@ -102,6 +106,10 @@ function Remove-xSharePointUserToLocalAdmin() {
         [parameter(Mandatory = $true,Position=1)] [string] $UserName
     )
 
+    if ($UserName.Contains("\") -eq $false) {
+        throw [Exception] "Usernames should be formatted as domain\username"
+    }
+
     $domainName = $UserName.Split('\')[0]
     $accountName = $UserName.Split('\')[1]
 
@@ -161,6 +169,10 @@ function Test-xSharePointUserIsLocalAdmin() {
     (
         [parameter(Mandatory = $true,Position=1)] [string] $UserName
     )
+
+    if ($UserName.Contains("\") -eq $false) {
+        throw [Exception] "Usernames should be formatted as domain\username"
+    }
 
     $domainName = $UserName.Split('\')[0]
     $accountName = $UserName.Split('\')[1]
