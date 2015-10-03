@@ -29,7 +29,7 @@ function Get-TargetResource
 
             if ($null -eq $cacheHost) { return $nullReturnValue }
             $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort $cacheHost.PortNo -ErrorAction SilentlyContinue
+            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort ($cacheHost | Where-Object { $_.HostName -eq $computerName }).PortNo -ErrorAction SilentlyContinue
 
             $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
@@ -65,13 +65,6 @@ function Set-TargetResource
     )
 
     $CurrentState = Get-TargetResource @PSBoundParameters
-    
-    $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $ServiceAccount
-
-    if (!$isLocalAdmin)
-    {
-        Add-xSharePointUserToLocalAdmin -UserName $ServiceAccount
-    }
 
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Adding the distributed cache to the server"
@@ -99,16 +92,37 @@ function Set-TargetResource
                 $params = $args[0]
                 
                 Add-SPDistributedCacheServiceInstance
+
+                Get-SPServiceInstance | Where-Object { $_.TypeName -eq "Distributed Cache" } | Stop-SPServiceInstance -Confirm:$false
+
+                $count = 0
+                $maxCount = 30
+                while (($count -lt $maxCount) -and ((Get-SPServiceInstance | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Disabled" }) -ne $null)) {
+                    Start-Sleep -Seconds 60
+                    $count++
+                }
+
                 Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB
+
+                Get-SPServiceInstance | Where-Object { $_.TypeName -eq "Distributed Cache" } | Start-SPServiceInstance 
+
+                $count = 0
+                $maxCount = 30
+                while (($count -lt $maxCount) -and ((Get-SPServiceInstance | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Online" }) -ne $null)) {
+                    Start-Sleep -Seconds 60
+                    $count++
+                }
 
                 $farm = Get-SPFarm
                 $cacheService = $farm.Services | Where-Object { $_.Name -eq "AppFabricCachingService" }
-                $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
 
-                $account = Get-SPManagedAccount -Identity $params.ServiceAccount
-                $cacheService.ProcessIdentity.ManagedAccount = $account
-                $cacheService.ProcessIdentity.Update() 
-                $cacheService.ProcessIdentity.Deploy()
+                if ($cacheService.ProcessIdentity.ManagedAccount.Username -ne $params.ServiceAccount) {
+                    $cacheService.ProcessIdentity.CurrentIdentityType = "SpecificUser"
+                    $account = Get-SPManagedAccount -Identity $params.ServiceAccount
+                    $cacheService.ProcessIdentity.ManagedAccount = $account
+                    $cacheService.ProcessIdentity.Update() 
+                    $cacheService.ProcessIdentity.Deploy()
+                }
             }
         }
     } else {
@@ -129,12 +143,6 @@ function Set-TargetResource
             }  
         }
         Write-Verbose -Message "Distributed cache removed."
-    }
-
-    # Remove the FarmAccount from the local Administrators group, if it was added above
-    if (!$isLocalAdmin)
-    {
-        Remove-xSharePointUserToLocalAdmin -UserName $ServiceAccount
     }
 }
 
