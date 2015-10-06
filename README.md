@@ -70,7 +70,9 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### 0.7.0.0
 
- * Bug fixes and stability improvements
+ * Support for MinRole options in SharePoint 2016
+ * Fix to distributed cache deployment of more than one server
+ * Additional bug fixes and stability improvements
 
 ### 0.6.0.0
 

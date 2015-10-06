@@ -5,5 +5,6 @@ class MSFT_xSPJoinFarm : OMI_BaseResource
     [Key] string DatabaseServer;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required] string Passphrase;
+    [Write, ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
 };
 
