@@ -7,10 +7,15 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
+
+	if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -45,10 +50,15 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
+
+	if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -102,11 +112,16 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
+	if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose "Checking for local farm presence"
+    Write-Verbose "Testing for local farm presence"
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName") 
 }
 
