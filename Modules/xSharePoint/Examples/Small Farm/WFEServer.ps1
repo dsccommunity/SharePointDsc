@@ -71,11 +71,6 @@ Configuration SharePointWFEServer
         # This section triggers installation of both SharePoint
         # as well as the prerequisites required
         #********************************************************** 
-
-        xSPClearRemoteSessions ClearRemotePowerShellSessions
-        {
-            ClearRemoteSessions = $true
-        }
         xSPInstallPrereqs InstallPrerequisites
         {
             InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
@@ -97,6 +92,7 @@ Configuration SharePointWFEServer
         {
             BinaryDir  = "C:\SPInstall"
             ProductKey = $ProductKey
+            Ensure     = "Present"
             DependsOn  = "[xSPInstallPrereqs]InstallPrerequisites"
         }
 
@@ -129,7 +125,6 @@ Configuration SharePointWFEServer
             DatabaseServer           = $DatabaseServer
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $FarmPassPhrase
-            FarmAccount              = $FarmAccount
             InstallAccount           = $InstallAccount
             DependsOn                = "[xSPInstall]InstallBinaries"
         }

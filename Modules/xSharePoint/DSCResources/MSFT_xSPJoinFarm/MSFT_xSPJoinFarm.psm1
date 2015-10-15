@@ -4,32 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
+    if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
 
-    $result = Invoke-Command -Session $session -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+        
+
         try {
             $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
         } catch {
@@ -38,12 +29,16 @@ function Get-TargetResource
         
         if ($null -eq $spFarm) {return @{ }}
 
-        $returnValue = @{
-            FarmName = $spFarm.Name
+        $configDb = Get-SPDatabase | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
+
+        return @{
+            FarmConfigDatabaseName = $spFarm.Name
+            DatabaseServer = $configDb.Server.Name
+            InstallAccount = $params.InstallAccount
+            Passphrase = $params.Passphrase
         }
-        return $returnValue
     }
-    $result
+    return $result
 }
 
 
@@ -52,101 +47,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [System.UInt32]
-        $WaitTime = 30,
-
-        [System.UInt32]
-        $WaitCount = 60
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
-    $session = Get-xSharePointAuthenticatedPSSession -Credential $InstallAccount -ForceNewSession $true
-    Invoke-Command -Session $session -ArgumentList $PSBoundParameters -ScriptBlock {
+
+    if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
+
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-     
-        $WaitTime = $PSBoundParameters.WaitTime
-        if ($WaitTime -lt 1) {$WaitTime = 30}
-        $WaitCount = $PSBoundParameters.WaitCount
-        if ($WaitCount -lt 1) {$WaitCount = 30}
-           
-        $loopCount = 0
+        
 
-        $majorVersion = (Get-xSharePointAssemblyVerion -PathToAssembly "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.dll").Major
-
-        while ($loopCount -le $WaitCount) {
-            try
-            {
-                if ($majorVersion -eq 15) {
-                    Write-Verbose -Message "Version: SharePoint 2013"
-
-                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                    -DatabaseServer $params.DatabaseServer `
-                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                    -SkipRegisterAsDistributedCacheHost:$true 
-                }
-                if ($majorVersion -eq 16) {
-                    Write-Verbose -Message "Version: SharePoint 2016"
-    
-                    Connect-SPConfigurationDatabase -DatabaseName $params.FarmConfigDatabaseName `
-                                                    -DatabaseServer $params.DatabaseServer `
-                                                    -LocalServerRole Custom `
-                                                    -Passphrase (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force) `
-                                                    -SkipRegisterAsDistributedCacheHost:$true 
-                }
-
-
-                $loopCount = $WaitCount + 1
+        $joinFarmArgs = @{
+            DatabaseServer = $params.DatabaseServer
+            DatabaseName = $params.FarmConfigDatabaseName
+            Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+            SkipRegisterAsDistributedCacheHost = $true
+        }
+        
+        switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+            15 {
+                Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
-            catch
-            {
-                $loopCount = $loopCount + 1
-                Start-Sleep -Seconds $WaitTime
+            16 {
+                Write-Verbose -Message "Detected Version: SharePoint 2016"
+                $joinFarmArgs.Add("LocalServerRole", "Custom")
+            }
+            Default {
+                throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
             }
         }
-    }
 
-    Write-Verbose -Message "Installing help collection"
-    Invoke-Command -Session $session -ScriptBlock {
+        Connect-SPConfigurationDatabase @joinFarmArgs
         Install-SPHelpCollection -All
-    }
-    
-    Write-Verbose -Message "Initialising farm resource security"
-    Invoke-Command -Session $session -ScriptBlock {
         Initialize-SPResourceSecurity
-    }
-
-    Write-Verbose -Message "Installing farm services"
-    Invoke-Command -Session $session -ScriptBlock {
         Install-SPService
-    }
-
-    Write-Verbose -Message "Installing farm features"
-    Invoke-Command -Session $session -ScriptBlock {
-        Install-SPFeature -AllExistingFeatures -Force
-    }
-
-    Write-Verbose -Message "Installing application content"
-    Invoke-Command -Session $session -ScriptBlock {
+        Install-SPFeature -AllExistingFeatures -Force 
         Install-SPApplicationContent
     }
 
@@ -167,37 +109,20 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $FarmConfigDatabaseName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DatabaseServer,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $FarmAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Passphrase,
-
-        [System.UInt32]
-        $WaitTime = 30,
-
-        [System.UInt32]
-        $WaitCount = 60
+        [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
-    $result = Get-TargetResource -FarmConfigDatabaseName $FarmConfigDatabaseName -DatabaseServer $DatabaseServer -FarmAccount $FarmAccount -InstallAccount $InstallAccount -Passphrase $Passphrase
- 
-    if ($result.Count -eq 0) { return $false }
-    return $true   
+    if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose "Testing for local farm presence"
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName") 
 }
 
 

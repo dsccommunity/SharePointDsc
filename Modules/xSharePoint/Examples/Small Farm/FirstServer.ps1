@@ -71,11 +71,6 @@ Configuration SharePointFarmServer
         # This section triggers installation of both SharePoint
         # as well as the prerequisites required
         #********************************************************** 
-
-        xSPClearRemoteSessions ClearRemotePowerShellSessions
-        {
-            ClearRemoteSessions = $true
-        }
         xSPInstallPrereqs InstallPrerequisites
         {
             InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
@@ -97,6 +92,7 @@ Configuration SharePointFarmServer
         {
             BinaryDir  = "C:\SPInstall"
             ProductKey = $ProductKey
+            Ensure     = "Present"
             DependsOn  = "[xSPInstallPrereqs]InstallPrerequisites"
         }
 

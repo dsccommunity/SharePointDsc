@@ -2,6 +2,6 @@
 class MSFT_xSPServiceInstance : OMI_BaseResource
 {
     [Key] string Name;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };

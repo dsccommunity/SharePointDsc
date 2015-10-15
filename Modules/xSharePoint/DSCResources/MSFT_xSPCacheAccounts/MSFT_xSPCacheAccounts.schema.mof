@@ -5,6 +5,6 @@ class MSFT_xSPCacheAccounts : OMI_BaseResource
     [Key] string WebAppUrl;
     [Required] string SuperUserAlias;
     [Required] string SuperReaderAlias;
-    [Required, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

@@ -1,4 +1,4 @@
-version: 0.5.{build}.0
+version: 0.7.{build}.0
 
 install:
     - cinst -y pester
@@ -12,7 +12,9 @@ build: off
 test_script:
     - ps: |
         $testResultsFile = ".\TestsResults.xml"
-        $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
+        $testCoverageFiles = @()
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Tests\xSharePoint.TestHarness.psm1"
+        $res = Invoke-xSharePointTests $testResultsFile
         (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
         if ($res.FailedCount -gt 0) { 
             throw "$($res.FailedCount) tests failed."
@@ -20,19 +22,14 @@ test_script:
 
 after_test:
     - ps: |
-
-        
-
         Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
-        (Get-Content $manifest -Raw).Replace("0.5.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
+        (Get-Content $manifest -Raw).Replace("0.7.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
         Add-Type -assemblyname System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint", "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip")
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\xSharePoint.zip" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
         New-Nuspec -packageName $env:APPVEYOR_PROJECT_NAME -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription $env:APPVEYOR_PROJECT_NAME -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
         nuget pack ".\$($env:APPVEYOR_PROJECT_NAME).nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
-        $nuGetPackageName = $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
+        $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$nuGetPackageName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-
-        
