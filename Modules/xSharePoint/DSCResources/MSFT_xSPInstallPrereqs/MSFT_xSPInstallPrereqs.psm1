@@ -128,7 +128,7 @@ function Set-TargetResource
             }
         }
         $requiredParams | ForEach-Object {
-            $prereqArgs += " /$_ `"$($PSBoundParameters.$_)`""
+            $prereqArgs += " /$_`:`"$($PSBoundParameters.$_)`""
         }
     }
 
