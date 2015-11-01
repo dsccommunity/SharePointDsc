@@ -10,10 +10,20 @@ function Get-MofSchemaObject() {
         FriendlyName = $null
         ClassName = $null
         Attributes = @()
+        Documentation = $null
     }
 
+    $currentComment = ""
+    $currentlyInCommentBlock = $false
     foreach($textLine in $contents) {
-        if ($textLine.Contains("ClassVersion") -or $textLine.Contains("ClassVersion")) {
+        if ($textLine.StartsWith("/*")) {
+            $currentlyInCommentBlock = $true
+        } elseif($textLine.StartsWith("*/")) {
+            $currentlyInCommentBlock = $false
+            $results.Documentation = $currentComment
+        } elseif($currentlyInCommentBlock -eq $true) {
+            $currentComment += $textLine + [Environment]::NewLine
+        } elseif ($textLine.Contains("ClassVersion") -or $textLine.Contains("ClassVersion")) {
             if ($textLine -match "ClassVersion(`"*.`")") {
                 $start = $textLine.IndexOf("ClassVersion(`"") + 14
                 $end = $textLine.IndexOf("`")", $start)
