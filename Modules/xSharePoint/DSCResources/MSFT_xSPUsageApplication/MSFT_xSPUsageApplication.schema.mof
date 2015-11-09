@@ -22,9 +22,8 @@ class MSFT_xSPUsageApplication : OMI_BaseResource
     [Key] string Name;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Write] string DatabaseName;
-    [Write] string DatabasePassword;
     [Write] string DatabaseServer;
-    [Write] string DatabaseUsername;
+    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
     [Write] string FailoverDatabaseServer;
     [Write] uint32 UsageLogCutTime;
     [Write] string UsageLogLocation;
