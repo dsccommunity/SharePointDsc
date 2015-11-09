@@ -25,9 +25,8 @@ class MSFT_xSPSecureStoreServiceApp : OMI_BaseResource
     [Write] uint32 AuditlogMaxSize;
     [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
     [Write] string DatabaseName;
-    [Write] string DatabasePassword;
     [Write] string DatabaseServer;
-    [Write] string DatabaseUsername;
+    [Write, ValueMap {"Windows","SQL"}, Value{"Windows","SQL"}] string DatabaseAuthenticationType;
     [Write] string FailoverDatabaseServer;
     [Write] boolean PartitionMode;
     [Write] boolean Sharing;

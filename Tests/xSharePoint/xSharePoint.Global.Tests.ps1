@@ -2,7 +2,6 @@
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
-
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
