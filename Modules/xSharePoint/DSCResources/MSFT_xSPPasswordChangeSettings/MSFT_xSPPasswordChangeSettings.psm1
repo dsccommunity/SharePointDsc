@@ -44,15 +44,7 @@ function Set-TargetResource
     Write-Verbose -Message "Updating farm wide automatic password change settings"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
-        <#$updateParams = @{ 
-            PasswordChangeEmailAddress = $params.MailAddress
-			DaysBeforePasswordExpirationToSendEmail = $params.DaysBeforeExpiry
-			PasswordChangeMaximumTries = $params.NumberOfRetries
-			PasswordChangeGuardTime = $params.PasswordChangeWaitTimeSeconds
-			 
-        }#>
-		$farm = Get-SPFarm
+     	$farm = Get-SPFarm
 		$farm.PasswordChangeEmailAddress=$params.MailAddress;
 		$farm.PasswordChangeGuardTime=$params.PasswordChangeWaitTimeSeconds
 		$farm.PasswordChangeMaximumTries=$params.NumberOfRetries
