@@ -28,30 +28,31 @@ Describe "xSPPasswordChangeSettings" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue         
 
-        Context " Farm isn't available " {
+         Context " Farm isn't available " {
             Mock Get-SPFarm { return $null
-			}
+            }
 
             It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
+                Get-TargetResource @testParams | Should Throw 
             }
 
             It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+                Test-TargetResource @testParams | Should be $false
             }
 
         }
 
-		Context " Properties already set tests " {
+
+        Context " Properties already set tests " {
             Mock Get-SPFarm { 
-				return @{
+                return @{
             PasswordChangeEmailAddress = "e@mail.com"
             DaysBeforePasswordExpirationToSendEmail = 7
             PasswordChangeGuardTime = 60
             PasswordChangeMaximumTries = 3
-					}
-			}
-			
+                    }
+            }
+            
             It "returns farm properties from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty 
             }
@@ -63,17 +64,17 @@ Describe "xSPPasswordChangeSettings" {
         }
 
 
-		Context " Properties update tests " {
+        Context " Properties update tests " {
             Mock Get-SPFarm { 
-				$result = @{
-				PasswordChangeEmailAddress="";
-				PasswordChangeGuardTime=0
-				PasswordChangeMaximumTries=0
-				DaysBeforePasswordExpirationToSendEmail=0
-					}
-				$result = $result | Add-Member  ScriptMethod Update { return $true} -passThru
-				return $result
-			}
+                $result = @{
+                PasswordChangeEmailAddress="";
+                PasswordChangeGuardTime=0
+                PasswordChangeMaximumTries=0
+                DaysBeforePasswordExpirationToSendEmail=0
+                    }
+                $result = $result | Add-Member  ScriptMethod Update { return $true} -passThru
+                return $result
+            }
 
             It "returns farm properties from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty 
