@@ -28,7 +28,7 @@ function Get-xSharePointAssemblyVersion() {
 }
 function Get-UtilAsScriptBlock(){
     $content = Get-Content (Resolve-Path .\xSharePoint.psd1)
-	write-host [Scriptblock]::Create($content )
+    write-host [Scriptblock]::Create($content )
 }
 
 function Get-xSharePointInstalledProductVersion() {

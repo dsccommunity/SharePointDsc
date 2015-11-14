@@ -77,9 +77,8 @@ Describe "xSPOutgoingEmailSettings" {
                         OutboundMailCodePage= "65001"
                     }
                 $result = $result | Add-Member  ScriptMethod UpdateMailSettings  {
-    param( [string]$SMTPServer, [string]$FromAddress, [string]$ReplyToAddress, [string]$CharacterSet )
-    return ;
-}                 -passThru
+                        param( [string]$SMTPServer, [string]$FromAddress, [string]$ReplyToAddress, [string]$CharacterSet )
+                        return ; }                 -passThru
                 return $result
             }
 
