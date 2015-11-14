@@ -4,10 +4,10 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-	    [parameter(Mandatory = $true)] [System.String] $MailAddress,
-        [parameter(Mandatory = $true)] [ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
+        [parameter(Mandatory = $true)][System.String] $MailAddress,
+        [parameter(Mandatory = $true)][ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
         [parameter(Mandatory = $true)][ValidateRange(0,36000 )]  [System.UInt32] $PasswordChangeWaitTimeSeconds,
-		[parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries
+        [parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries
     )
 
     Write-Verbose -Message "Retrieving farm wide automatic password change settings"
@@ -19,10 +19,10 @@ function Get-TargetResource
         if ($null -eq $farm ) { return $null }
         return @{
 
-		MailAddress = $farm.PasswordChangeEmailAddress
-		PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
-		NumberOfRetries= $farm.PasswordChangeMaximumTries
-		DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail 
+        MailAddress = $farm.PasswordChangeEmailAddress
+        PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
+        NumberOfRetries= $farm.PasswordChangeMaximumTries
+        DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail 
         }
     }
     return $result
@@ -33,23 +33,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $MailAddress,
-        [parameter(Mandatory = $true)] [ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
+        [parameter(Mandatory = $true)][System.String] $MailAddress,
+        [parameter(Mandatory = $true)][ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
         [parameter(Mandatory = $true)][ValidateRange(0,36000 )]  [System.UInt32] $PasswordChangeWaitTimeSeconds,
-		[parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries        
+        [parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries        
     )
 
     Write-Verbose -Message "Updating farm wide automatic password change settings"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-     	$farm = Get-SPFarm
+        $farm = Get-SPFarm
 
-		if ($null -eq $farm ) { return $null }
-		$farm.PasswordChangeEmailAddress=$params.MailAddress;
-		$farm.PasswordChangeGuardTime=$params.PasswordChangeWaitTimeSeconds
-		$farm.PasswordChangeMaximumTries=$params.NumberOfRetries
-		$farm.DaysBeforePasswordExpirationToSendEmail =$params.DaysBeforeExpiry
-		$farm.Update();
+        if ($null -eq $farm ) { return $null }
+        $farm.PasswordChangeEmailAddress=$params.MailAddress;
+        $farm.PasswordChangeGuardTime=$params.PasswordChangeWaitTimeSeconds
+        $farm.PasswordChangeMaximumTries=$params.NumberOfRetries
+        $farm.DaysBeforePasswordExpirationToSendEmail =$params.DaysBeforeExpiry
+        $farm.Update();
 
     }
 }
@@ -61,16 +61,16 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $MailAddress,
-        [parameter(Mandatory = $true)] [ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
+        [parameter(Mandatory = $true)][System.String] $MailAddress,
+        [parameter(Mandatory = $true)][ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
         [parameter(Mandatory = $true)][ValidateRange(0,36000 )]  [System.UInt32] $PasswordChangeWaitTimeSeconds,
-		[parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries
-	)
+        [parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries
+    )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing retrieving farm wide automatic password change settings"
-	if ($null -eq $CurrentValues) { return $false }
-	
+    if ($null -eq $CurrentValues) { return $false }
+    
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
 }
 
