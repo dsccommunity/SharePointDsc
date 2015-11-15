@@ -69,11 +69,11 @@ function Get-TargetResource
             $QueryProcessingExists = $true
         }
 
-		$indexComps = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology `
+        $indexComps = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology `
             | Where-Object {($_.GetType().Name -eq "IndexComponent") `
                 -and ($_.IndexPartitionOrdinal -eq $params.Index)}
 
-		$servers = ""
+        $servers = ""
         foreach ($indexComp in $indexComps) {
             $servers += $indexComp.ServerName + ","
         }
