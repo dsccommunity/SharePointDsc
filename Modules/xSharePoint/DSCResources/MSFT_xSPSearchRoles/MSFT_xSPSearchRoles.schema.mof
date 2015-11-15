@@ -22,7 +22,7 @@ This will behave the same as the xSPSearchIndexPartition resource.
         PsDscRunAsCredential    = $SPSetupAccount
         FirstPartitionIndex     = 0
         FirstPartitionDirectory = "I:\SearchIndexes\0"
-		FirstPartitionServers   = "Server1,Server2"
+        FirstPartitionServers   = "Server1,Server2"
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSearchRoles")]
