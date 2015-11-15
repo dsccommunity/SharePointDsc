@@ -5,9 +5,9 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)][System.String] $MailAddress,
-        [parameter(Mandatory = $true)][ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
-        [parameter(Mandatory = $true)][ValidateRange(0,36000 )]  [System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries
+        [parameter(Mandatory = $false)][ValidateRange(0,356)][System.UInt32] $DaysBeforeExpiry,
+        [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
+        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries
     )
 
     Write-Verbose -Message "Retrieving farm wide automatic password change settings"
@@ -18,11 +18,10 @@ function Get-TargetResource
         $farm = Get-SPFarm
         if ($null -eq $farm ) { return $null }
         return @{
-
-        MailAddress = $farm.PasswordChangeEmailAddress
-        PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
-        NumberOfRetries= $farm.PasswordChangeMaximumTries
-        DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail 
+            MailAddress = $farm.PasswordChangeEmailAddress
+            PasswordChangeWaitTimeSeconds= $farm.PasswordChangeGuardTime
+            NumberOfRetries= $farm.PasswordChangeMaximumTries
+            DaysBeforeExpiry = $farm.DaysBeforePasswordExpirationToSendEmail 
         }
     }
     return $result
@@ -34,9 +33,9 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)][System.String] $MailAddress,
-        [parameter(Mandatory = $true)][ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
-        [parameter(Mandatory = $true)][ValidateRange(0,36000 )]  [System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries        
+        [parameter(Mandatory = $false)][ValidateRange(0,356 )][System.UInt32] $DaysBeforeExpiry,
+        [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
+        [parameter(Mandatory = $false)][ValidateRange(0,99 )][System.UInt32] $NumberOfRetries        
     )
 
     Write-Verbose -Message "Updating farm wide automatic password change settings"
@@ -45,10 +44,17 @@ function Set-TargetResource
         $farm = Get-SPFarm
 
         if ($null -eq $farm ) { return $null }
+        
         $farm.PasswordChangeEmailAddress=$params.MailAddress;
-        $farm.PasswordChangeGuardTime=$params.PasswordChangeWaitTimeSeconds
-        $farm.PasswordChangeMaximumTries=$params.NumberOfRetries
-        $farm.DaysBeforePasswordExpirationToSendEmail =$params.DaysBeforeExpiry
+        if($params.PasswordChangeWaitTimeSeconds -ne $null){
+            $farm.PasswordChangeGuardTime=$params.PasswordChangeWaitTimeSeconds
+        }
+        if($params.NumberOfRetries -ne $null){
+            $farm.PasswordChangeMaximumTries=$params.NumberOfRetries
+        }
+        if($params.DaysBeforeExpiry -ne $null){
+            $farm.DaysBeforePasswordExpirationToSendEmail=$params.DaysBeforeExpiry
+        }
         $farm.Update();
 
     }
@@ -62,9 +68,9 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)][System.String] $MailAddress,
-        [parameter(Mandatory = $true)][ValidateRange(0,356 )] [System.UInt32] $DaysBeforeExpiry,
-        [parameter(Mandatory = $true)][ValidateRange(0,36000 )]  [System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $true)][ValidateRange(0,99 )] [System.UInt32] $NumberOfRetries
+        [parameter(Mandatory = $false)][ValidateRange(0,356)][System.UInt32] $DaysBeforeExpiry,
+        [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
+        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
