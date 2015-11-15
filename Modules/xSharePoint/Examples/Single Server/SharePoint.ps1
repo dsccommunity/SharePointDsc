@@ -8,7 +8,7 @@ Configuration SharePointServer
         [Parameter(Mandatory=$true)] [ValidateNotNullorEmpty()] [PSCredential] $domainAdminCredential
     )
 
-	Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName xSharePoint
     Import-DscResource -ModuleName xWebAdministration
     Import-DscResource -ModuleName xCredSSP
@@ -131,70 +131,70 @@ Configuration SharePointServer
         # application settings
         #**********************************************************
 
-		foreach($webApp in $ConfigurationData.NonNodeData.SharePoint.WebApplications) {
-			$webAppInternalName = $webApp.Name.Replace(" ", "")
-			xSPWebApplication $webAppInternalName
-			{
-				Name                   = $webApp.Name
-				ApplicationPool        = $webApp.AppPool
-				ApplicationPoolAccount = $webApp.APpPoolAccount
-				AllowAnonymous         = $webApp.Anonymous
-				AuthenticationMethod   = $webApp.Authentication
-				DatabaseName           = $webApp.DatabaseName
-				DatabaseServer         = $ConfigurationData.NonNodeData.SQLServer.ContentDatabaseServer
-				Url                    = $webApp.Url
-				Port                   = [Uri]::new($webApp.Url).Port
-				PsDscRunAsCredential   = $SPSetupAccount
-				DependsOn              = "[xSPManagedAccount]WebPoolManagedAccount"
-			}
+        foreach($webApp in $ConfigurationData.NonNodeData.SharePoint.WebApplications) {
+            $webAppInternalName = $webApp.Name.Replace(" ", "")
+            xSPWebApplication $webAppInternalName
+            {
+                Name                   = $webApp.Name
+                ApplicationPool        = $webApp.AppPool
+                ApplicationPoolAccount = $webApp.APpPoolAccount
+                AllowAnonymous         = $webApp.Anonymous
+                AuthenticationMethod   = $webApp.Authentication
+                DatabaseName           = $webApp.DatabaseName
+                DatabaseServer         = $ConfigurationData.NonNodeData.SQLServer.ContentDatabaseServer
+                Url                    = $webApp.Url
+                Port                   = [Uri]::new($webApp.Url).Port
+                PsDscRunAsCredential   = $SPSetupAccount
+                DependsOn              = "[xSPManagedAccount]WebPoolManagedAccount"
+            }
 
-			foreach($managedPath in $webApp.ManagedPaths) {
-				xSPManagedPath "$($webAppInternalName)Path$($managedPath.Path)" 
-				{
-					WebAppUrl            = $webApp.Url
-					PsDscRunAsCredential = $SPSetupAccount
-					RelativeUrl          = $managedPath.Path
-					Explicit             = $managedPath.Explicit
-					HostHeader           = $webApp.UseHostNamedSiteCollections
-					DependsOn            = "[xSPWebApplication]$webAppInternalName"
-				}
-			}
-			
-			xSPCacheAccounts "$($webAppInternalName)CacheAccounts"
-			{
-				WebAppUrl              = $webApp.Url
-				SuperUserAlias         = $webApp.SuperUser
-				SuperReaderAlias       = $webApp.SuperReader
-				PsDscRunAsCredential   = $SPSetupAccount
-				DependsOn              = "[xSPWebApplication]$webAppInternalName"
-			}
+            foreach($managedPath in $webApp.ManagedPaths) {
+                xSPManagedPath "$($webAppInternalName)Path$($managedPath.Path)" 
+                {
+                    WebAppUrl            = $webApp.Url
+                    PsDscRunAsCredential = $SPSetupAccount
+                    RelativeUrl          = $managedPath.Path
+                    Explicit             = $managedPath.Explicit
+                    HostHeader           = $webApp.UseHostNamedSiteCollections
+                    DependsOn            = "[xSPWebApplication]$webAppInternalName"
+                }
+            }
+            
+            xSPCacheAccounts "$($webAppInternalName)CacheAccounts"
+            {
+                WebAppUrl              = $webApp.Url
+                SuperUserAlias         = $webApp.SuperUser
+                SuperReaderAlias       = $webApp.SuperReader
+                PsDscRunAsCredential   = $SPSetupAccount
+                DependsOn              = "[xSPWebApplication]$webAppInternalName"
+            }
 
-			foreach($siteCollection in $webApp.SiteCollections) {
-				$internalSiteName = "$($webAppInternalName)Site$($siteCollection.Name.Replace(' ', ''))"
-				if ($webApp.UseHostNamedSiteCollections -eq $true) {
-					xSPSite $internalSiteName
-					{
-						Url                      = $siteCollection.Url
-						OwnerAlias               = $siteCollection.Owner
-						HostHeaderWebApplication = $webApp.Url
-						Name                     = $siteCollection.Name
-						Template                 = $siteCollection.Template
-						PsDscRunAsCredential     = $SPSetupAccount
-						DependsOn                = "[xSPWebApplication]$webAppInternalName"
-					}
-				} else {
-					xSPSite $internalSiteName
-					{
-						Url                      = $siteCollection.Url
-						OwnerAlias               = $siteCollection.Owner
-						Name                     = $siteCollection.Name
-						Template                 = $siteCollection.Template
-						PsDscRunAsCredential     = $SPSetupAccount
-						DependsOn                = "[xSPWebApplication]$webAppInternalName"
-					}
-				}
-			}
-		}
+            foreach($siteCollection in $webApp.SiteCollections) {
+                $internalSiteName = "$($webAppInternalName)Site$($siteCollection.Name.Replace(' ', ''))"
+                if ($webApp.UseHostNamedSiteCollections -eq $true) {
+                    xSPSite $internalSiteName
+                    {
+                        Url                      = $siteCollection.Url
+                        OwnerAlias               = $siteCollection.Owner
+                        HostHeaderWebApplication = $webApp.Url
+                        Name                     = $siteCollection.Name
+                        Template                 = $siteCollection.Template
+                        PsDscRunAsCredential     = $SPSetupAccount
+                        DependsOn                = "[xSPWebApplication]$webAppInternalName"
+                    }
+                } else {
+                    xSPSite $internalSiteName
+                    {
+                        Url                      = $siteCollection.Url
+                        OwnerAlias               = $siteCollection.Owner
+                        Name                     = $siteCollection.Name
+                        Template                 = $siteCollection.Template
+                        PsDscRunAsCredential     = $SPSetupAccount
+                        DependsOn                = "[xSPWebApplication]$webAppInternalName"
+                    }
+                }
+            }
+        }
 
 
         #**********************************************************
@@ -212,61 +212,61 @@ Configuration SharePointServer
             DependsOn            = "[xSPCreateFarm]CreateSPFarm"
         }
 
-		# App server service instances
-		if ($Node.ServiceRoles.AppServer -eq $true) {
-			xSPServiceInstance UserProfileServiceInstance
-			{  
-				Name                 = "User Profile Service"
-				Ensure               = "Present"
-				PsDscRunAsCredential = $SPSetupAccount
-				DependsOn            = "[xSPCreateFarm]CreateSPFarm"
-			}        
-			xSPServiceInstance SecureStoreServiceInstance
-			{  
-				Name                 = "Secure Store Service"
-				Ensure               = "Present"
-				PsDscRunAsCredential = $SPSetupAccount
-				DependsOn            = "[xSPCreateFarm]CreateSPFarm"
-			}
+        # App server service instances
+        if ($Node.ServiceRoles.AppServer -eq $true) {
+            xSPServiceInstance UserProfileServiceInstance
+            {  
+                Name                 = "User Profile Service"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            }        
+            xSPServiceInstance SecureStoreServiceInstance
+            {  
+                Name                 = "Secure Store Service"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            }
 
-			xSPUserProfileSyncService UserProfileSyncService
-			{  
-				UserProfileServiceAppName = "User Profile Service Application"
-				Ensure                    = "Present"
-				FarmAccount               = $FarmAccount
-				PsDscRunAsCredential      = $SPSetupAccount
-				DependsOn                 = "[xSPUserProfileServiceApp]UserProfileServiceApp"
-			}
-		}
-		
-        # Front end service instances
-		if ($Node.ServiceRoles.WebFrontEnd -eq $true) {
-			xSPServiceInstance ManagedMetadataServiceInstance
-			{  
-				Name                 = "Managed Metadata Web Service"
-				Ensure               = "Present"
-				PsDscRunAsCredential = $SPSetupAccount
-				DependsOn            = "[xSPCreateFarm]CreateSPFarm"
-			}
-			xSPServiceInstance BCSServiceInstance
-			{  
-				Name                 = "Business Data Connectivity Service"
-				Ensure               = "Present"
-				PsDscRunAsCredential = $SPSetupAccount
-				DependsOn            = "[xSPCreateFarm]CreateSPFarm"
-			}
-		}
+            xSPUserProfileSyncService UserProfileSyncService
+            {  
+                UserProfileServiceAppName = "User Profile Service Application"
+                Ensure                    = "Present"
+                FarmAccount               = $FarmAccount
+                PsDscRunAsCredential      = $SPSetupAccount
+                DependsOn                 = "[xSPUserProfileServiceApp]UserProfileServiceApp"
+            }
+        }
         
-		# Search front or back end instances
-		if ($Node.ServiceRoles.SearchFrontEnd -eq $true -or $Node.ServiceRoles.SearchBackEnd -eq $true) {
-			xSPServiceInstance SearchServiceInstance
-			{  
-				Name                 = "SharePoint Server Search"
-				Ensure               = "Present"
-				PsDscRunAsCredential = $SPSetupAccount
-				DependsOn            = "[xSPCreateFarm]CreateSPFarm"
-			}
-		}
+        # Front end service instances
+        if ($Node.ServiceRoles.WebFrontEnd -eq $true) {
+            xSPServiceInstance ManagedMetadataServiceInstance
+            {  
+                Name                 = "Managed Metadata Web Service"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            }
+            xSPServiceInstance BCSServiceInstance
+            {  
+                Name                 = "Business Data Connectivity Service"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            }
+        }
+        
+        # Search front or back end instances
+        if ($Node.ServiceRoles.SearchFrontEnd -eq $true -or $Node.ServiceRoles.SearchBackEnd -eq $true) {
+            xSPServiceInstance SearchServiceInstance
+            {  
+                Name                 = "SharePoint Server Search"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            }
+        }
         
         #**********************************************************
         # Service applications
@@ -275,7 +275,7 @@ Configuration SharePointServer
         # dependencies
         #**********************************************************
 
-		$serviceAppPoolName = "SharePoint Service Applications"
+        $serviceAppPoolName = "SharePoint Service Applications"
         xSPServiceAppPool MainServiceAppPool
         {
             Name                 = $serviceAppPoolName
@@ -317,7 +317,7 @@ Configuration SharePointServer
             DatabaseName         = $ConfigurationData.NonNodeData.SharePoint.ManagedMetadataService.DatabaseName
             DependsOn            = "[xSPServiceAppPool]MainServiceAppPool"
         }
-		xSPBCSServiceApp BCSServiceApp
+        xSPBCSServiceApp BCSServiceApp
         {
             Name                  = "BCS Service Application"
             ApplicationPool       = $serviceAppPoolName
@@ -330,35 +330,35 @@ Configuration SharePointServer
         {  
             Name                  = "Search Service Application"
             DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.Search.DatabaseName
-			DatabaseServer        = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
+            DatabaseServer        = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
             ApplicationPool       = $serviceAppPoolName
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
         }
-		xSPSearchRoles LocalSearchRoles
-		{
-			Ensure                  = "Present"
+        xSPSearchRoles LocalSearchRoles
+        {
+            Ensure                  = "Present"
             Admin                   = $true
-			Crawler                 = $true
-			ContentProcessing       = $true
-			AnalyticsProcessing     = $true
-			QueryProcessing         = $true
-			ServiceAppName          = "Search Service Application"
-			PsDscRunAsCredential    = $SPSetupAccount
+            Crawler                 = $true
+            ContentProcessing       = $true
+            AnalyticsProcessing     = $true
+            QueryProcessing         = $true
+            ServiceAppName          = "Search Service Application"
+            PsDscRunAsCredential    = $SPSetupAccount
             FirstPartitionIndex     = 0
-			FirstPartitionDirectory = "$($ConfigurationData.NonNodeData.SharePoint.Search.IndexRootPath.TrimEnd("\"))\0"
-			FirstPartitionServers   = $env:COMPUTERNAME
+            FirstPartitionDirectory = "$($ConfigurationData.NonNodeData.SharePoint.Search.IndexRootPath.TrimEnd("\"))\0"
+            FirstPartitionServers   = $env:COMPUTERNAME
             DependsOn               = "[xSPSearchServiceApp]SearchServiceApp"
-		}
-		xSPSearchIndexPartition MainSearchPartition
-		{
-			Ensure               = "Present"
-			Servers              = $env:COMPUTERNAME
-			Index                = 1
+        }
+        xSPSearchIndexPartition MainSearchPartition
+        {
+            Ensure               = "Present"
+            Servers              = $env:COMPUTERNAME
+            Index                = 1
             RootDirectory        = "$($ConfigurationData.NonNodeData.SharePoint.Search.IndexRootPath.TrimEnd("\"))\1"
             PsDscRunAsCredential = $SPSetupAccount
-			DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
-		}
+            DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
+        }
 
         #**********************************************************
         # Local configuration manager settings
