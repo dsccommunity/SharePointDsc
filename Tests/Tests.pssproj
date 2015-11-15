@@ -66,6 +66,7 @@
     <Compile Include="xSharePoint.TestHarness.psm1" />
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPSearchIndexPartition.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSearchRoles.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
   </ItemGroup>

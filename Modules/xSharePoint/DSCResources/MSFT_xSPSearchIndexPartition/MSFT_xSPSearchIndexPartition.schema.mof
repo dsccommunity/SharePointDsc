@@ -1,0 +1,11 @@
+/*
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchIndexPartition")]
+class MSFT_xSPSearchIndexPartition : OMI_BaseResource
+{
+    [Key] Uint32 Index;
+    [Required] String Servers;
+    [Required] String RootDirectory;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
