@@ -18,7 +18,7 @@ Describe "xSPPasswordChangeSettings" {
             MailAddress = "e@mail.com"
             DaysBeforeExpiry = 7
             PasswordChangeWaitTimeSeconds = 60
-            NumberOfRetries = 3
+
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
