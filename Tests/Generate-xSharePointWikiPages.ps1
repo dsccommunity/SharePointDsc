@@ -10,7 +10,7 @@ $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
     ForEach-Object { 
         $result = Get-MofSchemaObject $_.FullName
-		Write-Output "Generating wiki page for $($result.FriendlyName)"
+        Write-Output "Generating wiki page for $($result.FriendlyName)"
         
         $output = "**Parameters**" + [Environment]::NewLine + [Environment]::NewLine
 

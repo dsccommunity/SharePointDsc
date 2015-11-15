@@ -10,9 +10,9 @@ $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
     ForEach-Object { 
         $result = Get-MofSchemaObject $_.FullName
-		Write-Output "Generating help document for $($result.FriendlyName)"
+        Write-Output "Generating help document for $($result.FriendlyName)"
         
-		$output = @"
+        $output = @"
 NAME
     $($result.FriendlyName)
 

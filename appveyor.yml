@@ -22,10 +22,10 @@ test_script:
 
 after_test:
     - ps: |
-		New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US" -ItemType Directory
-		& "$env:APPVEYOR_BUILD_FOLDER\Tests\Generate-xSharePointHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US"
+        New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US" -ItemType Directory
+        & "$env:APPVEYOR_BUILD_FOLDER\Tests\Generate-xSharePointHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US"
 
-		Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
+        Remove-Item (Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.pssproj")
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
         (Get-Content $manifest -Raw).Replace("0.7.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
         Add-Type -assemblyname System.IO.Compression.FileSystem
