@@ -69,6 +69,15 @@ function Get-TargetResource
             $QueryProcessingExists = $true
         }
 
+		$indexComps = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology `
+            | Where-Object {($_.GetType().Name -eq "IndexComponent") `
+                -and ($_.IndexPartitionOrdinal -eq $params.Index)}
+
+		$servers = ""
+        foreach ($indexComp in $indexComps) {
+            $servers += $indexComp.ServerName + ","
+        }
+
         return @{
             ServiceAppName = $params.ServiceAppName
             Admin = $AdminExists
@@ -79,7 +88,7 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
             FirstPartitionIndex = $params.FirstPartitionIndex
             FirstPartitionDirectory = $params.FirstPartitionDirectory
-            FirstPartitionServers = $params.FirstPartitionServers
+            FirstPartitionServers = $servers.TrimEnd(",")
             Ensure = $params.Ensure
         }
     }
@@ -162,7 +171,7 @@ function Set-TargetResource
             if($null -eq $IndexComponent1) {
                 Write-Verbose "Adding First search indedx at partition $($params.FirstPartitionIndex)"
 
-                $servers = $params.FirstPartitionServers.Split(',', [StringSplitOptions]::RemoveEmptyEntries)
+                $servers = $params.FirstPartitionServers.Replace(" ", "").Split(',', [StringSplitOptions]::RemoveEmptyEntries)
                 foreach($server in $servers) {
                     $InvokeCommandArgs = @{
                         ArgumentList = @($params.FirstPartitionDirectory)
