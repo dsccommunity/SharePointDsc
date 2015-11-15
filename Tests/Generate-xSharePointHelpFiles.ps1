@@ -12,12 +12,9 @@ Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
         $result = Get-MofSchemaObject $_.FullName
         Write-Output "Generating help document for $($result.FriendlyName)"
         
-        $output = @"
-NAME
-    $($result.FriendlyName)
-
-PARAMETERS
-"@ + [Environment]::NewLine
+        $output = "NAME" + [Environment]::NewLine
+		$output += "    $($result.FriendlyName)" + [Environment]::NewLine + [Environment]::NewLine
+		$output += "PARAMETERS" + [Environment]::NewLine
 
         foreach($property in $result.Attributes) {
             $output += "    $($property.Name) ($($property.State), $($property.DataType)"
