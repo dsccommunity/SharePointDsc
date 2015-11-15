@@ -10,12 +10,17 @@ $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
     ForEach-Object { 
         $result = Get-MofSchemaObject $_.FullName
-		Write-Output "Generating wiki page for $($result.FriendlyName)"
+		Write-Output "Generating help document for $($result.FriendlyName)"
         
-        $output = "**Parameters**" + [Environment]::NewLine + [Environment]::NewLine
+		$output = @"
+NAME
+    $($result.FriendlyName)
+
+PARAMETERS
+"@ + [Environment]::NewLine
 
         foreach($property in $result.Attributes) {
-            $output += " - $($property.Name) ($($property.State), $($property.DataType)"
+            $output += "    $($property.Name) ($($property.State), $($property.DataType)"
             if ([string]::IsNullOrEmpty($property.ValueMap) -ne $true) {
                 $output += ", Allowed values: "
                 $property.ValueMap | ForEach-Object {
@@ -27,7 +32,7 @@ Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
             $output += ")" + [Environment]::NewLine
         }
 
-        $output += [Environment]::NewLine + $result.Documentation
+        $output += [Environment]::NewLine + $result.Documentation.Replace("**Description**", "DESCRIPTION").Replace("**Example**","EXAMPLE")
 
-        $output | Out-File -FilePath (Join-Path $OutPutPath "$($result.FriendlyName).md") -Encoding utf8 -Force
+        $output | Out-File -FilePath (Join-Path $OutPutPath "about_$($result.FriendlyName).help.txt") -Encoding utf8 -Force
     }
