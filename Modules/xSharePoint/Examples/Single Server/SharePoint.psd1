@@ -17,7 +17,7 @@
 	NonNodeData = @{
 		DomainDetails = @{
 			DomainName = "contoso.local"
-			NetbiosName = "DSC"
+			NetbiosName = "Contoso"
 		}
 		SQLServer = @{
 			ContentDatabaseServer = "sql1.contoso.local"
@@ -32,13 +32,13 @@
 				AdminContentDatabase = "SP_AdminContent"
 			}
 			DiagnosticLogs = @{
-				Path = "L:\ULSLogs"
+				Path = "C:\ULSLogs"
 				MaxSize = 10
 				DaysToKeep = 7
 			}
 			UsageLogs = @{
 				DatabaseName = "SP_Usage"
-				Path = "L:\UsageLogs"
+				Path = "C:\UsageLogs"
 			}
 			StateService = @{
 				DatabaseName = "SP_State"
@@ -51,9 +51,9 @@
 					Authentication = "NTLM"
 					Anonymous = $false
 					AppPool = "SharePoint Sites"
-					AppPoolAccount = "DSC\svcSPWebApp"
-					SuperUser = "DSC\svcSPSuperUser"
-					SuperReader = "DSC\svcSPReader"
+					AppPoolAccount = "Contoso\svcSPWebApp"
+					SuperUser = "Contoso\svcSPSuperUser"
+					SuperReader = "Contoso\svcSPReader"
 					UseHostNamedSiteCollections = $true
 					ManagedPaths = @(
 						@{
@@ -68,13 +68,13 @@
 					SiteCollections = @(
 						@{
 							Url = "http://sites.sharepoint.contoso.local"
-							Owner = "DSC\svcSPFarm"
+							Owner = "Contoso\svcSPFarm"
 							Name = "Team Sites"
 							Template = "STS#0"
 						},
 						@{
 							Url = "http://my.sharepoint.contoso.local"
-							Owner = "DSC\svcSPFarm"
+							Owner = "Contoso\svcSPFarm"
 							Name = "My Sites"
 							Template = "SPSMSITEHOST#0"
 						}
@@ -98,7 +98,7 @@
 			}
 			Search = @{
 				DatabaseName = "SP_Search"
-				IndexRootPath = "I:\SearchPartitions"
+				IndexRootPath = "C:\SearchPartitions"
 			}
 		}
 	}
