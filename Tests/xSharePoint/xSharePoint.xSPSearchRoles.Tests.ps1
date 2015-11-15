@@ -213,20 +213,20 @@ Describe "xSPSearchRoles" {
         }
 
         Context "The correct topology on this server exists" {
-		    Mock Get-SPEnterpriseSearchComponent {
+            Mock Get-SPEnterpriseSearchComponent {
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
             }
 
-			Mock Get-SPEnterpriseSearchServiceInstance  {
-				return @{
-					Server = @{
-						Address = $env:COMPUTERNAME
-					}
-					Status = "Online"
-				}
-			}
+            Mock Get-SPEnterpriseSearchServiceInstance  {
+                return @{
+                    Server = @{
+                        Address = $env:COMPUTERNAME
+                    }
+                    Status = "Online"
+                }
+            }
 
-			$testParams = @{
+            $testParams = @{
                 ServiceAppName = "Search Service Application"
                 Admin = $true
                 Crawler = $true
@@ -239,9 +239,9 @@ Describe "xSPSearchRoles" {
                 FirstPartitionServers = $env:COMPUTERNAME
             }
 
-			It "returns true from the test method" {
-				Test-TargetResource @testParams -Verbose | Should Be $true
-			}
-		}
+            It "returns true from the test method" {
+                Test-TargetResource @testParams -Verbose | Should Be $true
+            }
+        }
     }
 }

@@ -42,7 +42,7 @@ function Get-TargetResource
                 FirstPartitionIndex = $params.FirstPartitionIndex
                 FirstPartitionDirectory = $params.FirstPartitionDirectory
                 FirstPartitionServers = $params.FirstPartitionServers
-				Ensure = $params.Ensure
+                Ensure = $params.Ensure
             }
         }
         $currentTopology = $ssa.ActiveTopology
@@ -80,7 +80,7 @@ function Get-TargetResource
             FirstPartitionIndex = $params.FirstPartitionIndex
             FirstPartitionDirectory = $params.FirstPartitionDirectory
             FirstPartitionServers = $params.FirstPartitionServers
-			Ensure = $params.Ensure
+            Ensure = $params.Ensure
         }
     }
     return $result
