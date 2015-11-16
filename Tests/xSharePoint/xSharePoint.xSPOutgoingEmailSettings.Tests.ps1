@@ -91,7 +91,7 @@ Describe "xSPOutgoingEmailSettings" {
                 $Global:UpdateMailSettingsCalled=$false;
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPWebApplication
-                  $Global:UpdateMailSettingsCalled | Should Be $true
+                $Global:UpdateMailSettingsCalled | Should Be $true
             }
         }
 
