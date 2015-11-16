@@ -15,7 +15,8 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
@@ -44,6 +45,7 @@ function Get-TargetResource
             Port = (New-Object System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
             InstallAccount = $params.InstallAccount
+            BlockedFileTypes = $wa.BlockedFileExtensions
         }
     }
     return $result
@@ -66,7 +68,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
@@ -74,6 +77,12 @@ function Set-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
+        $blockedFileTypes = $null
+        if($params.ContainsKey("BlockedFileTypes"))
+        {
+            $blockedFileTypes =$params.BlockedFileTypes
+            $params.Remove("BlockedFileTypes")
+        }
 
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) {
@@ -92,9 +101,17 @@ function Set-TargetResource
                 $params.Remove("AllowAnonymous") | Out-Null 
                 $params.Add("AllowAnonymousAccess", $true)
             }
-
-            New-SPWebApplication @params
+         
+            $wa = New-SPWebApplication @params
         }
+        write-host "bla"
+        write-debug "bla"
+        if($blockedFileTypes -ne $null){
+            $wa.BlockedFileExtensions.RemoveAll();
+            $blockedFileTypes| % {$wa.BlockedFileExtensions.Add($_) }
+            $wa.Update()
+        }
+
     }
 }
 
@@ -116,7 +133,8 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
