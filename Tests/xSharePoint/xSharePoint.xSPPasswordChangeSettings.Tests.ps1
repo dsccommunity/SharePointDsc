@@ -91,7 +91,6 @@ Describe "xSPPasswordChangeSettings" {
             It "calls the new and set methods from the set function" {
                 $Global:UpdateCalledSPFarmUpdateCalled =$false;
                 Set-TargetResource @testParams
-                
                 Assert-MockCalled Get-SPFarm
                 $Global:UpdateCalledSPFarmUpdateCalled  | Should Be $true
             }
