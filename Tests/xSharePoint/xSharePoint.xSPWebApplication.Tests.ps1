@@ -184,7 +184,7 @@ Describe "xSPWebApplication" {
                 } -passThru
                 $result= $result | Add-Member -MemberType MemberSet -value $blockedFileTypes -Name "BlockedFileExtensions"
                  $result = $result | Add-Member -MemberType ScriptMethod Update { 
-                    $Global:SPWebApplicationUpdateCalled = $true;
+                    $Global:BlockedFilesClearCalled = $true;
                     return $true;
                 
                     } -PassThru
@@ -194,10 +194,10 @@ Describe "xSPWebApplication" {
             It "calls the new cmdlet from the set method and does not touch blockedFileExtensions" {
                 $Global:SPWebApplicationUpdateCalled = $false;
                 $Global:BlockedFilesAddCalled = $false;
-                $Global:BlockedFilesRemoveAllCalled = $false;
+                $Global:BlockedFilesClearCalled = $false;
                 Set-TargetResource @testParams
                 $Global:BlockedFilesAddCalled| Should be  $false;
-                $Global:BlockedFilesRemoveAllCalled| Should be  $false;
+                $Global:BlockedFilesClearCalled| Should be  $false;
                 $Global:SPWebApplicationUpdateCalled| Should be  $false;
                 Assert-MockCalled New-SPWebApplication
             }
@@ -236,8 +236,8 @@ Describe "xSPWebApplication" {
                 })
                
                $blockedFileTypes = new-object PSObject 
-               $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod RemoveAll { 
-                    $Global:BlockedFilesRemoveAllCalled = $true;
+               $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod Clear { 
+                    $Global:BlockedFilesClearCalled = $true;
                     return $true;
                 } -passThru
                $blockedFileTypes = $blockedFileTypes | Add-Member  ScriptMethod Add {
@@ -258,10 +258,10 @@ Describe "xSPWebApplication" {
 
             It "calls the new cmdlet from the set method and does update blockedFileExtensions" {
                 $Global:BlockedFilesAddCalled = $false;
-                $Global:BlockedFilesRemoveAllCalled = $false;
+                $Global:BlockedFilesClearCalled = $false;
                 Set-TargetResource @testParams
                 $Global:BlockedFilesAddCalled| Should be  $true;
-                $Global:BlockedFilesRemoveAllCalled| Should be  $true;
+                $Global:BlockedFilesClearCalled| Should be  $true;
                 $Global:SPWebApplicationUpdateCalled| Should be  $true;
 
                 Assert-MockCalled Get-SPWebApplication
