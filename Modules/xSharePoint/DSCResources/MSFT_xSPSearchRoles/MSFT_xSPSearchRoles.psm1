@@ -48,23 +48,23 @@ function Get-TargetResource
         $currentTopology = $ssa.ActiveTopology
         
         #Make sure what we expect to be there is
-        $AdminComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "AdminComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+        $AdminComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "AdminComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
         if($AdminComponent1) {
             $AdminExists = $true
         }
-        $CrawlComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "CrawlComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+        $CrawlComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "CrawlComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
         if($CrawlComponent1) {
             $CrawlerExists = $true
         }
-        $ContentProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "ContentProcessingComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+        $ContentProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "ContentProcessingComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
         if($ContentProcessingComponent1) {
             $ContentProcessingExists = $true
         }
-        $AnalyticsProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "AnalyticsProcessingComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+        $AnalyticsProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "AnalyticsProcessingComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
         if($AnalyticsProcessingComponent1) {
             $AnalyticsProcessingExists = $true
         }
-        $QueryProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "QueryProcessingComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+        $QueryProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object {($_.GetType().Name -eq "QueryProcessingComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
         if($QueryProcessingComponent1) {
             $QueryProcessingExists = $true
         }
@@ -197,23 +197,23 @@ function Set-TargetResource
             }
             Set-SPEnterpriseSearchTopology -Identity $newTopology
         } else {
-            $AdminComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "AdminComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+            $AdminComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "AdminComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
              if (($params.Admin -eq $false) -and ($null -ne $AdminComponent1)) {
                 Remove-SPEnterpriseSearchComponent -Identity $AdminComponent1.ComponentId -SearchTopology $newTopology -confirm:$false
             }
-            $CrawlComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "CrawlComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+            $CrawlComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "CrawlComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
             if (($params.Crawler -eq $false) -and ($null -ne $CrawlComponent1)) {
                 Remove-SPEnterpriseSearchComponent -Identity $CrawlComponent1.ComponentId -SearchTopology $newTopology -confirm:$false
             }
-            $ContentProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "ContentProcessingComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+            $ContentProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "ContentProcessingComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
             if (($params.ContentProcessing -eq $false) -and ($null -ne $ContentProcessingComponent1)) {
                 Remove-SPEnterpriseSearchComponent -Identity $ContentProcessingComponent1.ComponentId -SearchTopology $newTopology -confirm:$false
             }
-            $AnalyticsProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "AnalyticsProcessingComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+            $AnalyticsProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "AnalyticsProcessingComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
             if (($params.AnalyticsProcessing -eq $false) -and ($null -ne $AnalyticsProcessingComponent1)) {
                 Remove-SPEnterpriseSearchComponent -Identity $AnalyticsProcessingComponent1.ComponentId -SearchTopology $newTopology -confirm:$false
             }
-            $QueryProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "QueryProcessingComponent1") -and ($_.ServerName -eq $($ssi.Server.Address))}
+            $QueryProcessingComponent1 = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq "QueryProcessingComponent") -and ($_.ServerName -eq $($ssi.Server.Address))}
             if (($params.QueryProcessing -eq $false) -and ($null -ne $QueryProcessingComponent1)) {
                 Remove-SPEnterpriseSearchComponent -Identity $QueryProcessingComponent1.ComponentId -SearchTopology $newTopology -confirm:$false
             }

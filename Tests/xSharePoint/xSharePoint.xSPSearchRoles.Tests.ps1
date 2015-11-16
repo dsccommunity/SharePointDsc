@@ -50,29 +50,29 @@ Describe "xSPSearchRoles" {
             }
         }
 
-        Add-Type -TypeDefinition "public class AdminComponent1 { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
-        Add-Type -TypeDefinition "public class CrawlComponent1 { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
-        Add-Type -TypeDefinition "public class ContentProcessingComponent1 { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
-        Add-Type -TypeDefinition "public class AnalyticsProcessingComponent1 { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
-        Add-Type -TypeDefinition "public class QueryProcessingComponent1 { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
+        Add-Type -TypeDefinition "public class AdminComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
+        Add-Type -TypeDefinition "public class CrawlComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
+        Add-Type -TypeDefinition "public class ContentProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
+        Add-Type -TypeDefinition "public class AnalyticsProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
+        Add-Type -TypeDefinition "public class QueryProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;}}"
 
-        $adminComponent = New-Object AdminComponent1
+        $adminComponent = New-Object AdminComponent
         $adminComponent.ServerName = $env:COMPUTERNAME
         $adminComponent.ComponentId = [Guid]::NewGuid()
 
-        $crawlComponent = New-Object CrawlComponent1
+        $crawlComponent = New-Object CrawlComponent
         $crawlComponent.ServerName = $env:COMPUTERNAME
         $crawlComponent.ComponentId = [Guid]::NewGuid()
 
-        $contentProcessingComponent = New-Object ContentProcessingComponent1
+        $contentProcessingComponent = New-Object ContentProcessingComponent
         $contentProcessingComponent.ServerName = $env:COMPUTERNAME
         $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-        $analyticsProcessingComponent = New-Object AnalyticsProcessingComponent1
+        $analyticsProcessingComponent = New-Object AnalyticsProcessingComponent
         $analyticsProcessingComponent.ServerName = $env:COMPUTERNAME
         $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-        $queryProcessingComponent = New-Object QueryProcessingComponent1
+        $queryProcessingComponent = New-Object QueryProcessingComponent
         $queryProcessingComponent.ServerName = $env:COMPUTERNAME
         $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
 
