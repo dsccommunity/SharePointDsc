@@ -18,13 +18,10 @@ function Get-TargetResource
 		$params = $args[0]
 		
 		$webApp = $null
-		if([string]::IsNullOrEmpty($params.WebAppUrl)){
-			$webApp = Get-SPWebApplication -IncludeCentralAdministration | Where { $_.IsAdministrationWebApplication } 
-		}else{
-			$webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration 
-		}
+		$webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration 
+
 		if ($null -eq $webApp ) { 
-			throw "Web Application $webAppUrl not found"
+			return $null
 		}
 		return @{
 		WebAppUrl = $webApp.Url
@@ -53,13 +50,8 @@ function Set-TargetResource
 	Invoke-xSharePointCommand -Arguments $PSBoundParameters -ScriptBlock {
 		$params = $args[0]
 		$webApp = $null
-		if([string]::IsNullOrEmpty($params.WebAppUrl)){
-			Write-Verbose -Message "retrieving global(CA) settings"
-			$webApp = Get-SPWebApplication -IncludeCentralAdministration | Where { $_.IsAdministrationWebApplication } 
-		}else{
-			Write-Verbose -Message "retrieving $($params.WebAppUrl)  settings"
-			$webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration 
-		}
+		Write-Verbose -Message "retrieving $($params.WebAppUrl)  settings"
+		$webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration 
 		if($null -eq $webApp)
 		{
 		    throw "Web Application $webAppUrl not found"

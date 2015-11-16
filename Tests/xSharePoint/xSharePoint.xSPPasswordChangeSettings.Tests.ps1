@@ -72,7 +72,11 @@ Describe "xSPPasswordChangeSettings" {
                 PasswordChangeMaximumTries=0
                 DaysBeforePasswordExpirationToSendEmail=0
                     }
-                $result = $result | Add-Member  ScriptMethod Update { return $true} -passThru
+                $result = $result | Add-Member  ScriptMethod Update { 
+                    $Global:UpdateCalledSPFarmUpdateCalled = $true;
+                    return $true;
+                
+                    } -passThru
                 return $result
             }
 
@@ -85,8 +89,11 @@ Describe "xSPPasswordChangeSettings" {
             }
 
             It "calls the new and set methods from the set function" {
+                $Global:UpdateCalledSPFarmUpdateCalled =$false;
                 Set-TargetResource @testParams
+                
                 Assert-MockCalled Get-SPFarm
+                $Global:UpdateCalledSPFarmUpdateCalled  | Should Be $true
             }
         }
 

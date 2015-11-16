@@ -35,12 +35,12 @@ Describe "xSPOutgoingEmailSettings" {
             Mock Get-SPWebApplication -MockWith  { return $null
             }
 
-            It "throws exception from the get method" {
-                {Get-TargetResource @testParams} | Should Throw 
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should be $null 
             }
 
-            It "throws exception from the test method" {
-               { Test-TargetResource @testParams } | Should Throw
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should be $false
             }
 
         }
@@ -64,7 +64,7 @@ Describe "xSPOutgoingEmailSettings" {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-        }
+        } 
 
 
         Context " Properties update tests " {
@@ -78,7 +78,8 @@ Describe "xSPOutgoingEmailSettings" {
                     }
                 $result = $result | Add-Member  ScriptMethod UpdateMailSettings  {
                         param( [string]$SMTPServer, [string]$FromAddress, [string]$ReplyToAddress, [string]$CharacterSet )
-                        return ; }                 -passThru
+                        $Global:UpdateMailSettingsCalled = $true;
+                        return ; } -passThru
                 return $result
             }
 
@@ -87,8 +88,10 @@ Describe "xSPOutgoingEmailSettings" {
             }
 
             It "calls the new and set methods from the set function" {
+                $Global:UpdateMailSettingsCalled=$false;
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPWebApplication
+                  $Global:UpdateMailSettingsCalled | Should Be $true
             }
         }
 
