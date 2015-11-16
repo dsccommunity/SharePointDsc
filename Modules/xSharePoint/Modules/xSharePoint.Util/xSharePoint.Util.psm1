@@ -154,7 +154,7 @@ function Test-xSharePointSpecificParameters() {
     }
 
     $KeyList | ForEach-Object {
-        if (($_ -ne "Verbose") -or ($_ -ne "InstallAccount")) {
+        if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) {
             if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
                 if ($DesiredValues.ContainsKey($_)) {
                     $desiredType = $DesiredValues.$_.GetType()
