@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPOutgoingEmailSettings")]
+class MSFT_xSPOutgoingEmailSettings : OMI_BaseResource
+{
+    [key] string WebAppUrl;
+    [Write] string SMTPServer;
+    [Write] string FromAddress;
+    [Write] string ReplyToAddress;
+    [Write] string CharacterSet;
+};
+

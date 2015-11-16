@@ -27,6 +27,7 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+
 function Get-xSharePointInstalledProductVersion() {
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
