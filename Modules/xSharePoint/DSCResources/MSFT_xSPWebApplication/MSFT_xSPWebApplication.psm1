@@ -107,7 +107,7 @@ function Set-TargetResource
         write-host "bla"
         write-debug "bla"
         if($blockedFileTypes -ne $null){
-            $wa.BlockedFileExtensions.RemoveAll();
+            $wa.BlockedFileExtensions.Clear();
             $blockedFileTypes| % {$wa.BlockedFileExtensions.Add($_) }
             $wa.Update()
         }
