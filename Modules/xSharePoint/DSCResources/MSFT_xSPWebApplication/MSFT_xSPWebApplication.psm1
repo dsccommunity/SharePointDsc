@@ -80,15 +80,15 @@ function Set-TargetResource
         $params = $args[0]
         
         $blockedFileTypes = $null
+        $allowedFileTypes = $null
         if($params.ContainsKey("BlockedFileTypes"))
         {
             $blockedFileTypes =$params.BlockedFileTypes
             $params.Remove("BlockedFileTypes")
         }
-        $allowedFileTypes = $null
         if($params.ContainsKey("AllowedFileTypes"))
         {
-            $allowedFileTypes  =$params.BlockedFileTypes
+            $allowedFileTypes  =$params.AllowedFileTypes
             $params.Remove("AllowedFileTypes")
         }
 
@@ -112,14 +112,18 @@ function Set-TargetResource
          
             $wa = New-SPWebApplication @params
         }
-        $blockedFileTypes| % {
-            if(!$wa.BlockedFileExtensions.ContainExtension($_)){
-                $wa.BlockedFileExtensions.Add($_) ;
+        if($blockedFileTypes -ne $null){
+            $blockedFileTypes| % {
+                if(!$wa.BlockedFileExtensions.ContainExtension($_)){
+                    $wa.BlockedFileExtensions.Add($_) ;
+                }
             }
         }
-        $allowedFileTypes| % {
-            if($wa.BlockedFileExtensions.ContainExtension($_)){
-                $wa.BlockedFileExtensions.Remove($_) 
+        if($allowedFileTypes -ne $null){
+            $allowedFileTypes| % {
+                if($wa.BlockedFileExtensions.ContainExtension($_)){
+                    $wa.BlockedFileExtensions.Remove($_) 
+                }
             }
         }
         if(($allowedFileTypes -ne $null) -or ($blockedFileTypes -ne $null)){
