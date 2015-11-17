@@ -14,5 +14,7 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write] string Port;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Write] string BlockedFileTypes[];
+	[Write] string AllowedFileTypes[];
+
 };
 

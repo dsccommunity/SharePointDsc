@@ -8,27 +8,26 @@ function Get-TargetResource
         [parameter(Mandatory = $true)] [System.String] $SMTPServer,
         [parameter(Mandatory = $true)] [System.String] $FromAddress,
         [parameter(Mandatory = $true)] [System.String] $ReplyToAddress,
-        [parameter(Mandatory = $true)] [System.String] $CharacterSet
+        [parameter(Mandatory = $true)] [System.String] $CharacterSet,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
         
     )
 
     Write-Verbose -Message "Retrieving outgoing email settings configuration "
 
-    $result = Invoke-xSharePointCommand -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
-        $webApp = $null
-        $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration 
+        $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration  -ErrorAction SilentlyContinue
 
         if ($null -eq $webApp ) { 
             return $null
         }
         return @{
-        WebAppUrl = $webApp.Url
-        SMTPServer= $webApp.OutboundMailServiceInstance
-        FromAddress= $webApp.OutboundMailSenderAddress
-        ReplyToAddress= $webApp.OutboundMailReplyToAddress
-        CharacterSet = $webApp.OutboundMailCodePage
+            WebAppUrl = $webApp.Url
+            SMTPServer= $webApp.OutboundMailServiceInstance
+            FromAddress= $webApp.OutboundMailSenderAddress
+            ReplyToAddress= $webApp.OutboundMailReplyToAddress
+            CharacterSet = $webApp.OutboundMailCodePage
         }
     }
     return $result
@@ -43,11 +42,12 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $SMTPServer,
         [parameter(Mandatory = $true)] [System.String] $FromAddress,
         [parameter(Mandatory = $true)] [System.String] $ReplyToAddress,
-        [parameter(Mandatory = $true)] [System.String] $CharacterSet
+        [parameter(Mandatory = $true)] [System.String] $CharacterSet,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Updating outgoing email settings configuration for $WebAppUrl"
-    Invoke-xSharePointCommand -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $webApp = $null
         Write-Verbose -Message "retrieving $($params.WebAppUrl)  settings"
@@ -71,7 +71,8 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $SMTPServer,
         [parameter(Mandatory = $true)] [System.String] $FromAddress,
         [parameter(Mandatory = $true)] [System.String] $ReplyToAddress,
-        [parameter(Mandatory = $true)] [System.String] $CharacterSet
+        [parameter(Mandatory = $true)] [System.String] $CharacterSet,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

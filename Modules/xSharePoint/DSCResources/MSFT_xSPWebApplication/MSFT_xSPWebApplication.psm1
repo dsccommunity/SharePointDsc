@@ -16,7 +16,8 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes
+        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes,
+        [parameter(Mandatory = $false)][string[]] $AllowedFileTypes
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
@@ -69,7 +70,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes
+        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes,
+        [parameter(Mandatory = $false)][string[]] $AllowedFileTypes
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
@@ -82,6 +84,12 @@ function Set-TargetResource
         {
             $blockedFileTypes =$params.BlockedFileTypes
             $params.Remove("BlockedFileTypes")
+        }
+        $allowedFileTypes = $null
+        if($params.ContainsKey("AllowedFileTypes"))
+        {
+            $allowedFileTypes  =$params.BlockedFileTypes
+            $params.Remove("AllowedFileTypes")
         }
 
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
@@ -104,13 +112,21 @@ function Set-TargetResource
          
             $wa = New-SPWebApplication @params
         }
-        write-host "bla"
-        write-debug "bla"
-        if($blockedFileTypes -ne $null){
-            $wa.BlockedFileExtensions.Clear();
-            $blockedFileTypes| % {$wa.BlockedFileExtensions.Add($_) }
+        $blockedFileTypes| % {
+            if(!$wa.BlockedFileExtensions.ContainExtension($_)){
+                $wa.BlockedFileExtensions.Add($_) ;
+            }
+        }
+        $allowedFileTypes| % {
+            if($wa.BlockedFileExtensions.ContainExtension($_)){
+                $wa.BlockedFileExtensions.Remove($_) 
+            }
+        }
+        if(($allowedFileTypes -ne $null) -or ($blockedFileTypes -ne $null)){
             $wa.Update()
         }
+
+
 
     }
 }
@@ -134,7 +150,8 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes
+        [parameter(Mandatory = $false)][string[]] $BlockedFileTypes,
+        [parameter(Mandatory = $false)][string[]] $AllowedFileTypes
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
