@@ -7,12 +7,13 @@ function Get-TargetResource
         [parameter(Mandatory = $true)][System.String] $MailAddress,
         [parameter(Mandatory = $false)][ValidateRange(0,356)][System.UInt32] $DaysBeforeExpiry,
         [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries
+        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Retrieving farm wide automatic password change settings"
 
-    $result = Invoke-xSharePointCommand -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $farm = Get-SPFarm
@@ -35,13 +36,14 @@ function Set-TargetResource
         [parameter(Mandatory = $true)][System.String] $MailAddress,
         [parameter(Mandatory = $false)][ValidateRange(0,356 )][System.UInt32] $DaysBeforeExpiry,
         [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $false)][ValidateRange(0,99 )][System.UInt32] $NumberOfRetries        
+        [parameter(Mandatory = $false)][ValidateRange(0,99 )][System.UInt32] $NumberOfRetries,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Updating farm wide automatic password change settings"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $farm = Get-SPFarm
+        $farm = Get-SPFarm -ErrorAction Continue 
 
         if ($null -eq $farm ) { return $null }
         
@@ -70,7 +72,8 @@ function Test-TargetResource
         [parameter(Mandatory = $true)][System.String] $MailAddress,
         [parameter(Mandatory = $false)][ValidateRange(0,356)][System.UInt32] $DaysBeforeExpiry,
         [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries
+        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

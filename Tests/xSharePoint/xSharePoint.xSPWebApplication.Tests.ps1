@@ -211,6 +211,7 @@ Describe "xSPWebApplication" {
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
             BlockedFileTypes  = @("java", "vbs")
+            AllowedFileTypes  = @("exe", "vbs")
         }
 
 
@@ -234,10 +235,19 @@ Describe "xSPWebApplication" {
                     )
                     Url = $testParams.Url
                 })
-               
                $blockedFileTypes = new-object PSObject 
-               $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod Clear { 
+               $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod Remove { 
                     $Global:BlockedFilesClearCalled = $true;
+                    return $true;
+                } -passThru
+                $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod Contains { 
+                    param($extension)
+                    if($extension -eq "exe"){
+                        return $true
+                    }
+                    return $false
+                    }
+                    $Global:BlockedFilesContainsCalled = $true;
                     return $true;
                 } -passThru
                $blockedFileTypes = $blockedFileTypes | Add-Member  ScriptMethod Add {
@@ -245,15 +255,12 @@ Describe "xSPWebApplication" {
                     $Global:BlockedFilesAddCalled = $true;
                     return $true;
                 } -passThru
-
                 $result=$result| Add-Member  ScriptMethod Update { 
                     $Global:SPWebApplicationUpdateCalled = $true;
                     return $true;               
-                   } -PassThru
-               
-                              $result= $result | Add-Member NoteProperty  -value $blockedFileTypes -Name "BlockedFileExtensions" -PassThru
-
-            return $result
+                } -PassThru
+                $result= $result | Add-Member NoteProperty  -value $blockedFileTypes -Name "BlockedFileExtensions" -PassThru
+                return $result
             }
 
             It "calls the new cmdlet from the set method and does update blockedFileExtensions" {
@@ -261,7 +268,7 @@ Describe "xSPWebApplication" {
                 $Global:BlockedFilesClearCalled = $false;
                 Set-TargetResource @testParams
                 $Global:BlockedFilesAddCalled| Should be  $true;
-                $Global:BlockedFilesClearCalled| Should be  $true;
+                $Global:BlockedFilesContainsCalled| Should be  $true;
                 $Global:SPWebApplicationUpdateCalled| Should be  $true;
 
                 Assert-MockCalled Get-SPWebApplication

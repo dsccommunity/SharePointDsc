@@ -15,7 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPOutgoingEmailSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
-            WebAppUrl = "http://sp2013.australiasoutheast.cloudapp.azure.com"
+            WebAppUrl = "http://sharepoint.contoso.com"
             SMTPServer = "smtp.contoso.com"
             FromAddress = "from@email.com"
             ReplyToAddress = "reply@email.com"
@@ -36,7 +36,7 @@ Describe "xSPOutgoingEmailSettings" {
             }
 
             It "returns null from the get method" {
-                Get-TargetResource @testParams | Should be $null 
+                Get-TargetResource @testParams | Should BeNullOrEmpty 
             }
 
             It "returns false from the test method" {
@@ -48,7 +48,7 @@ Describe "xSPOutgoingEmailSettings" {
         Context " Properties match" {
             Mock Get-SPWebApplication { 
                 return @{
-                        Url= "http://sp2013.australiasoutheast.cloudapp.azure.com"
+                        Url= "http://sharepoint.contoso.com"
                         OutboundMailServiceInstance= "smtp.contoso.com"
                         OutboundMailSenderAddress = "from@email.com"
                         OutboundMailReplyToAddress= "reply@email.com"
@@ -70,7 +70,7 @@ Describe "xSPOutgoingEmailSettings" {
         Context " Properties update tests " {
             Mock Get-SPWebApplication { 
                 $result = @{
-                        Url= "http://sp2013.australiasoutheast.cloudapp.azure.com"
+                        Url= "http://sharepoint.contoso.com"
                         OutboundMailServiceInstance= "smtp2.contoso.com"
                         OutboundMailSenderAddress = "from@email.com"
                         OutboundMailReplyToAddress= "reply@email.com"
