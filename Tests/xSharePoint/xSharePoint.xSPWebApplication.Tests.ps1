@@ -240,15 +240,14 @@ Describe "xSPWebApplication" {
                     $Global:BlockedFilesClearCalled = $true;
                     return $true;
                 } -passThru
-                $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod Contains { 
+                $blockedFileTypes =  $blockedFileTypes | Add-Member  ScriptMethod ContainExtension { 
                     param($extension)
+                    $Global:BlockedFilesContainsCalled = $true;
                     if($extension -eq "exe"){
                         return $true
                     }
                     return $false
-                    }
-                    $Global:BlockedFilesContainsCalled = $true;
-                    return $true;
+                    
                 } -passThru
                $blockedFileTypes = $blockedFileTypes | Add-Member  ScriptMethod Add {
                     param( [string]$fileType)
