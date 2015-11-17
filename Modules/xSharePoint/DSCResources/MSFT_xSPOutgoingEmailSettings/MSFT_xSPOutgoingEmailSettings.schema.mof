@@ -6,6 +6,6 @@ class MSFT_xSPOutgoingEmailSettings : OMI_BaseResource
     [Write] string FromAddress;
     [Write] string ReplyToAddress;
     [Write] string CharacterSet;
-	[Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
