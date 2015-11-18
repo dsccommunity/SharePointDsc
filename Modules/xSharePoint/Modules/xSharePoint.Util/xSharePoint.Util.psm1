@@ -154,7 +154,7 @@ function Test-xSharePointSpecificParameters() {
     }
 
     $KeyList | ForEach-Object {
-        if ($_ -ne "Verbose") {
+        if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount"))  {
             if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
                 if ($DesiredValues.ContainsKey($_)) {
                     $desiredType = $DesiredValues.$_.GetType()
@@ -166,6 +166,11 @@ function Test-xSharePointSpecificParameters() {
                             }
                         }
                         "Int32" {
+                            if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                $returnValue = $false
+                            }
+                        }
+                        "Int16" {
                             if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
                                 $returnValue = $false
                             }
