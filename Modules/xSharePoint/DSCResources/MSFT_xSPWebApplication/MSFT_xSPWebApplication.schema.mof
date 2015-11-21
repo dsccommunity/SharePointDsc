@@ -17,7 +17,7 @@ Class MSFT_xSPWebApplicationHappyHour
 Class MSFT_xSPWebApplicationThrottling
 {
     [write]uint32 ListViewThreshold;
-    [write]boolean AllowObjectModelOverride;
+    [write]boolean AllowObjectModelOverride; 
     [write]uint32 AdminThreshold;
     [write]uint32 ListViewLookupThreshold;
     [write]boolean HappyHourEnabled;
