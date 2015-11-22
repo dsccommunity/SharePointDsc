@@ -7,6 +7,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $Index,
         [parameter(Mandatory = $true)]  [System.String]  $Servers,
         [parameter(Mandatory = $true)]  [System.String]  $RootDirectory,
+        [parameter(Mandatory = $true)]  [System.String]  $ServiceAppName,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
@@ -15,7 +16,7 @@ function Get-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
-        $ssa = Get-SPEnterpriseSearchServiceApplication
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName 
         $indexComps = Get-SPEnterpriseSearchComponent -SearchTopology $ssa.ActiveTopology `
             | Where-Object {($_.GetType().Name -eq "IndexComponent") `
                 -and ($_.IndexPartitionOrdinal -eq $params.Index)}
@@ -52,6 +53,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $Index,
         [parameter(Mandatory = $true)]  [System.String]  $Servers,
         [parameter(Mandatory = $true)]  [System.String]  $RootDirectory,
+        [parameter(Mandatory = $true)]  [System.String]  $ServiceAppName,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
@@ -60,7 +62,7 @@ function Set-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
-        $ssa = Get-SPEnterpriseSearchServiceApplication
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName 
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa -Clone -SearchTopology $ssa.ActiveTopology
 
         $servers = $params["Servers"].Replace(" ", "").Split(",", [StringSplitOptions]::RemoveEmptyEntries)
@@ -74,24 +76,20 @@ function Set-TargetResource
             }
 
             #Wait for Search Service Instance to come online
+            $loopCount = 0
             $online = Get-SPEnterpriseSearchServiceInstance -Identity $ssi; 
             do {
                 $online = Get-SPEnterpriseSearchServiceInstance -Identity $ssi; 
-                Write-Verbose "Waiting for service on $server - current status is $($online.Status)"
-                Start-Sleep -Seconds 10
+                Write-Verbose "Waiting for service: $($online.TypeName)"
+                $loopCount++
+                Start-Sleep -Seconds 30
             } 
-            until ($online.Status -eq "Online")
+            until ($online.Status -eq "Online" -or $loopCount -eq 20)
 
             if ($params.Ensure -eq "Present") {
                 Write-Verbose "Creating $($params.RootDirectory) on $server"
-                $InvokeCommandArgs = @{
-                        ArgumentList = @($params.RootDirectory)
-                    }
-                $session = New-PSSession -ComputerName $server -Name "Microsoft.SharePoint.DSC.SearchIndexSetup" -SessionOption (New-PSSessionOption -OperationTimeout 0 -IdleTimeout 60000)
-                if ($null -ne $session) { $InvokeCommandArgs.Add("Session", $session) }
-                Invoke-Command @InvokeCommandArgs -ScriptBlock {
-                    New-Item $args[0] -ItemType Directory -Force        
-                }
+                $networkPath = "\\$server\" + $params.RootDirectory.Replace(":\", "$\")
+                New-Item $networkPath -ItemType Directory -Force
                 New-SPEnterpriseSearchIndexComponent -SearchTopology $newTopology -SearchServiceInstance $ssi -IndexPartition $params.Index -RootDirectory $params.RootDirectory
             }
             else {
@@ -114,6 +112,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $Index,
         [parameter(Mandatory = $true)]  [System.String]  $Servers,
         [parameter(Mandatory = $true)]  [System.String]  $RootDirectory,
+        [parameter(Mandatory = $true)]  [System.String]  $ServiceAppName,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
     )

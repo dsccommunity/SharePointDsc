@@ -28,7 +28,7 @@ function Get-TargetResource
         $QueryProcessingExists = $false;
 
         $ssi = Get-SPEnterpriseSearchServiceInstance -Identity $env:COMPUTERNAME 
-        $ssa = Get-SPEnterpriseSearchServiceApplication        
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName      
         if($ssi.Status -eq "Offline") {
             Write-Verbose "Search is offline"
             return @{
@@ -122,7 +122,7 @@ function Set-TargetResource
         $ConfirmPreference = 'None'
 
         $ssi = Get-SPEnterpriseSearchServiceInstance -Local
-        $ssa = Get-SPEnterpriseSearchServiceApplication
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
 
         if($ssi.Status -eq "Offline") {
             Write-Verbose "Start Search Service Instance"
@@ -130,12 +130,15 @@ function Set-TargetResource
         }
 
         #Wait for Search Service Instance to come online
+        $loopCount = 0
         $online = Get-SPEnterpriseSearchServiceInstance -Identity $ssi; 
         do {
             $online = Get-SPEnterpriseSearchServiceInstance -Identity $ssi; 
             Write-Verbose "Waiting for service: $($online.TypeName)"
+            $loopCount++
+            Start-Sleep -Seconds 30
         } 
-        until ($online.Status -eq "Online")
+        until ($online.Status -eq "Online" -or $loopCount -eq 20)
 
         $currentTopology = $ssa.ActiveTopology
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa -Clone -SearchTopology $currentTopology
@@ -169,7 +172,7 @@ function Set-TargetResource
             
             #Add the First search index if no other indexes already exist required
             if($null -eq $IndexComponent1) {
-                Write-Verbose "Adding First search indedx at partition $($params.FirstPartitionIndex)"
+                Write-Verbose "Adding First search index at partition $($params.FirstPartitionIndex)"
 
                 $servers = $params.FirstPartitionServers.Replace(" ", "").Split(',', [StringSplitOptions]::RemoveEmptyEntries)
                 foreach($server in $servers) {
@@ -181,12 +184,17 @@ function Set-TargetResource
                         Write-Verbose "Start Search Service Instance"
                         Start-SPEnterpriseSearchServiceInstance -Identity $indexSsi
                     }
-                    $online = Get-SPEnterpriseSearchServiceInstance -Identity $indexSsi 
+
+                    #Wait for Search Service Instance to come online
+                    $loopCount = 0
+                    $online = Get-SPEnterpriseSearchServiceInstance -Identity $indexSsi; 
                     do {
-                        $online = Get-SPEnterpriseSearchServiceInstance -Identity $indexSsi 
+                        $online = Get-SPEnterpriseSearchServiceInstance -Identity $indexSsi; 
                         Write-Verbose "Waiting for service: $($online.TypeName)"
+                        $loopCount++
+                        Start-Sleep -Seconds 30
                     } 
-                    until ($online.Status -eq "Online")
+                    until ($online.Status -eq "Online" -or $loopCount -eq 20)
                     New-SPEnterpriseSearchIndexComponent -SearchTopology $newTopology -SearchServiceInstance $indexSsi -IndexPartition $params.FirstPartitionIndex -RootDirectory $params.FirstPartitionDirectory
                 }
             }
