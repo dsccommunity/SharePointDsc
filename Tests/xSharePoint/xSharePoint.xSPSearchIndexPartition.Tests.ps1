@@ -19,6 +19,7 @@ Describe "xSPSearchIndexPartition" {
             Servers = $env:COMPUTERNAME
             RootDirectory = "C:\SearchIndex\0"
             Ensure = "Present"
+            ServiceAppName = "Search Service Application"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
