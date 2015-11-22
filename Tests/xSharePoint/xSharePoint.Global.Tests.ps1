@@ -2,7 +2,6 @@
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
-
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
@@ -22,11 +21,13 @@ Describe 'xSharePoint whole of module tests' {
             $mofFiles | ForEach-Object {
                 $fileHasInstallAccount = $false
 
-                $mofSchema = Get-MofSchemaObject $_.FullName
-                $installAccount = $mofSchema.Attributes | Where-Object { $_.Name -eq "InstallAccount" }
-                if (($null -ne $installAccount) -and ($installAccount.State -eq "Required")) {
-                    $mofFilesWithNoInstallAccount += 1
-                    Write-Warning "File $($_.FullName) has InstallAccount listed as a required parameter. After v0.6 of xSharePoint this should be changed to 'write' instead of 'required'"
+                $mofSchemas = Get-MofSchemaObject $_.FullName
+                foreach($mofSchema in $mofSchemas) {
+                    $installAccount = $mofSchema.Attributes | Where-Object { $_.Name -eq "InstallAccount" }
+                    if (($null -ne $installAccount) -and ($installAccount.State -eq "Required")) {
+                        $mofFilesWithNoInstallAccount += 1
+                        Write-Warning "File $($_.FullName) has InstallAccount listed as a required parameter. After v0.6 of xSharePoint this should be changed to 'write' instead of 'required'"
+                    }
                 }
             }
             $mofFilesWithNoInstallAccount | Should Be 0

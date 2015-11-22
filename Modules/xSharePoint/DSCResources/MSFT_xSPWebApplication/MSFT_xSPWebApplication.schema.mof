@@ -1,11 +1,12 @@
-﻿[ClassVersion("1.0.0")]
+﻿[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationHappyHour")]
 Class MSFT_xSPFilesTypes
 {
     [write]String Blocked[];
     [write]String EnsureBlocked[];
     [write]String EnsureAllowed[];
 };
-[ClassVersion("1.0.0")]
+
+[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationHappyHour")]
 Class MSFT_xSPWebApplicationHappyHour
 {
     [write] uint32 Hour;
@@ -13,7 +14,8 @@ Class MSFT_xSPWebApplicationHappyHour
     [write] uint32 Duration;
 
 };
-[ClassVersion("1.0.0")]
+
+[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationThrottling")]
 Class MSFT_xSPWebApplicationThrottling
 {
     [write]uint32 ListViewThreshold;
@@ -30,7 +32,7 @@ Class MSFT_xSPWebApplicationThrottling
     
 };
 
-[ClassVersion("1.0.0")]
+[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationWorkflowSettings")]
 Class MSFT_xSPWebApplicationWorkflowSettings
 {
     [write]boolean ExternalWorkflowParticipantsEnabled;
@@ -38,7 +40,7 @@ Class MSFT_xSPWebApplicationWorkflowSettings
     [write]boolean EmailToNoPermissionWorkflowParticipantsEnable;
 };
 
-[ClassVersion("1.0.0")]
+[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationSettings")]
 Class MSFT_xSPWebApplicationSettings
 {
     [write]uint32 TimeZone;
@@ -49,7 +51,6 @@ Class MSFT_xSPWebApplicationSettings
     [write]boolean BlogAPI;
     [write]boolean BlogAPIAuthenticated;
     [write, ValueMap{"Strict","Permissive"}, Values{"Stric","Permissive"}] String BrowserFileHandling;
-    
     [write]boolean SecurityValidation;
     [write]boolean RecycleBinEnabled;
     [write]boolean SecondStageRecycleBinEnabled;
