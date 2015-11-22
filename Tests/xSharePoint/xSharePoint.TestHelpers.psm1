@@ -5,31 +5,55 @@ function Get-MofSchemaObject() {
     )
     $contents = Get-Content $fileName
 
-    $results = @{
+    $results = @()
+
+    $currentResult = @{
         ClassVersion = $null
         FriendlyName = $null
         ClassName = $null
         Attributes = @()
+        Documentation = $null
     }
 
+    $currentComment = ""
+    $currentlyInCommentBlock = $false
     foreach($textLine in $contents) {
-        if ($textLine.Contains("ClassVersion") -or $textLine.Contains("ClassVersion")) {
+        if ($textLine.StartsWith("/*")) {
+            $currentlyInCommentBlock = $true
+        } elseif($textLine.StartsWith("*/")) {
+            $currentlyInCommentBlock = $false
+            $currentResult.Documentation = $currentComment
+        } elseif($currentlyInCommentBlock -eq $true) {
+            $currentComment += $textLine + [Environment]::NewLine
+        } elseif ($textLine -match "ClassVersion" -or $textLine -match "FriendlyName") {
             if ($textLine -match "ClassVersion(`"*.`")") {
                 $start = $textLine.IndexOf("ClassVersion(`"") + 14
                 $end = $textLine.IndexOf("`")", $start)
-                $results.ClassVersion = $textLine.Substring($start, $end - $start)
+                $currentResult.ClassVersion = $textLine.Substring($start, $end - $start)
             }
 
             if ($textLine -match "FriendlyName(`"*.`")") {
                 $start = $textLine.IndexOf("FriendlyName(`"") + 14
                 $end = $textLine.IndexOf("`")", $start)
-                $results.FriendlyName = $textLine.Substring($start, $end - $start)
+                $currentResult.FriendlyName = $textLine.Substring($start, $end - $start)
             }
-        } elseif ($textLine.Contains("class ")) {
-            $start = $textLine.IndexOf("class ") + 6
+        } elseif ($textLine -match "class ") {
+            $start = $textLine.ToLower().IndexOf("class ") + 6
             $end = $textLine.IndexOf(" ", $start)
-            $results.ClassName = $textLine.Substring($start, $end - $start)
-        } elseif ($textLine.Trim() -eq "{" -or $textLine.Trim() -eq "};" -or [string]::IsNullOrEmpty($textLine)) {
+            if ($end -eq -1) {
+                $end = $textLine.Length
+            }
+            $currentResult.ClassName = $textLine.Substring($start, $end - $start)
+        } elseif ($textLine.Trim() -eq "{" -or [string]::IsNullOrEmpty($textLine.Trim())) {
+        } elseif ($textLine.Trim() -eq "};") {
+            $results += $currentResult
+            $currentResult = @{
+                ClassVersion = $null
+                FriendlyName = $null
+                ClassName = $null
+                Attributes = @()
+                Documentation = $null
+            }
         } else {
             $attributeValue = @{
                 State = $null
@@ -66,7 +90,7 @@ function Get-MofSchemaObject() {
             $attributeValue.DataType = $nonMetadataObjects[1]
             $attributeValue.Name = $nonMetadataObjects[2]
 
-            $results.Attributes += $attributeValue
+            $currentResult.Attributes += $attributeValue
         }
     }
     return $results
@@ -78,7 +102,8 @@ function Assert-MofSchemaScriptParameters() {
         [string]$mofFileName
     )
     $hasErrors = $false
-    $mofData = Get-MofSchemaObject -fileName $mofFileName
+    $mofSchemas = Get-MofSchemaObject -fileName $mofFileName
+    $mofData = $mofSchemas | Where-Object { $_.ClassName -eq $mofFileName.Replace(".schema.mof", "") }
     $psFile = $mofFileName.Replace(".schema.mof", ".psm1")
 
     $tokens = $null 

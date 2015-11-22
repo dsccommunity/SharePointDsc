@@ -205,21 +205,21 @@ function Set-TargetResource
             if($blockedFiles.Blocked -ne $null ){
                 $wa.BlockedFileExtensions.Clear(); 
                 $blockedFiles.Blocked| % {
-                    $wa.BlockedFileExtensions.Add($_) ;
+                    $wa.BlockedFileExtensions.Add($_);
 
                 }
             }
             if($blockedFiles.EnsureBlocked -ne $null){
                 $blockedFiles.EnsureBlocked| % {
                     if(!$wa.BlockedFileExtensions.ContainExtension($_)){
-                        $wa.BlockedFileExtensions.Add($_) ;
+                        $wa.BlockedFileExtensions.Add($_);
                     }
                 }
             }
             if($blockedFiles.EnsureAllowed -ne $null){
                 $blockedFiles.EnsureAllowed | % {
                     if($wa.BlockedFileExtensions.ContainExtension($_)){
-                        $wa.BlockedFileExtensions.Remove($_) 
+                        $wa.BlockedFileExtensions.Remove($_);
                     }
                 }
             }
