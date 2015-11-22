@@ -173,14 +173,9 @@ function Set-TargetResource
 
                 $servers = $params.FirstPartitionServers.Replace(" ", "").Split(',', [StringSplitOptions]::RemoveEmptyEntries)
                 foreach($server in $servers) {
-                    $InvokeCommandArgs = @{
-                        ArgumentList = @($params.FirstPartitionDirectory)
-                    }
-                    $session = New-PSSession -ComputerName $server -Name "Microsoft.SharePoint.DSC.SearchRolesSetup" -SessionOption (New-PSSessionOption -OperationTimeout 0 -IdleTimeout 60000)
-                    if ($null -ne $session) { $InvokeCommandArgs.Add("Session", $session) }
-                    Invoke-Command @InvokeCommandArgs -ScriptBlock {
-                        New-Item $args[0] -ItemType Directory -Force        
-                    }
+                    $networkPath = "\\$server\" + $params.FirstPartitionDirectory.Replace(":\", "$\")
+                    New-Item $networkPath -ItemType Directory -Force
+
                     $indexSsi = Get-SPEnterpriseSearchServiceInstance -Identity $server
                     if($indexSsi.Status -eq "Offline") {
                         Write-Verbose "Start Search Service Instance"
