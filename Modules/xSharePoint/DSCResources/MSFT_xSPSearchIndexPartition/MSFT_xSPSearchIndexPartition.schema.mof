@@ -16,7 +16,7 @@ Additional search index partitions can be created through using this resource.
         Servers              = "Server2,Server3"
         Index                = 1
         RootDirectory        = "I:\SearchIndexes\1"
-		ServiceAppName       = "Search Service Application"
+        ServiceAppName       = "Search Service Application"
         PsDscRunAsCredential = $SPSetupAccount
         DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
     }
@@ -27,7 +27,7 @@ class MSFT_xSPSearchIndexPartition : OMI_BaseResource
     [Key] Uint32 Index;
     [Required] String Servers;
     [Required] String RootDirectory;
-	[Required] String ServiceAppName;
+    [Required] String ServiceAppName;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
