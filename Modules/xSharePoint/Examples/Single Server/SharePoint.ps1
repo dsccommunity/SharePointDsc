@@ -335,30 +335,6 @@ Configuration SharePointServer
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
         }
-        xSPSearchRoles LocalSearchRoles
-        {
-            Ensure                  = "Present"
-            Admin                   = $true
-            Crawler                 = $true
-            ContentProcessing       = $true
-            AnalyticsProcessing     = $true
-            QueryProcessing         = $true
-            ServiceAppName          = "Search Service Application"
-            PsDscRunAsCredential    = $SPSetupAccount
-            FirstPartitionIndex     = 0
-            FirstPartitionDirectory = "$($ConfigurationData.NonNodeData.SharePoint.Search.IndexRootPath.TrimEnd("\"))\0"
-            FirstPartitionServers   = $env:COMPUTERNAME
-            DependsOn               = "[xSPSearchServiceApp]SearchServiceApp"
-        }
-        xSPSearchIndexPartition MainSearchPartition
-        {
-            Ensure               = "Present"
-            Servers              = $env:COMPUTERNAME
-            Index                = 1
-            RootDirectory        = "$($ConfigurationData.NonNodeData.SharePoint.Search.IndexRootPath.TrimEnd("\"))\1"
-            PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
-        }
 
         #**********************************************************
         # Local configuration manager settings
