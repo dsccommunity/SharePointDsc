@@ -257,15 +257,12 @@ Configuration SharePointServer
             }
         }
         
-        # Search front or back end instances
-        if ($Node.ServiceRoles.SearchFrontEnd -eq $true -or $Node.ServiceRoles.SearchBackEnd -eq $true) {
-            xSPServiceInstance SearchServiceInstance
-            {  
-                Name                 = "SharePoint Server Search"
-                Ensure               = "Present"
-                PsDscRunAsCredential = $SPSetupAccount
-                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
-            }
+        xSPServiceInstance SearchServiceInstance
+        {  
+            Name                 = "SharePoint Server Search"
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
         }
         
         #**********************************************************

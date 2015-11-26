@@ -2,20 +2,45 @@
     AllNodes = @(
         @{
             NodeName = "*"
+            DisableIISLoopbackCheck = $true
         },
         @{ 
             NodeName = "sharepoint1"
             ServiceRoles = @{
+                WebFrontEnd = $false
+                DistributedCache = $false
+                AppServer = $true
+            }
+        },
+        @{ 
+            NodeName = "sharepoint2"
+            ServiceRoles = @{
+                WebFrontEnd = $false
+                DistributedCache = $false
+                AppServer = $true
+            }
+        },
+        @{ 
+            NodeName = "sharepoint3"
+            ServiceRoles = @{
                 WebFrontEnd = $true
                 DistributedCache = $true
-                AppServer = $true
+                AppServer = $false
+            }
+        },
+        @{ 
+            NodeName = "sharepoint4"
+            ServiceRoles = @{
+                WebFrontEnd = $true
+                DistributedCache = $true
+                AppServer = $false
             }
         }
     )
     NonNodeData = @{
         DomainDetails = @{
             DomainName = "contoso.local"
-            NetbiosName = "Contoso"
+            NetbiosName = "CONTOSO"
         }
         SQLServer = @{
             ContentDatabaseServer = "sql1.contoso.local"
@@ -26,17 +51,17 @@
         SharePoint = @{
             Farm = @{
                 ConfigurationDatabase = "SP_Config"
-                Passphrase = "ExamplePassphase!"
+                Passphrase = "SharePoint156!"
                 AdminContentDatabase = "SP_AdminContent"
             }
             DiagnosticLogs = @{
-                Path = "C:\ULSLogs"
+                Path = "L:\ULSLogs"
                 MaxSize = 10
                 DaysToKeep = 7
             }
             UsageLogs = @{
                 DatabaseName = "SP_Usage"
-                Path = "C:\UsageLogs"
+                Path = "L:\UsageLogs"
             }
             StateService = @{
                 DatabaseName = "SP_State"
@@ -49,9 +74,9 @@
                     Authentication = "NTLM"
                     Anonymous = $false
                     AppPool = "SharePoint Sites"
-                    AppPoolAccount = "Contoso\svcSPWebApp"
-                    SuperUser = "Contoso\svcSPSuperUser"
-                    SuperReader = "Contoso\svcSPReader"
+                    AppPoolAccount = "CONTOSO\svcSPWebApp"
+                    SuperUser = "CONTOSO\svcSPSuperUser"
+                    SuperReader = "CONTOSO\svcSPReader"
                     UseHostNamedSiteCollections = $true
                     ManagedPaths = @(
                         @{
@@ -65,14 +90,14 @@
                     )
                     SiteCollections = @(
                         @{
-                            Url = "http://sites.sharepoint.contoso.local"
-                            Owner = "Contoso\svcSPFarm"
+                            Url = "http://teams.sharepoint.contoso.local"
+                            Owner = "CONTOSO\svcSPFarm"
                             Name = "Team Sites"
                             Template = "STS#0"
                         },
                         @{
                             Url = "http://my.sharepoint.contoso.local"
-                            Owner = "Contoso\svcSPFarm"
+                            Owner = "CONTOSO\svcSPFarm"
                             Name = "My Sites"
                             Template = "SPSMSITEHOST#0"
                         }
