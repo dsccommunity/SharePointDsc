@@ -1,3 +1,9 @@
+function Get-ContentService
+{
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+    return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+}
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -18,12 +24,15 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+        try {
+            $spFarm = Get-SPFarm
+        } catch {
+            Write-Verbose -Verbose "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            return $null
+        }
 
         # Get a reference to the Administration WebService
-        $admService = [Microsoft.SharePoint.Administration.SPWebService]::ContentService
-
-        if ($null -eq $admService) { return $null }
+        $admService = Get-ContentService
         
         return @{
             # Set the antivirus settings
@@ -59,13 +68,16 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+        try {
+            $spFarm = Get-SPFarm
+        } catch {
+            throw "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            return
+        }
         
         Write-Verbose -Message "Start update"
-        # Load the SharePoint Assembly, using old style for backward compatibility with V1
-        [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-
-        # Get a reference to the Administration WebService
-        $admService = [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+        $admService = Get-ContentService
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected")) { 
