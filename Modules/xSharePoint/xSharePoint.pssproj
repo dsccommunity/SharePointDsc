@@ -124,14 +124,13 @@
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
+    <Compile Include="Examples\Small Farm\SharePoint.ps1" />
+    <Compile Include="Examples\Small Farm\SharePoint.psd1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Examples\Single Server\SharePoint.ps1" />
-    <Content Include="Examples\Small Farm\AppServer.ps1" />
-    <Content Include="Examples\Small Farm\FirstServer.ps1" />
-    <Content Include="Examples\Small Farm\WFEServer.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
