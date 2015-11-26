@@ -17,6 +17,12 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+        function Get-ContentService
+        {
+            [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+            return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+        }
         
         try {
             $spFarm = Get-SPFarm
@@ -62,6 +68,12 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+        function Get-ContentService
+        {
+            [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+            return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+        }
 
         try {
             $spFarm = Get-SPFarm
@@ -113,12 +125,6 @@ function Test-TargetResource
     if ($null -eq $CurrentValues) { return $false }
 
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
-}
-
-function Get-ContentService
-{
-    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-    return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
 }
 
 Export-ModuleMember -Function *-TargetResource
