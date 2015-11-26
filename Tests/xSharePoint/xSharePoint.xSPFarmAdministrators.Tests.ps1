@@ -47,18 +47,19 @@ Describe "xSPFarmAdministrators" {
         Context "Central admin exists and a fixed members list is used which matches" {
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
                 $web = @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return @{
                             Users = @(
                                 @{ UserLogin = "Demo\User1" },
                                 @{ UserLogin = "Demo\User2" }
                             )
                         }
-                    }
+                    } -PassThru
                 }
                 return $web
             }
@@ -75,20 +76,22 @@ Describe "xSPFarmAdministrators" {
         Context "Central admin exists and a fixed members list is used which does not match" {
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User1" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
+            Mock Get-SPUser { return @{} }
 
             It "should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -96,6 +99,10 @@ Describe "xSPFarmAdministrators" {
 
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "should update the members list" {
+                Set-TargetResource @testParams 
             }
         }
         
@@ -106,20 +113,21 @@ Describe "xSPFarmAdministrators" {
             }
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User1" },
                                 @{ UserLogin = "Demo\User2" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
 
             It "should return values from the get method" {
@@ -138,19 +146,20 @@ Describe "xSPFarmAdministrators" {
             }
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User1" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
 
             It "should return values from the get method" {
@@ -159,6 +168,10 @@ Describe "xSPFarmAdministrators" {
 
             It "should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should update the members list" {
+                Set-TargetResource @testParams 
             }
         }
 
@@ -169,20 +182,21 @@ Describe "xSPFarmAdministrators" {
             }
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User1" },
                                 @{ UserLogin = "Demo\User2" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
 
             It "should return values from the get method" {
@@ -191,6 +205,10 @@ Describe "xSPFarmAdministrators" {
 
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "should update the members list" {
+                Set-TargetResource @testParams 
             }
         }
 
@@ -201,19 +219,20 @@ Describe "xSPFarmAdministrators" {
             }
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User2" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
 
             It "should return values from the get method" {
@@ -233,19 +252,20 @@ Describe "xSPFarmAdministrators" {
             }
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User2" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
 
             It "should throw in the get method" {
@@ -267,19 +287,20 @@ Describe "xSPFarmAdministrators" {
             }
             Mock Get-SPwebapplication { return @{
                     IsAdministrationWebApplication = $true
+                    Url = "http://admin.shareopoint.contoso.local"
                 }}
             Mock Get-SPWeb {
-                $web = @{
+                return @{
                     AssociatedOwnerGroup = "Farm Administrators"
-                    SiteGroups = @{
-                        "Farm Administrators" = @{
-                            Users = @(
+                    SiteGroups = New-Object Object | Add-Member ScriptMethod GetByName {
+                        return New-Object  Object | Add-Member ScriptProperty Users {
+                            return @(
                                 @{ UserLogin = "Demo\User2" }
                             )
-                        }
-                    }
+                        } -PassThru | Add-Member ScriptMethod AddUser { } -PassThru `
+                                    | Add-Member ScriptMethod RemoveUser { } -PassThru
+                    } -PassThru
                 }
-                return $web
             }
 
             It "should throw in the get method" {

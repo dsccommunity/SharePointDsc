@@ -31,7 +31,7 @@ function Get-TargetResource
         }
         $caWeb = Get-SPweb($caWebapp.Url)
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
-        $farmAdministratorsGroup = $caWeb.SiteGroups[$farmAdminGroup]
+        $farmAdministratorsGroup = $caWeb.SiteGroups.GetByName($farmAdminGroup)
         return @{
             Name = $params.Name
             Members = $farmAdministratorsGroup.users.UserLogin
@@ -243,14 +243,14 @@ Param ([Hashtable] $changeUsers)
 
         if ($changeUsers.ContainsKey("Add")) {
             ForEach ($loginName in $changeUsers.Add) {
-                $caWeb.SiteGroups[$farmAdminGroup].AddUser($loginName,"","","")
+                $caWeb.SiteGroups.GetByName($farmAdminGroup).AddUser($loginName,"","","")
             }
         }
         
         if ($changeUsers.ContainsKey("Remove")) {
             ForEach ($loginName in $changeUsers.Remove) {
                 $removeUser = get-spuser $loginName -web $caWebapp.Url
-                $caWeb.SiteGroups[$farmAdminGroup].RemoveUser($removeUser)
+                $caWeb.SiteGroups.GetByName($farmAdminGroup).RemoveUser($removeUser)
             }
         }
     }
