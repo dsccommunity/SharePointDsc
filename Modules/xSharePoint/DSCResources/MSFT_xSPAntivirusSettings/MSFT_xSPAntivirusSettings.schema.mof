@@ -1,0 +1,13 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPAntivirusSettings")]
+class MSFT_xSPAntivirusSettings : OMI_BaseResource
+{
+    [Key] Boolean ScanOnDownload;
+    [Write] Boolean ScanOnUpload;
+    [Write] Boolean AllowDownloadInfected;
+    [Write] Boolean AttemptToClean;
+    [Write] Uint16 TimeoutDuration;
+    [Write] Uint16 NumberOfThreads;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

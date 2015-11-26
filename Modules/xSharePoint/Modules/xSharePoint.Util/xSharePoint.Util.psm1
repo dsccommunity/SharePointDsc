@@ -170,6 +170,11 @@ function Test-xSharePointSpecificParameters() {
                                 $returnValue = $false
                             }
                         }
+                        "Int16" {
+                            if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                $returnValue = $false
+                            }
+                        }
                         default {
                             $returnValue = $false
                         }

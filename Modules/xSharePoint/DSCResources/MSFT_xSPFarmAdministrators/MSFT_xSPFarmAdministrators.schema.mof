@@ -1,0 +1,11 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPFarmAdministrators")]
+class MSFT_xSPFarmAdministrators : OMI_BaseResource
+{
+    [Key] String Name;
+    [Write] String Members[];
+    [Write] String MembersToInclude[];
+    [Write] String MembersToExclude[];
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
