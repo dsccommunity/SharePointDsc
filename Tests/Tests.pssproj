@@ -59,6 +59,8 @@
     <Content Include="xSharePoint\xSharePoint.xSPBCSServiceApp.Tests.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Generate-xSharePointHelpFiles.ps1" />
+    <Compile Include="Generate-xSharePointWikiPages.ps1" />
     <Compile Include="Stubs\DistributedCache\DistributedCache.psm1" />
     <Compile Include="Stubs\SharePoint\16.0.4316.1217\Microsoft.SharePoint.PowerShell.psm1" />
     <Compile Include="Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" />

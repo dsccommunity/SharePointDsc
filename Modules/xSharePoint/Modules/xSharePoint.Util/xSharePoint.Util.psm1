@@ -38,7 +38,7 @@ function Invoke-xSharePointCommand() {
     param
     (
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential,
-        [parameter(Mandatory = $false)] [HashTable]   $Arguments,
+        [parameter(Mandatory = $false)] [Object[]]    $Arguments,
         [parameter(Mandatory = $true)]  [ScriptBlock] $ScriptBlock
     )
 
@@ -154,7 +154,7 @@ function Test-xSharePointSpecificParameters() {
     }
 
     $KeyList | ForEach-Object {
-        if ($_ -ne "Verbose") {
+        if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) {
             if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
                 if ($DesiredValues.ContainsKey($_)) {
                     $desiredType = $DesiredValues.$_.GetType()
@@ -177,7 +177,6 @@ function Test-xSharePointSpecificParameters() {
                 }            
             }
         }
-        
     }
     return $returnValue
 }

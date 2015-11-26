@@ -1,12 +1,29 @@
+/*
+**Description**
+
+This resource provisions an instance of the usage and health monitoring service application.
+The database settings are only used for initial provisioning, but the usage settings can be changed and will be enforced as the resource is executed. 
+
+**Example**
+
+    xSPUsageApplication UsageApplication 
+    {
+        Name                  = "Usage Service Application"
+        DatabaseName          = "SP_Usage"
+        UsageLogCutTime       = 5
+        UsageLogLocation      = "L:\UsageLogs"
+        UsageLogMaxFileSizeKB = 1024
+        InstallAccount        = $InstallAccount
+    }
+*/
 [ClassVersion("1.0.0.0"), FriendlyName("xSPUsageApplication")]
 class MSFT_xSPUsageApplication : OMI_BaseResource
 {
     [Key] string Name;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Write] string DatabaseName;
-    [Write] string DatabasePassword;
     [Write] string DatabaseServer;
-    [Write] string DatabaseUsername;
+    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
     [Write] string FailoverDatabaseServer;
     [Write] uint32 UsageLogCutTime;
     [Write] string UsageLogLocation;
