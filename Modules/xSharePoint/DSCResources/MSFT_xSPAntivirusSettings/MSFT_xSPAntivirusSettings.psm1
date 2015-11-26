@@ -1,9 +1,3 @@
-function Get-ContentService
-{
-    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-    return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
-}
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -121,5 +115,10 @@ function Test-TargetResource
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
+function Get-ContentService
+{
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+    return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+}
 
 Export-ModuleMember -Function *-TargetResource
