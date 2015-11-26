@@ -126,7 +126,7 @@ function Set-TargetResource
             if (($PSBoundParameters.ContainsKey($_) -and [string]::IsNullOrEmpty($PSBoundParameters.$_)) -or (-not $PSBoundParameters.ContainsKey($_))) {
                 throw "In offline mode for version $majorVersion parameter $_ is required"
             }
-			if ((Test-Path $PSBoundParameters.$_) -eq $false) {
+            if ((Test-Path $PSBoundParameters.$_) -eq $false) {
                 throw "The $_ parameter has been passed but the file cannot be found at the path supplied: `"$($PSBoundParameters.$_)`""
             }
         }

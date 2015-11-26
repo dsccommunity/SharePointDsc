@@ -33,11 +33,11 @@ Describe "xSPInstallPrereqs" {
         Mock Get-ChildItem { return $null }
 
         Context "Prerequisites are not installed but should be and are to be installed in online mode" {
-			$testParams = @{
-				InstallerPath = "C:\SPInstall"
-				OnlineMode = $true
-				Ensure = "Present"
-			}
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-CimInstance { return @() }
@@ -92,13 +92,13 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are installed and should be" {
-			$testParams = @{
-				InstallerPath = "C:\SPInstall"
-				OnlineMode = $true
-				Ensure = "Present"
-			}
-			
-			Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+            
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
             if ($majorBuildNumber -eq 15) {
                 Mock Get-CimInstance { return @(
                     @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
@@ -139,11 +139,11 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are installed but should not be" {
-			$testParams = @{
-				InstallerPath = "C:\SPInstall"
-				OnlineMode = $true
-				Ensure = "Absent"
-			}
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Absent"
+            }
 
             It "throws an exception from the set method" {
                 {Test-TargetResource @testParams} | Should Throw
@@ -155,11 +155,11 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are not installed but should be and are to be installed in offline mode" {
-			$testParams = @{
-				InstallerPath = "C:\SPInstall"
-				OnlineMode = $false
-				Ensure = "Present"
-			}
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-CimInstance { return @() }
@@ -181,18 +181,18 @@ Describe "xSPInstallPrereqs" {
 
             It "does not throw an exception where the required parameters are included" {
                 Mock Start-Process { return @{ ExitCode = 0 } }
-				Mock Test-Path { return $true }
+                Mock Test-Path { return $true }
 
                 {Set-TargetResource @testParams} | Should Not Throw
             }
         }
 
-		Context "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" {
+        Context "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" {
             $testParams = @{
-				InstallerPath = "C:\SPInstall"
-				OnlineMode = $false
-				Ensure = "Present"
-			}
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false }) }
             Mock Get-CimInstance { return @() }
@@ -214,7 +214,7 @@ Describe "xSPInstallPrereqs" {
 
             It "does not throw an exception where the required parameters are included" {
                 Mock Start-Process { return @{ ExitCode = 0 } }
-				Mock Test-Path { return $false }
+                Mock Test-Path { return $false }
 
                 {Set-TargetResource @testParams} | Should Throw
             }
