@@ -10,7 +10,7 @@ $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
     ForEach-Object {
         $mofFileObject = $_ 
-        $result = (Get-MofSchemaObject $_.FullName) | Where-Object { $_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "") -and $result.FriendlyName -ne $null }
+        $result = (Get-MofSchemaObject $_.FullName) | Where-Object { $_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "") -and $_.FriendlyName -ne $null }
         if ($result -ne $null) {
             Write-Output "Generating help document for $($result.FriendlyName)"
         
