@@ -12,7 +12,7 @@ It is possible to set the outgoing server, from address, reply to address and th
         WebAppUrl             = "http://sharepoint1:2013"
         SMTPServer            = "smtp.contoso.com"
         FromAddress           = "sharepoint@contoso.com"
-		ReplyToAddress        = "noreply@contoso.com"
+        ReplyToAddress        = "noreply@contoso.com"
         PsDscRunAsCredential  = $InstallAccount
     }
 */
