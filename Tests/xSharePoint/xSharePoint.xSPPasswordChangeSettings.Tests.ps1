@@ -28,9 +28,8 @@ Describe "xSPPasswordChangeSettings" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue         
 
-         Context " Farm isn't available " {
-            Mock Get-SPFarm { return $null
-            }
+         Context "No local SharePoint farm is available" {
+            Mock Get-SPFarm { return $null }
 
             It "returns null from the get method" {
                 Get-TargetResource @testParams | Should Throw 
@@ -39,18 +38,17 @@ Describe "xSPPasswordChangeSettings" {
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
-
         }
 
 
-        Context " Properties already set tests " {
+        Context "There is a local SharePoint farm and the properties are set correctly" {
             Mock Get-SPFarm { 
                 return @{
-            PasswordChangeEmailAddress = "e@mail.com"
-            DaysBeforePasswordExpirationToSendEmail = 7
-            PasswordChangeGuardTime = 60
-            PasswordChangeMaximumTries = 3
-                    }
+                    PasswordChangeEmailAddress = "e@mail.com"
+                    DaysBeforePasswordExpirationToSendEmail = 7
+                    PasswordChangeGuardTime = 60
+                    PasswordChangeMaximumTries = 3
+                }
             }
             
             It "returns farm properties from the get method" {
@@ -60,23 +58,22 @@ Describe "xSPPasswordChangeSettings" {
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
         }
 
 
-        Context " Properties update tests " {
+        Context "There is a local SharePoint farm and the properties are not set correctly" {
             Mock Get-SPFarm { 
                 $result = @{
-                PasswordChangeEmailAddress="";
-                PasswordChangeGuardTime=0
-                PasswordChangeMaximumTries=0
-                DaysBeforePasswordExpirationToSendEmail=0
-                    }
+                    PasswordChangeEmailAddress = "";
+                    PasswordChangeGuardTime = 0
+                    PasswordChangeMaximumTries = 0
+                    DaysBeforePasswordExpirationToSendEmail = 0
+                }
                 $result = $result | Add-Member  ScriptMethod Update { 
                     $Global:SPFarmUpdateCalled = $true;
                     return $true;
                 
-                    } -passThru
+                    } -PassThru
                 return $result
             }
 
@@ -89,7 +86,7 @@ Describe "xSPPasswordChangeSettings" {
             }
 
             It "calls the new and set methods from the set function" {
-                $Global:SPFarmUpdateCalled =$false;
+                $Global:SPFarmUpdateCalled = $false;
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPFarm
                 $Global:SPFarmUpdateCalled  | Should Be $true
