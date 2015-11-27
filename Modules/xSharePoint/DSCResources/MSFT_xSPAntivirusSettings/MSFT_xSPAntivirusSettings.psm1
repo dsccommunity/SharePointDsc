@@ -17,12 +17,6 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-
-        function Get-ContentService
-        {
-            [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-            return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
-        }
         
         try {
             $spFarm = Get-SPFarm
@@ -32,7 +26,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-ContentService
+        $admService = Get-xSharePointContentService
         
         return @{
             # Set the antivirus settings
@@ -69,12 +63,6 @@ function Set-TargetResource
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        function Get-ContentService
-        {
-            [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-            return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
-        }
-
         try {
             $spFarm = Get-SPFarm
         } catch {
@@ -83,7 +71,7 @@ function Set-TargetResource
         }
         
         Write-Verbose -Message "Start update"
-        $admService = Get-ContentService
+        $admService = Get-xSharePointContentService
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected")) { 

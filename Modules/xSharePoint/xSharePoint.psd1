@@ -71,6 +71,7 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Get-xSharePointInstalledProductVersion",
+                    "Get-xSharePointContentService",
                     "Rename-xSharePointParamValue",
                     "Add-xSharePointUserToLocalAdmin",
                     "Remove-xSharePointUserToLocalAdmin",

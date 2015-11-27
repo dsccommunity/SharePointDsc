@@ -27,7 +27,7 @@ Describe "xSPAntivirusSettings" {
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-        
+                
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Context "The server is not part of SharePoint farm" {
@@ -47,7 +47,7 @@ Describe "xSPAntivirusSettings" {
         }
 
         Context "The server is in a farm and the incorrect settings have been applied" {
-            Mock Get-ContentService {
+            Mock Get-xSharePointContentService {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $false
@@ -81,7 +81,7 @@ Describe "xSPAntivirusSettings" {
         }
 
         Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-ContentService {
+            Mock Get-xSharePointContentService {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $true
