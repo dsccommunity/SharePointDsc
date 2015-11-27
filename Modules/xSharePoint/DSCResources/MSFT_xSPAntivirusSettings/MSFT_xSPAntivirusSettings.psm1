@@ -18,14 +18,6 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-<<<<<<< HEAD
-        [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-
-        # Get a reference to the Administration WebService
-        $admService = [Microsoft.SharePoint.Administration.SPWebService]::ContentService
-
-        if ($null -eq $admService) { return $null }
-=======
         try {
             $spFarm = Get-SPFarm
         } catch {
@@ -35,7 +27,6 @@ function Get-TargetResource
 
         # Get a reference to the Administration WebService
         $admService = Get-xSharePointContentService
->>>>>>> 5984775ce4f46b599147591dfe21ea0fae930982
         
         return @{
             # Set the antivirus settings
@@ -71,15 +62,6 @@ function Set-TargetResource
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-<<<<<<< HEAD
-        
-        Write-Verbose -Message "Start update"
-        # Load the SharePoint Assembly, using old style for backward compatibility with V1
-        [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-
-        # Get a reference to the Administration WebService
-        $admService = [Microsoft.SharePoint.Administration.SPWebService]::ContentService
-=======
 
         try {
             $spFarm = Get-SPFarm
@@ -90,7 +72,6 @@ function Set-TargetResource
         
         Write-Verbose -Message "Start update"
         $admService = Get-xSharePointContentService
->>>>>>> 5984775ce4f46b599147591dfe21ea0fae930982
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected")) { 
@@ -134,8 +115,4 @@ function Test-TargetResource
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 5984775ce4f46b599147591dfe21ea0fae930982
 Export-ModuleMember -Function *-TargetResource
