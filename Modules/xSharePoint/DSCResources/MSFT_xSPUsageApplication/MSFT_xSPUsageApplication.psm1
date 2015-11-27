@@ -7,9 +7,8 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabasePassword,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
         [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
         [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
@@ -63,9 +62,8 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabasePassword,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
         [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
         [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
@@ -84,9 +82,11 @@ function Set-TargetResource
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
-            if ($params.ContainsKey("DatabasePassword")) { $newParams.Add("DatabasePassword", (ConvertTo-SecureString -String $params.DatabasePassword -AsPlainText -force)) }
+            if ($params.ContainsKey("DatabaseCredentials")) {
+                $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
+                $params.Add("DatabasePassword", (ConvertTo-SecureString $params.DatabaseCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+            }
             if ($params.ContainsKey("DatabaseServer")) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
-            if ($params.ContainsKey("DatabaseUsername")) { $newParams.Add("DatabaseUsername", $params.DatabaseUsername) }
             if ($params.ContainsKey("FailoverDatabaseServer")) { $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) }
 
             New-SPUsageApplication @newParams
@@ -118,9 +118,8 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabasePassword,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseUsername,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
         [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
         [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,

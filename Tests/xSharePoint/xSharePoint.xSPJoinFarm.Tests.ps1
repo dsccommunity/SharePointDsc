@@ -71,6 +71,26 @@ Describe "xSPJoinFarm" {
             }
         }
 
+        if ($majorBuildNumber -eq 15) {
+            $testParams.Add("ServerRole", "WebFrontEnd")
+
+            Context "only valid parameters for SharePoint 2013 are used" {
+                It "throws if server role is used in the get method" {
+                    { Get-TargetResource @testParams } | Should Throw
+                }
+
+                It "throws if server role is used in the test method" {
+                    { Test-TargetResource @testParams } | Should Throw
+                }
+
+                It "throws if server role is used in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw
+                }
+            }
+
+            $testParams.Remove("ServerRole")
+        }
+
         Context "no farm is configured locally and an unsupported version of SharePoint is installed on the server" {
             Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
 

@@ -50,11 +50,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="DSCResources\" />
+    <Folder Include="DSCResources\MSFT_xSPAntivirusSettings\" />
     <Folder Include="DSCResources\MSFT_xSPBCSServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPCacheAccounts\" />
     <Folder Include="DSCResources\MSFT_xSPCreateFarm\" />
     <Folder Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\" />
     <Folder Include="DSCResources\MSFT_xSPDistributedCacheService\" />
+    <Folder Include="DSCResources\MSFT_xSPFarmAdministrators\" />
     <Folder Include="DSCResources\MSFT_xSPFeature\" />
     <Folder Include="DSCResources\MSFT_xSPInstallPrereqs\" />
     <Folder Include="DSCResources\MSFT_xSPInstall\" />
@@ -79,6 +81,8 @@
     <Folder Include="Examples\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.psm1" />
@@ -89,6 +93,8 @@
     <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPDistributedCacheService\MSFT_xSPDistributedCacheService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPDistributedCacheService\MSFT_xSPDistributedCacheService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPFarmAdministrators\MSFT_xSPFarmAdministrators.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPFarmAdministrators\MSFT_xSPFarmAdministrators.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.psm1" />
     <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.psm1" />
@@ -123,14 +129,14 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="Examples\Single Server\SharePoint.psd1" />
+    <Compile Include="Examples\Small Farm\SharePoint.ps1" />
+    <Compile Include="Examples\Small Farm\SharePoint.psd1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Examples\Single Server\SharePoint.ps1" />
-    <Content Include="Examples\Small Farm\AppServer.ps1" />
-    <Content Include="Examples\Small Farm\FirstServer.ps1" />
-    <Content Include="Examples\Small Farm\WFEServer.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
