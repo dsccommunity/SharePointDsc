@@ -39,7 +39,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)]  $GeneralSettings,
+        [parameter(Mandatory = $false)] $GeneralSettings,
         [parameter(Mandatory = $false)] $WorkflowSettings,
         [parameter(Mandatory = $false)] $ThrottlingSettings,
         [parameter(Mandatory = $false)] $BlockedFileTypes
@@ -55,8 +55,10 @@ function Get-TargetResource
         if ($null -eq $wa) { return $null }
 
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
-
         if ($authProvider.DisableKerberos -eq $true) { $localAuthMode = "NTLM" } else { $localAuthMode = "Kerberos" }
+
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
 
         return @{
             Name = $wa.DisplayName
@@ -71,6 +73,8 @@ function Get-TargetResource
             Port = (New-Object System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
             InstallAccount = $params.InstallAccount
+            ThrottlingSettings = (Get-xSPWebApplicationThrottlingSettings -WebApplication $wa)
+            WorkflowSettings = (Get-xSPWebApplicationWorkflowSettings -WebApplication $wa)
         }
     }
     return $result
@@ -94,7 +98,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)]  $GeneralSettings,
+        [parameter(Mandatory = $false)] $GeneralSettings,
         [parameter(Mandatory = $false)] $WorkflowSettings,
         [parameter(Mandatory = $false)] $ThrottlingSettings,
         [parameter(Mandatory = $false)] $BlockedFileTypes
@@ -111,93 +115,44 @@ function Set-TargetResource
         $params.Remove("Settings") | Out-Null
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) {
+            $newWebAppParams = @{
+                Name = $params.Name
+                ApplicationPool = $params.ApplicationPool
+                ApplicationPoolAccount = $params.ApplicationPoolAccount
+                Url = $params.Url
+            }
             if ($params.ContainsKey("AuthenticationMethod") -eq $true) {
                 if ($params.AuthenticationMethod -eq "NTLM") {
                     $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos 
                 } else {
                     $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
                 }
-                $params.Remove("AuthenticationMethod")
-                $params.Add("AuthenticationProvider", $ap)
+                $newWebAppParams.Add("AuthenticationProvider", $ap)
             }
-             
-            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
             if ($params.ContainsKey("AllowAnonymous")) { 
-                $params.Remove("AllowAnonymous") | Out-Null 
-                $params.Add("AllowAnonymousAccess", $true)
+                $newWebAppParams.Add("AllowAnonymousAccess", $true)
             }
+            if ($params.ContainsKey("DatabaseName") -eq $true) { $newWebAppParams.Add("DatabaseName", $params.DatabaseName) }
+            if ($params.ContainsKey("DatabaseServer") -eq $true) { $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer) }
+            if ($params.ContainsKey("HostHeader") -eq $true) { $newWebAppParams.Add("HostHeader", $params.HostHeader) }
+            if ($params.ContainsKey("Path") -eq $true) { $newWebAppParams.Add("Path", $params.Path) }
+            if ($params.ContainsKey("Port") -eq $true) { $newWebAppParams.Add("Port", $params.Port) } 
          
-            $wa = New-SPWebApplication @params
+            $wa = New-SPWebApplication @newWebAppParams
         }
-#region throttling settings
 
-        $throttlingSettings = $settings.ThrottlingSettings
+        # Resource throttling settings
+        if ($params.ContainsKey("ThrottlingSettings") -eq $true) {
+            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+            Set-xSPWebApplicationThrottlingSettings -WebApplication $wa -Settings $params.ThrottlingSettings
+        }
 
-        if($throttlingSettings -ne $null){ 
-            if($throttlingSettings.ListViewThreshold -ne $null ){
-                $wa.MaxItemsPerThrottledOperation = $throttlingSettings.ListViewThreshold
-            }
-            if($throttlingSettings.AllowObjectModelOverride -ne $null){
-                $wa.AllowOMCodeOverrideThrottleSettings =  $throttlingSettings.AllowObjectModelOverride
-            }
-            if($throttlingSettings.AdminThreshold -ne $null){
-                $wa.MaxItemsPerThrottledOperationOverride = $throttlingSettings.AdminThreshold
-            }
-            if($throttlingSettings.ListViewLookupThreshold -ne $null){
-                $wa.MaxQueryLookupFields =  $throttlingSettings.ListViewLookupThreshold
-            }
-            if($throttlingSettings.HappyHourEnabled -ne $null){
-                $wa.UnthrottledPrivilegedOperationWindowEnabled =$throttlingSettings.HappyHourEnabled
-            }
-            if($throttlingSettings.HappyHour -ne $null){
-                $happyHour =$throttlingSettings.HappyHour;
-                if(($happyHour.Hour -ne $null) -and ($happyHour.Minute -ne $null) -and ($happyHour.Duration -ne $null)){
-                    if(($happyHour.Hour -le 24) -and ($happyHour.Minute -le 24) -and ($happyHour.Duration -le 24)){
-                        $wa.DailyStartUnthrottledPrivilegedOperationsHour = $happyHour.Hour 
-                        $wa.DailyStartUnthrottledPrivilegedOperationsMinute = $happyHour.Minute
-                        $wa.DailyUnthrottledPrivilegedOperationsDuration = $happyHour.Duration
-                    }else{
-                        throw "the valid  hour, minute and duration range is 0-24";
-                        }
-                    
-                }else {
-                    throw "You need to Provide Hour, Minute and Duration when providing HappyHour settings";
-                }
-            }
-            if($throttlingSettings.UniquePermissionThreshold){
-                $wa.MaxUniquePermScopesPerList = $throttlingSettings.UniquePermissionThreshold
-            }
-            if($throttlingSettings.EventHandlersEnabled){
-                $wa.EventHandlersEnabled = $throttlingSettings.EventHandlersEnabled
-            }
-            if($throttlingSettings.RequestThrottling){
-                $wa.HttpThrottleSettings.PerformThrottle = $throttlingSettings.RequestThrottling
-            }
-            if($throttlingSettings.ChangeLogEnabled){
-                $wa.ChangeLogExpirationEnabled = $throttlingSettings.ChangeLogEnabled
-            }
-            if($throttlingSettings.ChangeLogExpiryDays){
-                $wa.ChangeLogRetentionPeriod = New-TimeSpan -Days $throttlingSettings.ChangeLogExpiryDays
-            }
+        # Workflow settings
+        if ($params.ContainsKey("WorkflowSettings") -eq $true) {
+            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+            Set-xSPWebApplicationWorkflowSettingsSettings -WebApplication $wa -Settings $params.ThrottlingSettings
         }
-#endregion
-#region WorkflowSettings       
-        #Set-WorkflowSettings $settings.WorkflowSettings  $wa
-        $workflowSettings = $settings.WorkflowSettings  
-        if($workflowSettings -ne $null ){    
-            if($workflowSettings.UserDefinedWorkflowsEnabled -ne $null){
-                $wa.UserDefinedWorkflowsEnabled =  $workflowSettings.UserDefinedWorkflowsEnabled;
-            }
-            if($workflowSettings.EmailToNoPermissionWorkflowParticipantsEnable -ne $null){
-                $wa.EmailToNoPermissionWorkflowParticipantsEnabled = $workflowSettings.EmailToNoPermissionWorkflowParticipantsEnable;
-            }
-            if($workflowSettings.ExternalWorkflowParticipantsEnabled -ne $null){
-                $wa.ExternalWorkflowParticipantsEnabled = $workflowSettings.ExternalWorkflowParticipantsEnabled;
-            }
-                
-            $wa.UpdateWorkflowConfigurationSettings();
-        }
-#endregion
+
         Write-Verbose "applying extended settings"
 #region blockedFiles
         $blockedFiles= $settings.BlockedFileTypes  
@@ -308,7 +263,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)]  $GeneralSettings,
+        [parameter(Mandatory = $false)] $GeneralSettings,
         [parameter(Mandatory = $false)] $WorkflowSettings,
         [parameter(Mandatory = $false)] $ThrottlingSettings,
         [parameter(Mandatory = $false)] $BlockedFileTypes
@@ -317,7 +272,28 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
     if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+
+    $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
+                                                     -DesiredValues $PSBoundParameters `
+                                                     -ValuesToCheck @("ApplicationPool")
+
+    if ($testReturn -eq $false) { return $false }
+
+    # Resource throttling settings
+    if ($PSBoundParameters.ContainsKey("ThrottlingSettings") -eq $true) {
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+        $testReturn = Test-xSPWebApplicationThrottlingSettings -CurrentSettings $CurrentValues.ThrottlingSettings -DesiredSettings $ThrottlingSettings
+    }
+    if ($testReturn -eq $false) { return $false }
+
+    # Workflow settings
+    if ($PSBoundParameters.ContainsKey("WorkflowSettings") -eq $true) {
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+        $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.WorkflowSettings -DesiredSettings $WorkflowSettings
+    }
+    if ($testReturn -eq $false) { return $false }
+
+    return $testReturn
 }
 
 

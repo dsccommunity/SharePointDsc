@@ -1,4 +1,4 @@
-﻿[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationHappyHour")]
+﻿[ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationBlockedFileTypes")]
 Class MSFT_xSPFilesTypes
 {
     [write]String Blocked[];
@@ -18,18 +18,17 @@ Class MSFT_xSPWebApplicationHappyHour
 [ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationThrottling")]
 Class MSFT_xSPWebApplicationThrottling
 {
-    [write]uint32 ListViewThreshold;
-    [write]boolean AllowObjectModelOverride; 
-    [write]uint32 AdminThreshold;
-    [write]uint32 ListViewLookupThreshold;
-    [write]boolean HappyHourEnabled;
+    [write] uint32 ListViewThreshold;
+    [write] boolean AllowObjectModelOverride; 
+    [write] uint32 AdminThreshold;
+    [write] uint32 ListViewLookupThreshold;
+    [write] boolean HappyHourEnabled;
     [Write, EmbeddedInstance("MSFT_xSPWebApplicationHappyHour")] String HappyHour;
-    [write]uint32 UniquePermissionThreshold;
-    [write]boolean RequestThrottling;
-    [write]boolean ChangeLogEnabled;
-    [write]uint32 ChangeLogExpiryDays;
-    [write]boolean EventHandlersEnabled;
-    
+    [write] uint32 UniquePermissionThreshold;
+    [write] boolean RequestThrottling;
+    [write] boolean ChangeLogEnabled;
+    [write] uint32 ChangeLogExpiryDays;
+    [write] boolean EventHandlersEnabled;
 };
 
 [ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationWorkflowSettings")]

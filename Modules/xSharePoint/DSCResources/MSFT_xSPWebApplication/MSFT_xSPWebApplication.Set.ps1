@@ -78,57 +78,6 @@ function Set-WorkflowSettings ($workflowSettings, $wa)
     $wa.Update();
 }
 
-function Set-ThrottlingSettings ($throttlingSettings, $wa)
-{
-    if($throttlingSettings -eq $null){ return;}
-    if($throttlingSettings.ListViewThreshold -ne $null ){
-        $wa.MaxItemsPerThrottledOperation = $throttlingSettings.ListViewThreshold
-    }
-    if($throttlingSettings.AllowObjectModelOverride -ne $null){
-        $wa.AllowOMCodeOverrideThrottleSettings =  $throttlingSettings.AllowObjectModelOverride
-    }
-    if($throttlingSettings.AdminThreshold -ne $null){
-        $wa.MaxItemsPerThrottledOperationOverride = $throttlingSettings.AdminThreshold
-    }
-    if($throttlingSettings.ListViewLookupThreshold -ne $null){
-        $wa.MaxQueryLookupFields =  $throttlingSettings.ListViewLookupThreshold
-    }
-    if($throttlingSettings.HappyHourEnabled -ne $null){
-        $wa.UnthrottledPrivilegedOperationWindowEnabled =$throttlingSettings.HappyHourEnabled
-    }
-    if($throttlingSettings.HappyHour -ne $null){
-        $happyHour =$throttlingSettings.HappyHour;
-        if(($happyHour.Hour -ne $null) -and ($happyHour.Minute -ne $null) -and ($happyHour.Duration -ne $null)){
-            if(($happyHour.Hour -le 24) -and ($happyHour.Minute -le 24) -and ($happyHour.Duration -le 24)){
-                $wa.DailyStartUnthrottledPrivilegedOperationsHour = $happyHour.Hour 
-                $wa.DailyStartUnthrottledPrivilegedOperationsMinute = $happyHour.Minute
-                $wa.DailyUnthrottledPrivilegedOperationsDuration = $happyHour.Duration
-            }else{
-                throw "the valid range hour, minute and duration is 0-24";
-                }
-                    
-        }else {
-            throw "You need to Provide Hour, Minute and Duration when providing HappyHour settings";
-        }
-    }
-    if($throttlingSettings.UniquePermissionThreshold){
-        $wa.MaxUniquePermScopesPerList = $throttlingSettings.UniquePermissionThreshold
-    }
-    if($throttlingSettings.EventHandlersEnabled){
-        $wa.EventHandlersEnabled = $throttlingSettings.EventHandlersEnabled
-    }
-    if($throttlingSettings.RequestThrottling){
-        $wa.HttpThrottleSettings.PerformThrottle = $throttlingSettings.RequestThrottling
-    }
-    if($throttlingSettings.ChangeLogEnabled){
-        $wa.ChangeLogExpirationEnabled = $throttlingSettings.ChangeLogEnabled
-    }
-    if($throttlingSettings.ChangeLogExpiryDays){
-        $wa.ChangeLogRetentionPeriod = New-TimeSpan -Days $throttlingSettings.ChangeLogExpiryDays
-    }
-    $wa.Update();
-}
-
 function GetAndRemove-Parameter($params, $name){
     $result =$null
     if($params.ContainsKey($name))
@@ -180,9 +129,3 @@ if ($null -eq $wa) {
          
     $wa = New-SPWebApplication @params
 }
-
-Set-ThrottlingSettings $settings.ThrottlingSettings $wa
-Set-WorkflowSettings $settings.WorkflowSettings  $wa
-Set-BlockedFiles $settings.BlockedFileTypes  $wa
-Set-GeneralSettings $settings.GeneralSettings   $wa
-    
