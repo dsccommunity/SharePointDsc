@@ -53,11 +53,33 @@ Describe "xSPDistributedCacheService" {
                                     Add-Member ScriptMethod Update {} -PassThru | 
                                     Add-Member ScriptMethod Deploy {} -PassThru  
             }) 
-        } }    
+        } }
+        Mock Stop-SPServiceInstance { $Global:xSharePointDCacheOnline = $false }
+        Mock Start-SPServiceInstance { $Global:xSharePointDCacheOnline = $true }
+
+        Mock Get-SPServiceInstance { 
+                if ($Global:xSharePointDCacheOnline -eq $false) {
+                    return @(New-Object Object |            
+                                Add-Member NoteProperty TypeName "Distributed Cache" -PassThru |
+                                Add-Member NoteProperty Status "Disabled" -PassThru |
+                                Add-Member NoteProperty Service "SPDistributedCacheService Name=AppFabricCachingService" -PassThru |
+                                Add-Member NoteProperty Server @{ Name = $env:COMPUTERNAME } -PassThru |             
+                                Add-Member ScriptMethod Delete {} -PassThru)
+                } else {
+                    return @(New-Object Object |            
+                                Add-Member NoteProperty TypeName "Distributed Cache" -PassThru |
+                                Add-Member NoteProperty Status "Online" -PassThru |
+                                Add-Member NoteProperty Service "SPDistributedCacheService Name=AppFabricCachingService" -PassThru |
+                                Add-Member NoteProperty Server @{ Name = $env:COMPUTERNAME } -PassThru |             
+                                Add-Member ScriptMethod Delete {} -PassThru)
+                }
+                
+            }
 
         Context "Distributed cache is not configured" {
             Mock Use-CacheCluster { throw [Exception] "ERRPS001 Error in reading provider and connection string values." }
-
+            $Global:xSharePointDCacheOnline = $false
+            
             It "returns null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
@@ -73,6 +95,8 @@ Describe "xSPDistributedCacheService" {
         }
 
         Context "Distributed cache is configured correctly and running as required" {
+            $Global:xSharePointDCacheOnline = $true
+
             Mock Get-AFCacheHostConfiguration { return @{
                 Size = $testParams.CacheSizeInMB
             }}
@@ -84,6 +108,7 @@ Describe "xSPDistributedCacheService" {
         }
 
         Context "Distributed cache is configured but the required firewall rules are not deployed" {
+            $Global:xSharePointDCacheOnline = $true
             Mock Get-NetFirewallRule { return $null }
 
             It "returns false from the test method" {
@@ -97,17 +122,13 @@ Describe "xSPDistributedCacheService" {
         }
 
         Context "Distributed cache is confgured but should not be running on this machine" {
+            $Global:xSharePointDCacheOnline = $true
             $testParams.Ensure = "Absent"
             Mock Get-AFCacheHostConfiguration { return @{
                 Size = $testParams.CacheSizeInMB
             }}
             Mock Get-CacheHost { return @{ PortNo = 22233 } }
             Mock Get-NetFirewallRule { return @{} } 
-            Mock Get-SPServiceInstance { return @(New-Object Object |            
-                                                    Add-Member NoteProperty Service "SPDistributedCacheService Name=AppFabricCachingService" -PassThru |
-                                                    Add-Member NoteProperty Server @{ Name = $env:COMPUTERNAME } -PassThru |             
-                                                    Add-Member ScriptMethod Delete {} -PassThru
-            )}
             Mock Remove-SPDistributedCacheServiceInstance { }
 
             It "returns false from the test method" {

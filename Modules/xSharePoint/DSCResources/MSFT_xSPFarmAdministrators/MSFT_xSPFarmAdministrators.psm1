@@ -11,14 +11,34 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
+    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
+        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+    }
+
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
+        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    }
+
     Write-Verbose -Message "Getting all Farm Administrators"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+
         $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        if ($null -eq $caWebapp) {
+            Write-Verbose "Unable to locate central administration website"
+            return $null
+        }
         $caWeb = Get-SPweb($caWebapp.Url)
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
-        $farmAdministratorsGroup = $caWeb.SiteGroups[$farmAdminGroup]
-        return $farmAdministratorsGroup.users.UserLogin
+        $farmAdministratorsGroup = $caWeb.SiteGroups.GetByName($farmAdminGroup)
+        return @{
+            Name = $params.Name
+            Members = $farmAdministratorsGroup.users.UserLogin
+            MembersToInclude = $params.MembersToInclude
+            MembersToExclude = $params.MembersToExclude
+            InstallAccount = $params.InstallAccount
+        }
     }
     return $result
 }
@@ -42,13 +62,23 @@ function Set-TargetResource
         Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
     }
 
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
+        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    if ($null -eq $CurrentValues) { 
+        throw "Unable to locate central administration website"
+    }
+
     $changeUsers = @{}
     $runChange = $false
     
     if ($Members) {
         Write-Verbose "Processing Members parameter"
-        $differences = Compare-Object -ReferenceObject $CurrentValues -DifferenceObject $Members
+
+        $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
+
         if ($differences -eq $null) {
             Write-Verbose "Farm Administrators group matches. No further processing required"
         } else {
@@ -88,7 +118,7 @@ function Set-TargetResource
         
         $addUsers = @()
         ForEach ($member in $MembersToInclude) {
-            if (-not($CurrentValues.Contains($member))) {
+            if (-not($CurrentValues.Members.Contains($member))) {
                 Write-Verbose "$member is not a Farm Administrator. Add user to Add list"
                 $addUsers += $member
             } else {
@@ -108,7 +138,7 @@ function Set-TargetResource
         
         $removeUsers = @()
         ForEach ($member in $MembersToExclude) {
-            if ($CurrentValues.Contains($member)) {
+            if ($CurrentValues.Members.Contains($member)) {
                 Write-Verbose "$member is a Farm Administrator. Add user to Remove list"
                 $removeUsers += $member
             } else {
@@ -149,11 +179,18 @@ function Test-TargetResource
         Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
     }
 
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
+        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    }
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    if ($null -eq $CurrentValues) { return $false }
     
     if ($Members) {
         Write-Verbose "Processing Members parameter"
-        $differences = Compare-Object -ReferenceObject $CurrentValues -DifferenceObject $Members
+        $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
+
         if ($differences -eq $null) {
             Write-Verbose "Farm Administrators group matches"
             return $true
@@ -167,7 +204,7 @@ function Test-TargetResource
     if ($MembersToInclude) {
         Write-Verbose "Processing MembersToInclude parameter"
         ForEach ($member in $MembersToInclude) {
-            if (-not($CurrentValues.Contains($member))) {
+            if (-not($CurrentValues.Members.Contains($member))) {
                 Write-Verbose "$member is not a Farm Administrator. Set result to false"
                 $result = $false
             } else {
@@ -179,7 +216,7 @@ function Test-TargetResource
     if ($MembersToExclude) {
         Write-Verbose "Processing MembersToExclude parameter"
         ForEach ($member in $MembersToExclude) {
-            if ($CurrentValues.Contains($member)) {
+            if ($CurrentValues.Members.Contains($member)) {
                 Write-Verbose "$member is a Farm Administrator. Set result to false"
                 $result = $false
             } else {
@@ -197,24 +234,23 @@ Param ([Hashtable] $changeUsers)
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $changeUsers -ScriptBlock {
         $changeUsers = $args[0]
 
-        if ($changeUsers.ContainsKey("Add")) {
-            $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
-            $caWeb = Get-SPweb($caWebapp.Url)
-            $farmAdminGroup = $caWeb.AssociatedOwnerGroup
+        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        if ($null -eq $caWebapp) {
+            throw "Unable to locate central administration website"
+        }
+        $caWeb = Get-SPweb($caWebapp.Url)
+        $farmAdminGroup = $caWeb.AssociatedOwnerGroup
 
+        if ($changeUsers.ContainsKey("Add")) {
             ForEach ($loginName in $changeUsers.Add) {
-                $caWeb.SiteGroups[$farmAdminGroup].AddUser($loginName,"","","")
+                $caWeb.SiteGroups.GetByName($farmAdminGroup).AddUser($loginName,"","","")
             }
         }
         
         if ($changeUsers.ContainsKey("Remove")) {
-            $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
-            $caWeb = Get-SPweb($caWebapp.Url)
-            $farmAdminGroup = $caWeb.AssociatedOwnerGroup
-
             ForEach ($loginName in $changeUsers.Remove) {
                 $removeUser = get-spuser $loginName -web $caWebapp.Url
-                $caWeb.SiteGroups[$farmAdminGroup].RemoveUser($removeUser)
+                $caWeb.SiteGroups.GetByName($farmAdminGroup).RemoveUser($removeUser)
             }
         }
     }
