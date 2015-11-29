@@ -47,16 +47,19 @@ function Set-xSPWebApplicationThrottlingSettings {
     }
     if($Settings.ContainsKey("HappyHour") -eq $true) {
         $happyHour = $Settings.HappyHour;
-        if(($happyHour.Hour -ne $null) -and ($happyHour.Minute -ne $null) -and ($happyHour.Duration -ne $null)){
-            if(($happyHour.Hour -le 24) -and ($happyHour.Minute -le 24) -and ($happyHour.Duration -le 24)){
-                $WebApplication.DailyStartUnthrottledPrivilegedOperationsHour = $happyHour.Hour 
-                $WebApplication.DailyStartUnthrottledPrivilegedOperationsMinute = $happyHour.Minute
-                $WebApplication.DailyUnthrottledPrivilegedOperationsDuration = $happyHour.Duration
-            } else {
-                throw "the valid  hour, minute and duration range is 0-24";
-            }        
+        if ($happyHour.ContainsKey("Hour") -eq $false -or $happyHour.ContainsKey("Minute") -eq $false -or $happyHour.ContainsKey("Duration") -eq $false) {
+            throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
         } else {
-            throw "You need to Provide Hour, Minute and Duration when providing HappyHour settings";
+            if ($happyHour.Hour -lt 0 -or $happyHour.Hour -gt 23) {
+                throw "Happy hour setting 'hour' must be between 0 and 23"
+            }
+            if ($happyHour.Minute -lt 0 -or $happyHour.Minute -gt 59) {
+                throw "Happy hour setting 'minute' must be between 0 and 59"
+            }
+            if ($happyHour.Duration -lt 0 -or $happyHour.Duration -gt 23) {
+                throw "Happy hour setting 'hour' must be between 0 and 23"
+            }
+            $WebApplication.SetDailyUnthrottledPrivilegedOperationWindow($happyHour.Hour, $happyHour.Minute, $happyHour.Duration)
         }
     }
     if($Settings.ContainsKey("UniquePermissionThreshold") -eq $true) {
