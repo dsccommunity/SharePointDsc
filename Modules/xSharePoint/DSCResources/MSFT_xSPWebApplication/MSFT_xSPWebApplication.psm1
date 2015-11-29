@@ -1,26 +1,3 @@
-function GetAndRemove-Parameter($params, $name){
-    $result =$null
-    if($params.ContainsKey($name))
-    {
-        $result = $params.$name 
-        $params.Remove( $name)
-    }
-    return $result;
-}
-function Sanitize-ComplexTypes{
-   param(
-        [Parameter(Position = 0)]
-        $params
-    )
-    return @{
-        GeneralSettings  = GetAndRemove-Parameter $params "GeneralSettings"
-        WorkflowSettings = GetAndRemove-Parameter $params "WorkflowSettings"
-        Extensions = GetAndRemove-Parameter $params "Extensions"
-        ThrottlingSettings = GetAndRemove-Parameter $params "ThrottlingSettings"
-        BlockedFileTypes = GetAndRemove-Parameter $params "BlockedFileTypes"
-    }
-}
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -60,6 +37,7 @@ function Get-TargetResource
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
 
         return @{
             Name = $wa.DisplayName
@@ -77,6 +55,7 @@ function Get-TargetResource
             ThrottlingSettings = (Get-xSPWebApplicationThrottlingSettings -WebApplication $wa)
             WorkflowSettings = (Get-xSPWebApplicationWorkflowSettings -WebApplication $wa)
             BlockedFileTypes = (Get-xSPWebApplicationBlockedFileTypes -WebApplication $wa)
+            GeneralSettings = (Get-xSPWebApplicationGeneralSettings -WebApplication $wa)
         }
     }
     return $result
@@ -161,65 +140,18 @@ function Set-TargetResource
             Set-xSPWebApplicationBlockedFileTypes -WebApplication $wa -Settings $params.BlockedFileTypes
         }
 
-#region General settings
-            
-       $generalSettings = $settings.GeneralSettings   
-        if($generalSettings -ne $null){ 
-            #TODO: Quota Template
-            if($generalSettings.TimeZone -ne $null){
-                $wa.DefaultTimeZone =$generalSettings.TimeZone
-            }
-            if($generalSettings.Alerts -ne $null){
-                $wa.AlertsEnabled = $generalSettings.Alerts
-            }
-            if($generalSettings.AlertsLimit -ne $null){
-                $wa.AlertsMaximum = $generalSettings.AlertsLimit
-            }
-            if($generalSettings.RSS -ne $null){
-                $wa.SyndicationEnabled = $generalSettings.RSS
-            }
-            if($generalSettings.AlertsLimit){
-                $wa.MetaWeblogEnabled = $generalSettings.BlogAPI
-            }
-            if($generalSettings.BlogAPIAuthenticated){
-                $wa.MetaWeblogAuthenticationEnabled = $generalSettings.BlogAPIAuthenticated
-            }
-            if($generalSettings.BrowserFileHandling){
-                $wa.BrowserFileHandling = $generalSettings.BrowserFileHandling
-            }
-            if($generalSettings.SecurityValidation){
-                $wa.FormDigestSettings.Enabled = $generalSettings.SecurityValidation
-            }
-            if($generalSettings.MaximumUploadSize){
-                $wa.MaximumFileSize = $generalSettings.MaximumUploadSize
-            }
-            if($generalSettings.RecycleBinEnabled){
-                $wa.RecycleBinEnabled = $generalSettings.RecycleBinEnabled
-            }
-            if($generalSettings.RecycleBinCleanupEnabled){
-                $wa.RecycleBinCleanupEnabled =  $generalSettings.RecycleBinCleanupEnabled
-            }
-            if($generalSettings.RecycleBinRetentionPeriod){
-                $wa.RecycleBinRetentionPeriod = $generalSettings.RecycleBinRetentionPeriod
-            }
-            if($generalSettings.SecondStageRecycleBinEnabled){
-                $wa.SecondStageRecycleBinQuota = $generalSettings.SecondStageRecycleBinEnabled
-            }
-            if($generalSettings.CustomerExperienceProgram){
-                $wa.BrowserCEIPEnabled = $generalSettings.CustomerExperienceProgram
-             }
-            if($generalSettings.Presence -ne $null){
-                $wa.PresenceEnabled =  $generalSettings.Presence
-            }
+        # General Settings
+        if ($params.ContainsKey("GeneralSettings") -eq $true) {
+            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
+            Set-xSPWebApplicationGeneralSettings -WebApplication $wa -Settings $params.GeneralSettings
         }
-        if( ($settings.WorkflowSettings -ne $null) -or
-            ($settings.GeneralSettings -ne $null) -or
-            ($settings.ThrottlingSettings -ne $null) -or
-            ($settings.BlockedFileTypes -ne $null) 
-            ){
+
+        if( ($params.WorkflowSettings -ne $null) -or
+            ($params.GeneralSettings -ne $null) -or
+            ($params.ThrottlingSettings -ne $null) -or
+            ($params.BlockedFileTypes -ne $null) ) {
                 $wa.Update()
-            }
-#endregion
+        }
     }
 }
 
@@ -276,6 +208,13 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("BlockedFileTypes") -eq $true) {
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
         $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.BlockedFileTypes -DesiredSettings $BlockedFileTypes
+    }
+    if ($testReturn -eq $false) { return $false }
+
+    # General settings
+    if ($PSBoundParameters.ContainsKey("GeneralSettings") -eq $true) {
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
+        $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.GeneralSettings -DesiredSettings $GeneralSettings
     }
     if ($testReturn -eq $false) { return $false }
 

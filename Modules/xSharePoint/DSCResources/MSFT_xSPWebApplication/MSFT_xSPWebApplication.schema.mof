@@ -42,23 +42,21 @@ Class MSFT_xSPWebApplicationWorkflowSettings
 [ClassVersion("1.0.0"), FriendlyName("xSPWebApplicationSettings")]
 Class MSFT_xSPWebApplicationSettings
 {
-    [write]uint32 TimeZone;
-    [write]String DefaultQuotaTemplate;
-    [write]boolean Alerts;
-    [write]uint32 AlertsLimit;
-    [write]boolean RSS;
-    [write]boolean BlogAPI;
-    [write]boolean BlogAPIAuthenticated;
+    [write] uint32 TimeZone;
+    [write] boolean Alerts;
+    [write] uint32 AlertsLimit;
+    [write] boolean RSS;
+    [write] boolean BlogAPI;
+    [write] boolean BlogAPIAuthenticated;
     [write, ValueMap{"Strict","Permissive"}, Values{"Stric","Permissive"}] String BrowserFileHandling;
-    [write]boolean SecurityValidation;
-    [write]boolean RecycleBinEnabled;
-    [write]boolean SecondStageRecycleBinEnabled;
-    [write]boolean RecycleBinCleanupEnabled ;
-    [write]uint32 RecycleBinRetentionPeriod;
-    [write]uint32 SecondStageRecycleBinQuota;
-    [write]uint32 MaximumUploadSize;
-    [write]boolean CustomerExperienceProgram;
-    [write]boolean PresenceEnabled;
+    [write] boolean SecurityValidation;
+    [write] boolean RecycleBinEnabled;
+    [write] boolean RecycleBinCleanupEnabled;
+    [write] uint32 RecycleBinRetentionPeriod;
+    [write] uint32 SecondStageRecycleBinQuota;
+    [write] uint32 MaximumUploadSize;
+    [write] boolean CustomerExperienceProgram;
+    [write] boolean PresenceEnabled;
 };
 
 /*
