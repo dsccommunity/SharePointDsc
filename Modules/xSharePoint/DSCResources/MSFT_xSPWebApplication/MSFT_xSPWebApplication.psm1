@@ -86,14 +86,9 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
-    $settings =  Sanitize-ComplexTypes $PSBoundParameters 
-    $PSBoundParameters.Add("Settings", $settings)
-    Write-Verbose -Message "Creating web application '$Name'"
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $settings =$params.Settings
-        $params.Remove("Settings") | Out-Null
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) {
             $newWebAppParams = @{

@@ -30,49 +30,48 @@ function Set-xSPWebApplicationThrottlingSettings {
         [parameter(Mandatory = $true)] $Settings
     )
 
-    if($Settings.ListViewThreshold -ne $null ){
+    if($Settings.ContainsKey("ListViewThreshold") -eq $true) {
         $WebApplication.MaxItemsPerThrottledOperation = $Settings.ListViewThreshold
     }
-    if($Settings.AllowObjectModelOverride -ne $null){
+    if($Settings.ContainsKey("AllowObjectModelOverride") -eq $true) {
         $WebApplication.AllowOMCodeOverrideThrottleSettings =  $Settings.AllowObjectModelOverride
     }
-    if($Settings.AdminThreshold -ne $null){
+    if($Settings.ContainsKey("AdminThreshold") -eq $true) {
         $WebApplication.MaxItemsPerThrottledOperationOverride = $Settings.AdminThreshold
     }
-    if($Settings.ListViewLookupThreshold -ne $null){
+    if($Settings.ContainsKey("ListViewLookupThreshold") -eq $true) {
         $WebApplication.MaxQueryLookupFields =  $Settings.ListViewLookupThreshold
     }
-    if($Settings.HappyHourEnabled -ne $null){
+    if($Settings.ContainsKey("HappyHourEnabled") -eq $true) {
         $WebApplication.UnthrottledPrivilegedOperationWindowEnabled =$Settings.HappyHourEnabled
     }
-    if($Settings.HappyHour -ne $null){
-        $happyHour =$Settings.HappyHour;
+    if($Settings.ContainsKey("HappyHour") -eq $true) {
+        $happyHour = $Settings.HappyHour;
         if(($happyHour.Hour -ne $null) -and ($happyHour.Minute -ne $null) -and ($happyHour.Duration -ne $null)){
             if(($happyHour.Hour -le 24) -and ($happyHour.Minute -le 24) -and ($happyHour.Duration -le 24)){
                 $WebApplication.DailyStartUnthrottledPrivilegedOperationsHour = $happyHour.Hour 
                 $WebApplication.DailyStartUnthrottledPrivilegedOperationsMinute = $happyHour.Minute
                 $WebApplication.DailyUnthrottledPrivilegedOperationsDuration = $happyHour.Duration
-            }else{
+            } else {
                 throw "the valid  hour, minute and duration range is 0-24";
-                }
-                    
-        }else {
+            }        
+        } else {
             throw "You need to Provide Hour, Minute and Duration when providing HappyHour settings";
         }
     }
-    if($Settings.UniquePermissionThreshold){
+    if($Settings.ContainsKey("UniquePermissionThreshold") -eq $true) {
         $WebApplication.MaxUniquePermScopesPerList = $Settings.UniquePermissionThreshold
     }
-    if($Settings.EventHandlersEnabled){
+    if($Settings.ContainsKey("EventHandlersEnabled") -eq $true) {
         $WebApplication.EventHandlersEnabled = $Settings.EventHandlersEnabled
     }
-    if($Settings.RequestThrottling){
+    if($Settings.ContainsKey("RequestThrottling") -eq $true) {
         $WebApplication.HttpThrottleSettings.PerformThrottle = $Settings.RequestThrottling
     }
-    if($Settings.ChangeLogEnabled){
+    if($Settings.ContainsKey("ChangeLogEnabled") -eq $true) {
         $WebApplication.ChangeLogExpirationEnabled = $Settings.ChangeLogEnabled
     }
-    if($Settings.ChangeLogExpiryDays){
+    if($Settings.ContainsKey("ChangeLogExpiryDays") -eq $true) {
         $WebApplication.ChangeLogRetentionPeriod = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
     }
 }
@@ -100,7 +99,7 @@ function Test-xSPWebApplicationThrottlingSettings {
                                                          "EventHandlersEnabled"
                                                      )
     if ($testReturn -eq $true) {
-        if ($Settings.ContainsKey("HappyHour") -eq $true) {
+        if ($DesiredSettings.ContainsKey("HappyHour") -eq $true) {
             $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings.HappyHour `
                                                              -DesiredValues $DesiredSettings.HappyHour
         }

@@ -18,31 +18,31 @@ function Set-xSPWebApplicationBlockedFileTypes {
         [parameter(Mandatory = $true)] $Settings
     )
     
-    if ($Settings.Blocked -ne $null -and (($Settings.EnsureBlocked -ne $null) -or ($Settings.EnsureAllowed -ne $null))) {
+    if ($Settings.ContainsKey("Blocked") -eq $true -and (($Settings.ContainsKey("EnsureBlocked") -eq $true) -or ($Settings.ContainsKey("EnsureAllowed") -eq $true))) {
         throw "Blocked file types must use either the 'blocked' property or the 'EnsureBlocked' and/or 'EnsureAllowed' properties, but not both."
     }
 
-    if ($Settings.Blocked -eq $null -and $Settings.EnsureBlocked -eq $null -and $Settings.EnsureAllowed -eq $null) {
+    if ($Settings.ContainsKey("Blocked") -eq $false -and $Settings.ContainsKey("EnsureBlocked") -eq $false -and $Settings.ContainsKey("EnsureAllowed") -eq $false) {
         throw "Blocked file types must specify at least one property (either 'Blocked, 'EnsureBlocked' or 'EnsureAllowed')"
     }
 
-    if($Settings.Blocked -ne $null ){
+    if($Settings.ContainsKey("Blocked") -ne $null ) {
         $WebApplication.BlockedFileExtensions.Clear(); 
-        $blockedFiles.Blocked | ForEach-Object {
+        $Settings.Blocked | ForEach-Object {
             $WebApplication.BlockedFileExtensions.Add($_);
         }
     }
 
-    if($Settings.EnsureBlocked -ne $null){
-        $blockedFiles.EnsureBlocked | ForEach-Object {
+    if($Settings.ContainsKey("EnsureBlocked") -ne $null) {
+        $Settings.EnsureBlocked | ForEach-Object {
             if(!$WebApplication.BlockedFileExtensions.ContainExtension($_)){
                 $WebApplication.BlockedFileExtensions.Add($_);
             }
         }
     }
 
-    if($Settings.EnsureAllowed -ne $null){
-        $blockedFiles.EnsureAllowed | ForEach-Object {
+    if($Settings.ContainsKey("EnsureAllowed") -ne $null) {
+        $Settings.EnsureAllowed | ForEach-Object {
             if($WebApplication.BlockedFileExtensions.ContainExtension($_)){
                 $WebApplication.BlockedFileExtensions.Remove($_);
             }

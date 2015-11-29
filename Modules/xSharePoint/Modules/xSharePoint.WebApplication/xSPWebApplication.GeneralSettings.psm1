@@ -31,21 +31,21 @@ function Set-xSPWebApplicationGeneralSettings {
         [parameter(Mandatory = $true)] $Settings
     )
 
-    if ($Settings.TimeZone -ne $null)         { $WebApplication.DefaultTimeZone = $Settings.TimeZone }
-    if ($Settings.Alerts -ne $null)           { $WebApplication.AlertsEnabled = $Settings.Alerts }
-    if ($Settings.AlertsLimit -ne $null)      { $WebApplication.AlertsMaximum = $Settings.AlertsLimit }
-    if ($Settings.RSS -ne $null)              { $WebApplication.SyndicationEnabled = $Settings.RSS }
-    if ($Settings.AlertsLimit)                { $WebApplication.MetaWeblogEnabled = $Settings.BlogAPI }
-    if ($Settings.BlogAPIAuthenticated)       { $WebApplication.MetaWeblogAuthenticationEnabled = $Settings.BlogAPIAuthenticated }
-    if ($Settings.BrowserFileHandling)        { $WebApplication.BrowserFileHandling = $Settings.BrowserFileHandling }
-    if ($Settings.SecurityValidation)         { $WebApplication.FormDigestSettings.Enabled = $Settings.SecurityValidation }
-    if ($Settings.MaximumUploadSize)          { $WebApplication.MaximumFileSize = $Settings.MaximumUploadSize }
-    if ($Settings.RecycleBinEnabled)          { $WebApplication.RecycleBinEnabled = $Settings.RecycleBinEnabled }
-    if ($Settings.RecycleBinCleanupEnabled)   { $WebApplication.RecycleBinCleanupEnabled = $Settings.RecycleBinCleanupEnabled }
-    if ($Settings.RecycleBinRetentionPeriod)  { $WebApplication.RecycleBinRetentionPeriod = $Settings.RecycleBinRetentionPeriod }
-    if ($Settings.SecondStageRecycleBinQuota) { $WebApplication.SecondStageRecycleBinQuota = $Settings.SecondStageRecycleBinQuota }
-    if ($Settings.CustomerExperienceProgram)  { $WebApplication.BrowserCEIPEnabled = $Settings.CustomerExperienceProgram }
-    if ($Settings.Presence -ne $null)         { $WebApplication.PresenceEnabled = $Settings.Presence }
+    if ($Settings.ContainsKey("TimeZone") -eq $true)                   { $WebApplication.DefaultTimeZone = $Settings.TimeZone }
+    if ($Settings.ContainsKey("Alerts") -eq $true)                     { $WebApplication.AlertsEnabled = $Settings.Alerts }
+    if ($Settings.ContainsKey("AlertsLimit") -eq $true)                { $WebApplication.AlertsMaximum = $Settings.AlertsLimit }
+    if ($Settings.ContainsKey("RSS") -eq $true)                        { $WebApplication.SyndicationEnabled = $Settings.RSS }
+    if ($Settings.ContainsKey("AlertsLimit") -eq $true)                { $WebApplication.MetaWeblogEnabled = $Settings.BlogAPI }
+    if ($Settings.ContainsKey("BlogAPIAuthenticated") -eq $true)       { $WebApplication.MetaWeblogAuthenticationEnabled = $Settings.BlogAPIAuthenticated }
+    if ($Settings.ContainsKey("BrowserFileHandling") -eq $true)        { $WebApplication.BrowserFileHandling = $Settings.BrowserFileHandling }
+    if ($Settings.ContainsKey("SecurityValidation") -eq $true)         { $WebApplication.FormDigestSettings.Enabled = $Settings.SecurityValidation }
+    if ($Settings.ContainsKey("MaximumUploadSize") -eq $true)          { $WebApplication.MaximumFileSize = $Settings.MaximumUploadSize }
+    if ($Settings.ContainsKey("RecycleBinEnabled") -eq $true)          { $WebApplication.RecycleBinEnabled = $Settings.RecycleBinEnabled }
+    if ($Settings.ContainsKey("RecycleBinCleanupEnabled") -eq $true)   { $WebApplication.RecycleBinCleanupEnabled = $Settings.RecycleBinCleanupEnabled }
+    if ($Settings.ContainsKey("RecycleBinRetentionPeriod") -eq $true)  { $WebApplication.RecycleBinRetentionPeriod = $Settings.RecycleBinRetentionPeriod }
+    if ($Settings.ContainsKey("SecondStageRecycleBinQuota") -eq $true) { $WebApplication.SecondStageRecycleBinQuota = $Settings.SecondStageRecycleBinQuota }
+    if ($Settings.ContainsKey("CustomerExperienceProgram") -eq $true)  { $WebApplication.BrowserCEIPEnabled = $Settings.CustomerExperienceProgram }
+    if ($Settings.ContainsKey("Presence") -eq $true)                   { $WebApplication.PresenceEnabled = $Settings.Presence }
 }
 
 function Test-xSPWebApplicationGeneralSettings {
@@ -55,6 +55,8 @@ function Test-xSPWebApplicationGeneralSettings {
         [parameter(Mandatory = $true)] $CurrentSettings,
         [parameter(Mandatory = $true)] $DesiredSettings
     )
-
+    $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
+                                                     -DesiredValues $DesiredSettings
+    return $testReturn
 }
 

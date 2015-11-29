@@ -17,13 +17,13 @@ function Set-xSPWebApplicationWorkflowSettings {
         [parameter(Mandatory = $true)] $WebApplication,
         [parameter(Mandatory = $true)] $Settings
     )
-    if($Settings.UserDefinedWorkflowsEnabled -ne $null){
+    if($Settings.ContainsKey("UserDefinedWorkflowsEnabled") -eq $true) {
         $WebApplication.UserDefinedWorkflowsEnabled =  $Settings.UserDefinedWorkflowsEnabled;
     }
-    if($Settings.EmailToNoPermissionWorkflowParticipantsEnable -ne $null){
+    if($Settings.ContainsKey("EmailToNoPermissionWorkflowParticipantsEnable") -eq $true) {
         $WebApplication.EmailToNoPermissionWorkflowParticipantsEnabled = $Settings.EmailToNoPermissionWorkflowParticipantsEnable;
     }
-    if($Settings.ExternalWorkflowParticipantsEnabled -ne $null){
+    if($Settings.ContainsKey("ExternalWorkflowParticipantsEnabled") -eq $true) {
         $WebApplication.ExternalWorkflowParticipantsEnabled = $Settings.ExternalWorkflowParticipantsEnabled;
     }                
     $WebApplication.UpdateWorkflowConfigurationSettings();
