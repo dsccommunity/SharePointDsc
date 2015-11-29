@@ -202,14 +202,14 @@ function Test-TargetResource
     # Blocked file types
     if ($PSBoundParameters.ContainsKey("BlockedFileTypes") -eq $true) {
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
-        $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.BlockedFileTypes -DesiredSettings $BlockedFileTypes
+        $testReturn = Test-xSPWebApplicationBlockedFileTypes -CurrentSettings $CurrentValues.BlockedFileTypes -DesiredSettings $BlockedFileTypes
     }
     if ($testReturn -eq $false) { return $false }
 
     # General settings
     if ($PSBoundParameters.ContainsKey("GeneralSettings") -eq $true) {
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
-        $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.GeneralSettings -DesiredSettings $GeneralSettings
+        $testReturn = Test-xSPWebApplicationGeneralSettings -CurrentSettings $CurrentValues.GeneralSettings -DesiredSettings $GeneralSettings
     }
     if ($testReturn -eq $false) { return $false }
 

@@ -26,25 +26,25 @@ function Set-xSPWebApplicationBlockedFileTypes {
         throw "Blocked file types must specify at least one property (either 'Blocked, 'EnsureBlocked' or 'EnsureAllowed')"
     }
 
-    if($Settings.ContainsKey("Blocked") -ne $null ) {
+    if($Settings.ContainsKey("Blocked") -eq $true) {
         $WebApplication.BlockedFileExtensions.Clear(); 
         $Settings.Blocked | ForEach-Object {
-            $WebApplication.BlockedFileExtensions.Add($_);
+            $WebApplication.BlockedFileExtensions.Add($_.ToLower());
         }
     }
 
-    if($Settings.ContainsKey("EnsureBlocked") -ne $null) {
+    if($Settings.ContainsKey("EnsureBlocked") -eq $true) {
         $Settings.EnsureBlocked | ForEach-Object {
-            if(!$WebApplication.BlockedFileExtensions.ContainExtension($_)){
-                $WebApplication.BlockedFileExtensions.Add($_);
+            if(!$WebApplication.BlockedFileExtensions.Contains($_.ToLower())){
+                $WebApplication.BlockedFileExtensions.Add($_.ToLower());
             }
         }
     }
 
-    if($Settings.ContainsKey("EnsureAllowed") -ne $null) {
+    if($Settings.ContainsKey("EnsureAllowed") -eq $true) {
         $Settings.EnsureAllowed | ForEach-Object {
-            if($WebApplication.BlockedFileExtensions.ContainExtension($_)){
-                $WebApplication.BlockedFileExtensions.Remove($_);
+            if($WebApplication.BlockedFileExtensions.Contains($_.ToLower())){
+                $WebApplication.BlockedFileExtensions.Remove($_.ToLower());
             }
         }
     }
@@ -58,27 +58,32 @@ function Test-xSPWebApplicationBlockedFileTypes {
         [parameter(Mandatory = $true)] $DesiredSettings
     )
 
-    if ($DesiredSettings.Blocked -ne $null -and (($DesiredSettings.EnsureBlocked -ne $null) -or ($DesiredSettings.EnsureAllowed -ne $null))) {
+    if ($DesiredSettings.ContainsKey("Blocked") -eq $true -and (($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) -or ($DesiredSettings.ContainsKey("EnsureAllowed") -eq $true))) {
         throw "Blocked file types must use either the 'blocked' property or the 'EnsureBlocked' and/or 'EnsureAllowed' properties, but not both."
     }
 
-    if ($DesiredSettings.Blocked -eq $null -and $DesiredSettings.EnsureBlocked -eq $null -and $DesiredSettings.EnsureAllowed -eq $null) {
+    if ($DesiredSettings.ContainsKey("Blocked") -eq $false -and $DesiredSettings.ContainsKey("EnsureBlocked") -eq $false -and $DesiredSettings.ContainsKey("EnsureAllowed") -eq $false) {
         throw "Blocked file types must specify at least one property (either 'Blocked, 'EnsureBlocked' or 'EnsureAllowed')"
     }
 
-    if ($DesiredSettings.Blocked -ne $null) {
+    if ($DesiredSettings.ContainsKey("Blocked") -eq $true) {
         $compareResult = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.Blocked
         if ($compareResult -eq $null) { return $true } else { return $false }
     }
     
-    if($DesiredSettings.EnsureBlocked -ne $null){
-        $itemsToRemove = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureBlocked -IncludeEqual -ExcludeDifferent
+    if($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) {
+        $itemsToRemove = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureBlocked -ExcludeDifferent
         if ($itemsToRemove -ne $null) { return $false }
     }
 
-    if($DesiredSettings.EnsureAllowed -ne $null){
+    if($DesiredSettings.ContainsKey("EnsureAllowed") -eq $true) {
         $itemsToAdd = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureAllowed | Where-Object { $_.SideIndicator -eq "=>"}
-        if ($itemsToAdd -ne $null) { return $false }
+        if ($itemsToAdd -ne $null) {
+            $compareResult = Compare-Object -ReferenceObject $DesiredSettings.EnsureAllowed -DifferenceObject $itemsToAdd.InputObject
+            if ($compareResult -ne $null) { return $false }
+        } else {
+            return $false
+        }   
     }
 
     return $true
