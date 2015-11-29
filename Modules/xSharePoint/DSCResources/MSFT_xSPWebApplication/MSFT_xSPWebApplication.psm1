@@ -59,6 +59,7 @@ function Get-TargetResource
 
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
 
         return @{
             Name = $wa.DisplayName
@@ -75,6 +76,7 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
             ThrottlingSettings = (Get-xSPWebApplicationThrottlingSettings -WebApplication $wa)
             WorkflowSettings = (Get-xSPWebApplicationWorkflowSettings -WebApplication $wa)
+            BlockedFileTypes = (Get-xSPWebApplicationBlockedFileTypes -WebApplication $wa)
         }
     }
     return $result
@@ -150,37 +152,14 @@ function Set-TargetResource
         # Workflow settings
         if ($params.ContainsKey("WorkflowSettings") -eq $true) {
             Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
-            Set-xSPWebApplicationWorkflowSettingsSettings -WebApplication $wa -Settings $params.ThrottlingSettings
+            Set-xSPWebApplicationWorkflowSettings -WebApplication $wa -Settings $params.ThrottlingSettings
         }
 
-        Write-Verbose "applying extended settings"
-#region blockedFiles
-        $blockedFiles= $settings.BlockedFileTypes  
-        if($blockedFiles -ne $null){
-            if($blockedFiles.Blocked -ne $null ){
-                $wa.BlockedFileExtensions.Clear(); 
-                $blockedFiles.Blocked| % {
-                    $wa.BlockedFileExtensions.Add($_);
-
-                }
-            }
-            if($blockedFiles.EnsureBlocked -ne $null){
-                $blockedFiles.EnsureBlocked| % {
-                    if(!$wa.BlockedFileExtensions.ContainExtension($_)){
-                        $wa.BlockedFileExtensions.Add($_);
-                    }
-                }
-            }
-            if($blockedFiles.EnsureAllowed -ne $null){
-                $blockedFiles.EnsureAllowed | % {
-                    if($wa.BlockedFileExtensions.ContainExtension($_)){
-                        $wa.BlockedFileExtensions.Remove($_);
-                    }
-                }
-            }
+        # Blocked file types
+        if ($params.ContainsKey("BlockedFileTypes") -eq $true) {
+            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
+            Set-xSPWebApplicationBlockedFileTypes -WebApplication $wa -Settings $params.BlockedFileTypes
         }
-
-#endregion
 
 #region General settings
             
@@ -290,6 +269,13 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey("WorkflowSettings") -eq $true) {
         Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
         $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.WorkflowSettings -DesiredSettings $WorkflowSettings
+    }
+    if ($testReturn -eq $false) { return $false }
+
+    # Blocked file types
+    if ($PSBoundParameters.ContainsKey("BlockedFileTypes") -eq $true) {
+        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
+        $testReturn = Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues.BlockedFileTypes -DesiredSettings $BlockedFileTypes
     }
     if ($testReturn -eq $false) { return $false }
 
