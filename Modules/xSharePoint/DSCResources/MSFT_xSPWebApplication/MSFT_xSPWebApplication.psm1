@@ -126,7 +126,7 @@ function Set-TargetResource
         # Workflow settings
         if ($params.ContainsKey("WorkflowSettings") -eq $true) {
             Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
-            Set-xSPWebApplicationWorkflowSettings -WebApplication $wa -Settings $params.ThrottlingSettings
+            Set-xSPWebApplicationWorkflowSettings -WebApplication $wa -Settings $params.WorkflowSettings
         }
 
         # Blocked file types

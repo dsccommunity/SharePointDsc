@@ -144,7 +144,7 @@ Describe "xSPWebApplication (Throttling)" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 

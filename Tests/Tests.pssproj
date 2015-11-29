@@ -72,6 +72,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAntivirusSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.Workflow.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.Throttling.Tests.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
