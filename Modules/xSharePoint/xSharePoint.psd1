@@ -96,7 +96,7 @@ AliasesToExport = '*'
 # HelpInfo URI of this module
 # HelpInfoURI = ''
 
-# Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
+# Default prefix for commands exported from this module. Override the default prefix using Import-Module -prefix.
 # DefaultCommandPrefix = ''
 
 
