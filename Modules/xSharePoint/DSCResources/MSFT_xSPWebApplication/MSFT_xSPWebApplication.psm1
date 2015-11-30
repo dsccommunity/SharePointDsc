@@ -122,13 +122,7 @@ function Set-TargetResource
             Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
             Set-xSPWebApplicationThrottlingSettings -WebApplication $wa -Settings $params.ThrottlingSettings
         }
-
-        # Workflow settings
-        if ($params.ContainsKey("WorkflowSettings") -eq $true) {
-            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
-            Set-xSPWebApplicationWorkflowSettings -WebApplication $wa -Settings $params.WorkflowSettings
-        }
-
+        
         # Blocked file types
         if ($params.ContainsKey("BlockedFileTypes") -eq $true) {
             Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
@@ -141,11 +135,18 @@ function Set-TargetResource
             Set-xSPWebApplicationGeneralSettings -WebApplication $wa -Settings $params.GeneralSettings
         }
 
-        if( ($params.WorkflowSettings -ne $null) -or
-            ($params.GeneralSettings -ne $null) -or
+        if( ($params.GeneralSettings -ne $null) -or
             ($params.ThrottlingSettings -ne $null) -or
             ($params.BlockedFileTypes -ne $null) ) {
                 $wa.Update()
+        }
+
+        # Workflow settings
+        if ($params.ContainsKey("WorkflowSettings") -eq $true) {
+            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+            # Workflow uses a seperate update method, to avoid update conflicts get a fresh web app object
+            $wa2 = Get-SPWebApplication -Identity $params.Name
+            Set-xSPWebApplicationWorkflowSettings -WebApplication $wa2 -Settings $params.WorkflowSettings
         }
     }
 }
