@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path "C:\users\brian\Documents\GitHubVisualStudio\xSharePoint\Tests\xSharePoint" "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot  "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -93,9 +93,7 @@ Describe "xSPWebApplication (Workflow)" {
                     EmailToNoPermissionWorkflowParticipantsEnabled = $false
                     ExternalWorkflowParticipantsEnabled = $false
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
-                } -PassThru | Add-Member ScriptMethod UpdateWorkflowConfigurationSettings {
+                $webApp = $webApp | Add-Member ScriptMethod UpdateWorkflowConfigurationSettings {
                     $Global:xSPWebApplicationUpdateWorkflowCalled = $true
                 } -PassThru
                 return @($webApp)
@@ -109,11 +107,9 @@ Describe "xSPWebApplication (Workflow)" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
             $Global:xSPWebApplicationUpdateWorkflowCalled = $false
             It "updates the workflow settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
                 $Global:xSPWebApplicationUpdateWorkflowCalled | Should Be $true
             }
         }
