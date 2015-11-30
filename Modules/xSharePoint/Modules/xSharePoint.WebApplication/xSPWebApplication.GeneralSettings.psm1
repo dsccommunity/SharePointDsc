@@ -28,24 +28,38 @@ function Set-xSPWebApplicationGeneralSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] $Settings
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
     )
 
-    if ($Settings.ContainsKey("TimeZone") -eq $true)                   { $WebApplication.DefaultTimeZone = $Settings.TimeZone }
-    if ($Settings.ContainsKey("Alerts") -eq $true)                     { $WebApplication.AlertsEnabled = $Settings.Alerts }
-    if ($Settings.ContainsKey("AlertsLimit") -eq $true)                { $WebApplication.AlertsMaximum = $Settings.AlertsLimit }
-    if ($Settings.ContainsKey("RSS") -eq $true)                        { $WebApplication.SyndicationEnabled = $Settings.RSS }
-    if ($Settings.ContainsKey("AlertsLimit") -eq $true)                { $WebApplication.MetaWeblogEnabled = $Settings.BlogAPI }
-    if ($Settings.ContainsKey("BlogAPIAuthenticated") -eq $true)       { $WebApplication.MetaWeblogAuthenticationEnabled = $Settings.BlogAPIAuthenticated }
-    if ($Settings.ContainsKey("BrowserFileHandling") -eq $true)        { $WebApplication.BrowserFileHandling = $Settings.BrowserFileHandling }
-    if ($Settings.ContainsKey("SecurityValidation") -eq $true)         { $WebApplication.FormDigestSettings.Enabled = $Settings.SecurityValidation }
-    if ($Settings.ContainsKey("MaximumUploadSize") -eq $true)          { $WebApplication.MaximumFileSize = $Settings.MaximumUploadSize }
-    if ($Settings.ContainsKey("RecycleBinEnabled") -eq $true)          { $WebApplication.RecycleBinEnabled = $Settings.RecycleBinEnabled }
-    if ($Settings.ContainsKey("RecycleBinCleanupEnabled") -eq $true)   { $WebApplication.RecycleBinCleanupEnabled = $Settings.RecycleBinCleanupEnabled }
-    if ($Settings.ContainsKey("RecycleBinRetentionPeriod") -eq $true)  { $WebApplication.RecycleBinRetentionPeriod = $Settings.RecycleBinRetentionPeriod }
-    if ($Settings.ContainsKey("SecondStageRecycleBinQuota") -eq $true) { $WebApplication.SecondStageRecycleBinQuota = $Settings.SecondStageRecycleBinQuota }
-    if ($Settings.ContainsKey("CustomerExperienceProgram") -eq $true)  { $WebApplication.BrowserCEIPEnabled = $Settings.CustomerExperienceProgram }
-    if ($Settings.ContainsKey("Presence") -eq $true)                   { $WebApplication.PresenceEnabled = $Settings.Presence }
+    # Format here is SPWebApplication property = Custom settings property
+    $mapping = @{
+        DefaultTimeZone = "TimeZone"
+        AlertsEnabled = "Alerts"
+        AlertsMaximum = "AlertsLimit"
+        SyndicationEnabled = "RSS"
+        MetaWeblogEnabled = "BlogAPI"
+        MetaWeblogAuthenticationEnabled = "BlogAPIAuthenticated"
+        BrowserFileHandling = "BrowserFileHandling"
+        MaximumFileSize = "MaximumUploadSize"
+        RecycleBinEnabled = "RecycleBinEnabled"
+        RecycleBinCleanupEnabled = "RecycleBinCleanupEnabled"
+        RecycleBinRetentionPeriod = "RecycleBinRetentionPeriod"
+        SecondStageRecycleBinQuota = "SecondStageRecycleBinQuota"
+        BrowserCEIPEnabled = "CustomerExperienceProgram"
+        PresenceEnabled = "Presence"
+    } 
+    $mapping.Keys | ForEach-Object {
+        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication `
+                                                   -PropertyToSet $_ `
+                                                   -ParamsValue $settings `
+                                                   -ParamKey $mapping[$_]
+    }
+
+    # Set form digest setting child property
+    Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
+                                               -PropertyToSet "Enabled" `
+                                               -ParamsValue $settings `
+                                               -ParamKey "SecurityValidation"
 }
 
 function Test-xSPWebApplicationGeneralSettings {
@@ -53,10 +67,11 @@ function Test-xSPWebApplicationGeneralSettings {
     [OutputType([System.Boolean])]
     param(
         [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] $DesiredSettings
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
     )
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
-                                                     -DesiredValues $DesiredSettings
+                                                     -DesiredValues $DesiredSettings `
+                                                     -ValuesToCheck @("TimeZone", "Alerts", "AlertsLimit", "RSS", "BlogAPI", "BlogAPIAuthenticated", "BrowserFileHandling", "SecurityValidation", "RecycleBinEnabled", "RecycleBinCleanupEnabled", "RecycleBinRetentionPeriod", "SecondStageRecycleBinQuota", "MaximumUploadSize", "CustomerExperienceProgram", "PresenceEnabled")
     return $testReturn
 }
 

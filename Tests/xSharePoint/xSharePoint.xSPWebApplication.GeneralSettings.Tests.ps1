@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path "C:\users\brian\Documents\GitHubVisualStudio\xSharePoint\Tests\xSharePoint" "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -20,7 +20,7 @@ Describe "xSPWebApplication (General Settings)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            GeneralSettings = @{
+            GeneralSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationSettings -Property @{
                 TimeZone = 3081
                 Alerts = $true
                 AlertsLimit = 10
@@ -36,7 +36,7 @@ Describe "xSPWebApplication (General Settings)" {
                 MaximumUploadSize = 100
                 CustomerExperienceProgram = $true
                 PresenceEnabled = $true
-            }
+            } -ClientOnly)
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")

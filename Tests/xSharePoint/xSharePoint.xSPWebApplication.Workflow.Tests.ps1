@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path "C:\users\brian\Documents\GitHubVisualStudio\xSharePoint\Tests\xSharePoint" "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -20,11 +20,11 @@ Describe "xSPWebApplication (Workflow)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            WorkflowSettings = @{
+            WorkflowSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationWorkflowSettings -Property @{
                 ExternalWorkflowParticipantsEnabled = $true
                 UserDefinedWorkflowsEnabled = $true
                 EmailToNoPermissionWorkflowParticipantsEnable = $true
-            }
+            } -ClientOnly)
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -112,7 +112,6 @@ Describe "xSPWebApplication (Workflow)" {
             $Global:xSPWebApplicationUpdateWorkflowCalled = $false
             It "updates the workflow settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
                 $Global:xSPWebApplicationUpdateWorkflowCalled | Should Be $true
             }
         }

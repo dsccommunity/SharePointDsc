@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path "C:\users\brian\Documents\GitHubVisualStudio\xSharePoint\Tests\xSharePoint" "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -20,23 +20,23 @@ Describe "xSPWebApplication (Throttling)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            ThrottlingSettings = @{
+            ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
                 ListViewThreshold = 1000
                 AllowObjectModelOverride = $true
                 AdminThreshold = 2000
                 ListViewLookupThreshold = 12
                 HappyHourEnabled = $true
-                HappyHour = @{
+                HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
                     Hour = 2
                     Minute = 0
                     Duration = 1
-                }
+                } -ClientOnly)
                 UniquePermissionThreshold = 100
                 RequestThrottling = $true
                 ChangeLogEnabled = $true
                 ChangeLogExpiryDays = 30
                 EventHandlersEnabled = $true
-            }
+            } -ClientOnly)
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -161,23 +161,23 @@ Describe "xSPWebApplication (Throttling)" {
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
-                ThrottlingSettings = @{
+                ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
                     ListViewThreshold = 1000
                     AllowObjectModelOverride = $true
                     AdminThreshold = 2000
                     ListViewLookupThreshold = 12
                     HappyHourEnabled = $true
-                    HappyHour = @{
+                    HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
                         Hour = 5
                         Minute = 0
                         Duration = 1
-                    }
+                    } -ClientOnly)
                     UniquePermissionThreshold = 100
                     RequestThrottling = $true
                     ChangeLogEnabled = $true
                     ChangeLogExpiryDays = 30
                     EventHandlersEnabled = $true
-                }
+                } -ClientOnly)
             }
             $Global:xSPWebApplicationUpdateCalled = $false
             $Global:xSPWebApplicationUpdateHappyHourCalled = $false
@@ -194,14 +194,14 @@ Describe "xSPWebApplication (Throttling)" {
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
                     Url = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = @{
+                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
-                        HappyHour = @{
+                        HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
                             Hour = 100
                             Minute = 0
                             Duration = 1
-                        }
-                    }
+                        } -ClientOnly)
+                    } -ClientOnly)
                 }
                 { Set-TargetResource @testParams } | Should throw
 
@@ -211,14 +211,14 @@ Describe "xSPWebApplication (Throttling)" {
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
                     Url = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = @{
+                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
-                        HappyHour = @{
+                        HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
                             Hour = 5
                             Minute = 100
                             Duration = 1
-                        }
-                    }
+                        } -ClientOnly)
+                    } -ClientOnly)
                 }
                 { Set-TargetResource @testParams } | Should throw
 
@@ -228,14 +228,14 @@ Describe "xSPWebApplication (Throttling)" {
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
                     Url = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = @{
+                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
-                        HappyHour = @{
+                        HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
                             Hour = 5
                             Minute = 0
                             Duration = 100
-                        }
-                    }
+                        } -ClientOnly)
+                    } -ClientOnly)
                 }
                 { Set-TargetResource @testParams } | Should throw
             }

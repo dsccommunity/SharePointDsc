@@ -15,15 +15,15 @@ function Set-xSPWebApplicationWorkflowSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] $Settings
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
     )
-    if($Settings.ContainsKey("UserDefinedWorkflowsEnabled") -eq $true) {
+    if((Test-xSharePointObjectHasProperty $Settings "UserDefinedWorkflowsEnabled") -eq $true) {
         $WebApplication.UserDefinedWorkflowsEnabled =  $Settings.UserDefinedWorkflowsEnabled;
     }
-    if($Settings.ContainsKey("EmailToNoPermissionWorkflowParticipantsEnable") -eq $true) {
+    if((Test-xSharePointObjectHasProperty $Settings "EmailToNoPermissionWorkflowParticipantsEnable") -eq $true) {
         $WebApplication.EmailToNoPermissionWorkflowParticipantsEnabled = $Settings.EmailToNoPermissionWorkflowParticipantsEnable;
     }
-    if($Settings.ContainsKey("ExternalWorkflowParticipantsEnabled") -eq $true) {
+    if((Test-xSharePointObjectHasProperty $Settings "ExternalWorkflowParticipantsEnabled") -eq $true) {
         $WebApplication.ExternalWorkflowParticipantsEnabled = $Settings.ExternalWorkflowParticipantsEnabled;
     }                
     $WebApplication.UpdateWorkflowConfigurationSettings();
@@ -34,11 +34,12 @@ function Test-xSPWebApplicationWorkflowSettings {
     [OutputType([System.Boolean])]
     param(
         [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] $DesiredSettings
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
     )
 
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
-                                                     -DesiredValues $DesiredSettings
+                                                     -DesiredValues $DesiredSettings `
+                                                     -ValuesToCheck @("UserDefinedWorkflowsEnabled","EmailToNoPermissionWorkflowParticipantsEnable","ExternalWorkflowParticipantsEnabled")
     return $testReturn
 }
 
