@@ -55,6 +55,8 @@ function Test-xSPWebApplicationGeneralSettings {
         [parameter(Mandatory = $true)] $CurrentSettings,
         [parameter(Mandatory = $true)] $DesiredSettings
     )
+
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings
     return $testReturn
