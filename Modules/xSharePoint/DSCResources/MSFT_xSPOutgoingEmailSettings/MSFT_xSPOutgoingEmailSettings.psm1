@@ -4,11 +4,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)] [System.String] $SMTPServer,
-        [parameter(Mandatory = $true)] [System.String] $FromAddress,
-        [parameter(Mandatory = $true)] [System.String] $ReplyToAddress,
-        [parameter(Mandatory = $true)] [System.String] $CharacterSet,
+        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String] $SMTPServer,
+        [parameter(Mandatory = $true)]  [System.String] $FromAddress,
+        [parameter(Mandatory = $true)]  [System.String] $ReplyToAddress,
+        [parameter(Mandatory = $true)]  [System.String] $CharacterSet,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
         
     )
@@ -17,9 +17,9 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration  -ErrorAction SilentlyContinue
+        $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration -ErrorAction SilentlyContinue
 
-        if ($null -eq $webApp ) { 
+        if ($null -eq $webApp) { 
             return $null
         }
         return @{
@@ -38,11 +38,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [System.String] $SMTPServer,
-        [parameter(Mandatory = $true)] [System.String] $FromAddress,
-        [parameter(Mandatory = $true)] [System.String] $ReplyToAddress,
-        [parameter(Mandatory = $true)] [System.String] $CharacterSet,
+        [parameter(Mandatory = $true)]  [System.String] $FromAddress,
+        [parameter(Mandatory = $true)]  [System.String] $ReplyToAddress,
+        [parameter(Mandatory = $true)]  [System.String] $CharacterSet,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -67,11 +67,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $WebAppUrl,
+        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [System.String] $SMTPServer,
-        [parameter(Mandatory = $true)] [System.String] $FromAddress,
-        [parameter(Mandatory = $true)] [System.String] $ReplyToAddress,
-        [parameter(Mandatory = $true)] [System.String] $CharacterSet,
+        [parameter(Mandatory = $true)]  [System.String] $FromAddress,
+        [parameter(Mandatory = $true)]  [System.String] $ReplyToAddress,
+        [parameter(Mandatory = $true)]  [System.String] $CharacterSet,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -79,7 +79,7 @@ function Test-TargetResource
     Write-Verbose -Message "Comparing Current and Target Outgoing email settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl", "SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
 }
 
 
