@@ -186,7 +186,7 @@ function Test-xSharePointSpecificParameters() {
                     }
                 }            
             }
-        }
+        } 
     }
     return $returnValue
 }
