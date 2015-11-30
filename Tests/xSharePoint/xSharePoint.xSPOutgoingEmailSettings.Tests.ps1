@@ -30,8 +30,7 @@ Describe "xSPOutgoingEmailSettings" {
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue         
 
 
-
-        Context " Web Application isn't available " {
+        Context "The Web Application isn't available" {
             Mock Get-SPWebApplication -MockWith  { return $null
             }
 
@@ -43,9 +42,13 @@ Describe "xSPOutgoingEmailSettings" {
                 Test-TargetResource @testParams | Should be $false
             }
 
+            It "throws an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw
+            }
         }
 
-        Context " Properties match" {
+
+        Context "The web application exists and the properties match" {
             Mock Get-SPWebApplication { 
                 return @{
                         Url= "http://sharepoint.contoso.com"
@@ -63,11 +66,10 @@ Describe "xSPOutgoingEmailSettings" {
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
         } 
 
 
-        Context " Properties update tests " {
+        Context "The web application exists and the properties don't match" {
             Mock Get-SPWebApplication { 
                 $result = @{
                         Url= "http://sharepoint.contoso.com"
@@ -94,8 +96,5 @@ Describe "xSPOutgoingEmailSettings" {
                 $Global:UpdateMailSettingsCalled | Should Be $true
             }
         }
-
-
-
     }    
 }

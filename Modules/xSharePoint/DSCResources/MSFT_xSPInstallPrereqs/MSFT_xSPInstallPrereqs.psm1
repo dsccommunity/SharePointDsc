@@ -19,6 +19,8 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
         [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $false)] [System.String]  $ODBC,
+        [parameter(Mandatory = $false)] [System.String]  $DotNet452,
         [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
     
@@ -101,6 +103,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
         [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $false)] [System.String]  $ODBC,
+        [parameter(Mandatory = $false)] [System.String]  $DotNet452,
         [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 
@@ -117,7 +121,7 @@ function Set-TargetResource
     }
     if ($majorVersion -eq 16) {
         Write-Verbose -Message "Version: SharePoint 2016"
-        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56","KB2898850","MSVCRT12")
+        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56","KB2898850","MSVCRT12","ODBC","DotNet452")
     }
     
     $prereqArgs = "/unattended"
@@ -126,9 +130,12 @@ function Set-TargetResource
             if (($PSBoundParameters.ContainsKey($_) -and [string]::IsNullOrEmpty($PSBoundParameters.$_)) -or (-not $PSBoundParameters.ContainsKey($_))) {
                 throw "In offline mode for version $majorVersion parameter $_ is required"
             }
+            if ((Test-Path $PSBoundParameters.$_) -eq $false) {
+                throw "The $_ parameter has been passed but the file cannot be found at the path supplied: `"$($PSBoundParameters.$_)`""
+            }
         }
         $requiredParams | ForEach-Object {
-            $prereqArgs += " /$_ `"$($PSBoundParameters.$_)`""
+            $prereqArgs += " /$_`:`"$($PSBoundParameters.$_)`""
         }
     }
 
@@ -183,6 +190,8 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
         [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $false)] [System.String]  $ODBC,
+        [parameter(Mandatory = $false)] [System.String]  $DotNet452,
         [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
     )
 

@@ -4,10 +4,10 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)][System.String] $MailAddress,
-        [parameter(Mandatory = $false)][ValidateRange(0,356)][System.UInt32] $DaysBeforeExpiry,
-        [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries,
+        [parameter(Mandatory = $true)]  [System.String]                             $MailAddress,
+        [parameter(Mandatory = $false)] [ValidateRange(0,356)]  [System.UInt32]     $DaysBeforeExpiry,
+        [parameter(Mandatory = $false)] [ValidateRange(0,36000)][System.UInt32]     $PasswordChangeWaitTimeSeconds,
+        [parameter(Mandatory = $false)] [ValidateRange(0,99)]   [System.UInt32]     $NumberOfRetries,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -33,10 +33,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)][System.String] $MailAddress,
-        [parameter(Mandatory = $false)][ValidateRange(0,356 )][System.UInt32] $DaysBeforeExpiry,
-        [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $false)][ValidateRange(0,99 )][System.UInt32] $NumberOfRetries,
+        [parameter(Mandatory = $true)]  [System.String]                             $MailAddress,
+        [parameter(Mandatory = $false)] [ValidateRange(0,356)]  [System.UInt32]     $DaysBeforeExpiry,
+        [parameter(Mandatory = $false)] [ValidateRange(0,36000)][System.UInt32]     $PasswordChangeWaitTimeSeconds,
+        [parameter(Mandatory = $false)] [ValidateRange(0,99)]   [System.UInt32]     $NumberOfRetries,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -47,18 +47,17 @@ function Set-TargetResource
 
         if ($null -eq $farm ) { return $null }
         
-        $farm.PasswordChangeEmailAddress=$params.MailAddress;
-        if($params.PasswordChangeWaitTimeSeconds -ne $null){
-            $farm.PasswordChangeGuardTime=$params.PasswordChangeWaitTimeSeconds
+        $farm.PasswordChangeEmailAddress = $params.MailAddress;
+        if($params.PasswordChangeWaitTimeSeconds -ne $null) {
+            $farm.PasswordChangeGuardTime = $params.PasswordChangeWaitTimeSeconds
         }
-        if($params.NumberOfRetries -ne $null){
-            $farm.PasswordChangeMaximumTries=$params.NumberOfRetries
+        if($params.NumberOfRetries -ne $null) {
+            $farm.PasswordChangeMaximumTries = $params.NumberOfRetries
         }
-        if($params.DaysBeforeExpiry -ne $null){
-            $farm.DaysBeforePasswordExpirationToSendEmail=$params.DaysBeforeExpiry
+        if($params.DaysBeforeExpiry -ne $null) {
+            $farm.DaysBeforePasswordExpirationToSendEmail = $params.DaysBeforeExpiry
         }
         $farm.Update();
-
     }
 }
 
@@ -69,10 +68,10 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)][System.String] $MailAddress,
-        [parameter(Mandatory = $false)][ValidateRange(0,356)][System.UInt32] $DaysBeforeExpiry,
-        [parameter(Mandatory = $false)][ValidateRange(0,36000)][System.UInt32] $PasswordChangeWaitTimeSeconds,
-        [parameter(Mandatory = $false)][ValidateRange(0,99)][System.UInt32] $NumberOfRetries,
+        [parameter(Mandatory = $true)]  [System.String]                             $MailAddress,
+        [parameter(Mandatory = $false)] [ValidateRange(0,356)]  [System.UInt32]     $DaysBeforeExpiry,
+        [parameter(Mandatory = $false)] [ValidateRange(0,36000)][System.UInt32]     $PasswordChangeWaitTimeSeconds,
+        [parameter(Mandatory = $false)] [ValidateRange(0,99)]   [System.UInt32]     $NumberOfRetries,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 

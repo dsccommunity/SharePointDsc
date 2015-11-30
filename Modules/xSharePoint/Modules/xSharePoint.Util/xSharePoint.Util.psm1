@@ -27,6 +27,10 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-xSharePointContentService() {
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+    return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+}
 
 function Get-xSharePointInstalledProductVersion() {
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
@@ -39,7 +43,7 @@ function Invoke-xSharePointCommand() {
     param
     (
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential,
-        [parameter(Mandatory = $false)] [HashTable]   $Arguments,
+        [parameter(Mandatory = $false)] [Object[]]    $Arguments,
         [parameter(Mandatory = $true)]  [ScriptBlock] $ScriptBlock
     )
 
@@ -155,7 +159,7 @@ function Test-xSharePointSpecificParameters() {
     }
 
     $KeyList | ForEach-Object {
-        if ($_ -ne "Verbose") {
+        if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) {
             if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
                 if ($DesiredValues.ContainsKey($_)) {
                     $desiredType = $DesiredValues.$_.GetType()
@@ -171,14 +175,18 @@ function Test-xSharePointSpecificParameters() {
                                 $returnValue = $false
                             }
                         }
+                        "Int16" {
+                            if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                $returnValue = $false
+                            }
+                        }
                         default {
                             $returnValue = $false
                         }
                     }
                 }            
             }
-        }
-        
+        } 
     }
     return $returnValue
 }

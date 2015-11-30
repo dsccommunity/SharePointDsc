@@ -9,12 +9,11 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
         [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String]  $DatabasePassword,
         [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String]  $DatabaseUsername,
         [parameter(Mandatory = $false)] [System.String]  $FailoverDatabaseServer,
         [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
         [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
+        [parameter(Mandatory = $false)] [ValidateSet("Windows", "SQL")] [System.String]  $DatabaseAuthenticationType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -23,7 +22,6 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
         if ($null -eq $serviceApps) { 
@@ -58,12 +56,11 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
         [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String]  $DatabasePassword,
         [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String]  $DatabaseUsername,
         [parameter(Mandatory = $false)] [System.String]  $FailoverDatabaseServer,
         [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
         [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
+        [parameter(Mandatory = $false)] [ValidateSet("Windows", "SQL")] [System.String]  $DatabaseAuthenticationType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -71,11 +68,19 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
     $params = $PSBoundParameters
 
+    if((($params.ContainsKey("DatabaseAuthenticationType") -eq $true) -and `
+        ($params.ContainsKey("DatabaseCredentials") -eq $false)) -or `
+        (($params.ContainsKey("DatabaseCredentials") -eq $true) -and `
+        ($params.ContainsKey("DatabaseAuthenticationType") -eq $false))) {
+        throw "Where DatabaseCredentials are specified you must also specify DatabaseAuthenticationType to identify the type of credentials being passed"
+        return;
+    }
+
     switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
         16 {
             $hasOptionalParams = $false
-            @("AuditlogMaxSize","DatabaseName","DatabasePassword","DatabaseServer","DatabaseUsername", `
-              "FailoverDatabaseServer","PartitionMode","Sharing","DatabaseCredentials") | ForEach-Object {
+            @("AuditlogMaxSize","DatabaseName","DatabaseServer","FailoverDatabaseServer",`
+                "PartitionMode","Sharing","DatabaseCredentials") | ForEach-Object {
                 if ($PSBoundParameters.ContainsKey($_) -eq $true) { $hasOptionalParams = $true }
             }
             if ($hasOptionalParams -eq $false) {
@@ -91,6 +96,14 @@ function Set-TargetResource
             $params = $args[0]
             
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+
+            if($params.ContainsKey("DatabaseAuthenticationType")) {
+                if ($params.DatabaseAuthenticationType -eq "SQL") {
+                    $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
+                    $params.Add("DatabasePassword", (ConvertTo-SecureString $params.DatabaseCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+                }
+                $params.Remove("DatabaseAuthenticationType")
+            }
 
             New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy"
         }
@@ -130,12 +143,11 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
         [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String]  $DatabasePassword,
         [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String]  $DatabaseUsername,
         [parameter(Mandatory = $false)] [System.String]  $FailoverDatabaseServer,
         [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
         [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
+        [parameter(Mandatory = $false)] [ValidateSet("Windows", "SQL")] [System.String]  $DatabaseAuthenticationType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )

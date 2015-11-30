@@ -71,6 +71,7 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Get-xSharePointInstalledProductVersion",
+                    "Get-xSharePointContentService",
                     "Rename-xSharePointParamValue",
                     "Add-xSharePointUserToLocalAdmin",
                     "Remove-xSharePointUserToLocalAdmin",
@@ -95,7 +96,7 @@ AliasesToExport = '*'
 # HelpInfo URI of this module
 # HelpInfoURI = ''
 
-# Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
+# Default prefix for commands exported from this module. Override the default prefix using Import-Module -prefix.
 # DefaultCommandPrefix = ''
 
 
