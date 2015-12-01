@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPAppManagementServiceApp"
+$ModuleName = "MSFT_xSPSubscriptionSettingsService"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPAppManagementServiceApp" {
+Describe "xSPSubscriptionSettingsService" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test App"
@@ -32,7 +32,7 @@ Describe "xSPAppManagementServiceApp" {
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPAppManagementServiceApplication { }
+            Mock New-SPSubscriptionSettingsServiceApplication { }
 
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -45,11 +45,11 @@ Describe "xSPAppManagementServiceApp" {
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPAppManagementServiceApplication
+                Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
             }
         }
 
-        Context "When service applications exist in the current farm but the specific Add-in app does not" {
+        Context "When service applications exist in the current farm but the specific subscription settings service app does not" {
 
             Mock Get-SPServiceApplication { return @(@{
                 TypeName = "Some other service app type"
@@ -65,7 +65,7 @@ Describe "xSPAppManagementServiceApp" {
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Business Data Connectivity Service Application"
+                    TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
@@ -87,8 +87,8 @@ Describe "xSPAppManagementServiceApp" {
 
         Context "When a service application exists and the app pool is not configured correctly" {
             Mock Get-SPServiceApplication { 
-                $service = @(@{
-                    TypeName = "Business Data Connectivity Service Application"
+                return @(@{
+                    TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
@@ -96,15 +96,9 @@ Describe "xSPAppManagementServiceApp" {
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 })
-                    
-                $service = $service | Add-Member ScriptMethod Update {
-                    $Global:xSPAppServiceUpdateCalled = $true
-                } -PassThru 
-            return $result 
-                return $service
             }
-            Mock Get-SPServiceApplicationPool { 
-                @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Set-SPSubscriptionSettingsServiceApplication { }
 
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -112,8 +106,9 @@ Describe "xSPAppManagementServiceApp" {
 
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
+
                 Assert-MockCalled Get-SPServiceApplicationPool
-                $Global:xSPWebApplicationUpdateWorkflowCalled | Should Be $true
+                Assert-MockCalled Set-SPSubscriptionSettingsServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
             }
         }
     }
