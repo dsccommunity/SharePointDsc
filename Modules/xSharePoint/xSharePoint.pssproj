@@ -76,6 +76,7 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPAddInManagementServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -86,6 +87,7 @@
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPAddInManagementServiceApp\MSFT_xSPAddInManagementServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.psm1" />
@@ -146,6 +148,7 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DSCResources\MSFT_xSPAddInManagementServiceApp\MSFT_xSPAddInManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
