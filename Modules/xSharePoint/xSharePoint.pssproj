@@ -65,6 +65,7 @@
     <Folder Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPManagedPath\" />
     <Folder Include="DSCResources\MSFT_xSPQuotaTemplate\" />
+    <Folder Include="DSCResources\MSFT_xSPOutgoingEmailSettings\" />
     <Folder Include="DSCResources\MSFT_xSPSearchServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPSecureStoreServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPServiceAppPool\" />
@@ -75,9 +76,11 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
+    <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
+    <Folder Include="Modules\xSharePoint.WebApplication\" />
     <Folder Include="Modules\xSharePoint.Util\" />
     <Folder Include="Examples\" />
   </ItemGroup>
@@ -112,6 +115,9 @@
     <Compile Include="DSCResources\MSFT_xSPManagedPath\MSFT_xSPManagedPath.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPQuotaTemplate\MSFT_xSPQuotaTemplate.psm1" />
     <Compile Include="DSCResources\MSFT_xSPQuotaTemplate\MSFT_xSPQuotaTemplate.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPOutgoingEmailSettings\MSFT_xSPOutgoingEmailSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPOutgoingEmailSettings\MSFT_xSPOutgoingEmailSettings.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSearchServiceApp\MSFT_xSPSearchServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSearchServiceApp\MSFT_xSPSearchServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPSecureStoreServiceApp\MSFT_xSPSecureStoreServiceApp.psm1" />
@@ -136,9 +142,14 @@
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
     <Compile Include="Examples\Small Farm\SharePoint.psd1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
+    <Compile Include="Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" />
+    <Compile Include="Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" />
+    <Compile Include="Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" />
+    <Compile Include="Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" />
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

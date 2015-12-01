@@ -1,3 +1,64 @@
+﻿[ClassVersion("1.0.0")]
+Class MSFT_xSPFilesTypes
+{
+    [write] string Blocked[];
+    [write] string EnsureBlocked[];
+    [write] string EnsureAllowed[];
+};
+
+[ClassVersion("1.0.0")]
+Class MSFT_xSPWebApplicationHappyHour
+{
+    [write] uint32 Hour;
+    [write] uint32 Minute;
+    [write] uint32 Duration;
+
+};
+
+[ClassVersion("1.0.0")]
+Class MSFT_xSPWebApplicationThrottling
+{
+    [write] uint32 ListViewThreshold;
+    [write] boolean AllowObjectModelOverride; 
+    [write] uint32 AdminThreshold;
+    [write] uint32 ListViewLookupThreshold;
+    [write] boolean HappyHourEnabled;
+    [Write, EmbeddedInstance("MSFT_xSPWebApplicationHappyHour")] string HappyHour;
+    [write] uint32 UniquePermissionThreshold;
+    [write] boolean RequestThrottling;
+    [write] boolean ChangeLogEnabled;
+    [write] uint32 ChangeLogExpiryDays;
+    [write] boolean EventHandlersEnabled;
+};
+
+[ClassVersion("1.0.0")]
+Class MSFT_xSPWebApplicationWorkflowSettings
+{
+    [write] boolean ExternalWorkflowParticipantsEnabled;
+    [write] boolean UserDefinedWorkflowsEnabled;
+    [write] boolean EmailToNoPermissionWorkflowParticipantsEnable;
+};
+
+[ClassVersion("1.0.0")]
+Class MSFT_xSPWebApplicationSettings
+{
+    [write] uint32 TimeZone;
+    [write] boolean Alerts;
+    [write] uint32 AlertsLimit;
+    [write] boolean RSS;
+    [write] boolean BlogAPI;
+    [write] boolean BlogAPIAuthenticated;
+    [write, ValueMap{"Strict","Permissive"}, Values{"Stric","Permissive"}] String BrowserFileHandling;
+    [write] boolean SecurityValidation;
+    [write] boolean RecycleBinEnabled;
+    [write] boolean RecycleBinCleanupEnabled;
+    [write] uint32 RecycleBinRetentionPeriod;
+    [write] uint32 SecondStageRecycleBinQuota;
+    [write] uint32 MaximumUploadSize;
+    [write] boolean CustomerExperienceProgram;
+    [write] boolean PresenceEnabled;
+};
+
 /*
 **Description**
 
@@ -20,7 +81,7 @@ The resource will provision the web application with all of the current settings
         PsDscRunAsCredential   = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWebApplication")]
+[ClassVersion("1.1.0.0"), FriendlyName("xSPWebApplication")]
 class MSFT_xSPWebApplication : OMI_BaseResource
 {
     [Key] string Name;
@@ -34,6 +95,10 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write] string HostHeader;
     [Write] string Path;
     [Write] string Port;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, EmbeddedInstance("MSFT_xSPWebApplicationSettings")] string GeneralSettings;
+    [Write, EmbeddedInstance("MSFT_xSPWebApplicationWorkflowSettings")] string WorkflowSettings;
+    [Write, EmbeddedInstance("MSFT_xSPWebApplicationThrottling")] string ThrottlingSettings;
+    [Write, EmbeddedInstance("MSFT_xSPFilesTypes")] string BlockedFileTypes;
 };
 
