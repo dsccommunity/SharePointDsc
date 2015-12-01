@@ -96,6 +96,7 @@ Describe "xSPSubscriptionSettingsService" {
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 })
+
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Set-SPSubscriptionSettingsServiceApplication { }

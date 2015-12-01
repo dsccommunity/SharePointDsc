@@ -74,7 +74,7 @@ function Set-TargetResource
                 $AppService =  Get-SPServiceApplication -Name $params.Name `
                     | Where-Object { $_.TypeName -eq "App Management Service Application"  } 
                 $AppService.ApplicationPool = $appPool
-                $service.Update()
+                $AppService.Update()
                     
             }
         }

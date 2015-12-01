@@ -73,9 +73,9 @@ function Set-TargetResource
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
-                Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object { $_.TypeName -eq "Microsoft SharePoint Foundation Subscription Settings Service Application" } `
-                    | Set-SPSubscriptionSettingsServiceApplication -ApplicationPool $appPool
+                $service = Get-SPServiceApplication -Name $params.Name `
+                    | Where-Object { $_.TypeName -eq "Microsoft SharePoint Foundation Subscription Settings Service Application" } 
+                $service    | Set-SPSubscriptionSettingsServiceApplication -ApplicationPool $appPool
             }
         }
     }

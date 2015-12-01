@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPAppManagementServiceApp"
+$ModuleName = "MSFT_xSPAddInManagementServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPAppManagementServiceApp" {
+Describe "xSPAddInManagementServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test App"
@@ -32,7 +32,8 @@ Describe "xSPAppManagementServiceApp" {
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPAppManagementServiceApplication { }
+            Mock New-SPAppManagementServiceApplication {  return  @(@{})}
+            Mock New-SPAppManagementServiceApplicationProxy{ return $null }
 
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -65,7 +66,7 @@ Describe "xSPAppManagementServiceApp" {
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Business Data Connectivity Service Application"
+                    TypeName = "App Management Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
@@ -88,7 +89,7 @@ Describe "xSPAppManagementServiceApp" {
         Context "When a service application exists and the app pool is not configured correctly" {
             Mock Get-SPServiceApplication { 
                 $service = @(@{
-                    TypeName = "Business Data Connectivity Service Application"
+                    TypeName = "App Management Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
@@ -100,7 +101,6 @@ Describe "xSPAppManagementServiceApp" {
                 $service = $service | Add-Member ScriptMethod Update {
                     $Global:xSPAppServiceUpdateCalled = $true
                 } -PassThru 
-            return $result 
                 return $service
             }
             Mock Get-SPServiceApplicationPool { 
@@ -113,7 +113,7 @@ Describe "xSPAppManagementServiceApp" {
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplicationPool
-                $Global:xSPWebApplicationUpdateWorkflowCalled | Should Be $true
+                $Global:xSPAppServiceUpdateCalled | Should Be $true
             }
         }
     }
