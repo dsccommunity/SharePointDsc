@@ -1,0 +1,12 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPQuotaTemplate")]
+class MSFT_xSPQuotaTemplate : OMI_BaseResource
+{
+    [Key] string Name;
+    [Write] uint32 StorageMaxInMB;
+    [Write] uint32 StorageWarningInMB;
+    [Write] uint32 MaximumUsagePointsSolutions;
+    [Write] uint32 WarningUsagePointsSolutions;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
