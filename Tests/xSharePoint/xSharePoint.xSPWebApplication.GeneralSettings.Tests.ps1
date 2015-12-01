@@ -7,10 +7,11 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPWebApplication"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+
 
 Describe "xSPWebApplication (General Settings)" {
     InModuleScope $ModuleName {

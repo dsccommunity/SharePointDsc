@@ -92,6 +92,7 @@ function Test-xSPWebApplicationThrottlingSettings {
         [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
     )
 
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @(

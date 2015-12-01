@@ -57,7 +57,7 @@ function Test-xSPWebApplicationBlockedFileTypes {
         [parameter(Mandatory = $true)] $CurrentSettings,
         [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
     )
-
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
     if ((Test-xSharePointObjectHasProperty $DesiredSettings "Blocked") -eq $true -and ((Test-xSharePointObjectHasProperty $DesiredSettings "EnsureBlocked") -eq $true -or (Test-xSharePointObjectHasProperty $DesiredSettings "EnsureAllowed") -eq $true)) {
         throw "Blocked file types must use either the 'blocked' property or the 'EnsureBlocked' and/or 'EnsureAllowed' properties, but not both."
     }
