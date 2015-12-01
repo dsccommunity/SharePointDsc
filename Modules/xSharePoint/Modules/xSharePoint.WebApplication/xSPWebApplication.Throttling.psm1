@@ -55,13 +55,9 @@ function Set-xSPWebApplicationThrottlingSettings {
                                                -ParamKey "RequestThrottling"
     
     # Create time span object separately
-    if (Test-xSharePointObjectHasProperty $Settings "ChangeLogExpiryDays") {
+    if ((Test-xSharePointObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true) {
         $WebApplication.ChangeLogRetentionPeriod = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
     }
-
-
-
-    
 }
 
 
