@@ -21,7 +21,7 @@ Describe "xSPWebApplication (General Settings)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            GeneralSettings = @{
+            GeneralSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationSettings -Property @{
                 TimeZone = 3081
                 Alerts = $true
                 AlertsLimit = 10
@@ -37,7 +37,7 @@ Describe "xSPWebApplication (General Settings)" {
                 MaximumUploadSize = 100
                 CustomerExperienceProgram = $true
                 PresenceEnabled = $true
-            }
+            } -ClientOnly)
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")

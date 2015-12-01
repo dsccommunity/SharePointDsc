@@ -75,8 +75,10 @@ CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Rename-xSharePointParamValue",
                     "Add-xSharePointUserToLocalAdmin",
                     "Remove-xSharePointUserToLocalAdmin",
+                    "Test-xSharePointObjectHasProperty",
                     "Test-xSharePointUserIsLocalAdmin",
-                    "Test-xSharePointSpecificParameters")
+                    "Test-xSharePointSpecificParameters",
+                    "Set-xSharePointObjectPropertyIfValueExists")
 
 # Variables to export from this module
 VariablesToExport = '*'

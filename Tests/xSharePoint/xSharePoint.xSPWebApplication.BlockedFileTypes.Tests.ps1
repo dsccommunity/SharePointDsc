@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot  "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -20,9 +20,9 @@ Describe "xSPWebApplication (Blocked file types)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            BlockedFileTypes = @{
+            BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
                 Blocked = @("exe", "dll", "ps1")
-            }
+            } -ClientOnly) 
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -121,10 +121,10 @@ Describe "xSPWebApplication (Blocked file types)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            BlockedFileTypes = @{
+            BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
                 EnsureBlocked = @("exe")
                 EnsureAllowed = @("pdf")
-            }
+            } -ClientOnly)
         }
 
         Context "The web appliation exists and a list of types to include and exclude both match" {
@@ -238,11 +238,11 @@ Describe "xSPWebApplication (Blocked file types)" {
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
-                BlockedFileTypes = @{
+                BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
                     Blocked = @("exe", "dll", "ps1")
                     EnsureBlocked = @("exe", "dll")
                     EnsureAllowed = @("ps1")
-                }
+                } -ClientOnly)
             }
 
             It "throws an exception on the test method" {
@@ -287,7 +287,8 @@ Describe "xSPWebApplication (Blocked file types)" {
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
-                BlockedFileTypes = @{ }
+                BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
+                } -ClientOnly)
             }
 
             It "throws an exception on the test method" {

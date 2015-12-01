@@ -16,16 +16,17 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] $GeneralSettings,
-        [parameter(Mandatory = $false)] $WorkflowSettings,
-        [parameter(Mandatory = $false)] $ThrottlingSettings,
-        [parameter(Mandatory = $false)] $BlockedFileTypes
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $GeneralSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $WorkflowSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ThrottlingSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $BlockedFileTypes
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
+        $ScriptRoot = $args[1]
         
         
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
@@ -34,10 +35,10 @@ function Get-TargetResource
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
         if ($authProvider.DisableKerberos -eq $true) { $localAuthMode = "NTLM" } else { $localAuthMode = "Kerberos" }
 
-        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
-        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
-        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
-        Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
 
         return @{
             Name = $wa.DisplayName
@@ -79,15 +80,16 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] $GeneralSettings,
-        [parameter(Mandatory = $false)] $WorkflowSettings,
-        [parameter(Mandatory = $false)] $ThrottlingSettings,
-        [parameter(Mandatory = $false)] $BlockedFileTypes
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $GeneralSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $WorkflowSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ThrottlingSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $BlockedFileTypes
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
+        $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) {
@@ -119,19 +121,19 @@ function Set-TargetResource
 
         # Resource throttling settings
         if ($params.ContainsKey("ThrottlingSettings") -eq $true) {
-            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
             Set-xSPWebApplicationThrottlingSettings -WebApplication $wa -Settings $params.ThrottlingSettings
         }
         
         # Blocked file types
         if ($params.ContainsKey("BlockedFileTypes") -eq $true) {
-            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" -Resolve)
             Set-xSPWebApplicationBlockedFileTypes -WebApplication $wa -Settings $params.BlockedFileTypes
         }
 
         # General Settings
         if ($params.ContainsKey("GeneralSettings") -eq $true) {
-            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
             Set-xSPWebApplicationGeneralSettings -WebApplication $wa -Settings $params.GeneralSettings
         }
 
@@ -143,10 +145,20 @@ function Set-TargetResource
 
         # Workflow settings
         if ($params.ContainsKey("WorkflowSettings") -eq $true) {
-            Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
             # Workflow uses a seperate update method, to avoid update conflicts get a fresh web app object
             $wa2 = Get-SPWebApplication -Identity $params.Name
             Set-xSPWebApplicationWorkflowSettings -WebApplication $wa2 -Settings $params.WorkflowSettings
+        }
+
+        # Happy hour settings
+        if ($params.ContainsKey("ThrottlingSettings") -eq $true) {
+            if ((Test-xSharePointObjectHasProperty $params.ThrottlingSettings "HappyHour") -eq $true) {
+                Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+                # Happy hour settins use separate update method so use a fresh web app to update these
+                $wa3 = Get-SPWebApplication -Identity $params.Name
+                Set-xSPWebApplicationHappyHourSettings -WebApplication $wa3 -Settings $params.ThrottlingSettings.HappyHour
+            }
         }
     }
 }
@@ -170,10 +182,10 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] $GeneralSettings,
-        [parameter(Mandatory = $false)] $WorkflowSettings,
-        [parameter(Mandatory = $false)] $ThrottlingSettings,
-        [parameter(Mandatory = $false)] $BlockedFileTypes
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $GeneralSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $WorkflowSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ThrottlingSettings,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $BlockedFileTypes
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

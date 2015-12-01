@@ -27,55 +27,64 @@ function Set-xSPWebApplicationThrottlingSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] $Settings
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
     )
 
-    if($Settings.ContainsKey("ListViewThreshold") -eq $true) {
-        $WebApplication.MaxItemsPerThrottledOperation = $Settings.ListViewThreshold
+    # Format here is SPWebApplication property = Custom settings property
+    $mapping = @{
+        MaxItemsPerThrottledOperation = "ListViewThreshold"
+        AllowOMCodeOverrideThrottleSettings = "AllowObjectModelOverride"
+        MaxItemsPerThrottledOperationOverride = "AdminThreshold"
+        MaxQueryLookupFields = "ListViewLookupThreshold"
+        UnthrottledPrivilegedOperationWindowEnabled = "HappyHourEnabled"
+        MaxUniquePermScopesPerList = "UniquePermissionThreshold"
+        EventHandlersEnabled = "EventHandlersEnabled"
+        ChangeLogExpirationEnabled = "ChangeLogEnabled"
+    } 
+    $mapping.Keys | ForEach-Object {
+        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication `
+                                                   -PropertyToSet $_ `
+                                                   -ParamsValue $settings `
+                                                   -ParamKey $mapping[$_]
     }
-    if($Settings.ContainsKey("AllowObjectModelOverride") -eq $true) {
-        $WebApplication.AllowOMCodeOverrideThrottleSettings =  $Settings.AllowObjectModelOverride
-    }
-    if($Settings.ContainsKey("AdminThreshold") -eq $true) {
-        $WebApplication.MaxItemsPerThrottledOperationOverride = $Settings.AdminThreshold
-    }
-    if($Settings.ContainsKey("ListViewLookupThreshold") -eq $true) {
-        $WebApplication.MaxQueryLookupFields =  $Settings.ListViewLookupThreshold
-    }
-    if($Settings.ContainsKey("HappyHourEnabled") -eq $true) {
-        $WebApplication.UnthrottledPrivilegedOperationWindowEnabled =$Settings.HappyHourEnabled
-    }
-    if($Settings.ContainsKey("HappyHour") -eq $true) {
-        $happyHour = $Settings.HappyHour;
-        if ($happyHour.ContainsKey("Hour") -eq $false -or $happyHour.ContainsKey("Minute") -eq $false -or $happyHour.ContainsKey("Duration") -eq $false) {
-            throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
-        } else {
-            if ($happyHour.Hour -lt 0 -or $happyHour.Hour -gt 23) {
-                throw "Happy hour setting 'hour' must be between 0 and 23"
-            }
-            if ($happyHour.Minute -lt 0 -or $happyHour.Minute -gt 59) {
-                throw "Happy hour setting 'minute' must be between 0 and 59"
-            }
-            if ($happyHour.Duration -lt 0 -or $happyHour.Duration -gt 23) {
-                throw "Happy hour setting 'hour' must be between 0 and 23"
-            }
-            $WebApplication.SetDailyUnthrottledPrivilegedOperationWindow($happyHour.Hour, $happyHour.Minute, $happyHour.Duration)
-        }
-    }
-    if($Settings.ContainsKey("UniquePermissionThreshold") -eq $true) {
-        $WebApplication.MaxUniquePermScopesPerList = $Settings.UniquePermissionThreshold
-    }
-    if($Settings.ContainsKey("EventHandlersEnabled") -eq $true) {
-        $WebApplication.EventHandlersEnabled = $Settings.EventHandlersEnabled
-    }
-    if($Settings.ContainsKey("RequestThrottling") -eq $true) {
-        $WebApplication.HttpThrottleSettings.PerformThrottle = $Settings.RequestThrottling
-    }
-    if($Settings.ContainsKey("ChangeLogEnabled") -eq $true) {
-        $WebApplication.ChangeLogExpirationEnabled = $Settings.ChangeLogEnabled
-    }
-    if($Settings.ContainsKey("ChangeLogExpiryDays") -eq $true) {
+
+    # Set throttle settings child property seperately
+    Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.HttpThrottleSettings `
+                                               -PropertyToSet "PerformThrottle" `
+                                               -ParamsValue $Settings `
+                                               -ParamKey "RequestThrottling"
+    
+    # Create time span object separately
+    if (Test-xSharePointObjectHasProperty $Settings "ChangeLogExpiryDays") {
         $WebApplication.ChangeLogRetentionPeriod = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
+    }
+
+
+
+    
+}
+
+
+function Set-xSPWebApplicationHappyHourSettings {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $true)] $WebApplication,
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
+    )
+
+    if ((Test-xSharePointObjectHasProperty $Settings "Hour") -eq $false -or (Test-xSharePointObjectHasProperty $Settings "Minute") -eq $false -or (Test-xSharePointObjectHasProperty $Settings "Duration") -eq $false) {
+        throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
+    } else {
+        if ($Settings.Hour -lt 0 -or $Settings.Hour -gt 23) {
+            throw "Happy hour setting 'hour' must be between 0 and 23"
+        }
+        if ($Settings.Minute -lt 0 -or $Settings.Minute -gt 59) {
+            throw "Happy hour setting 'minute' must be between 0 and 59"
+        }
+        if ($Settings.Duration -lt 0 -or $Settings.Duration -gt 23) {
+            throw "Happy hour setting 'hour' must be between 0 and 23"
+        }
+        $WebApplication.SetDailyUnthrottledPrivilegedOperationWindow($happyHour.Hour, $happyHour.Minute, $happyHour.Duration)
     }
 }
 
@@ -84,7 +93,7 @@ function Test-xSPWebApplicationThrottlingSettings {
     [OutputType([System.Boolean])]
     param(
         [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] $DesiredSettings
+        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
     )
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
@@ -102,9 +111,10 @@ function Test-xSPWebApplicationThrottlingSettings {
                                                          "EventHandlersEnabled"
                                                      )
     if ($testReturn -eq $true) {
-        if ($DesiredSettings.ContainsKey("HappyHour") -eq $true) {
+        if ((Test-xSharePointObjectHasProperty $DesiredSettings "HappyHour") -eq $true) {
             $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings.HappyHour `
-                                                             -DesiredValues $DesiredSettings.HappyHour
+                                                             -DesiredValues $DesiredSettings.HappyHour `
+                                                             -ValuesToCheck @("Hour", "Minute", "Duration")
         }
     }
     return $testReturn
