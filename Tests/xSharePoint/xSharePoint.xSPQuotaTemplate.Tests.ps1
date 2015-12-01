@@ -81,7 +81,9 @@ Describe "xSPQuotaTemplate" {
         Context "The server is in a farm and the template doesn't exist" {
             Mock Get-xSharePointContentService {
                 $returnVal = @{
-                    QuotaTemplates = $null
+                    QuotaTemplates = @{
+                        Test = $null
+                    }
                 } 
                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
                 return $returnVal
