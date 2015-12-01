@@ -11,16 +11,18 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPWebApplication"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.Util\xSharePoint.Util.psm1")
 
 Describe "xSPWebApplication" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Managed Metadata Service App"
+            Name = "SharePoint Sites"
             ApplicationPool = "SharePoint Web Apps"
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
         }
+        
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
         Mock Invoke-xSharePointCommand { 
