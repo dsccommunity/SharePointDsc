@@ -67,6 +67,7 @@
     <Compile Include="xSharePoint.TestHarness.psm1" />
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPQuotaTemplate.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAntivirusSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />

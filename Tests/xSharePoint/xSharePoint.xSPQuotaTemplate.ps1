@@ -9,18 +9,18 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPQuotaTemplate"
+$ModuleName = "MSFT_xSPAntivirusSettings"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPQuotaTemplate" {
+Describe "xSPAntivirusSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "Test"
-            StorageMaxInMB = 1024
-            StorageWarningInMB = 512
-            MaximumUsagePointsSolutions = 1000
-            WarningUsagePointsSolutions = 800
-            Ensure = "Present"
+            ScanOnDownload = $true
+            ScanOnUpload = $true
+            AllowDownloadInfected = $true
+            AttemptToClean = $true
+            TimeoutDuration = 60
+            NumberOfThreads = 5
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -49,14 +49,18 @@ Describe "xSPQuotaTemplate" {
         Context "The server is in a farm and the incorrect settings have been applied" {
             Mock Get-xSharePointContentService {
                 $returnVal = @{
-                    QuoteTemplates["Test"] = @{
-                        StorageMaximumLevel = 512
-                        StorageWarningLevel = 256
-                        UserCodeMaximumLevel = 400
-                        UserCodeWarningLevel = 200
+                    AntivirusSettings = @{
+                        AllowDownload = $false
+                        DownloadScanEnabled = $false
+                        UploadScanEnabled = $false
+                        CleaningEnabled = $false
+                        NumberOfThreads = 0
+                        Timeout = @{
+                            TotalSeconds = 0;
+                        }
                     }
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointAntivirusUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPFarm { return @{} }
@@ -69,24 +73,28 @@ Describe "xSPQuotaTemplate" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointQuotaTemplatesUpdated = $false
-            It "updates the quota template settings" {
+            $Global:xSharePointAntivirusUpdated = $false
+            It "updates the antivirus settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointQuotaTemplatesUpdated | Should Be $true
+                $Global:xSharePointAntivirusUpdated | Should Be $true
             }
         }
 
         Context "The server is in a farm and the correct settings have been applied" {
             Mock Get-xSharePointContentService {
                 $returnVal = @{
-                    QuoteTemplates["Test"] = @{
-                        StorageMaximumLevel = 1024
-                        StorageWarningLevel = 512
-                        UserCodeMaximumLevel = 800
-                        UserCodeWarningLevel = 400
+                    AntivirusSettings = @{
+                        AllowDownload = $true
+                        DownloadScanEnabled = $true
+                        UploadScanEnabled = $true
+                        CleaningEnabled = $true
+                        NumberOfThreads = 5
+                        Timeout = @{
+                            TotalSeconds = 60;
+                        }
                     }
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointAntivirusUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPFarm { return @{} }

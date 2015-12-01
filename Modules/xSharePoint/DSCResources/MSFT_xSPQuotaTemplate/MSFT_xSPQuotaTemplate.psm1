@@ -14,6 +14,13 @@ function Get-TargetResource
     )
     
     Write-Verbose -Message "Getting Quota Template settings"
+    if ($StorageMaxInMB -lt $StorageWarningInMB) {
+        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+    }
+
+    if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) {
+        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+    }
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -67,6 +74,14 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting quota template settings"
 
+    if ($StorageMaxInMB -lt $StorageWarningInMB) {
+        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+    }
+
+    if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) {
+        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+    }
+
     switch ($Ensure) {
         "Present" {
             Write-Verbose "Ensure is set to Present - Add or update template"
@@ -90,24 +105,29 @@ function Set-TargetResource
                     #Template does not exist, create new template
                     $newTemplate = New-Object Microsoft.SharePoint.Administration.SPQuotaTemplate
                     $newTemplate.Name = $params.Name
-                    $newTemplate.StorageMaximumLevel = ($params.StorageMaxInMB * 1048576) # Convert from megabytes to bytes
-                    $newTemplate.StorageWarningLevel = ($params.StorageWarningInMB * 1048576) # Convert from megabytes to bytes
-                    $newTemplate.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions
-                    $newTemplate.UserCodeWarningLevel = $params.WarningUsagePointsSolutions
+                    if ($params.ContainsKey("StorageMaxInMB")) { $newTemplate.StorageMaximumLevel = ($params.StorageMaxInMB * 1048576) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("StorageWarningInMB")) { $newTemplate.StorageWarningLevel = ($params.StorageWarningInMB * 1048576) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("MaximumUsagePointsSolutions")) { $newTemplate.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("WarningUsagePointsSolutions")) { $newTemplate.UserCodeWarningLevel = $params.WarningUsagePointsSolutions } # Convert from megabytes to bytes
                     $admService.QuotaTemplates.Add($newTemplate)
                     $admService.Update()
                 } else {
                     #Template exists, update settings
-                    $template.StorageMaximumLevel = ($params.StorageMaxInMB * 1048576) # Convert from megabytes to bytes
-                    $template.StorageWarningLevel = ($params.StorageWarningInMB * 1048576) # Convert from megabytes to bytes
-                    $template.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions
-                    $template.UserCodeWarningLevel = $params.WarningUsagePointsSolutions
+                    if ($params.ContainsKey("StorageMaxInMB")) { $template.StorageMaximumLevel = ($params.StorageMaxInMB * 1048576) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("StorageWarningInMB")) { $template.StorageWarningLevel = ($params.StorageWarningInMB * 1048576) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("MaximumUsagePointsSolutions")) { $template.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("WarningUsagePointsSolutions")) { $template.UserCodeWarningLevel = $params.WarningUsagePointsSolutions } # Convert from megabytes to bytes
                     $admService.Update()
                 }
             }
         }
         "Absent" {
             Write-Verbose "Ensure is set to Absent - Removing template"
+
+            if ($StorageMaxInMB -or $StorageWarningInMB -or $MaximumUsagePointsSolutions -or $WarningUsagePointsSolutions) {
+                Throw "Do not use StorageMaxInMB, StorageWarningInMB, MaximumUsagePointsSolutions or WarningUsagePointsSolutions when Ensure is specified as Absent"
+            }
+
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
         
@@ -146,6 +166,14 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing quota template settings"
+    if ($StorageMaxInMB -lt $StorageWarningInMB) {
+        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+    }
+
+    if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) {
+        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+    }
+
     switch ($Ensure) {
         "Present" {
             $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -162,10 +190,6 @@ function Test-TargetResource
             return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
         }
     }
-        # CHECK if Ensure equals Absent, then return false if exists
-    
-        # CHECK if Ensure equals Present, then return false if not exists and if parameters match return true
-
 }
 
 
