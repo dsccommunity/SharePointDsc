@@ -83,8 +83,8 @@ Describe "xSPQuotaTemplate" {
                 $returnVal = @{
                     QuotaTemplates = @{
                         Test = @{
-                            StorageMaximumLevel = 1024
-                            StorageWarningLevel = 512
+                            StorageMaximumLevel = 1073741824
+                            StorageWarningLevel = 536870912
                             UserCodeMaximumLevel = 1000
                             UserCodeWarningLevel = 800
                         }
