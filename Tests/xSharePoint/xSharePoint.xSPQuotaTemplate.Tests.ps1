@@ -49,7 +49,7 @@ Describe "xSPQuotaTemplate" {
         Context "The server is in a farm and the incorrect settings have been applied" {
             Mock Get-xSharePointContentService {
                 $returnVal = @{
-                    QuoteTemplates = @{
+                    QuotaTemplates = @{
                         Test = @{
                             StorageMaximumLevel = 512
                             StorageWarningLevel = 256
@@ -81,7 +81,7 @@ Describe "xSPQuotaTemplate" {
         Context "The server is in a farm and the correct settings have been applied" {
             Mock Get-xSharePointContentService {
                 $returnVal = @{
-                    QuoteTemplates = @{
+                    QuotaTemplates = @{
                         Test = @{
                             StorageMaximumLevel = 1024
                             StorageWarningLevel = 512
