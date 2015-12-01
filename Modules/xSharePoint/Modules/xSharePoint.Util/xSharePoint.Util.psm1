@@ -141,16 +141,36 @@ function Remove-xSharePointUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Test-xSharePointObjectHasProperty() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
+        [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
+    )
+    return [bool]($Object.PSobject.Properties.name -contains $PropertyName)
+}
+
 function Test-xSharePointSpecificParameters() {
     [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true,Position=1)]  [HashTable] $CurrentValues,
-        [parameter(Mandatory = $true,Position=2)]  [HashTable] $DesiredValues,
+        [parameter(Mandatory = $true,Position=2)]  [Object]    $DesiredValues,
         [parameter(Mandatory = $false,Position=3)] [Array]     $ValuesToCheck
     )
 
     $returnValue = $true
+
+    if (($DesiredValues.GetType().Name -ne "HashTable") `
+        -and ($DesiredValues.GetType().Name -ne "CimInstance") `
+        -and ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary")) {
+        throw "Property 'DesiredValues' in Test-xSharePointSpecificParameters must be either a Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)"
+    }
+
+    if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck)) {
+        throw "If 'DesiredValues' is a Hashtable then property 'ValuesToCheck' must contain a value"
+    }
 
     if (($ValuesToCheck -eq $null) -or ($ValuesToCheck.Count -lt 1)) {
         $KeyList = $DesiredValues.Keys
@@ -161,7 +181,13 @@ function Test-xSharePointSpecificParameters() {
     $KeyList | ForEach-Object {
         if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) {
             if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
-                if ($DesiredValues.ContainsKey($_)) {
+                if ($DesiredValues.GetType().Name -eq "HashTable" -or $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary") {
+                    $CheckDesiredValue = $DesiredValues.ContainsKey($_)
+                } else {
+                    $CheckDesiredValue = Test-xSharePointObjectHasProperty $DesiredValues $_
+                }
+
+                if ($CheckDesiredValue) {
                     $desiredType = $DesiredValues.$_.GetType()
                     $fieldName = $_
                     switch ($desiredType.Name) {
@@ -186,7 +212,7 @@ function Test-xSharePointSpecificParameters() {
                     }
                 }            
             }
-        }
+        } 
     }
     return $returnValue
 }
@@ -208,6 +234,27 @@ function Test-xSharePointUserIsLocalAdmin() {
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | 
         ForEach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)} | 
         Where-Object { $_ -eq $accountName }
+}
+
+function Set-xSharePointObjectPropertyIfValueExists() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)] [object] $ObjectToSet,
+        [parameter(Mandatory = $true,Position=1)] [string] $PropertyToSet,
+        [parameter(Mandatory = $true,Position=1)] [object] $ParamsValue,
+        [parameter(Mandatory = $true,Position=1)] [string] $ParamKey
+    )
+
+    if ($ParamsValue.GetType().Name -eq "Hashtable") {
+        if ($ParamsValue.ContainsKey($ParamKey) -eq $true) {
+            $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
+        }
+    } else {
+        if (((Test-xSharePointObjectHasProperty $ParamsValue $ParamKey) -eq $true) -and ($null -ne $ParamsValue.$ParamKey)) {
+            $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
+        }
+    }
 }
 
 Export-ModuleMember -Function *
