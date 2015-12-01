@@ -97,6 +97,7 @@ Describe "xSPQuotaTemplate" {
 
             It "return values from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be 'Present'
+                (Get-TargetResource @testParams).StorageMaxInMB | Should Be 1024
             }
 
             It "returns true from the test method" {
