@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSessionStateService")]
+class MSFT_xSPSessionStateService : OMI_BaseResource
+{
+    [Key] string DatabaseName;
+    [Key] string DatabaseServer;
+    [Required, Write] boolean Enabled;
+    [Write] uint32 SessionTimeout;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
