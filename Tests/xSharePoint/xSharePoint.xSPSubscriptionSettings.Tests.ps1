@@ -87,7 +87,7 @@ Describe "xSPSubscriptionSettingsService" {
 
         Context "When a service application exists and the app pool is not configured correctly" {
             Mock Get-SPServiceApplication { 
-                return @(@{
+                $service = @(@{
                     TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
@@ -96,6 +96,12 @@ Describe "xSPSubscriptionSettingsService" {
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 })
+                    
+                $service = $service | Add-Member ScriptMethod Update {
+                    $Global:xSPSubscriptionServiceUpdateCalled = $true
+                } -PassThru 
+                return $service
+
 
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
@@ -109,7 +115,7 @@ Describe "xSPSubscriptionSettingsService" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
-                Assert-MockCalled Set-SPSubscriptionSettingsServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
+                $Global:xSPSubscriptionServiceUpdateCalled | Should Be $true
             }
         }
     }
