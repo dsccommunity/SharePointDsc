@@ -46,7 +46,7 @@ Describe "xSPQuotaTemplate" {
             }
         }
 
-        Context "The server is in a farm and the incorrect settings have been applied" {
+        Context "The server is in a farm and the incorrect settings have been applied to the template" {
             Mock Get-xSharePointContentService {
                 $returnVal = @{
                     QuotaTemplates = @{
@@ -73,6 +73,31 @@ Describe "xSPQuotaTemplate" {
 
             $Global:xSharePointQuotaTemplatesUpdated = $false
             It "updates the quota template settings" {
+                Set-TargetResource @testParams
+                $Global:xSharePointQuotaTemplatesUpdated | Should Be $true
+            }
+        }
+
+        Context "The server is in a farm and the template doesn't exist" {
+            Mock Get-xSharePointContentService {
+                $returnVal = @{
+                    QuotaTemplates = $null
+                } 
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                return $returnVal
+            }
+            Mock Get-SPFarm { return @{} }
+
+            It "return values from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be 'Absent'
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSharePointQuotaTemplatesUpdated = $false
+            It "creates a new quota template" {
                 Set-TargetResource @testParams
                 $Global:xSharePointQuotaTemplatesUpdated | Should Be $true
             }

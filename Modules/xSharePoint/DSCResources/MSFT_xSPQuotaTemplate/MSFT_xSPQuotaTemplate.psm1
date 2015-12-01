@@ -177,7 +177,7 @@ function Test-TargetResource
     switch ($Ensure) {
         "Present" {
             $CurrentValues = Get-TargetResource @PSBoundParameters
-            if ($null -eq $CurrentValues) { return $false }
+            if ($CurrentValues.Ensure -eq "Absent") { return $false }
             return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
         }
         "Absent" {
@@ -186,8 +186,13 @@ function Test-TargetResource
             }
 
             $CurrentValues = Get-TargetResource @PSBoundParameters
-            if ($null -eq $CurrentValues) { return $false }
-            return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+            if ($CurrentValues.Ensure -eq "Present") { 
+                # Template exists, which is not supposed to be. Return false
+                return $false
+            } else { 
+                # Template does not exists, which is supposed to be. Return true
+                return $true
+            } 
         }
     }
 }
