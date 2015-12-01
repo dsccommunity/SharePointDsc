@@ -20,7 +20,7 @@ Describe "xSPWebApplication (Blocked file types)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
+            BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPBlockedFileTypes -Property @{
                 Blocked = @("exe", "dll", "ps1")
             } -ClientOnly) 
         }
@@ -121,7 +121,7 @@ Describe "xSPWebApplication (Blocked file types)" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
-            BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
+            BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPBlockedFileTypes -Property @{
                 EnsureBlocked = @("exe")
                 EnsureAllowed = @("pdf")
             } -ClientOnly)
@@ -238,7 +238,7 @@ Describe "xSPWebApplication (Blocked file types)" {
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
-                BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
+                BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPBlockedFileTypes -Property @{
                     Blocked = @("exe", "dll", "ps1")
                     EnsureBlocked = @("exe", "dll")
                     EnsureAllowed = @("ps1")
@@ -287,7 +287,7 @@ Describe "xSPWebApplication (Blocked file types)" {
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
-                BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPFilesTypes -Property @{
+                BlockedFileTypes = (New-CimInstance -ClassName MSFT_xSPBlockedFileTypes -Property @{
                 } -ClientOnly)
             }
 

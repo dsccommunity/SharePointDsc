@@ -1,5 +1,5 @@
 ﻿[ClassVersion("1.0.0")]
-Class MSFT_xSPFilesTypes
+Class MSFT_xSPBlockedFileTypes
 {
     [write] string Blocked[];
     [write] string EnsureBlocked[];
@@ -99,6 +99,6 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write, EmbeddedInstance("MSFT_xSPWebApplicationSettings")] string GeneralSettings;
     [Write, EmbeddedInstance("MSFT_xSPWebApplicationWorkflowSettings")] string WorkflowSettings;
     [Write, EmbeddedInstance("MSFT_xSPWebApplicationThrottling")] string ThrottlingSettings;
-    [Write, EmbeddedInstance("MSFT_xSPFilesTypes")] string BlockedFileTypes;
+    [Write, EmbeddedInstance("MSFT_xSPBlockedFileTypes")] string BlockedFileTypes;
 };
 
