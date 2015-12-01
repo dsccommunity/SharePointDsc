@@ -65,6 +65,8 @@
     <Folder Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPManagedPath\" />
     <Folder Include="DSCResources\MSFT_xSPOutgoingEmailSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPSearchIndexPartition\" />
+    <Folder Include="DSCResources\MSFT_xSPSearchRoles\" />
     <Folder Include="DSCResources\MSFT_xSPSearchServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPSecureStoreServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPServiceAppPool\" />
@@ -115,6 +117,10 @@
     <Compile Include="DSCResources\MSFT_xSPOutgoingEmailSettings\MSFT_xSPOutgoingEmailSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPOutgoingEmailSettings\MSFT_xSPOutgoingEmailSettings.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSearchIndexPartition\MSFT_xSPSearchIndexPartition.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSearchIndexPartition\MSFT_xSPSearchIndexPartition.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPSearchRoles\MSFT_xSPSearchRoles.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSearchRoles\MSFT_xSPSearchRoles.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPSearchServiceApp\MSFT_xSPSearchServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSearchServiceApp\MSFT_xSPSearchServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPSecureStoreServiceApp\MSFT_xSPSecureStoreServiceApp.psm1" />

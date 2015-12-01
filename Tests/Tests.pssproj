@@ -71,6 +71,8 @@
     <Compile Include="xSharePoint\xSharePoint.xSPPasswordChangeSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAntivirusSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPSearchIndexPartition.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPSearchRoles.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.BlockedFileTypes.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.GeneralSettings.Tests.ps1" />
