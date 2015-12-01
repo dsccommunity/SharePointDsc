@@ -85,8 +85,8 @@ Describe "xSPQuotaTemplate" {
                         Test = @{
                             StorageMaximumLevel = 1024
                             StorageWarningLevel = 512
-                            UserCodeMaximumLevel = 800
-                            UserCodeWarningLevel = 400
+                            UserCodeMaximumLevel = 1000
+                            UserCodeWarningLevel = 800
                         }
                     }
                 } 

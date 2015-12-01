@@ -91,7 +91,7 @@ function Set-TargetResource
                 try {
                     $spFarm = Get-SPFarm
                 } catch {
-                    Write-Verbose -Verbose "No local SharePoint farm was detected. Quota template settings will not be applied"
+                    throw "No local SharePoint farm was detected. Antivirus settings will not be applied"
                     return
                 }
 
