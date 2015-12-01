@@ -26,17 +26,15 @@ This will behave the same as the xSPSearchIndexPartition resource.
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSearchRoles")]
-class MSFT_xSPSearchRoles : OMI_BaseResource
+class MSFT_xSPSearchTopology : OMI_BaseResource
 {
     [Key] String ServiceAppName;
-    [Required] Boolean Admin;
-    [Required] Boolean Crawler;
-    [Required] Boolean ContentProcessing;
-    [Required] Boolean AnalyticsProcessing;
-    [Required] Boolean QueryProcessing;
+    [Required] String Admin[];
+    [Required] String Crawler[];
+    [Required] String ContentProcessing[];
+    [Required] String AnalyticsProcessing[];
+    [Required] String QueryProcessing[];
+	[Required] String IndexPartition[];
+	[Write] String FirstPartitionDirectory;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Write] Uint32 FirstPartitionIndex;
-    [Write] String FirstPartitionDirectory;
-    [Write] String FirstPartitionServers;
 };
