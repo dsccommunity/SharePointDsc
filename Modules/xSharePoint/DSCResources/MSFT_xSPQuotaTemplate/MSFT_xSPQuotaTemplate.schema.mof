@@ -8,7 +8,7 @@ These settings will be used to make sure a certain quota template exists or not.
 
     xSPQuotaTemplate TeamsiteTemplate
     {
-		Name = "Teamsite"
+        Name = "Teamsite"
         StorageMaxInMB = 1024
         StorageWarningInMB = 512
         MaximumUsagePointsSolutions = 1000
