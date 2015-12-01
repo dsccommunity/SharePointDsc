@@ -67,11 +67,11 @@
     <Compile Include="xSharePoint.TestHarness.psm1" />
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
-    <Compile Include="xSharePoint\xSharePoint.xSPQuotaTemplate.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPOutgoingEmailSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPPasswordChangeSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAntivirusSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPQuotaTemplate.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.BlockedFileTypes.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.GeneralSettings.Tests.ps1" />
