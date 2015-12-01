@@ -96,7 +96,7 @@ Describe "xSPQuotaTemplate" {
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Ensure | Should Be 'Present'
             }
 
             It "returns true from the test method" {
