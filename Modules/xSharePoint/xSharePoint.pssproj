@@ -76,6 +76,7 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPVisioServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -133,6 +134,7 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPVisioServiceApp\MSFT_xSPVisioServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
@@ -146,7 +148,6 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
