@@ -63,11 +63,11 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
+        $ScriptRoot = $args[2]
         $ConfirmPreference = 'None'
-
 
         $AllSearchServers = @()
         $AllSearchServers += ($params.Admin | Where-Object { $AllSearchServers.Contains($_) -eq $false })
@@ -82,14 +82,14 @@ function Set-TargetResource
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
             if($searchService.Status -eq "Offline") {
                 Write-Verbose "Start Search Service Instance"
-                Start-SPEnterpriseSearchServiceInstance -Identity $indexSsi
+                Start-SPEnterpriseSearchServiceInstance -Identity $searchServer
             }
 
             #Wait for Search Service Instance to come online
             $loopCount = 0
-            $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchService; 
+            $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer 
             do {
-                $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchService; 
+                $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer 
                 Write-Verbose "Waiting for service: $($online.TypeName)"
                 $loopCount++
                 Start-Sleep -Seconds 30

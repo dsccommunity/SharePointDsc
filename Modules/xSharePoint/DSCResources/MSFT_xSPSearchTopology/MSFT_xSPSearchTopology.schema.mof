@@ -12,17 +12,15 @@ This will behave the same as the xSPSearchIndexPartition resource.
 
     xSPSearchRoles LocalSearchRoles
     {
-        Ensure                  = "Present"
-        Admin                   = $true
-        Crawler                 = $true
-        ContentProcessing       = $true
-        AnalyticsProcessing     = $true
-        QueryProcessing         = $true
         ServiceAppName          = "Search Service Application"
+        Admin                   = @("Server1","Server2")
+        Crawler                 = @("Server1","Server2")
+        ContentProcessing       = @("Server1","Server2")
+        AnalyticsProcessing     = @("Server1","Server2")
+        QueryProcessing         = @("Server3","Server4")
         PsDscRunAsCredential    = $SPSetupAccount
-        FirstPartitionIndex     = 0
         FirstPartitionDirectory = "I:\SearchIndexes\0"
-        FirstPartitionServers   = "Server1,Server2"
+        IndexPartition          = @("Server3","Server4")
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSearchRoles")]
