@@ -9,7 +9,7 @@ The resource will provision and configure the Visio Graphics Service Application
     xSPVisioServiceApp VisioServices
     {
         Name            = "Visio Graphics Service Application"
-		ApplicationPool	= "SharePoint Web Services"        
+	ApplicationPool	= "SharePoint Web Services"        
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPVisioServiceApp")]
@@ -18,4 +18,3 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Key] string Name;
     [Write] string ApplicationPool;
 };
-
