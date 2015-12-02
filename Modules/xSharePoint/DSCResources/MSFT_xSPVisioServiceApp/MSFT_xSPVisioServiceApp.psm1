@@ -6,12 +6,12 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-		[parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+	[parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
 	Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
@@ -41,7 +41,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-		[parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+	[parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
 	$result = Get-TargetResource @PSBoundParameters
@@ -50,13 +50,13 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            
+        
 
-            New-SPVisioServiceApplication -Name $params.Name `
-                                          -ApplicationPool $params.ApplicationPool
+        New-SPVisioServiceApplication -Name $params.Name `
+                                      -ApplicationPool $params.ApplicationPool
         }
     }
-	else {
+   else {
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Visio Graphics Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
