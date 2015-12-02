@@ -76,6 +76,7 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -92,6 +93,7 @@
     <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPCreateFarm\MSFT_xSPCreateFarm.psm1" />
     <Compile Include="DSCResources\MSFT_xSPCreateFarm\MSFT_xSPCreateFarm.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPDistributedCacheService\MSFT_xSPDistributedCacheService.psm1" />
@@ -146,6 +148,7 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
