@@ -68,6 +68,19 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
+### Unreleased
+
+### 0.8.0.0
+
+* Fix for 'Prerequisite Installer Does Not Validate File Paths'
+* Added the following resources:
+    * xSPAntivirusSettings 
+    * xSPFarmAdministrators
+    * xSPPasswordChangeSettings
+    * xSPOutgoingEmailSettings
+* Documentation generation and credential handling fixes
+* And adding blocked file types.
+
 ### 0.7.0.0
 
  * Support for MinRole options in SharePoint 2016
