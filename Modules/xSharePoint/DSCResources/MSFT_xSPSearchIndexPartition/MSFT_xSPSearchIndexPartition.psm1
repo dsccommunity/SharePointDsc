@@ -45,27 +45,27 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
+        $ScriptRoot = $args[2]
         $ConfirmPreference = 'None'
-
 
         $AllSearchServers = $params.Servers
 
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers) {
-            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $server
+            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
             if($searchService.Status -eq "Offline") {
                 Write-Verbose "Start Search Service Instance"
-                Start-SPEnterpriseSearchServiceInstance -Identity $indexSsi
+                Start-SPEnterpriseSearchServiceInstance -Identity $searchService
             }
 
             #Wait for Search Service Instance to come online
             $loopCount = 0
-            $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchService; 
+            $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer 
             do {
-                $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchService; 
+                $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer 
                 Write-Verbose "Waiting for service: $($online.TypeName)"
                 $loopCount++
                 Start-Sleep -Seconds 30
@@ -124,7 +124,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
-                                              -ValuesToCheck @($Servers)
+                                              -ValuesToCheck @("Servers")
 }
 
 Export-ModuleMember -Function *-TargetResource

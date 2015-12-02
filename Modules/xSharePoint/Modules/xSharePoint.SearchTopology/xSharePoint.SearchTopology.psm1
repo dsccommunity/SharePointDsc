@@ -2,7 +2,7 @@ function Set-xSharePointSearchTopologyComponents {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)]  [string]    $ComponentType,
-        [parameter(Mandatory = $true)]  [object[]]  $CurrentServers,
+        [parameter(Mandatory = $false)] [object[]]  $CurrentServers,
         [parameter(Mandatory = $true)]  [object[]]  $DesiredServers,
         [parameter(Mandatory = $true)]  [object]    $NewTopology,
         [parameter(Mandatory = $true)]  [Hashtable] $ServiceInstances,
@@ -10,7 +10,7 @@ function Set-xSharePointSearchTopologyComponents {
         [parameter(Mandatory = $false)] [Int]       $PartitionId = 0
     )
 
-    if ($null -ne $CurrentServers) {
+    if ($null -eq $CurrentServers) {
         $ComponentsToAdd = $DesiredServers
     } else {
         $ComponentsToAdd = @()
@@ -47,7 +47,7 @@ function Set-xSharePointSearchTopologyComponents {
                 $NewComponentParams.Add("IndexPartition", $PartitionId)
                 if ($PSBoundParameters.ContainsKey("PartitionDirectory") -eq $true) {
                     if ([string]::IsNullOrEmpty($PSBoundParameters.PartitionDirectory) -eq $false) {
-                        $NewComponentParams.Add("FirstPartitionDirectory", $PartitionDirectory)
+                        $NewComponentParams.Add("RootDirectory", $PartitionDirectory)
                     }
                 }
                 New-SPEnterpriseSearchIndexComponent @NewComponentParams
@@ -55,7 +55,7 @@ function Set-xSharePointSearchTopologyComponents {
         }
     }
     foreach($ComponentToRemove in $ComponentsToRemove) {
-        if ($ComponentType -eq "IndexPartition") {
+        if ($ComponentType -eq "IndexComponent") {
             $component = Get-SPEnterpriseSearchComponent -SearchTopology $NewTopology | Where-Object {($_.GetType().Name -eq $ComponentType) -and ($_.ServerName -eq $ComponentToRemove) -and ($_.IndexPartitionOrdinal -eq $PartitionId)}
         } else {
             $component = Get-SPEnterpriseSearchComponent -SearchTopology $NewTopology | Where-Object {($_.GetType().Name -eq $ComponentType) -and ($_.ServerName -eq $ComponentToRemove)}

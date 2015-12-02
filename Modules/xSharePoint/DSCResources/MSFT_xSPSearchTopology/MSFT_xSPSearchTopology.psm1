@@ -79,7 +79,7 @@ function Set-TargetResource
 
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers) {
-            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $server
+            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
             if($searchService.Status -eq "Offline") {
                 Write-Verbose "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $indexSsi
