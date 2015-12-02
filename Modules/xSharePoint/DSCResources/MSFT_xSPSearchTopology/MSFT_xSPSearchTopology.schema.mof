@@ -34,7 +34,7 @@ class MSFT_xSPSearchTopology : OMI_BaseResource
     [Required] String ContentProcessing[];
     [Required] String AnalyticsProcessing[];
     [Required] String QueryProcessing[];
-	[Required] String IndexPartition[];
-	[Write] String FirstPartitionDirectory;
+    [Required] String IndexPartition[];
+    [Write] String FirstPartitionDirectory;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
