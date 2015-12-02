@@ -1,0 +1,30 @@
+/*
+**Description**
+
+This resource is used to configure quota templates in the farm.
+These settings will be used to make sure a certain quota template exists or not. When it exists, it will also make sure the settings are configured as specified.
+
+**Example**
+
+    xSPQuotaTemplate TeamsiteTemplate
+    {
+        Name = "Teamsite"
+        StorageMaxInMB = 1024
+        StorageWarningInMB = 512
+        MaximumUsagePointsSolutions = 1000
+        WarningUsagePointsSolutions = 800
+        Ensure = "Present"
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPQuotaTemplate")]
+class MSFT_xSPQuotaTemplate : OMI_BaseResource
+{
+    [Key] string Name;
+    [Write] uint32 StorageMaxInMB;
+    [Write] uint32 StorageWarningInMB;
+    [Write] uint32 MaximumUsagePointsSolutions;
+    [Write] uint32 WarningUsagePointsSolutions;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
