@@ -1,0 +1,26 @@
+﻿[ClassVersion("1.0.0")]
+Class MSFT_xSPWebApplicationHappyHour
+{
+    [write] uint32 Hour;
+    [write] uint32 Minute;
+    [write] uint32 Duration;
+
+};
+
+[ClassVersion("1.0.0"), FriendlyName("xSPWebAppThrottlingSettings")]
+Class MSFT_xSPWebAppThrottlingSettings
+{
+    [Key] string Url;
+    [write] uint32 ListViewThreshold;
+    [write] boolean AllowObjectModelOverride; 
+    [write] uint32 AdminThreshold;
+    [write] uint32 ListViewLookupThreshold;
+    [write] boolean HappyHourEnabled;
+    [Write, EmbeddedInstance("MSFT_xSPWebApplicationHappyHour")] string HappyHour;
+    [write] uint32 UniquePermissionThreshold;
+    [write] boolean RequestThrottling;
+    [write] boolean ChangeLogEnabled;
+    [write] uint32 ChangeLogExpiryDays;
+    [write] boolean EventHandlersEnabled;
+	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+};

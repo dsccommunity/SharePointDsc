@@ -1,0 +1,21 @@
+﻿[ClassVersion("1.0.0"), FriendlyName("xSPWebAppGeneralSettings")]
+Class MSFT_xSPWebAppGeneralSettings
+{
+    [Key] string Url;
+    [write] uint32 TimeZone;
+    [write] boolean Alerts;
+    [write] uint32 AlertsLimit;
+    [write] boolean RSS;
+    [write] boolean BlogAPI;
+    [write] boolean BlogAPIAuthenticated;
+    [write, ValueMap{"Strict","Permissive"}, Values{"Stric","Permissive"}] String BrowserFileHandling;
+    [write] boolean SecurityValidation;
+    [write] boolean RecycleBinEnabled;
+    [write] boolean RecycleBinCleanupEnabled;
+    [write] uint32 RecycleBinRetentionPeriod;
+    [write] uint32 SecondStageRecycleBinQuota;
+    [write] uint32 MaximumUploadSize;
+    [write] boolean CustomerExperienceProgram;
+    [write] boolean PresenceEnabled;
+	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+};

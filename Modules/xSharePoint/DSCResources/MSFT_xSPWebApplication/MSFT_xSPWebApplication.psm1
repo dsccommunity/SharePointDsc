@@ -15,11 +15,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $GeneralSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $WorkflowSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ThrottlingSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $BlockedFileTypes
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting web application '$Name'"
@@ -27,7 +23,6 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
-        
         
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return $null }
@@ -79,11 +74,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $GeneralSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $WorkflowSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ThrottlingSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $BlockedFileTypes
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
@@ -181,11 +172,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $GeneralSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $WorkflowSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ThrottlingSettings,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $BlockedFileTypes
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

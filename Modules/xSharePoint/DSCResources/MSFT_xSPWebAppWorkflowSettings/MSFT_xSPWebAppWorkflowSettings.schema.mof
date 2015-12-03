@@ -1,0 +1,9 @@
+﻿[ClassVersion("1.0.0"), FriendlyName("xSPWebAppWorkflowSettings")]
+Class MSFT_xSPWebAppWorkflowSettings
+{
+    [Key] string Url;
+    [write] boolean ExternalWorkflowParticipantsEnabled;
+    [write] boolean UserDefinedWorkflowsEnabled;
+    [write] boolean EmailToNoPermissionWorkflowParticipantsEnable;
+	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+};
