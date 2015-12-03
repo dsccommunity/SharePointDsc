@@ -23,7 +23,7 @@ This will behave the same as the xSPSearchIndexPartition resource.
         IndexPartition          = @("Server3","Server4")
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchRoles")]
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchTopology")]
 class MSFT_xSPSearchTopology : OMI_BaseResource
 {
     [Key] String ServiceAppName;
