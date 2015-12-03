@@ -11,7 +11,7 @@ Any settings not included will be left as the default (or whatever they have bee
     {
         Url                                           = "Shttp://exmaple.contoso.local"
         ExternalWorkflowParticipantsEnabled           = $false
-		EmailToNoPermissionWorkflowParticipantsEnable = $false
+        EmailToNoPermissionWorkflowParticipantsEnable = $false
         PsDscRunAsCredential                          = $InstallAccount
     }
 */

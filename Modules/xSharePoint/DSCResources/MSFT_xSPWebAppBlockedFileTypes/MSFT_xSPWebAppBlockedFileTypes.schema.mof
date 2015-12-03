@@ -15,7 +15,7 @@ Both of these properties will only make changes to the file types in their list 
     {
         Url                    = "Shttp://exmaple.contoso.local"
         EnsureBlocked          = @("exe", "dll", "msi")
-		EnsureAllowed          = @("pdf", "docx", "xlsx")
+        EnsureAllowed          = @("pdf", "docx", "xlsx")
         PsDscRunAsCredential   = $InstallAccount
     }
 */

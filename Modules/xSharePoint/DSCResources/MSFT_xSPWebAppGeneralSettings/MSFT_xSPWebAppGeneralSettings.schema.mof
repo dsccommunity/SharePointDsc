@@ -11,8 +11,8 @@ Any settings not included will be left as the default (or whatever they have bee
     {
         Url                    = "Shttp://exmaple.contoso.local"
         TimeZone               = 76
-		Alerts                 = $true
-		RSS                    = $false
+        Alerts                 = $true
+        RSS                    = $false
         PsDscRunAsCredential   = $InstallAccount
     }
 */
