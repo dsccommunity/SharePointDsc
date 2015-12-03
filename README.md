@@ -80,6 +80,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed issue with xSPInstallPrereqs using wrong parameters in offline install mode
  * Fixed issue with xSPInstallPrereqs where it would not validate that installer paths exist
  * Fixed xSPSecureStoreServiceApp and xSPUsageApplication to use PSCredentials instead of plain text username/password for database credentials
+ * Added built in PowerShell help (for calling "Get-Help about_[resource]", such as "Get-Help about_xSPCreateFarm")
 
 ### 0.7.0.0
 
