@@ -17,5 +17,5 @@ Class MSFT_xSPWebAppGeneralSettings
     [write] uint32 MaximumUploadSize;
     [write] boolean CustomerExperienceProgram;
     [write] boolean PresenceEnabled;
-	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

@@ -22,5 +22,5 @@ Class MSFT_xSPWebAppThrottlingSettings
     [write] boolean ChangeLogEnabled;
     [write] uint32 ChangeLogExpiryDays;
     [write] boolean EventHandlersEnabled;
-	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

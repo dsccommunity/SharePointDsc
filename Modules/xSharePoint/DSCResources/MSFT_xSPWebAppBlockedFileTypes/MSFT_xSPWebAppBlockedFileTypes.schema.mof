@@ -5,5 +5,5 @@ Class MSFT_xSPBlockedFileTypes
     [write] string Blocked[];
     [write] string EnsureBlocked[];
     [write] string EnsureAllowed[];
-	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

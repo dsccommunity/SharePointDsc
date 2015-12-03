@@ -5,5 +5,5 @@ Class MSFT_xSPWebAppWorkflowSettings
     [write] boolean ExternalWorkflowParticipantsEnabled;
     [write] boolean UserDefinedWorkflowsEnabled;
     [write] boolean EmailToNoPermissionWorkflowParticipantsEnable;
-	[Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
