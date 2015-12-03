@@ -135,9 +135,7 @@ function Set-TargetResource
                 } else {
                     # Set the SharePoint Designer settings
                     if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null } 
-                    Write-Verbose -Verbose "Scope: $($params.Scope)"
                     if ($params.ContainsKey("Scope")) { $params.Remove("Scope") | Out-Null }
-                    Write-Verbose -Verbose "Scope: $($params.Scope)"
  
                     $params = $params | Rename-xSharePointParamValue -oldName "Url" -newName "WebApplication" `
                                       | Rename-xSharePointParamValue -oldName "AllowSharePointDesigner" -newName "AllowDesigner" `

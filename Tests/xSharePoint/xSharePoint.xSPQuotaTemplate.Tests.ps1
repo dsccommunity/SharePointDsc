@@ -120,31 +120,28 @@ Describe "xSPQuotaTemplate" {
         }
 
         Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-xSharePointContentService {
-                $quotaTemplates = @(@{
-                        Test = @{
-                            StorageMaximumLevel = 1073741824
-                            StorageWarningLevel = 536870912
-                            UserCodeMaximumLevel = 1000
-                            UserCodeWarningLevel = 800
-                        }
-                    })
-                $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+             Mock Get-xSharePointContentService { 
+                 $returnVal = @{ 
+                     QuotaTemplates = @{ 
+                         Test = @{ 
+                             StorageMaximumLevel = 1073741824 
+                             StorageWarningLevel = 536870912 
+                             UserCodeMaximumLevel = 1000 
+                             UserCodeWarningLevel = 800 
+                         } 
+                     } 
+                 }  
+                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru 
+                 return $returnVal 
+             } 
 
-                
-                $contentService = @{
-                    QuotaTemplates = $quotaTemplatesCol
-                } 
-
-                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
-                return $contentService
-            }
 
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be 'Present'
-                (Get-TargetResource @testParams).StorageMaxInMB | Should Be 1024
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be 'Present'
+                $result.StorageMaxInMB | Should Be 1024
             }
 
             It "returns true from the test method" {
