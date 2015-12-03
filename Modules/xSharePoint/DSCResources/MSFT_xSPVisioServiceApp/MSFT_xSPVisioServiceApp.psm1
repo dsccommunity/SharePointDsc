@@ -6,10 +6,10 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-		[parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-	Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
+    Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -41,10 +41,10 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-		[parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-	$result = Get-TargetResource @PSBoundParameters
+    $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Count -eq 0) { 
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
@@ -56,7 +56,7 @@ function Set-TargetResource
                                           -ApplicationPool $params.ApplicationPool
         }
     }
-	else {
+    else {
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Visio Graphics Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {

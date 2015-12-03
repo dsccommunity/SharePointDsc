@@ -8,8 +8,8 @@ The resource will provision and configure the Visio Graphics Service Application
 
     xSPVisioServiceApp VisioServices
     {
-        Name            = "Visio Graphics Service Application"
-		ApplicationPool	= "SharePoint Web Services"        
+        Name               = "Visio Graphics Service Application"
+        ApplicationPool    = "SharePoint Web Services"        
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPVisioServiceApp")]
