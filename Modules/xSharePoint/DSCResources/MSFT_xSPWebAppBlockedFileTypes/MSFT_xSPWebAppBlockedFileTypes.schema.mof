@@ -20,7 +20,7 @@ Both of these properties will only make changes to the file types in their list 
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppBlockedFileTypes")]
-Class MSFT_xSPBlockedFileTypes : OMI_BaseResource
+Class MSFT_xSPWebAppBlockedFileTypes : OMI_BaseResource
 {
     [Key] string Url;
     [write] string Blocked[];
