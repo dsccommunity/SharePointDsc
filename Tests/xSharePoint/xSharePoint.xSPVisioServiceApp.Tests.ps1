@@ -95,8 +95,6 @@ Describe "xSPVisioServiceApp" {
             }
 
             It "calls the update service app cmdlet from the set method" {
-                Set-TargetResource @testParams
-
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPVisioServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
             }
