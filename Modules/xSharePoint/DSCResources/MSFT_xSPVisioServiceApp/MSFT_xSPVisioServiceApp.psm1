@@ -46,7 +46,7 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Count -eq 0) { 
+    if ($result -eq $null) { 
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
