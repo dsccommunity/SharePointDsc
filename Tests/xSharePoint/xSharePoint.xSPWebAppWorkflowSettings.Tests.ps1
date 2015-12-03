@@ -9,22 +9,16 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebApplication"
+$ModuleName = "MSFT_xSPWebAppWorkflowSettings"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebApplication (Workflow)" {
+Describe "xSPWebAppWorkflowSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "SharePoint Sites"
-            ApplicationPool = "SharePoint Web Apps"
-            ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
-            AuthenticationMethod = "NTLM"
-            WorkflowSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationWorkflowSettings -Property @{
-                ExternalWorkflowParticipantsEnabled = $true
-                UserDefinedWorkflowsEnabled = $true
-                EmailToNoPermissionWorkflowParticipantsEnable = $true
-            } -ClientOnly)
+            ExternalWorkflowParticipantsEnabled = $true
+            UserDefinedWorkflowsEnabled = $true
+            EmailToNoPermissionWorkflowParticipantsEnable = $true
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")

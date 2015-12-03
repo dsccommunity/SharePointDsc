@@ -28,7 +28,7 @@ function Set-xSPWebApplicationGeneralSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
+        [parameter(Mandatory = $true)] $Settings
     )
 
     # Format here is SPWebApplication property = Custom settings property
@@ -67,7 +67,7 @@ function Test-xSPWebApplicationGeneralSettings {
     [OutputType([System.Boolean])]
     param(
         [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
+        [parameter(Mandatory = $true)] $DesiredSettings
     )
 
 

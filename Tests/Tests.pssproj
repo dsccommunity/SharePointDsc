@@ -74,10 +74,10 @@
     <Compile Include="xSharePoint\xSharePoint.xSPSearchIndexPartition.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSearchTopology.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
-    <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.BlockedFileTypes.Tests.ps1" />
-    <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.GeneralSettings.Tests.ps1" />
-    <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.Workflow.Tests.ps1" />
-    <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.Throttling.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebAppBlockedFileTypes.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebAppGeneralSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebAppWorkflowSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebAppThrottlingSettings.Tests.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
