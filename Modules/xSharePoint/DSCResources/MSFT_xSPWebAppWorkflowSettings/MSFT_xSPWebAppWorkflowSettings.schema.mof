@@ -16,7 +16,7 @@ Any settings not included will be left as the default (or whatever they have bee
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppWorkflowSettings")]
-Class MSFT_xSPWebAppWorkflowSettings
+Class MSFT_xSPWebAppWorkflowSettings : OMI_BaseResource
 {
     [Key] string Url;
     [write] boolean ExternalWorkflowParticipantsEnabled;

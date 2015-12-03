@@ -17,7 +17,7 @@ Any settings not included will be left as the default (or whatever they have bee
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppGeneralSettings")]
-Class MSFT_xSPWebAppGeneralSettings
+Class MSFT_xSPWebAppGeneralSettings : OMI_BaseResource
 {
     [Key] string Url;
     [write] uint32 TimeZone;

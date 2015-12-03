@@ -32,7 +32,7 @@ You can specify the start time of this window as well as how many hours it will 
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppThrottlingSettings")]
-Class MSFT_xSPWebAppThrottlingSettings
+Class MSFT_xSPWebAppThrottlingSettings : OMI_BaseResource
 {
     [Key] string Url;
     [write] uint32 ListViewThreshold;
