@@ -19,8 +19,8 @@ Both of these properties will only make changes to the file types in their list 
         PsDscRunAsCredential   = $InstallAccount
     }
 */
-[ClassVersion("1.0.0"), FriendlyName("xSPBlockedFileTypes")]
-Class MSFT_xSPBlockedFileTypes
+[ClassVersion("1.0.0"), FriendlyName("xSPWebAppBlockedFileTypes")]
+Class MSFT_xSPBlockedFileTypes : OMI_BaseResource
 {
     [Key] string Url;
     [write] string Blocked[];
