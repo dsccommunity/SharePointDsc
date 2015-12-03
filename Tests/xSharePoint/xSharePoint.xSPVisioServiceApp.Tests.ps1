@@ -30,7 +30,7 @@ Describe "xSPVisioServiceApp" {
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPVisioGraphicsServiceApplication { }
+            Mock New-SPVisioServiceApplication { }
 
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -43,7 +43,7 @@ Describe "xSPVisioServiceApp" {
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPVisioGraphicsServiceApplication 
+                Assert-MockCalled New-SPVisioServiceApplication 
             }
         }
 
@@ -88,7 +88,7 @@ Describe "xSPVisioServiceApp" {
                 })
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPVisioGraphicsServiceApplication { }
+            Mock Set-SPVisioServiceApplication { }
 
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -98,7 +98,7 @@ Describe "xSPVisioServiceApp" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
-                Assert-MockCalled Set-SPVisioGraphicsServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
+                Assert-MockCalled Set-SPVisioServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
             }
         }
     }
