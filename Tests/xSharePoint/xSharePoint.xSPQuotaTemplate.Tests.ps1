@@ -30,6 +30,8 @@ Describe "xSPQuotaTemplate" {
                 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
+        Add-Type -TypeDefinition "namespace Microsoft.SharePoint.Administration { public class SPQuotaTemplate { public string Name { get; set; } public long StorageMaximumLevel { get; set; } public long StorageWarningLevel { get; set; } public double UserCodeMaximumLevel { get; set; } public double UserCodeWarningLevel { get; set; }}}"
+
         Context "The server is not part of SharePoint farm" {
             Mock Get-SPFarm { throw "Unable to detect local farm" }
 
@@ -48,19 +50,25 @@ Describe "xSPQuotaTemplate" {
 
         Context "The server is in a farm and the incorrect settings have been applied to the template" {
             Mock Get-xSharePointContentService {
-                $returnVal = @{
-                    QuotaTemplates = @{
+                $quotaTemplates = @(@{
                         Test = @{
                             StorageMaximumLevel = 512
                             StorageWarningLevel = 256
                             UserCodeMaximumLevel = 400
                             UserCodeWarningLevel = 200
                         }
-                    }
+                    })
+                $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+
+                
+                $contentService = @{
+                    QuotaTemplates = $quotaTemplatesCol
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
-                return $returnVal
+
+                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                return $contentService
             }
+
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
@@ -80,14 +88,20 @@ Describe "xSPQuotaTemplate" {
 
         Context "The server is in a farm and the template doesn't exist" {
             Mock Get-xSharePointContentService {
-                $returnVal = @{
-                    QuotaTemplates = @{
+                $quotaTemplates = @(@{
                         Test = $null
-                    }
+                    })
+                $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+
+                
+                $contentService = @{
+                    QuotaTemplates = $quotaTemplatesCol
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
-                return $returnVal
+
+                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                return $contentService
             }
+
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
@@ -107,19 +121,25 @@ Describe "xSPQuotaTemplate" {
 
         Context "The server is in a farm and the correct settings have been applied" {
             Mock Get-xSharePointContentService {
-                $returnVal = @{
-                    QuotaTemplates = @{
+                $quotaTemplates = @(@{
                         Test = @{
                             StorageMaximumLevel = 1073741824
                             StorageWarningLevel = 536870912
                             UserCodeMaximumLevel = 1000
                             UserCodeWarningLevel = 800
                         }
-                    }
+                    })
+                $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+
+                
+                $contentService = @{
+                    QuotaTemplates = $quotaTemplatesCol
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
-                return $returnVal
+
+                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                return $contentService
             }
+
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
