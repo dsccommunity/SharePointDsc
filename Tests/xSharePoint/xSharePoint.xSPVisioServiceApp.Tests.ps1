@@ -78,5 +78,26 @@ Describe "xSPVisioServiceApp" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
+
+		Context "When a service application exists and is not configured correctly" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Visio Graphics Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the update service app cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Get-SPServiceApplicationPool
+            }
+        }
     }
 }
