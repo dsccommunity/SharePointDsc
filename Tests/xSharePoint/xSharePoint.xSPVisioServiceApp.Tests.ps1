@@ -79,7 +79,7 @@ Describe "xSPVisioServiceApp" {
             }
         }
 
-		Context "When a service application exists and is not configured correctly" {
+        Context "When a service application exists and is not configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
