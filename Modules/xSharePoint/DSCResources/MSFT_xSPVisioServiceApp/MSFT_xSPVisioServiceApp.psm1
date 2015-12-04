@@ -64,7 +64,7 @@ function Set-TargetResource
 
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
-                Get-SPServiceApplication -Name $params.Name `
+                Get-SPServiceApplication -Name $params.Name `n
                     | Where-Object { $_.TypeName -eq "Visio Graphics Service Application" } `
                     | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
             }
