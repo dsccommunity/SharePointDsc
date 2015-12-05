@@ -145,8 +145,7 @@ function Set-TargetResource
 
     switch ($process.ExitCode) {
         0 {
-            Write-Verbose -Message "Prerequisite installer completed successfully. Rebooting to finalise installations"
-            $global:DSCMachineStatus = 1
+            Write-Verbose -Message "Prerequisite installer completed successfully."
         }
         1 {
             throw "Another instance of the prerequisite installer is already running"
