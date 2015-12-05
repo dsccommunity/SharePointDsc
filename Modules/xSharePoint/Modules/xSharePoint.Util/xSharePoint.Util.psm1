@@ -148,7 +148,12 @@ function Test-xSharePointObjectHasProperty() {
         [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
         [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
     )
-    return [bool]($Object.PSobject.Properties.name -contains $PropertyName)
+    if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true) {
+        if ($Object.$PropertyName -ne $null) {
+            return $true
+        }
+    }
+    return $false
 }
 
 function Test-xSharePointSpecificParameters() {
