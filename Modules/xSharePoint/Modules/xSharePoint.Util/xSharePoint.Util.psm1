@@ -250,8 +250,7 @@ function Set-xSharePointObjectPropertyIfValueExists() {
         [parameter(Mandatory = $true,Position=1)] [object] $ParamsValue,
         [parameter(Mandatory = $true,Position=1)] [string] $ParamKey
     )
-
-    if ($ParamsValue.GetType().Name -eq "Hashtable") {
+    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey") {
         if ($ParamsValue.ContainsKey($ParamKey) -eq $true) {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
