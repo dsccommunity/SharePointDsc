@@ -10,6 +10,10 @@ function Set-xSharePointSearchTopologyComponents {
         [parameter(Mandatory = $false)] [Int]       $PartitionId = 0
     )
 
+    if ($null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue)) {
+        Add-PSSnapin Microsoft.SharePoint.PowerShell
+    }; 
+
     if ($null -eq $CurrentServers) {
         $ComponentsToAdd = $DesiredServers
     } else {
