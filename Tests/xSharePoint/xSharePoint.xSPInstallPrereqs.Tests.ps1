@@ -117,8 +117,10 @@ Describe "xSPInstallPrereqs" {
                     @{ Name = "AppFabric 1.1 for Windows Server"}
                     @{ Name = "WCF Data Services 5.6.0 Runtime"}
                     @{ Name = "Microsoft ODBC Driver 11 for SQL Server"}
-                    @{ Name = "Microsoft Visual C++ 2013 x64 Minimum Runtime - 12.0.21005"}
-                    @{ Name = "Microsoft Visual C++ 2013 x64 Additional Runtime - 12.0.21005"}
+                    @{ Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}
+                    @{ Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}
+                    @{ Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}
+                    @{ Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}
                     @{ Name = "Microsoft SQL Server 2012 Native Client"}
                     @{ Name = "Active Directory Rights Management Services Client 2.1"}
                 )}

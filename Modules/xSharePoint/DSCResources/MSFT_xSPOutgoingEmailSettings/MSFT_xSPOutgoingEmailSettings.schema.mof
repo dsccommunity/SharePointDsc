@@ -20,10 +20,10 @@ It is possible to set the outgoing server, from address, reply to address and th
 class MSFT_xSPOutgoingEmailSettings : OMI_BaseResource
 {
     [key] string WebAppUrl;
-    [Write] string SMTPServer;
-    [Write] string FromAddress;
-    [Write] string ReplyToAddress;
-    [Write] string CharacterSet;
+    [Required] string SMTPServer;
+    [Required] string FromAddress;
+    [Required] string ReplyToAddress;
+    [Required] string CharacterSet;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

@@ -148,7 +148,12 @@ function Test-xSharePointObjectHasProperty() {
         [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
         [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
     )
-    return [bool]($Object.PSobject.Properties.name -contains $PropertyName)
+    if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true) {
+        if ($Object.$PropertyName -ne $null) {
+            return $true
+        }
+    }
+    return $false
 }
 
 function Test-xSharePointSpecificParameters() {
@@ -245,8 +250,7 @@ function Set-xSharePointObjectPropertyIfValueExists() {
         [parameter(Mandatory = $true,Position=1)] [object] $ParamsValue,
         [parameter(Mandatory = $true,Position=1)] [string] $ParamKey
     )
-
-    if ($ParamsValue.GetType().Name -eq "Hashtable") {
+    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey") {
         if ($ParamsValue.ContainsKey($ParamKey) -eq $true) {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
