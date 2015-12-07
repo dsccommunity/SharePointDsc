@@ -125,17 +125,18 @@ function Set-TargetResource
 
         # Build up the topology changes for each object type
         @("Admin", "Crawler", "ContentProcessing", "AnalyticsProcessing", "QueryProcessing", "IndexPartition")  | ForEach-Object { 
-            Write-Verbose "Setting components for '$_' property"
+            $CurrentSearchProperty = $_
+            Write-Verbose "Setting components for '$CurrentSearchProperty' property"
 
-            if ($null -eq $CurrentValues.$_) {
-                $ComponentsToAdd = $params.$_
+            if ($null -eq $CurrentValues.$CurrentSearchProperty) {
+                $ComponentsToAdd = $params.$CurrentSearchProperty
             } else {
                 $ComponentsToAdd = @()
                 $ComponentsToRemove = @()
-                foreach($Component in ($params.$_ | Where-Object { $CurrentValues.$_.Contains($_) -eq $false })) {
+                foreach($Component in ($params.$CurrentSearchProperty | Where-Object { $CurrentValues.$CurrentSearchProperty.Contains($_) -eq $false })) {
                     $ComponentsToAdd += $Component
                 }
-                foreach($Component in ($CurrentValues.$_ | Where-Object { $params.$_.Contains($_) -eq $false })) {
+                foreach($Component in ($CurrentValues.$CurrentSearchProperty | Where-Object { $params.$CurrentSearchProperty.Contains($_) -eq $false })) {
                     $ComponentsToRemove += $Component
                 }
             }
@@ -144,7 +145,7 @@ function Set-TargetResource
                     SearchTopology = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$ComponentToAdd
                 }
-                switch($componentTypes.$_) {
+                switch($componentTypes.$CurrentSearchProperty) {
                     "AdminComponent" {
                         New-SPEnterpriseSearchAdminComponent @NewComponentParams
                     }
@@ -172,10 +173,10 @@ function Set-TargetResource
                 }
             }
             foreach($ComponentToRemove in $ComponentsToRemove) {
-                if ($componentTypes.$_ -eq "IndexComponent") {
-                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$_) -and ($_.ServerName -eq $ComponentToRemove) -and ($_.IndexPartitionOrdinal -eq 0)}
+                if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent") {
+                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) -and ($_.ServerName -eq $ComponentToRemove) -and ($_.IndexPartitionOrdinal -eq 0)}
                 } else {
-                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$_) -and ($_.ServerName -eq $ComponentToRemove)}
+                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) -and ($_.ServerName -eq $ComponentToRemove)}
                 }
                 if ($null -ne $component) {
                     Remove-SPEnterpriseSearchComponent -Identity $component.ComponentId -SearchTopology $newTopology -confirm:$false

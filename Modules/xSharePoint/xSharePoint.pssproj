@@ -85,7 +85,6 @@
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
-    <Folder Include="Modules\xSharePoint.SearchTopology\" />
     <Folder Include="Modules\xSharePoint.WebApplication\" />
     <Folder Include="Modules\xSharePoint.Util\" />
     <Folder Include="Examples\" />
@@ -153,7 +152,6 @@
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
     <Compile Include="Examples\Small Farm\SharePoint.psd1" />
-    <Compile Include="Modules\xSharePoint.SearchTopology\xSharePoint.SearchTopology.psm1" />
     <Compile Include="Modules\xSharePoint.Util\xSharePoint.Util.psm1" />
     <Compile Include="Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" />
     <Compile Include="Modules\xSharePoint.WebApplication\xSPWebApplication.BlockedFileTypes.psm1" />

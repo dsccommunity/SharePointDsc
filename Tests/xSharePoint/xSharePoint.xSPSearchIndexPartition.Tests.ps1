@@ -21,7 +21,6 @@ Describe "xSPSearchIndexPartition" {
             ServiceAppName = "Search Service Application"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint\Modules\xSharePoint.SearchTopology\xSharePoint.SearchTopology.psm1")
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Mock Invoke-xSharePointCommand { 
@@ -60,9 +59,9 @@ Describe "xSPSearchIndexPartition" {
             }
         }
         Mock Start-SPEnterpriseSearchServiceInstance { return $null }
-        Mock New-SPEnterpriseSearchIndexComponent { return $null } -ModuleName "xSharePoint.SearchTopology"
-        Mock Remove-SPEnterpriseSearchComponent { return $null } -ModuleName "xSharePoint.SearchTopology"
-        Mock Set-SPEnterpriseSearchTopology { return $null } -ModuleName "xSharePoint.SearchTopology"
+        Mock New-SPEnterpriseSearchIndexComponent { return $null }
+        Mock Remove-SPEnterpriseSearchComponent { return $null }
+        Mock Set-SPEnterpriseSearchTopology { return $null }
 
         Add-Type -TypeDefinition "public class IndexComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Int32 IndexPartitionOrdinal {get; set;}}"
         $indexComponent = New-Object IndexComponent
@@ -70,7 +69,7 @@ Describe "xSPSearchIndexPartition" {
         $indexComponent.IndexPartitionOrdinal = 0
         
         Context "Search index doesn't exist and it should" {
-            Mock Get-SPEnterpriseSearchComponent { return @() } -ModuleName "xSharePoint.SearchTopology"
+            Mock Get-SPEnterpriseSearchComponent { return @() }
             $Global:xSharePointSearchRoleInstanceCallCount = 0
 
             It "returns an empty server list from the get method" {
@@ -84,13 +83,12 @@ Describe "xSPSearchIndexPartition" {
 
             It "creates the search index in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchIndexComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled New-SPEnterpriseSearchIndexComponent
             }
         }
         
         Context "Search index does exist and it should" {
             Mock Get-SPEnterpriseSearchComponent { return @($indexComponent) }
-            Mock Get-SPEnterpriseSearchComponent { return @($indexComponent) } -ModuleName "xSharePoint.SearchTopology"
 
             It "returns present from the get method" {
                 $result = Get-TargetResource @testParams
@@ -105,14 +103,13 @@ Describe "xSPSearchIndexPartition" {
         $testParams.Servers = @("SharePoint2")
 
         Context "Search index exists and it shouldn't" {
-            Mock Get-SPEnterpriseSearchComponent { return @($indexComponent) }
             Mock Get-SPEnterpriseSearchComponent { 
                 Add-Type -TypeDefinition "public class IndexComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Int32 IndexPartitionOrdinal {get; set;}}"
                 $indexComponent = New-Object IndexComponent
                 $indexComponent.ServerName = $env:COMPUTERNAME
                 $indexComponent.IndexPartitionOrdinal = 0
                 return @($indexComponent) 
-            } -ModuleName "xSharePoint.SearchTopology"
+            }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -120,7 +117,7 @@ Describe "xSPSearchIndexPartition" {
 
             It "removes the search index in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPEnterpriseSearchComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled Remove-SPEnterpriseSearchComponent
             }
         }
     }

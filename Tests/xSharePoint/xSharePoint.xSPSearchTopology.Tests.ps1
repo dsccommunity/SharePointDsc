@@ -25,7 +25,6 @@ Describe "xSPSearchTopology" {
             FirstPartitionDirectory = "I:\SearchIndexes\0"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint\Modules\xSharePoint.SearchTopology\xSharePoint.SearchTopology.psm1")
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Mock Invoke-xSharePointCommand { 
@@ -80,22 +79,19 @@ Describe "xSPSearchTopology" {
 
         Mock Start-SPEnterpriseSearchServiceInstance { return $null }
         Mock New-SPEnterpriseSearchTopology { return @{} }
-        Mock New-SPEnterpriseSearchAdminComponent { return @{} } -ModuleName "xSharePoint.SearchTopology"
-        Mock New-SPEnterpriseSearchCrawlComponent { return @{} } -ModuleName "xSharePoint.SearchTopology"
-        Mock New-SPEnterpriseSearchContentProcessingComponent { return @{} } -ModuleName "xSharePoint.SearchTopology"
-        Mock New-SPEnterpriseSearchAnalyticsProcessingComponent { return @{} } -ModuleName "xSharePoint.SearchTopology"
-        Mock New-SPEnterpriseSearchQueryProcessingComponent { return @{} } -ModuleName "xSharePoint.SearchTopology"
-        Mock New-SPEnterpriseSearchIndexComponent { return @{} } -ModuleName "xSharePoint.SearchTopology"
+        Mock New-SPEnterpriseSearchAdminComponent { return @{} } 
+        Mock New-SPEnterpriseSearchCrawlComponent { return @{} }
+        Mock New-SPEnterpriseSearchContentProcessingComponent { return @{} }
+        Mock New-SPEnterpriseSearchAnalyticsProcessingComponent { return @{} }
+        Mock New-SPEnterpriseSearchQueryProcessingComponent { return @{} }
+        Mock New-SPEnterpriseSearchIndexComponent { return @{} }
         Mock Set-SPEnterpriseSearchTopology { return @{} }
-        Mock Remove-SPEnterpriseSearchComponent { return $null } -ModuleName "xSharePoint.SearchTopology"
+        Mock Remove-SPEnterpriseSearchComponent { return $null }
 
         Context "No search topology has been applied" {
             Mock Get-SPEnterpriseSearchComponent {
                 return @{}
             }
-            Mock Get-SPEnterpriseSearchComponent {
-                return @{}
-            } -ModuleName "xSharePoint.SearchTopology"
 
             It "returns empty values from the get method" {
                 $result = Get-TargetResource @testParams
@@ -119,9 +115,6 @@ Describe "xSPSearchTopology" {
             Mock Get-SPEnterpriseSearchComponent {
                 return @{}
             }
-            Mock Get-SPEnterpriseSearchComponent {
-                return @{}
-            } -ModuleName "xSharePoint.SearchTopology"
             $Global:xSharePointSearchRoleInstanceCalLCount = 0
             Mock Get-SPEnterpriseSearchServiceInstance  {
                 if ($Global:xSharePointSearchRoleInstanceCalLCount -eq 2) {
@@ -154,21 +147,13 @@ Describe "xSPSearchTopology" {
                     Status = "Online"
                 }
             }
-            Mock Get-SPEnterpriseSearchServiceInstance  {
-                return @{
-                    Server = @{
-                        Address = $env:COMPUTERNAME
-                    }
-                    Status = "Online"
-                }
-            } -ModuleName "xSharePoint.SearchTopology"
         
             It "adds a missing admin component" {
                 Mock Get-SPEnterpriseSearchComponent {
                     return @($crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchAdminComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled New-SPEnterpriseSearchAdminComponent
             }
 
             It "adds a missing crawl component" {
@@ -176,7 +161,7 @@ Describe "xSPSearchTopology" {
                     return @($adminComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchCrawlComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled New-SPEnterpriseSearchCrawlComponent
             }
 
             It "adds a missing content processing component" {
@@ -184,7 +169,7 @@ Describe "xSPSearchTopology" {
                     return @($adminComponent, $crawlComponent, $analyticsProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchContentProcessingComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled New-SPEnterpriseSearchContentProcessingComponent
             }
 
             It "adds a missing analytics processing component" {
@@ -192,7 +177,7 @@ Describe "xSPSearchTopology" {
                     return @($adminComponent, $crawlComponent, $contentProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchAnalyticsProcessingComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled New-SPEnterpriseSearchAnalyticsProcessingComponent
             }
 
             It "adds a missing query processing component" {
@@ -200,7 +185,7 @@ Describe "xSPSearchTopology" {
                     return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent)
                 }
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchQueryProcessingComponent -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled New-SPEnterpriseSearchQueryProcessingComponent
             }
 
             $testParams = @{
@@ -245,11 +230,11 @@ Describe "xSPSearchTopology" {
                 $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
 
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
-            } -ModuleName "xSharePoint.SearchTopology"
+            }
 
             It "Removes components that shouldn't be on this server" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPEnterpriseSearchComponent -Times 5 -ModuleName "xSharePoint.SearchTopology"
+                Assert-MockCalled Remove-SPEnterpriseSearchComponent -Times 5
             }
 
             
@@ -292,7 +277,7 @@ Describe "xSPSearchTopology" {
                 $indexComponent.IndexPartitionOrdinal = 0
 
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent, $indexComponent)
-            } -ModuleName "xSharePoint.SearchTopology"
+            }
 
             Mock Get-SPEnterpriseSearchServiceInstance  {
                 return @{
