@@ -70,12 +70,12 @@ function Set-TargetResource
         $ConfirmPreference = 'None'
 
         $AllSearchServers = @()
-        $AllSearchServers += ($params.Admin | Where-Object { $AllSearchServers.Contains($_) -eq $false })
-        $AllSearchServers += ($params.Crawler | Where-Object { $AllSearchServers.Contains($_) -eq $false })
-        $AllSearchServers += ($params.ContentProcessing | Where-Object { $AllSearchServers.Contains($_) -eq $false })
+        $AllSearchServers += ($params.Admin               | Where-Object { $AllSearchServers.Contains($_) -eq $false })
+        $AllSearchServers += ($params.Crawler             | Where-Object { $AllSearchServers.Contains($_) -eq $false })
+        $AllSearchServers += ($params.ContentProcessing   | Where-Object { $AllSearchServers.Contains($_) -eq $false })
         $AllSearchServers += ($params.AnalyticsProcessing | Where-Object { $AllSearchServers.Contains($_) -eq $false })
-        $AllSearchServers += ($params.QueryProcessing | Where-Object { $AllSearchServers.Contains($_) -eq $false })
-        $AllSearchServers += ($params.IndexPartition | Where-Object { $AllSearchServers.Contains($_) -eq $false })
+        $AllSearchServers += ($params.QueryProcessing     | Where-Object { $AllSearchServers.Contains($_) -eq $false })
+        $AllSearchServers += ($params.IndexPartition      | Where-Object { $AllSearchServers.Contains($_) -eq $false })
 
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers) {
@@ -114,52 +114,77 @@ function Set-TargetResource
         $currentTopology = $ssa.ActiveTopology
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa -Clone -SearchTopology $currentTopology
 
+        $componentTypes = @{
+            Admin = "AdminComponent"
+            Crawler = "CrawlComponent"
+            ContentProcessing = "ContentProcessingComponent"
+            AnalyticsProcessing = "AnalyticsProcessingComponent"
+            QueryProcessing = "QueryProcessingComponent"
+            IndexPartition = "IndexComponent"
+        }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.SearchTopology\xSharePoint.SearchTopology.psm1" -Resolve)
+        # Build up the topology changes for each object type
+        @("Admin", "Crawler", "ContentProcessing", "AnalyticsProcessing", "QueryProcessing", "IndexPartition")  | ForEach-Object { 
+            Write-Verbose "Setting components for '$_' property"
 
-        # Admin components
-        Set-xSharePointSearchTopologyComponents -ComponentType "AdminComponent" `
-                                                -CurrentServers $CurrentValues.Admin `
-                                                -DesiredServers $params.Admin `
-                                                -NewTopology $newTopology `
-                                                -ServiceInstances $AllSearchServiceInstances
-        # Crawler components
-        Set-xSharePointSearchTopologyComponents -ComponentType "CrawlComponent" `
-                                                -CurrentServers $CurrentValues.Crawler `
-                                                -DesiredServers $params.Crawler `
-                                                -NewTopology $newTopology `
-                                                -ServiceInstances $AllSearchServiceInstances
-        # Content Processing components
-        Set-xSharePointSearchTopologyComponents -ComponentType "ContentProcessingComponent" `
-                                                -CurrentServers $CurrentValues.ContentProcessing `
-                                                -DesiredServers $params.ContentProcessing `
-                                                -NewTopology $newTopology `
-                                                -ServiceInstances $AllSearchServiceInstances
-        # Analytics components
-        Set-xSharePointSearchTopologyComponents -ComponentType "AnalyticsProcessingComponent" `
-                                                -CurrentServers $CurrentValues.AnalyticsProcessing `
-                                                -DesiredServers $params.AnalyticsProcessing `
-                                                -NewTopology $newTopology `
-                                                -ServiceInstances $AllSearchServiceInstances
-        # Query components
-        Set-xSharePointSearchTopologyComponents -ComponentType "QueryProcessingComponent" `
-                                                -CurrentServers $CurrentValues.QueryProcessing `
-                                                -DesiredServers $params.QueryProcessing `
-                                                -NewTopology $newTopology `
-                                                -ServiceInstances $AllSearchServiceInstances
-        # Index components
-        $IndexParams = @{ PartitionId = 0 }
-        if ($params.ContainsKey("FirstPartitionDirectory") -eq $true) { 
-            $IndexParams.Add("PartitionDirectory", $params.FirstPartitionDirectory)
-        } 
-        Set-xSharePointSearchTopologyComponents -ComponentType "IndexComponent" `
-                                                -CurrentServers $CurrentValues.IndexPartition `
-                                                -DesiredServers $params.IndexPartition `
-                                                -NewTopology $newTopology `
-                                                -ServiceInstances $AllSearchServiceInstances `
-                                                @IndexParams
+            if ($null -eq $CurrentValues.$_) {
+                $ComponentsToAdd = $params.$_
+            } else {
+                $ComponentsToAdd = @()
+                $ComponentsToRemove = @()
+                foreach($Component in ($params.$_ | Where-Object { $CurrentValues.$_.Contains($_) -eq $false })) {
+                    $ComponentsToAdd += $Component
+                }
+                foreach($Component in ($CurrentValues.$_ | Where-Object { $params.$_.Contains($_) -eq $false })) {
+                    $ComponentsToRemove += $Component
+                }
+            }
+            foreach($ComponentToAdd in $ComponentsToAdd) {
+                $NewComponentParams = @{
+                    SearchTopology = $newTopology
+                    SearchServiceInstance = $AllSearchServiceInstances.$ComponentToAdd
+                }
+                switch($componentTypes.$_) {
+                    "AdminComponent" {
+                        New-SPEnterpriseSearchAdminComponent @NewComponentParams
+                    }
+                    "CrawlComponent" {
+                        New-SPEnterpriseSearchCrawlComponent @NewComponentParams
+                    }
+                    "ContentProcessingComponent" {
+                        New-SPEnterpriseSearchContentProcessingComponent @NewComponentParams
+                    }
+                    "AnalyticsProcessingComponent" {
+                        New-SPEnterpriseSearchAnalyticsProcessingComponent @NewComponentParams
+                    }
+                    "QueryProcessingComponent" {
+                        New-SPEnterpriseSearchQueryProcessingComponent @NewComponentParams
+                    }
+                    "IndexComponent" {
+                        $NewComponentParams.Add("IndexPartition", 0)
+                        if ($params.ContainsKey("FirstPartitionDirectory") -eq $true) {
+                            if ([string]::IsNullOrEmpty($params.FirstPartitionDirectory) -eq $false) {
+                                $NewComponentParams.Add("RootDirectory", $params.FirstPartitionDirectory)
+                            }
+                        }
+                        New-SPEnterpriseSearchIndexComponent @NewComponentParams
+                    }
+                }
+            }
+            foreach($ComponentToRemove in $ComponentsToRemove) {
+                if ($componentTypes.$_ -eq "IndexComponent") {
+                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$_) -and ($_.ServerName -eq $ComponentToRemove) -and ($_.IndexPartitionOrdinal -eq 0)}
+                } else {
+                    $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$_) -and ($_.ServerName -eq $ComponentToRemove)}
+                }
+                if ($null -ne $component) {
+                    Remove-SPEnterpriseSearchComponent -Identity $component.ComponentId -SearchTopology $newTopology -confirm:$false
+                }
+        
+            }
+        }
 
-        # Apply the new topology
+        # Apply the new topology to the farm
         Set-SPEnterpriseSearchTopology -Identity $newTopology
     }
 }
