@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '0.7.0.0'
+ModuleVersion = '0.8.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -71,11 +71,14 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Get-xSharePointInstalledProductVersion",
+                    "Get-xSharePointContentService",
                     "Rename-xSharePointParamValue",
                     "Add-xSharePointUserToLocalAdmin",
                     "Remove-xSharePointUserToLocalAdmin",
+                    "Test-xSharePointObjectHasProperty",
                     "Test-xSharePointUserIsLocalAdmin",
-                    "Test-xSharePointSpecificParameters")
+                    "Test-xSharePointSpecificParameters",
+                    "Set-xSharePointObjectPropertyIfValueExists")
 
 # Variables to export from this module
 VariablesToExport = '*'
@@ -95,8 +98,9 @@ AliasesToExport = '*'
 # HelpInfo URI of this module
 # HelpInfoURI = ''
 
-# Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
+# Default prefix for commands exported from this module. Override the default prefix using Import-Module -prefix.
 # DefaultCommandPrefix = ''
+
 
 }
 

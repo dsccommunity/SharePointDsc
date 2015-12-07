@@ -14,11 +14,7 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
     
 Describe "xSPInstallPrereqs" {
     InModuleScope $ModuleName {
-        $testParams = @{
-            InstallerPath = "C:\SPInstall"
-            OnlineMode = $true
-            Ensure = "Present"
-        }
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
         Mock Invoke-xSharePointCommand { 
@@ -37,6 +33,12 @@ Describe "xSPInstallPrereqs" {
         Mock Get-ChildItem { return $null }
 
         Context "Prerequisites are not installed but should be and are to be installed in online mode" {
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-CimInstance { return @() }
             Mock Get-ChildItem { return @() }
@@ -90,6 +92,12 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are installed and should be" {
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+            
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
             if ($majorBuildNumber -eq 15) {
                 Mock Get-CimInstance { return @(
@@ -109,8 +117,10 @@ Describe "xSPInstallPrereqs" {
                     @{ Name = "AppFabric 1.1 for Windows Server"}
                     @{ Name = "WCF Data Services 5.6.0 Runtime"}
                     @{ Name = "Microsoft ODBC Driver 11 for SQL Server"}
-                    @{ Name = "Microsoft Visual C++ 2013 x64 Minimum Runtime - 12.0.21005"}
-                    @{ Name = "Microsoft Visual C++ 2013 x64 Additional Runtime - 12.0.21005"}
+                    @{ Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}
+                    @{ Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}
+                    @{ Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}
+                    @{ Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}
                     @{ Name = "Microsoft SQL Server 2012 Native Client"}
                     @{ Name = "Active Directory Rights Management Services Client 2.1"}
                 )}
@@ -131,7 +141,11 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are installed but should not be" {
-            $testParams.Ensure = "Absent"
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Absent"
+            }
 
             It "throws an exception from the set method" {
                 {Test-TargetResource @testParams} | Should Throw
@@ -143,9 +157,46 @@ Describe "xSPInstallPrereqs" {
         }
 
         Context "Prerequisites are not installed but should be and are to be installed in offline mode" {
-            $testParams.OnlineMode = $false
-            $testParams.Ensure = "Present"
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
+
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
+            Mock Get-CimInstance { return @() }
+            Mock Get-ChildItem { return @() }
+
+            It "throws an exception in the set method if required parameters are not set" {
+                {Set-TargetResource @testParams} | Should Throw
+            }
+
+            if ($majorBuildNumber -eq 15) {
+                $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+            }
+            if ($majorBuildNumber -eq 16) {
+                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56","KB2898850","MSVCRT12","ODBC","DotNet452")
+            }
+            $requiredParams | ForEach-Object {
+                $testParams.Add($_, "C:\fake\value.exe")
+            }
+
+            It "does not throw an exception where the required parameters are included" {
+                Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path { return $true }
+
+                {Set-TargetResource @testParams} | Should Not Throw
+            }
+        }
+
+        Context "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" {
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $false
+                Ensure = "Present"
+            }
+
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false }) }
             Mock Get-CimInstance { return @() }
             Mock Get-ChildItem { return @() }
 
@@ -165,8 +216,9 @@ Describe "xSPInstallPrereqs" {
 
             It "does not throw an exception where the required parameters are included" {
                 Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path { return $false }
 
-                {Set-TargetResource @testParams} | Should Not Throw
+                {Set-TargetResource @testParams} | Should Throw
             }
         }
     }    

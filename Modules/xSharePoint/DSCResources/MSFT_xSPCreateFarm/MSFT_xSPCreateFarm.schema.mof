@@ -1,3 +1,29 @@
+/*
+**Description**
+
+This resource is used to provision a new SharePoint farm.
+It should only be used on the first server in the farm to create the configuration database, all servers to join the farm after the first server creates the configuration database should use [xSPJoinFarm](xSPJoinFarm). 
+Once the config DB has been created, the resource will install local help collections, secure resources, activate features and provision the central admin site.
+
+The port of the Central Admin website can be set by using the CentralAdministrationPort property, if this is not defined the site will be provisioned on port 9999.
+However this setting will not impact existing deployments that already have Central Admin provisioned on another port.
+Also when a farm is created, the current behavior is to not enroll the server as a cache server (which is the default behavior of SharePoint).
+This means you need to use [xSPDistributedCacheService](xSPDistributedCacheService) on at least one server in the farm to designate it as a cache server.
+
+**Example**
+
+    xSPCreateFarm CreateSPFarm
+    {
+        DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
+        FarmConfigDatabaseName    = "SP_Config"
+        Passphrase                = "Example Passphrase"
+        FarmAccount               = $FarmAccount
+        PsDscRunAsCredential      = $SetupAccount
+        AdminContentDatabaseName  = "SP_AdminContent"
+        CentralAdministrationPort = 2000
+        ServerRole                = Custom
+    }
+*/
 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPCreateFarm")]
 class MSFT_xSPCreateFarm : OMI_BaseResource

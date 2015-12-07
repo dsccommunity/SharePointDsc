@@ -20,15 +20,14 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
-        
+        $ScriptRoot = $args[1]
         
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return $null }
 
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
-
         if ($authProvider.DisableKerberos -eq $true) { $localAuthMode = "NTLM" } else { $localAuthMode = "Kerberos" }
 
         return @{
@@ -70,30 +69,36 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Creating web application '$Name'"
-
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
-        
+        $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) {
+            $newWebAppParams = @{
+                Name = $params.Name
+                ApplicationPool = $params.ApplicationPool
+                ApplicationPoolAccount = $params.ApplicationPoolAccount
+                Url = $params.Url
+            }
             if ($params.ContainsKey("AuthenticationMethod") -eq $true) {
                 if ($params.AuthenticationMethod -eq "NTLM") {
                     $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos 
                 } else {
                     $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
                 }
-                $params.Remove("AuthenticationMethod")
-                $params.Add("AuthenticationProvider", $ap)
+                $newWebAppParams.Add("AuthenticationProvider", $ap)
             }
-             
-            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
             if ($params.ContainsKey("AllowAnonymous")) { 
-                $params.Remove("AllowAnonymous") | Out-Null 
-                $params.Add("AllowAnonymousAccess", $true)
+                $newWebAppParams.Add("AllowAnonymousAccess", $true)
             }
-
-            New-SPWebApplication @params
+            if ($params.ContainsKey("DatabaseName") -eq $true) { $newWebAppParams.Add("DatabaseName", $params.DatabaseName) }
+            if ($params.ContainsKey("DatabaseServer") -eq $true) { $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer) }
+            if ($params.ContainsKey("HostHeader") -eq $true) { $newWebAppParams.Add("HostHeader", $params.HostHeader) }
+            if ($params.ContainsKey("Path") -eq $true) { $newWebAppParams.Add("Path", $params.Path) }
+            if ($params.ContainsKey("Port") -eq $true) { $newWebAppParams.Add("Port", $params.Port) } 
+         
+            $wa = New-SPWebApplication @newWebAppParams
         }
     }
 }
@@ -122,7 +127,11 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
     if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+
+    $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
+                                                     -DesiredValues $PSBoundParameters `
+                                                     -ValuesToCheck @("ApplicationPool")
+    return $testReturn
 }
 
 

@@ -151,5 +151,67 @@ Describe "xSPSecureStoreServiceApp" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
+
+        Context "When specific windows credentials are to be used for the database" {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                AuditingEnabled = $false
+                DatabaseName = "SP_ManagedMetadata"
+                DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                DatabaseAuthenticationType = "Windows"
+            }
+
+            Mock Get-SPServiceApplication { return $null }
+            Mock New-SPSecureStoreServiceApplication { }
+            Mock New-SPSecureStoreServiceApplicationProxy { }
+
+            It "allows valid Windows credentials can be passed" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPSecureStoreServiceApplication 
+            }
+
+            It "throws an exception if database authentication type is not specified" {
+                $testParams.Remove("DatabaseAuthenticationType")
+                { Set-TargetResource @testParams } | Should Throw
+            }
+
+            It "throws an exception if the credentials aren't provided and the authentication type is set" {
+                $testParams.Add("DatabaseAuthenticationType", "Windows")
+                $testParams.Remove("DatabaseCredentials")
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
+
+        Context "When specific SQL credentials are to be used for the database" {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                AuditingEnabled = $false
+                DatabaseName = "SP_ManagedMetadata"
+                DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                DatabaseAuthenticationType = "SQL"
+            }
+
+            Mock Get-SPServiceApplication { return $null }
+            Mock New-SPSecureStoreServiceApplication { }
+            Mock New-SPSecureStoreServiceApplicationProxy { }
+
+            It "allows valid SQL credentials can be passed" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPSecureStoreServiceApplication 
+            }
+
+            It "throws an exception if database authentication type is not specified" {
+                $testParams.Remove("DatabaseAuthenticationType")
+                { Set-TargetResource @testParams } | Should Throw
+            }
+
+            It "throws an exception if the credentials aren't provided and the authentication type is set" {
+                $testParams.Add("DatabaseAuthenticationType", "Windows")
+                $testParams.Remove("DatabaseCredentials")
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
     }    
 }

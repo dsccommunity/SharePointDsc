@@ -22,8 +22,6 @@ Describe "xSPUsageApplication" {
             UsageLogMaxSpaceGB = 10
             DatabaseName = "SP_Usage"
             DatabaseServer = "sql.test.domain"
-            DatabaseUsername = "user"
-            DatabasePassword = "password"
             FailoverDatabaseServer = "anothersql.test.domain"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -57,6 +55,12 @@ Describe "xSPUsageApplication" {
             }
 
             It "creates a new service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPUsageApplication
+            }
+
+            It "creates a new service application with custom database credentials" {
+                $testParams.Add("DatabaseCredentials", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPUsageApplication
             }
