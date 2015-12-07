@@ -9,35 +9,29 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPWebApplication"
+$ModuleName = "MSFT_xSPWebAppGeneralSettings"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-Describe "xSPWebApplication (General Settings)" {
+Describe "xSPWebAppGeneralSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "SharePoint Sites"
-            ApplicationPool = "SharePoint Web Apps"
-            ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
-            AuthenticationMethod = "NTLM"
-            GeneralSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationSettings -Property @{
-                TimeZone = 3081
-                Alerts = $true
-                AlertsLimit = 10
-                RSS = $true
-                BlogAPI = $true
-                BlogAPIAuthenticated = $true
-                BrowserFileHandling = "Permissive"
-                SecurityValidation = $true
-                RecycleBinEnabled = $true
-                RecycleBinCleanupEnabled = $true
-                RecycleBinRetentionPeriod = 30
-                SecondStageRecycleBinQuota = 30
-                MaximumUploadSize = 100
-                CustomerExperienceProgram = $true
-                PresenceEnabled = $true
-            } -ClientOnly)
+            TimeZone = 3081
+            Alerts = $true
+            AlertsLimit = 10
+            RSS = $true
+            BlogAPI = $true
+            BlogAPIAuthenticated = $true
+            BrowserFileHandling = "Permissive"
+            SecurityValidation = $true
+            RecycleBinEnabled = $true
+            RecycleBinCleanupEnabled = $true
+            RecycleBinRetentionPeriod = 30
+            SecondStageRecycleBinQuota = 30
+            MaximumUploadSize = 100
+            CustomerExperienceProgram = $true
+            PresenceEnabled = $true
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -70,23 +64,23 @@ Describe "xSPWebApplication (General Settings)" {
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
                     Url = $testParams.Url
-                    DefaultTimeZone = $testParams.GeneralSettings.TimeZone
-                    AlertsEnabled = $testParams.GeneralSettings.Alerts
-                    AlertsMaximum = $testParams.GeneralSettings.AlertsLimit
-                    SyndicationEnabled = $testParams.GeneralSettings.RSS
-                    MetaWeblogEnabled = $testParams.GeneralSettings.BlogAPI
-                    MetaWeblogAuthenticationEnabled = $testParams.GeneralSettings.BlogAPIAuthenticated
-                    BrowserFileHandling = $testParams.GeneralSettings.BrowserFileHandling
+                    DefaultTimeZone = $testParams.TimeZone
+                    AlertsEnabled = $testParams.Alerts
+                    AlertsMaximum = $testParams.AlertsLimit
+                    SyndicationEnabled = $testParams.RSS
+                    MetaWeblogEnabled = $testParams.BlogAPI
+                    MetaWeblogAuthenticationEnabled = $testParams.BlogAPIAuthenticated
+                    BrowserFileHandling = $testParams.BrowserFileHandling
                     FormDigestSettings = @{
-                        Enabled = $testParams.GeneralSettings.SecurityValidation
+                        Enabled = $testParams.SecurityValidation
                     }
-                    RecycleBinEnabled = $testParams.GeneralSettings.RecycleBinEnabled
-                    RecycleBinCleanupEnabled = $testParams.GeneralSettings.RecycleBinCleanupEnabled
-                    RecycleBinRetentionPeriod = $testParams.GeneralSettings.RecycleBinRetentionPeriod
-                    SecondStageRecycleBinQuota = $testParams.GeneralSettings.SecondStageRecycleBinQuota
-                    MaximumFileSize = $testParams.GeneralSettings.MaximumUploadSize
-                    BrowserCEIPEnabled = $testParams.GeneralSettings.CustomerExperienceProgram
-                    PresenceEnabled = $testParams.GeneralSettings.PresenceEnabled
+                    RecycleBinEnabled = $testParams.RecycleBinEnabled
+                    RecycleBinCleanupEnabled = $testParams.RecycleBinCleanupEnabled
+                    RecycleBinRetentionPeriod = $testParams.RecycleBinRetentionPeriod
+                    SecondStageRecycleBinQuota = $testParams.SecondStageRecycleBinQuota
+                    MaximumFileSize = $testParams.MaximumUploadSize
+                    BrowserCEIPEnabled = $testParams.CustomerExperienceProgram
+                    PresenceEnabled = $testParams.PresenceEnabled
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
                     $Global:xSPWebApplicationUpdateCalled = $true
@@ -154,7 +148,7 @@ Describe "xSPWebApplication (General Settings)" {
             }
 
             $Global:xSPWebApplicationUpdateCalled = $false
-            It "updates the workflow settings" {
+            It "updates the general settings" {
                 Set-TargetResource @testParams
                 $Global:xSPWebApplicationUpdateCalled | Should Be $true
             }

@@ -32,12 +32,13 @@ Please read the installation instructions that are present on both the download 
 
 Below is a list of DSC resource types that are currently provided by xSharePoint:
 
+ - xSPAntivirusSettings
  - xBCSServiceApp
  - xSPCacheAccounts
- - xSPClearRemoteSessions
  - xSPCreateFarm
  - xSPDiagnosticLoggingSettings
  - xSPDistributedCacheService
+ - xSPFarmAdministrators
  - xSPFeature
  - xSPInstall
  - xSPInstallPreReqs
@@ -45,6 +46,8 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPManagedAccount
  - xSPManagedMetadataServiceApp
  - xSPManagedPath
+ - xSPOutgoingEmailSettings
+ - xSPPasswordChangeSettings
  - xSPSearchServiceApp
  - xSPSecureStoreServiceApp
  - xSPServiceAppPool
@@ -54,7 +57,11 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPUsageApplication
  - xSPUserProfileServiceApp
  - xSPUserProfileSyncService
+ - xSPWebAppBlockedFileTypes
+ - xSPWebAppGeneralSettings
  - xSPWebApplication
+ - xSPWebAppThrottlingSettings
+ - xSPWebAppWorkflowSettings
 
 ## Preview status
 
@@ -67,6 +74,13 @@ Review the "examples" directory in the xSharePoint resource for some general exa
 Additional detailed documentation is included on the wiki on GitHub. 
 
 ## Version History
+
+### 0.8.0.0
+ * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings
+ * Fixed issue with xSPInstallPrereqs using wrong parameters in offline install mode
+ * Fixed issue with xSPInstallPrereqs where it would not validate that installer paths exist
+ * Fixed xSPSecureStoreServiceApp and xSPUsageApplication to use PSCredentials instead of plain text username/password for database credentials
+ * Added built in PowerShell help (for calling "Get-Help about_[resource]", such as "Get-Help about_xSPCreateFarm")
 
 ### 0.7.0.0
 

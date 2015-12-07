@@ -9,34 +9,28 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebApplication"
+$ModuleName = "MSFT_xSPWebAppThrottlingSettings"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebApplication (Throttling)" {
+Describe "xSPWebAppThrottlingSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "SharePoint Sites"
-            ApplicationPool = "SharePoint Web Apps"
-            ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
-            AuthenticationMethod = "NTLM"
-            ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
-                ListViewThreshold = 1000
-                AllowObjectModelOverride = $true
-                AdminThreshold = 2000
-                ListViewLookupThreshold = 12
-                HappyHourEnabled = $true
-                HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
-                    Hour = 2
-                    Minute = 0
-                    Duration = 1
-                } -ClientOnly)
-                UniquePermissionThreshold = 100
-                RequestThrottling = $true
-                ChangeLogEnabled = $true
-                ChangeLogExpiryDays = 30
-                EventHandlersEnabled = $true
+            ListViewThreshold = 1000
+            AllowObjectModelOverride = $true
+            AdminThreshold = 2000
+            ListViewLookupThreshold = 12
+            HappyHourEnabled = $true
+            HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+                Hour = 2
+                Minute = 0
+                Duration = 1
             } -ClientOnly)
+            UniquePermissionThreshold = 100
+            RequestThrottling = $true
+            ChangeLogEnabled = $true
+            ChangeLogExpiryDays = 30
+            EventHandlersEnabled = $true
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -68,23 +62,23 @@ Describe "xSPWebApplication (Throttling)" {
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
                 Url = $testParams.Url
-                MaxItemsPerThrottledOperation = $testParams.ThrottlingSettings.ListViewThreshold
-                AllowOMCodeOverrideThrottleSettings = $testParams.ThrottlingSettings.AllowObjectModelOverride
-                MaxItemsPerThrottledOperationOverride = $testParams.ThrottlingSettings.AdminThreshold
-                MaxQueryLookupFields = $testParams.ThrottlingSettings.ListViewLookupThreshold
-                UnthrottledPrivilegedOperationWindowEnabled = $testParams.ThrottlingSettings.HappyHourEnabled
-                DailyStartUnthrottledPrivilegedOperationsHour = $testParams.ThrottlingSettings.HappyHour.Hour
-                DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.ThrottlingSettings.HappyHour.Minute
-                DailyUnthrottledPrivilegedOperationsDuration = $testParams.ThrottlingSettings.HappyHour.Duration
-                MaxUniquePermScopesPerList = $testParams.ThrottlingSettings.UniquePermissionThreshold
+                MaxItemsPerThrottledOperation = $testParams.ListViewThreshold
+                AllowOMCodeOverrideThrottleSettings = $testParams.AllowObjectModelOverride
+                MaxItemsPerThrottledOperationOverride = $testParams.AdminThreshold
+                MaxQueryLookupFields = $testParams.ListViewLookupThreshold
+                UnthrottledPrivilegedOperationWindowEnabled = $testParams.HappyHourEnabled
+                DailyStartUnthrottledPrivilegedOperationsHour = $testParams.HappyHour.Hour
+                DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.HappyHour.Minute
+                DailyUnthrottledPrivilegedOperationsDuration = $testParams.HappyHour.Duration
+                MaxUniquePermScopesPerList = $testParams.UniquePermissionThreshold
                 HttpThrottleSettings = @{
-                    PerformThrottle = $testParams.ThrottlingSettings.RequestThrottling
+                    PerformThrottle = $testParams.RequestThrottling
                 }
-                ChangeLogExpirationEnabled = $testParams.ThrottlingSettings.ChangeLogEnabled
+                ChangeLogExpirationEnabled = $testParams.ChangeLogEnabled
                 ChangeLogRetentionPeriod = @{
-                    Days = $testParams.ThrottlingSettings.ChangeLogExpiryDays
+                    Days = $testParams.ChangeLogExpiryDays
                 }
-                EventHandlersEnabled = $testParams.ThrottlingSettings.EventHandlersEnabled
+                EventHandlersEnabled = $testParams.EventHandlersEnabled
             })}
 
             It "returns the current data from the get method" {
@@ -115,22 +109,22 @@ Describe "xSPWebApplication (Throttling)" {
                     )
                     Url = $testParams.Url
                     MaxItemsPerThrottledOperation = 1
-                    AllowOMCodeOverrideThrottleSettings = $testParams.ThrottlingSettings.AllowObjectModelOverride
-                    MaxItemsPerThrottledOperationOverride = $testParams.ThrottlingSettings.AdminThreshold
-                    MaxQueryLookupFields = $testParams.ThrottlingSettings.ListViewLookupThreshold
-                    UnthrottledPrivilegedOperationWindowEnabled = $testParams.ThrottlingSettings.HappyHourEnabled
-                    DailyStartUnthrottledPrivilegedOperationsHour = $testParams.ThrottlingSettings.HappyHour.Hour
-                    DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.ThrottlingSettings.HappyHour.Minute
-                    DailyUnthrottledPrivilegedOperationsDuration = $testParams.ThrottlingSettings.HappyHour.Duration
-                    MaxUniquePermScopesPerList = $testParams.ThrottlingSettings.UniquePermissionThreshold
+                    AllowOMCodeOverrideThrottleSettings = $testParams.AllowObjectModelOverride
+                    MaxItemsPerThrottledOperationOverride = $testParams.AdminThreshold
+                    MaxQueryLookupFields = $testParams.ListViewLookupThreshold
+                    UnthrottledPrivilegedOperationWindowEnabled = $testParams.HappyHourEnabled
+                    DailyStartUnthrottledPrivilegedOperationsHour = $testParams.HappyHour.Hour
+                    DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.HappyHour.Minute
+                    DailyUnthrottledPrivilegedOperationsDuration = $testParams.HappyHour.Duration
+                    MaxUniquePermScopesPerList = $testParams.UniquePermissionThreshold
                     HttpThrottleSettings = @{
-                        PerformThrottle = $testParams.ThrottlingSettings.RequestThrottling
+                        PerformThrottle = $testParams.RequestThrottling
                     }
-                    ChangeLogExpirationEnabled = $testParams.ThrottlingSettings.ChangeLogEnabled
+                    ChangeLogExpirationEnabled = $testParams.ChangeLogEnabled
                     ChangeLogRetentionPeriod = @{
-                        Days = $testParams.ThrottlingSettings.ChangeLogExpiryDays
+                        Days = $testParams.ChangeLogExpiryDays
                     }
-                    EventHandlersEnabled = $testParams.ThrottlingSettings.EventHandlersEnabled
+                    EventHandlersEnabled = $testParams.EventHandlersEnabled
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
                     $Global:xSPWebApplicationUpdateCalled = $true
@@ -156,28 +150,22 @@ Describe "xSPWebApplication (Throttling)" {
             }
 
             $testParams = @{
-                Name = "SharePoint Sites"
-                ApplicationPool = "SharePoint Web Apps"
-                ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
-                ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
-                    ListViewThreshold = 1000
-                    AllowObjectModelOverride = $true
-                    AdminThreshold = 2000
-                    ListViewLookupThreshold = 12
-                    HappyHourEnabled = $true
-                    HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
-                        Hour = 5
-                        Minute = 0
-                        Duration = 1
-                    } -ClientOnly)
-                    UniquePermissionThreshold = 100
-                    RequestThrottling = $true
-                    ChangeLogEnabled = $true
-                    ChangeLogExpiryDays = 30
-                    EventHandlersEnabled = $true
+                ListViewThreshold = 1000
+                AllowObjectModelOverride = $true
+                AdminThreshold = 2000
+                ListViewLookupThreshold = 12
+                HappyHourEnabled = $true
+                HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+                    Hour = 5
+                    Minute = 0
+                    Duration = 1
                 } -ClientOnly)
+                UniquePermissionThreshold = 100
+                RequestThrottling = $true
+                ChangeLogEnabled = $true
+                ChangeLogExpiryDays = 30
+                EventHandlersEnabled = $true
             }
             $Global:xSPWebApplicationUpdateCalled = $false
             $Global:xSPWebApplicationUpdateHappyHourCalled = $false
