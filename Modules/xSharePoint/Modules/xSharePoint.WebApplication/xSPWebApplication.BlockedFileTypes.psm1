@@ -71,18 +71,13 @@ function Test-xSPWebApplicationBlockedFileTypes {
     }
     
     if($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) {
-        $itemsToRemove = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureBlocked -ExcludeDifferent
-        if ($itemsToRemove -ne $null) { return $false }
+        $itemsToAdd = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureBlocked | Where-Object { $_.SideIndicator -eq "=>"}
+        if ($itemsToAdd -ne $null) { return $false }
     }
 
     if($DesiredSettings.ContainsKey("EnsureAllowed") -eq $true) {
-        $itemsToAdd = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureAllowed | Where-Object { $_.SideIndicator -eq "=>"}
-        if ($itemsToAdd -ne $null) {
-            $compareResult = Compare-Object -ReferenceObject $DesiredSettings.EnsureAllowed -DifferenceObject $itemsToAdd.InputObject
-            if ($compareResult -ne $null) { return $false }
-        } else {
-            return $false
-        }   
+        $itemsToRemove = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureAllowed -ExcludeDifferent -IncludeEqual
+        if ($itemsToRemove -ne $null) { return $false } 
     }
 
     return $true
