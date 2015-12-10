@@ -95,7 +95,7 @@ Describe "xSharePoint.Util" {
             Test-xSharePointSpecificParameters -CurrentValues $current -DesiredValues $desired -ValuesToCheck @("SecondExample") | Should Be $false
         }
 
-        It "Returns false when an empty array is used in the current values " {
+        It "Returns false when an empty array is used in the current values" {
             $current = @{ }
             $desired = @{ Example = "test"; SecondExample = "false"  }
             Test-xSharePointSpecificParameters -CurrentValues $current -DesiredValues $desired | Should Be $false

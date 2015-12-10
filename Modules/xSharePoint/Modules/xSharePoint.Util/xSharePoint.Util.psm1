@@ -198,9 +198,14 @@ function Test-xSharePointSpecificParameters() {
                     $desiredType = $DesiredValues.$_.GetType()
                     $fieldName = $_
                     if ($desiredType.IsArray -eq $true) {
-                        if ((Compare-Object -ReferenceObject $CurrentValues.$fieldName -DifferenceObject $DesiredValues.$fieldName) -ne $null) {
+                        if (($CurrentValues.ContainsKey($fieldName) -eq $false) -or ($CurrentValues.$fieldName -eq $null)) {
                             $returnValue = $false
+                        } else {
+                            if ((Compare-Object -ReferenceObject $CurrentValues.$fieldName -DifferenceObject $DesiredValues.$fieldName) -ne $null) {
+                                $returnValue = $false
+                            }
                         }
+                        
                     } else {
                         switch ($desiredType.Name) {
                             "String" {
