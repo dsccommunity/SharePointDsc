@@ -102,6 +102,11 @@ function Set-TargetResource
             $networkPath = "\\$IndexPartitionServer\" + $params.FirstPartitionDirectory.Replace(":\", "$\")
             New-Item $networkPath -ItemType Directory -Force
         }
+
+        # Create the directory on the local server as it will not apply the topology without it
+        if ((Test-Path -Path $params.FirstPartitionDirectory) -eq $false) {
+            New-Item $params.FirstPartitionDirectory -ItemType Directory -Force
+        }
         
         # Get all service service instances to assign topology components to
         $AllSearchServiceInstances = @{}
