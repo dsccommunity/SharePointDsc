@@ -73,10 +73,17 @@ function Set-TargetResource
             until ($online.Status -eq "Online" -or $loopCount -eq 20)
         }
 
-        # Create the index partition directory on each remote server
-        foreach($IndexPartitionServer in $params.Servers) {
-            $networkPath = "\\$IndexPartitionServer\" + $params.RootDirectory.Replace(":\", "$\")
-            New-Item $networkPath -ItemType Directory -Force
+        if ($params.ContainsKey("RootDirectory") -eq $true) {
+            # Create the index partition directory on each remote server
+            foreach($IndexPartitionServer in $params.Servers) {
+                $networkPath = "\\$IndexPartitionServer\" + $params.RootDirectory.Replace(":\", "$\")
+                New-Item $networkPath -ItemType Directory -Force
+            }
+
+            # Create the directory on the local server as it will not apply the topology without it
+            if ((Test-Path -Path $params.RootDirectory) -eq $false) {
+                New-Item $params.RootDirectory -ItemType Directory -Force
+            }
         }
         
         # Get all service service instances to assign topology components to
@@ -131,7 +138,7 @@ function Set-TargetResource
             foreach($ComponentToRemove in $ComponentsToRemove) {
                 $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) -and ($_.ServerName -eq $ComponentToRemove) -and ($_.IndexPartitionOrdinal -eq $params.Index)}
                 if ($null -ne $component) {
-                    Remove-SPEnterpriseSearchComponent -Identity $component.ComponentId -SearchTopology $newTopology -confirm:$false
+                    $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology -confirm:$false
                 }
         
             }

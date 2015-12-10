@@ -185,8 +185,10 @@ function Test-xSharePointSpecificParameters() {
 
     $KeyList | ForEach-Object {
         if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) {
-            if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_)) {
-                if ($DesiredValues.GetType().Name -eq "HashTable" -or $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary") {
+            if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_) -or ($DesiredValues.$_.GetType().IsArray)) {
+                if ($DesiredValues.GetType().Name -eq "HashTable" -or `
+                    $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary") {
+                    
                     $CheckDesiredValue = $DesiredValues.ContainsKey($_)
                 } else {
                     $CheckDesiredValue = Test-xSharePointObjectHasProperty $DesiredValues $_
@@ -195,24 +197,30 @@ function Test-xSharePointSpecificParameters() {
                 if ($CheckDesiredValue) {
                     $desiredType = $DesiredValues.$_.GetType()
                     $fieldName = $_
-                    switch ($desiredType.Name) {
-                        "String" {
-                            if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and [string]::IsNullOrEmpty($DesiredValues.$fieldName)) {} else {
-                                $returnValue = $false
-                            }
-                        }
-                        "Int32" {
-                            if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
-                                $returnValue = $false
-                            }
-                        }
-                        "Int16" {
-                            if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
-                                $returnValue = $false
-                            }
-                        }
-                        default {
+                    if ($desiredType.IsArray -eq $true) {
+                        if ((Compare-Object -ReferenceObject $CurrentValues.$fieldName -DifferenceObject $DesiredValues.$fieldName) -ne $null) {
                             $returnValue = $false
+                        }
+                    } else {
+                        switch ($desiredType.Name) {
+                            "String" {
+                                if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) -and [string]::IsNullOrEmpty($DesiredValues.$fieldName)) {} else {
+                                    $returnValue = $false
+                                }
+                            }
+                            "Int32" {
+                                if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                    $returnValue = $false
+                                }
+                            }
+                            "Int16" {
+                                if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                    $returnValue = $false
+                                }
+                            }
+                            default {
+                                $returnValue = $false
+                            }
                         }
                     }
                 }            

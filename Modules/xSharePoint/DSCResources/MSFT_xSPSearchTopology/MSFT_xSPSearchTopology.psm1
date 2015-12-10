@@ -138,10 +138,10 @@ function Set-TargetResource
             } else {
                 $ComponentsToAdd = @()
                 $ComponentsToRemove = @()
-                foreach($Component in ($params.$CurrentSearchProperty | Where-Object { $CurrentValues.$CurrentSearchProperty.Contains($_) -eq $false })) {
+                foreach($Component in ($params.$CurrentSearchProperty | Where-Object { $CurrentValues.$CurrentSearchProperty -contains $_ -eq $false })) {
                     $ComponentsToAdd += $Component
                 }
-                foreach($Component in ($CurrentValues.$CurrentSearchProperty | Where-Object { $params.$CurrentSearchProperty.Contains($_) -eq $false })) {
+                foreach($Component in ($CurrentValues.$CurrentSearchProperty | Where-Object { $params.$CurrentSearchProperty -contains $_ -eq $false })) {
                     $ComponentsToRemove += $Component
                 }
             }
@@ -184,7 +184,7 @@ function Set-TargetResource
                     $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | Where-Object {($_.GetType().Name -eq $componentTypes.$CurrentSearchProperty) -and ($_.ServerName -eq $ComponentToRemove)}
                 }
                 if ($null -ne $component) {
-                    Remove-SPEnterpriseSearchComponent -Identity $component.ComponentId -SearchTopology $newTopology -confirm:$false
+                    $component | Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology -confirm:$false
                 }
         
             }
