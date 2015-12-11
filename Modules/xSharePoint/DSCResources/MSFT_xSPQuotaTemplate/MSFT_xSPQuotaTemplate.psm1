@@ -45,8 +45,8 @@ function Get-TargetResource
         } else {
             return @{
                 Name = $params.Name
-                StorageMaxInMB = ($template.StorageMaximumLevel/1048576) # Convert from bytes to megabytes
-                StorageWarningInMB = ($template.StorageWarningLevel/1048576) # Convert from bytes to megabytes
+                StorageMaxInMB = ($template.StorageMaximumLevel / 1MB) # Convert from bytes to megabytes
+                StorageWarningInMB = ($template.StorageWarningLevel / 1MB) # Convert from bytes to megabytes
                 MaximumUsagePointsSolutions = $template.UserCodeMaximumLevel
                 WarningUsagePointsSolutions = $template.UserCodeWarningLevel
                 Ensure = "Present"
@@ -105,16 +105,16 @@ function Set-TargetResource
                     #Template does not exist, create new template
                     $newTemplate = New-Object Microsoft.SharePoint.Administration.SPQuotaTemplate
                     $newTemplate.Name = $params.Name
-                    if ($params.ContainsKey("StorageMaxInMB")) { $newTemplate.StorageMaximumLevel = ($params.StorageMaxInMB * 1048576) } # Convert from megabytes to bytes
-                    if ($params.ContainsKey("StorageWarningInMB")) { $newTemplate.StorageWarningLevel = ($params.StorageWarningInMB * 1048576) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("StorageMaxInMB")) { $newTemplate.StorageMaximumLevel = ($params.StorageMaxInMB * 1MB) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("StorageWarningInMB")) { $newTemplate.StorageWarningLevel = ($params.StorageWarningInMB * 1MB) } # Convert from megabytes to bytes
                     if ($params.ContainsKey("MaximumUsagePointsSolutions")) { $newTemplate.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions } # Convert from megabytes to bytes
                     if ($params.ContainsKey("WarningUsagePointsSolutions")) { $newTemplate.UserCodeWarningLevel = $params.WarningUsagePointsSolutions } # Convert from megabytes to bytes
                     $admService.QuotaTemplates.Add($newTemplate)
                     $admService.Update()
                 } else {
                     #Template exists, update settings
-                    if ($params.ContainsKey("StorageMaxInMB")) { $template.StorageMaximumLevel = ($params.StorageMaxInMB * 1048576) } # Convert from megabytes to bytes
-                    if ($params.ContainsKey("StorageWarningInMB")) { $template.StorageWarningLevel = ($params.StorageWarningInMB * 1048576) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("StorageMaxInMB")) { $template.StorageMaximumLevel = ($params.StorageMaxInMB * 1MB) } # Convert from megabytes to bytes
+                    if ($params.ContainsKey("StorageWarningInMB")) { $template.StorageWarningLevel = ($params.StorageWarningInMB * 1MB) } # Convert from megabytes to bytes
                     if ($params.ContainsKey("MaximumUsagePointsSolutions")) { $template.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions } # Convert from megabytes to bytes
                     if ($params.ContainsKey("WarningUsagePointsSolutions")) { $template.UserCodeWarningLevel = $params.WarningUsagePointsSolutions } # Convert from megabytes to bytes
                     $admService.Update()
@@ -196,6 +196,5 @@ function Test-TargetResource
         }
     }
 }
-
 
 Export-ModuleMember -Function *-TargetResource
