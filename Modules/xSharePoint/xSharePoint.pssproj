@@ -141,6 +141,8 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPVisioServiceApp\MSFT_xSPVisioServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPVisioServiceApp\MSFT_xSPVisioServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
