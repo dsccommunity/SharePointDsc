@@ -1,0 +1,28 @@
+/*
+**Description**
+
+This resource is used to provision and manage an instance of the App Management Services Service Application.
+It will identify an instance of the BCS app through the application display name.
+Currently the resource will provision the app if it does not yet exist, and will change the service account associated to the app if it does not match the configuration.
+Database names or server name will not be changed if the configuration does not match, these parameters are only used for the initial provisioning of the service application.
+
+**Example**
+
+   xSPAddInManagementServiceApp AppManagementServiceApp
+    {
+        Name = "App Management Service Application"
+        AppPool = "SharePoint web services"
+        DatabaseServer = "SQL01.contoso.com"
+        DatabaseName = "SP_ManagedMetadata"
+}
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPAddInManagementServiceApp")]
+class MSFT_xSPAddInManagementServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] String ApplicationPool;
+    [Write] string DatabaseName;
+    [Write] String DatabaseServer;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
