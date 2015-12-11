@@ -70,6 +70,7 @@
     <Folder Include="DSCResources\MSFT_xSPSecureStoreServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPServiceAppPool\" />
     <Folder Include="DSCResources\MSFT_xSPServiceInstance\" />
+    <Folder Include="DSCResources\MSFT_xSPSessionStateService\" />
     <Folder Include="DSCResources\MSFT_xSPSite\" />
     <Folder Include="DSCResources\MSFT_xSPStateServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUsageApplication\" />
@@ -77,6 +78,10 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppGeneralSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
@@ -128,6 +133,8 @@
     <Compile Include="DSCResources\MSFT_xSPServiceAppPool\MSFT_xSPServiceAppPool.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPServiceInstance\MSFT_xSPServiceInstance.psm1" />
     <Compile Include="DSCResources\MSFT_xSPServiceInstance\MSFT_xSPServiceInstance.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPSessionStateService\MSFT_xSPSessionStateService.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSessionStateService\MSFT_xSPSessionStateService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPStateServiceApp\MSFT_xSPStateServiceApp.psm1" />
@@ -138,8 +145,12 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
     <Compile Include="Examples\Small Farm\SharePoint.psd1" />
@@ -153,6 +164,10 @@
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
