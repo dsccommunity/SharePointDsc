@@ -110,10 +110,27 @@ Describe "xSPAddInManagementServiceApp" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:xSPAppServiceUpdateCalled = $false
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplicationPool
                 $Global:xSPAppServiceUpdateCalled | Should Be $true
+            }
+        }
+
+        Context "When a service app needs to be created and no database paramsters are provided" {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "Test App Pool"
+            }
+
+            Mock Get-SPServiceApplication { return $null }
+            Mock New-SPAppManagementServiceApplication {  return  @(@{})}
+            Mock New-SPAppManagementServiceApplicationProxy{ return $null }
+
+            it "should not throw an exception in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPAppManagementServiceApplication
             }
         }
     }

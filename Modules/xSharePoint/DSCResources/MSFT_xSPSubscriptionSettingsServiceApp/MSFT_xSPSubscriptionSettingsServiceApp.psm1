@@ -10,7 +10,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
-    Write-Verbose -Message "Getting Add-in service app '$Name'"
+    Write-Verbose -Message "Getting Subscription Settings Service '$Name'"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -19,7 +19,7 @@ function Get-TargetResource
         if ($null -eq $serviceApps) { 
             return $null 
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "App Management Service Application" }
+        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Microsoft SharePoint Foundation Subscription Settings Service Application" }
 
         If ($null -eq $serviceApp) { 
             return $null 
@@ -52,30 +52,34 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Count -eq 0) { 
-        Write-Verbose -Message "Creating Add-in Service Application $Name"
+    if ($result -eq $null) { 
+        Write-Verbose -Message "Creating Subscription Settings Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-            $appService = New-SPAppManagementServiceApplication -Name $params.Name `
-                                                        -ApplicationPool $params.ApplicationPool `
-                                                        -DatabaseName $params.DatabaseName `
-                                                        -DatabaseServer $params.DatabaseServer
-            $null = New-SPAppManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -UseDefaultProxyGroup -ServiceApplication $appService -ea Stop
+            $newParams = @{
+                Name = $params.Name 
+                ApplicationPool = $params.ApplicationPool
+            }
+            if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
+            if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
+            New-SPSubscriptionSettingsServiceApplication @newParams
         }
     }
     else {
         if ($ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose -Message "Updating Add-in Service Application $Name"
+            Write-Verbose -Message "Updating Subscription Settings Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 
-                $AppService =  Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object { $_.TypeName -eq "App Management Service Application"  } 
-                $AppService.ApplicationPool = $appPool
-                $AppService.Update()
-                    
+
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+
+                $service = Get-SPServiceApplication -Name $params.Name `
+                    | Where-Object { $_.TypeName -eq "Microsoft SharePoint Foundation Subscription Settings Service Application" } 
+
+                $service.ApplicationPool = $appPool
+                $service.Update()
             }
         }
     }
@@ -94,7 +98,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     
-    Write-Verbose -Message "Testing for  Add-in Service Application '$Name'"
+    Write-Verbose -Message "Testing for Subscription Settings Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
     if ($null -eq $CurrentValues) { return $false }

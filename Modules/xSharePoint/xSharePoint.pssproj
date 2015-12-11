@@ -50,7 +50,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="DSCResources\" />
-    <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsService\" />
+    <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAntivirusSettings\" />
     <Folder Include="DSCResources\MSFT_xSPBCSServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPCacheAccounts\" />
@@ -82,7 +82,7 @@
     <Folder Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
-    <Folder Include="DSCResources\MSFT_xSPAddInManagementServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -91,10 +91,10 @@
     <Folder Include="Examples\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsService\MSFT_xSPSubscriptionSettingsService.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.schema.mof" />
-    <Compile Include="DSCResources\MSFT_xSPAddInManagementServiceApp\MSFT_xSPAddInManagementServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPAppManagementServiceApp\MSFT_xSPAppManagementServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.psm1" />
@@ -161,8 +161,8 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsService\MSFT_xSPSubscriptionSettingsService.schema.mof" />
-    <Content Include="DSCResources\MSFT_xSPAddInManagementServiceApp\MSFT_xSPAddInManagementServiceApp.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPAppManagementServiceApp\MSFT_xSPAppManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.schema.mof" />
