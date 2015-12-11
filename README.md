@@ -75,6 +75,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
+### Unreleased
+
+ * Added xSPStateServiceApp resource
+
 ### 0.8.0.0
  * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings
  * Fixed issue with xSPInstallPrereqs using wrong parameters in offline install mode

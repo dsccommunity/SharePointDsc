@@ -97,6 +97,5 @@ Describe "xSPSessionStateService" {
                 Assert-MockCalled Disable-SPSessionStateService
             }
         }
-        
     }    
 }
