@@ -78,6 +78,7 @@
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppGeneralSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppPolicy\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
@@ -144,6 +145,8 @@
     <Compile Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppPolicy\MSFT_xSPWebAppPolicy.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppPolicy\MSFT_xSPWebAppPolicy.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
