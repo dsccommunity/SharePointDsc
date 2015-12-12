@@ -77,7 +77,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
- * Added xSPStateServiceApp and xSPWebAppPolicy resources
+ * Added xSPStateServiceApp, xSPDesignerSettings, xSPQuotaTemplate and xSPWebAppPolicy resources
 
 ### 0.8.0.0
  * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings
