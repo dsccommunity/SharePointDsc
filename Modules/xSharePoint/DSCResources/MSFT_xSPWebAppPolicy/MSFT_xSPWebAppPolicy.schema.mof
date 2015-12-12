@@ -19,7 +19,7 @@ class MSFT_xSPWebAppPolicy : OMI_BaseResource
     [Key] string WebAppUrl;
     [Key] string UserName;
     [Write, ValueMap{"DenyAll","DenyWrite","FullRead", "FullControl"}, Values{"DenyAll","DenyWrite","FullRead", "FullControl"}] string PermissionLevel;
-	[Write] boolean ActAsSystemUser;
+    [Write] boolean ActAsSystemUser;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
