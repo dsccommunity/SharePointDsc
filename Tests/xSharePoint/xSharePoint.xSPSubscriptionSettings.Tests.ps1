@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSubscriptionSettingsService"
+$ModuleName = "MSFT_xSPSubscriptionSettingsServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSubscriptionSettingsService" {
+Describe "xSPSubscriptionSettingsServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test App"
