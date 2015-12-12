@@ -73,6 +73,7 @@
     <Folder Include="DSCResources\MSFT_xSPStateServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUsageApplication\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileSyncConnection\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
@@ -131,6 +132,8 @@
     <Compile Include="DSCResources\MSFT_xSPUsageApplication\MSFT_xSPUsageApplication.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />

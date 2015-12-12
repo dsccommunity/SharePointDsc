@@ -72,6 +72,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAntivirusSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPUserProfileSyncConnection.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.BlockedFileTypes.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.GeneralSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplication.Workflow.Tests.ps1" />
