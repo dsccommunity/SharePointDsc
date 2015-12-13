@@ -7,7 +7,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [System.String] $UserName,
         [parameter(Mandatory = $true)]  [ValidateSet("Deny All","Deny Write","Full Read", "Full Control")] [System.String] $PermissionLevel,
-        [parameter(Mandatory = $false)] [System.String] $ActAsSystemUser,
+        [parameter(Mandatory = $false)] [System.Boolean] $ActAsSystemUser,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -25,7 +25,7 @@ function Get-TargetResource
             return @{
                 WebAppUrl = $params.WebAppUrl
                 UserName = $params.UserName
-                PermissionLevel = $policyObject.PolicyRoleBindings[0].Name
+                PermissionLevel = ($policyObject.PolicyRoleBindings | Select-Object -First 1).Name
                 ActAsSystemUser = $policyObject.IsSystemUser
                 InstallAccount = $params.InstallAccount
             }
@@ -42,7 +42,8 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [System.String] $UserName,
-        [parameter(Mandatory = $true)]  [ValidateSet("DenyAll","DenyWrite","FullRead", "FullControl")] [System.String] $PermissionLevel,
+        [parameter(Mandatory = $true)]  [ValidateSet("Deny All","Deny Write","Full Read", "Full Control")] [System.String] $PermissionLevel,
+        [parameter(Mandatory = $false)] [System.Boolean] $ActAsSystemUser,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -101,14 +102,15 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [System.String] $UserName,
-        [parameter(Mandatory = $true)]  [ValidateSet("DenyAll","DenyWrite","FullRead", "FullControl")] [System.String] $PermissionLevel,
+        [parameter(Mandatory = $true)]  [ValidateSet("Deny All","Deny Write","Full Read", "Full Control")] [System.String] $PermissionLevel,
+        [parameter(Mandatory = $false)] [System.Boolean] $ActAsSystemUser,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
-    if ($null -eq $CurrentValues) {return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $params -ValuesToCheck @("PermissionLevel", "ActAsSystemUser")
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("PermissionLevel", "ActAsSystemUser")
 }
 
 Export-ModuleMember -Function *-TargetResource
