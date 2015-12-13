@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSubscriptionSettingsService"
+$ModuleName = "MSFT_xSPSubscriptionSettingsServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSubscriptionSettingsService" {
+Describe "xSPSubscriptionSettingsServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test App"
@@ -111,11 +111,27 @@ Describe "xSPSubscriptionSettingsService" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:xSPSubscriptionServiceUpdateCalled = $false
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 $Global:xSPSubscriptionServiceUpdateCalled | Should Be $true
+            }
+        }
+
+        Context "When a service app needs to be created and no database paramsters are provided" {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "Test App Pool"
+            }
+
+            Mock Get-SPServiceApplication { return $null }
+            Mock New-SPSubscriptionSettingsServiceApplication { }
+
+            it "should not throw an exception in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
             }
         }
     }

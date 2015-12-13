@@ -50,7 +50,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="DSCResources\" />
-    <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsService\" />
+    <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAntivirusSettings\" />
     <Folder Include="DSCResources\MSFT_xSPBCSServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPCacheAccounts\" />
@@ -65,11 +66,13 @@
     <Folder Include="DSCResources\MSFT_xSPManagedAccount\" />
     <Folder Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPManagedPath\" />
+    <Folder Include="DSCResources\MSFT_xSPQuotaTemplate\" />
     <Folder Include="DSCResources\MSFT_xSPOutgoingEmailSettings\" />
     <Folder Include="DSCResources\MSFT_xSPSearchServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPSecureStoreServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPServiceAppPool\" />
     <Folder Include="DSCResources\MSFT_xSPServiceInstance\" />
+    <Folder Include="DSCResources\MSFT_xSPSessionStateService\" />
     <Folder Include="DSCResources\MSFT_xSPSite\" />
     <Folder Include="DSCResources\MSFT_xSPStateServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUsageApplication\" />
@@ -77,7 +80,11 @@
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
-    <Folder Include="DSCResources\MSFT_xSPAddInManagementServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppGeneralSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
+    <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -86,16 +93,17 @@
     <Folder Include="Examples\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsService\MSFT_xSPSubscriptionSettingsService.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.schema.mof" />
-    <Compile Include="DSCResources\MSFT_xSPAddInManagementServiceApp\MSFT_xSPAddInManagementServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPAppManagementServiceApp\MSFT_xSPAppManagementServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPBCSServiceApp\MSFT_xSPBCSServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.psm1" />
     <Compile Include="DSCResources\MSFT_xSPCacheAccounts\MSFT_xSPCacheAccounts.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPCreateFarm\MSFT_xSPCreateFarm.psm1" />
     <Compile Include="DSCResources\MSFT_xSPCreateFarm\MSFT_xSPCreateFarm.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPDiagnosticLoggingSettings\MSFT_xSPDiagnosticLoggingSettings.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPDistributedCacheService\MSFT_xSPDistributedCacheService.psm1" />
@@ -116,6 +124,8 @@
     <Compile Include="DSCResources\MSFT_xSPManagedMetadataServiceApp\MSFT_xSPManagedMetaDataServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPManagedPath\MSFT_xSPManagedPath.psm1" />
     <Compile Include="DSCResources\MSFT_xSPManagedPath\MSFT_xSPManagedPath.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPQuotaTemplate\MSFT_xSPQuotaTemplate.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPQuotaTemplate\MSFT_xSPQuotaTemplate.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPOutgoingEmailSettings\MSFT_xSPOutgoingEmailSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPOutgoingEmailSettings\MSFT_xSPOutgoingEmailSettings.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.psm1" />
@@ -127,6 +137,8 @@
     <Compile Include="DSCResources\MSFT_xSPServiceAppPool\MSFT_xSPServiceAppPool.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPServiceInstance\MSFT_xSPServiceInstance.psm1" />
     <Compile Include="DSCResources\MSFT_xSPServiceInstance\MSFT_xSPServiceInstance.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPSessionStateService\MSFT_xSPSessionStateService.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPSessionStateService\MSFT_xSPSessionStateService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPStateServiceApp\MSFT_xSPStateServiceApp.psm1" />
@@ -137,8 +149,12 @@
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
     <Compile Include="Examples\Small Farm\SharePoint.psd1" />
@@ -150,9 +166,14 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsService\MSFT_xSPSubscriptionSettingsService.schema.mof" />
-    <Content Include="DSCResources\MSFT_xSPAddInManagementServiceApp\MSFT_xSPAddInManagementServiceApp.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPAppManagementServiceApp\MSFT_xSPAppManagementServiceApp.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

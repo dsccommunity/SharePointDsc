@@ -15,15 +15,15 @@ function Set-xSPWebApplicationWorkflowSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
+        [parameter(Mandatory = $true)] $Settings
     )
-    if((Test-xSharePointObjectHasProperty $Settings "UserDefinedWorkflowsEnabled") -eq $true) {
+    if($Settings.ContainsKey("UserDefinedWorkflowsEnabled") -eq $true) {
         $WebApplication.UserDefinedWorkflowsEnabled =  $Settings.UserDefinedWorkflowsEnabled;
     }
-    if((Test-xSharePointObjectHasProperty $Settings "EmailToNoPermissionWorkflowParticipantsEnable") -eq $true) {
+    if($Settings.ContainsKey("EmailToNoPermissionWorkflowParticipantsEnable") -eq $true) {
         $WebApplication.EmailToNoPermissionWorkflowParticipantsEnabled = $Settings.EmailToNoPermissionWorkflowParticipantsEnable;
     }
-    if((Test-xSharePointObjectHasProperty $Settings "ExternalWorkflowParticipantsEnabled") -eq $true) {
+    if($Settings.ContainsKey("ExternalWorkflowParticipantsEnabled") -eq $true) {
         $WebApplication.ExternalWorkflowParticipantsEnabled = $Settings.ExternalWorkflowParticipantsEnabled;
     }                
     $WebApplication.UpdateWorkflowConfigurationSettings();
@@ -34,7 +34,7 @@ function Test-xSPWebApplicationWorkflowSettings {
     [OutputType([System.Boolean])]
     param(
         [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
+        [parameter(Mandatory = $true)] $DesiredSettings
     )
     
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
