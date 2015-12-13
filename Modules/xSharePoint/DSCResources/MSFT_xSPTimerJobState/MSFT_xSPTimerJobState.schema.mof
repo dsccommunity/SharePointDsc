@@ -1,0 +1,28 @@
+/*
+**Description**
+
+This resource is used to configure a timer job and make sure it is in a specific state.
+The resource can be used to enable or disabled the job and configure the schedule of the job.
+
+NOTE: Make sure you use the internal timer job name, not the display name!
+
+**Example**
+    xSPTimerJobState DisableTimerJob_DeadSiteDelete
+    {
+        Name = "job-dead-site-delete"
+        WebApplication = "SharePoint - www.domain.com80"
+        Enabled = $true
+        Schedule="weekly at sat 5:00"
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPTimerJobState")]
+class MSFT_xSPTimerJobState : OMI_BaseResource
+{
+    [Key] String Name;
+    [Write] String WebApplication;
+    [Write] Boolean Enabled;
+    [Write] String Schedule;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
