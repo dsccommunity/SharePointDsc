@@ -10,7 +10,7 @@ This resource currently supports AD only.
     {
         UserProfileService = "User Profile Service Application"
         Forest = "contoso.com"
-        Domain = "Contoso"
+        Name = "Contoso"
         ConnectionCredentials = $connectionCredential
         Server = "server.contoso.com"
         UseSSL = $false
