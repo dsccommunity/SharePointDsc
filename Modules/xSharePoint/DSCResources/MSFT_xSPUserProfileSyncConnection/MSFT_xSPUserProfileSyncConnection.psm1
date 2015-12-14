@@ -6,12 +6,13 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $Forest,
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Credentials,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $ConnectionCredentials,
         [parameter(Mandatory = $true)] [System.String] $UserProfileService,
-        [parameter(Mandatory = $true)] [System.String] $IncludedOUs,
-        [parameter(Mandatory = $false)] [System.String] $ExcludedOUs,
+        [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
+        [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
+		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -22,24 +23,24 @@ function Get-TargetResource
         
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
-        if ($null -eq $serviceApps) { 
-            return $null 
-        }
-       
-
+ 
         If ($null -eq $ups)
         {
             return $null
         }
         else
         {
+            $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
+            $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
-            ##todo: refactor
-            #$context = [Microsoft.Office.Server.ServerContext]::Default
-            $context = [Microsoft.SharePoint.SPServiceContext]::GetContext($ups.ServiceApplicationProxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
-            $upcm = New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
             $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
+			if($connection -eq $null){
+				return $null
+			}
             $namingContext = $connection.NamingContexts | select -first 1
+			if($namingContext -eq $null){
+				return $null
+			}
             return @{
                         UserProfileService = $UserProfileService
                         Forest = $connection.Server #"contoso.com" #TODO: GetCorrect Forest
@@ -64,13 +65,14 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $Forest,
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Credentials,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $ConnectionCredentials,
         [parameter(Mandatory = $true)] [System.String] $UserProfileService,
-        [parameter(Mandatory = $true)] [System.String] $IncludedOUs,
-        [parameter(Mandatory = $false)] [System.String] $ExcludedOUs,
+        [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
+        [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [System.Boolean] $Force,
+		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
    )
 
@@ -87,28 +89,27 @@ function Set-TargetResource
     if ($null -eq $ups) { 
         throw "User Profile Service Application $($params.UserProfileService) not found"
     }
-    ##todo: refactor    
-    ## $context =   [Microsoft.Office.Server.ServerContext]::Default
-    $context = [Microsoft.SharePoint.SPServiceContext]::GetContext($ups.ServiceApplicationProxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
-    $upcm = New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
+     $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
+     $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" $context
 
     if($upcm.IsSynchronizationRunning())
     {
         throw "Synchronization is in Progress."
     }
         
-    $securePassword =  $securePassword | ConvertTo-SecureString  $params.Credential.GetNetworkCredential().password -AsPlainText -Force
+    $securePassword =  ConvertTo-SecureString  $params.ConnectionCredentials.GetNetworkCredential().password -AsPlainText -Force
+    
     $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
     if($connection -ne $null -and $params.Forest -ne  $connection.Server)
     {
-            $namingContext = $connection.NamingContexts | select -first 1
-            $connection.SetCredentials($params.Credential.UserName, $securePassword);
+            $namingContext = $connection.NamingContexts[0]
+            $connection.SetCredentials($params.ConnectionCredentials.UserName, $securePassword);
             
             if($params.ContainsKey("IncludedOUs")){
-                $namingContext.IncludedOUs = params.IncludedOUs
+                $namingContext.IncludedOUs = $params.IncludedOUs
             }
             if($params.ContainsKey("ExcludedOUs")){
-                $namingContext.ExcludedOUs = params.ExcludedOUs
+                $namingContext.ExcludedOUs = $params.ExcludedOUs
             }else{
                 $namingContext.ExcludedOUs = @()
             }
@@ -117,7 +118,7 @@ function Set-TargetResource
             return;
         
     }else{
-        if($params.Forest -ne  $connection.Server){
+        if($connection -ne $null -and $params.Forest -ne  $connection.Server){
             if($params.ContainsKey("Force")){
                 $connection.Delete();
             }else{
@@ -125,7 +126,7 @@ function Set-TargetResource
             }
             
         }
-        $namingContext =  New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext(
+        $namingContext =  New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
                                         $params.Name,
                                         $params.Forest, 
                                         $true, 
@@ -162,12 +163,13 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $Forest,
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Credentials,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $ConnectionCredentials,
         [parameter(Mandatory = $true)] [System.String] $UserProfileService,
-        [parameter(Mandatory = $true)] [System.String] $IncludedOUs,
-        [parameter(Mandatory = $false)] [System.String] $ExcludedOUs,
+        [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
+        [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
+		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -200,10 +202,10 @@ function Test-TargetResource
     }else{
         $allGood = $true;
         $CurrentValues.ExcludedOUs | for-eachobject {
-                        if(-not $ExcludedOUs.Contains($_)){
-                            $allGood=$false;
-                        }
-                    }
+            if(-not $ExcludedOUs.Contains($_)){
+                $allGood=$false;
+            }
+        }
         if($allGood -eq $false)
         {
              return $false
