@@ -150,6 +150,7 @@ Describe "xSPUserProfileSyncConnection" {
 
 
             $connection = @{ DisplayName = "Contoso" 
+                            Server = "contoso.com"
                               NamingContexts=  New-Object System.Collections.ArrayList
                             }
             
@@ -186,7 +187,7 @@ Describe "xSPUserProfileSyncConnection" {
          
 
 
-            It "returns valid value from the Get method" {
+            It "returns service instance from the Get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
@@ -202,90 +203,196 @@ Describe "xSPUserProfileSyncConnection" {
                 $Global:xSPUPSSyncConnectionSetCredentialsCalled | Should be $true
                 $Global:xSPUPSSyncConnectionRefreshSchemaCalled | Should be $true
             }
-
         }
 
         Context "When connection exists and forest is different" {
+        ###//TODO: execute integration test
+            $namingContext =@{ AccountUserName = "TestAccount" 
+                    IncludedOUs = New-Object System.Collections.ArrayList 
+                    ExcludedOUs = New-Object System.Collections.ArrayList 
+                  }
+            $namingContext.IncludedOUs.Add("OU=com, OU=Contoso, OU=Included")
+            $namingContext.ExcludedOUs.Add("OU=com, OU=Contoso, OU=Excluded")
+            
+            $connection = @{ DisplayName = "Contoso" 
+                              NamingContexts=  New-Object System.Collections.ArrayList
+                              Server =   "Litware.net"         
+                            }
+            $connection.NamingContexts.Add($namingContext);
+            $connection = $connection  | Add-Member ScriptMethod Delete {
+                    $Global:xSPUPSSyncConnectionDeleteCalled = $true
+                } -PassThru
+            $userProfileServiceValidConnection =  @{
+                Name = "User Profile Service Application"
+                TypeName = "User Profile Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                ServiceApplicationProxyGroup = "Proxy Group"
+                ConnectionManager=  New-Object System.Collections.ArrayList
+            }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            $userProfileServiceValidConnection.ConnectionManager.Add($connection);
+            Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+            $ConnnectionManager = New-Object System.Collections.ArrayList | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
+                                                    param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
+                                                    $name, `
+                                                    $forest, `
+                                                    $useSSL, `
+                                                    $userName, `
+                                                    $securePassword, `
+                                                    $namingContext, `
+                                                    $p1, $p2 `
+                                                )
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
+            } -PassThru            
+            $ConnnectionManager.Add($connection)
+            Mock New-Object -MockWith {
+                return (@{} | Add-Member ScriptMethod IsSynchronizationRunning {
+                    $Global:UpsSyncIsSynchronizationRunning=$true;
+                    return $false; 
+                } -PassThru   |  Add-Member  ConnectionManager $ConnnectionManager  -PassThru )
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
+            Mock New-Object -MockWith {return @{}
+            }  -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext"}
+
+            It "returns service instance from the Get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
 
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
+            It "throws exception as force isn't specified" {
+                $Global:xSPUPSSyncConnectionDeleteCalled=$false
+                {Set-TargetResource @testParams} | should throw
+                $Global:xSPUPSSyncConnectionDeleteCalled | Should be $false
+            }
+
+            $forceTestParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                Server = "server.contoso.com"
+                UseSSL = $false
+                Force = $true
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+         
+             It "delete and create as force is specified" {
+                $Global:xSPUPSSyncConnectionDeleteCalled=$false
+                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$false
+                Set-TargetResource @forceTestParams 
+                $Global:xSPUPSSyncConnectionDeleteCalled | Should be $true
+                $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $true
+            }
         }
+
         Context "When synchronization is running" {
            #needs service application
             Mock Get-SPServiceApplication { 
                 return @(
-                    New-Object Object|Add-Member NoteProperty ServiceApplicationProxyGroup "" -PassThru 
+                    New-Object Object|Add-Member NoteProperty ServiceApplicationProxyGroup "Proxy Group" -PassThru 
                 )
             }
             Mock New-Object -MockWith {
-            return (@{} | Add-Member ScriptMethod IsSynchronizationRunning {
-                $Global:UpsSyncIsSynchronizationRunning=$true;
-                return $true;
-            } -PassThru)
+                return (@{} | Add-Member ScriptMethod IsSynchronizationRunning {
+                    $Global:UpsSyncIsSynchronizationRunning=$true;
+                    return $true;
+                } -PassThru)
             } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
 
             It "attempts to execute method but synchronization is running" {
                 $Global:UpsSyncIsSynchronizationRunning=$false
+                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$false
                 {Set-TargetResource @testParams }| Should throw
                 Assert-MockCalled Get-SPServiceApplication
-                Assert-MockCalled New-Object
+                Assert-MockCalled New-Object -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
                 $Global:UpsSyncIsSynchronizationRunning| Should be $true;
+                $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $false;
             }
 
-            
-            #throw exception
         }
-        Context "When connection exists and Excluded and Included OUs are different" {
-            Mock Get-SPServiceApplication { 
-                return @(
-                    New-Object Object |            
-                        Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                        Add-Member NoteProperty ServiceApplicationProxyGroup "" -PassThru |  
-                        Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
-                        Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru              
-                        
-                )
+        
+        Context "When connection exists and Excluded and Included OUs are different. force parameter provided" {
+            $namingContext =@{ AccountUserName = "TestAccount" 
+                IncludedOUs = New-Object System.Collections.ArrayList 
+                ExcludedOUs = New-Object System.Collections.ArrayList 
             }
+            $namingContext.IncludedOUs.Add("OU=com, OU=Contoso, OU=Included")
+            $namingContext.ExcludedOUs.Add("OU=com, OU=Contoso, OU=Excluded")
 
-            Mock New-Object  -ParameterFilter { TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } { 
-                return @{
-                    ConnectionManager = @($ConnnectionManager)
-                }
-                }
 
-<#            return @(        
-                New-Object Object |            
-                Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                Add-Member ScriptMethod ConnectionManager {return $ConnnectionManager}
+            $connection = @{ DisplayName = "Contoso" 
+                            Server = "contoso.com"
+                              NamingContexts=  New-Object System.Collections.ArrayList
+            }
             
-            )#>
-            #}
+            $connection.NamingContexts.Add($namingContext);
+            $connection = $connection  | Add-Member ScriptMethod RefreshSchema {
+                    $Global:xSPUPSSyncConnectionRefreshSchemaCalled = $true
+                } -PassThru | Add-Member ScriptMethod Update {
+                    $Global:xSPUPSSyncConnectionUpdateCalled = $true
+                } -PassThru| Add-Member ScriptMethod SetCredentials {
+                     param($userAccount,$securePassword )
+                    $Global:xSPUPSSyncConnectionSetCredentialsCalled  = $true
+                } -PassThru
+
+            $userProfileServiceValidConnection =  @{
+                Name = "User Profile Service Application"
+                TypeName = "User Profile Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                ServiceApplicationProxyGroup = "Proxy Group"
+                ConnectionManager=  New-Object System.Collections.ArrayList
+                
+            }
+            $userProfileServiceValidConnection.ConnectionManager.Add($connection);
+            Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+
+            Mock New-Object -MockWith {
+                return (@{
+                    ConnectionManager = $ConnnectionManager  
+                        } | Add-Member ScriptMethod IsSynchronizationRunning {
+                $Global:UpsSyncIsSynchronizationRunning=$true;
+                return $false; 
+                } -PassThru   )
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
+            
+            $difOUsTestParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                Server = "server.contoso.com"
+                UseSSL = $false
+                Force = $false
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com","OU=Notes Users,DC=Contoso,DC=com")
+                ExcludedOUs = @("OU=Excluded, OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
             It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+                Get-TargetResource @difOUsTestParams | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
 
-            It "returns true when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $true
+            It "returns false when the Test method is called" {
+                Test-TargetResource @difOUsTestParams | Should Be $false
             }
 
-            Mock Get-SPFarm { return @{
-                DefaultServiceAccount = @{ Name = "WRONG\account" }
-            }}
 
-            It "returns values from the get method where the farm account doesn't match" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "updates OU lists" {
+                $Global:xSPUPSSyncConnectionUpdateCalled= $false
+                $Global:xSPUPSSyncConnectionSetCredentialsCalled  = $false
+                $Global:xSPUPSSyncConnectionRefreshSchemaCalled =$false
+                Set-TargetResource @difOUsTestParams
+                $Global:xSPUPSSyncConnectionUpdateCalled | Should be $true
+                $Global:xSPUPSSyncConnectionSetCredentialsCalled  | Should be $true
+                $Global:xSPUPSSyncConnectionRefreshSchemaCalled | Should be $true
             }
         }
     }    
