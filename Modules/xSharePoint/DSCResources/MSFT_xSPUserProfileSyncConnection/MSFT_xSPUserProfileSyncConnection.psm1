@@ -11,6 +11,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
         [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
+        [parameter(Mandatory = $false)] [System.String] $Force,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
 		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -51,7 +52,7 @@ function Get-TargetResource
                         Server =$namingContext.PreferredDomainControllers;
                         UseSSL = $connection.UseSSL;
                         ConnectionType = $connection.Type;
-
+                        Force = $params.Force
             }
         }
     }
@@ -84,7 +85,7 @@ function Set-TargetResource
         
 
     if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
-    $ups = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+    $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
                 
     if ($null -eq $ups) { 
         throw "User Profile Service Application $($params.UserProfileService) not found"
@@ -99,8 +100,8 @@ function Set-TargetResource
         
     $securePassword =  ConvertTo-SecureString  $params.ConnectionCredentials.GetNetworkCredential().password -AsPlainText -Force
     
-    $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
-    if($connection -ne $null -and $params.Forest -ne  $connection.Server)
+    $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name} | select -first 1
+    if($connection -ne $null -and $params.Forest -ieq  $connection.Server)
     {
             $namingContext = $connection.NamingContexts[0]
             $connection.SetCredentials($params.ConnectionCredentials.UserName, $securePassword);
@@ -118,8 +119,8 @@ function Set-TargetResource
             return;
         
     }else{
-        if($connection -ne $null -and $params.Forest -ne  $connection.Server){
-            if($params.ContainsKey("Force")){
+        if($connection -ne $null -and $params.Forest -ine  $connection.Server){
+            if($params.ContainsKey("Force") -and $params.Force -eq $true){
                 $connection.Delete();
             }else{
                 throw "connection exists and forest is different. use force  "
@@ -168,6 +169,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
         [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
+        [parameter(Mandatory = $false)] [System.String] $Force,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
 		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -176,7 +178,11 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service sync connection $Name"
     if ($null -eq $CurrentValues) { return $false }
-    ## todo: test included and excluded OUs
+    if( $Force)
+    {
+        return $false
+    }
+    
         return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL")
     
     if($CurrentValues.IncludedOUs.Count -ne $IncludedOus.Count)
