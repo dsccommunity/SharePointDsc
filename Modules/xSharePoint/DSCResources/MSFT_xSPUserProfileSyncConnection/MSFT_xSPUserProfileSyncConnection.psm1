@@ -80,7 +80,7 @@ function Set-TargetResource
     Write-Verbose -Message "Creating user profile service application $Name"
 
 
-    $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
     $params = $args[0]
         
 
