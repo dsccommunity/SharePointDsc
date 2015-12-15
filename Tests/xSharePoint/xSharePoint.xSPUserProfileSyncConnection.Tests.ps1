@@ -13,10 +13,6 @@ $ModuleName = "MSFT_xSPUserProfileSyncConnection"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-## New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
-## New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext
-## Mock New-Object { return $zipMock } -ParameterFilter { $ComObject -eq 'Shell.Application' }
-
 
 Describe "xSPUserProfileSyncConnection" {
     InModuleScope $ModuleName {
@@ -51,14 +47,9 @@ Describe "xSPUserProfileSyncConnection" {
                                 param($userAccount,$securePassword )
                             $Global:xSPUPSSyncConnectionSetCredentialsCalled  = $true
                         } -PassThru
-        #connection exist, different forest, force provided
         $connection = $connection  | Add-Member ScriptMethod Delete {
                             $Global:xSPUPSSyncConnectionDeleteCalled = $true
                         } -PassThru
-
-                        #connection exist, different forest, force not provided
-                            #throw exception
-
 
 
 
@@ -244,7 +235,7 @@ Describe "xSPUserProfileSyncConnection" {
                                                     $p1, $p2 `
                                                 )
 
-            $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
+                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
             } -PassThru            
             $ConnnectionManager.Add($connection)
             Mock New-Object -MockWith {
