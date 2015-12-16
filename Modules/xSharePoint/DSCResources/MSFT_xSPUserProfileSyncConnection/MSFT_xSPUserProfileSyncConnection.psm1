@@ -42,16 +42,17 @@ function Get-TargetResource
 			if($namingContext -eq $null){
 				return $null
 			}
+            $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
             return @{
                         UserProfileService = $UserProfileService
                         Forest = $connection.Server #"contoso.com" #TODO: GetCorrect Forest
-                        Domain = $namingContext.DisplayName
-                        Credentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
+                        Name = $namingContext.DisplayName
+                        Credentials = $accountCredentials 
                         IncludedOUs = $namingContext.ContainersIncluded
                         ExcludedOUs = $namingContext.ContainersExcluded
-                        Server =$namingContext.PreferredDomainControllers;
-                        UseSSL = $connection.UseSSL;
-                        ConnectionType = $connection.Type;
+                        Server =$namingContext.PreferredDomainControllers
+                        UseSSL = $connection.UseSSL
+                        ConnectionType = $connection.Type.ToString()
                         Force = $params.Force
             }
         }
@@ -178,45 +179,13 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service sync connection $Name"
     if ($null -eq $CurrentValues) { return $false }
-    if( $Force)
+    if( $Force -eq $true)
     {
-        return $false
+        return $false 
     }
     
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL")
-    
-    if($CurrentValues.IncludedOUs.Count -ne $IncludedOus.Count)
-    {
-        return $false
-    }else{
-        $allGood = $true;
-        $CurrentValues.IncludedOUs | for-eachobject {
-                        if(-not $IncludedOUs.Contains($_)){
-                            $allGood=$false;
-                        }
-                    }
-        if($allGood -eq $false)
-        {
-             return $false
-        }
-    }
-
-    if( ($ExcludedOus -eq $null -and $CurrentValues.ExcludedOus.Count -gt 0) -or 
-        ($CurrentValues.ExcludedOUs.Count -ne $ExcludedOUs.Count)  )
-    {
-        return $false
-    }else{
-        $allGood = $true;
-        $CurrentValues.ExcludedOUs | for-eachobject {
-            if(-not $ExcludedOUs.Contains($_)){
-                $allGood=$false;
-            }
-        }
-        if($allGood -eq $false)
-        {
-             return $false
-        }
-    }
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
+   
 
 }
         
