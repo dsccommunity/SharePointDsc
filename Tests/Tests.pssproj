@@ -77,6 +77,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPQuotaTemplate.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSessionStateService.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPUserProfileSyncConnection.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppBlockedFileTypes.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppGeneralSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppWorkflowSettings.Tests.ps1" />

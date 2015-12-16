@@ -1,0 +1,38 @@
+/*
+**Description**
+
+This resource will ensure a specifc user profile sync connection is in place and that it is configured accordingly to its definition
+
+This resource currently supports AD only.
+**Example**
+
+  xSPUserProfileSyncConnection MainDomain
+    {
+        UserProfileService = "User Profile Service Application"
+        Forest = "contoso.com"
+        Name = "Contoso"
+        ConnectionCredentials = $connectionCredential
+        Server = "server.contoso.com"
+        UseSSL = $false
+        IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+        ExcludedOUs = @("OU=Notes Usersa,DC=Contoso,DC=com")
+        Force = $false
+        ConnectionType = "ActiveDirectory"
+}
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSyncConnection")]
+class MSFT_xSPUserProfileSyncConnection : OMI_BaseResource
+{   
+    [Key] string Name;
+    [Required] string Forest;
+    [Required] string UserProfileService;
+    [Required, EmbeddedInstance("MSFT_Credential")] String ConnectionCredentials;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Required] string IncludedOUs[];
+    [write] string ExcludedOUs[];
+    [write] string Server;
+    [Write] boolean  UseSSL;
+    [Write] boolean  Force;
+    [Write, ValueMap{"ActiveDirectory","BusinessDataCatalog"}, Values{"ActiveDirectory","BusinessDataCatalog"}] string ConnectionType ;
+};
+
