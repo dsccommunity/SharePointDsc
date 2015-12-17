@@ -81,6 +81,7 @@
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppGeneralSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
@@ -153,6 +154,7 @@
     <Compile Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplication\MSFT_xSPWebApplication.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\MSFT_xSPWebAppSiteUseAndDeletion.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
@@ -172,6 +174,7 @@
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\MSFT_xSPWebAppSiteUseAndDeletion.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />

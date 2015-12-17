@@ -67,6 +67,7 @@
     <Compile Include="xSharePoint.TestHarness.psm1" />
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebAppSiteUseAndDeletion.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPDesignerSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppManagementServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSubscriptionSettings.Tests.ps1" />
