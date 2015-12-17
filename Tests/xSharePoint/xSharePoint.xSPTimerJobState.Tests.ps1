@@ -15,12 +15,9 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPTimerJobState" {
     InModuleScope $ModuleName {
         $testParams = @{
-            ScanOnDownload = $true
-            ScanOnUpload = $true
-            AllowDownloadInfected = $true
-            AttemptToClean = $true
-            TimeoutDuration = 60
-            NumberOfThreads = 5
+            Name = "job-spapp-statequery"
+            Enabled = $true
+            Schedule = "hourly between 0 and 59"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -46,22 +43,17 @@ Describe "xSPTimerJobState" {
             }
         }
 
-        Context "The server is in a farm and the incorrect settings have been applied" {
-            Mock Get-xSharePointContentService {
+        Context "The server is in a farm and the incorrect enabled settings have been applied" {
+            Mock Get-SPTimerJob {
                 $returnVal = @{
-                    AntivirusSettings = @{
-                        AllowDownload = $false
-                        DownloadScanEnabled = $false
-                        UploadScanEnabled = $false
-                        CleaningEnabled = $false
-                        NumberOfThreads = 0
-                        Timeout = @{
-                            TotalSeconds = 0;
-                        }
-                    }
+                    Name = "job-spapp-statequery"
+                    IsDisabled = $true
+                    Schedule = "hourly between 0 and 59"
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointAntivirusUpdated = $true } -PassThru
                 return $returnVal
+            }
+            Mock Set-SPTimerJob {
+                $Global:xSharePointTimerJobUpdated = $true
             }
             Mock Get-SPFarm { return @{} }
 
@@ -73,28 +65,76 @@ Describe "xSPTimerJobState" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointAntivirusUpdated = $false
-            It "updates the antivirus settings" {
+            $Global:xSharePointTimerJobUpdated = $false
+            It "updates the timerjob settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointAntivirusUpdated | Should Be $true
+                $Global:xSharePointTimerJobUpdated | Should Be $true
+            }
+        }
+
+        Context "The server is in a farm and the incorrect schedule settings have been applied" {
+            Mock Get-SPTimerJob {
+                $returnVal = @{
+                    Name = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "weekly at sat 23:00:00"
+                } 
+                return $returnVal
+            }
+            Mock Set-SPTimerJob {
+                $Global:xSharePointTimerJobUpdated = $true
+            }
+            Mock Get-SPFarm { return @{} }
+
+            It "return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSharePointTimerJobUpdated = $false
+            It "updates the timer job settings" {
+                Set-TargetResource @testParams
+                $Global:xSharePointTimerJobUpdated | Should Be $true
+            }
+        }
+
+        Context "The server is in a farm and the incorrect schedule format has been used" {
+            Mock Get-SPTimerJob {
+                $returnVal = @{
+                    Name = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "incorrect format"
+                } 
+                return $returnVal
+            }
+            Mock Set-SPTimerJob { throw "Invalid format" }
+            Mock Get-SPFarm { return @{} }
+
+            It "return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSharePointTimerJobUpdated = $false
+            It "throws an exception because the incorrect schedule format is used" {
+                { Set-TargetResource @testParams } | Should throw "Incorrect schedule format used. New schedule will not be applied."
             }
         }
 
         Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-xSharePointContentService {
+            Mock Get-SPTimerJob {
                 $returnVal = @{
-                    AntivirusSettings = @{
-                        AllowDownload = $true
-                        DownloadScanEnabled = $true
-                        UploadScanEnabled = $true
-                        CleaningEnabled = $true
-                        NumberOfThreads = 5
-                        Timeout = @{
-                            TotalSeconds = 60;
-                        }
-                    }
+                    Name = "job-spapp-statequery"
+                    IsDisabled = $false
+                    Schedule = "hourly between 0 and 59"
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointAntivirusUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointTimerJobUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPFarm { return @{} }

@@ -19,7 +19,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            Write-Verbose -Verbose "No local SharePoint farm was detected. Timer job settings will not be applied"
             return $null
         }
 
@@ -79,7 +79,7 @@ function Set-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            throw "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            throw "No local SharePoint farm was detected. Timer job settings will not be applied"
             return
         }
         
@@ -109,9 +109,19 @@ function Set-TargetResource
             # Set timer job schedule
             Write-Verbose -Verbose "Set timer job $($params.Name) schedule"
             if ($params.ContainsKey("WebApplication")) {
-                Set-SPTimerJob $params.Name -WebApplication $params.WebApplication -Schedule $params.Schedule
+                try {
+                    Set-SPTimerJob $params.Name -WebApplication $params.WebApplication -Schedule $params.Schedule -EA Stop
+                } catch {
+                    throw "Incorrect schedule format used. New schedule will not be applied."
+                    return
+                }
             } else {
-                Set-SPTimerJob $params.Name -Schedule $params.Schedule
+                try {
+                    Set-SPTimerJob $params.Name -Schedule $params.Schedule -EA Stop
+                } catch {
+                    throw "Incorrect schedule format used. New schedule will not be applied."
+                    return
+                }
             }
         }
     }
