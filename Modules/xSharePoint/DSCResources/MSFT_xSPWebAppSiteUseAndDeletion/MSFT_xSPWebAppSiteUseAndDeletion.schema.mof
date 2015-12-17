@@ -16,6 +16,7 @@ You can enable or disable the Site Use and Deletion feature, specify the amount 
         PsDscRunAsCredential                     = $InstallAccount
     }
 */
+
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppSiteUseAndDeletion")]
 Class xSPWebAppSiteUseAndDeletion : OMI_BaseResource
 {
