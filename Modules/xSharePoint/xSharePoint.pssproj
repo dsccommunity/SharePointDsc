@@ -83,6 +83,7 @@
     <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -108,6 +109,7 @@
     <Compile Include="DSCResources\MSFT_xSPFarmAdministrators\MSFT_xSPFarmAdministrators.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.psm1" />
     <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\MSFT_xSPHealthAnalyzerRuleState.psm1" />
     <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.psm1" />
     <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPInstall\MSFT_xSPInstall.psm1" />
@@ -163,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\MSFT_xSPHealthAnalyzerRuleState.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.schema.mof" />
