@@ -66,13 +66,13 @@ Describe "xSPUserProfileSyncConnection" {
                         } -PassThru
 
         $namingContext =@{ 
-            IncludedOUs = New-Object System.Collections.ArrayList 
-            ExcludedOUs = New-Object System.Collections.ArrayList 
+            ContainersIncluded = New-Object System.Collections.ArrayList 
+            ContainersExcluded = New-Object System.Collections.ArrayList 
             DisplayName="Contoso" 
             PreferredDomainControllers=$null;
         }
-        $namingContext.IncludedOUs.Add("OU=com, OU=Contoso, OU=Included")
-        $namingContext.ExcludedOUs.Add("OU=com, OU=Contoso, OU=Excluded")
+        $namingContext.ContainersIncluded.Add("OU=com, OU=Contoso, OU=Included")
+        $namingContext.ContainersExcluded.Add("OU=com, OU=Contoso, OU=Excluded")
         $connection.NamingContexts.Add($namingContext);
         
         $ConnnectionManager = New-Object System.Collections.ArrayList | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
