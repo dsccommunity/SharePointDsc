@@ -76,7 +76,9 @@ Additional detailed documentation is included on the wiki on GitHub.
 ## Version History
 
 ### Unreleased
- * Added xSPStateServiceApp, xSPSearchTopology and xSPSearchIndexPartition resources
+
+ * Added xSPStateServiceApp, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology and xSPSearchIndexPartition resources
+ * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
 
 ### 0.8.0.0
  * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings
