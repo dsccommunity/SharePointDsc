@@ -78,6 +78,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 ### Unreleased
 
  * Added xSPStateServiceApp, xSPDesignerSettings, xSPQuotaTemplate and xSPWebAppSiteUseAndDeletion resources
+ * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
 
 ### 0.8.0.0
  * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings

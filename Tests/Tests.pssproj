@@ -69,6 +69,8 @@
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppSiteUseAndDeletion.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPDesignerSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPAppManagementServiceApp.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPSubscriptionSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPOutgoingEmailSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPPasswordChangeSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
