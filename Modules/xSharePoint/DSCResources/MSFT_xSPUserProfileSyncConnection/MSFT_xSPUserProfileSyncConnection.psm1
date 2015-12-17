@@ -31,6 +31,8 @@ function Get-TargetResource
         }
         else
         {
+
+            #what if permission isn't granted ?
             $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
             $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
@@ -43,6 +45,7 @@ function Get-TargetResource
 				return $null
 			}
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
+            $domainController = $namingContext.PreferredDomainControllers | select -First 1
             return @{
                         UserProfileService = $UserProfileService
                         Forest = $connection.Server #"contoso.com" #TODO: GetCorrect Forest
@@ -50,7 +53,7 @@ function Get-TargetResource
                         Credentials = $accountCredentials 
                         IncludedOUs = $namingContext.ContainersIncluded
                         ExcludedOUs = $namingContext.ContainersExcluded
-                        Server =$namingContext.PreferredDomainControllers
+                        Server =$domainController
                         UseSSL = $connection.UseSSL
                         ConnectionType = $connection.Type.ToString()
                         Force = $params.Force
@@ -91,8 +94,9 @@ function Set-TargetResource
     if ($null -eq $ups) { 
         throw "User Profile Service Application $($params.UserProfileService) not found"
     }
-     $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
-     $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" $context
+    $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
+    Write-Verbose -Message "retrieving UserProfileConfigManager "
+    $upcm = New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
     if($upcm.IsSynchronizationRunning())
     {
@@ -100,26 +104,30 @@ function Set-TargetResource
     }
         
     $securePassword =  ConvertTo-SecureString  $params.ConnectionCredentials.GetNetworkCredential().password -AsPlainText -Force
-    
     $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name} | select -first 1
     if($connection -ne $null -and $params.Forest -ieq  $connection.Server)
     {
-            $namingContext = $connection.NamingContexts[0]
-            $connection.SetCredentials($params.ConnectionCredentials.UserName, $securePassword);
+        $namingContext = $connection.NamingContexts[0]
+        $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
+        $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+
+        $connection.SetCredentials($domain, $userName, $securePassword);
             
-            if($params.ContainsKey("IncludedOUs")){
-                $namingContext.IncludedOUs = $params.IncludedOUs
-            }
-            if($params.ContainsKey("ExcludedOUs")){
-                $namingContext.ExcludedOUs = $params.ExcludedOUs
-            }else{
-                $namingContext.ExcludedOUs = @()
-            }
-            $connection.RefreshSchema();
-            $connection.Update();
-            return;
+        if($params.ContainsKey("IncludedOUs")){
+            $namingContext.ContainersIncluded.Clear()
+            $params.IncludedOUs| %{$namingContext.ContainersIncluded.Add($_) }
+        }
+        $namingContext.ContainersExcluded.Clear()
+        if($params.ContainsKey("ExcludedOUs")){
+            $params.IncludedOUs| %{$namingContext.ContainersExcluded.Add($_) }
+        }
+
+        $connection.Update();
+        $connection.RefreshSchema($securePassword);
+        return;
         
     }else{
+        Write-Verbose -Message "creating a new connection "
         if($connection -ne $null -and $params.Forest -ine  $connection.Server){
             if($params.ContainsKey("Force") -and $params.Force -eq $true){
                 $connection.Delete();
@@ -128,24 +136,32 @@ function Set-TargetResource
             }
             
         }
+        $partition = [ADSI]("LDAP://$($params.Forest)")
+        $partitionId = New-Object Guid($partition.objectGUID)
         $namingContext =  New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
                                         $params.Name,
                                         $params.Forest, 
                                         $true, 
-                                        [guid]::NewGuid(), 
+                                        $partitionId , 
                                         $params.IncludedOUs, 
                                         $params.ExcludedOus,
-                                        $params.Server, 
+                                        $($params.Server), 
                                         $false)
+        Write-Verbose -Message "$($params.ConnectionCredentials.UserName)"
+         $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
+         $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+         
         $newUPSADConnection =  $upcm.ConnectionManager.AddActiveDirectoryConnection( `
                                         [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
                                         $params.Name, `
                                         $params.Forest, `
                                         $params.UseSSL, `
-                                        $params.Credential.UserName, `
+                                        $domain, `
+                                        $userName, `
                                         $securePassword, `
-                                        $namingContext, `
-                                        $null, $null `
+                                        $($namingContext), `
+                                        $null,
+                                        $null `
                                     )
 
 
