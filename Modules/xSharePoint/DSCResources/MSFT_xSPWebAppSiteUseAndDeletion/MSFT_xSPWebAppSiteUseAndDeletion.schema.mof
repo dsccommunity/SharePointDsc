@@ -1,0 +1,29 @@
+﻿/*
+**Description**
+
+This resource is responsible for controlling the Site Use and Deletion settings on a specific web application.
+You can enable or disable the Site Use and Deletion feature, specify the amount of days after which the alerts are being send, if sites have to be deleted automatically and if so after how many days this has to be done.
+
+**Example**
+
+    xSPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
+    {
+        Url                                      = "http://example.contoso.local"
+        SendUnusedSiteCollectionNotifications    = $true
+        UnusedSiteNotificationPeriod             = 90
+        AutomaticallyDeleteUnusedSiteCollections = $true
+        UnusedSiteNotificationsBeforeDeletion    = 24
+        PsDscRunAsCredential                     = $InstallAccount
+    }
+*/
+
+[ClassVersion("1.0.0"), FriendlyName("xSPWebAppSiteUseAndDeletion")]
+Class xSPWebAppSiteUseAndDeletion : OMI_BaseResource
+{
+    [Key] string Url;
+    [write] boolean SendUnusedSiteCollectionNotifications;
+    [write] int32 UnusedSiteNotificationPeriod;
+    [write] boolean AutomaticallyDeleteUnusedSiteCollections;
+    [write] int32 UnusedSiteNotificationsBeforeDeletion;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+};

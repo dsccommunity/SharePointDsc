@@ -60,7 +60,9 @@ class MSFT_xSPInstallPrereqs : OMI_BaseResource
     [Write] String KB2671763;
     [Write] String WCFDataServices56;
     [Write] String KB2898850;
-    [Write] String MSVCRT12;
+    [Write] String MSVCRT11;
+    [Write] String MSVCRT14;
+    [Write] String KB3092423;
     [Write] String ODBC;
     [Write] String DotNet452;
     [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
