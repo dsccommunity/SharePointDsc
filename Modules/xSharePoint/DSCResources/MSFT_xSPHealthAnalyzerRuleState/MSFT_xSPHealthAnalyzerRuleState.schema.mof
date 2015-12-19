@@ -21,9 +21,9 @@ Note that this will not scan documents for viruses on it's own, an external tool
 [ClassVersion("1.0.0.0"), FriendlyName("xSPHealthAnalyzerRuleState")]
 class MSFT_xSPHealthAnalyzerRuleState : OMI_BaseResource
 {
-    [Key] String eName;
+    [Key] String Name;
     [Required] Boolean Enabled;
-    [Write, ValueMap{"Any Server","All Servers"}, Values{"Any Server","All Servers"}] String Scope;
+    [Write, ValueMap{"All Servers", "Any Server"}, Values{"All Servers", "Any Server"}] String Scope;
     [Write, ValueMap{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}, Values{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}] String Schedule;
     [Write] Boolean FixAutomatically;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;

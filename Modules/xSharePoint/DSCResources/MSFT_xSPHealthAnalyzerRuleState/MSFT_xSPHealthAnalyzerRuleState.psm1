@@ -4,16 +4,15 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.Boolean] $ScanOnDownload,
-        [parameter(Mandatory = $false)] [System.Boolean] $ScanOnUpload,
-        [parameter(Mandatory = $false)] [System.Boolean] $AllowDownloadInfected,
-        [parameter(Mandatory = $false)] [System.Boolean] $AttemptToClean,
-        [parameter(Mandatory = $false)] [System.UInt16] $TimeoutDuration,
-        [parameter(Mandatory = $false)] [System.UInt16] $NumberOfThreads,
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $Scope,
+        [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
+        [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Getting antivirus configuration settings"
+    Write-Verbose -Message "Getting Health Rule configuration settings"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -21,23 +20,45 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            Write-Verbose -Verbose "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
             return $null
         }
 
-        # Get a reference to the Administration WebService
-        $admService = Get-xSharePointContentService
-        
-        return @{
-            # Set the antivirus settings
-            AllowDownloadInfected = $admService.AntivirusSettings.AllowDownload
-            ScanOnDownload = $admService.AntivirusSettings.DownloadScanEnabled
-            ScanOnUpload = $admService.AntivirusSettings.UploadScanEnabled
-            AttemptToClean = $admService.AntivirusSettings.CleaningEnabled
-            NumberOfThreads = $admService.AntivirusSettings.NumberOfThreads
-            TimeoutDuration = $admService.AntivirusSettings.Timeout.TotalSeconds
-            InstallAccount = $params.InstallAccount
+        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        if ($null -eq $caWebapp) {
+            Write-Verbose -Verbose "Unable to locate central administration website"
+            return $null
         }
+
+        # Get CA SPWeb
+        $caWeb = Get-SPWeb($caWebapp.Url)
+        $healthRulesList = $caWeb.Lists | ? { $_.BaseTemplate -eq "HealthRules"}
+
+        if ($healthRulesList -ne $null) {
+            $spQuery = New-Object Microsoft.SharePoint.SPQuery 
+            $querytext =   "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>$($params.Name)</Value></Eq></Where>"
+            $spQuery.Query = $querytext
+            $results = $healthRulesList.GetItems($spQuery)
+            if ($results.Count -eq 1) {
+                $item = $results[0]
+
+                return @{
+                    # Set the Health Analyzer Rule settings
+                    Name = $params.Name
+                    Enabled = $item["HealthRuleCheckEnabled"]
+                    Scope = $item["HealthRuleScope"]
+                    Schedule = $item["HealthRuleSchedule"]
+                    FixAutomatically = $item["HealthRuleAutoRepairEnabled"]
+                    InstallAccount = $params.InstallAccount
+                }
+            } else {
+                Write-Verbose -Verbose "Unable to find specified Health Analyzer Rule"
+                return $null                
+            }
+        } else {
+            Write-Verbose -Verbose "Unable to locate Health Analyzer Rules list"
+            return $null
+        }       
     }
 
     return $result
@@ -49,12 +70,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.Boolean] $ScanOnDownload,
-        [parameter(Mandatory = $false)] [System.Boolean] $ScanOnUpload,
-        [parameter(Mandatory = $false)] [System.Boolean] $AllowDownloadInfected,
-        [parameter(Mandatory = $false)] [System.Boolean] $AttemptToClean,
-        [parameter(Mandatory = $false)] [System.UInt16] $TimeoutDuration,
-        [parameter(Mandatory = $false)] [System.UInt16] $NumberOfThreads,
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $Scope,
+        [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
+        [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -66,28 +86,42 @@ function Set-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            throw "No local SharePoint farm was detected. Antivirus settings will not be applied"
+            throw "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
             return
         }
-        
-        Write-Verbose -Message "Start update"
-        $admService = Get-xSharePointContentService
 
-        # Set the antivirus settings
-        if ($params.ContainsKey("AllowDownloadInfected")) { 
-            Write-Verbose -Message "Setting Allow Download"
-            $admService.AntivirusSettings.AllowDownload = $params.AllowDownloadInfected
+        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        if ($null -eq $caWebapp) {
+            throw "No Central Admin web application was found. Health Analyzer Rule  settings will not be applied"
+            return
         }
-        if ($params.ContainsKey("ScanOnDownload")) { $admService.AntivirusSettings.DownloadScanEnabled = $params.ScanOnDownload }
-        if ($params.ContainsKey("ScanOnUpload")) { $admService.AntivirusSettings.UploadScanEnabled = $params.ScanOnUpload }
-        if ($params.ContainsKey("AttemptToClean")) { $admService.AntivirusSettings.CleaningEnabled = $params.AttemptToClean }
-        if ($params.ContainsKey("NumberOfThreads")) { $admService.AntivirusSettings.NumberOfThreads = $params.NumberOfThreads }
-        if ($params.ContainsKey("TimeoutDuration")) { 
-            $timespan = New-TimeSpan -Seconds $params.TimeoutDuration
-            $admService.AntivirusSettings.Timeout = $timespan
+
+        # Get Central Admin SPWeb
+        $caWeb = Get-SPWeb($caWebapp.Url)
+        $healthRulesList = $caWeb.Lists | ? { $_.BaseTemplate -eq "HealthRules"}
+
+        if ($healthRulesList -ne $null) {
+            $spQuery = New-Object Microsoft.SharePoint.SPQuery 
+            $querytext =   "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>$($params.Name)</Value></Eq></Where>"
+            $spQuery.Query = $querytext
+            $results = $healthRulesList.GetItems($spQuery)
+            if ($results.Count -eq 1) {
+                $item = $results[0]
+
+                $item["HealthRuleCheckEnabled"] = $params.Enabled
+                if ($params.ContainsKey("Scope")) { $item["HealthRuleScope"] = $params.Scope }
+                if ($params.ContainsKey("Schedule")) { $item["HealthRuleSchedule"] = $params.Schedule }
+                if ($params.ContainsKey("FixAutomatically")) { $item["HealthRuleAutoRepairEnabled"] = $params.FixAutomatically }
+
+                $item.Update()
+            } else {
+                throw "Could not find specified Health Analyzer Rule. Health Analyzer Rule settings will not be applied"
+                return
+            }
+        } else {
+            throw "Could not find Health Analyzer Rules list. Health Analyzer Rule settings will not be applied"
+            return
         }
-        
-        $admService.Update()
     }
 }
 
@@ -98,16 +132,15 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.Boolean] $ScanOnDownload,
-        [parameter(Mandatory = $false)] [System.Boolean] $ScanOnUpload,
-        [parameter(Mandatory = $false)] [System.Boolean] $AllowDownloadInfected,
-        [parameter(Mandatory = $false)] [System.Boolean] $AttemptToClean,
-        [parameter(Mandatory = $false)] [System.UInt16] $TimeoutDuration,
-        [parameter(Mandatory = $false)] [System.UInt16] $NumberOfThreads,
+        [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $Scope,
+        [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
+        [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Testing antivirus configuration settings"
+    Write-Verbose -Message "Testing Health Analyzer rule configuration settings"
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) { return $false }
