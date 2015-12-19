@@ -26,13 +26,13 @@ class MSFT_xSPUserProfileSyncConnection : OMI_BaseResource
     [Key] string Name;
     [Required] string Forest;
     [Required] string UserProfileService;
-    [Required, EmbeddedInstance("MSFT_Credential")] String ConnectionCredentials;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Required, EmbeddedInstance("MSFT_Credential")] string ConnectionCredentials;
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
     [Required] string IncludedOUs[];
     [write] string ExcludedOUs[];
     [write] string Server;
-    [Write] boolean  UseSSL;
-    [Write] boolean  Force;
+    [Write] boolean UseSSL;
+    [Write] boolean Force;
     [Write, ValueMap{"ActiveDirectory","BusinessDataCatalog"}, Values{"ActiveDirectory","BusinessDataCatalog"}] string ConnectionType ;
 };
 

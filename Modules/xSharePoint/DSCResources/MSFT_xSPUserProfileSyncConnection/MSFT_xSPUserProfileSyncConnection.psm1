@@ -13,7 +13,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.String] $Force,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
-		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
+        [parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -37,13 +37,13 @@ function Get-TargetResource
             $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
             $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
-			if($connection -eq $null){
-				return $null
-			}
+            if($connection -eq $null){
+                return $null
+            }
             $namingContext = $connection.NamingContexts | select -first 1
-			if($namingContext -eq $null){
-				return $null
-			}
+            if($namingContext -eq $null){
+                return $null
+            }
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
             $domainController = $namingContext.PreferredDomainControllers | select -First 1
             return @{
@@ -77,7 +77,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [System.Boolean] $Force,
-		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
+        [parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
    )
 
@@ -107,23 +107,24 @@ function Set-TargetResource
     $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name} | select -first 1
     if($connection -ne $null -and $params.Forest -ieq  $connection.Server)
     {
-        $namingContext = $connection.NamingContexts[0]
         $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
         $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
-
         $connection.SetCredentials($domain, $userName, $securePassword);
-            
-        if($params.ContainsKey("IncludedOUs")){
-            $namingContext.ContainersIncluded.Clear()
-            $params.IncludedOUs| %{$namingContext.ContainersIncluded.Add($_) }
-        }
-        $namingContext.ContainersExcluded.Clear()
-        if($params.ContainsKey("ExcludedOUs")){
-            $params.IncludedOUs| %{$namingContext.ContainersExcluded.Add($_) }
-        }
 
+         $connection.NamingContexts | %{
+            $namingContext = $_
+            if($params.ContainsKey("IncludedOUs")){
+                $namingContext.ContainersIncluded.Clear()
+                $params.IncludedOUs| %{$namingContext.ContainersIncluded.Add($_) }
+            }
+            $namingContext.ContainersExcluded.Clear()
+            if($params.ContainsKey("ExcludedOUs")){
+                $params.IncludedOUs| %{$namingContext.ContainersExcluded.Add($_) }
+            }
+        }
         $connection.Update();
         $connection.RefreshSchema($securePassword);
+        
         return;
         
     }else{
@@ -136,40 +137,59 @@ function Set-TargetResource
             }
             
         }
-        $partition = [ADSI]("LDAP://$($params.Forest)")
-        $partitionId = New-Object Guid($partition.objectGUID)
-        $namingContext =  New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
-                                        $params.Name,
+
+                $servers = New-Object System.Collections.Generic.List[[System.String]]
+        if($params.Contains("Server")){
+            $servers.add($params.Server) 
+        }
+        $listIncludedOUs = New-Object System.Collections.Generic.List[[System.String]]
+        $params.IncludedOUs | %{ 
+            $listIncludedOUs.Add($_) 
+        }
+
+        $listExcludedOUs = New-Object System.Collections.Generic.List[[System.String]]
+        if($params.Contains("ExcludedOus")){
+            $params.ExcludedOus | %{$listExcludedOUs.Add($_) }
+        }
+        $list = New-Object System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
+
+        $partition = [ADSI]("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
+        $list.Add((New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
+                                        $partition.distinguishedName,
+                                        $params.Forest, 
+                                        $false, 
+                                        (New-Object Guid($partition.objectGUID)) , 
+                                        $listIncludedOUs , 
+                                        $listExcludedOUs ,
+                                        $null , 
+                                        $false)))
+        $partition = [ADSI]("LDAP://CN=Configuration," +("DC=" + $params.Forest.Replace(".", ",DC=")))
+        $list.Add((New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
+                                        $partition.distinguishedName,
                                         $params.Forest, 
                                         $true, 
-                                        $partitionId , 
-                                        $params.IncludedOUs, 
-                                        $params.ExcludedOus,
-                                        $($params.Server), 
-                                        $false)
-        Write-Verbose -Message "$($params.ConnectionCredentials.UserName)"
-         $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
-         $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
+                                        (New-Object Guid($partition.objectGUID)) , 
+                                        $listIncludedOUs , 
+                                        $listExcludedOUs ,
+                                        $null , 
+                                        $false)))
+
+        $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
+        $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
          
-        $newUPSADConnection =  $upcm.ConnectionManager.AddActiveDirectoryConnection( `
-                                        [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
+        $newUPSADConnection =  $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
                                         $params.Name, `
                                         $params.Forest, `
                                         $params.UseSSL, `
-                                        $domain, `
+                                        $userDomain, `
                                         $userName, `
                                         $securePassword, `
-                                        $($namingContext), `
-                                        $null,
-                                        $null `
-                                    )
-
-
+                                        $list, `
+                                        $null,`
+                                        $null)
         }
-   
     }
 }
-
 
 
 
@@ -188,7 +208,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.String] $Force,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
-		[parameter(Mandatory = $false)] [System.String] $ConnectionType,
+        [parameter(Mandatory = $false)] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
