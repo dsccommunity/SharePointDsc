@@ -18,7 +18,9 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
         [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
-        [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT11,
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT14,
+        [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
         [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
@@ -104,7 +106,9 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
         [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
-        [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT11,
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT14,
+        [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
         [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
@@ -123,7 +127,7 @@ function Set-TargetResource
     }
     if ($majorVersion -eq 16) {
         Write-Verbose -Message "Version: SharePoint 2016"
-        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56","KB2898850","MSVCRT12","ODBC","DotNet452")
+        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
     }
     
     $prereqArgs = "/unattended"
@@ -190,7 +194,9 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
         [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
-        [parameter(Mandatory = $false)] [System.String]  $MSVCRT12,
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT11,
+        [parameter(Mandatory = $false)] [System.String]  $MSVCRT14,
+        [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
         [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
