@@ -19,7 +19,11 @@ function Get-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
-        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName      
+        $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName  
+        
+        IF ($null -eq $ssa) {
+            return $null
+        }    
         $currentTopology = $ssa.ActiveTopology
         
         $AdminComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object { ($_.GetType().Name -eq "AdminComponent") }).ServerName
@@ -116,6 +120,10 @@ function Set-TargetResource
 
         # Get current topology and prepare a new one
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
+        if ($null -eq $ssa) {
+            throw "Search service applications '$($params.ServiceAppName)' was not found"
+            return
+        }
         $currentTopology = $ssa.ActiveTopology
         $newTopology = New-SPEnterpriseSearchTopology -SearchApplication $ssa -Clone -SearchTopology $currentTopology
 
@@ -214,6 +222,7 @@ function Test-TargetResource
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    if ($CurrentValues -eq $null) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @(

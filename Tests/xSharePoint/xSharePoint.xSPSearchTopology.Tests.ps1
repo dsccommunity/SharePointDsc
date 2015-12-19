@@ -111,6 +111,8 @@ Describe "xSPSearchTopology" {
             }
         }
 
+        
+
         Context "No search topology exist and the search service instance isnt running" {
             Mock Get-SPEnterpriseSearchComponent {
                 return @{}
@@ -301,6 +303,25 @@ Describe "xSPSearchTopology" {
 
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "No search service application exists" {
+            Mock Get-SPEnterpriseSearchServiceApplication { return $null }
+            Mock Get-SPEnterpriseSearchComponent {
+                return @{}
+            }
+
+            It "returns empty values from the get method" {
+                Get-TargetResource @testParams | Should Be $null
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "sets the desired topology for the current server" {
+                { Set-TargetResource @testParams } | Should Throw 
             }
         }
     }
