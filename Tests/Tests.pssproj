@@ -75,6 +75,8 @@
     <Compile Include="xSharePoint\xSharePoint.xSPPasswordChangeSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPFarmAdministrators.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAntivirusSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPSearchIndexPartition.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPSearchTopology.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPQuotaTemplate.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSecureStoreServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPSessionStateService.Tests.ps1" />
