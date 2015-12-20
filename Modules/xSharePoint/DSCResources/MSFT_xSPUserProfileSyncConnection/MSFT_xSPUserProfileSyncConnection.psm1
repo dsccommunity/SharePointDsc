@@ -139,7 +139,7 @@ function Set-TargetResource
         }
 
                 $servers = New-Object System.Collections.Generic.List[[System.String]]
-        if($params.Contains("Server")){
+        if($params.ContainsKey("Server")){
             $servers.add($params.Server) 
         }
         $listIncludedOUs = New-Object System.Collections.Generic.List[[System.String]]
@@ -148,7 +148,7 @@ function Set-TargetResource
         }
 
         $listExcludedOUs = New-Object System.Collections.Generic.List[[System.String]]
-        if($params.Contains("ExcludedOus")){
+        if($params.ContainsKey("ExcludedOus")){
             $params.ExcludedOus | %{$listExcludedOUs.Add($_) }
         }
         $list = New-Object System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
