@@ -16,7 +16,7 @@ Describe "xSPDesignerSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "https://intranet.sharepoint.contoso.com"
-            Scope = "WebApplication"
+            SettingsScope = "WebApplication"
             AllowSharePointDesigner = $false
             AllowDetachPagesFromDefinition = $false
             AllowCustomiseMasterPage = $false
@@ -89,7 +89,7 @@ Describe "xSPDesignerSettings" {
         Context "The server is in a farm, site collection scope and the incorrect settings have been applied" {
             $testParams = @{
                 Url = "https://intranet.sharepoint.contoso.com"
-                Scope = "SiteCollection"
+                SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
                 AllowCustomiseMasterPage = $false
@@ -168,7 +168,7 @@ Describe "xSPDesignerSettings" {
         Context "The server is in a farm, scope is site collection and the correct settings have been applied" {
             $testParams = @{
                 Url = "https://intranet.sharepoint.contoso.com"
-                Scope = "SiteCollection"
+                SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
                 AllowCustomiseMasterPage = $false
