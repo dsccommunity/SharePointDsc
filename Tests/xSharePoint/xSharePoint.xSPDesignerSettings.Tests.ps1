@@ -16,7 +16,7 @@ Describe "xSPDesignerSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "https://intranet.sharepoint.contoso.com"
-            Scope = "WebApplication"
+            Target = "WebApplication"
             AllowSharePointDesigner = $false
             AllowDetachPagesFromDefinition = $false
             AllowCustomiseMasterPage = $false
@@ -49,7 +49,7 @@ Describe "xSPDesignerSettings" {
             }
         }
 
-        Context "The server is in a farm, web application scope and the incorrect settings have been applied" {
+        Context "The server is in a farm, target web application and the incorrect settings have been applied" {
             Mock Get-SPDesignerSettings { return @{
                     AllowDesigner = $true
                     AllowRevertFromTemplate = $true
@@ -86,10 +86,10 @@ Describe "xSPDesignerSettings" {
             }
         }
 
-        Context "The server is in a farm, site collection scope and the incorrect settings have been applied" {
+        Context "The server is in a farm, target site collection and the incorrect settings have been applied" {
             $testParams = @{
                 Url = "https://intranet.sharepoint.contoso.com"
-                Scope = "SiteCollection"
+                Target = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
                 AllowCustomiseMasterPage = $false
@@ -130,7 +130,7 @@ Describe "xSPDesignerSettings" {
             }
         }
 
-        Context "The server is in a farm, scope is web application and the correct settings have been applied" {
+        Context "The server is in a farm, target is web application and the correct settings have been applied" {
             Mock Get-SPDesignerSettings {
                 $returnVal = @{
                     AllowDesigner = $false
@@ -165,10 +165,10 @@ Describe "xSPDesignerSettings" {
 
         }
 
-        Context "The server is in a farm, scope is site collection and the correct settings have been applied" {
+        Context "The server is in a farm, target is site collection and the correct settings have been applied" {
             $testParams = @{
                 Url = "https://intranet.sharepoint.contoso.com"
-                Scope = "SiteCollection"
+                Target = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
                 AllowCustomiseMasterPage = $false

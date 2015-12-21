@@ -52,9 +52,7 @@ Describe "xSPTimerJobState" {
                 } 
                 return $returnVal
             }
-            Mock Set-SPTimerJob {
-                $Global:xSharePointTimerJobUpdated = $true
-            }
+            Mock Set-SPTimerJob { return $null }
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
@@ -65,10 +63,9 @@ Describe "xSPTimerJobState" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointTimerJobUpdated = $false
             It "updates the timerjob settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointTimerJobUpdated | Should Be $true
+                Assert-MockCalled Set-SPTimerJob
             }
         }
 
@@ -81,9 +78,7 @@ Describe "xSPTimerJobState" {
                 } 
                 return $returnVal
             }
-            Mock Set-SPTimerJob {
-                $Global:xSharePointTimerJobUpdated = $true
-            }
+            Mock Set-SPTimerJob { return $null }
             Mock Get-SPFarm { return @{} }
 
             It "return values from the get method" {
@@ -94,10 +89,9 @@ Describe "xSPTimerJobState" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointTimerJobUpdated = $false
             It "updates the timer job settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointTimerJobUpdated | Should Be $true
+                Assert-MockCalled Set-SPTimerJob
             }
         }
 
@@ -121,7 +115,6 @@ Describe "xSPTimerJobState" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointTimerJobUpdated = $false
             It "throws an exception because the incorrect schedule format is used" {
                 { Set-TargetResource @testParams } | Should throw "Incorrect schedule format used. New schedule will not be applied."
             }

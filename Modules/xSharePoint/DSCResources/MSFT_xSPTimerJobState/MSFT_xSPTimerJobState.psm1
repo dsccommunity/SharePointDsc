@@ -112,15 +112,25 @@ function Set-TargetResource
                 try {
                     Set-SPTimerJob $params.Name -WebApplication $params.WebApplication -Schedule $params.Schedule -EA Stop
                 } catch {
-                    throw "Incorrect schedule format used. New schedule will not be applied."
-                    return
+                    if ($_.Exception.Message -like "*The time given was not given in the proper format*") {
+                        throw "Incorrect schedule format used. New schedule will not be applied."
+                        return
+                    } else {
+                        Write-Verbose -Verbose "Error occurred. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
+                        return
+                    }
                 }
             } else {
                 try {
                     Set-SPTimerJob $params.Name -Schedule $params.Schedule -EA Stop
                 } catch {
-                    throw "Incorrect schedule format used. New schedule will not be applied."
-                    return
+                    if ($_.Exception.Message -like "*The time given was not given in the proper format*") {
+                        throw "Incorrect schedule format used. New schedule will not be applied."
+                        return
+                    } else {
+                        Write-Verbose -Verbose "Error occurred. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
+                        return
+                    }
                 }
             }
         }
