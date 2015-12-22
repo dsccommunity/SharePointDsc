@@ -14,15 +14,17 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $appDomain =  Get-SPAppDomain
-        $prefix = "";
-        if($params.ContainsKey("Prefix")){
-            $prefix = Get-SPAppSiteSubscriptionName
+         $wa = Get-SPWebApplication $param.WebApp
+        $feature = $wa.Features | ?{ $_.ID -eq [Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")}
+        if($feature -eq $null ){
+            throw "not an app catalog"
         }
-
+        $feature 
+        $site = Get-SPSite $feature.Properties["__AppCatSiteId"].Value
+ 
         return @{
-            AppDomain = $appDomain
-            pPrefix= $prefix
+            AppCatalogUrl = $site.Url #this needs to be update so it reads correct info
+            WebApp= $params.WebApp
             InstallAccount = $params.InstallAccount
         }
     }
@@ -48,12 +50,9 @@ function Set-TargetResource
         {
             $AppCatalogUrl= "/" + $AppCatalogUrl
         }
-        Update-SPAppCatalogConfiguration -site $WebApp + $AppCatalogUrl
+        Update-SPAppCatalogConfiguration -site $WebApp + $AppCatalogUrl -Confirm:$false
 
 
-        if($params.ContainsKey("Prefix")){
-            Set-SPAppSiteSubscriptionName -Name $params.Prefix -Confirm:$false
-        }
     }
 }
 
