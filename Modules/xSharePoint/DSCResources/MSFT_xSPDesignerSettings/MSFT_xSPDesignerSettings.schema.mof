@@ -28,7 +28,7 @@ Use the "Scope" property to set it to either "WebApplication" or "SiteCollection
 class MSFT_xSPDesignerSettings : OMI_BaseResource
 {
     [Key] string Url;
-    [Required, ValueMap{"WebApplication","SiteCollection"}, Values{"WebApplication","SiteCollection"}] string Scope; 
+    [Required, ValueMap{"WebApplication","SiteCollection"}, Values{"WebApplication","SiteCollection"}] string SettingsScope; 
     [Write] Boolean AllowSharePointDesigner;
     [Write] Boolean AllowDetachPagesFromDefinition;
     [Write] Boolean AllowCustomiseMasterPage;
