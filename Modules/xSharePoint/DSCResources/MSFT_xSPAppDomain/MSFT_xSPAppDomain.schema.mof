@@ -1,0 +1,34 @@
+/*
+**Description**
+
+This resource will set the value for the app domain settings.
+The App domain settings work at the farm(using Set-AppDomain),at the web application(using Set-WebApplicationAppDomain) or at the HNSC level. 
+
+@CamiloBorges
+hey, question around the app urls... what about this guy here https://technet.microsoft.com/en-us/library/dn167722.aspx
+
+@BrianFarnhill
+Yea good call, as long as the commit is there we can fall back to it,
+ but i think its a safe call to just use the new one. 
+ Just make sure when you write the doco in the comments of the MOF file we add a note about needing the PU
+
+
+
+**Example**
+
+    xSPAppDomain Domain
+    {
+        AppDomain = "contosointranetapps.com"
+        Prefix = "app"
+        PsDscRunAsCredential = $InstallAccount
+    }
+
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPAppDomain")]
+class MSFT_xSPAppDomain : OMI_BaseResource
+{
+    [Key] string AppDomain;
+    [Required] string Prefix;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    
+};
