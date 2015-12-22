@@ -84,6 +84,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPVisioServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppBlockedFileTypes.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppGeneralSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebAppPolicy.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppWorkflowSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppThrottlingSettings.Tests.ps1" />
   </ItemGroup>
