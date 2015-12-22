@@ -15,10 +15,8 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPAppCatalog" {
     InModuleScope $ModuleName {
         $testParams = @{
-            WebAppUrl = "http://sites.sharepoint.com"
-            RelativeUrl = "teams"
-            Explicit = $false
-            HostHeader = $false
+            WebApp = "https://content.sharepoint.contoso.com"
+            AppCatalogUrl = "/sites/AppCatalog"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -27,13 +25,19 @@ Describe "xSPAppCatalog" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock New-SPManagedPath { }
-
-        Context "Service is not available" {
-            Mock Get-SPManagedPath { return $null }
+        
+        Context "Update-SPAppCatalogConfiguration fails due to service or invalid template" {
+            Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
+            Mock Get-SPWebApplication {return @{ Features = @(@{ID=''
+                              Properties = @()
+                                }
+                            )
+                }
+            }
 
             It "returns null from the get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPWebApplication
             }
 
             It "returns false from the test method" {
@@ -41,105 +45,51 @@ Describe "xSPAppCatalog" {
             }
 
             It "throws exception when executed" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPManagedPath
-            }
-
-        }
-
-        Context "Catalog site does not exist" {
-            Mock Get-SPManagedPath { return $null }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "throws exception when executed" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPManagedPath
-            }
-
-        }
-
-        Context "Catalog site wasn't created using catalog template" {
-            Mock Get-SPManagedPath { return $null }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "throws exception when executed" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPManagedPath
+                {Set-TargetResource @testParams}| Should throw
+        
             }
 
         }
 
         Context "Save Settings at Web Application level" {
-            Mock Get-SPManagedPath { return $null }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            Mock Update-SPAppCatalogConfiguration { }
+            Mock Get-SPWebApplication {
+              
             }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "throws exception when executed" {
+            It "save settings" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPManagedPath
+                Assert-MockCalled Update-SPAppCatalogConfiguration
             }
 
         }
+        Context "Settings match" {
+            Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
+            Mock Get-SPWebApplication { return @{
+                Features = @(@{ID=[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")
+                              Properties = @{
+                              "__AppCatSiteId" = @{Value = "/sites/AppCatalog"} 
+                              }
+                                }
+                            )
+                    }
+            }
+            Mock Get-SPSite {
+            return @{
+                ServerRelativeUrl="/sites/AppCatalog"
+                }
+            }
 
-
-        Context "Save Settings at HNSC level" {
-            Mock Get-SPManagedPath { return $null }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns value from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+                Test-TargetResource @testParams | Should Be $true
             }
 
-            It "throws exception when executed" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPManagedPath
-            }
 
         }
 
-
-        Context "App Management Is Available. Settings are saved" {
-            Mock Get-SPManagedPath { return @{
-                Name = $testParams.RelativeUrl
-                Type = "ExplicitInclusion"
-            } }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "saves settings when executed" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPManagedPath
-            }
-        }
     }    
 }
 
