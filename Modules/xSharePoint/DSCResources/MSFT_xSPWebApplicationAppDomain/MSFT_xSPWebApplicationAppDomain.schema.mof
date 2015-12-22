@@ -5,7 +5,7 @@ This resource will configure the App Domain at a specific zone for the given Web
 The configuration is done per zone level, and if the zone isn't provided then Default is used. 
 If no WebApplication is provided then setting is saved globally
 
- New-SPWebApplicationAppDomain -AppDomain contosoapps.com -WebApplication http://www.contoso.com -Zone Internet -Port 10000
+ 
 **Example**
 
     xSPWebApplicationAppDomain Domain
