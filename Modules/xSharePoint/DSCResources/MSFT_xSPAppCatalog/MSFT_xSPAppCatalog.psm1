@@ -17,13 +17,12 @@ function Get-TargetResource
          $wa = Get-SPWebApplication $param.WebApp
         $feature = $wa.Features | ?{ $_.ID -eq [Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")}
         if($feature -eq $null ){
-            throw "not an app catalog"
+            return $null
         }
-        $feature 
         $site = Get-SPSite $feature.Properties["__AppCatSiteId"].Value
  
         return @{
-            AppCatalogUrl = $site.Url #this needs to be update so it reads correct info
+            AppCatalogUrl = $site.ServerRelativeUrl
             WebApp= $params.WebApp
             InstallAccount = $params.InstallAccount
         }
@@ -50,7 +49,7 @@ function Set-TargetResource
         {
             $AppCatalogUrl= "/" + $AppCatalogUrl
         }
-        Update-SPAppCatalogConfiguration -site $WebApp + $AppCatalogUrl -Confirm:$false
+        Update-SPAppCatalogConfiguration -site ($WebApp + $AppCatalogUrl) -Confirm:$false 
 
 
     }
@@ -70,6 +69,9 @@ function Test-TargetResource
 
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    if($CurrentValues -eq $null){
+        return $false
+    }
     Write-Verbose -Message "Testing app domain settings"
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AppCatalogUrl", "WebApp") 
 }
