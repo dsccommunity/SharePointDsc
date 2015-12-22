@@ -22,7 +22,7 @@ function Get-TargetResource
 
         return @{
             AppDomain = $appDomain
-            pPrefix= $prefix
+            Prefix= $prefix
             InstallAccount = $params.InstallAccount
         }
     }
@@ -34,12 +34,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Account,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
-        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
-        [parameter(Mandatory = $false)] [System.String] $Schedule,
-        [parameter(Mandatory = $true)]  [System.String] $AccountName
+        [parameter(Mandatory = $true)] [System.String] $AppDomain,
+        [parameter(Mandatory = $false)]  [System.String] $Prefix
+
     )
 
   
