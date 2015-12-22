@@ -11,7 +11,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Getting cache accounts for $WebAppUrl"
+    Write-Verbose -Message "Getting web app policy for $UserName at $WebAppUrl"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -29,7 +29,22 @@ function Get-TargetResource
                 ActAsSystemUser = $policyObject.IsSystemUser
                 InstallAccount = $params.InstallAccount
             }
-        } else { return $null }
+        } else {
+            foreach($userName in $wa.Policies.UserName) {
+                $claimsPrincipal = New-SPClaimsPrincipal -EncodedClaim $userName -ErrorAction SilentlyContinue
+                if (($null -ne $claimsPrincipal) -and ($claimsPrincipal.Value -eq $params.UserName)) {
+                    $policyObject = $wa.Policies | Where-Object { $_.UserName -eq $userName }
+                    return @{
+                        WebAppUrl = $params.WebAppUrl
+                        UserName = $claimsPrincipal.Value
+                        PermissionLevel = ($policyObject.PolicyRoleBindings | Select-Object -First 1).Name
+                        ActAsSystemUser = $policyObject.IsSystemUser
+                        InstallAccount = $params.InstallAccount
+                    }
+                }
+            }
+            return $null 
+        }
     }
     return $result
 }
@@ -47,7 +62,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Setting cache accounts for $WebAppUrl"
+    Write-Verbose -Message "Setting web app policy for $UserName at $WebAppUrl"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -73,6 +88,16 @@ function Set-TargetResource
         
         if ($wa.Policies.UserName -contains $params.UserName) {
             $policyObject = $wa.Policies | Where-Object { $_.UserName -eq $params.UserName }
+        } else {
+            foreach($userName in $wa.Policies.UserName) {
+                $claimsPrincipal = New-SPClaimsPrincipal -EncodedClaim $userName -ErrorAction SilentlyContinue
+                if (($null -ne $claimsPrincipal) -and ($claimsPrincipal.Value -eq $params.UserName)) {
+                    $policyObject = $wa.Policies | Where-Object { $_.UserName -eq $userName }
+                }
+            }
+        }
+
+        if ($null -ne $policyObject) {
             if ($params.ContainsKey("ActAsSystemUser") -eq $true) {
                 $policyObject.IsSystemUser = $params.ActAsSystemUser
             }
@@ -80,7 +105,6 @@ function Set-TargetResource
             $policyObject.PolicyRoleBindings.Add($newRole)
             
             $wa.Update()
-            
         } else {
             $newPolicy = $wa.Policies.Add($params.UserName, $params.UserName)
             $newPolicy.PolicyRoleBindings.Add($newRole)
@@ -108,7 +132,7 @@ function Test-TargetResource
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
+    Write-Verbose -Message "Testing web app policy for $UserName at $WebAppUrl"
     if ($null -eq $CurrentValues) { return $false }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("PermissionLevel", "ActAsSystemUser")
 }

@@ -161,6 +161,49 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context "Existing records with a claims based user name allow functions to still operate" {
+             Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = $testParams.PermissionLevel
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = @(
+                        @{
+                            UserName = "i:0#.w|" + $testParams.UserName
+                            PolicyRoleBindings = $roleBindings
+                            IsSystemUser = $testParams.ActAsSystemUser
+                        }
+                    )
+                }
+                $webApp = $webApp | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+            Mock New-SPClaimsPrincipal {
+                return @{
+                    Value = $testParams.UserName
+                } 
+            }
+
+            It "returns the current values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
         Context "Policies of all permissions can be used to add new policies" {
             Mock Get-SPWebApplication { 
                 $webApp = @{
