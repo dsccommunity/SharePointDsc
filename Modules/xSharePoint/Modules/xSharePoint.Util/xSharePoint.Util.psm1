@@ -185,7 +185,7 @@ function Test-xSharePointSpecificParameters() {
 
     $KeyList | ForEach-Object {
         if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) {
-            if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_) -or ($DesiredValues.$_.GetType().IsArray)) {
+            if (($CurrentValues.ContainsKey($_) -eq $false) -or ($CurrentValues.$_ -ne $DesiredValues.$_) -or (($DesiredValues.ContainsKey($_) -eq $true) -and ($DesiredValues.$_.GetType().IsArray))) {
                 if ($DesiredValues.GetType().Name -eq "HashTable" -or `
                     $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary") {
                     
