@@ -17,7 +17,7 @@ Describe "xSPHealthAnalyzerRuleState" {
         $testParams = @{
             Name = "Drives are at risk of running out of free space."
             Enabled = $true
-            Scope   = "All Servers"
+            RuleScope   = "All Servers"
             Schedule = "Daily"
             FixAutomatically = $false
         }
@@ -132,7 +132,7 @@ Describe "xSPHealthAnalyzerRuleState" {
             It "return values from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Enabled | Should Be $false
-                $result.Scope | Should Be 'Any Server'
+                $result.RuleScope | Should Be 'Any Server'
                 $result.Schedule| Should Be 'Weekly'
                 $result.FixAutomatically | Should Be $true
             }
@@ -171,7 +171,7 @@ Describe "xSPHealthAnalyzerRuleState" {
             It "return values from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Enabled | Should Be $true
-                $result.Scope | Should Be 'All Servers'
+                $result.RuleScope | Should Be 'All Servers'
                 $result.Schedule| Should Be 'Daily'
                 $result.FixAutomatically | Should Be $false
             }

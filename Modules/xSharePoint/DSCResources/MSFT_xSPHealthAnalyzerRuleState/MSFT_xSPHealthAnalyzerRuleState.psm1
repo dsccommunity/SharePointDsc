@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $Scope,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $RuleScope,
         [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
         [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -46,7 +46,7 @@ function Get-TargetResource
                     # Set the Health Analyzer Rule settings
                     Name = $params.Name
                     Enabled = $item["HealthRuleCheckEnabled"]
-                    Scope = $item["HealthRuleScope"]
+                    RuleScope = $item["HealthRuleScope"]
                     Schedule = $item["HealthRuleSchedule"]
                     FixAutomatically = $item["HealthRuleAutoRepairEnabled"]
                     InstallAccount = $params.InstallAccount
@@ -72,13 +72,13 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $Scope,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $RuleScope,
         [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
         [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Setting antivirus configuration settings"
+    Write-Verbose -Message "Setting Health Analyzer Rule configuration settings"
 
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -109,7 +109,7 @@ function Set-TargetResource
                 $item = $results[0]
 
                 $item["HealthRuleCheckEnabled"] = $params.Enabled
-                if ($params.ContainsKey("Scope")) { $item["HealthRuleScope"] = $params.Scope }
+                if ($params.ContainsKey("RuleScope")) { $item["HealthRuleScope"] = $params.RuleScope }
                 if ($params.ContainsKey("Schedule")) { $item["HealthRuleSchedule"] = $params.Schedule }
                 if ($params.ContainsKey("FixAutomatically")) { $item["HealthRuleAutoRepairEnabled"] = $params.FixAutomatically }
 
@@ -134,7 +134,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $Scope,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $RuleScope,
         [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
         [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
