@@ -28,11 +28,15 @@ Describe "xSPAppCatalog" {
         
         Context "Update-SPAppCatalogConfiguration fails due to service or invalid template" {
             Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
-            Mock Get-SPWebApplication {return @{ Features = @(@{ID=''
-                              Properties = @()
+            Mock Get-SPWebApplication { return @{
+                Features = @{[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5111") = @{
+                                        Properties = @{
+                                        "__AppCatSiteId" = @{Value = "/sites/AppCatalog"} 
+                                        }
+                                    }
                                 }
-                            )
-                }
+                            
+                    }
             }
 
             It "returns null from the get method" {
@@ -65,12 +69,13 @@ Describe "xSPAppCatalog" {
         Context "Settings match" {
             Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
             Mock Get-SPWebApplication { return @{
-                Features = @(@{ID=[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")
-                              Properties = @{
-                              "__AppCatSiteId" = @{Value = "/sites/AppCatalog"} 
-                              }
+                Features = @{[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828") = @{
+                                        Properties = @{
+                                        "__AppCatSiteId" = @{Value = "/sites/AppCatalog"} 
+                                        }
+                                    }
                                 }
-                            )
+                            
                     }
             }
             Mock Get-SPSite {

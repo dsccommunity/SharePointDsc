@@ -14,8 +14,8 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-         $wa = Get-SPWebApplication $param.WebApp
-        $feature = $wa.Features | ?{ $_.ID -eq [Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")}
+        $wa = Get-SPWebApplication $param.WebApp
+        $feature = $wa.Features[[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")]
         if($feature -eq $null ){
             return $null
         }
