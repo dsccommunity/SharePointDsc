@@ -134,7 +134,7 @@ Describe "xSPDesignerSettings" {
         Context "The server is in a farm, target site collection and InstallAccount is used" {
             $testParams = @{
                 Url = "https://intranet.sharepoint.contoso.com"
-                Target = "SiteCollection"
+                SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
                 AllowCustomiseMasterPage = $false
