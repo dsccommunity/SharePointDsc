@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.String] $Url,
-        [parameter(Mandatory = $true)]  [ValidateSet("WebApplication","SiteCollection")] [System.String] $Scope,
+        [parameter(Mandatory = $true)]  [ValidateSet("WebApplication","SiteCollection")] [System.String] $SettingsScope,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowSharePointDesigner,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowDetachPagesFromDefinition,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowCustomiseMasterPage,
@@ -18,7 +18,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SharePoint Designer configuration settings"
 
-    switch ($Scope) {
+    switch ($SettingsScope) {
         "WebApplication" {
             $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
@@ -42,7 +42,7 @@ function Get-TargetResource
                     return @{
                         # Set the SPD settings
                         Url = $params.Url
-                        Scope = $params.Scope
+                        SettingsScope = $params.SettingsScope
                         AllowSharePointDesigner = $spdSettings.AllowDesigner
                         AllowDetachPagesFromDefinition = $spdSettings.AllowRevertFromTemplate
                         AllowCustomiseMasterPage = $spdSettings.AllowMasterPageEditing
@@ -75,7 +75,7 @@ function Get-TargetResource
                     return @{
                         # Set the SPD settings
                         Url = $params.Url
-                        Scope = $params.Scope
+                        SettingsScope = $params.SettingsScope
                         AllowSharePointDesigner = $site.AllowDesigner
                         AllowDetachPagesFromDefinition = $site.AllowRevertFromTemplate
                         AllowCustomiseMasterPage = $site.AllowMasterPageEditing
@@ -100,7 +100,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.String] $Url,
-        [parameter(Mandatory = $true)]  [ValidateSet("WebApplication","SiteCollection")] [System.String] $Scope,
+        [parameter(Mandatory = $true)]  [ValidateSet("WebApplication","SiteCollection")] [System.String] $SettingsScope,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowSharePointDesigner,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowDetachPagesFromDefinition,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowCustomiseMasterPage,
@@ -113,7 +113,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting SharePoint Designer configuration settings"
 
-    switch ($Scope) {
+    switch ($SettingsScope) {
         "WebApplication" {
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
@@ -135,7 +135,7 @@ function Set-TargetResource
                 } else {
                     # Set the SharePoint Designer settings
                     if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null } 
-                    if ($params.ContainsKey("Scope")) { $params.Remove("Scope") | Out-Null }
+                    if ($params.ContainsKey("SettingsScope")) { $params.Remove("SettingsScope") | Out-Null }
  
                     $params = $params | Rename-xSharePointParamValue -oldName "Url" -newName "WebApplication" `
                                       | Rename-xSharePointParamValue -oldName "AllowSharePointDesigner" -newName "AllowDesigner" `
@@ -189,7 +189,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.String] $Url,
-        [parameter(Mandatory = $true)]  [ValidateSet("WebApplication","SiteCollection")] [System.String] $Scope,
+        [parameter(Mandatory = $true)]  [ValidateSet("WebApplication","SiteCollection")] [System.String] $SettingsScope,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowSharePointDesigner,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowDetachPagesFromDefinition,
         [parameter(Mandatory = $false)] [System.Boolean] $AllowCustomiseMasterPage,

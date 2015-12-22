@@ -22,8 +22,8 @@ Class xSPWebAppSiteUseAndDeletion : OMI_BaseResource
 {
     [Key] string Url;
     [write] boolean SendUnusedSiteCollectionNotifications;
-    [write] int32 UnusedSiteNotificationPeriod;
+    [write] uint32 UnusedSiteNotificationPeriod;
     [write] boolean AutomaticallyDeleteUnusedSiteCollections;
-    [write] int32 UnusedSiteNotificationsBeforeDeletion;
+    [write] uint32 UnusedSiteNotificationsBeforeDeletion;
     [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
