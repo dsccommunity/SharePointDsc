@@ -1,26 +1,21 @@
 /*
 **Description**
 
-This resource will ensure a managed account is provisioned in to the SharePoint farm.
-The Account object specific the credential to store (including username and password) to set as the managed account. 
-The settings for EmailNotification, PreExpireDays and Schedule all relate to enabling automatic password change for the managed account, leaving these option out of the resource will ensure that no automatic password changing from SharePoint occurs.
-
-@CamiloBorges
-hey, question around the app urls... what about this guy here https://technet.microsoft.com/en-us/library/dn167722.aspx
-
-@BrianFarnhill
-Yea good call, as long as the commit is there we can fall back to it,
- but i think its a safe call to just use the new one. 
- Just make sure when you write the doco in the comments of the MOF file we add a note about needing the PU
-
+This resource will configure the App Domain at a specific zone for the given Web Application.
+The configuration is done per zone level, and if the zone isn't provided then Default is used. 
+If no WebApplication is provided then setting is saved globally
 
  New-SPWebApplicationAppDomain -AppDomain contosoapps.com -WebApplication http://www.contoso.com -Zone Internet -Port 10000
 **Example**
 
-    xSPAppDomain Domain
+    xSPWebApplicationAppDomain Domain
     {
         AppDomain = "contosointranetapps.com"
         Prefix = "app"
+        WebApplication ="http://portal.contoso.com";
+        Zone = "Default";
+        Port=80;
+        SSL=$false;
         PsDscRunAsCredential = $InstallAccount
     }
 
