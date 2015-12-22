@@ -85,54 +85,54 @@ function Set-TargetResource
         
         Write-Verbose -Message "Start update"
 
-        # Set the timer job settings
-        if ($params.ContainsKey("Enabled")) { 
-            # Enable/Disable timer job
-            if ($params.Enabled) {
-                Write-Verbose -Verbose "Enable timer job $($params.Name)"
-                if ($params.ContainsKey("WebApplication")) {
-                    Enable-SPTimerJob $params.Name -WebApplication $params.WebApplication
-                } else {
-                    Enable-SPTimerJob $params.Name
-                }
-            } else {
-                Write-Verbose -Verbose "Disable timer job $($params.Name)"
-                if ($params.ContainsKey("WebApplication")) {
-                    Disable-SPTimerJob $params.Name -WebApplication $params.WebApplication
-                } else {
-                    Disable-SPTimerJob $params.Name
-                }
-            }
+        #find Timer Job
+        if ($params.ContainsKey("WebApplication")) {
+            $job = Get-SPTimerJob $params.Name -WebApplication $params.WebApplication
+        } else {
+            $job = Get-SPTimerJob $params.Name
         }
 
-        if ($params.ContainsKey("Schedule")) {
-            # Set timer job schedule
-            Write-Verbose -Verbose "Set timer job $($params.Name) schedule"
-            if ($params.ContainsKey("WebApplication")) {
-                try {
-                    Set-SPTimerJob $params.Name -WebApplication $params.WebApplication -Schedule $params.Schedule -EA Stop
-                } catch {
-                    if ($_.Exception.Message -like "*The time given was not given in the proper format*") {
-                        throw "Incorrect schedule format used. New schedule will not be applied."
-                        return
-                    } else {
-                        Write-Verbose -Verbose "Error occurred. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
+        if ($job.Count -eq 1) {
+            # Set the timer job settings
+            if ($params.ContainsKey("Enabled")) { 
+                # Enable/Disable timer job
+                if ($params.Enabled) {
+                    Write-Verbose -Verbose "Enable timer job $($params.Name)"
+                    try {
+                        Enable-SPTimerJob $job
+                    } catch {
+                        throw "Error occurred while enabling job. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
                         return
                     }
-                }
-            } else {
-                try {
-                    Set-SPTimerJob $params.Name -Schedule $params.Schedule -EA Stop
-                } catch {
-                    if ($_.Exception.Message -like "*The time given was not given in the proper format*") {
-                        throw "Incorrect schedule format used. New schedule will not be applied."
-                        return
-                    } else {
-                        Write-Verbose -Verbose "Error occurred. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
+                } else {
+                    Write-Verbose -Verbose "Disable timer job $($params.Name)"
+                    try {
+                        Disable-SPTimerJob $job
+                    } catch {
+                        throw "Error occurred while disabling job. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
                         return
                     }
                 }
             }
+
+            if ($params.ContainsKey("Schedule")) {
+                # Set timer job schedule
+                Write-Verbose -Verbose "Set timer job $($params.Name) schedule"
+                try {
+                    Set-SPTimerJob $job -Schedule $params.Schedule -EA Stop
+                } catch {
+                    if ($_.Exception.Message -like "*The time given was not given in the proper format*") {
+                        throw "Incorrect schedule format used. New schedule will not be applied."
+                        return
+                    } else {
+                        throw "Error occurred. Timer job settings will not be applied. Error details: $($_.Exception.Message)"
+                        return
+                    }
+                }
+            }
+        } else {
+            throw "Could not find specified job. Total jobs found: $($job.Count)"
+            return
         }
     }
 }

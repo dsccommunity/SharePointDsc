@@ -19,10 +19,11 @@ Use "Get-SPTimerJob -WebApplication "http://servername" | select Name, DisplayNa
 **Example**
     xSPTimerJobState DisableTimerJob_DeadSiteDelete
     {
-        Name = "job-dead-site-delete"
-        WebApplication = "SharePoint - www.domain.com80"
-        Enabled = $true
-        Schedule="weekly at sat 5:00"
+        Name                    = "job-dead-site-delete"
+        WebApplication          = "SharePoint - www.domain.com80"
+        Enabled                 = $true
+        Schedule                ="weekly at sat 5:00"
+        PsDscRunAsCredential    = $InstallAccount
     }
 */
 

@@ -19,7 +19,7 @@ Describe "xSPWebAppSiteUseAndDeletion" {
             SendUnusedSiteCollectionNotifications    = $true
             UnusedSiteNotificationPeriod             = 90
             AutomaticallyDeleteUnusedSiteCollections = $true
-            UnusedSiteNotificationsBeforeDeletion    = 24
+            UnusedSiteNotificationsBeforeDeletion    = 30
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -68,7 +68,7 @@ Describe "xSPWebAppSiteUseAndDeletion" {
                         SendUnusedSiteCollectionNotifications    = $false
                         UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
                         AutomaticallyDeleteUnusedSiteCollections = $false
-                        UnusedSiteNotificationsBeforeDeletion    = 12
+                        UnusedSiteNotificationsBeforeDeletion    = 28
                 } 
                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
                 return $returnVal
@@ -97,7 +97,7 @@ Describe "xSPWebAppSiteUseAndDeletion" {
                     SendUnusedSiteCollectionNotifications    = $true
                     UnusedSiteNotificationPeriod             = @{ TotalDays = 90; }
                     AutomaticallyDeleteUnusedSiteCollections = $true
-                    UnusedSiteNotificationsBeforeDeletion    = 24
+                    UnusedSiteNotificationsBeforeDeletion    = 30
                 } 
                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
                 return $returnVal

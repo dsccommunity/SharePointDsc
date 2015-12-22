@@ -56,36 +56,41 @@ function Get-TargetResource
             }
         }
         "SiteCollection" {
-            $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
+            if (Test-xSharePointRunAsCredential -Credential $InstallAccount) {
+                $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                    $params = $args[0]
         
-                try {
-                    $spFarm = Get-SPFarm
-                } catch {
-                    Write-Verbose -Verbose "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
-                    return $null
-                }
+                    try {
+                        $spFarm = Get-SPFarm
+                    } catch {
+                        Write-Verbose -Verbose "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
+                        return $null
+                    }
 
-                # Check if site collections exists
-                $site = Get-SPSite | Where {$_.Url -eq $url}
-                if ($site -eq $null) {
-                    Write-Verbose -Verbose "Site collection not found. SharePoint Designer settings will not be applied"
-                    return $null
-                } else {
-                    return @{
-                        # Set the SPD settings
-                        Url = $params.Url
-                        Target = $params.Target
-                        AllowSharePointDesigner = $site.AllowDesigner
-                        AllowDetachPagesFromDefinition = $site.AllowRevertFromTemplate
-                        AllowCustomiseMasterPage = $site.AllowMasterPageEditing
-                        AllowManageSiteURLStructure = $site.ShowURLStructure
-                        AllowCreateDeclarativeWorkflow = $site.AllowCreateDeclarativeWorkflow
-                        AllowSavePublishDeclarativeWorkflow = $site.AllowSavePublishDeclarativeWorkflow
-                        AllowSaveDeclarativeWorkflowAsTemplate = $site.AllowSaveDeclarativeWorkflowAsTemplate
-                        InstallAccount = $params.InstallAccount
+                    # Check if site collections exists
+                    $site = Get-SPSite | Where {$_.Url -eq $url}
+                    if ($site -eq $null) {
+                        Write-Verbose -Verbose "Site collection not found. SharePoint Designer settings will not be applied"
+                        return $null
+                    } else {
+                        return @{
+                            # Set the SPD settings
+                            Url = $params.Url
+                            Target = $params.Target
+                            AllowSharePointDesigner = $site.AllowDesigner
+                            AllowDetachPagesFromDefinition = $site.AllowRevertFromTemplate
+                            AllowCustomiseMasterPage = $site.AllowMasterPageEditing
+                            AllowManageSiteURLStructure = $site.ShowURLStructure
+                            AllowCreateDeclarativeWorkflow = $site.AllowCreateDeclarativeWorkflow
+                            AllowSavePublishDeclarativeWorkflow = $site.AllowSavePublishDeclarativeWorkflow
+                            AllowSaveDeclarativeWorkflowAsTemplate = $site.AllowSaveDeclarativeWorkflowAsTemplate
+                            InstallAccount = $params.InstallAccount
+                        }
                     }
                 }
+            } else {
+                Write-Verbose -Verbose "No PsDscRunAsCredential used. Changing these settings is unsupported with this configuration."
+                return $null
             }
         }
     }
@@ -146,33 +151,38 @@ function Set-TargetResource
             }
         }
         "SiteCollection" {
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
+            if (Test-xSharePointRunAsCredential -Credential $InstallAccount) {
+                Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                    $params = $args[0]
 
-                try {
-                    $spFarm = Get-SPFarm
-                } catch {
-                    throw "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
-                    return
-                }
+                    try {
+                        $spFarm = Get-SPFarm
+                    } catch {
+                        throw "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
+                        return
+                    }
         
-                Write-Verbose -Verbose "Start update SPD site collection settings"
+                    Write-Verbose -Verbose "Start update SPD site collection settings"
 
-                # Check if site collection exists
-                $site = Get-SPSite | Where {$_.Url -eq $url}
-                if ($site -eq $null) {
-                    throw "Site collection not found. SharePoint Designer settings will not be applied"
-                    return $null
-                } else {
-                    # Set the SharePoint Designer settings
-                    if ($params.ContainsKey("AllowSharePointDesigner")) { $site.AllowDesigner = $params.AllowSharePointDesigner }
-                    if ($params.ContainsKey("AllowDetachPagesFromDefinition")) { $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition }
-                    if ($params.ContainsKey("AllowCustomiseMasterPage")) { $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage }
-                    if ($params.ContainsKey("AllowManageSiteURLStructure")) {$site.ShowURLStructure = $params.AllowManageSiteURLStructure }
-                    if ($params.ContainsKey("AllowCreateDeclarativeWorkflow")) { $site.AllowCreateDeclarativeWorkflow = $params.AllowCreateDeclarativeWorkflow }
-                    if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow")) { $site.AllowSavePublishDeclarativeWorkflow = $params.AllowSavePublishDeclarativeWorkflow }
-                    if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate")) { $site.AllowSaveDeclarativeWorkflowAsTemplate = $params.AllowSaveDeclarativeWorkflowAsTemplate }
+                    # Check if site collection exists
+                    $site = Get-SPSite | Where {$_.Url -eq $url}
+                    if ($site -eq $null) {
+                        throw "Site collection not found. SharePoint Designer settings will not be applied"
+                        return $null
+                    } else {
+                        # Set the SharePoint Designer settings
+                        if ($params.ContainsKey("AllowSharePointDesigner")) { $site.AllowDesigner = $params.AllowSharePointDesigner }
+                        if ($params.ContainsKey("AllowDetachPagesFromDefinition")) { $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition }
+                        if ($params.ContainsKey("AllowCustomiseMasterPage")) { $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage }
+                        if ($params.ContainsKey("AllowManageSiteURLStructure")) {$site.ShowURLStructure = $params.AllowManageSiteURLStructure }
+                        if ($params.ContainsKey("AllowCreateDeclarativeWorkflow")) { $site.AllowCreateDeclarativeWorkflow = $params.AllowCreateDeclarativeWorkflow }
+                        if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow")) { $site.AllowSavePublishDeclarativeWorkflow = $params.AllowSavePublishDeclarativeWorkflow }
+                        if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate")) { $site.AllowSaveDeclarativeWorkflowAsTemplate = $params.AllowSaveDeclarativeWorkflowAsTemplate }
+                    }
                 }
+            } else {
+                throw "No PsDscRunAsCredential used. Changing these settings is unsupported with this configuration."
+                return
             }
         }
     }
