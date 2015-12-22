@@ -27,6 +27,16 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-xSharePointServiceContext {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $proxyGroup
+    )
+      Write-Verbose "Getting SPContext for Proxy group $($proxyGroup)"
+    return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
+}
 function Get-xSharePointContentService() {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
@@ -106,7 +116,22 @@ function Invoke-xSharePointCommand() {
         return $result
     }
 }
+function Remove-xSharePointParamValue() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] $params,
+        [parameter(Mandatory = $true,Position=2)] $name
+    )
 
+    if ($params.ContainsKey($name)) {
+        $paramValue = $params.$name
+
+        $params.Remove($name) | Out-Null
+        return $paramValue
+    }
+    return $null;
+}
 function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
@@ -148,7 +173,12 @@ function Test-xSharePointObjectHasProperty() {
         [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
         [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
     )
-    return [bool]($Object.PSobject.Properties.name -contains $PropertyName)
+    if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true) {
+        if ($Object.$PropertyName -ne $null) {
+            return $true
+        }
+    }
+    return $false
 }
 
 function Test-xSharePointSpecificParameters() {
@@ -245,8 +275,7 @@ function Set-xSharePointObjectPropertyIfValueExists() {
         [parameter(Mandatory = $true,Position=1)] [object] $ParamsValue,
         [parameter(Mandatory = $true,Position=1)] [string] $ParamKey
     )
-
-    if ($ParamsValue.GetType().Name -eq "Hashtable") {
+    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey") {
         if ($ParamsValue.ContainsKey($ParamKey) -eq $true) {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }

@@ -27,7 +27,7 @@ function Set-xSPWebApplicationThrottlingSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
+        [parameter(Mandatory = $true)] $Settings
     )
 
     # Format here is SPWebApplication property = Custom settings property
@@ -55,13 +55,9 @@ function Set-xSPWebApplicationThrottlingSettings {
                                                -ParamKey "RequestThrottling"
     
     # Create time span object separately
-    if (Test-xSharePointObjectHasProperty $Settings "ChangeLogExpiryDays") {
+    if ((Test-xSharePointObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true) {
         $WebApplication.ChangeLogRetentionPeriod = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
     }
-
-
-
-    
 }
 
 
@@ -69,7 +65,7 @@ function Set-xSPWebApplicationHappyHourSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $Settings
+        [parameter(Mandatory = $true)] $Settings
     )
 
     if ((Test-xSharePointObjectHasProperty $Settings "Hour") -eq $false -or (Test-xSharePointObjectHasProperty $Settings "Minute") -eq $false -or (Test-xSharePointObjectHasProperty $Settings "Duration") -eq $false) {
@@ -93,7 +89,7 @@ function Test-xSPWebApplicationThrottlingSettings {
     [OutputType([System.Boolean])]
     param(
         [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] [Microsoft.Management.Infrastructure.CimInstance] $DesiredSettings
+        [parameter(Mandatory = $true)] $DesiredSettings
     )
 
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)

@@ -1,0 +1,34 @@
+/*
+**Description**
+
+This resource will configure the App Domain at a specific zone for the given Web Application.
+The configuration is done per zone level, and if the zone isn't provided then Default is used. 
+If no WebApplication is provided then setting is saved globally
+
+ New-SPWebApplicationAppDomain -AppDomain contosoapps.com -WebApplication http://www.contoso.com -Zone Internet -Port 10000
+**Example**
+
+    xSPWebApplicationAppDomain Domain
+    {
+        AppDomain = "contosointranetapps.com"
+        Prefix = "app"
+        WebApplication ="http://portal.contoso.com";
+        Zone = "Default";
+        Port=80;
+        SSL=$false;
+        PsDscRunAsCredential = $InstallAccount
+    }
+
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPWebApplicationAppDomain")]
+class MSFT_xSPWebApplicationAppDomain : OMI_BaseResource
+{
+    [Key] string AppDomain;
+    [Required] string Prefix;
+    [write] string WebApplication;
+    [write, ValueMap{"Internet","Intranet","Extranet", "Custom"}, Values{"Internet","Intranet","Extranet", "Custom"}]  string Zone;
+    [write] string Port;
+    [write] boolean SSL
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    
+};
