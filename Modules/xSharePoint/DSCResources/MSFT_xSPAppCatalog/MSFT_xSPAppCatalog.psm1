@@ -4,26 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $AppCatalogUrl ,
-        [parameter(Mandatory = $true)]  [System.String] $WebApp, 
+        [parameter(Mandatory = $true)]  [System.String] $SiteUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
     )
 
-    Write-Verbose -Message "Checking app urls settings"
+    Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $wa = Get-SPWebApplication $param.WebApp
-        $feature = $wa.Features[[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828")]
-        if($feature -eq $null ){
+
+        $site = Get-SPSite $params.SiteUrl -ErrorAction SilentlyContinue
+        if ($null -eq $site) {
             return $null
         }
-        $site = Get-SPSite $feature.Properties["__AppCatSiteId"].Value
- 
+        $wa = $site.WebApplication
+        $feature = $wa.Features.Item([Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828"))
+        if($feature -eq $null){
+            return $null
+        }
+        if ($site.ID -ne $feature.Properties["__AppCatSiteId"].Value) {
+            return $null
+        } 
         return @{
-            AppCatalogUrl = $site.ServerRelativeUrl
-            WebApp= $params.WebApp
+            SiteUrl = $site.Url
             InstallAccount = $params.InstallAccount
         }
     }
@@ -35,26 +39,16 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)] [System.String] $AppCatalogUrl ,
-        [parameter(Mandatory = $true)]  [System.String] $WebApp 
+        [parameter(Mandatory = $true)]  [System.String] $SiteUrl,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-  
-
-    Write-Verbose -Message "Updating app domain settings "
+    Write-Verbose -Message "Updating app domain settings for $SiteUrl"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        if($AppCatalogUrl.Substring(0,1) -ine "/")
-        {
-            $AppCatalogUrl= "/" + $AppCatalogUrl
-        }
-        Update-SPAppCatalogConfiguration -site ($WebApp + $AppCatalogUrl) -Confirm:$false 
-
-
+        Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false 
     }
 }
-
 
 function Test-TargetResource
 {
@@ -62,20 +56,16 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)] [System.String] $AppCatalogUrl ,
-        [parameter(Mandatory = $true)]  [System.String] $WebApp 
+        [parameter(Mandatory = $true)]  [System.String] $SiteUrl,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing app domain settings"
     if($CurrentValues -eq $null){
         return $false
     }
-    Write-Verbose -Message "Testing app domain settings"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AppCatalogUrl", "WebApp") 
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-
