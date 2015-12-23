@@ -33,6 +33,9 @@ Please read the installation instructions that are present on both the download 
 Below is a list of DSC resource types that are currently provided by xSharePoint:
 
  - xSPAntivirusSettings
+ - xSPAppCatalog
+ - xSPAppDomain
+ - xSPAppManagementServiceApp
  - xBCSServiceApp
  - xSPCacheAccounts
  - xSPCreateFarm
@@ -60,12 +63,16 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPSite
  - xSPStateServiceApp
  - xSPTimerJobState
+ - xSPSubscriptionSettingsServiceApp
  - xSPUsageApplication
  - xSPUserProfileServiceApp
  - xSPUserProfileSyncService
+ - xSPVisioServiceApp
  - xSPWebAppBlockedFileTypes
  - xSPWebAppGeneralSettings
  - xSPWebApplication
+ - xSPWebApplicationAppDomain
+ - xSPWebAppPolicy
  - xSPWebAppSiteUseAndDeletion
  - xSPWebAppThrottlingSettings
  - xSPWebAppWorkflowSettings
@@ -84,7 +91,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
- * Added xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
+ * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
  * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
 
 ### 0.8.0.0

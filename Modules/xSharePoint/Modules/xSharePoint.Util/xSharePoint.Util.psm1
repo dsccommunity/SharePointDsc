@@ -163,19 +163,10 @@ function Test-xSharePointRunAsCredential() {
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential
     )
 
-    if ($null -eq $Credential) {
-        # No credentials passed, local credentials used
-        if ($Env:USERNAME.Contains("$")) {
-            # PsDscRunAsCredential not set, using local system account
-            return $false
-        } else {
-            # PsDscRunAsCredential set
-            return $true
-        }
-    } else {
-        # Credentials passed
-        return $false
-    }
+    # If no specific credential is passed and it's not the machine account, it must be PsDscRunAsCredential
+    if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false)) { return $true }
+    # return false for all other scenarios
+    return $false
 }
 
 function Test-xSharePointSpecificParameters() {

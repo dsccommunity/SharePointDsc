@@ -45,12 +45,12 @@ Describe "xSPTimerJobState" {
 
         Context "The server is in a farm and the incorrect enabled settings have been applied" {
             Mock Get-SPTimerJob {
-                $returnVal = @(@{
+                $returnVal = @{
                     Name = "job-spapp-statequery"
                     IsDisabled = $true
                     Schedule = "hourly between 0 and 59"
-                })
-                return ,$returnVal
+                }
+                return @($returnVal)
             }
             Mock Set-SPTimerJob { return $null }
             Mock Get-SPFarm { return @{} }
@@ -71,12 +71,12 @@ Describe "xSPTimerJobState" {
 
         Context "The server is in a farm and the incorrect schedule settings have been applied" {
             Mock Get-SPTimerJob {
-                $returnVal = @(@{
+                $returnVal = @{
                     Name = "job-spapp-statequery"
                     IsDisabled = $false
                     Schedule = "weekly at sat 23:00:00"
-                })
-                return ,$returnVal
+                }
+                return @($returnVal)
             }
             Mock Set-SPTimerJob { return $null }
             Mock Get-SPFarm { return @{} }
@@ -97,12 +97,12 @@ Describe "xSPTimerJobState" {
 
         Context "The server is in a farm and the incorrect schedule format has been used" {
             Mock Get-SPTimerJob {
-                $returnVal = @(@{
+                $returnVal = @{
                     Name = "job-spapp-statequery"
                     IsDisabled = $false
                     Schedule = "incorrect format"
-                })
-                return ,$returnVal
+                }
+                return @($returnVal)
             }
             Mock Set-SPTimerJob { throw "Invalid Time: `"The time given was not given in the proper format. See: Get-Help Set-SPTimerJob -detailed`"" }
             Mock Get-SPFarm { return @{} }
@@ -122,12 +122,12 @@ Describe "xSPTimerJobState" {
 
         Context "The server is in a farm and the correct settings have been applied" {
             Mock Get-SPTimerJob {
-                $returnVal = @(@{
+                $returnVal = @{
                     Name = "job-spapp-statequery"
                     IsDisabled = $false
                     Schedule = "hourly between 0 and 59"
-                })
-                return ,$returnVal
+                }
+                return @($returnVal)
             }
             Mock Get-SPFarm { return @{} }
 
@@ -138,7 +138,6 @@ Describe "xSPTimerJobState" {
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
         }
     }
 }
