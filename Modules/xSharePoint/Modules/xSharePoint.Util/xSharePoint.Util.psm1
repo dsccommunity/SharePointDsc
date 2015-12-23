@@ -27,6 +27,16 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-xSharePointServiceContext {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $proxyGroup
+    )
+      Write-Verbose "Getting SPContext for Proxy group $($proxyGroup)"
+    return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
+}
 function Get-xSharePointContentService() {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
@@ -106,7 +116,22 @@ function Invoke-xSharePointCommand() {
         return $result
     }
 }
+function Remove-xSharePointParamValue() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] $params,
+        [parameter(Mandatory = $true,Position=2)] $name
+    )
 
+    if ($params.ContainsKey($name)) {
+        $paramValue = $params.$name
+
+        $params.Remove($name) | Out-Null
+        return $paramValue
+    }
+    return $null;
+}
 function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param

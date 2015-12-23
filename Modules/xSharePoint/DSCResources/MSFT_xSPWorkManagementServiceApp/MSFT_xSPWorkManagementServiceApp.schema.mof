@@ -1,0 +1,24 @@
+/*
+**Description**
+
+This resource is used to provision and manage an instance of the Work Management Services Service Application.
+It will identify an instance of the work management service application through the application display name.
+Currently the resource will provision the app if it does not yet exist, and will change the application pool associated to the app if it does not match the configuration.
+
+
+**Example**
+
+   xSPWorkManagementServiceApp WorkManagementServiceApp
+    {
+        Name = "App Management Service Application"
+        AppPool = "SharePoint web services"
+}
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("WorkManagementServiceApp")]
+class MSFT_WorkManagementServiceApp : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] String ApplicationPool;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

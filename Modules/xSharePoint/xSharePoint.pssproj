@@ -51,6 +51,7 @@
   <ItemGroup>
     <Folder Include="DSCResources\" />
     <Folder Include="DSCResources\MSFT_xSPAppCatalog\" />
+    <Folder Include="DSCResources\MSFT_xSPWorkManagementServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplicationAppDomain\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\" />
@@ -81,6 +82,7 @@
     <Folder Include="DSCResources\MSFT_xSPStateServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPUsageApplication\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileSyncConnection\" />
     <Folder Include="DSCResources\MSFT_xSPUserProfileSyncService\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplication\" />
     <Folder Include="DSCResources\MSFT_xSPPasswordChangeSettings\" />
@@ -104,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
@@ -165,6 +168,8 @@
     <Compile Include="DSCResources\MSFT_xSPUsageApplication\MSFT_xSPUsageApplication.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncService\MSFT_xSPUserProfileSyncService.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPVisioServiceApp\MSFT_xSPVisioServiceApp.psm1" />
@@ -190,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
