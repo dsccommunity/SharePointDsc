@@ -50,6 +50,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="DSCResources\" />
+    <Folder Include="DSCResources\MSFT_xSPAppCatalog\" />
+    <Folder Include="DSCResources\MSFT_xSPWebApplicationAppDomain\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAntivirusSettings\" />
@@ -91,7 +93,9 @@
     <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\" />
+    <Folder Include="DSCResources\MSFT_xSPTimerJobState\" />
     <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPAppDomain\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -100,6 +104,9 @@
     <Folder Include="Examples\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAntivirusSettings\MSFT_xSPAntivirusSettings.schema.mof" />
@@ -155,6 +162,7 @@
     <Compile Include="DSCResources\MSFT_xSPSite\MSFT_xSPSite.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPStateServiceApp\MSFT_xSPStateServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPStateServiceApp\MSFT_xSPStateServiceApp.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPTimerJobState\MSFT_xSPTimerJobState.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUsageApplication\MSFT_xSPUsageApplication.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUsageApplication\MSFT_xSPUsageApplication.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileServiceApp\MSFT_xSPUserProfileServiceApp.psm1" />
@@ -183,11 +191,15 @@
     <Compile Include="xSharePoint.psd1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPAppManagementServiceApp\MSFT_xSPAppManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\MSFT_xSPHealthAnalyzerRuleState.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPTimerJobState\MSFT_xSPTimerJobState.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppGeneralSettings\MSFT_xSPWebAppGeneralSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\MSFT_xSPWebAppSiteUseAndDeletion.schema.mof" />

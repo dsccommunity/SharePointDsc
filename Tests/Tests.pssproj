@@ -68,6 +68,10 @@
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPHealthAnalyzerRuleState.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPTimerJobState.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPAppCatalog.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPAppDomain.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWebApplicationAppDomain.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppSiteUseAndDeletion.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPDesignerSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppManagementServiceApp.Tests.ps1" />

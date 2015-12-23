@@ -76,6 +76,7 @@ CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Add-xSharePointUserToLocalAdmin",
                     "Remove-xSharePointUserToLocalAdmin",
                     "Test-xSharePointObjectHasProperty",
+                    "Test-xSharePointRunAsCredential",
                     "Test-xSharePointUserIsLocalAdmin",
                     "Test-xSharePointSpecificParameters",
                     "Set-xSharePointObjectPropertyIfValueExists")
