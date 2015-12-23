@@ -56,7 +56,7 @@ function Get-TargetResource
             }
         }
         "SiteCollection" {
-            if (Test-xSharePointRunAsCredential -Credential $InstallAccount) {
+            if ((Test-xSharePointRunAsCredential -Credential $InstallAccount) -eq $true) {
                 $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                     $params = $args[0]
         
@@ -89,8 +89,7 @@ function Get-TargetResource
                     }
                 }
             } else {
-                Write-Verbose -Verbose "No PsDscRunAsCredential used. Changing these settings is unsupported with this configuration."
-                return $null
+                throw "A known issue exists that prevents these settings from being managed when InstallAccount is used instead of PsDscRunAsAccount. See http://aka.ms/xSharePointRemoteIssues for details."
             }
         }
     }
@@ -151,7 +150,7 @@ function Set-TargetResource
             }
         }
         "SiteCollection" {
-            if (Test-xSharePointRunAsCredential -Credential $InstallAccount) {
+            if ((Test-xSharePointRunAsCredential -Credential $InstallAccount) -eq $true) {
                 Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                     $params = $args[0]
 
@@ -181,8 +180,7 @@ function Set-TargetResource
                     }
                 }
             } else {
-                throw "No PsDscRunAsCredential used. Changing these settings is unsupported with this configuration."
-                return
+                throw "A known issue exists that prevents these settings from being managed when InstallAccount is used instead of PsDscRunAsAccount. See http://aka.ms/xSharePointRemoteIssues for details."
             }
         }
     }

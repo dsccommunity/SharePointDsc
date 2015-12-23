@@ -127,7 +127,6 @@ Describe "xSPDesignerSettings" {
 
             It "updates the SharePoint Designer settings" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Get-SPSite
             }
         }
 
@@ -159,16 +158,16 @@ Describe "xSPDesignerSettings" {
 
             Mock Get-SPFarm { return @{} }
 
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "throws an exception in the get method to say that this is not supported" {
+                { Get-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
             }
 
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+            It "throws an exception in the test method to say that this is not supported" {
+                { Test-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
             }
 
-            It "throws an exception in the set method to say there is no local farm" {
-                { Set-TargetResource @testParams } | Should throw "No PsDscRunAsCredential used. Changing these settings is unsupported with this configuration."
+            It "throws an exception in the set method to say that this is not supported" {
+                { Set-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
             }
         }
 
