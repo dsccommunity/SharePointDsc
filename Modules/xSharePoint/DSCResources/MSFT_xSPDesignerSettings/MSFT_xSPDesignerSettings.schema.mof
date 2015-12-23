@@ -6,21 +6,27 @@ These settings will be used to control if users are allowed to make changes usin
 Note that this will not prevent users from installing SharePoint Designer, just from using SharePoint Designer to connect to the farm.
 
 Settings can be applied against an entire web application, or a specific site collection. 
-Use the "Scope" property to set it to either "WebApplication" or "SiteCollection" to define which you are targetting.
+Use the "SettingsScope" property to set it to either "WebApplication" or "SiteCollection" to define which you are targetting.
+
+Known issue:
+When using PowerShell v4 or PowerShell v5 with the InstallAccount switch (instead of PsDscRunAsCredential), you cannot use the SettingsScope "SiteCollection".
+Due to an issue with Remote PowerShell and SharePoint, changing the Site Collection settings results in an Access Denied error.
+Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential configuration.
 
 **Example**
 
     xSPDesignerSettings MainWebAppSPDSettings
     {
-        Url = "https://intranet.sharepoint.contoso.com"
-        Scope = "WebApplication"
-        AllowSharePointDesigner = $false
-        AllowDetachPagesFromDefinition = $false
-        AllowCustomiseMasterPage = $false
-        AllowManageSiteURLStructure = $false
-        AllowCreateDeclarativeWorkflow = $false
-        AllowSavePublishDeclarativeWorkflow = $false
-        AllowSaveDeclarativeWorkflowAsTemplate = $false
+        Url                                     = "https://intranet.sharepoint.contoso.com"
+        SettingsScope                           = "WebApplication"
+        AllowSharePointDesigner                 = $false
+        AllowDetachPagesFromDefinition          = $false
+        AllowCustomiseMasterPage                = $false
+        AllowManageSiteURLStructure             = $false
+        AllowCreateDeclarativeWorkflow          = $false
+        AllowSavePublishDeclarativeWorkflow     = $false
+        AllowSaveDeclarativeWorkflowAsTemplate  = $false
+        PsDscRunAsCredential                    = $InstallAccount
     }
 */
 
