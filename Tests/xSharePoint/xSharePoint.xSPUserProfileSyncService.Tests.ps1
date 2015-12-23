@@ -9,7 +9,7 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "xSPUserProfileSyncService"
+$ModuleName = "MSFT_xSPUserProfileSyncService"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPUserProfileSyncService" {
