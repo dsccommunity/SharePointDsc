@@ -1,0 +1,25 @@
+﻿/* 
+**Description** 
+
+The resource will provision and configure the Word Automation Service Application. 
+The database specific parameters are only used during initial provisioning of the app, and will not change database settings beyond the initial deployment. 
+
+**Example** 
+    xSPWordAutomationServiceApp Word Automation 
+    { 
+        Name = "Word Automation Service Application" 
+        Ensure = "Present"
+        ApplicationPool = "SharePoint Web Services" 
+        PsDscRunAsCredential = $InstallAccount 
+    } 
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPWordAutomationServiceApp")] 
+class MSFT_xSPWordAutomationServiceApp : OMI_BaseResource 
+{ 
+    [Key] string Name; 
+    [Write] string ApplicationPool; 
+    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials; 
+    [Required] string DatabaseName; 
+    [Write] string DatabaseServer; 
+}; 
