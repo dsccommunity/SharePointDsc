@@ -24,7 +24,7 @@ class MSFT_xSPWebApplicationAppDomain : OMI_BaseResource
 {
     [Key] string WebApplication;
     [Key, ValueMap{"Internet","Intranet","Extranet", "Custom"}, Values{"Internet","Intranet","Extranet", "Custom"}]  string Zone;
-	[Required] string AppDomain;
+    [Required] string AppDomain;
     [Write] string Port;
     [Write] boolean SSL
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
