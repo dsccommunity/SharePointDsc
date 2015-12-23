@@ -90,6 +90,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppPolicy.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppWorkflowSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppThrottlingSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWorkManagementServiceApp.Tests.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
