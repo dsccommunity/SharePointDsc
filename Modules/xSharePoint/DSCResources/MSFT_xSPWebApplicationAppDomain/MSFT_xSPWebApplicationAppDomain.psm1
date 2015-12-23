@@ -4,13 +4,12 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $AppDomain,
-        [parameter(Mandatory = $true)] [System.String] $Prefix,
-        [parameter(Mandatory = $false)]  [System.String] $WebApplication,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $Zone,
-        [parameter(Mandatory = $false)] [System.UInt32] $Port,
-        [parameter(Mandatory = $false)] [System.Boolean] $SSL
+        [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
+        [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
+        [parameter(Mandatory = $true)]  [System.String]  $Zone,
+        [parameter(Mandatory = $false)] [System.UInt32]  $Port,
+        [parameter(Mandatory = $false)] [System.Boolean] $SSL,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
     )
 
@@ -18,37 +17,20 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
-        $prefix = Get-SPAppSiteSubscriptionName -ErrorAction SilentlyContinue
-        if($params.ContainsKey("WebApplication")){
-            $params.Add("Confirm", $false)
-            $ssl = $params | Remove-xSharePointParamValue -name "SSL" 
-            $appDomain = $params | Remove-xSharePointParamValue -name "AppDomain"
-            $port = $params | Remove-xSharePointParamValue -name "Port"
-            $webAppAppDomain =   Get-SPWebApplicationAppDomain $params
+        $webAppAppDomain = Get-SPWebApplicationAppDomain -WebApplication $params.WebApplication -Zone $params.Zone
+
+        if ($null -eq $webAppAppDomain) {
+            return $null
+        } else {
             return @{
                 AppDomain = $webAppAppDomain.AppDomain 
-                WebApplication = $webAppAppDomain.WebApplication
+                WebApplication = $params.WebApplication
                 Zone = $webAppAppDomain.UrlZone
                 Port = $webAppAppDomain.Port
                 SSL = $webAppAppDomain.IsSchemeSSL
-                Prefix= $prefix
-                InstallAccount = $params.InstallAccount
-            }
-        }else{
-            return @{
-                AppDomain = Get-SPAppDomain
-                Prefix= $prefix
-                Zone = $null
-                Port = $null
-                SSL = $null
                 InstallAccount = $params.InstallAccount
             }
         }
-
-
-
-
     }
     return $result
 }
@@ -58,46 +40,37 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $true)] [System.String] $Prefix,
-        [parameter(Mandatory = $false)] [System.String] $WebApplication,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $Zone,
-        [parameter(Mandatory = $false)] [System.UInt32] $Port,
-        [parameter(Mandatory = $false)] [System.Boolean] $SSL
+        [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
+        [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
+        [parameter(Mandatory = $true)]  [System.String]  $Zone,
+        [parameter(Mandatory = $false)] [System.UInt32]  $Port,
+        [parameter(Mandatory = $false)] [System.Boolean] $SSL,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Updating app domain settings "
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
-        $prefix = $params | Remove-xSharePointParamValue -name "Prefix"
-        if($prefix -ne $null){
-            Set-SPAppSiteSubscriptionName -Name $prefix -Confirm:$false
+        $CurrentValues = $args[1]
+
+        if ($null -ne $CurrentValues) {
+            Get-SPWebApplicationAppDomain -WebApplication $params.WebApplication -Zone $params.Zone | Remove-SPWebApplicationAppDomain
+            Start-Sleep -Seconds 5
         }
 
-        if($params.ContainsKey("WebApplication")){
-            $getParams = @{}
-            $params.Add("Confirm", $false)
-            $getParams.Add("ErrorAction", 0)
-            $getParams.Add("WebApplication", $params.WebApplication)
-            if($params.ContainsKey("Zone")){
-                $getPArams.Add("Zone",$Params.Zone)
-            }
-
-            $appDomain = (Get-SPWebApplicationAppDomain  @getParams )
-            $params = $params | Rename-xSharePointParamValue -oldName  "SSL"  -newName "SecureSocketsLayer"
-            if($appDomain -ne $null){
-                Remove-SPWebApplicationAppDomain $appDomain
-                Sleep -Seconds 1
-            }
-               New-SPWebApplicationAppDomain @params
-            
-        }else{
-            Set-SPAppDomain $params.AppDomain  -Confirm:$false    
+        $newParams = @{
+            AppDomain = $params.AppDomain
+            WebApplication = $params.WebApplication 
+            Zone = $params.Zone
         }
+        if ($params.ContainsKey("Port") -eq $true) { $newParams.Add("Port", $params.Port) }
+        if ($params.ContainsKey("SSL") -eq $true) { $newParams.Add("SecureSocketsLayer", $params.SSL) }
+
+        New-SPWebApplicationAppDomain @newParams
     }
 }
-
 
 function Test-TargetResource
 {
@@ -105,18 +78,18 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $true)] [System.String] $Prefix,
-        [parameter(Mandatory = $false)] [System.String] $WebApplication,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $Zone,
-        [parameter(Mandatory = $false)] [System.UInt32] $Port,
-        [parameter(Mandatory = $false)] [System.Boolean] $SSL
+        [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
+        [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
+        [parameter(Mandatory = $true)]  [System.String]  $Zone,
+        [parameter(Mandatory = $false)] [System.UInt32]  $Port,
+        [parameter(Mandatory = $false)] [System.Boolean] $SSL,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing app domain settings"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AppDomain", "Prefix", "Zone", "SSL", "WebApplication") 
+    if ($null -eq $CurrentValues) { return $false }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AppDomain", "Port", "SSL") 
 }
 
 
