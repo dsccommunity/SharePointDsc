@@ -156,6 +156,28 @@ function Test-xSharePointObjectHasProperty() {
     return $false
 }
 
+function Test-xSharePointRunAsCredential() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential
+    )
+
+    if ($null -eq $Credential) {
+        # No credentials passed, local credentials used
+        if ($Env:USERNAME.Contains("$")) {
+            # PsDscRunAsCredential not set, using local system account
+            return $false
+        } else {
+            # PsDscRunAsCredential set
+            return $true
+        }
+    } else {
+        # Credentials passed
+        return $false
+    }
+}
+
 function Test-xSharePointSpecificParameters() {
     [CmdletBinding()]
     param
