@@ -115,7 +115,7 @@ function Set-TargetResource
                 # Set timer job schedule
                 Write-Verbose -Verbose "Set timer job $($params.Name) schedule"
                 try {
-                    Set-SPTimerJob $job -Schedule $params.Schedule
+                    Set-SPTimerJob $job -Schedule $params.Schedule -ErrorAction Stop
                 } catch {
                     if ($_.Exception.Message -like "*The time given was not given in the proper format*") {
                         throw "Incorrect schedule format used. New schedule will not be applied."
