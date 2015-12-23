@@ -15,8 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPAppCatalog" {
     InModuleScope $ModuleName {
         $testParams = @{
-            WebApp = "https://content.sharepoint.contoso.com"
-            AppCatalogUrl = "/sites/AppCatalog"
+            SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -26,22 +25,21 @@ Describe "xSPAppCatalog" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Context "Update-SPAppCatalogConfiguration fails due to service or invalid template" {
+        $mockSiteId = [Guid]::NewGuid()
+        
+        Context "The specified site exists, but cannot be set as an app catalog as it is of the wrong template" {
             Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
-            Mock Get-SPWebApplication { return @{
-                Features = @{[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5111") = @{
-                                        Properties = @{
-                                        "__AppCatSiteId" = @{Value = "/sites/AppCatalog"} 
-                                        }
-                                    }
-                                }
-                            
+            Mock Get-SPSite {
+                return @{
+                    WebApplication = @{
+                        Features = @( @{} ) | Add-Member ScriptMethod Item { return $null } -PassThru -Force
                     }
+                    ID = $mockSiteId
+                }
             }
 
             It "returns null from the get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPWebApplication
             }
 
             It "returns false from the test method" {
@@ -49,38 +47,49 @@ Describe "xSPAppCatalog" {
             }
 
             It "throws exception when executed" {
-                {Set-TargetResource @testParams}| Should throw
-        
+                { Set-TargetResource @testParams } | Should throw
             }
-
         }
 
-        Context "Save Settings at Web Application level" {
+        Context "The specified site exists but is not set as the app catalog for its web application" {
             Mock Update-SPAppCatalogConfiguration { }
-            Mock Get-SPWebApplication {
-              
+            Mock Get-SPSite {
+                return @{
+                    WebApplication = @{
+                        Features = @( @{} ) | Add-Member ScriptMethod Item { return $null } -PassThru -Force
+                    }
+                    ID = $mockSiteId
+                }
             }
-            It "save settings" {
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Updates the settings" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Update-SPAppCatalogConfiguration
             }
 
         }
-        Context "Settings match" {
-            Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
-            Mock Get-SPWebApplication { return @{
-                Features = @{[Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828") = @{
-                                        Properties = @{
-                                        "__AppCatSiteId" = @{Value = "/sites/AppCatalog"} 
-                                        }
-                                    }
-                                }
-                            
-                    }
-            }
+        
+        Context "The specified site exists and is the current app catalog already" {
             Mock Get-SPSite {
-            return @{
-                ServerRelativeUrl="/sites/AppCatalog"
+                return @{
+                    WebApplication = @{
+                        Features = @( @{} ) | Add-Member ScriptMethod Item { return @{ 
+                            ID = [guid]::NewGuid()
+                            Properties = @{
+                                            "__AppCatSiteId" = @{Value = $mockSiteId} 
+                                        }
+                        } } -PassThru -Force
+                    }
+                    ID = $mockSiteId
+                    Url = $testParams.SiteUrl
                 }
             }
 
@@ -91,10 +100,7 @@ Describe "xSPAppCatalog" {
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
-
         }
-
     }    
 }
 

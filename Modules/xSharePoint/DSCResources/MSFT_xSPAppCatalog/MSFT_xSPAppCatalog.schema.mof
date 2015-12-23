@@ -1,24 +1,22 @@
 /*
 **Description**
 
-This resource will configure the App Catalog settings for Web Applications and Host Named Site Collections(HNSC).
-The catalog site needs to have been created using the correct template. 
-The catalog URL for HNSC works based on convention. All HNSC need to have catalog on the same path.
+This resource will ensure that a specific site collection is marked as the app catalog for the web application that the site is in.
+The catalog site needs to have been created using the correct template (APPCATALOG#0).
 
 **Example**
 
     xSPAppCatalog MainAppCatalog
     {
-        WebApp = "https://content.sharepoint.contoso.com"
-        AppCatalogUrl = "/sites/AppCatalog"
+        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+        PsDscRunAsCredential = $SPSetupAccount
     }
 
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPAppCatalog")]
 class MSFT_xSPAppCatalog : OMI_BaseResource
 {
-    [Key] string WebApp;
-    [Required] string AppCatalogUrl;
+    [Key] string SiteUrl;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     
 };

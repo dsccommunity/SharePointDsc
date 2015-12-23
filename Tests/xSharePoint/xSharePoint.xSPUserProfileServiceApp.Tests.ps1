@@ -12,7 +12,7 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 $ModuleName = "MSFT_xSPUserProfileServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "MSFT_xSPUserProfileServiceApp" {
+Describe "xSPUserProfileServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "User Profile Service App"

@@ -16,33 +16,11 @@ Describe "xSPWebApplicationAppDomain" {
     InModuleScope $ModuleName {
         $testParams = @{
             AppDomain = "contosointranetapps.com"
-            Prefix = "app"
             WebApplication ="http://portal.contoso.com"
             Zone = "Default"
-            Port=80;
-            SSL=$false
+            Port = 80;
+            SSL = $false
         }
-        $testParamsBasic = @{
-            AppDomain = "contosointranetapps.com"
-            Prefix = "app"
-        }
-
-        $returnMatch =@{
-                AppDomain = "contosointranetapps.com"
-                WebApplication = "http://portal.contoso.com"
-                UrlZone = "Default"
-                Port = "80"
-                IsSchemeSSL=$false
-                Prefix= "app"
-        } 
-        $returnNotMatch =@{
-                AppDomain = "litwareintranetapps.com"
-                WebApplication = "http://portal.contoso.com"
-                UrlZone = "Default"
-                Port = "80"
-                IsSchemeSSL=$false
-                Prefix= "app"
-        } 
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -51,56 +29,38 @@ Describe "xSPWebApplicationAppDomain" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock New-SPManagedPath { }
+        Mock New-SPWebApplicationAppDomain { }
+        Mock Remove-SPWebApplicationAppDomain { }
+        Mock Start-Sleep { }
 
-        Context "Subscription Service isn't available" {
-            Mock Get-SPAppSiteSubscriptionName {  return $null }
-            
-            It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+        Context "No app domain settings have been configured for the specified web app and zone" {
+            Mock Get-SPWebApplicationAppDomain { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws exception when executed" {
-                Mock  Set-SPAppSiteSubscriptionName {throw 'Exception'}
-                {Set-TargetResource @testParams}| Should Throw
-               
-            }
-            It "subscription is available, but app isn't throws exception when executed" {
-                Mock New-SPWebApplicationAppDomain  {throw 'Exception'}
-                Mock Set-SPAppSiteSubscriptionName {}
-                {Set-TargetResource @testParams}| Should Throw
-                Assert-MockCalled Set-SPAppSiteSubscriptionName
-            }
-
-        }
-        Context "App Management Is Available. adds new web app app domain Settings" {
-            Mock Get-SPWebApplicationAppDomain { return $null}
-            Mock New-SPWebApplicationAppDomain  {}
-            It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "saves settings when executed" {
+            It "creates the new app domain entry" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPWebApplicationAppDomain 
+                Assert-MockCalled New-SPWebApplicationAppDomain
             }
         }
 
-        Context "App Management Is Available. updates web app app domain Settings" {
-            Mock Get-SPWebApplicationAppDomain { return $returnNotMatch
-            
+        Context "An app domain has been configured for the specified web app and zone but it's not correct" {
+            Mock Get-SPWebApplicationAppDomain { 
+                return @{
+                    AppDomain = "wrong.domain"
+                    UrlZone = $testParams.Zone
+                    Port = $testParams.Port
+                    IsSchemeSSL = $testParams.SSL
+                }
             }
-            Mock Remove-SPWebApplicationAppDomain{}
-            Mock New-SPWebApplicationAppDomain  {}
-            It "returns values from the get method" {
+
+            It "returns null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
@@ -108,31 +68,62 @@ Describe "xSPWebApplicationAppDomain" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "saves settings when executed" {
+            It "creates the new app domain entry" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPWebApplicationAppDomain 
-                Assert-MockCalled New-SPWebApplicationAppDomain 
+                Assert-MockCalled Remove-SPWebApplicationAppDomain
+                Assert-MockCalled New-SPWebApplicationAppDomain
             }
         }
-        Context "Basic: App Management Is Available. updates app domain Settings" {
-            Mock Get-SPAppDomain { return $null            }
-            Mock Set-SPAppDomain{}
-            It "returns values from the get method" {
-                Get-TargetResource @testParamsBasic | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPAppDomain
+
+        Context "The correct app domain has been configued for the requested web app and zone" {
+            Mock Get-SPWebApplicationAppDomain { 
+                return @{
+                    AppDomain = $testParams.AppDomain
+                    UrlZone = $testParams.Zone
+                    Port = $testParams.Port
+                    IsSchemeSSL = $testParams.SSL
+                }
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "returns false from the test method" {
-                Test-TargetResource @testParamsBasic | Should Be $false
-            }
-
-            It "saves settings when executed" {
-                Set-TargetResource @testParamsBasic
-                Assert-MockCalled Set-SPAppDomain
+                Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        
+        $testParams = @{
+            AppDomain = "contosointranetapps.com"
+            WebApplication ="http://portal.contoso.com"
+            Zone = "Default"
+        }
+
+        Context "The functions operate without optional parameters included" {
+            Mock Get-SPWebApplicationAppDomain { 
+                return @{
+                    AppDomain = "invalid.domain"
+                    UrlZone = $testParams.Zone
+                    Port = $testParams.Port
+                    IsSchemeSSL = $testParams.SSL
+                }
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "creates the new app domain entry" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPWebApplicationAppDomain
+                Assert-MockCalled New-SPWebApplicationAppDomain
+            }
+        }
     }    
 }
 
