@@ -15,7 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPAppDomain" {
     InModuleScope $ModuleName {
         $testParams = @{
-            AppDomain = "http://apps.contoso.com"
+            AppDomain = "apps.contoso.com"
             Prefix = "apps"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -27,21 +27,13 @@ Describe "xSPAppDomain" {
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
       
-        Mock Set-SPAppDomain 
-        Mock Set-SPAppSiteSubscriptionName  
-        $sampleResultDifferent =  @{
-            AppDomain = "http://apps2.contoso.com"
-            Prefix= "apps2"
-        }
+        Mock Set-SPAppDomain {}
+        Mock Set-SPAppSiteSubscriptionName  {}
 
-        $sampleResultEquals =  @{
-            AppDomain = "http://apps.contoso.com"
-            Prefix= "apps"
-        }
-
-        Context "App Management Is Available. Settings are saved" {
+        Context "No app URLs have been configured locally" {
             Mock Get-SPAppDomain {  }
             Mock Get-SPAppSiteSubscriptionName  {  }   
+
             It "returns values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
@@ -56,21 +48,36 @@ Describe "xSPAppDomain" {
                 Assert-MockCalled Set-SPAppSiteSubscriptionName  
             }
         }
-        Context "App Management Is Available. Settings are a match" {
-            Mock Get-SPAppDomain { return "http://apps.contoso.com" }
-            Mock Get-SPAppSiteSubscriptionName  {  return "apps" }   
+
+        Context "Incorrect app URLs have been configured locally" {
+            Mock Get-SPAppDomain { return "wrong.domain" }
+            Mock Get-SPAppSiteSubscriptionName  { return "wrongprefix" }   
+
             It "returns values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "saves settings when executed" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPAppDomain
                 Assert-MockCalled Set-SPAppSiteSubscriptionName  
+            }
+        }
+
+        Context "Correct app URLs have been configured locally" {
+            Mock Get-SPAppDomain { return $testParams.AppDomain }
+            Mock Get-SPAppSiteSubscriptionName  { $testParams.Prefix }   
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

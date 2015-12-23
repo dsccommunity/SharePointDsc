@@ -4,7 +4,7 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $false)] [System.String] $AppDomain,
+        [parameter(Mandatory = $true)]  [System.String] $AppDomain,
         [parameter(Mandatory = $true)]  [System.String] $Prefix,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
@@ -15,10 +15,7 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $appDomain =  Get-SPAppDomain
-        $prefix = "";
-        if($params.ContainsKey("Prefix")){
-            $prefix = Get-SPAppSiteSubscriptionName
-        }
+        $prefix = Get-SPAppSiteSubscriptionName -ErrorAction Continue
 
         return @{
             AppDomain = $appDomain
@@ -34,22 +31,17 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $false)]  [System.String] $Prefix
-
+        [parameter(Mandatory = $true)]  [System.String] $AppDomain,
+        [parameter(Mandatory = $true)]  [System.String] $Prefix,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
-
-  
 
     Write-Verbose -Message "Updating app domain settings "
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         Set-SPAppDomain $params.AppDomain
-        if($params.ContainsKey("Prefix")){
-            Set-SPAppSiteSubscriptionName -Name $params.Prefix -Confirm:$false
-        }
+        Set-SPAppSiteSubscriptionName -Name $params.Prefix -Confirm:$false
     }
 }
 
@@ -60,9 +52,9 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)] [System.String] $AppDomain,
-        [parameter(Mandatory = $false)]  [System.String] $Prefix
+        [parameter(Mandatory = $true)]  [System.String] $AppDomain,
+        [parameter(Mandatory = $true)]  [System.String] $Prefix,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
