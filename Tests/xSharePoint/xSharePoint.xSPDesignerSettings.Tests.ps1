@@ -16,7 +16,7 @@ Describe "xSPDesignerSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "https://intranet.sharepoint.contoso.com"
-            Scope = "WebApplication"
+            SettingsScope = "WebApplication"
             AllowSharePointDesigner = $false
             AllowDetachPagesFromDefinition = $false
             AllowCustomiseMasterPage = $false
@@ -49,7 +49,7 @@ Describe "xSPDesignerSettings" {
             }
         }
 
-        Context "The server is in a farm, web application scope and the incorrect settings have been applied" {
+        Context "The server is in a farm, target web application and the incorrect settings have been applied" {
             Mock Get-SPDesignerSettings { return @{
                     AllowDesigner = $true
                     AllowRevertFromTemplate = $true
@@ -66,55 +66,13 @@ Describe "xSPDesignerSettings" {
                 $result.DisplayName = "Test"
                 $result.Url = "https://intranet.sharepoint.contoso.com"
 
+                $result = $result | Add-Member ScriptMethod Update { $Global:xSharePointDesignerUpdated = $true } -PassThru
+
                 return $result
             }
             
             Mock Get-SPFarm { return @{} }
             
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "updates the SharePoint Designer settings" {
-                Mock Set-SPDesignerSettings {}
-                Set-TargetResource @testParams
-                Assert-MockCalled Set-SPDesignerSettings
-            }
-        }
-
-        Context "The server is in a farm, site collection scope and the incorrect settings have been applied" {
-            $testParams = @{
-                Url = "https://intranet.sharepoint.contoso.com"
-                Scope = "SiteCollection"
-                AllowSharePointDesigner = $false
-                AllowDetachPagesFromDefinition = $false
-                AllowCustomiseMasterPage = $false
-                AllowManageSiteURLStructure = $false
-                AllowCreateDeclarativeWorkflow = $false
-                AllowSavePublishDeclarativeWorkflow = $false
-                AllowSaveDeclarativeWorkflowAsTemplate = $false
-            }
-            Mock Get-SPSite {
-                $returnVal = @{
-                        Url = "https://intranet.sharepoint.contoso.com"
-                        AllowDesigner = $true
-                        AllowRevertFromTemplate = $true
-                        AllowMasterPageEditing = $true
-                        ShowURLStructure = $true
-                        AllowCreateDeclarativeWorkflow = $true
-                        AllowSavePublishDeclarativeWorkflow = $true
-                        AllowSaveDeclarativeWorkflowAsTemplate = $true
-                } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointDesignerUpdated = $true } -PassThru
-                return $returnVal
-            }
-
-            Mock Get-SPFarm { return @{} }
-
             It "return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
@@ -130,7 +88,90 @@ Describe "xSPDesignerSettings" {
             }
         }
 
-        Context "The server is in a farm, scope is web application and the correct settings have been applied" {
+        Context "The server is in a farm, target site collection and the incorrect settings have been applied" {
+            $testParams = @{
+                Url = "https://intranet.sharepoint.contoso.com"
+                SettingsScope = "SiteCollection"
+                AllowSharePointDesigner = $false
+                AllowDetachPagesFromDefinition = $false
+                AllowCustomiseMasterPage = $false
+                AllowManageSiteURLStructure = $false
+                AllowCreateDeclarativeWorkflow = $false
+                AllowSavePublishDeclarativeWorkflow = $false
+                AllowSaveDeclarativeWorkflowAsTemplate = $false
+            }
+            Mock Get-SPSite {
+                return @{
+                        Url = "https://intranet.sharepoint.contoso.com"
+                        AllowDesigner = $true
+                        AllowRevertFromTemplate = $true
+                        AllowMasterPageEditing = $true
+                        ShowURLStructure = $true
+                        AllowCreateDeclarativeWorkflow = $true
+                        AllowSavePublishDeclarativeWorkflow = $true
+                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                } 
+            }
+
+            Mock Test-xSharePointRunAsCredential { return $true }
+
+            Mock Get-SPFarm { return @{} }
+
+            It "return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "updates the SharePoint Designer settings" {
+                Set-TargetResource @testParams
+            }
+        }
+
+        Context "The server is in a farm, target site collection and InstallAccount is used" {
+            $testParams = @{
+                Url = "https://intranet.sharepoint.contoso.com"
+                SettingsScope = "SiteCollection"
+                AllowSharePointDesigner = $false
+                AllowDetachPagesFromDefinition = $false
+                AllowCustomiseMasterPage = $false
+                AllowManageSiteURLStructure = $false
+                AllowCreateDeclarativeWorkflow = $false
+                AllowSavePublishDeclarativeWorkflow = $false
+                AllowSaveDeclarativeWorkflowAsTemplate = $false
+            }
+            Mock Get-SPSite {
+                return @{
+                        Url = "https://intranet.sharepoint.contoso.com"
+                        AllowDesigner = $true
+                        AllowRevertFromTemplate = $true
+                        AllowMasterPageEditing = $true
+                        ShowURLStructure = $true
+                        AllowCreateDeclarativeWorkflow = $true
+                        AllowSavePublishDeclarativeWorkflow = $true
+                        AllowSaveDeclarativeWorkflowAsTemplate = $true
+                } 
+            }
+            Mock Test-xSharePointRunAsCredential { return $false }
+
+            Mock Get-SPFarm { return @{} }
+
+            It "throws an exception in the get method to say that this is not supported" {
+                { Get-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+            }
+
+            It "throws an exception in the test method to say that this is not supported" {
+                { Test-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+            }
+
+            It "throws an exception in the set method to say that this is not supported" {
+                { Set-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+            }
+        }
+
+        Context "The server is in a farm, target is web application and the correct settings have been applied" {
             Mock Get-SPDesignerSettings {
                 $returnVal = @{
                     AllowDesigner = $false
@@ -165,10 +206,10 @@ Describe "xSPDesignerSettings" {
 
         }
 
-        Context "The server is in a farm, scope is site collection and the correct settings have been applied" {
+        Context "The server is in a farm, target is site collection and the correct settings have been applied" {
             $testParams = @{
                 Url = "https://intranet.sharepoint.contoso.com"
-                Scope = "SiteCollection"
+                SettingsScope = "SiteCollection"
                 AllowSharePointDesigner = $false
                 AllowDetachPagesFromDefinition = $false
                 AllowCustomiseMasterPage = $false
@@ -192,6 +233,8 @@ Describe "xSPDesignerSettings" {
                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointDesignerUpdated = $true } -PassThru
                 return $returnVal
             }
+
+            Mock Test-xSharePointRunAsCredential { return $true }
 
             Mock Get-SPFarm { return @{} }
 
