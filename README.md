@@ -90,7 +90,12 @@ Additional detailed documentation is included on the wiki on GitHub.
 ## Version History
 
 ### Unreleased
- * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy, xSPTimerJobState and xSPHealthAnalyzerRuleState resources
+
+ * Added xSPHealthAnalyzerRuleState resources
+
+### 0.9.0.0
+
+ * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
  * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
 
 ### 0.8.0.0
