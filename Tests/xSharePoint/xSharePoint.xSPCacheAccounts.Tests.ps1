@@ -25,11 +25,11 @@ Describe "xSPCacheAccounts" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
-        try { [Microsoft.SharePoint.Administration.SPThingType] }
+        try { [Microsoft.SharePoint.Administration.SPPolicyRoleType] }
         catch {
             Add-Type @"
 namespace Microsoft.SharePoint.Administration {
-    public enum SPPolicyRoleType { FullRead, FullControl };
+    public enum SPPolicyRoleType { FullRead, FullControl, DenyWrite, DenyAll };
 }        
 "@
         }    
