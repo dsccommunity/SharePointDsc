@@ -39,7 +39,7 @@ function Get-TargetResource
             $querytext =   "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>$($params.Name)</Value></Eq></Where>"
             $spQuery.Query = $querytext
             $results = $healthRulesList.GetItems($spQuery)
-            if ($results.Count -eq 1) {
+            if ($results.GetType().IsArray -eq $false) {
                 $item = $results[0]
 
                 return @{
@@ -105,7 +105,7 @@ function Set-TargetResource
             $querytext =   "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>$($params.Name)</Value></Eq></Where>"
             $spQuery.Query = $querytext
             $results = $healthRulesList.GetItems($spQuery)
-            if ($results.Count -eq 1) {
+            if ($results.GetType().IsArray -eq $false) {
                 $item = $results[0]
 
                 $item["HealthRuleCheckEnabled"] = $params.Enabled
