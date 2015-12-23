@@ -51,6 +51,7 @@
   <ItemGroup>
     <Folder Include="DSCResources\" />
     <Folder Include="DSCResources\MSFT_xSPAppCatalog\" />
+    <Folder Include="DSCResources\MSFT_xSPWorkManagementServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplicationAppDomain\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\" />
@@ -105,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
@@ -193,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
