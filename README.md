@@ -89,7 +89,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### Unreleased
+### 0.9.0.0
 
  * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
  * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
