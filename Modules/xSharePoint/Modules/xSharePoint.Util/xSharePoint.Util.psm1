@@ -27,6 +27,17 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-xSharePointServiceContext {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $proxyGroup
+    )
+      Write-Verbose "Getting SPContext for Proxy group $($proxyGroup)"
+    return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
+}
+
 function Get-xSharePointContentService() {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
