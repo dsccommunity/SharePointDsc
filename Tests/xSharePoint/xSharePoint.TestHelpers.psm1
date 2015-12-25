@@ -103,7 +103,7 @@ function Assert-MofSchemaScriptParameters() {
     )
     $hasErrors = $false
     $mofSchemas = Get-MofSchemaObject -fileName $mofFileName
-    $mofData = $mofSchemas | Where-Object { $_.ClassName -eq $mofFileName.Replace(".schema.mof", "") }
+    $mofData = $mofSchemas | Where-Object { $_.ClassName -eq (Get-Item $mofFileName).Name.Replace(".schema.mof", "") }
     $psFile = $mofFileName.Replace(".schema.mof", ".psm1")
 
     $tokens = $null 
