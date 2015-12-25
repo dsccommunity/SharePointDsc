@@ -98,6 +98,9 @@ Describe "xSPUserProfileSyncConnection" {
             } -PassThru   )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
+        Mock New-Object -MockWith {
+            return (New-Object System.Collections.Generic.List[System.Object])
+        }  -ParameterFilter { $TypeName -eq "System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]" } 
         $userProfileServiceValidConnection =  @{
             Name = "User Profile Service Application"
             TypeName = "User Profile Service Application"
