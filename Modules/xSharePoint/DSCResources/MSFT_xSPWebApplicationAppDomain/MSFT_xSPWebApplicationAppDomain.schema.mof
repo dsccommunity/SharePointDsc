@@ -23,7 +23,7 @@ The app prefix should still be set using the xSPAppDomain resource before this i
 class MSFT_xSPWebApplicationAppDomain : OMI_BaseResource
 {
     [Key] String WebApplication;
-    [Key, ValueMap{"Internet","Intranet","Extranet","Custom"}, Values{"Internet","Intranet","Extranet","Custom"}] String Zone;
+    [Key, ValueMap{"Default","Internet","Intranet","Extranet","Custom"}, Values{"Default","Internet","Intranet","Extranet","Custom"}] String Zone;
     [Required] String AppDomain;
     [Write] Uint32 Port;
     [Write] Boolean SSL;
