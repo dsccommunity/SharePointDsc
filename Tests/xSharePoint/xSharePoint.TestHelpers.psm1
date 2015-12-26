@@ -127,6 +127,10 @@ function Assert-MofSchemaScriptParameters() {
             $parameters = $functionAst.FindAll( {$args[0] -is [System.Management.Automation.Language.ParameterAst]}, $true)
 
             foreach ($mofParameter in $mofData.Attributes) {
+
+                if ($mofParameter.IsArray -eq $true) {
+                    $t = "t"
+                }
                 # Check the parameter exists
                 $paramToCheck = $parameters | Where-Object { $_.Name.ToString() -eq "`$$($mofParameter.Name)" }
 
@@ -191,6 +195,14 @@ function Assert-MofSchemaScriptParameters() {
                     if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match $mofParameter.DataType }) -eq $null) {
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that does not match the data type of the schema"
+                    }
+
+                    if ($mofParameter.IsArray -eq $true) {
+                        if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match $mofParameter.DataType -and $_.TypeName.IsArray -eq $true }) -eq $null) {
+                            $hasErrors = $true
+                            Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that is marked as an array in the schema but is not an array in the PowerShell module"
+                        }
+
                     }
                 } else {
                     switch ($mofParameter.EmbeddedInstance) {
