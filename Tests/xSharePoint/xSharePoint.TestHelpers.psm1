@@ -61,6 +61,7 @@ function Get-MofSchemaObject() {
                 ValueMap = $null
                 DataType = $null
                 Name = $null
+                IsArray = $false
             }
 
             $start = $textLine.IndexOf("[") + 1
@@ -90,6 +91,11 @@ function Get-MofSchemaObject() {
             $attributeValue.DataType = $nonMetadataObjects[1]
             $attributeValue.Name = $nonMetadataObjects[2]
 
+            if ($attributeValue.Name.EndsWith("[]") -eq $true) {
+                $attributeValue.Name = $attributeValue.Name.Replace("[]", "")
+                $attributeValue.IsArray = $true
+            }
+
             $currentResult.Attributes += $attributeValue
         }
     }
@@ -112,7 +118,7 @@ function Assert-MofSchemaScriptParameters() {
     $functions = $ast.FindAll( {$args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst]}, $true)
 
     $functions | ForEach-Object {
-        if ($_ -like "*-TargetResource") {
+        if ($_.Name -like "*-TargetResource") {
             $function = $_
             $astTokens = $null
             $astErrors = $null
@@ -162,21 +168,21 @@ function Assert-MofSchemaScriptParameters() {
                     if (-not $validateSetAttribute) { 
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) that is missing a ValidateSet attribute in the $($function.Name) method"
-                    }
+                    } else {
+                        $psValidateSetParams = $validateSetAttribute.PositionalArguments | % { $_.Value.ToString() }
 
-                    $psValidateSetParams = $validateSetAttribute.PositionalArguments | % { $_.Value.ToString() }
-
-                    $mofParameter.ValueMap | ForEach-Object {
-                        if ($psValidateSetParams -notcontains $_) {
-                            $hasErrors = $true
-                            Write-Warning "File $psFile has parameter $($mofParameter.Name) that does not have '$_' in its validateset parameter for $($function.Name) method"
+                        $mofParameter.ValueMap | ForEach-Object {
+                            if ($psValidateSetParams -notcontains $_) {
+                                $hasErrors = $true
+                                Write-Warning "File $psFile has parameter $($mofParameter.Name) that does not have '$_' in its validateset parameter for $($function.Name) method"
+                            }
                         }
-                    }
 
-                    $psValidateSetParams | ForEach-Object {
-                        if ($mofParameter.ValueMap -notcontains $_) {
-                            $hasErrors = $true
-                            Write-Warning "File $psFile has parameter $($mofParameter.Name) that contains '$_' in the $($function.Name) function which is not in the valuemap in the schema"
+                        $psValidateSetParams | ForEach-Object {
+                            if ($mofParameter.ValueMap -notcontains $_) {
+                                $hasErrors = $true
+                                Write-Warning "File $psFile has parameter $($mofParameter.Name) that contains '$_' in the $($function.Name) function which is not in the valuemap in the schema"
+                            }
                         }
                     }
                 }

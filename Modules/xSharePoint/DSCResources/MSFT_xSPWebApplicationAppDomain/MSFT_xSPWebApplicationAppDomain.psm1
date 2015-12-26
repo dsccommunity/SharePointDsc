@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
         [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
-        [parameter(Mandatory = $true)]  [System.String]  $Zone,
+        [parameter(Mandatory = $true)]  [System.String] [ValidateSet("Internet","Intranet","Extranet","Custom")] $Zone,
         [parameter(Mandatory = $false)] [System.UInt32]  $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $SSL,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -42,7 +42,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
         [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
-        [parameter(Mandatory = $true)]  [System.String]  $Zone,
+        [parameter(Mandatory = $true)]  [System.String] [ValidateSet("Internet","Intranet","Extranet","Custom")]  $Zone,
         [parameter(Mandatory = $false)] [System.UInt32]  $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $SSL,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -80,7 +80,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
         [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
-        [parameter(Mandatory = $true)]  [System.String]  $Zone,
+        [parameter(Mandatory = $true)]  [System.String] [ValidateSet("Internet","Intranet","Extranet","Custom")]  $Zone,
         [parameter(Mandatory = $false)] [System.UInt32]  $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $SSL,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount

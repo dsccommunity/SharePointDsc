@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
@@ -51,7 +51,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
@@ -113,7 +113,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
