@@ -22,7 +22,12 @@ function Get-TargetResource
         [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnEditor ,
         [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnViewer ,
         [parameter(Mandatory = $false)]  [System.bool ] $IsUserEditable ,
+        [parameter(Mandatory = $false)]  [System.bool ] $IsAlias ,
+        [parameter(Mandatory = $false)]  [System.bool ] $IsSearchable,
         [parameter(Mandatory = $false)]  [System.bool ] $UserOverrridePrivacy ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermStore ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermGroup ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermSet ,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -31,7 +36,7 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-
+        #TermSet ts = property.TermSet;
         $upsa = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
         $UPProperty = $userProfileProperties.GetPropertyByName($params.Name)  
         if ($null -eq $upsa) { 
@@ -78,7 +83,12 @@ function Set-TargetResource
         [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnEditor ,
         [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnViewer ,
         [parameter(Mandatory = $false)]  [System.bool ] $IsUserEditable ,
+        [parameter(Mandatory = $false)]  [System.bool ] $IsAlias ,
+        [parameter(Mandatory = $false)]  [System.bool ] $IsSearchable,
         [parameter(Mandatory = $false)]  [System.bool ] $UserOverrridePrivacy ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermStore ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermGroup ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermSet ,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -95,7 +105,8 @@ function Set-TargetResource
         $CoreProperties = $UPAConfMgr.ProfilePropertyManager.GetCoreProperties()                              
 
         $userProfileSubTypeManager = [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($context)
-        $userProfile = $userProfileSubTypeManager.GetProfileSubtype([Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::GetDefaultProfileName([Microsoft.Office.Server.UserProfiles.ProfileType]::User))
+        # 
+        #$userProfile = $userProfileSubTypeManager.GetProfileSubtype([Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::GetDefaultProfileName([Microsoft.Office.Server.UserProfiles.ProfileType]::User))
         $UPProperty = $userProfileProperties.GetPropertyByName($params.Name)  
 
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
@@ -125,6 +136,7 @@ function Set-TargetResource
         $UPTypeProperty = $userProfileTypeProperties.GetPropertyByName($params.Name)
         $coreProperty = $UPTypeProperty.CoreProperty
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
 
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $UPTypeProperty -PropertyToSet "IsVisibleOnViewer" -ParamsValue $params -ParamKey "IsVisibleOnViewer"
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $UPTypeProperty -PropertyToSet "IsVisibleOnEditor" -ParamsValue $params -ParamKey "IsVisibleOnEditor"
@@ -134,7 +146,17 @@ function Set-TargetResource
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $UPProperty -PropertyToSet "PrivacyPolicy" -ParamsValue $params -ParamKey "PolicySetting"
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $UPProperty -PropertyToSet "IsUserEditable" -ParamsValue $params -ParamKey "IsUserEditable"																
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $UPProperty -PropertyToSet "UserOverridePrivacy" -ParamsValue $params -ParamKey "UserOverridePrivacy"																
-
+        #region MMS properties
+        $termSet = null;
+        if ((![String]::IsNullOrEmpty($termStoreName)) -and (![String]::IsNullOrEmpty($termgroupName)) -and (![String]::IsNullOrEmpty($termSetName)))
+        {
+            TaxonomySession session = new TaxonomySession(_site);
+            TermStore termStore = session.TermStores[termStoreName];
+            Group group = termStore.Groups[groupName];
+            termSet = group.TermSets[termSetName];
+        }
+        #endregion
+        
         $UPTypeProperty.CoreProperty.Commit()
         $UPTypeProperty.Commit()
         $UPProperty.Commit()
@@ -185,7 +207,12 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnEditor ,
         [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnViewer ,
         [parameter(Mandatory = $false)]  [System.bool ] $IsUserEditable ,
+        [parameter(Mandatory = $false)]  [System.bool ] $IsAlias ,
+        [parameter(Mandatory = $false)]  [System.bool ] $IsSearchable,
         [parameter(Mandatory = $false)]  [System.bool ] $UserOverrridePrivacy ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermStore ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermGroup ,
+        [parameter(Mandatory = $false)]  [System.string ] $TermSet ,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
     )
