@@ -167,6 +167,8 @@ Describe "xSPUserProfileProperty" {
         Context "When creating property and there is no MMS with default storage location for column specific" {
            
         }
-
+        Context "When property exists and ensure equals Absent" {
+           
+        }
     }    
 }

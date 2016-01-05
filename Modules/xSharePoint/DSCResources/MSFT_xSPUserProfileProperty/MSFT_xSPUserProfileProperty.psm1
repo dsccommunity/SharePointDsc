@@ -12,19 +12,19 @@ function Get-TargetResource
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [System.string ] $PrivacySetting ,
-        [parameter(Mandatory = $false)]  [System.bool ] $AllowUserEdit ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingDirection ,
-        [parameter(Mandatory = $false)]  [System.int ] $Length ,
-        [parameter(Mandatory = $false)]  [System.int ] $DisplayOrder ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsEventLog ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnEditor ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnViewer ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsUserEditable ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsAlias ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsSearchable,
-        [parameter(Mandatory = $false)]  [System.bool ] $UserOverrridePrivacy ,
+        [parameter(Mandatory = $false)]  [System.Int32] $Length ,
+        [parameter(Mandatory = $false)]  [System.Int32] $DisplayOrder ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsEventLog ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsVisibleOnEditor ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsVisibleOnViewer ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsUserEditable ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsAlias ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsSearchable,
+        [parameter(Mandatory = $false)]  [System.Boolean] $UserOverridePrivacy ,
         [parameter(Mandatory = $false)]  [System.string ] $TermStore ,
         [parameter(Mandatory = $false)]  [System.string ] $TermGroup ,
         [parameter(Mandatory = $false)]  [System.string ] $TermSet ,
@@ -82,10 +82,11 @@ function Get-TargetResource
                 $mapping.PropertyName = $currentMapping.DataSourcePropertyName
             }
         }
+        
 
         return @{
             Name = $userProfileProperty.Name 
-            UserProfileServiceAppName = $params.$UserProfileServiceAppName
+            UserProfileServiceAppName = $params.UserProfileServiceAppName
             DisplayName = $userProfileProperty.DisplayName
             Type = $userProfileProperty.CoreProperty.Type.GetTypeCode()
             Description = $userProfileProperty.Description 
@@ -125,19 +126,19 @@ function Set-TargetResource
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [System.string ] $PrivacySetting ,
-        [parameter(Mandatory = $false)]  [System.bool ] $AllowUserEdit ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingDirection ,
-        [parameter(Mandatory = $false)]  [System.int ] $Length ,
-        [parameter(Mandatory = $false)]  [System.int ] $DisplayOrder ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsEventLog ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnEditor ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnViewer ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsUserEditable ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsAlias ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsSearchable,
-        [parameter(Mandatory = $false)]  [System.bool ] $UserOverrridePrivacy ,
+        [parameter(Mandatory = $false)]  [System.Int32] $Length ,
+        [parameter(Mandatory = $false)]  [System.Int32] $DisplayOrder ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsEventLog ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsVisibleOnEditor ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsVisibleOnViewer ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsUserEditable ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsAlias ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsSearchable,
+        [parameter(Mandatory = $false)]  [System.Boolean] $UserOverridePrivacy ,
         [parameter(Mandatory = $false)]  [System.string ] $TermStore ,
         [parameter(Mandatory = $false)]  [System.string ] $TermGroup ,
         [parameter(Mandatory = $false)]  [System.string ] $TermSet ,
@@ -145,11 +146,11 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Creating user profile property $Name"
-
-    $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $test = $PSBoundParameters
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
         $params = $args[0]
         
-          $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+                $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
  
         If ($null -eq $ups)
         {
@@ -160,16 +161,22 @@ function Set-TargetResource
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext  $caURL 
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
-
-        #$UPAConnMgr = $userProfileConfigManager.ConnectionManager
+        $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
+        
         $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
         $userProfileTypeProperties = $userProfilePropertyManager.GetProfileTypeProperties([Microsoft.Office.Server.UserProfiles.ProfileType]::User)
-        $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
+        
 
         $userProfileSubTypeManager = [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($context)
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype([Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::GetDefaultProfileName([Microsoft.Office.Server.UserProfiles.ProfileType]::User))
-        
+        $userProfileSubTypeProperties = $userProfileSubType.Properties
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+
+        $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
+        if($null -eq $syncConnection ) {
+            throw "connection not found"
+        }
+
 
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
 	        if($userProfileProperty -ne $null)
@@ -181,18 +188,20 @@ function Set-TargetResource
 	        $coreProperty.Name = $params.Name
 	        $coreProperty.DisplayName = $params.DisplayName
 
+
 	        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"												
 	
-	        if($SharePointPropType.ToLower() -eq "stringmultivalue")
+	        if($params.Type.ToLower() -eq "stringmultivalue")
 	        {
 		        $coreProperty.IsMultivalued =$true;
 	        }
-	        $coreProperty.Type = $SharePointPropType
+	        $coreProperty.Type = $params.Type
 	        $CoreProperties.Add($coreProperty)
-	        $UPTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
-	        $upSubProperty = $UPProperties.Create($UPTypeProperty)
-	        $UPProperties.Add($upSubProperty)																
-	        Sleep -Miliseconds 100
+	        $upTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
+            $userProfileTypeProperties.Add($upTypeProperty)
+	        $upSubProperty = $userProfileSubTypeProperties.Create($UPTypeProperty)
+            $userProfileSubTypeProperties.Add($upSubProperty)		
+	        Sleep -Milliseconds 100
 	        $userProfileProperty =  $userProfileSubType.Properties.GetPropertyByName($params.Name) 
         }
 
@@ -223,28 +232,34 @@ function Set-TargetResource
         }
         #endregion
         
-        $coreProperty.CoreProperty.Commit()
+        $userProfileProperty.CoreProperty.Commit()
         $userProfileTypeProperty.Commit()
         $userProfileProperty.Commit()
         #Setting the display order
         if($params.ContainsKey("DisplayOrder"))
         {
-	        $UPProperties.SetDisplayOrderByPropertyName($params.Name,$SharePointPropDisplayOrder)
-	        $UPProperties.CommitDisplayOrder()
+            $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
+	        $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
+	        $profileManager.Properties.CommitDisplayOrder()
         }
 
         #region mapping
         if($params.ContainsKey("MappingConnectionName") -and $params.ContainsKey("MappingPropertyName")){
             $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
-            $currentMapping  = $synchConnection.PropertyMapping.Item($params.Name)
+            $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
             if($currentmapping -eq $null)
             {
-	            $import = ((!$params.ContainsKey("MappingDirection")) -or ($params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Import"))
 	            $export = !$import -and ($params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export") 
-                $synchConnection.PropertyMapping.Add( $params.Name, $params.MappingPropertyName,$import, $export) 
+                if($export){
+                    $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,$params.Name,$params.MappingPropertyName)
+                }else{
+                    $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,$params.Name,$params.MappingPropertyName)
+                }
+
             }
-        }
+        }        
         #endregion 
+
     }
     return  $result
 }
@@ -264,19 +279,19 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [System.string ] $PrivacySetting ,
-        [parameter(Mandatory = $false)]  [System.bool ] $AllowUserEdit ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingDirection ,
-        [parameter(Mandatory = $false)]  [System.int ] $Length ,
-        [parameter(Mandatory = $false)]  [System.int ] $DisplayOrder ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsEventLog ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnEditor ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsVisibleOnViewer ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsUserEditable ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsAlias ,
-        [parameter(Mandatory = $false)]  [System.bool ] $IsSearchable,
-        [parameter(Mandatory = $false)]  [System.bool ] $UserOverrridePrivacy ,
+        [parameter(Mandatory = $false)]  [System.Int32] $Length ,
+        [parameter(Mandatory = $false)]  [System.Int32] $DisplayOrder ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsEventLog ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsVisibleOnEditor ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsVisibleOnViewer ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsUserEditable ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsAlias ,
+        [parameter(Mandatory = $false)]  [System.Boolean] $IsSearchable,
+        [parameter(Mandatory = $false)]  [System.Boolean] $UserOverridePrivacy ,
         [parameter(Mandatory = $false)]  [System.string ] $TermStore ,
         [parameter(Mandatory = $false)]  [System.string ] $TermGroup ,
         [parameter(Mandatory = $false)]  [System.string ] $TermSet ,
