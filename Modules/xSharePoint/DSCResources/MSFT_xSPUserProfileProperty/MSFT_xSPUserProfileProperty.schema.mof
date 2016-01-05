@@ -18,7 +18,7 @@ This DSC resource doesn't currently supports metadata properties
 **Example**
 xSPUserProfileProperty WorkEmailProperty
 {
-    Name = "WorkEmail"
+    Name = "WorkEmail2"
     UserProfileServiceAppName = "User Profile Service Application"
     DisplayName = "Work Email"
     Type = "Email"
@@ -34,7 +34,7 @@ xSPUserProfileProperty WorkEmailProperty
     IsVisibleOnEditor=$true
     IsVisibleOnViewer = $true
     IsUserEditable = $true
-    IsAlias = $false #: used to edit “Alias” of the property value under Search Settings.
+    IsAlias = $false #: used to edit "Alias" of the property value under Search Settings.
     IsSearchable = $false # e: used to edit “Indexed” of the property value again under Search Settings.
     TermStore = ""
     TermGroup = ""

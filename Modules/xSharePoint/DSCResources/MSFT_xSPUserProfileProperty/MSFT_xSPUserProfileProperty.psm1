@@ -80,7 +80,6 @@ function Get-TargetResource
                     $mapping.Direction = "Export"
                 }
                 $mapping.PropertyName = $currentMapping.DataSourcePropertyName
-                }
             }
         }
 
