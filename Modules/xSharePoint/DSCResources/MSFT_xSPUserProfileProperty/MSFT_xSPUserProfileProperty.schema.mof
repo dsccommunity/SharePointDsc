@@ -25,7 +25,6 @@ xSPUserProfileProperty WorkEmailProperty
     Description = "" #implementation isn't using it yet
     PolicySetting = "Required"
     PrivacySetting = "Everyone"
-    AllowUserEdit = $false
     MappingConnectionName = "contoso.com"
     MappingPropertyName = "mail"
     MappingDirection = "Import"
@@ -57,7 +56,6 @@ class MSFT_xSPUserProfileProperty : OMI_BaseResource
     [write] string Description 
     [ValueMap{"Mandatory", "Optin","Optout", "Disabled"}, Values{"Mandatory", "Optin","Optout", "Disabled"}] string PolicySetting;
     [ValueMap{"Public", "Contacts", "Organization", "Manager", "Private"}, Values{"Public", "Contacts", "Organization", "Manager", "Private"}] string PrivacySetting ;
-    [write] boolean AllowUserEdit 
     [write] string MappingConnectionName 
     [write] string MappingPropertyName 
     [write] string MappingDirection 

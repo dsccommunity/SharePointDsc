@@ -160,7 +160,13 @@ Describe "xSPUserProfileProperty" {
         Context "When property exists and mapping exists, mapping config does not match" {
            
         }
+        Context "When creating property and user has no access to MMS" {
+           
+        }
 
+        Context "When creating property and there is no MMS with default storage location for column specific" {
+           
+        }
 
     }    
 }
