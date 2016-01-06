@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.string ] $Name ,
         [parameter(Mandatory = $false)]  [System.string ] $Ensure ,
-        [parameter(Mandatory = $true)]  [System.string ] $UserProfileServiceAppName ,
+        [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)]  [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
@@ -37,7 +37,7 @@ function Get-TargetResource
         $params = $args[0]
         
         
-        $upsa = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
+        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
         if ($null -eq $upsa) { 
             return $null 
         }
@@ -88,7 +88,7 @@ function Get-TargetResource
 
         return @{
             Name = $userProfileProperty.Name 
-            UserProfileServiceAppName = $params.UserProfileServiceAppName
+            UserProfileServiceAppName = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             Type = $userProfileProperty.CoreProperty.Type.GetTypeCode()
             Description = $userProfileProperty.Description 
@@ -122,7 +122,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.string ] $Name ,
         [parameter(Mandatory = $false)]  [System.string ] $Ensure ,
-        [parameter(Mandatory = $true)]  [System.string ] $UserProfileServiceAppName ,
+        [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $true)]  [System.string ] $DisplayName ,
         [parameter(Mandatory = $true)]  [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
@@ -168,7 +168,7 @@ function Set-TargetResource
         }
         #endregion 
         #region setting up objects 
-        $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
+        $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
  
         If ($null -eq $ups)
         {
@@ -203,6 +203,7 @@ function Set-TargetResource
 
         #region retrieving term set 
         $termSet =$null
+        #Get-TermSet
         if ($params.ContainsKey("TermSet"))
         {
             $currentTermSet=$userProfileProperty.CoreProperty.TermSet;
@@ -239,6 +240,9 @@ function Set-TargetResource
 	        }
         } elseif($userProfileProperty -eq $null){
             #region creating property
+            #Add-NewProperty $params
+
+            # $userProfileProperty Add-NewProperty $params
 	        $coreProperty = $CoreProperties.Create($false)
 	        $coreProperty.Name = $params.Name
 	        $coreProperty.DisplayName = $params.DisplayName
@@ -262,9 +266,13 @@ function Set-TargetResource
             $userProfileSubTypeProperties.Add($upSubProperty)		
 	        Sleep -Milliseconds 100
 	        $userProfileProperty =  $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+
+            #return $userProfileProperty
             #endregion
         }
         #region setting up  properties 
+        #update-property $userProfileProperty $params $termSet
+
         $coreProperty = $userProfileProperty.CoreProperty
         $userProfileTypeProperty = $userProfileProperty.TypeProperty
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
@@ -287,6 +295,7 @@ function Set-TargetResource
         $userProfileProperty.Commit()
         #region setting display order
 
+        # Set-DisplayOrder
         if($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
@@ -295,6 +304,7 @@ function Set-TargetResource
         }
         #endregion
         #region mapping
+        #Set-Mapping
         if($params.ContainsKey("MappingConnectionName") -and $params.ContainsKey("MappingPropertyName")){
             $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
             $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
@@ -337,7 +347,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.string ] $Name ,
         [parameter(Mandatory = $false)]  [System.string ] $Ensure ,
-        [parameter(Mandatory = $true)]  [System.string ] $UserProfileServiceAppName ,
+        [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)]  [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,

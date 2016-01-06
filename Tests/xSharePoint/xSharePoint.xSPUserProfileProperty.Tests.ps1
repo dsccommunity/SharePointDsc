@@ -15,12 +15,12 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 
 Describe "xSPUserProfileProperty" {
     InModuleScope $ModuleName {
-        $testParams = @{
-           Name = "WorkEmail14"
-           UserProfileServiceAppName = "User Profile Service Application"
-           DisplayName = "WorkEmail14"
+        $testParamsNewProperty = @{
+           Name = "WorkEmailNew"
+           UserProfileService = "User Profile Service Application"
+           DisplayName = "WorkEmailNew"
            Type = "String"
-           Description = "" #implementation isn't using it yet
+           Description = "" 
            PolicySetting = "Mandatory"
            PrivacySetting = "Public"
            MappingConnectionName = "contoso"
@@ -32,11 +32,36 @@ Describe "xSPUserProfileProperty" {
            IsVisibleOnEditor=$true
            IsVisibleOnViewer = $true
            IsUserEditable = $true
-           IsAlias = $false #: used to edit "Alias" of the property value under Search Settings.
-           IsSearchable = $false # e: used to edit “Indexed” of the property value again under Search Settings.
+           IsAlias = $false
+           IsSearchable = $false 
            TermStore = "Managed Metadata service"
            TermGroup = "People"
            TermSet = "Department" 
+           UserOverridePrivacy = $false
+        }
+
+        $testParamsUpdateProperty = @{
+           Name = "WorkEmailUpdate"
+           UserProfileService = "User Profile Service Application"
+           DisplayName = "WorkEmailUpdate"
+           Type = "String"
+           Description = ""
+           PolicySetting = "Optional"
+           PrivacySetting = "Private"
+           MappingConnectionName = "contoso"
+           MappingPropertyName = "mail"
+           MappingDirection = "Import"
+           Length = 30
+           DisplayOrder = 5496 
+           IsEventLog =$true
+           IsVisibleOnEditor=$false
+           IsVisibleOnViewer = $false
+           IsUserEditable = $false
+           IsAlias = $true 
+           IsSearchable = $true 
+           TermStore = "Managed Metadata service"
+           TermGroup = "People"
+           TermSet = "Location" 
            UserOverridePrivacy = $false
         }
         
@@ -52,14 +77,9 @@ Describe "xSPUserProfileProperty" {
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
-        #required mocks
-        #(Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
-
-
-
         $coreProperty = @{ 
-                            DisplayName = "WorkEmail" 
-                            Name = "WorkEmail"
+                            DisplayName = "WorkEmailUpdate" 
+                            Name = "WorkEmailUpdate"
                             IsMultiValued=$false
                             Type = "String"
                             TermSet = $null
@@ -70,7 +90,6 @@ Describe "xSPUserProfileProperty" {
                         } -PassThru | Add-Member ScriptMethod Delete {
                             $Global:xSPUPSPropertyDeleteCalled = $true
                         } -PassThru
-
 
 
         $coreProperties = @() | Add-Member ScriptMethod Create {
@@ -94,8 +113,8 @@ Describe "xSPUserProfileProperty" {
                             $Global:xSPUPTypeAddCalled  = $true
                         } -PassThru 
        $subTypeProperty = @{
-                            Name= "WorkEmail2"
-                            DisplayName="WorkEmail2"
+                            Name= "WorkEmailUpdate"
+                            DisplayName="WorkEmailUpdate"
                             Description = ""
                             PrivacyPolicy = "Required"
                             DefaultPrivacy = "Everyone"
@@ -181,9 +200,9 @@ Describe "xSPUserProfileProperty" {
         $propertyMapping = @{}| Add-Member ScriptMethod Item {
                             param( [string]$property  )
                             $Global:xSPUPSMappingItemCalled = $true
-                                if($property="WorkEmail2"){
+                                if($property="WorkEmailUpdate"){
                                     return @{
-                                    DataSourcePropertyName="WorkEmail2"
+                                    DataSourcePropertyName="WorkEmailUpdate"
                                     IsImport=$true
                                     IsExport=$false
                                     }| Add-Member ScriptMethod Delete {
@@ -251,20 +270,17 @@ Describe "xSPUserProfileProperty" {
         }
         $userProfileServiceValidConnection.ConnectionManager.Add($connection);
         
-        Context "When connection doesn't exist" {
-         <#  $userProfileServiceNoConnections =  @{
+        Context "When property doesn't exist" {
+<#           $userProfileServiceNoConnections =  @{
                 Name = "User Profile Service Application"
                 ApplicationPool = "SharePoint Service Applications"
                 FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
                 ServiceApplicationProxyGroup = "Proxy Group"
                 ConnnectionManager = @()
-            }
+            }#>
 
-            Mock Get-SPServiceApplication { return $userProfileServiceNoConnections }
+            Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
 
-            Mock New-Object -MockWith {return @{}
-            
-            }  -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext"}
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
@@ -279,10 +295,19 @@ Describe "xSPUserProfileProperty" {
                 Set-TargetResource @testParams
                 $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $true
             }
-            #>
+
         }
 
-        Context "When property doesn't exist" {
+        Context "When property doesn't exist, connection doesn't exist" {
+        }
+
+        Context "When property doesn't exist, termset doesn't exist" {
+        }
+
+        Context "When property doesn't exist, termgroup doesn't exist" {
+        }
+
+        Context "When property doesn't exist, termgstore doesn't exist" {
         }
 
         Context "When property exists" {

@@ -19,7 +19,7 @@ This DSC resource doesn't currently supports metadata properties
 xSPUserProfileProperty WorkEmailProperty
 {
     Name = "WorkEmail2"
-    UserProfileServiceAppName = "User Profile Service Application"
+    UserProfileService = "User Profile Service Application"
     DisplayName = "Work Email"
     Type = "Email"
     Description = "" #implementation isn't using it yet
@@ -50,7 +50,7 @@ class MSFT_xSPUserProfileProperty : OMI_BaseResource
 {
     [Key] string Name 
     [ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [required] string UserProfileServiceAppName 
+    [required] string UserProfileService
     [required] string DisplayName 
     [Required, [ValueMap{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}, Values{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}] ] string Type
     [write] string Description 
