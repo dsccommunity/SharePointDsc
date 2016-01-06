@@ -44,8 +44,10 @@ function Get-TargetResource
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext  $caURL 
         $userProfileConfigManager  = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
-        $userProfileSubTypeManager = [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($context)
-        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype([Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::GetDefaultProfileName([Microsoft.Office.Server.UserProfiles.ProfileType]::User))
+        
+        $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
+        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
+        
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
         if($null -eq $userProfileProperty ){
             return $null 
@@ -92,7 +94,7 @@ function Get-TargetResource
             Description = $userProfileProperty.Description 
             PolicySetting = $userProfileProperty.PrivacyPolicy
             PrivacySetting = $userProfileProperty.DefaultPrivacy
-            MappingConnectionName = $MappingConnectionName.ConnectionName
+            MappingConnectionName = $mapping.ConnectionName
             MappingPropertyName = $mapping.PropertyName
             MappingDirection = $Mapping.Direction
             Length = $userProfileProperty.CoreProperty.Length
@@ -145,12 +147,28 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
+    #note for integration test: CA can take a couple of minutes to notice the change. don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
+
     Write-Verbose -Message "Creating user profile property $Name"
     $test = $PSBoundParameters
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
         $params = $args[0]
-        
-                $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
+        #region Validating parameter combinations
+        if( ($params.ContainsKey("TermSet")  -or $params.ContainsKey("TermGroup") -or $params.ContainsKey("TermSet") ) -and
+            ($params.ContainsKey("TermSet")  -and $params.ContainsKey("TermGroup") -and $params.ContainsKey("TermSet") -eq $false ) 
+            )
+        {
+            throw "You have to provide all 3 parameters Termset, TermGroup and TermStore when providing any of the 3."
+        }
+
+
+        #what if combination property type + termstore isn't possible?
+        if($params.ContainsKey("TermSet")  -and (@("String","StringMultivalue").Contains($params.Type) -eq $false)  ){
+            throw "Only String and String Multivalue can use Termsets"
+        }
+        #endregion 
+        #region setting up objects 
+        $ups = Get-SPServiceApplication -Name $params.UserProfileServiceAppName -ErrorAction SilentlyContinue 
  
         If ($null -eq $ups)
         {
@@ -160,7 +178,12 @@ function Set-TargetResource
         
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext  $caURL 
+
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
+        if($null -eq $userProfileConfigManager)
+        {
+            throw "account running process needs permissions"
+        }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
         
         $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
@@ -168,22 +191,54 @@ function Set-TargetResource
         
 
         $userProfileSubTypeManager = [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($context)
-        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype([Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::GetDefaultProfileName([Microsoft.Office.Server.UserProfiles.ProfileType]::User))
+        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
+        
         $userProfileSubTypeProperties = $userProfileSubType.Properties
-        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
-
+        
         $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
         if($null -eq $syncConnection ) {
             throw "connection not found"
         }
+        #endregion 
 
+        #region retrieving term set 
+        $termSet =$null
+        if ($params.ContainsKey("TermSet"))
+        {
+            $currentTermSet=$userProfileProperty.CoreProperty.TermSet;
+            if($currentTermSet.Name -ne $params.TermSet -or 
+                $currentTermSet.Group.Name -ne $params.TermGroup -or 
+                $currentTermSet.TermStore.Name -ne $params.TermStore){
 
+                $session = new-Object  Microsoft.SharePoint.Taxonomy.TaxonomySession($caURL);
+                $termStore = $session.TermStores[$params.TermStore];
+                if($termStore -eq $null)
+                {
+                    throw "Term Store $($params.termStore) not found"
+                }
+                $group = $termStore.Groups[$params.TermGroup];
+                if($group -eq $null)
+                {
+                    throw "Term Group $($params.termGroup) not found"
+                }
+                $termSet = $group.TermSets[$params.TermSet];
+                if($termSet -eq $null)
+                {
+                    throw "Term Set $($params.termSet) not found"
+                }
+            }
+        }
+
+        #endregion
+
+        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
 	        if($userProfileProperty -ne $null)
 	        {
 		        $CoreProperties.RemovePropertyByName($params.Name)
 	        }
         } elseif($userProfileProperty -eq $null){
+            #region creating property
 	        $coreProperty = $CoreProperties.Create($false)
 	        $coreProperty.Name = $params.Name
 	        $coreProperty.DisplayName = $params.DisplayName
@@ -196,6 +251,10 @@ function Set-TargetResource
 		        $coreProperty.IsMultivalued =$true;
 	        }
 	        $coreProperty.Type = $params.Type
+            if($termSet -ne $null){
+                $coreProperty.TermSet = $termSet 
+            }
+
 	        $CoreProperties.Add($coreProperty)
 	        $upTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
             $userProfileTypeProperties.Add($upTypeProperty)
@@ -203,8 +262,9 @@ function Set-TargetResource
             $userProfileSubTypeProperties.Add($upSubProperty)		
 	        Sleep -Milliseconds 100
 	        $userProfileProperty =  $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+            #endregion
         }
-
+        #region setting up  properties 
         $coreProperty = $userProfileProperty.CoreProperty
         $userProfileTypeProperty = $userProfileProperty.TypeProperty
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
@@ -218,46 +278,50 @@ function Set-TargetResource
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "PrivacyPolicy" -ParamsValue $params -ParamKey "PolicySetting"
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "IsUserEditable" -ParamsValue $params -ParamKey "IsUserEditable"																
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "UserOverridePrivacy" -ParamsValue $params -ParamKey "UserOverridePrivacy"																
-        #region MMS properties
-        if ((![String]::IsNullOrEmpty($termStoreName)) -and (![String]::IsNullOrEmpty($termgroupName)) -and (![String]::IsNullOrEmpty($termSetName)))
-        {
-            $session = new-Object  Microsoft.SharePoint.Taxonomy.TaxonomySession($caURL);
-            $termStore = $session.TermStores[$params.TermStore];
-            $group = $termStore.Groups[$params.TermGroup];
-            $termSet = $group.TermSets[$params.TermSet];
-            if($termSet -ne $null)
-            {
-                $coreProperty.TermSet = $termSet
-            }
+        if($termSet -ne $null){
+            $coreProperty.TermSet = $termSet
         }
         #endregion
-        
         $userProfileProperty.CoreProperty.Commit()
         $userProfileTypeProperty.Commit()
         $userProfileProperty.Commit()
-        #Setting the display order
+        #region setting display order
+
         if($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
 	        $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
 	        $profileManager.Properties.CommitDisplayOrder()
         }
-
+        #endregion
         #region mapping
         if($params.ContainsKey("MappingConnectionName") -and $params.ContainsKey("MappingPropertyName")){
             $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
             $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
-            if($currentmapping -eq $null)
-            {
-	            $export = !$import -and ($params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export") 
-                if($export){
-                    $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,$params.Name,$params.MappingPropertyName)
-                }else{
-                    $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,$params.Name,$params.MappingPropertyName)
+            if($currentMapping -eq $null -or
+                ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) -or
+                ($currentMapping.IsImport -and $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export") 
+               ){
+                if($currentMapping -ne $null ){
+                    $currentMapping.Delete() #API allows updating, but UI doesn't do that.
                 }
-
-            }
-        }        
+               	$export = $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export"
+                if ($Connection.Type -eq "ActiveDirectoryImport"){  
+                        if($export){
+                            throw "not implemented"
+                        }else{
+                            $Connection.AddPropertyMapping($params.MappingPropertyName,$params.Name)  
+                            $Connection.Update()  
+                        }
+                }else{
+                    if ($export){  
+                        $syncConnection.PropertyMapping.AddNewExportMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,$params.Name,$params.MappingPropertyName)
+                    }else{
+                        $syncConnection.PropertyMapping.AddNewMapping([Microsoft.Office.Server.UserProfiles.ProfileType]::User,$params.Name,$params.MappingPropertyName)
+                    }
+                }
+            } 
+        }       
         #endregion 
 
     }
