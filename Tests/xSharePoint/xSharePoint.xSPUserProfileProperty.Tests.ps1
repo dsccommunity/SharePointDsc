@@ -1,7 +1,13 @@
+
 [CmdletBinding()]
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
+#(Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+#C:\Users\camilo\Source\Repos\xSharePoint\Modules\xSharePoint\DSCResources\MSFT_xSPUserProfileProperty\
+#C:\Users\camilo\Source\Repos\xSharePoint\Tests\xSharePoint
+#.\xSharePoint.xSPUserProfileProperty.Tests.ps1
+Add-PSSnapin Microsoft.SharePoint.PowerShell -ea 0 
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
@@ -39,7 +45,8 @@ Describe "xSPUserProfileProperty" {
            TermSet = "Department" 
            UserOverridePrivacy = $false
         }
-
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         $testParamsUpdateProperty = @{
            Name = "WorkEmailUpdate"
            UserProfileService = "User Profile Service Application"
@@ -90,12 +97,13 @@ Describe "xSPUserProfileProperty" {
                         } -PassThru | Add-Member ScriptMethod Delete {
                             $Global:xSPUPSPropertyDeleteCalled = $true
                         } -PassThru
-
-
-        $coreProperties = @() | Add-Member ScriptMethod Create {
+        $coreProperty.Type = $coreProperty.Type
+<#| Add-Member ScriptMethod GetTypeCode {
+                            $Global:xSPUPCoreGetTypeCodeCalled = $true
+                        } -PassThru 
+                        #>
+        $coreProperties = New-Object System.Collections.ArrayList  | Add-Member ScriptMethod Create {
                             $Global:xSPUPCoreCreateCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPCoreAddCalled  = $true
                         } -PassThru 
 
 
@@ -107,11 +115,9 @@ Describe "xSPUserProfileProperty" {
                             $Global:xSPUPPropertyCommitCalled = $true
                         } -PassThru 
 
-        $typeProperties = @() | Add-Member ScriptMethod Create {
+        $typeProperties = New-Object System.Collections.ArrayList | Add-Member ScriptMethod Create {
                             $Global:xSPUPTypeCreateCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPTypeAddCalled  = $true
-                        } -PassThru 
+                        } -PassThru
        $subTypeProperty = @{
                             Name= "WorkEmailUpdate"
                             DisplayName="WorkEmailUpdate"
@@ -128,48 +134,50 @@ Describe "xSPUserProfileProperty" {
                             $Global:xSPUPPropertyCommitCalled = $true
                         } -PassThru 
 
-        $userProfileSubTypePropertiesNoProperty = @() | Add-Member ScriptMethod Create {
+        $userProfileSubTypePropertiesNoProperty = New-Object System.Collections.ArrayList  | Add-Member ScriptMethod Create {
                             $Global:xSPUPSubTypeCreateCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPSubTypeAddCalled  = $true
-                        } -PassThru | Add-Member ScriptMethod GetPropertyByName {
+                        } -PassThru  | Add-Member ScriptMethod GetPropertyByName {
                             $Global:xSPUPGetPropertyByNameCalled  = $true
                             return $null
                         } -PassThru
 
-        $userProfileSubTypePropertiesValidProperty = @() | Add-Member ScriptMethod Create {
+        $userProfileSubTypePropertiesValidProperty = New-Object System.Collections.ArrayList  | Add-Member ScriptMethod Create {
                             $Global:xSPUPSubTypeCreateCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPSubTypeAddCalled  = $true
                         } -PassThru | Add-Member ScriptMethod GetPropertyByName {
                             $Global:xSPUPGetPropertyByNameCalled  = $true
                             return $subTypeProperty
                         } -PassThru
 
-        mock Get-xSharePointUserProfileSubTypeManager {
-        return @()| Add-Member ScriptMethod GetProfileSubtype {
+        mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+        $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                             $Global:xSPUPGetProfileSubtypeCalled = $true
                             return @{
                             Properties = $userProfileSubTypePropertiesNoProperty
                             }
                         } -PassThru 
+
+        return $result
         }
         
 
-        Mock Get-SPWebApplication {
-        return @(IsAdministrationWebApplication=$true
-                  Url ="caURL")
-        }
-        $TermSets =@{Department = @(Name="Department"
-                                )} 
+        Mock Get-SPWebApplication -MockWith {
+            return @(
+                    @{
+                        IsAdministrationWebApplication=$true
+                        Url ="caURL"
+                     })
+        }  
+        #IncludeCentralAdministration
+        $TermSets =@{Department = @{Name="Department"
+                                }} 
+                             
+        $TermGroups = @{People = @{Name="People"
+                                TermSets = $TermSets 
+                                }}
 
-        $TermGroups = @{People = @(Name="People"
-                                TermSets = @TermSets 
-                                )}
-
-        $TermStoresList = @{"Managed Metadata service" = @(Name="Managed Metadata service"
-                                Groups = @TermGroups 
-                                )}    
+        $TermStoresList = @{"Managed Metadata service" = @{Name="Managed Metadata service"
+                                Groups = $TermGroups 
+                                }}    
 
 
         Mock New-Object -MockWith {
@@ -180,7 +188,7 @@ Describe "xSPUserProfileProperty" {
 
         Mock New-Object -MockWith {
             return (@{
-                Properties = @()
+                Properties = New-Object System.Collections.ArrayList 
             } | Add-Member ScriptMethod SetDisplayOrderByPropertyName {
                 $Global:UpsSetDisplayOrderByPropertyNameCalled=$true;
                 return $false; 
@@ -193,7 +201,15 @@ Describe "xSPUserProfileProperty" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+<#        Mock Get-xSharePointUserProfileSubTypeManager{
+            $properties = @()
+        return @()| Add-Member ScriptMethod GetProfileSubtype {
+                $Global:UpsSubTypeMgrGetProfileSubtypeCalled=$true;
+                return $false; 
+            } -PassThru 
+            
+        }
+        #>
         
         Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
 
@@ -217,11 +233,10 @@ Describe "xSPUserProfileProperty" {
                                         } -PassThru 
                                 }
                             
-                        } -PassThru
+                        } -PassThru -Force
         $connection = @{ 
             DisplayName = "Contoso" 
             Server = "contoso.com"
-            NamingContexts=  New-Object System.Collections.ArrayList
             AccountDomain = "Contoso"
             AccountUsername = "TestAccount"
             Type= "ActiveDirectory"
@@ -234,7 +249,7 @@ Describe "xSPUserProfileProperty" {
                         } -PassThru
 
         
-        $ConnnectionManager = New-Object System.Collections.ArrayList | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
+        $ConnnectionManager = New-Object System.Collections.ArrayList  | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
                                                 param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
                                                 $name, `
                                                 $forest, `
@@ -249,7 +264,15 @@ Describe "xSPUserProfileProperty" {
         } -PassThru
             
         Mock New-Object -MockWith {
+            $ProfilePropertyManager = @{} | Add-Member ScriptMethod GetCoreProperties {
+                $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
+                return $false; 
+            } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
+                $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
+                return $false; 
+            } -PassThru     
             return (@{
+            ProfilePropertyManager = $ProfilePropertyManager
             ConnectionManager = $ConnnectionManager  
             } | Add-Member ScriptMethod IsSynchronizationRunning {
                 $Global:UpsSyncIsSynchronizationRunning=$true;
@@ -257,14 +280,11 @@ Describe "xSPUserProfileProperty" {
             } -PassThru   )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
-        Mock New-Object -MockWith {
-            return (New-Object System.Collections.Generic.List[System.Object])
-        }  -ParameterFilter { $TypeName -eq "System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]" } 
         $userProfileServiceValidConnection =  @{
             Name = "User Profile Service Application"
             TypeName = "User Profile Service Application"
             ApplicationPool = "SharePoint Service Applications"
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            FarmAccount = $farmAccount 
             ServiceApplicationProxyGroup = "Proxy Group"
             ConnectionManager=  New-Object System.Collections.ArrayList
         }
@@ -282,18 +302,31 @@ Describe "xSPUserProfileProperty" {
             Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
 
             It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
+                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:xSPUPSMappingItemCalled = $false
+                Get-TargetResource @testParamsNewProperty | Should BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
+                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
+                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:xSPUPSMappingItemCalled | Should be $true
             }
             
             It "returns false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
+                Test-TargetResource $testParamsNewProperty | Should Be $false
             }
 
             It "creates a new service application in the set method" {
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$false
-                Set-TargetResource @testParams
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $true
+                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:xSPUPSMappingItemCalled = $false
+
+                Set-TargetResource $testParamsNewProperty
+
+                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
+                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:xSPUPSMappingItemCalled | Should be $true
+
             }
 
         }
