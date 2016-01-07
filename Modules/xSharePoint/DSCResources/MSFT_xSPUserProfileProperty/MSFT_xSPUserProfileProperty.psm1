@@ -239,35 +239,35 @@ function Set-TargetResource
 
         #Ensure-Property $params
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
-	        if($userProfileProperty -ne $null)
-	        {
-		        $coreProperties.RemovePropertyByName($params.Name)
+            if($userProfileProperty -ne $null)
+            {
+                $coreProperties.RemovePropertyByName($params.Name)
                 return;
-	        }
+            }
         } elseif($userProfileProperty -eq $null){
             #region creating property
-	        $coreProperty = $coreProperties.Create($false)
-	        $coreProperty.Name = $params.Name
-	        $coreProperty.DisplayName = $params.DisplayName
+            $coreProperty = $coreProperties.Create($false)
+            $coreProperty.Name = $params.Name
+            $coreProperty.DisplayName = $params.DisplayName
 
-	        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"												
-	
-	        if($params.Type.ToLower() -eq "stringmultivalue")
-	        {
-		        $coreProperty.IsMultivalued =$true;
-	        }
-	        $coreProperty.Type = $params.Type
+            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"												
+    
+            if($params.Type.ToLower() -eq "stringmultivalue")
+            {
+                $coreProperty.IsMultivalued =$true;
+            }
+            $coreProperty.Type = $params.Type
             if($termSet -ne $null){
                 $coreProperty.TermSet = $termSet 
             }
 
-	        $CoreProperties.Add($coreProperty)
-	        $upTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
+            $CoreProperties.Add($coreProperty)
+            $upTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
             $userProfileTypeProperties.Add($upTypeProperty)
-	        $upSubProperty = $userProfileSubTypeProperties.Create($UPTypeProperty)
+            $upSubProperty = $userProfileSubTypeProperties.Create($UPTypeProperty)
             $userProfileSubTypeProperties.Add($upSubProperty)		
-	        Sleep -Milliseconds 100
-	        $userProfileProperty =  $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+            Sleep -Milliseconds 100
+            $userProfileProperty =  $userProfileSubType.Properties.GetPropertyByName($params.Name) 
 
             #return $userProfileProperty
             #endregion
@@ -304,8 +304,8 @@ function Set-TargetResource
         if($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
-	        $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
-	        $profileManager.Properties.CommitDisplayOrder()
+            $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
+            $profileManager.Properties.CommitDisplayOrder()
         }
         #endregion
         #region mapping
@@ -321,7 +321,7 @@ function Set-TargetResource
                 if($currentMapping -ne $null ){
                     $currentMapping.Delete() #API allows updating, but UI doesn't do that.
                 }
-               	$export = $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export"
+                $export = $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export"
                 if ($Connection.Type -eq "ActiveDirectoryImport"){  
                         if($export){
                             throw "not implemented"
