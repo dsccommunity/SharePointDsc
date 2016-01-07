@@ -250,7 +250,7 @@ function Set-TargetResource
             $coreProperty.Name = $params.Name
             $coreProperty.DisplayName = $params.DisplayName
 
-            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"												
+            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"                                                
     
             if($params.Type.ToLower() -eq "stringmultivalue")
             {
@@ -265,7 +265,7 @@ function Set-TargetResource
             $upTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
             $userProfileTypeProperties.Add($upTypeProperty)
             $upSubProperty = $userProfileSubTypeProperties.Create($UPTypeProperty)
-            $userProfileSubTypeProperties.Add($upSubProperty)		
+            $userProfileSubTypeProperties.Add($upSubProperty)        
             Sleep -Milliseconds 100
             $userProfileProperty =  $userProfileSubType.Properties.GetPropertyByName($params.Name) 
 
@@ -286,8 +286,8 @@ function Set-TargetResource
 
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DefaultPrivacy" -ParamsValue $params -ParamKey "PrivacySetting"
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "PrivacyPolicy" -ParamsValue $params -ParamKey "PolicySetting"
-        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "IsUserEditable" -ParamsValue $params -ParamKey "IsUserEditable"																
-        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "UserOverridePrivacy" -ParamsValue $params -ParamKey "UserOverridePrivacy"																
+        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "IsUserEditable" -ParamsValue $params -ParamKey "IsUserEditable"                                                                
+        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "UserOverridePrivacy" -ParamsValue $params -ParamKey "UserOverridePrivacy"                                                                
         if($termSet -ne $null){
             $coreProperty.TermSet = $termSet
         }
