@@ -5,13 +5,13 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.string ] $Name ,
-        [parameter(Mandatory = $false)]  [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
         [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)]  [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
-        [parameter(Mandatory = $false)]  [System.string ] $PolicySetting ,
-        [parameter(Mandatory = $false)]  [System.string ] $PrivacySetting ,
+        [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
+        [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
         [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
@@ -72,7 +72,7 @@ function Get-TargetResource
         }
         $syncConnection  = $userProfileConfigManager.ConnectionManager | ? {$_.PropertyMapping.Item($params.Name) -ne $null} 
         if($syncConnection -ne $null) {
-            $currentMapping  = $synchConnection.PropertyMapping.Item($params.Name)
+            $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
             if($currentMapping -ne $null)
             {
                 $mapping.Direction = "Import"
@@ -121,13 +121,13 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.string ] $Name ,
-        [parameter(Mandatory = $false)]  [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
         [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
-        [parameter(Mandatory = $true)]  [System.string ] $DisplayName ,
-        [parameter(Mandatory = $true)]  [System.string ] $Type ,
+        [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
+        [parameter(Mandatory = $false)]  [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
-        [parameter(Mandatory = $false)]  [System.string ] $PolicySetting ,
-        [parameter(Mandatory = $false)]  [System.string ] $PrivacySetting ,
+        [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
+        [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
         [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
@@ -161,10 +161,9 @@ function Set-TargetResource
             throw "You have to provide all 3 parameters Termset, TermGroup and TermStore when providing any of the 3."
         }
 
-
         #what if combination property type + termstore isn't possible?
-        if($params.ContainsKey("TermSet")  -and (@("String","StringMultivalue").Contains($params.Type) -eq $false)  ){
-            throw "Only String and String Multivalue can use Termsets"
+        if($params.ContainsKey("TermSet")  -and (@("string","stringmultivalue").Contains($params.Type.ToLower()) -eq $false)  ){
+            throw "Only String and String Maultivalue can use Termsets"
         }
         #endregion 
         #region setting up objects 
@@ -174,14 +173,13 @@ function Set-TargetResource
         {
             return $null
         }
-        #what if permission isn't granted ?
         
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext  $caURL 
 
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         if($null -eq $userProfileConfigManager)
-        {
+        {   #if config manager returns when ups is available then isuee is permissions
             throw "account running process needs permissions"
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
@@ -190,16 +188,23 @@ function Set-TargetResource
         $userProfileTypeProperties = $userProfilePropertyManager.GetProfileTypeProperties([Microsoft.Office.Server.UserProfiles.ProfileType]::User)
         
 
-        $userProfileSubTypeManager = [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($context)
+        $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
         
         $userProfileSubTypeProperties = $userProfileSubType.Properties
         
-        $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
+        $syncConnection  = $userProfileConfigManager.ConnectionManager | Where-Object { $_.DisplayName -eq $params.MappingConnectionName} 
         if($null -eq $syncConnection ) {
             throw "connection not found"
         }
         #endregion 
+
+        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+
+        if($userProfileProperty -ne $null -and $userProfileProperty.CoreProperty.Type.GetTypeCode() -ne $params.Type )
+        {
+            throw "Can't change property type. Current Type is $($userProfileProperty.CoreProperty.Type.GetTypeCode())"
+        }
 
         #region retrieving term set 
         $termSet =$null
@@ -232,21 +237,18 @@ function Set-TargetResource
 
         #endregion
 
-        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+        #Ensure-Property $params
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
 	        if($userProfileProperty -ne $null)
 	        {
-		        $CoreProperties.RemovePropertyByName($params.Name)
+		        $coreProperties.RemovePropertyByName($params.Name)
+                return;
 	        }
         } elseif($userProfileProperty -eq $null){
             #region creating property
-            #Add-NewProperty $params
-
-            # $userProfileProperty Add-NewProperty $params
-	        $coreProperty = $CoreProperties.Create($false)
+	        $coreProperty = $coreProperties.Create($false)
 	        $coreProperty.Name = $params.Name
 	        $coreProperty.DisplayName = $params.DisplayName
-
 
 	        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"												
 	
@@ -293,8 +295,11 @@ function Set-TargetResource
         $userProfileProperty.CoreProperty.Commit()
         $userProfileTypeProperty.Commit()
         $userProfileProperty.Commit()
-        #region setting display order
+        
+        
+        #/Ensure-Property 
 
+        #region display order
         # Set-DisplayOrder
         if($params.ContainsKey("DisplayOrder"))
         {
@@ -306,7 +311,8 @@ function Set-TargetResource
         #region mapping
         #Set-Mapping
         if($params.ContainsKey("MappingConnectionName") -and $params.ContainsKey("MappingPropertyName")){
-            $syncConnection  = $userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
+            $syncConnection  = $userProfileConfigManager.ConnectionManager| Where-Object { $_.DisplayName -eq $params.MappingConnectionName}  
+            #$userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
             $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
             if($currentMapping -eq $null -or
                 ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) -or
@@ -338,7 +344,6 @@ function Set-TargetResource
     return  $result
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -346,13 +351,13 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.string ] $Name ,
-        [parameter(Mandatory = $false)]  [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
         [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)]  [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
-        [parameter(Mandatory = $false)]  [System.string ] $PolicySetting ,
-        [parameter(Mandatory = $false)]  [System.string ] $PrivacySetting ,
+        [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
+        [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
         [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
@@ -374,9 +379,9 @@ function Test-TargetResource
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for user profile service application $Name"
+    Write-Verbose -Message "Testing for user profile property $Name"
     if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","AllowUserEdit", "MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
 }
 
 Export-ModuleMember -Function *-TargetResource

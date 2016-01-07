@@ -12,9 +12,6 @@ Length is only relevant if Field type is "String".
 
 This DSC resource doesn't currently supports metadata properties
 
--- needs to add support to
-   - linking to MMS terms
-   - indexed properties
 **Example**
 xSPUserProfileProperty WorkEmailProperty
 {
@@ -29,13 +26,13 @@ xSPUserProfileProperty WorkEmailProperty
     MappingPropertyName = "mail"
     MappingDirection = "Import"
     Length = 10
-    DisplayOrder =25 #relative to the section 
+    DisplayOrder =25 
     IsEventLog =$false
     IsVisibleOnEditor=$true
     IsVisibleOnViewer = $true
     IsUserEditable = $true
-    IsAlias = $false #: used to edit "Alias" of the property value under Search Settings.
-    IsSearchable = $false # e: used to edit “Indexed” of the property value again under Search Settings.
+    IsAlias = $false 
+    IsSearchable = $false 
     TermStore = ""
     TermGroup = ""
     TermSet = "" 
@@ -48,29 +45,29 @@ xSPUserProfileProperty WorkEmailProperty
 [ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileProperty")]
 class MSFT_xSPUserProfileProperty : OMI_BaseResource
 {
-    [Key] string Name 
-    [ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [required] string UserProfileService
-    [required] string DisplayName 
-    [Required, [ValueMap{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}, Values{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}] ] string Type
-    [write] string Description 
-    [ValueMap{"Mandatory", "Optin","Optout", "Disabled"}, Values{"Mandatory", "Optin","Optout", "Disabled"}] string PolicySetting;
-    [ValueMap{"Public", "Contacts", "Organization", "Manager", "Private"}, Values{"Public", "Contacts", "Organization", "Manager", "Private"}] string PrivacySetting ;
-    [write] string MappingConnectionName 
-    [write] string MappingPropertyName 
-    [write] string MappingDirection 
-    [write] uint32 Length 
-    [write] uint32 DisplayOrder
-    [write] boolean IsEventLog 
-    [write] boolean IsVisibleOnEditor
-    [write] boolean IsVisibleOnViewer
-    [write] boolean IsUserEditable 
-    [write] boolean IsAlias
-    [write] boolean IsSearchable
-    [write] boolean UserOverridePrivacy 
-    [write] string TermStore 
-    [write] string TermSetGroup
-    [write] string TermSet
+    [Key] string Name ;
+    [write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [required] string UserProfileService;
+    [required] string DisplayName ;
+    [Required, ValueMap{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}, Values{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}]  string Type;
+    [write] string Description ;
+    [write, ValueMap{"Mandatory", "Optin","Optout", "Disabled"}, Values{"Mandatory", "Optin","Optout", "Disabled"}] string PolicySetting;
+    [write, ValueMap{"Public", "Contacts", "Organization", "Manager", "Private"}, Values{"Public", "Contacts", "Organization", "Manager", "Private"}] string PrivacySetting ;
+    [write] string MappingConnectionName ;
+    [write] string MappingPropertyName ;
+    [write] string MappingDirection ;
+    [write] uint32 Length ;
+    [write] uint32 DisplayOrder;
+    [write] boolean IsEventLog ;
+    [write] boolean IsVisibleOnEditor;
+    [write] boolean IsVisibleOnViewer;
+    [write] boolean IsUserEditable ;
+    [write] boolean IsAlias;
+    [write] boolean IsSearchable;
+    [write] boolean UserOverridePrivacy ;
+    [write] string TermStore ;
+    [write] string TermSetGroup;
+    [write] string TermSet;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
