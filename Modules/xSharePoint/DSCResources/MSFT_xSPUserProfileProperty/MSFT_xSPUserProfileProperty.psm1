@@ -380,7 +380,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile property $Name"
-    if ($null -eq $CurrentValues) { return $false }
+    if ($null -eq $CurrentValues) { return $false  }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","AllowUserEdit", "MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
 }
 
