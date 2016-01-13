@@ -60,7 +60,7 @@ function Get-TargetResource
                         RecycleThreshold = $serviceApp.RecycleProcessThreshold
                         DisableBinaryFileScan = $serviceApp.DisableBinaryFileScan
                         ConversionProcesses = $serviceApp.TotalActiveProcesses
-                        JobConversionFrequency = $serviceApp.TimerJobFrequency
+                        JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
                         NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
                         TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
                         MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
@@ -189,7 +189,7 @@ function Set-TargetResource
                     $wordAutomationTimerjob = Get-SPTimerJob $params.Name
                     if ($wordAutomationTimerjob.Count -eq 1) {
                         $schedule = "every $($params.JobConversionFrequency) minutes between 0 and 0"
-                        Set-SPTimerJob $job -Schedule $schedule
+                        Set-SPTimerJob $wordAutomationTimerjob -Schedule $schedule
                     } else {
                         throw "Timerjob could not be found"
                     }
@@ -221,7 +221,7 @@ function Set-TargetResource
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue | Where-Object { $_.TypeName -eq "Word Automation Services" }
                 if ($null -ne $serviceApp) {
                     # Service app existed, deleting
-                    Remove-SPServiceApplication $params.Name -RemoveData -Confirm:$false
+                    Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
                 } 
             }
         }
@@ -263,7 +263,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters 
      
     if ($null -eq $CurrentValues) { return $false } 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool") 
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 } 
 
 Export-ModuleMember -Function *-TargetResource 
