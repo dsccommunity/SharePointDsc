@@ -13,8 +13,8 @@ Make sure the service application exists and has a specific configuration
         Name = "Word Automation Service Application" 
         Ensure = "Present"
         ApplicationPool = "SharePoint Web Services"
-        DatabaseName = WordAutomation_DB
-        DatabaseServer = SQLServer
+        DatabaseName = "WordAutomation_DB"
+        DatabaseServer = "SQLServer"
         SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
         DisableEmbeddedFonts = $false
         MaximumMemoryUsage = 100
