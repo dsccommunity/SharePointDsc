@@ -21,7 +21,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [ValidateRange(1,10)]                         [System.UInt32]   $MaximumConversionAttempts,
         [parameter(Mandatory = $false)] [ValidateRange(1,60)]                         [System.UInt32]   $MaximumSyncConversionRequests,
         [parameter(Mandatory = $false)] [ValidateRange(10,60)]                        [System.UInt32]   $KeepAliveTimeout,
-        [parameter(Mandatory = $false)] [ValidateRange(60,4294967295)]                [System.UInt32]   $MaximumConversionTime,
+        [parameter(Mandatory = $false)] [ValidateRange(60,3600)]                      [System.UInt32]   $MaximumConversionTime,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential]                     $InstallAccount 
     ) 
 
@@ -66,7 +66,7 @@ function Get-TargetResource
                         MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
                         MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
                         KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
-                        MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalMinutes
+                        MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalSeconds
                         InstallAccount = $params.InstallAccount
                     } 
                     return $returnVal 
@@ -113,7 +113,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [ValidateRange(1,10)]                         [System.UInt32]   $MaximumConversionAttempts,
         [parameter(Mandatory = $false)] [ValidateRange(1,60)]                         [System.UInt32]   $MaximumSyncConversionRequests,
         [parameter(Mandatory = $false)] [ValidateRange(10,60)]                        [System.UInt32]   $KeepAliveTimeout,
-        [parameter(Mandatory = $false)] [ValidateRange(60,4294967295)]                [System.UInt32]   $MaximumConversionTime,
+        [parameter(Mandatory = $false)] [ValidateRange(60,3600)]                      [System.UInt32]   $MaximumConversionTime,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential]                     $InstallAccount 
     ) 
 
@@ -135,25 +135,29 @@ function Set-TargetResource
                 if ($null -eq $serviceApp) {
                     # Service application does not exist, create it 
 
-                    ######################## Check if application pool exists
+                    $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
+                    if ($appPool) {
+                        $cmdletparams = @{}
+                        $cmdletparams.Name = $params.Name
+                        if ($params.Name) { $cmdletparams.DatabaseName = $params.DatabaseName }
+                        if ($params.Name) { $cmdletparams.DatabaseServer = $params.DatabaseServer }
+                        if ($params.Name) { $cmdletparams.ApplicationPool = $params.ApplicationPool }
 
-                    $cmdletparams = @{}
-                    $cmdletparams.Name = $params.Name
-                    if ($params.Name) { $cmdletparams.DatabaseName = $params.DatabaseName }
-                    if ($params.Name) { $cmdletparams.DatabaseServer = $params.DatabaseServer }
-                    if ($params.Name) { $cmdletparams.ApplicationPool = $params.ApplicationPool }
-
-                    $serviceApp = New-SPWordConversionServiceApplication @cmdletparams
+                        $serviceApp = New-SPWordConversionServiceApplication @cmdletparams
+                    } else {
+                        throw "Specified application pool does not exist"
+                    }
                 } else {
                     # Service application existed
                     # Check if the specified Application Pool is different and change if so
                     if ($params.ApplicationPool) {
                         if ($serviceApp.ApplicationPool.Name -ne $params.ApplicationPool) { 
-
-                            ######################## Check if application pool exists
-
                             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
-                            Set-SPWordConversionServiceApplication $serviceApp -ApplicationPool $appPool
+                            if ($appPool) {
+                                Set-SPWordConversionServiceApplication $serviceApp -ApplicationPool $appPool
+                            } else {
+                                throw "Specified application pool does not exist"
+                            }
                         }
                     }
 
@@ -202,7 +206,7 @@ function Set-TargetResource
                     $serviceApp.KeepAliveTimeout = $timespan
                 }
                 if ($params.MaximumConversionTime) {
-                    $timespan = New-TimeSpan -Minutes $params.MaximumConversionTime
+                    $timespan = New-TimeSpan -Seconds $params.MaximumConversionTime
                     $serviceApp.MaximumConversionTime = $timespan
                 }
 
@@ -247,7 +251,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [ValidateRange(1,10)]                         [System.UInt32]   $MaximumConversionAttempts,
         [parameter(Mandatory = $false)] [ValidateRange(1,60)]                         [System.UInt32]   $MaximumSyncConversionRequests,
         [parameter(Mandatory = $false)] [ValidateRange(10,60)]                        [System.UInt32]   $KeepAliveTimeout,
-        [parameter(Mandatory = $false)] [ValidateRange(60,4294967295)]                [System.UInt32]   $MaximumConversionTime,
+        [parameter(Mandatory = $false)] [ValidateRange(60,3600)]                      [System.UInt32]   $MaximumConversionTime,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential]                     $InstallAccount 
     ) 
 
