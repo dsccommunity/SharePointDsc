@@ -4,12 +4,39 @@
 The resource will provision and configure the Word Automation Service Application. 
 The database specific parameters are only used during initial provisioning of the app, and will not change database settings beyond the initial deployment. 
 
-**Example** 
+**Example**
+
+Make sure the service application exists and has a specific configuration
+
     xSPWordAutomationServiceApp Word Automation 
     { 
         Name = "Word Automation Service Application" 
         Ensure = "Present"
-        ApplicationPool = "SharePoint Web Services" 
+        ApplicationPool = "SharePoint Web Services"
+        DatabaseName = WordAutomation_DB
+        DatabaseServer = SQLServer
+        SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+        DisableEmbeddedFonts = $false
+        MaximumMemoryUsage = 100
+        RecycleThreshold = 100
+        DisableBinaryFileScan = $false
+        ConversionProcesses = 8
+        JobConversionFrequency = 15
+        NumberOfConversionsPerProcess = 12
+        TimeBeforeConversionIsMonitored  = 5
+        MaximumConversionAttempts = 2
+        MaximumSyncConversionRequests = 25 
+        KeepAliveTimeout = 30
+        MaximumConversionTime = 300
+        PsDscRunAsCredential = $InstallAccount 
+    } 
+
+Make sure the service application does not exist and remove when it does
+
+    xSPWordAutomationServiceApp Word Automation 
+    { 
+        Name = "Word Automation Service Application" 
+        Ensure = "Absent"
         PsDscRunAsCredential = $InstallAccount 
     } 
 */
@@ -18,8 +45,22 @@ The database specific parameters are only used during initial provisioning of th
 class MSFT_xSPWordAutomationServiceApp : OMI_BaseResource 
 { 
     [Key] string Name; 
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write] string ApplicationPool; 
-    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials; 
-    [Required] string DatabaseName; 
+    [Write] string DatabaseName; 
     [Write] string DatabaseServer; 
+    [Write, ValueMap{"docx","doc","mht","rtf","xml"}, Values{"docx","doc","mht","rtf","xml"}] string SupportedFileFormats[];
+    [Write] boolean DisableEmbeddedFonts;
+    [Write] uint32 MaximumMemoryUsage; 
+    [Write] uint32 RecycleThreshold; 
+    [Write] boolean DisableBinaryFileScan;
+    [Write] uint32 ConversionProcesses; 
+    [Write] uint32 JobConversionFrequency; 
+    [Write] uint32 NumberOfConversionsPerProcess; 
+    [Write] uint32 TimeBeforeConversionIsMonitored; 
+    [Write] uint32 MaximumConversionAttempts; 
+    [Write] uint32 MaximumSyncConversionRequests; 
+    [Write] uint32 KeepAliveTimeout; 
+    [Write] uint32 MaximumConversionTime; 
+    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 }; 
