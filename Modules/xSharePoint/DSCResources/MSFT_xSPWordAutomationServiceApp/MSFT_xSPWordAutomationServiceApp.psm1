@@ -62,11 +62,11 @@ function Get-TargetResource
                         ConversionProcesses = $serviceApp.TotalActiveProcesses
                         JobConversionFrequency = $serviceApp.TimerJobFrequency
                         NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
-                        TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout
+                        TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
                         MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
                         MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
-                        KeepAliveTimeout = $serviceApp.KeepAliveTimeout
-                        MaximumConversionTime = $serviceApp.MaximumConversionTime
+                        KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
+                        MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalMinutes
                         InstallAccount = $params.InstallAccount
                     } 
                     return $returnVal 
@@ -121,6 +121,10 @@ function Set-TargetResource
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
 
+    if (($Ensure -eq "Absent") -and ($ApplicationPool -and $DatabaseName)) {
+        throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
+    }
+
     switch ($Ensure) {
         "Present" {
             Write-Verbose -Message "Creating and/or configuring Word Automation Service Application $Name" 
@@ -130,6 +134,9 @@ function Set-TargetResource
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue | Where-Object { $_.TypeName -eq "Word Automation Services" }
                 if ($null -eq $serviceApp) {
                     # Service application does not exist, create it 
+
+                    ######################## Check if application pool exists
+
                     $cmdletparams = @{}
                     $cmdletparams.Name = $params.Name
                     if ($params.Name) { $cmdletparams.DatabaseName = $params.DatabaseName }
@@ -142,6 +149,9 @@ function Set-TargetResource
                     # Check if the specified Application Pool is different and change if so
                     if ($params.ApplicationPool) {
                         if ($serviceApp.ApplicationPool.Name -ne $params.ApplicationPool) { 
+
+                            ######################## Check if application pool exists
+
                             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
                             Set-SPWordConversionServiceApplication $serviceApp -ApplicationPool $appPool
                         }
@@ -170,13 +180,31 @@ function Set-TargetResource
                 if ($params.RecycleThreshold) { $serviceApp.RecycleProcessThreshold = $params.RecycleThreshold }
                 if ($params.DisableBinaryFileScan) { $serviceApp.DisableBinaryFileScan = $params.DisableBinaryFileScan }
                 if ($params.ConversionProcesses) { $serviceApp.TotalActiveProcesses = $params.ConversionProcesses }
-                if ($params.JobConversionFrequency) { $serviceApp.TimerJobFrequency = $params.JobConversionFrequency }
+                if ($params.JobConversionFrequency) {
+                    # Check for TimerJob and change schedule
+                    $wordAutomationTimerjob = Get-SPTimerJob $params.Name
+                    if ($wordAutomationTimerjob.Count -eq 1) {
+                        $schedule = "every $($params.JobConversionFrequency) minutes between 0 and 0"
+                        Set-SPTimerJob $job -Schedule $schedule
+                    } else {
+                        throw "Timerjob could not be found"
+                    }
+                }
                 if ($params.NumberOfConversionsPerProcess) { $serviceApp.ConversionsPerInstance = $params.NumberOfConversionsPerProcess }
-                if ($params.TimeBeforeConversionIsMonitored) {$serviceApp.ConversionTimeout = $params.TimeBeforeConversionIsMonitored }
+                if ($params.TimeBeforeConversionIsMonitored) {
+                    $timespan = New-TimeSpan -Minutes $params.TimeBeforeConversionIsMonitored
+                    $serviceApp.ConversionTimeout = $timespan
+                }
                 if ($params.MaximumConversionAttempts) { $serviceApp.MaximumConversionAttempts = $params.MaximumConversionAttempts }
                 if ($params.MaximumSyncConversionRequests) { $serviceApp.MaximumSyncConversionRequests = $params.MaximumSyncConversionRequests }
-                if ($params.KeepAliveTimeout) { $serviceApp.KeepAliveTimeout = $params.KeepAliveTimeout }
-                if ($params.MaximumConversionTime) { $serviceApp.MaximumConversionTime = $params.MaximumConversionTime }
+                if ($params.KeepAliveTimeout) {
+                    $timespan = New-TimeSpan -Seconds $params.KeepAliveTimeout
+                    $serviceApp.KeepAliveTimeout = $timespan
+                }
+                if ($params.MaximumConversionTime) {
+                    $timespan = New-TimeSpan -Minutes $params.MaximumConversionTime
+                    $serviceApp.MaximumConversionTime = $timespan
+                }
 
                 $serviceApp.Update()
             } 
