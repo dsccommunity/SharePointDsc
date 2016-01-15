@@ -89,12 +89,13 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### 0.9.0.0
+### Unreleased
 
  * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
  * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
 
 ### 0.8.0.0
+
  * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings
  * Fixed issue with xSPInstallPrereqs using wrong parameters in offline install mode
  * Fixed issue with xSPInstallPrereqs where it would not validate that installer paths exist
