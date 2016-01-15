@@ -1,0 +1,27 @@
+﻿NAME
+    xSPFeature
+
+PARAMETERS
+    Name (Key, string)
+    FeatureScope (Required, string, Allowed values: Farm, WebApplication, Site, Web)
+    Url (Key, string)
+    InstallAccount (Write, String)
+    Ensure (Required, string, Allowed values: Present, Absent)
+
+DESCRIPTION
+
+This resource is used to make sure that a specific feature is either enabled or disabled at a given URL/scope.
+The Ensure property will dictate if the feature should be on or off. 
+The name property is the name of the feature based on its folder name in the FEATURES folder in the SharePoint hive directory. 
+
+EXAMPLE
+
+    xSPFeature EnableViewFormsLockDown
+    {
+        Name                 = "ViewFormPagesLockDown"
+        Url                  = "http://www.contoso.com"
+        Ensure               = "Present"
+        Scope                = "Site"
+        PsDscRunAsCredential = $SetupAccuount     
+    }
+
