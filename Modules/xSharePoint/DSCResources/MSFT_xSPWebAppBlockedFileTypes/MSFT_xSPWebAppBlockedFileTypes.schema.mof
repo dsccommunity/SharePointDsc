@@ -11,7 +11,7 @@ Both of these properties will only make changes to the file types in their list 
 
 **Example**
 
-    xSPBlockedFileTypes PrimaryWebAppBlockedFileTypes
+    xSPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
     {
         Url                    = "Shttp://exmaple.contoso.local"
         EnsureBlocked          = @("exe", "dll", "msi")

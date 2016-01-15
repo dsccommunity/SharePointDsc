@@ -1,4 +1,4 @@
-﻿# xSharePoint
+# xSharePoint
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
@@ -33,9 +33,13 @@ Please read the installation instructions that are present on both the download 
 Below is a list of DSC resource types that are currently provided by xSharePoint:
 
  - xSPAntivirusSettings
+ - xSPAppCatalog
+ - xSPAppDomain
+ - xSPAppManagementServiceApp
  - xBCSServiceApp
  - xSPCacheAccounts
  - xSPCreateFarm
+ - xSPDesignerSettings
  - xSPDiagnosticLoggingSettings
  - xSPDistributedCacheService
  - xSPFarmAdministrators
@@ -48,18 +52,28 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPManagedPath
  - xSPOutgoingEmailSettings
  - xSPPasswordChangeSettings
+ - xSPQuotaTemplate
+ - xSPSearchIndexPartition
  - xSPSearchServiceApp
+ - xSPSearchTopology
  - xSPSecureStoreServiceApp
  - xSPServiceAppPool
  - xSPServiceInstance
+ - xSPSessionStateService
  - xSPSite
  - xSPStateServiceApp
+ - xSPTimerJobState
+ - xSPSubscriptionSettingsServiceApp
  - xSPUsageApplication
  - xSPUserProfileServiceApp
  - xSPUserProfileSyncService
+ - xSPVisioServiceApp
  - xSPWebAppBlockedFileTypes
  - xSPWebAppGeneralSettings
  - xSPWebApplication
+ - xSPWebApplicationAppDomain
+ - xSPWebAppPolicy
+ - xSPWebAppSiteUseAndDeletion
  - xSPWebAppThrottlingSettings
  - xSPWebAppWorkflowSettings
 
@@ -75,7 +89,15 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
+### Unreleased
+
+### 0.9.0.0
+
+ * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
+ * Fixed issue with wrong parameters in use for SP2016 beta 2 prerequisite installer
+
 ### 0.8.0.0
+
  * Added xSPAntivirusSettings, xSPFarmAdministrators, xSPOutgoingEmailSettings, xSPPasswordChangeSettings, xSPWebAppBlockedFileTypes, xSPWebAppGeneralSettings, xSPWebAppThrottlingSettings and xSPWebAppWorkflowSettings
  * Fixed issue with xSPInstallPrereqs using wrong parameters in offline install mode
  * Fixed issue with xSPInstallPrereqs where it would not validate that installer paths exist
@@ -103,7 +125,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### 0.4.0
 
-* Fixed issue with nested modules’ cmdlets not being found
+* Fixed issue with nested modules� cmdlets not being found
 
 ### 0.3.0
 
