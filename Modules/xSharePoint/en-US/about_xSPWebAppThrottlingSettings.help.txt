@@ -1,0 +1,42 @@
+﻿NAME
+    xSPWebAppThrottlingSettings
+
+PARAMETERS
+    Url (Key, string)
+    ListViewThreshold (write, uint32)
+    AllowObjectModelOverride (write, boolean)
+    AdminThreshold (write, uint32)
+    ListViewLookupThreshold (write, uint32)
+    HappyHourEnabled (write, boolean)
+    HappyHour (Write, string)
+    UniquePermissionThreshold (write, uint32)
+    RequestThrottling (write, boolean)
+    ChangeLogEnabled (write, boolean)
+    ChangeLogExpiryDays (write, uint32)
+    EventHandlersEnabled (write, boolean)
+    InstallAccount (Write, string)
+
+DESCRIPTION
+
+This resource is responsible for setting web application settings that are found under the "resource throttling" screen in central admin.
+The web application is specified through the URL property, and then any combination of settings can be applied.
+Any settings not included will be left as the default (or whatever they have been manually changed to within SharePoint).
+Happy hour is the setting used to control the window where threshold do not apply throughout the day.
+You can specify the start time of this window as well as how many hours it will last.
+
+EXAMPLE
+
+    xSPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
+    {
+        Url                      = "Shttp://exmaple.contoso.local"
+        ListViewThreshold        = 5000
+        AllowObjectModelOverride = $false
+        HappyHourEnabled         = $true
+        HappyHour                = MSFT_xSPWebApplicationHappyHour {
+            Hour     = 3
+            Minute   = 0
+            Duration = 1
+        }
+        PsDscRunAsCredential     = $InstallAccount
+    }
+
