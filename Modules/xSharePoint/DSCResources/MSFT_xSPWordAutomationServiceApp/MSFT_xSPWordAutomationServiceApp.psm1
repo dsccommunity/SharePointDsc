@@ -31,6 +31,10 @@ function Get-TargetResource
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
 
+    if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) {
+        throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
+    }
+
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
         $params = $args[0] 
           
@@ -121,7 +125,7 @@ function Set-TargetResource
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
 
-    if (($Ensure -eq "Absent") -and ($ApplicationPool -and $DatabaseName)) {
+    if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) {
         throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
     }
 
@@ -257,6 +261,10 @@ function Test-TargetResource
 
     if (($ApplicationPool -or $DatabaseName -or $DatabaseServer -or $SupportedFileFormats -or $DisableEmbeddedFonts -or $MaximumMemoryUsage -or $RecycleThreshold -or $DisableBinaryFileScan -or $ConversionProcesses -or $JobConversionFrequency -or $NumberOfConversionsPerProcess -or $TimeBeforeConversionIsMonitored -or $MaximumConversionAttempts -or $MaximumSyncConversionRequests -or $KeepAliveTimeout -or $MaximumConversionTime) -and ($Ensure -eq "Absent")) {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
+    }
+
+    if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) {
+        throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
     }
 
     Write-Verbose -Message "Testing for Word Automation Service Application '$Name'" 
