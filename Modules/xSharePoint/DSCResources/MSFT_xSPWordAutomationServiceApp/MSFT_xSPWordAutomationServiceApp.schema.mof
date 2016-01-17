@@ -1,8 +1,12 @@
 ﻿/* 
 **Description** 
 
-The resource will provision and configure the Word Automation Service Application. 
-The database specific parameters are only used during initial provisioning of the app, and will not change database settings beyond the initial deployment. 
+The resource is able to provision, unprovision and configure the Word Automation Service Application.
+All settings that you can configure on the Service Application administration page are configurable using this resource.
+
+Important:
+When you specify Ensure=Present, the Application Pool and DatabaseName parameters are required.
+When you specify Ensure=Absent, no other parameters are allowed (with the exception of Name, InstallAccount or PsDscRunAsCredential).
 
 **Example**
 
@@ -21,13 +25,13 @@ Make sure the service application exists and has a specific configuration
         RecycleThreshold = 100
         DisableBinaryFileScan = $false
         ConversionProcesses = 8
-        JobConversionFrequency = 15
+        JobConversionFrequency = 15                         (in minutes)
         NumberOfConversionsPerProcess = 12
-        TimeBeforeConversionIsMonitored = 5
+        TimeBeforeConversionIsMonitored = 5                 (in minutes)
         MaximumConversionAttempts = 2
         MaximumSyncConversionRequests = 25 
-        KeepAliveTimeout = 30
-        MaximumConversionTime = 300
+        KeepAliveTimeout = 30                               (in seconds)
+        MaximumConversionTime = 300                         (in seconds)
         PsDscRunAsCredential = $InstallAccount 
     } 
 
