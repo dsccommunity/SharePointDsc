@@ -89,6 +89,9 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
+### Unreleased 
+ * Added xSPWordAutomationServiceApp resources
+
 ### 0.9.0.0
 
  * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
