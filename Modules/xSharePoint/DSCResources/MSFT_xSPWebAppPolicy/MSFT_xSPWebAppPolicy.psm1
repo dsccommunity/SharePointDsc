@@ -106,6 +106,7 @@ function Set-TargetResource
             
             $wa.Update()
         } else {
+            ##### Check if user exists before adding. Claims user ook
             $newPolicy = $wa.Policies.Add($params.UserName, $params.UserName)
             $newPolicy.PolicyRoleBindings.Add($newRole)
             if ($params.ContainsKey("ActAsSystemUser") -eq $true) {

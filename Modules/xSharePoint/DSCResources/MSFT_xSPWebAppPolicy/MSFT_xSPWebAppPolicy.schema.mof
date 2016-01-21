@@ -5,13 +5,32 @@ This resource is used to set the "super user" and "super reader" cache accounts 
 
 **Example**
 
-    xSPCacheAccounts SetCacheAccounts
+    xSPWebAppPolicy WebAppPolicy
     {
         WebAppUrl            = "http://sharepoint.contoso.com"
-        SuperUserAlias       = "DEMO\svcSPSuperUser"
-        SuperReaderAlias     = "DEMO\svcSPReader"
+        UserName             = "DEMO\account"
+        PermissionLevel      = "Full Control"
+        ActAsSystemUser      = $false
         PsDscRunAsCredential = $InstallAccount
     }
+
+    xSPWebAppPolicy WebAppPolicy
+    {
+        WebAppUrl            = "http://sharepoint.contoso.com"
+        UserName             = "DEMO\account"
+        FullControlAccounts  = ""
+        FullReadAccounts     = ""
+        DenyWriteAccounts    = ""
+        DenyAllAccounts      = ""
+        RemoveAccounts       = ""
+
+        Username             = ""
+        PermissionLevel      = "Full Control"
+        ActAsSystemUser      = $false
+        PsDscRunAsCredential = $InstallAccount
+    }
+
+
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPolicy")]
 class MSFT_xSPWebAppPolicy : OMI_BaseResource
