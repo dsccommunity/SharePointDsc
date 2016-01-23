@@ -95,6 +95,7 @@
     <Folder Include="DSCResources\MSFT_xSPTimerJobState\" />
     <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAppDomain\" />
+    <Folder Include="DSCResources\MSFT_xSPWordAutomationServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -178,6 +179,8 @@
     <Compile Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\MSFT_xSPWebAppSiteUseAndDeletion.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWordAutomationServiceApp\MSFT_xSPWordAutomationServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWordAutomationServiceApp\MSFT_xSPWordAutomationServiceApp.schema.mof" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
     <Compile Include="Examples\Small Farm\SharePoint.psd1" />
