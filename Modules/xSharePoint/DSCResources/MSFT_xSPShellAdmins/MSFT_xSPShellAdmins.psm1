@@ -30,8 +30,9 @@ function Get-TargetResource
 
         if ($params.AllContentDatabases) {
             if ($params.Members) {
-                # Check if the members are configured on all databases
+                Write-Verbose -Verbose "Looping through content databases"
                 foreach ($contentDatabase in (Get-SPContentDatabase)) {
+                    Write-Verbose -Verbose "Checking content database $contentDatabase"
                     $dbShellAdmins = Get-SPShellAdmin -Database $contentDatabase.Id
                     foreach ($member in $params.Members) {
                         if (-not $dbShellAdmins.UserName.Contains($member)) {
@@ -42,7 +43,6 @@ function Get-TargetResource
             }
 
             if ($params.MembersToInclude) {
-                # Check if the members are configured on all databases
                 foreach ($contentDatabase in (Get-SPContentDatabase)) {
                     $dbShellAdmins = Get-SPShellAdmin -Database $contentDatabase.Id
                     foreach ($member in $params.MembersToInclude) {
