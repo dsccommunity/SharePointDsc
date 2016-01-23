@@ -22,10 +22,10 @@ The app prefix should still be set using the xSPAppDomain resource before this i
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebApplicationAppDomain")]
 class MSFT_xSPWebApplicationAppDomain : OMI_BaseResource
 {
-    [Key] string WebApplication;
-    [Key, ValueMap{"Internet","Intranet","Extranet", "Custom"}, Values{"Internet","Intranet","Extranet", "Custom"}]  string Zone;
-    [Required] string AppDomain;
-    [Write] string Port;
-    [Write] boolean SSL;
+    [Key] String WebApplication;
+    [Key, ValueMap{"Default","Internet","Intranet","Extranet","Custom"}, Values{"Default","Internet","Intranet","Extranet","Custom"}] String Zone;
+    [Required] String AppDomain;
+    [Write] Uint32 Port;
+    [Write] Boolean SSL;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

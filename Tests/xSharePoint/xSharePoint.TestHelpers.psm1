@@ -61,6 +61,7 @@ function Get-MofSchemaObject() {
                 ValueMap = $null
                 DataType = $null
                 Name = $null
+                IsArray = $false
             }
 
             $start = $textLine.IndexOf("[") + 1
@@ -90,6 +91,11 @@ function Get-MofSchemaObject() {
             $attributeValue.DataType = $nonMetadataObjects[1]
             $attributeValue.Name = $nonMetadataObjects[2]
 
+            if ($attributeValue.Name.EndsWith("[]") -eq $true) {
+                $attributeValue.Name = $attributeValue.Name.Replace("[]", "")
+                $attributeValue.IsArray = $true
+            }
+
             $currentResult.Attributes += $attributeValue
         }
     }
@@ -103,7 +109,7 @@ function Assert-MofSchemaScriptParameters() {
     )
     $hasErrors = $false
     $mofSchemas = Get-MofSchemaObject -fileName $mofFileName
-    $mofData = $mofSchemas | Where-Object { $_.ClassName -eq $mofFileName.Replace(".schema.mof", "") }
+    $mofData = $mofSchemas | Where-Object { $_.ClassName -eq (Get-Item $mofFileName).Name.Replace(".schema.mof", "") }
     $psFile = $mofFileName.Replace(".schema.mof", ".psm1")
 
     $tokens = $null 
@@ -112,7 +118,7 @@ function Assert-MofSchemaScriptParameters() {
     $functions = $ast.FindAll( {$args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst]}, $true)
 
     $functions | ForEach-Object {
-        if ($_ -like "*-TargetResource") {
+        if ($_.Name -like "*-TargetResource") {
             $function = $_
             $astTokens = $null
             $astErrors = $null
@@ -121,6 +127,10 @@ function Assert-MofSchemaScriptParameters() {
             $parameters = $functionAst.FindAll( {$args[0] -is [System.Management.Automation.Language.ParameterAst]}, $true)
 
             foreach ($mofParameter in $mofData.Attributes) {
+
+                if ($mofParameter.IsArray -eq $true) {
+                    $t = "t"
+                }
                 # Check the parameter exists
                 $paramToCheck = $parameters | Where-Object { $_.Name.ToString() -eq "`$$($mofParameter.Name)" }
 
@@ -162,21 +172,21 @@ function Assert-MofSchemaScriptParameters() {
                     if (-not $validateSetAttribute) { 
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) that is missing a ValidateSet attribute in the $($function.Name) method"
-                    }
+                    } else {
+                        $psValidateSetParams = $validateSetAttribute.PositionalArguments | % { $_.Value.ToString() }
 
-                    $psValidateSetParams = $validateSetAttribute.PositionalArguments | % { $_.Value.ToString() }
-
-                    $mofParameter.ValueMap | ForEach-Object {
-                        if ($psValidateSetParams -notcontains $_) {
-                            $hasErrors = $true
-                            Write-Warning "File $psFile has parameter $($mofParameter.Name) that does not have '$_' in its validateset parameter for $($function.Name) method"
+                        $mofParameter.ValueMap | ForEach-Object {
+                            if ($psValidateSetParams -notcontains $_) {
+                                $hasErrors = $true
+                                Write-Warning "File $psFile has parameter $($mofParameter.Name) that does not have '$_' in its validateset parameter for $($function.Name) method"
+                            }
                         }
-                    }
 
-                    $psValidateSetParams | ForEach-Object {
-                        if ($mofParameter.ValueMap -notcontains $_) {
-                            $hasErrors = $true
-                            Write-Warning "File $psFile has parameter $($mofParameter.Name) that contains '$_' in the $($function.Name) function which is not in the valuemap in the schema"
+                        $psValidateSetParams | ForEach-Object {
+                            if ($mofParameter.ValueMap -notcontains $_) {
+                                $hasErrors = $true
+                                Write-Warning "File $psFile has parameter $($mofParameter.Name) that contains '$_' in the $($function.Name) function which is not in the valuemap in the schema"
+                            }
                         }
                     }
                 }
@@ -185,6 +195,14 @@ function Assert-MofSchemaScriptParameters() {
                     if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match $mofParameter.DataType }) -eq $null) {
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that does not match the data type of the schema"
+                    }
+
+                    if ($mofParameter.IsArray -eq $true) {
+                        if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match $mofParameter.DataType -and $_.TypeName.IsArray -eq $true }) -eq $null) {
+                            $hasErrors = $true
+                            Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that is marked as an array in the schema but is not an array in the PowerShell module"
+                        }
+
                     }
                 } else {
                     switch ($mofParameter.EmbeddedInstance) {
