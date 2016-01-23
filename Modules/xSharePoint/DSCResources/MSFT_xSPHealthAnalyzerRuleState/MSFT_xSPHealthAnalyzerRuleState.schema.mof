@@ -22,7 +22,7 @@ class MSFT_xSPHealthAnalyzerRuleState : OMI_BaseResource
 {
     [Key] String Name;
     [Required] Boolean Enabled;
-    [Write, ValueMap{"All Servers", "Any Server"}, Values{"All Servers", "Any Server"}] String RuleScope;
+    [Write, ValueMap{"All Servers","Any Server"}, Values{"All Servers","Any Server"}] String RuleScope;
     [Write, ValueMap{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}, Values{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}] String Schedule;
     [Write] Boolean FixAutomatically;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;

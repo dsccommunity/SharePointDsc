@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $RuleScope,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers","Any Server")] [System.String] $RuleScope,
         [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
         [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -72,7 +72,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $RuleScope,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers","Any Server")] [System.String] $RuleScope,
         [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
         [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -134,7 +134,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [ValidateSet("All Servers", "Any Server")] [System.String] $RuleScope,
+        [parameter(Mandatory = $false)] [ValidateSet("All Servers","Any Server")] [System.String] $RuleScope,
         [parameter(Mandatory = $false)] [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] [System.String] $Schedule,
         [parameter(Mandatory = $false)] [System.Boolean] $FixAutomatically,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
