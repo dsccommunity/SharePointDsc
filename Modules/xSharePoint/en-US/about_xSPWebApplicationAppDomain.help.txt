@@ -1,12 +1,22 @@
-/*
-**Description**
+﻿NAME
+    xSPWebApplicationAppDomain
+
+PARAMETERS
+    WebApplication (Key, string)
+    string (Key, , Allowed values: Internet, Intranet, Extranet,  Custom)
+    AppDomain (Required, string)
+    Port (Write, string)
+    SSL (Write, boolean)
+    InstallAccount (Write, String)
+
+DESCRIPTION
 
 This resource will configure the App Domain at a specific zone for the given Web Application.
 The configuration is done per zone on the specified web application, allowing for the setting of unique app domains for each extension of a web application.
 The app prefix should still be set using the xSPAppDomain resource before this is applied to customise a specific zone. 
 
  
-**Example**
+EXAMPLE
 
     xSPWebApplicationAppDomain Domain
     {
@@ -18,14 +28,4 @@ The app prefix should still be set using the xSPAppDomain resource before this i
         PsDscRunAsCredential = $InstallAccount
     }
 
-*/
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWebApplicationAppDomain")]
-class MSFT_xSPWebApplicationAppDomain : OMI_BaseResource
-{
-    [Key] string WebApplication;
-    [Key, ValueMap{"Internet","Intranet","Extranet", "Custom"}, Values{"Internet","Intranet","Extranet", "Custom"}]  string Zone;
-    [Required] string AppDomain;
-    [Write] string Port;
-    [Write] boolean SSL;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-};
+
