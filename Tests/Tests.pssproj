@@ -67,6 +67,7 @@
     <Compile Include="xSharePoint.TestHarness.psm1" />
     <Compile Include="xSharePoint\xSharePoint.TestHelpers.psm1" />
     <Compile Include="xSharePoint\xSharePoint.Util.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPHealthAnalyzerRuleState.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPTimerJobState.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppCatalog.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppDomain.Tests.ps1" />
