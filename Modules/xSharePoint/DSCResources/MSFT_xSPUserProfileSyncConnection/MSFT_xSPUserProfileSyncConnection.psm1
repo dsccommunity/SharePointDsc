@@ -11,7 +11,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
         [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
-        [parameter(Mandatory = $false)] [System.String] $Force,
+        [parameter(Mandatory = $false)] [System.Boolean] $Force,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("ActiveDirectory","BusinessDataCatalog")] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -209,7 +209,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
         [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
-        [parameter(Mandatory = $false)] [System.String] $Force,
+        [parameter(Mandatory = $false)] [System.Boolean] $Force,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("ActiveDirectory","BusinessDataCatalog")] [System.String] $ConnectionType,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
