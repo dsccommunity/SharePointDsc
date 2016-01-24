@@ -10,8 +10,6 @@ If no DisplayOrder is added then SharePoint adds it as the last property of sect
 
 Length is only relevant if Field type is "String".
 
-This DSC resource doesn't currently supports metadata properties
-
 **Example**
 xSPUserProfileProperty WorkEmailProperty
 {

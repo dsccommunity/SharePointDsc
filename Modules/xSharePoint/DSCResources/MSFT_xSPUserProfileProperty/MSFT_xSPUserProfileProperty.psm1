@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
         [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
-        [parameter(Mandatory = $false)]  [System.string ] $Type ,
+        [parameter(Mandatory = $false)]  [ValidateSet("BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL")] [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
@@ -124,7 +124,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
         [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
-        [parameter(Mandatory = $false)]  [System.string ] $Type ,
+        [parameter(Mandatory = $false)]  [ValidateSet("BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL")] [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
@@ -180,7 +180,7 @@ function Set-TargetResource
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         if($null -eq $userProfileConfigManager)
         {   #if config manager returns when ups is available then isuee is permissions
-            throw "account running process needs permissions"
+            throw "account running process need admin permission on service application"
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
         
@@ -354,7 +354,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
         [parameter(Mandatory = $true)]  [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)]  [System.string ] $DisplayName ,
-        [parameter(Mandatory = $false)]  [System.string ] $Type ,
+        [parameter(Mandatory = $false)]  [ValidateSet("BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL")] [System.string ] $Type ,
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
