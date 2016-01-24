@@ -33,7 +33,7 @@ function Get-TargetResource
         {
 
             $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
-		    $context = Get-SPServiceContext -Site $caURL 
+            $context = Get-SPServiceContext -Site $caURL 
 
             $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
