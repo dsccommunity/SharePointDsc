@@ -269,16 +269,7 @@ Describe "xSPUserProfileProperty" {
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-        
-<#        Mock Get-xSharePointUserProfileSubTypeManager{
-            $properties = @()
-        return @()| Add-Member ScriptMethod GetProfileSubtype {
-                $Global:UpsSubTypeMgrGetProfileSubtypeCalled=$true;
-                return $false; 
-            } -PassThru 
-            
-        }
-        #>
+  
         
         Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
         $propertyMappingItem =  @{
@@ -302,7 +293,6 @@ Describe "xSPUserProfileProperty" {
                                         $Global:UpsMappingAddNewMappingCalled=$true;
                                         return $true; 
                                         } -PassThru 
-                            #} -PassThru -Force
         $connection = @{ 
             DisplayName = "Contoso" 
             Server = "contoso.com"
@@ -333,7 +323,6 @@ Describe "xSPUserProfileProperty" {
         $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
         } -PassThru
         
-        #$ConnnectionManager.add($connection)
         
         Mock New-Object -MockWith {
             $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
@@ -361,8 +350,6 @@ Describe "xSPUserProfileProperty" {
             ServiceApplicationProxyGroup = "Proxy Group"
             ConnectionManager=  @($connection) #New-Object System.Collections.ArrayList
         }
-
-        #$userProfileServiceValidConnection.ConnectionManager.Add($connection);
 
         Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
 
