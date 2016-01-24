@@ -1,7 +1,7 @@
 version: 0.9.{build}.0
 
 install:
-    - cinst -y pester --version 3.3.13
+    - cinst -y pester
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
         Import-Module .\DscResource.Tests\TestHelper.psm1 -force
