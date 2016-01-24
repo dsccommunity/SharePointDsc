@@ -45,7 +45,12 @@ Describe "xSPUserProfileSyncConnection" {
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
         Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
-
+		Mock Get-SPWebApplication { 
+				return @{
+						Url="http://ca"
+						IsAdministrationWebApplication=$true
+				}
+		}
         $connection = @{ 
             DisplayName = "Contoso" 
             Server = "contoso.com"

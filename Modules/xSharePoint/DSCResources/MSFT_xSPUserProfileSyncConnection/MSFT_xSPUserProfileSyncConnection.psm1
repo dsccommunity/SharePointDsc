@@ -32,8 +32,9 @@ function Get-TargetResource
         else
         {
 
-            #what if permission isn't granted ?
-            $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
+            $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+		    $context = Get-SPServiceContext -Site $caURL 
+
             $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
             $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
@@ -94,7 +95,9 @@ function Set-TargetResource
     if ($null -eq $ups) { 
         throw "User Profile Service Application $($params.UserProfileService) not found"
     }
-    $context = Get-xSharePointServiceContext  $ups.ServiceApplicationProxyGroup 
+    $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+    $context = Get-SPServiceContext -Site $caURL 
+
     Write-Verbose -Message "retrieving UserProfileConfigManager "
     $upcm = New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
