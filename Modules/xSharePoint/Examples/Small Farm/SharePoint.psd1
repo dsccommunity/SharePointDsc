@@ -69,7 +69,7 @@
             WebApplications = @(
                 @{
                     Name = "SharePoint Sites"
-                    DatabaeName = "SP_Content_01"
+                    DatabaseName = "SP_Content_01"
                     Url = "http://sites.sharepoint.contoso.local"
                     Authentication = "NTLM"
                     Anonymous = $false

@@ -26,7 +26,7 @@ class MSFT_xSPSecureStoreServiceApp : OMI_BaseResource
     [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
     [Write] string DatabaseName;
     [Write] string DatabaseServer;
-    [Write, ValueMap {"Windows","SQL"}, Values{"Windows","SQL"}] string DatabaseAuthenticationType;
+    [Write, ValueMap{"Windows","SQL"}, Values{"Windows","SQL"}] string DatabaseAuthenticationType;
     [Write] string FailoverDatabaseServer;
     [Write] boolean PartitionMode;
     [Write] boolean Sharing;
