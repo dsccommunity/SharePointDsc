@@ -3,10 +3,6 @@
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
-#(Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
-#C:\Users\camilo\Source\Repos\xSharePoint\Modules\xSharePoint\DSCResources\MSFT_xSPUserProfileProperty\
-#C:\Users\camilo\Source\Repos\xSharePoint\Tests\xSharePoint
-#.\xSharePoint.xSPUserProfileProperty.Tests.ps1
 Add-PSSnapin Microsoft.SharePoint.PowerShell -ea 0 
 
 $ErrorActionPreference = 'stop'
