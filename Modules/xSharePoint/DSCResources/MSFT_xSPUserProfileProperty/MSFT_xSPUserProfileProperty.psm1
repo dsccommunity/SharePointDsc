@@ -12,7 +12,6 @@ function Get-TargetResource
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
-        [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingDirection ,
