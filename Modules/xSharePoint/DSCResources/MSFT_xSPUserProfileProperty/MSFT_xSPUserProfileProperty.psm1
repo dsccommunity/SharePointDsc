@@ -128,7 +128,6 @@ function Set-TargetResource
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
-        [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingDirection ,
@@ -358,7 +357,6 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]  [System.string ] $Description ,
         [parameter(Mandatory = $false)]  [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] [System.string ] $PolicySetting ,
         [parameter(Mandatory = $false)]  [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] [System.string ] $PrivacySetting ,
-        [parameter(Mandatory = $false)]  [System.Boolean] $AllowUserEdit ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingConnectionName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingPropertyName ,
         [parameter(Mandatory = $false)]  [System.string ] $MappingDirection ,
@@ -381,7 +379,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile property $Name"
     if ($null -eq $CurrentValues) { return $false  }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","AllowUserEdit", "MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
 }
 
 Export-ModuleMember -Function *-TargetResource
