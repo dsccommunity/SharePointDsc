@@ -32,17 +32,6 @@ function Get-xSharePointContentService() {
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
 }
 
-function Get-xSharePointUserProfileSubTypeManager {
-    [CmdletBinding()]
-    param
-    (
-        $context
-    )
-    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
-    
-    return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($context)
-}
-
 function Get-xSharePointInstalledProductVersion() {
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
