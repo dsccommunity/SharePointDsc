@@ -48,7 +48,7 @@ function Get-TargetResource
             $domainController = $namingContext.PreferredDomainControllers | select -First 1
             return @{
                         UserProfileService = $UserProfileService
-                        Forest = $connection.Server #"contoso.com" #TODO: GetCorrect Forest
+                        Forest = $connection.Server
                         Name = $namingContext.DisplayName
                         Credentials = $accountCredentials 
                         IncludedOUs = $namingContext.ContainersIncluded
