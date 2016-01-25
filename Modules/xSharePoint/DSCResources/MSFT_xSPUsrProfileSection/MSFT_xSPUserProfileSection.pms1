@@ -1,0 +1,199 @@
+function Get-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)] [System.string] $Name ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $true)] [System.string] $UserProfileService ,
+        [parameter(Mandatory = $false)] [System.string] $DisplayName ,
+        [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder ,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+    )
+
+    Write-Verbose -Message "Getting user profile service application $Name"
+
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $params = $args[0]
+        
+        
+        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+        if ($null -eq $upsa) { 
+            return $null 
+        }
+        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+        $context = Get-SPServiceContext -Site $caURL 
+        $userProfileConfigManager  = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
+        
+        $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
+        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
+        
+        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+        if($null -eq $userProfileProperty ){
+            return $null 
+        }
+        
+        $termSet = @{
+            TermSet = ""
+            TermGroup =""
+            TermStore = ""
+        }
+
+        if($userProfileProperty.CoreProperty.TermSet -ne $null)
+        {
+            $termSet.TermSet = $userProfileProperty.CoreProperty.TermSet.Name
+            $termSet.TermGroup = $userProfileProperty.CoreProperty.TermSet.Group.Name
+            $termSet.TermStore = $userProfileProperty.CoreProperty.TermSet.TermStore.Name
+        }
+        $mapping  = @{
+            ConectionName = ""
+            PropertyName =""
+            Direction = ""
+        }
+        $syncConnection  = $userProfileConfigManager.ConnectionManager | ? {$_.PropertyMapping.Item($params.Name) -ne $null} 
+        if($syncConnection -ne $null) {
+            $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
+            if($currentMapping -ne $null)
+            {
+                $mapping.Direction = "Import"
+                $mapping.ConnectionName = $params.MappingConnectionName 
+                if($currentMapping.IsExport)
+                {
+                    $mapping.Direction = "Export"
+                }
+                $mapping.PropertyName = $currentMapping.DataSourcePropertyName
+            }
+        }
+        
+
+        return @{
+            Name = $userProfileProperty.Name 
+            UserProfileServiceAppName = $params.UserProfileService
+            DisplayName = $userProfileProperty.DisplayName
+            Type = $userProfileProperty.CoreProperty.Type.GetTypeCode()
+            Description = $userProfileProperty.Description 
+            PolicySetting = $userProfileProperty.PrivacyPolicy
+            PrivacySetting = $userProfileProperty.DefaultPrivacy
+            MappingConnectionName = $mapping.ConnectionName
+            MappingPropertyName = $mapping.PropertyName
+            MappingDirection = $Mapping.Direction
+            Length = $userProfileProperty.CoreProperty.Length
+            DisplayOrder =$userProfileProperty.DisplayOrder 
+            IsEventLog =$userProfileProperty.TypeProperty.IsEventLog
+            IsVisibleOnEditor=$userProfileProperty.TypeProperty.IsVisibleOnEditor
+            IsVisibleOnViewer  =$userProfileProperty.TypeProperty.IsVisibleOnViewer
+            IsUserEditable = $userProfileProperty.IsUserEditable
+            IsAlias = $userProfileProperty.IsAlias 
+            IsSearchable = $userProfileProperty.CoreProperty.IsSearchable 
+            TermStore = $termSet.TermStore
+            TermGroup = $termSet.TermGroup
+            TermSet = $termSet.TermSet
+            UserOverridePrivacy = $userProfileProperty.AllowPolicyOverride
+        }
+
+    }
+    return $result
+}
+
+function Set-TargetResource
+{
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)] [System.string ] $Name,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure,
+        [parameter(Mandatory = $true)] [System.string ] $UserProfileService,
+        [parameter(Mandatory = $false)] [System.string ] $DisplayName,
+        [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+    )
+
+    #note for integration test: CA can take a couple of minutes to notice the change. don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
+
+    Write-Verbose -Message "Creating user profile property $Name"
+    $test = $PSBoundParameters
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
+        $params = $args[0]
+        
+        #region setting up objects 
+        $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+ 
+        If ($null -eq $ups)
+        {
+            return $null
+        }
+        
+        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+        $context = Get-SPServiceContext  $caURL 
+
+        $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
+        if($null -eq $userProfileConfigManager)
+        {   #if config manager returns when ups is available then isuee is permissions
+            throw "account running process needs admin permission on user profile service application"
+        }
+        $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
+        
+        $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
+        $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
+        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
+        
+        
+        $userProfileProperty = $userProfileSubType.Properties.GetSectionByName($params.Name) 
+
+        if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
+            if($userProfileProperty -ne $null)
+            {
+                $coreProperties.RemovePropertyByName($params.Name)
+                return;
+            }
+        } elseif($userProfileProperty -eq $null){
+            $coreProperty = $coreProperties.Create($false)
+            $coreProperty.Name = $params.Name
+            $coreProperty.DisplayName = $params.DisplayName
+
+            $CoreProperties.Add($coreProperty)
+        }else{
+            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+
+        
+        }
+        $userProfileProperty.CoreProperty.Commit()
+
+        #region display order
+        # Set-DisplayOrder
+        if($params.ContainsKey("DisplayOrder"))
+        {
+            $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
+            $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
+            $profileManager.Properties.CommitDisplayOrder()
+        }
+        #endregion
+
+    }
+    return  $result
+}
+
+function Test-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)] [System.string ] $Name ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $true)] [System.string ] $UserProfileService ,
+        [parameter(Mandatory = $false)] [System.string ] $DisplayName ,
+        [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder ,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+
+    )
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing for user profile property $Name"
+    if ($null -eq $CurrentValues) { return $false  }
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
+}
+
+Export-ModuleMember -Function *-TargetResource
+
