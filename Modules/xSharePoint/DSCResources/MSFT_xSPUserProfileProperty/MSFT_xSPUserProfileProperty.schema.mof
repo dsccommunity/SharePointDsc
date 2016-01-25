@@ -49,10 +49,10 @@ class MSFT_xSPUserProfileProperty : OMI_BaseResource
     [write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [required] string UserProfileService;
     [write] string DisplayName ;
-    [write, ValueMap{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}, Values{"BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL"}]  string Type;
+    [write, ValueMap{"BigInteger","Binary","Boolean","Date","DateNoYear","DateTime","Email","Float","Guid","HTML","Integer","Person","String","StringMultiValue","TimeZone","URL"}, Values{"BigInteger","Binary","Boolean","Date","DateNoYear","DateTime","Email","Float","Guid","HTML","Integer","Person","String","StringMultiValue","TimeZone","URL"}] string Type;
     [write] string Description ;
-    [write, ValueMap{"Mandatory", "Optin","Optout", "Disabled"}, Values{"Mandatory", "Optin","Optout", "Disabled"}] string PolicySetting;
-    [write, ValueMap{"Public", "Contacts", "Organization", "Manager", "Private"}, Values{"Public", "Contacts", "Organization", "Manager", "Private"}] string PrivacySetting ;
+    [write, ValueMap{"Mandatory","Optin","Optout","Disabled"}, Values{"Mandatory","Optin","Optout","Disabled"}] string PolicySetting;
+    [write, ValueMap{"Public","Contacts","Organization","Manager","Private"}, Values{"Public","Contacts","Organization","Manager","Private"}] string PrivacySetting ;
     [write] string MappingConnectionName ;
     [write] string MappingPropertyName ;
     [write] string MappingDirection ;
@@ -66,7 +66,7 @@ class MSFT_xSPUserProfileProperty : OMI_BaseResource
     [write] boolean IsSearchable;
     [write] boolean UserOverridePrivacy ;
     [write] string TermStore ;
-    [write] string TermSetGroup;
+    [write] string TermGroup;
     [write] string TermSet;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
