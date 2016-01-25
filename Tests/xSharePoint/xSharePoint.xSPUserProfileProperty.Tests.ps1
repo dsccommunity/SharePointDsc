@@ -430,7 +430,7 @@ Describe "xSPUserProfileProperty" {
                 {Set-TargetResource @testParamsNewProperty} | should throw "connection not found"
 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $false
+                $Global:xSPUPGetPropertyByNameCalled | Should be $true
                 $Global:xSPUPSMappingItemCalled | Should be $false
 
             }
