@@ -191,10 +191,7 @@ function Set-TargetResource
         
         $userProfileSubTypeProperties = $userProfileSubType.Properties
         
-        $syncConnection  = $userProfileConfigManager.ConnectionManager | Where-Object { $_.DisplayName -eq $params.MappingConnectionName} 
-        if($null -eq $syncConnection ) {
-            throw "connection not found"
-        }
+        
         #endregion 
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
@@ -309,6 +306,10 @@ function Set-TargetResource
         #region mapping
         #Set-Mapping
         if($params.ContainsKey("MappingConnectionName") -and $params.ContainsKey("MappingPropertyName")){
+            $syncConnection  = $userProfileConfigManager.ConnectionManager | Where-Object { $_.DisplayName -eq $params.MappingConnectionName} 
+            if($null -eq $syncConnection ) {
+                throw "connection not found"
+            }
             $syncConnection  = $userProfileConfigManager.ConnectionManager| Where-Object { $_.DisplayName -eq $params.MappingConnectionName}  
             #$userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
             $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
