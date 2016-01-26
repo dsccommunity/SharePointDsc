@@ -14,7 +14,29 @@ The "MembersToInclude" and "MembersToExclude" properties will allow you to contr
         Members             = "CONTOSO\user1", "CONTOSO\user2"
         AllContentDatabases = $true
     }
+
+    xSPShellAdmins ShellAdmins
+    {
+        Name                = "Shell Admins"
+        Members             = "CONTOSO\user1", "CONTOSO\user2"
+        ContentDatabases    = [{
+            Name    = "SharePoint_Content"
+            Members = "CONTOSO\user3", "CONTOSO\user4"
+        }, {
+            Name    = "SharePoint_Content2"
+            Members = "CONTOSO\user5", "CONTOSO\user6"
+        }]
+    }
 */
+
+[ClassVersion("1.0.0")]
+Class MSFT_xSPContentDatabasePermissions
+{
+    [write]String Name;
+    [Write] String Members[];
+    [Write] String MembersToInclude[];
+    [Write] String MembersToExclude[];
+};
 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPShellAdmins")]
 class MSFT_xSPShellAdmins : OMI_BaseResource
@@ -23,6 +45,7 @@ class MSFT_xSPShellAdmins : OMI_BaseResource
     [Write] String Members[];
     [Write] String MembersToInclude[];
     [Write] String MembersToExclude[];
+    [Write, EmbeddedInstance("MSFT_xSPContentDatabasePermissions")] String ContentDatabases;
     [Write] Boolean AllContentDatabases;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
