@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String[]] $Members,
         [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
         [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance] $ContentDatabases,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $ContentDatabases,
         [parameter(Mandatory = $false)] [System.Boolean]  $AllContentDatabases,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -34,9 +34,7 @@ function Get-TargetResource
         $allContentDatabases = $true
 
         $cdbPermissions = @()
-        Write-Verbose -Verbose "Looping through content databases"
         foreach ($contentDatabase in (Get-SPContentDatabase)) {
-            Write-Verbose -Verbose "Checking content database $contentDatabase"
             $cdbPermission = @{}
             
             $cdbPermission.Name = $contentDatabase.Name
@@ -69,6 +67,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String[]] $Members,
         [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
         [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $ContentDatabases,
         [parameter(Mandatory = $false)] [System.Boolean]  $AllContentDatabases,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -93,38 +92,55 @@ function Set-TargetResource
         $shellAdmins = Get-SPShellAdmin
 
         if ($params.Members) {
-            $differences = Compare-Object -ReferenceObject $shellAdmins.UserName -DifferenceObject $params.Members
+            Write-Verbose -Verbose "Processing Members"
+            if ($shellAdmins) {
+                $differences = Compare-Object -ReferenceObject $shellAdmins.UserName -DifferenceObject $params.Members
 
-            if ($differences -eq $null) {
-                Write-Verbose "Shell Admins group matches. No further processing required"
-            } else {
-                Write-Verbose "Shell Admins group does not match. Perform corrective action"
-                ForEach ($difference in $differences) {
-                    if ($difference.SideIndicator -eq "=>") {
-                        # Add account
-                        $user = $difference.InputObject
-                        Add-SPShellAdmin -UserName $user
-                    } elseif ($difference.SideIndicator -eq "<=") {
-                        # Remove account
-                        $user = $difference.InputObject
-                        Remove-SPShellAdmin -UserName $user -Confirm:$false
+                if ($differences -eq $null) {
+                    Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
+                } else {
+                    Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
+                    ForEach ($difference in $differences) {
+                        if ($difference.SideIndicator -eq "=>") {
+                            # Add account
+                            $user = $difference.InputObject
+                            Add-SPShellAdmin -UserName $user
+                        } elseif ($difference.SideIndicator -eq "<=") {
+                            # Remove account
+                            $user = $difference.InputObject
+                            Remove-SPShellAdmin -UserName $user -Confirm:$false
+                        }
                     }
+                }
+            } else {
+                foreach ($member in $params.Members) {
+                    Add-SPShellAdmin -UserName $member
                 }
             }
         }
 
         if ($params.MembersToInclude) {
-            foreach ($member in $params.MembersToInclude) {
-                if (-not $shellAdmins.UserName.Contains($member)) {
+            Write-Verbose -Verbose "Processing MembersToInclude"
+            if ($shellAdmins) {
+                foreach ($member in $params.MembersToInclude) {
+                    if (-not $shellAdmins.UserName.Contains($member)) {
+                        Add-SPShellAdmin -UserName $member
+                    }
+                }
+            } else {
+                foreach ($member in $params.MembersToInclude) {
                     Add-SPShellAdmin -UserName $member
                 }
             }
         }
 
         if ($params.MembersToExclude) {
-            foreach ($member in $params.MembersToInclude) {
-                if ($shellAdmins.UserName.Contains($member)) {
-                    Remove-SPShellAdmin -UserName $member -Confirm:$false
+            Write-Verbose -Verbose "Processing MembersToExclude"
+            if (-not $shellAdmins) {
+                foreach ($member in $params.MembersToInclude) {
+                    if ($shellAdmins.UserName.Contains($member)) {
+                        Remove-SPShellAdmin -UserName $member -Confirm:$false
+                    }
                 }
             }
         }
@@ -135,38 +151,56 @@ function Set-TargetResource
 
             foreach ($contentDatabase in $params.ContentDatabases) {
                 # Check if configured database exists, throw error if not
-                Write-Verbose "Processing Content Database: $($contentDatabase.Name)"
+                Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
 
                 $currentCDB = Get-SPContentDatabase | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
                 if ($currentCDB -ne $null) {
-                    $dbShellAdmins = Get-SPShellAdmins -database $currentCDB.Id
+                    $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
+
                     if ($contentDatabase.Members) {
-                        $differences = Compare-Object -ReferenceObject $currentCDB.Members -DifferenceObject $dbShellAdmins.UserName
-                        ForEach ($difference in $differences) {
-                            if ($difference.SideIndicator -eq "=>") {
-                                # Add account
-                                $user = $difference.InputObject
-                                Add-SPShellAdmin -database $currentCDB.Id -UserName $user
-                            } elseif ($difference.SideIndicator -eq "<=") {
-                                # Remove account
-                                $user = $difference.InputObject
-                                Remove-SPShellAdmin -database $currentCDB.Id -UserName $user -Confirm:$false
+                        Write-Verbose -Verbose "Processing Members"
+                        if ($dbShellAdmins) {
+                            $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $dbShellAdmins.UserName
+                            ForEach ($difference in $differences) {
+                                if ($difference.SideIndicator -eq "<=") {
+                                    # Add account
+                                    $user = $difference.InputObject
+                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $user
+                                } elseif ($difference.SideIndicator -eq "=>") {
+                                    # Remove account
+                                    $user = $difference.InputObject
+                                    Remove-SPShellAdmin -database $currentCDB.Id -UserName $user -Confirm:$false
+                                }
+                            }
+                        } else {
+                            Foreach ($member in $contentDatabase.Members) {
+                                Add-SPShellAdmin -database $currentCDB.Id -UserName $member
                             }
                         }
                     }
 
                     if ($contentDatabase.MembersToInclude) {
-                        ForEach ($member in $contentDatabase.MembersToInclude) {
-                            if (-not $dbShellAdmins.UserName.Contains($member)) {
-                                Add-SPShellAdmin -UserName $member
+                        Write-Verbose -Verbose "Processing MembersToInclude"
+                        if ($dbShellAdmins) {
+                            ForEach ($member in $contentDatabase.MembersToInclude) {
+                                if (-not $dbShellAdmins.UserName.Contains($member)) {
+                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                }
+                            }
+                        } else {
+                            ForEach ($member in $contentDatabase.MembersToInclude) {
+                                Add-SPShellAdmin -database $currentCDB.Id -UserName $member
                             }
                         }
                     }
 
                     if ($contentDatabase.MembersToExclude) {
-                        ForEach ($member in $contentDatabase.MembersToExclude) {
-                            if ($shellAdmins.UserName.Contains($member)) {
-                                Remove-SPShellAdmin -UserName $member -Confirm:$false
+                        Write-Verbose -Verbose "Processing MembersToExclude"
+                        if ($dbShellAdmins) {
+                            ForEach ($member in $contentDatabase.MembersToExclude) {
+                                if ($dbShellAdmins.UserName.Contains($member)) {
+                                    Remove-SPShellAdmin -database $currentCDB.Id -UserName $member -Confirm:$false
+                                }
                             }
                         }
                     }
@@ -180,38 +214,54 @@ function Set-TargetResource
             foreach ($contentDatabase in (Get-SPContentDatabase)) {
                 $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
                 if ($params.Members) {
-                    $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName -DifferenceObject $params.Members
+                    Write-Verbose -Verbose "PRocessing CDB: $($contentDatabase.Name)"
+                    if ($dbShellAdmins) {
+                        $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName -DifferenceObject $params.Members
 
-                    if ($differences -eq $null) {
-                        Write-Verbose "Shell Admins group matches. No further processing required"
-                    } else {
-                        Write-Verbose "Shell Admins group does not match. Perform corrective action"
-                        ForEach ($difference in $differences) {
-                            if ($difference.SideIndicator -eq "=>") {
-                                # Add account
-                                $user = $difference.InputObject
-                                Add-SPShellAdmin -UserName $user
-                            } elseif ($difference.SideIndicator -eq "<=") {
-                                # Remove account
-                                $user = $difference.InputObject
-                                Remove-SPShellAdmin -UserName $user -Confirm:$false
+                        if ($differences -eq $null) {
+                            Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
+                        } else {
+                            Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
+                            ForEach ($difference in $differences) {
+                                if ($difference.SideIndicator -eq "=>") {
+                                    # Add account
+                                    $user = $difference.InputObject
+                                    Add-SPShellAdmin -database $contentDatabase.Id -UserName $user
+                                } elseif ($difference.SideIndicator -eq "<=") {
+                                    # Remove account
+                                    $user = $difference.InputObject
+                                    Remove-SPShellAdmin -database $contentDatabase.Id -UserName $user -Confirm:$false
+                                }
                             }
+                        }
+                    } else {
+                        Foreach ($member in $params.Members) {
+                            Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
                         }
                     }
                 }
 
                 if ($params.MembersToInclude) {
-                    foreach ($member in $params.MembersToInclude) {
-                        if (-not $dbShellAdmins.UserName.Contains($member)) {
-                            Add-SPShellAdmin -UserName $member
+                    if ($dbShellAdmins) {
+                        foreach ($member in $params.MembersToInclude) {
+                            if (-not $dbShellAdmins.UserName.Contains($member)) {
+                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                            }
                         }
+                    } else {
+                        foreach ($member in $params.MembersToInclude) {
+                            Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                        }
+
                     }
                 }
 
                 if ($params.MembersToExclude) {
-                    foreach ($member in $params.MembersToInclude) {
-                        if ($dbShellAdmins.UserName.Contains($member)) {
-                            Remove-SPShellAdmin -UserName $member -Confirm:$false
+                    if (-not $dbShellAdmins) {
+                        foreach ($member in $params.MembersToInclude) {
+                            if ($dbShellAdmins.UserName.Contains($member)) {
+                                Remove-SPShellAdmin -database $contentDatabase.Id -UserName $member -Confirm:$false
+                            }
                         }
                     }
                 }
@@ -231,6 +281,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String[]] $Members,
         [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
         [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
+        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $ContentDatabases,
         [parameter(Mandatory = $false)] [System.Boolean]  $AllContentDatabases,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -256,6 +307,8 @@ function Test-TargetResource
 
     if ($Members) {
         Write-Verbose "Processing Members parameter"
+        if ($CurrentValues.Members) { return $false }
+
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
 
         if ($differences -eq $null) {
@@ -268,6 +321,8 @@ function Test-TargetResource
 
     if ($MembersToInclude) {
         Write-Verbose "Processing MembersToInclude parameter"
+        if ($CurrentValues.Members) { return $false }
+
         ForEach ($member in $MembersToInclude) {
             if (-not($CurrentValues.Members.Contains($member))) {
                 Write-Verbose "$member is not a Shell Admin. Set result to false"
@@ -299,6 +354,8 @@ function Test-TargetResource
             Write-Verbose "Processing Content Database: $($contentDatabase.Name)"
 
             if ($Members) {
+                if ($contentDatabase.Members) { return $false }
+
                 $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $Members
                 if ($differences -eq $null) {
                     Write-Verbose "Shell Admins group matches"
@@ -309,6 +366,8 @@ function Test-TargetResource
             }
 
             if ($MembersToInclude) {
+                if ($contentDatabase.Members) { return $false }
+
                 ForEach ($member in $MembersToInclude) {
                     if (-not($contentDatabase.Members.Contains($member))) {
                         Write-Verbose "$member is not a Shell Admin. Set result to false"
@@ -343,6 +402,8 @@ function Test-TargetResource
             $currentCDB = $CurrentValues.ContentDatabases | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
             if ($currentCDB -ne $null) {
                 if ($contentDatabase.Members) {
+                    if ($currentCDB.Members) { return $false }
+
                     $differences = Compare-Object -ReferenceObject $currentCDB.Members -DifferenceObject $contentDatabase.Members
                     if ($differences -eq $null) {
                         Write-Verbose "Shell Admins group matches"
@@ -353,6 +414,8 @@ function Test-TargetResource
                 }
 
                 if ($contentDatabase.MembersToInclude) {
+                    if ($currentCDB.Members) { return $false }
+
                     ForEach ($member in $contentDatabase.MembersToInclude) {
                         if (-not($currentCDB.Members.Contains($member))) {
                             Write-Verbose "$member is not a Shell Admin. Set result to false"
@@ -384,4 +447,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-
