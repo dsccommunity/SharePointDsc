@@ -91,8 +91,8 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased 
  * Added xSPWordAutomationServiceApp resources
-
  * Added xSPHealthAnalyzerRuleState resources
+ * Added xSPUserProfileProperty
 
 ### 0.9.0.0
 

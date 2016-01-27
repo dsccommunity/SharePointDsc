@@ -178,7 +178,7 @@ function Set-TargetResource
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         if($null -eq $userProfileConfigManager)
         {   #if config manager returns when ups is available then isuee is permissions
-            throw "account running process needs permissions"
+            throw "account running process needs admin permissions on the user profile service application"
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
         
