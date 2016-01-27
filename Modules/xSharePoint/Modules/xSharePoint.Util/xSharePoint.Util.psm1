@@ -32,7 +32,7 @@ function Get-xSharePointServiceContext {
     param
     (
         [parameter(Mandatory = $true,Position=1)]
-        $proxyGroup
+        $ProxyGroup
     )
       Write-Verbose "Getting SPContext for Proxy group $($proxyGroup)"
     return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
