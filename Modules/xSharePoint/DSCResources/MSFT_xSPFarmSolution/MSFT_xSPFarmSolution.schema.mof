@@ -1,0 +1,26 @@
+/*
+**Description**
+
+This resource will deploy a farm solution to a farm. A version will be stored in the property bag to determin later if the correct version is installed.
+
+**Example**
+
+    xSPFarmSolution SampleWsp
+    {
+        Name                 = "MySolution.wsp"
+		LiteralPath          = "C:\src\MySolution.wsp"
+		Version              = "1.0.0"
+        PsDscRunAsCredential = $InstallAccount
+    }
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPFarmSolution")]
+class MSFT_xSPFarmSolution : OMI_BaseResource
+{
+    [Key] string Name;
+    [Required] string LiteralPath;
+    [Write] string WebApplications[];
+    [Write] string Ensure;
+	[Write] string Version;
+	[Write] Boolean Deployed;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
