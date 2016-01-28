@@ -14,21 +14,45 @@ function Get-TargetResource
     )
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+        Write-Verbose -Verbose "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+        return $null
     }
 
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    if ($ContentDatabases) {
+        foreach ($contentDatabase in $ContentDatabases) {
+            if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) -or ($contentDatabase.MembersToExclude))) {
+                Write-Verbose -Verbose "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+                return $null
+            }
+
+            if (!$contentDatabase.Members -and !$contentDatabase.MembersToInclude -and !$contentDatabase.MembersToExclude) {
+                Write-Verbose -Verbose "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+                return $null
+            }
+        }
+    } else {
+        if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
+            Write-Verbose -Verbose "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+            return $null
+        }
     }
 
     if ($ContentDatabases -and $AllContentDatabases) {
-        throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
+        Write-Verbose -Verbose "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
+        return $null
     }
 
     Write-Verbose -Message "Getting all Shell Admins"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+        try {
+            $spFarm = Get-SPFarm
+        } catch {
+            Write-Verbose -Verbose "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
+            return $null
+        }
 
         $shellAdmins = Get-SPShellAdmin
         $allContentDatabases = $true
@@ -78,8 +102,20 @@ function Set-TargetResource
         Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
     }
 
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    if ($ContentDatabases) {
+        foreach ($contentDatabase in $ContentDatabases) {
+            if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) -or ($contentDatabase.MembersToExclude))) {
+                throw "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+            }
+
+            if (!$contentDatabase.Members -and !$contentDatabase.MembersToInclude -and !$contentDatabase.MembersToExclude) {
+                throw "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+            }
+        }
+    } else {
+        if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
+            throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+        }
     }
 
     if ($ContentDatabases -and $AllContentDatabases) {
@@ -88,6 +124,13 @@ function Set-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
+
+        try {
+            $spFarm = Get-SPFarm
+        } catch {
+            throw "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
+            return
+        }
 
         $shellAdmins = Get-SPShellAdmin
 
@@ -136,8 +179,8 @@ function Set-TargetResource
 
         if ($params.MembersToExclude) {
             Write-Verbose -Verbose "Processing MembersToExclude"
-            if (-not $shellAdmins) {
-                foreach ($member in $params.MembersToInclude) {
+            if ($shellAdmins) {
+                foreach ($member in $params.MembersToExclude) {
                     if ($shellAdmins.UserName.Contains($member)) {
                         Remove-SPShellAdmin -UserName $member -Confirm:$false
                     }
@@ -146,6 +189,7 @@ function Set-TargetResource
         }
 
         if ($params.ContentDatabases) {
+            Write-Verbose "Processing ContentDatabases parameter"
             # The ContentDatabases parameter is set
             # Compare the configuration against the actual set and correct any issues
 
@@ -211,10 +255,12 @@ function Set-TargetResource
         }
 
         if ($params.AllContentDatabases) {
+            Write-Verbose "Processing AllContentDatabases parameter"
+
             foreach ($contentDatabase in (Get-SPContentDatabase)) {
                 $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
                 if ($params.Members) {
-                    Write-Verbose -Verbose "PRocessing CDB: $($contentDatabase.Name)"
+                    Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
                     if ($dbShellAdmins) {
                         $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName -DifferenceObject $params.Members
 
@@ -257,8 +303,8 @@ function Set-TargetResource
                 }
 
                 if ($params.MembersToExclude) {
-                    if (-not $dbShellAdmins) {
-                        foreach ($member in $params.MembersToInclude) {
+                    if ($dbShellAdmins) {
+                        foreach ($member in $params.MembersToExclude) {
                             if ($dbShellAdmins.UserName.Contains($member)) {
                                 Remove-SPShellAdmin -database $contentDatabase.Id -UserName $member -Confirm:$false
                             }
@@ -287,18 +333,6 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing Shell Admin settings"
-    
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
-    }
-
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
-    }
-
-    if ($ContentDatabases -and $AllContentDatabases) {
-        throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
-    }
 
     # Start checking
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -307,7 +341,7 @@ function Test-TargetResource
 
     if ($Members) {
         Write-Verbose "Processing Members parameter"
-        if ($CurrentValues.Members) { return $false }
+        if (-not $CurrentValues.Members) { return $false }
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
 
@@ -321,7 +355,7 @@ function Test-TargetResource
 
     if ($MembersToInclude) {
         Write-Verbose "Processing MembersToInclude parameter"
-        if ($CurrentValues.Members) { return $false }
+        if (-not $CurrentValues.Members) { return $false }
 
         ForEach ($member in $MembersToInclude) {
             if (-not($CurrentValues.Members.Contains($member))) {
@@ -335,12 +369,14 @@ function Test-TargetResource
 
     if ($MembersToExclude) {
         Write-Verbose "Processing MembersToExclude parameter"
-        ForEach ($member in $MembersToExclude) {
-            if ($CurrentValues.Members.Contains($member)) {
-                Write-Verbose "$member is a Shell Admin. Set result to false"
-                return $false
-            } else {
-                Write-Verbose "$member is not a Shell Admin. Skipping"
+        if ($CurrentValues.Members) {
+            ForEach ($member in $MembersToExclude) {
+                if ($CurrentValues.Members.Contains($member)) {
+                    Write-Verbose "$member is a Shell Admin. Set result to false"
+                    return $false
+                } else {
+                    Write-Verbose "$member is not a Shell Admin. Skipping"
+                }
             }
         }
     }
@@ -348,13 +384,14 @@ function Test-TargetResource
     if ($AllContentDatabases) {
         # The AllContentDatabases parameter is set
         # Check the Members group against all databases
+        Write-Verbose "Processing AllContentDatabases parameter"
 
         foreach ($contentDatabase in $CurrentValues.ContentDatabases) {
             # Check if configured database exists, throw error if not
             Write-Verbose "Processing Content Database: $($contentDatabase.Name)"
 
             if ($Members) {
-                if ($contentDatabase.Members) { return $false }
+                if (-not $contentDatabase.Members) { return $false }
 
                 $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $Members
                 if ($differences -eq $null) {
@@ -366,7 +403,7 @@ function Test-TargetResource
             }
 
             if ($MembersToInclude) {
-                if ($contentDatabase.Members) { return $false }
+                if (-not $contentDatabase.Members) { return $false }
 
                 ForEach ($member in $MembersToInclude) {
                     if (-not($contentDatabase.Members.Contains($member))) {
@@ -379,12 +416,14 @@ function Test-TargetResource
             }
 
             if ($MembersToExclude) {
-                ForEach ($member in $MembersToExclude) {
-                    if ($contentDatabase.Members.Contains($member)) {
-                        Write-Verbose "$member is a Shell Admin. Set result to false"
-                        return $false
-                    } else {
-                        Write-Verbose "$member is not a Shell Admin. Skipping"
+                if ($contentDatabase.Members) {
+                    ForEach ($member in $MembersToExclude) {
+                        if ($contentDatabase.Members.Contains($member)) {
+                            Write-Verbose "$member is a Shell Admin. Set result to false"
+                            return $false
+                        } else {
+                            Write-Verbose "$member is not a Shell Admin. Skipping"
+                        }
                     }
                 }
             }
@@ -394,6 +433,7 @@ function Test-TargetResource
     if ($ContentDatabases) {
         # The ContentDatabases parameter is set
         # Compare the configuration against the actual set
+        Write-Verbose "Processing ContentDatabases parameter"
 
         foreach ($contentDatabase in $ContentDatabases) {
             # Check if configured database exists, throw error if not
@@ -402,7 +442,8 @@ function Test-TargetResource
             $currentCDB = $CurrentValues.ContentDatabases | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
             if ($currentCDB -ne $null) {
                 if ($contentDatabase.Members) {
-                    if ($currentCDB.Members) { return $false }
+                    Write-Verbose "Processing Members parameter"
+                    if (-not $currentCDB.Members) { return $false }
 
                     $differences = Compare-Object -ReferenceObject $currentCDB.Members -DifferenceObject $contentDatabase.Members
                     if ($differences -eq $null) {
@@ -414,7 +455,8 @@ function Test-TargetResource
                 }
 
                 if ($contentDatabase.MembersToInclude) {
-                    if ($currentCDB.Members) { return $false }
+                    Write-Verbose "Processing MembersToInclude parameter"
+                    if (-not $currentCDB.Members) { return $false }
 
                     ForEach ($member in $contentDatabase.MembersToInclude) {
                         if (-not($currentCDB.Members.Contains($member))) {
@@ -427,12 +469,15 @@ function Test-TargetResource
                 }
 
                 if ($contentDatabase.MembersToExclude) {
-                    ForEach ($member in $contentDatabase.MembersToExclude) {
-                        if ($currentCDB.Members.Contains($member)) {
-                            Write-Verbose "$member is a Shell Admin. Set result to false"
-                            return $false
-                        } else {
-                            Write-Verbose "$member is not a Shell Admin. Skipping"
+                    Write-Verbose "Processing MembersToExclude parameter"
+                    if ($currentCDB.Members) {
+                        ForEach ($member in $contentDatabase.MembersToExclude) {
+                            if ($currentCDB.Members.Contains($member)) {
+                                Write-Verbose "$member is a Shell Admin. Set result to false"
+                                return $false
+                            } else {
+                                Write-Verbose "$member is not a Shell Admin. Skipping"
+                            }
                         }
                     }
                 }
