@@ -10,7 +10,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
-        [parameter(Mandatory = $false)] [Boolean]     $Deployed = $true,
+        [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -243,7 +243,7 @@ function Set-TargetResource
        
      } 
 
-     WaitFor-SolutionJob -SolutionName $Name
+     WaitFor-SolutionJob -SolutionName $Name -InstallAccount $InstallAccount
 
     if ($Ensure -eq "Absent")
     {
@@ -297,7 +297,8 @@ function WaitFor-SolutionJob
     [CmdletBinding()]
     param
     (
-        [string]$SolutionName
+        [parameter(Mandatory = $true)]  [string]$SolutionName,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     start-sleep -s 5
@@ -323,19 +324,18 @@ function WaitFor-SolutionJob
         }else{ 
             Write-Verbose "Solution '$($params.Name)' has no job pending."
             return @{ 
-			    LastOperationResult = "DeploymentSucceeded"
-			    LastOperationDetails = "Solution '$($params.Name)' has no job pending."
-		    }
+                LastOperationResult = "DeploymentSucceeded"
+                LastOperationDetails = "Solution '$($params.Name)' has no job pending."
+            }
         }
 
         Stop-SPAssignment $gc -Verbose:$false
 
-		return @{ 
-			LastOperationResult = $solution.LastOperationResult
-			LastOperationDetails = $solution.LastOperationDetails
-		}
+        return @{ 
+            LastOperationResult = $solution.LastOperationResult
+            LastOperationDetails = $solution.LastOperationDetails
+        }
     }
 }
 
 Export-ModuleMember -Function *-TargetResource
-
