@@ -18,6 +18,17 @@ Describe "xSPWorkManagement" {
             Name = "Test Work Management App"
             ApplicationPool = "Test App Pool"
         }
+        $testParamsComplete = @{
+            Name = "Test Work Management App"
+            ApplicationPool = "Test App Pool"
+            MinimumTimeBetweenEwsSyncSubscriptionSearches =10
+            MinimumTimeBetweenProviderRefreshes=10
+            MinimumTimeBetweenSearchQueries=10
+            NumberOfSubscriptionSyncsPerEwsSyncRun=5
+            NumberOfUsersEwsSyncWillProcessAtOnce=5
+            NumberOfUsersPerEwsSyncBatch=500
+        }
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
 
         
@@ -31,6 +42,8 @@ Describe "xSPWorkManagement" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPWorkManagementServiceApplication { }
+            Mock Set-SPWorkManagementServiceApplication { }
+
             Mock New-SPWorkManagementServiceApplicationProxy { }
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -48,6 +61,9 @@ Describe "xSPWorkManagement" {
         }
 
         Context "When service applications exist in the current farm but the specific Work Management app does not" {
+            Mock Set-SPWorkManagementServiceApplication { }
+            Mock New-SPWorkManagementServiceApplication { }
+            Mock New-SPWorkManagementServiceApplicationProxy { }
 
             Mock Get-SPServiceApplication { return @(@{
                 TypeName = "Some other service app type"
@@ -56,6 +72,7 @@ Describe "xSPWorkManagement" {
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+                Assert-MockCalled Set-SPWorkManagementServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
 
         }
@@ -85,23 +102,43 @@ Describe "xSPWorkManagement" {
                     TypeName = "Work Management Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                })|  Add-Member ScriptMethod Update {
-                    $Global:xSPServiceApplicationUpdateCalled = $true
-                } -PassThru 
+                })
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Set-SPWorkManagementServiceApplication { }
 
             It "returns false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
+                Test-TargetResource @testParamsComplete | Should Be $false
             }
 
             It "calls the update service app cmdlet from the set method" {
-                $Global:xSPServiceApplicationUpdateCalled = $false
-                Set-TargetResource @testParams
-                Assert-MockCalled Get-SPServiceApplicationPool
-                $Global:xSPServiceApplicationUpdateCalled | Should be $true
-                
+                Set-TargetResource @testParamsComplete
+                Assert-MockCalled Set-SPWorkManagementServiceApplication
+                Assert-MockCalled Get-SPWorkManagementServiceApplication
             }
         }
+        Context "When a service application exists and Ensure equals 'absent'" {
+            $testParamsAbsent = @{
+                Name = "Test Work Management App"
+            Ensure = "Absent"
+            }
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Work Management Service Application"
+                    DisplayName = $testParamsAbsent.Name
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                })
+            }
+            Mock Remove-SPServiceApplication{ }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource $testParamsAbsent | Should Be $false
+            }
+
+            It "calls the update service app cmdlet from the set method" {
+                Set-TargetResource $testParamsAbsent
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+
     }
 }
