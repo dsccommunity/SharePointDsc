@@ -147,17 +147,32 @@ function Set-TargetResource
                         if ($difference.SideIndicator -eq "=>") {
                             # Add account
                             $user = $difference.InputObject
-                            Add-SPShellAdmin -UserName $user
+                            try {
+                                Add-SPShellAdmin -UserName $user
+                            } catch {
+                                throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                return
+                            }
                         } elseif ($difference.SideIndicator -eq "<=") {
                             # Remove account
                             $user = $difference.InputObject
-                            Remove-SPShellAdmin -UserName $user -Confirm:$false
+                            try {
+                                Remove-SPShellAdmin -UserName $user -Confirm:$false
+                            } catch {
+                                throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                return
+                            }
                         }
                     }
                 }
             } else {
                 foreach ($member in $params.Members) {
-                    Add-SPShellAdmin -UserName $member
+                    try {
+                        Add-SPShellAdmin -UserName $member
+                    } catch {
+                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                        return
+                    }
                 }
             }
         }
@@ -167,12 +182,22 @@ function Set-TargetResource
             if ($shellAdmins) {
                 foreach ($member in $params.MembersToInclude) {
                     if (-not $shellAdmins.UserName.Contains($member)) {
-                        Add-SPShellAdmin -UserName $member
+                        try {
+                            Add-SPShellAdmin -UserName $member
+                        } catch {
+                            throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                            return
+                        }
                     }
                 }
             } else {
                 foreach ($member in $params.MembersToInclude) {
-                    Add-SPShellAdmin -UserName $member
+                    try {
+                        Add-SPShellAdmin -UserName $member
+                    } catch {
+                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                        return
+                    }
                 }
             }
         }
@@ -182,7 +207,12 @@ function Set-TargetResource
             if ($shellAdmins) {
                 foreach ($member in $params.MembersToExclude) {
                     if ($shellAdmins.UserName.Contains($member)) {
-                        Remove-SPShellAdmin -UserName $member -Confirm:$false
+                        try {
+                            Remove-SPShellAdmin -UserName $member -Confirm:$false
+                        } catch {
+                            throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                            return
+                        }
                     }
                 }
             }
@@ -209,16 +239,31 @@ function Set-TargetResource
                                 if ($difference.SideIndicator -eq "<=") {
                                     # Add account
                                     $user = $difference.InputObject
-                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $user
+                                    try {
+                                        Add-SPShellAdmin -database $currentCDB.Id -UserName $user
+                                    } catch {
+                                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                        return
+                                    }
                                 } elseif ($difference.SideIndicator -eq "=>") {
                                     # Remove account
                                     $user = $difference.InputObject
-                                    Remove-SPShellAdmin -database $currentCDB.Id -UserName $user -Confirm:$false
+                                    try {
+                                        Remove-SPShellAdmin -database $currentCDB.Id -UserName $user -Confirm:$false
+                                    } catch {
+                                        throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                        return
+                                    }
                                 }
                             }
                         } else {
                             Foreach ($member in $contentDatabase.Members) {
-                                Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                try {
+                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                } catch {
+                                    throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                    return
+                                }
                             }
                         }
                     }
@@ -228,12 +273,22 @@ function Set-TargetResource
                         if ($dbShellAdmins) {
                             ForEach ($member in $contentDatabase.MembersToInclude) {
                                 if (-not $dbShellAdmins.UserName.Contains($member)) {
-                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                    try {
+                                        Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                    } catch {
+                                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                        return
+                                    }
                                 }
                             }
                         } else {
                             ForEach ($member in $contentDatabase.MembersToInclude) {
-                                Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                try {
+                                    Add-SPShellAdmin -database $currentCDB.Id -UserName $member
+                                } catch {
+                                    throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                    return
+                                }
                             }
                         }
                     }
@@ -243,7 +298,12 @@ function Set-TargetResource
                         if ($dbShellAdmins) {
                             ForEach ($member in $contentDatabase.MembersToExclude) {
                                 if ($dbShellAdmins.UserName.Contains($member)) {
-                                    Remove-SPShellAdmin -database $currentCDB.Id -UserName $member -Confirm:$false
+                                    try {
+                                        Remove-SPShellAdmin -database $currentCDB.Id -UserName $member -Confirm:$false
+                                    } catch {
+                                        throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                        return
+                                    }
                                 }
                             }
                         }
@@ -272,17 +332,32 @@ function Set-TargetResource
                                 if ($difference.SideIndicator -eq "=>") {
                                     # Add account
                                     $user = $difference.InputObject
-                                    Add-SPShellAdmin -database $contentDatabase.Id -UserName $user
+                                    try {
+                                        Add-SPShellAdmin -database $contentDatabase.Id -UserName $user
+                                    } catch {
+                                        throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                        return
+                                    }
                                 } elseif ($difference.SideIndicator -eq "<=") {
                                     # Remove account
                                     $user = $difference.InputObject
-                                    Remove-SPShellAdmin -database $contentDatabase.Id -UserName $user -Confirm:$false
+                                    try {
+                                        Remove-SPShellAdmin -database $contentDatabase.Id -UserName $user -Confirm:$false
+                                    } catch {
+                                        throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                        return
+                                    }
                                 }
                             }
                         }
                     } else {
                         Foreach ($member in $params.Members) {
-                            Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                            try {
+                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                            } catch {
+                                throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                return
+                            }
                         }
                     }
                 }
@@ -291,12 +366,22 @@ function Set-TargetResource
                     if ($dbShellAdmins) {
                         foreach ($member in $params.MembersToInclude) {
                             if (-not $dbShellAdmins.UserName.Contains($member)) {
-                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                                try {
+                                    Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                                } catch {
+                                    throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                    return
+                                }
                             }
                         }
                     } else {
                         foreach ($member in $params.MembersToInclude) {
-                            Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                            try {
+                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                            } catch {
+                                throw "Error while setting the Shell Admin. The Shell Admin permissions will not be applied. Error details: $($_.Exception.Message)"
+                                return
+                            }
                         }
 
                     }
@@ -306,7 +391,12 @@ function Set-TargetResource
                     if ($dbShellAdmins) {
                         foreach ($member in $params.MembersToExclude) {
                             if ($dbShellAdmins.UserName.Contains($member)) {
-                                Remove-SPShellAdmin -database $contentDatabase.Id -UserName $member -Confirm:$false
+                                try {
+                                    Remove-SPShellAdmin -database $contentDatabase.Id -UserName $member -Confirm:$false
+                                } catch {
+                                    throw "Error while removing the Shell Admin. The Shell Admin permissions will not be revoked. Error details: $($_.Exception.Message)"
+                                    return
+                                }
                             }
                         }
                     }
