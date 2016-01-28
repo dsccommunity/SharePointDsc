@@ -13,126 +13,79 @@ $ModuleName = "MSFT_xSPFarmSolution"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "xSPFarmSolution" {
-	
-	InModuleScope $ModuleName {
-	
-		$testParams = @{
-            Name = "MySolution.wsp"
-            LiteralPath = "MySolution.wsp"
-        }
+    
+    InModuleScope $ModuleName {
+    
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
 
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
+
+        $testParams = @{
+            Name            = "SomeSolution"
+            LiteralPath     = "\\server\share\file.wsp"
+            Deployed        = $true
+            Ensure          = "Present"
+            Version         = "1.0.0.0"
+            WebApplications = @("http://app1", "http://app2")
+        }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
-		Context "When the solution does not exist,"{
+        Context "The solution isn't installed, but should be" {
+            $global:SolutionAdded = $false
+            Mock Get-SPSolution { 
+                if ($global:SolutionAdded) { 
+                    return [pscustomobject] @{ } 
+                }else{
+                    return $null 
+                }
+            } -Verifiable
+            Mock Add-SPSolution { 
+                $solution = [pscustomobject] @{ Properties = @{ Version = "" }}
+                $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                $global:SolutionAdded = $true
+                return $solution
+            } -Verifiable
+            Mock Install-SPSolution { } -Verifiable
+            Mock WaitFor-SolutionJob { }
 
-			$result = Get-TargetResource @testParams
+            $getResults = Get-TargetResource @testParams
 
-			It "it returns version 0.0.0.0" {
-				$result.Version | Should Be "0.0.0.0"
-			}
+            It "returns Ensure 'Absent' from the get method" {
+                $getResults.Ensure | Should Be "Absent"
+            }
 
-			It "it returns false for deployed." {
-				$result.Deployed | Should Be $false
-			}
+            It "returns Version '0.0.0.0' from the get method" {
+                $getResults.Version | Should Be "0.0.0.0"
+            }
 
-			It "it returns Absent for Ensure." {
-				$result.Ensure | Should Be "Absent"
-			}
+            It "returns Deployed 'false' from the get method" {
+                $getResults.Deployed | Should Be $false
+            }
 
-			It "it returns an empty array for WebApplications." {
-				$result.WebApplications.Count | Should Be 0
-			}
-		}
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
 
-		Context "When the solution does exist,"{
+            It "uploads the solution to the farm" {
+                Set-TargetResource @testParams
 
-			$result = Get-TargetResource @testParams
+                Assert-MockCalled Add-SPSolution 
+            }
+        }
 
-			It "it returns version ''" {
-				$result.Version | Should BeNullOrEmpty
-			}
+        Context "The solution is installed, but should not be"{
+        }
 
-			It "it returns true for deployed." {
-				$result.Deployed | Should Be $true
-			}
+        Context "The solution isn't installed, and should not be"{
+        }
 
-			It "it returns Present for Ensure." {
-				$result.Ensure | Should Be "Present"
-			}
+        Context "The solution is installed, but needs update"{
+        }
 
-			It "it returns an url of central administration for WebApplications." {
-				$result.WebApplications[0] | Should Be "http://s3y7028:8383/"
-			}
-		}
-
-		$desiredValues = @{
-			Name            = "SomeSolution"
-			LiteralPath     = "\\server\share\file.wsp"
-			Deployed        = $true
-			Ensure          = "Present"
-			Version         = "1.0.0.0"
-			WebApplications = @("http://app1", "http://app2")
-		}
-
-		Context "When the solution is installed properly"{
-        
-			$actualValues = @{
-				Deployed        = $true
-				Ensure          = "Present"
-				Version         = "1.0.0.0"
-				WebApplications = @("http://app1", "http://app2")
-			}
-
-			Mock Get-TargetResource { $actualValues }
-
-			It "it returns true for specific web applications"{
-
-				Test-TargetResource @desiredValues | should be $true
-			}
-
-			It "it returns true for all web applications"{
-				$desiredValues.WebApplications = @()
-
-				Test-TargetResource @desiredValues | should be $true 
-			}
-
-			It "it returns fals if not all web applicationsare deployed"{
-				$desiredValues.WebApplications = @("http://app1", "http://app2", "http://app3")
-
-				Test-TargetResource @desiredValues | should be $false 
-			}
-		}
-
-		Context "When the solution does not exist"{
-			$desiredValues = @{
-				Name            = "SomeSolution"
-				LiteralPath     = "\\server\share\file.wsp"
-				Deployed        = $true
-				Ensure          = "Present"
-				Version         = "1.0.0.0"
-				WebApplications = @("http://app1", "http://app2")
-			}
-
-			$actualValues = @{
-				Name            = "SomeSolution"
-				LiteralPath     = "\\server\share\file.wsp"
-				Deployed        = $false
-				Ensure          = "Absent"
-				Version         = "0.0.0.0"
-				WebApplications = @()
-			}
-
-			Mock Get--TargetResource { return $actualValues }
-			Mock Invoke-xSharePointCommand { return [PSCustomObject]@{ Properties = @{ Version = "1.0.0.0"}; ContainsGlobalAssembly = $true} } -Verifiable
-
-			It "Does something"{ 
-				Set-SPFarmSolutionInformation @desiredValues
-			}
-		}
-	}   
+        Context "The solution is installed, and should be"{
+        }
+    }   
 }

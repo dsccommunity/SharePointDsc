@@ -65,7 +65,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $CurrentValues = Get-SPFarmSolutionInformation @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.Version = $Version
@@ -278,7 +278,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $CurrentValues = Get-SPFarmSolutionInformation @PSBoundParameters
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing solution $Name"
 
     $PSBoundParameters.Ensure = $Ensure
