@@ -94,6 +94,8 @@ Additional detailed documentation is included on the wiki on GitHub.
 
  * Added xSPHealthAnalyzerRuleState resources
 
+ * Added xSPFarmSolution resource
+
 ### 0.9.0.0
 
  * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
