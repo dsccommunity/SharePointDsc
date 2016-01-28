@@ -92,9 +92,11 @@
     <Folder Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\" />
     <Folder Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
+    <Folder Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\" />
     <Folder Include="DSCResources\MSFT_xSPTimerJobState\" />
     <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAppDomain\" />
+    <Folder Include="DSCResources\MSFT_xSPWordAutomationServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPWorkManagementServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
@@ -126,6 +128,7 @@
     <Compile Include="DSCResources\MSFT_xSPFarmAdministrators\MSFT_xSPFarmAdministrators.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.psm1" />
     <Compile Include="DSCResources\MSFT_xSPFeature\MSFT_xSPFeature.schema.mof" />
+    <Compile Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\MSFT_xSPHealthAnalyzerRuleState.psm1" />
     <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.psm1" />
     <Compile Include="DSCResources\MSFT_xSPInstallPrereqs\MSFT_xSPInstallPrereqs.schema.mof" />
     <Compile Include="DSCResources\MSFT_xSPInstall\MSFT_xSPInstall.psm1" />
@@ -180,6 +183,7 @@
     <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWordAutomationServiceApp\MSFT_xSPWordAutomationServiceApp.psm1" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
     <Compile Include="Examples\Small Farm\SharePoint.psd1" />
@@ -197,6 +201,7 @@
     <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPAppManagementServiceApp\MSFT_xSPAppManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPDesignerSettings\MSFT_xSPDesignerSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPHealthAnalyzerRuleState\MSFT_xSPHealthAnalyzerRuleState.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPPasswordChangeSettings\MSFT_xSPPasswordChangeSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPTimerJobState\MSFT_xSPTimerJobState.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppBlockedFileTypes\MSFT_xSPWebAppBlockedFileTypes.schema.mof" />
@@ -205,6 +210,7 @@
     <Content Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWordAutomationServiceApp\MSFT_xSPWordAutomationServiceApp.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
