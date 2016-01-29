@@ -63,7 +63,8 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
-            New-SPSubscriptionSettingsServiceApplication @newParams
+            $serviceApp = New-SPSubscriptionSettingsServiceApplication @newParams
+            $proxy = New-SPSubscriptionSettingsServiceApplicationProxy -ServiceApplication $serviceApp -DefaultProxyGroup 
         }
     }
     else {
