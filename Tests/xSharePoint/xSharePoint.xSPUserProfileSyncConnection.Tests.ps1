@@ -31,8 +31,9 @@ Describe "xSPUserProfileSyncConnection" {
             Add-Type @"
                 namespace Microsoft.Office.Server.UserProfiles {
                 public enum ConnectionType { ActiveDirectory, BusinessDataCatalog };
+                public enum ProfileType { User};
                 }        
-"@
+"@ -ErrorAction SilentlyContinue 
         }   
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         

@@ -79,7 +79,8 @@ CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Test-xSharePointRunAsCredential",
                     "Test-xSharePointUserIsLocalAdmin",
                     "Test-xSharePointSpecificParameters",
-                    "Set-xSharePointObjectPropertyIfValueExists")
+                    "Set-xSharePointObjectPropertyIfValueExists",
+                    "Get-xSharePointUserProfileSubTypeManager")
 
 # Variables to export from this module
 VariablesToExport = '*'

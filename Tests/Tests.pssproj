@@ -71,6 +71,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPTimerJobState.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppCatalog.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppDomain.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPUserProfileProperty.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPUserProfileSyncConnection.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplicationAppDomain.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppSiteUseAndDeletion.Tests.ps1" />
