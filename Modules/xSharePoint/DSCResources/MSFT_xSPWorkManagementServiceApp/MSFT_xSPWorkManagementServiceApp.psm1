@@ -32,6 +32,12 @@ function Get-TargetResource
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
+                MinimumTimeBetweenEwsSyncSubscriptionSearches =  $serviceApp.AdminSettings.MinimumTimeBetweenEwsSyncSubscriptionSearches.TotalMinutes 
+                MinimumTimeBetweenProviderRefreshes= $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
+                MinimumTimeBetweenSearchQueries=  $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
+                NumberOfSubscriptionSyncsPerEwsSyncRun=  $serviceApp.AdminSettings.NumberOfSubscriptionSyncsPerEwsSyncRun
+                NumberOfUsersEwsSyncWillProcessAtOnce=  $serviceApp.AdminSettings.NumberOfUsersEwsSyncWillProcessAtOnce
+                NumberOfUsersPerEwsSyncBatch=  $serviceApp.AdminSettings.NumberOfUsersPerEwsSyncBatch
             }
             return $returnVal
         }
@@ -146,7 +152,15 @@ function Test-TargetResource
         }
     }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+                                                                                                                                "MinimumTimeBetweenEwsSyncSubscriptionSearches",
+                                                                                                                                "MinimumTimeBetweenProviderRefreshes",
+                                                                                                                                "MinimumTimeBetweenSearchQueries",
+                                                                                                                                "Name",
+                                                                                                                                "NumberOfSubscriptionSyncsPerEwsSyncRun",
+                                                                                                                                "NumberOfUsersEwsSyncWillProcessAtOnce",
+                                                                                                                                "NumberOfUsersPerEwsSyncBatch"
+                                                                                                                               )
 }
 
 Export-ModuleMember -Function *-TargetResource
