@@ -33,7 +33,7 @@ Describe "xSPSubscriptionSettingsServiceApp" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPSubscriptionSettingsServiceApplication { }
-            Mock New-SPSubscriptionSettingsServiceApplicationProxy {}
+
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
@@ -46,7 +46,6 @@ Describe "xSPSubscriptionSettingsServiceApp" {
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
-                Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
             }
         }
 
@@ -121,7 +120,7 @@ Describe "xSPSubscriptionSettingsServiceApp" {
             }
         }
 
-        Context "When a service app needs to be created and no database parameters are provided" {
+        Context "When a service app needs to be created and no database paramsters are provided" {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "Test App Pool"
@@ -129,12 +128,10 @@ Describe "xSPSubscriptionSettingsServiceApp" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPSubscriptionSettingsServiceApplication { }
-            Mock New-SPSubscriptionSettingsServiceApplicationProxy { }
 
             it "should not throw an exception in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
-                Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
             }
         }
     }
