@@ -32,8 +32,8 @@ Describe "xSPSubscriptionSettingsServiceApp" {
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSubscriptionSettingsServiceApplication { }
-            Mock New-SPSubscriptionSettingsServiceApplicationProxy {}
+            Mock New-SPSubscriptionSettingsServiceApplication { return @{}}
+            Mock New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
@@ -128,8 +128,8 @@ Describe "xSPSubscriptionSettingsServiceApp" {
             }
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSubscriptionSettingsServiceApplication { }
-            Mock New-SPSubscriptionSettingsServiceApplicationProxy { }
+            Mock New-SPSubscriptionSettingsServiceApplication {return @{} }
+            Mock New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
 
             it "should not throw an exception in the set method" {
                 Set-TargetResource @testParams
