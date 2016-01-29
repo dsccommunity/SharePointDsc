@@ -24,8 +24,8 @@ Remarks
 class MSFT_WorkManagementServiceApp : OMI_BaseResource
 {
     [Key] string Name;
-    [Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write] String ApplicationPool;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Required] String ApplicationPool;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Write] System.UInt32 MinimumTimeBetweenEwsSyncSubscriptionSearches;
     [Write] System.UInt32 MinimumTimeBetweenProviderRefreshes;

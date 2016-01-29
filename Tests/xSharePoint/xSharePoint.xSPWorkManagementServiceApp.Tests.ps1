@@ -37,29 +37,6 @@ Describe "xSPWorkManagement" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-                Context "When a service application exists and Ensure equals 'absent'" {
-            $testParamsAbsent = @{
-                Name = "Test Work Management App"
-                Ensure = "Absent"
-            }
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Work Management Service Application"
-                    DisplayName = $testParamsAbsent.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                })
-            }
-            Mock Remove-SPServiceApplication{ }
-
-            It "returns true when the Test method is called" {
-                Test-TargetResource @testParamsAbsent | Should Be $true
-            }
-
-            It "calls the remove service app cmdlet from the set method" {
-                Set-TargetResource @testParamsAbsent
-                Assert-MockCalled Remove-SPServiceApplication
-            }
-        }
 
         Context "When no service applications exist in the current farm" {
 
@@ -87,27 +64,13 @@ Describe "xSPWorkManagement" {
             Mock Set-SPWorkManagementServiceApplication { }
             Mock New-SPWorkManagementServiceApplication { }
             Mock New-SPWorkManagementServiceApplicationProxy { }
-            $Global:GetSpServiceApplicationCalled=$false
-            Mock Get-SPServiceApplication { 
-                if($Global:GetSpServiceApplicationCalled -eq $false){
-                    $Global:GetSpServiceApplicationCalled=$true;
-                    return @(@{
-                    TypeName = "Some other service app type"
-                    })
-                }
-                return @(@{
-                    TypeName = "Work Management Service Application" 
-                        })
-            }
-            
-        
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
-            }
-
-            It "creates  new app from the Get method" {
-                Set-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
                 Assert-MockCalled Set-SPWorkManagementServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
@@ -150,7 +113,30 @@ Describe "xSPWorkManagement" {
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParamsComplete
                 Assert-MockCalled Set-SPWorkManagementServiceApplication
-                Assert-MockCalled Get-SPServiceApplication
+                Assert-MockCalled Get-SPWorkManagementServiceApplication
+            }
+        }
+        Context "When a service application exists and Ensure equals 'absent'" {
+            $testParamsAbsent = @{
+                Name = "Test Work Management App"
+            Ensure = "Absent"
+            }
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Work Management Service Application"
+                    DisplayName = $testParamsAbsent.Name
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                })
+            }
+            Mock Remove-SPServiceApplication{ }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource $testParamsAbsent | Should Be $false
+            }
+
+            It "calls the update service app cmdlet from the set method" {
+                Set-TargetResource $testParamsAbsent
+                Assert-MockCalled Remove-SPServiceApplication
             }
         }
 
