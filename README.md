@@ -93,6 +93,8 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added xSPWordAutomationServiceApp resources
 
  * Added xSPHealthAnalyzerRuleState resources
+ 
+ * Added xSPWorkManagementApp 
 
 ### 0.9.0.0
 
