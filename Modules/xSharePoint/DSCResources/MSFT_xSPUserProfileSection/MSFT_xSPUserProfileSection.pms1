@@ -29,67 +29,17 @@ function Get-TargetResource
         $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
         
-        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
+        $userProfileProperty = $userProfileSubType.Properties.GetSectionByName($params.Name) 
         if($null -eq $userProfileProperty ){
             return $null 
         }
         
-        $termSet = @{
-            TermSet = ""
-            TermGroup =""
-            TermStore = ""
-        }
-
-        if($userProfileProperty.CoreProperty.TermSet -ne $null)
-        {
-            $termSet.TermSet = $userProfileProperty.CoreProperty.TermSet.Name
-            $termSet.TermGroup = $userProfileProperty.CoreProperty.TermSet.Group.Name
-            $termSet.TermStore = $userProfileProperty.CoreProperty.TermSet.TermStore.Name
-        }
-        $mapping  = @{
-            ConectionName = ""
-            PropertyName =""
-            Direction = ""
-        }
-        $syncConnection  = $userProfileConfigManager.ConnectionManager | ? {$_.PropertyMapping.Item($params.Name) -ne $null} 
-        if($syncConnection -ne $null) {
-            $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
-            if($currentMapping -ne $null)
-            {
-                $mapping.Direction = "Import"
-                $mapping.ConnectionName = $params.MappingConnectionName 
-                if($currentMapping.IsExport)
-                {
-                    $mapping.Direction = "Export"
-                }
-                $mapping.PropertyName = $currentMapping.DataSourcePropertyName
-            }
-        }
         
-
         return @{
             Name = $userProfileProperty.Name 
             UserProfileServiceAppName = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
-            Type = $userProfileProperty.CoreProperty.Type.GetTypeCode()
-            Description = $userProfileProperty.Description 
-            PolicySetting = $userProfileProperty.PrivacyPolicy
-            PrivacySetting = $userProfileProperty.DefaultPrivacy
-            MappingConnectionName = $mapping.ConnectionName
-            MappingPropertyName = $mapping.PropertyName
-            MappingDirection = $Mapping.Direction
-            Length = $userProfileProperty.CoreProperty.Length
             DisplayOrder =$userProfileProperty.DisplayOrder 
-            IsEventLog =$userProfileProperty.TypeProperty.IsEventLog
-            IsVisibleOnEditor=$userProfileProperty.TypeProperty.IsVisibleOnEditor
-            IsVisibleOnViewer  =$userProfileProperty.TypeProperty.IsVisibleOnViewer
-            IsUserEditable = $userProfileProperty.IsUserEditable
-            IsAlias = $userProfileProperty.IsAlias 
-            IsSearchable = $userProfileProperty.CoreProperty.IsSearchable 
-            TermStore = $termSet.TermStore
-            TermGroup = $termSet.TermGroup
-            TermSet = $termSet.TermSet
-            UserOverridePrivacy = $userProfileProperty.AllowPolicyOverride
         }
 
     }
@@ -144,7 +94,7 @@ function Set-TargetResource
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
             if($userProfileProperty -ne $null)
             {
-                $coreProperties.RemovePropertyByName($params.Name)
+                $coreProperties.RemoveSectionByName($params.Name)
                 return;
             }
         } elseif($userProfileProperty -eq $null){
@@ -165,7 +115,7 @@ function Set-TargetResource
         if($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
-            $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
+            $profileManager.Properties.SetDisplayOrderBySectionName($params.Name,$params.DisplayOrder)
             $profileManager.Properties.CommitDisplayOrder()
         }
         #endregion

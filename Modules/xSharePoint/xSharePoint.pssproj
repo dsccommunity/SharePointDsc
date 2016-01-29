@@ -97,7 +97,7 @@
     <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAppDomain\" />
     <Folder Include="DSCResources\MSFT_xSPWordAutomationServiceApp\" />
-    <Folder Include="DSCResources\MSFT_xSPUsrProfileSection\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileSection\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -107,7 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.psm1" />
-    <Compile Include="DSCResources\MSFT_xSPUsrProfileSection\MSFT_xSPUserProfileSection.pms1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSection\MSFT_xSPUserProfileSection.pms1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
@@ -196,7 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.schema.mof" />
-    <Content Include="DSCResources\MSFT_xSPUsrProfileSection\MSFT_xSPUserProfileSection.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPUserProfileSection\MSFT_xSPUserProfileSection.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
