@@ -76,7 +76,7 @@ Describe "xSPUserProfileProperty" {
                 public enum ConnectionType { ActiveDirectory, BusinessDataCatalog };
                 public enum ProfileType { User};
                 }        
-"@
+"@ -ErrorAction SilentlyContinue
         }   
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
