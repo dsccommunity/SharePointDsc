@@ -50,7 +50,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
+            Write-Verbose -Verbose "No local SharePoint farm was detected. Shell admin settings will not be applied"
             return $null
         }
 
@@ -128,7 +128,7 @@ function Set-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            throw "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
+            throw "No local SharePoint farm was detected. Shell Admin settings will not be applied"
             return
         }
 
@@ -309,7 +309,7 @@ function Set-TargetResource
                         }
                     }
                 } else {
-                    throw "Specified database does not exist"
+                    throw "Specified database does not exist: $($contentDatabase.Name)"
                 }
             }
         }
@@ -572,7 +572,7 @@ function Test-TargetResource
                     }
                 }
             } else {
-                throw "Specified database does not exist"
+                throw "Specified database does not exist: $($contentDatabase.Name)"
             }
         }
     }

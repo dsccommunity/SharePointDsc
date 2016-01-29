@@ -94,7 +94,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
- * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState and xSPShellAdmin resources
+ * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
 
 ### 0.9.0.0
 

@@ -4,10 +4,10 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
-        [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
-        [parameter(Mandatory = $true)]  [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
-        [parameter(Mandatory = $false)] [System.UInt32]  $Port,
+        [parameter(Mandatory = $true)] [System.String] $AppDomain,
+        [parameter(Mandatory = $true)] [System.String] $WebApplication,
+        [parameter(Mandatory = $true)] [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
+        [parameter(Mandatory = $false)] [System.String] $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $SSL,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
@@ -40,10 +40,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
-        [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
-        [parameter(Mandatory = $true)]  [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]  $Zone,
-        [parameter(Mandatory = $false)] [System.UInt32]  $Port,
+        [parameter(Mandatory = $true)] [System.String] $AppDomain,
+        [parameter(Mandatory = $true)] [System.String] $WebApplication,
+        [parameter(Mandatory = $true)] [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
+        [parameter(Mandatory = $false)] [System.String] $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $SSL,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -78,10 +78,10 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String]  $AppDomain,
-        [parameter(Mandatory = $true)]  [System.String]  $WebApplication,
-        [parameter(Mandatory = $true)]  [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")]  $Zone,
-        [parameter(Mandatory = $false)] [System.UInt32]  $Port,
+        [parameter(Mandatory = $true)] [System.String] $AppDomain,
+        [parameter(Mandatory = $true)] [System.String] $WebApplication,
+        [parameter(Mandatory = $true)] [System.String] [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] $Zone,
+        [parameter(Mandatory = $false)] [System.String] $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $SSL,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )

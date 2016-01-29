@@ -47,7 +47,7 @@ Workaround: Change database owner in SQL Server.
 [ClassVersion("1.0.0")]
 Class MSFT_xSPContentDatabasePermissions
 {
-    [Write, Description("Name of the Content Database")] String Name;
+    [Key, Description("Name of the Content Database")] String Name;
     [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];

@@ -51,6 +51,8 @@
   <ItemGroup>
     <Folder Include="DSCResources\" />
     <Folder Include="DSCResources\MSFT_xSPAppCatalog\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileProperty\" />
+    <Folder Include="DSCResources\MSFT_xSPUserProfileSyncConnection\" />
     <Folder Include="DSCResources\MSFT_xSPWebApplicationAppDomain\" />
     <Folder Include="DSCResources\MSFT_xSPDesignerSettings\" />
     <Folder Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\" />
@@ -98,6 +100,7 @@
     <Folder Include="DSCResources\MSFT_xSPAppDomain\" />
     <Folder Include="DSCResources\MSFT_xSPShellAdmins\" />
     <Folder Include="DSCResources\MSFT_xSPWordAutomationServiceApp\" />
+    <Folder Include="DSCResources\MSFT_xSPWorkManagementServiceApp\" />
     <Folder Include="Examples\Small Farm\" />
     <Folder Include="Examples\Single Server\" />
     <Folder Include="Modules\" />
@@ -108,6 +111,8 @@
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.psm1" />
     <Compile Include="DSCResources\MSFT_xSPShellAdmins\MSFT_xSPShellAdmins.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPUserProfileProperty\MSFT_xSPUserProfileProperty.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.psm1" />
     <Compile Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.psm1" />
@@ -183,6 +188,7 @@
     <Compile Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\MSFT_xSPWebAppSiteUseAndDeletion.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWordAutomationServiceApp\MSFT_xSPWordAutomationServiceApp.psm1" />
     <Compile Include="Examples\Single Server\SharePoint.psd1" />
     <Compile Include="Examples\Small Farm\SharePoint.ps1" />
@@ -197,6 +203,8 @@
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPShellAdmins\MSFT_xSPShellAdmins.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPUserProfileProperty\MSFT_xSPUserProfileProperty.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPAppDomain\MSFT_xSPAppDomain.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPSubscriptionSettingsServiceApp\MSFT_xSPSubscriptionSettingsServiceApp.schema.mof" />
@@ -210,6 +218,7 @@
     <Content Include="DSCResources\MSFT_xSPWebAppSiteUseAndDeletion\MSFT_xSPWebAppSiteUseAndDeletion.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppThrottlingSettings\MSFT_xSPWebAppThrottlingSettings.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebAppWorkflowSettings\MSFT_xSPWebAppWorkflowSettings.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPWorkManagementServiceApp\MSFT_xSPWorkManagementServiceApp.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWordAutomationServiceApp\MSFT_xSPWordAutomationServiceApp.schema.mof" />
     <Content Include="Examples\Single Server\SharePoint.ps1" />
   </ItemGroup>
