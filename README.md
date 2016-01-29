@@ -91,8 +91,12 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased 
  * Added xSPWordAutomationServiceApp resources
-
  * Added xSPHealthAnalyzerRuleState resources
+ * Added xSPUserProfileProperty
+
+ * Added xSPWorkManagementApp 
+
+ * Added xSPUserProfileSyncConnection
 
  * Added xSPFarmSolution resource
 
