@@ -94,6 +94,10 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added xSPHealthAnalyzerRuleState resources
  * Added xSPUserProfileProperty
 
+ * Added xSPWorkManagementApp 
+
+ * Added xSPUserProfileSyncConnection
+
 ### 0.9.0.0
 
  * Added xSPAppCatalog, xSPAppDomain, xSPWebApplicationAppDomain, xSPSessionStateService, xSPDesignerSettings, xSPQuotaTemplate, xSPWebAppSiteUseAndDeletion, xSPSearchTopology, xSPSearchIndexPartition, xSPWebAppPolicy and xSPTimerJobState resources
