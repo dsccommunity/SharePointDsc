@@ -1,0 +1,30 @@
+﻿NAME
+    xSPDistributedCacheService
+
+PARAMETERS
+    Name (Key, String)
+    Ensure (Required, string, Allowed values: Present, Absent)
+    CacheSizeInMB (Required, UInt32)
+    ServiceAccount (Required, String)
+    InstallAccount (Write, String)
+    CreateFirewallRules (Required, Boolean)
+
+DESCRIPTION
+
+This resource is responsible for provisioning the distributed cache to the service it runs on. 
+This is required in your farm on at least one server (as the behavior of [xSPCreateFarm](xSPCreateFarm) and [xSPJoinFarm](xSPJoinFarm) is to not enroll every server as a cache server). 
+The service will be provisioned or de-provisioned based on the Ensure property, and when provisioned the CacheSizeInMB property and ServiceAccount property will be used to configure it.
+The property createFirewallRules is used to determine if exceptions should be added to the windows firewall to allow communication between servers on the appropriate ports.
+
+EXAMPLE
+
+    xSPDistributedCacheService EnableDistributedCache
+    {
+        Name                = "AppFabricCachingService"
+        Ensure              = "Present"
+        CacheSizeInMB       = 8192
+        ServiceAccount      = "DEMO\ServiceAccount"
+        InstallAccount      = $InstallAccount
+        CreateFirewallRules = $true
+    }
+
