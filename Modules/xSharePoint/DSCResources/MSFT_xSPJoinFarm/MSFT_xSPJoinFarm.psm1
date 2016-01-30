@@ -76,8 +76,13 @@ function Set-TargetResource
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
             16 {
-                Write-Verbose -Message "Detected Version: SharePoint 2016"
-                $joinFarmArgs.Add("LocalServerRole", "Custom")
+                if ($params.ContainsKey("ServerRole") -eq $true) {
+                    Write-Verbose -Message "Detected Version: SharePoint 2016 - configuring server as $($params.ServerRole)"
+                    $newFarmArgs.Add("LocalServerRole", $params.ServerRole)
+                } else {
+                    Write-Verbose -Message "Detected Version: SharePoint 2016 - no server role provided, configuring server without a specific role"
+                    $newFarmArgs.Add("ServerRoleOptional", $true)
+                }
             }
             Default {
                 throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
