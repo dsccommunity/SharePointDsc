@@ -78,10 +78,10 @@ function Set-TargetResource
             16 {
                 if ($params.ContainsKey("ServerRole") -eq $true) {
                     Write-Verbose -Message "Detected Version: SharePoint 2016 - configuring server as $($params.ServerRole)"
-                    $newFarmArgs.Add("LocalServerRole", $params.ServerRole)
+                    $joinFarmArgs.Add("LocalServerRole", $params.ServerRole)
                 } else {
                     Write-Verbose -Message "Detected Version: SharePoint 2016 - no server role provided, configuring server without a specific role"
-                    $newFarmArgs.Add("ServerRoleOptional", $true)
+                    $joinFarmArgs.Add("ServerRoleOptional", $true)
                 }
             }
             Default {
