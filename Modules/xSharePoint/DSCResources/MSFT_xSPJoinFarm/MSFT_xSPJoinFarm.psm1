@@ -81,7 +81,6 @@ function Set-TargetResource
                     $joinFarmArgs.Add("LocalServerRole", $params.ServerRole)
                 } else {
                     Write-Verbose -Message "Detected Version: SharePoint 2016 - no server role provided, configuring server without a specific role"
-                    $joinFarmArgs.Add("ServerRoleOptional", $true)
                 }
             }
             Default {
