@@ -61,7 +61,7 @@ Describe "xSPJoinFarm" {
                         Assert-MockCalled Connect-SPConfigurationDatabase
                     }
                     16 {
-                        Assert-MockCalled Connect-SPConfigurationDatabase -ParameterFilter { $LocalServerRole -ne $null }
+                        Assert-MockCalled Connect-SPConfigurationDatabase
                     }
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
