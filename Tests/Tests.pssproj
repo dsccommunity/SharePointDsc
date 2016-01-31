@@ -72,6 +72,8 @@
     <Compile Include="xSharePoint\xSharePoint.xSPTimerJobState.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppCatalog.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPAppDomain.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPUserProfileProperty.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPUserProfileSyncConnection.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebApplicationAppDomain.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppSiteUseAndDeletion.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPDesignerSettings.Tests.ps1" />
@@ -93,6 +95,7 @@
     <Compile Include="xSharePoint\xSharePoint.xSPWordAutomationServiceApp.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppWorkflowSettings.Tests.ps1" />
     <Compile Include="xSharePoint\xSharePoint.xSPWebAppThrottlingSettings.Tests.ps1" />
+    <Compile Include="xSharePoint\xSharePoint.xSPWorkManagementServiceApp.Tests.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />
