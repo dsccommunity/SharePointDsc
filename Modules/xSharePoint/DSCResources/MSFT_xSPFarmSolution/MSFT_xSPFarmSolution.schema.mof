@@ -19,9 +19,9 @@ If the solution does not contain resources scoped for web applications the prope
     {
         Name                 = "MySolution.wsp"
         LiteralPath          = "C:\src\MySolution.wsp"
-		Ensure               = "Present"
+        Ensure               = "Present"
         Version              = "1.0.0"
-		WebApplications      = @("http://collaboration", "http://mysites")
+        WebApplications      = @("http://collaboration", "http://mysites")
         PsDscRunAsCredential = $InstallAccount
     }
 */
