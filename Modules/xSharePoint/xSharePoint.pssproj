@@ -98,6 +98,7 @@
     <Folder Include="DSCResources\MSFT_xSPTimerJobState\" />
     <Folder Include="DSCResources\MSFT_xSPAppManagementServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPAppDomain\" />
+    <Folder Include="DSCResources\MSFT_xSPShellAdmins\" />
     <Folder Include="DSCResources\MSFT_xSPWordAutomationServiceApp\" />
     <Folder Include="DSCResources\MSFT_xSPFarmSolution\" />
     <Folder Include="DSCResources\MSFT_xSPWorkManagementServiceApp\" />
@@ -111,6 +112,7 @@
   <ItemGroup>
     <Compile Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.psm1" />
     <Compile Include="DSCResources\MSFT_xSPFarmSolution\MSFT_xSPFarmSolution.psm1" />
+    <Compile Include="DSCResources\MSFT_xSPShellAdmins\MSFT_xSPShellAdmins.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.psm1" />
     <Compile Include="DSCResources\MSFT_xSPUserProfileProperty\MSFT_xSPUserProfileProperty.psm1" />
     <Compile Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.psm1" />
@@ -203,6 +205,7 @@
   <ItemGroup>
     <Content Include="DSCResources\MSFT_xSPAppCatalog\MSFT_xSPAppCatalog.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPFarmSolution\MSFT_xSPFarmSolution.schema.mof" />
+    <Content Include="DSCResources\MSFT_xSPShellAdmins\MSFT_xSPShellAdmins.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPUserProfileSyncConnection\MSFT_xSPUserProfileSyncConnection.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPUserProfileProperty\MSFT_xSPUserProfileProperty.schema.mof" />
     <Content Include="DSCResources\MSFT_xSPWebApplicationAppDomain\MSFT_xSPWebApplicationAppDomain.schema.mof" />
