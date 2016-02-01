@@ -1,0 +1,30 @@
+/*
+**Description**
+
+This resource is used to configure Health Analyzer rules for the local farm.
+The resource is able to enable/disable and configure the specified rule.
+
+**Example**
+
+    xSPHealthAnalyzerRuleState DisableDiskSpaceRule
+    {
+        Name = "Drives are at risk of running out of free space."
+        Enabled = $true
+        RuleScope   = "All Servers"
+        Schedule = "Daily"
+        FixAutomatically = $false
+        InstallAccount = $InstallAccount
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPHealthAnalyzerRuleState")]
+class MSFT_xSPHealthAnalyzerRuleState : OMI_BaseResource
+{
+    [Key] String Name;
+    [Required] Boolean Enabled;
+    [Write, ValueMap{"All Servers","Any Server"}, Values{"All Servers","Any Server"}] String RuleScope;
+    [Write, ValueMap{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}, Values{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}] String Schedule;
+    [Write] Boolean FixAutomatically;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

@@ -3,7 +3,7 @@
 
 PARAMETERS
     Index (Key, Uint32)
-    Servers[] (Required, String)
+    Servers (Required, String)
     RootDirectory (Write, String)
     ServiceAppName (Required, String)
     InstallAccount (Write, String)

@@ -1,4 +1,4 @@
-# xSharePoint
+ï»¿# xSharePoint
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
@@ -36,7 +36,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPAppCatalog
  - xSPAppDomain
  - xSPAppManagementServiceApp
- - xBCSServiceApp
+ - xSPBCSServiceApp
  - xSPCacheAccounts
  - xSPCreateFarm
  - xSPDesignerSettings
@@ -44,6 +44,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPDistributedCacheService
  - xSPFarmAdministrators
  - xSPFeature
+ - xSPHealthAnalyzerRuleState
  - xSPInstall
  - xSPInstallPreReqs
  - xSPJoinFarm
@@ -60,10 +61,11 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPServiceAppPool
  - xSPServiceInstance
  - xSPSessionStateService
+ - xSPShellAdmin
  - xSPSite
  - xSPStateServiceApp
- - xSPTimerJobState
  - xSPSubscriptionSettingsServiceApp
+ - xSPTimerJobState
  - xSPUsageApplication
  - xSPUserProfileServiceApp
  - xSPUserProfileSyncService
@@ -76,6 +78,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPWebAppSiteUseAndDeletion
  - xSPWebAppThrottlingSettings
  - xSPWebAppWorkflowSettings
+ - xSPWordAutomationServiceApp
 
 ## Preview status
 
@@ -89,7 +92,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### Unreleased
+### 0.10.0.0
+
+ * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
+ * Fixed issue with MinRole support in xSPJoinFarm
 
 ### 0.9.0.0
 
@@ -125,7 +131,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### 0.4.0
 
-* Fixed issue with nested modules’ cmdlets not being found
+* Fixed issue with nested modulesï¿½ cmdlets not being found
 
 ### 0.3.0
 

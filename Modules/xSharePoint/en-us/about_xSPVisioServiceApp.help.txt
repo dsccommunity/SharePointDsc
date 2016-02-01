@@ -3,7 +3,7 @@
 
 PARAMETERS
     Name (Key, string)
-    ApplicationPool (Write, string)
+    ApplicationPool (Required, string)
 
 DESCRIPTION
 

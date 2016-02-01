@@ -3,9 +3,9 @@
 
 PARAMETERS
     Name (Key, String)
-    Members[] (Write, String)
-    MembersToInclude[] (Write, String)
-    MembersToExclude[] (Write, String)
+    Members (Write, String)
+    MembersToInclude (Write, String)
+    MembersToExclude (Write, String)
     InstallAccount (Write, String)
 
 DESCRIPTION

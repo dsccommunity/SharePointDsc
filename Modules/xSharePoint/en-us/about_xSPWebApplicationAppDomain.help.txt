@@ -3,7 +3,7 @@
 
 PARAMETERS
     WebApplication (Key, string)
-    string (Key, , Allowed values: Internet, Intranet, Extranet,  Custom)
+    Zone (Key, string, Allowed values: Default, Internet, Intranet, Extranet, Custom)
     AppDomain (Required, string)
     Port (Write, string)
     SSL (Write, boolean)

@@ -8,12 +8,12 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 
@@ -51,12 +51,12 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
     Write-Verbose -Message "Joining existing farm configuration database"
 
-    if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 
@@ -76,8 +76,12 @@ function Set-TargetResource
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
             16 {
-                Write-Verbose -Message "Detected Version: SharePoint 2016"
-                $joinFarmArgs.Add("LocalServerRole", "Custom")
+                if ($params.ContainsKey("ServerRole") -eq $true) {
+                    Write-Verbose -Message "Detected Version: SharePoint 2016 - configuring server as $($params.ServerRole)"
+                    $joinFarmArgs.Add("LocalServerRole", $params.ServerRole)
+                } else {
+                    Write-Verbose -Message "Detected Version: SharePoint 2016 - no server role provided, configuring server without a specific role"
+                }
             }
             Default {
                 throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
@@ -113,10 +117,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.String] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
-    if ($null -ne $ServerRole -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 

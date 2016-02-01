@@ -9,7 +9,7 @@ PARAMETERS
     DatabaseCredentials (Write, String)
     DatabaseName (Write, string)
     DatabaseServer (Write, string)
-    DatabaseAuthenticationType (Write, string, Allowed values: te,  ValueMap {Windows, SQL)
+    DatabaseAuthenticationType (Write, string, Allowed values: Windows, SQL)
     FailoverDatabaseServer (Write, string)
     PartitionMode (Write, boolean)
     Sharing (Write, boolean)

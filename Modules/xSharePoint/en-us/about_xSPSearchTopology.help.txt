@@ -3,13 +3,13 @@
 
 PARAMETERS
     ServiceAppName (Key, String)
-    Admin[] (Required, String)
-    Crawler[] (Required, String)
-    ContentProcessing[] (Required, String)
-    AnalyticsProcessing[] (Required, String)
-    QueryProcessing[] (Required, String)
-    IndexPartition[] (Required, String)
-    FirstPartitionDirectory (Write, String)
+    Admin (Required, String)
+    Crawler (Required, String)
+    ContentProcessing (Required, String)
+    AnalyticsProcessing (Required, String)
+    QueryProcessing (Required, String)
+    IndexPartition (Required, String)
+    FirstPartitionDirectory (Required, String)
     InstallAccount (Write, String)
 
 DESCRIPTION

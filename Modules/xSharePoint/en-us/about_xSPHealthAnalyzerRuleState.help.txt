@@ -1,0 +1,28 @@
+﻿NAME
+    xSPHealthAnalyzerRuleState
+
+PARAMETERS
+    Name (Key, String)
+    Enabled (Required, Boolean)
+    RuleScope (Write, String, Allowed values: All Servers, Any Server)
+    Schedule (Write, String, Allowed values: Hourly, Daily, Weekly, Monthly, OnDemandOnly)
+    FixAutomatically (Write, Boolean)
+    InstallAccount (Write, String)
+
+DESCRIPTION
+
+This resource is used to configure Health Analyzer rules for the local farm.
+The resource is able to enable/disable and configure the specified rule.
+
+EXAMPLE
+
+    xSPHealthAnalyzerRuleState DisableDiskSpaceRule
+    {
+        Name = "Drives are at risk of running out of free space."
+        Enabled = $true
+        RuleScope   = "All Servers"
+        Schedule = "Daily"
+        FixAutomatically = $false
+        InstallAccount = $InstallAccount
+    }
+

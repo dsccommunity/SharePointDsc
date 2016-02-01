@@ -4,7 +4,7 @@
 PARAMETERS
     WebAppUrl (Key, string)
     UserName (Key, string)
-    PermissionLevel (Write, string, Allowed values: Deny All, Deny Write, Full Read,  Full Control)
+    PermissionLevel (Required, string, Allowed values: Deny All, Deny Write, Full Read, Full Control)
     ActAsSystemUser (Write, boolean)
     InstallAccount (Write, String)
 

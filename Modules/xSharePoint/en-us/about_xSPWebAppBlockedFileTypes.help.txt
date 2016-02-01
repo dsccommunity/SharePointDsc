@@ -3,9 +3,9 @@
 
 PARAMETERS
     Url (Key, string)
-    Blocked[] (write, string)
-    EnsureBlocked[] (write, string)
-    EnsureAllowed[] (write, string)
+    Blocked (write, string)
+    EnsureBlocked (write, string)
+    EnsureAllowed (write, string)
     InstallAccount (Write, string)
 
 DESCRIPTION

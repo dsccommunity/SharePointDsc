@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '0.9.0.0'
+ModuleVersion = '0.10.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -79,7 +79,8 @@ CmdletsToExport = @("Invoke-xSharePointCommand",
                     "Test-xSharePointRunAsCredential",
                     "Test-xSharePointUserIsLocalAdmin",
                     "Test-xSharePointSpecificParameters",
-                    "Set-xSharePointObjectPropertyIfValueExists")
+                    "Set-xSharePointObjectPropertyIfValueExists",
+                    "Get-xSharePointUserProfileSubTypeManager")
 
 # Variables to export from this module
 VariablesToExport = '*'
