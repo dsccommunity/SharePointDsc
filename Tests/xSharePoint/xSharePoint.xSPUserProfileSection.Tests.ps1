@@ -24,7 +24,7 @@ Describe "xSPUserProfileProperty" {
            DisplayOrder = 5000 
         }
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+      #  $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         <#$testParamsUpdate = @{
            Name = "PersonalInformation"
            UserProfileService = "User Profile Service Application"
@@ -44,31 +44,16 @@ Describe "xSPUserProfileProperty" {
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
-        $corePropertyUpdate = @{ 
+      <#  $coreProperty = @{ 
                            Name = "PersonalInformation"
-                           DisplayName = "Personal InformationUpdate"
+                           DisplayName = "Personal Information"
                         } | Add-Member ScriptMethod Commit {
                             $Global:xSPUPSPropertyCommitCalled = $true
                         } -PassThru | Add-Member ScriptMethod Delete {
                             $Global:xSPUPSPropertyDeleteCalled = $true
                         } -PassThru
 
-        $coreProperties = @{ProfileInformation = $corePropertyUpdate}
-
-        $coreProperties = $coreProperties | Add-Member ScriptMethod Create {
-                            $Global:xSPUPCoreCreateCalled = $true
-                            return @{
-                            Name="";
-                            DisplayName=""
-                            Type=""
-                            TermSet=$null
-                            Length=10
-                            }
-                        } -PassThru  | Add-Member ScriptMethod RemoveSectionByName {
-                            $Global:xSPUPCoreRemovePropertyByNameCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPCoreAddCalled = $true
-                        } -PassThru -Force 
+     
                         
         
         #$typeProperties.Add($typeProperty)
@@ -79,20 +64,20 @@ Describe "xSPUserProfileProperty" {
                         }| Add-Member ScriptMethod Commit {
                             $Global:xSPUPPropertyCommitCalled = $true
                         } -PassThru 
-
+                        #>
 
         $coreProperty = @{ 
-                            DisplayName = $testParamsNew.DisplayName
-                            Name = $testParamsNew.Name
+                            DisplayName = $testParams.DisplayName
+                            Name = $testParams.Name
                         } | Add-Member ScriptMethod Commit {
                             $Global:xSPUPSPropertyCommitCalled = $true
                         } -PassThru | Add-Member ScriptMethod Delete {
                             $Global:xSPUPSPropertyDeleteCalled = $true
                         } -PassThru
         $subTypeProperty = @{
-                            Name= $testParamsNew.Name
-                            DisplayName= $testParamsNew.DisplayName
-                            DisplayOrder =$testParamsNew.DisplayOrder
+                            Name= $testParams.Name
+                            DisplayName= $testParams.DisplayName
+                            DisplayOrder =$testParams.DisplayOrder
                             CoreProperty = $coreProperty
                             #TypeProperty = $typeProperty
 
@@ -110,15 +95,31 @@ Describe "xSPUserProfileProperty" {
                         } -PassThru| Add-Member ScriptMethod Add {
                             $Global:xSPUPSubTypeAddCalled = $true
                         } -PassThru -Force 
+        $coreProperties = @{ProfileInformation = $coreProperty}
 
-        $userProfileSubTypePropertiesUpdateProperty = @{"ProfileInformation" = $subTypePropertyUpdate } | Add-Member ScriptMethod Create {
+        $coreProperties = $coreProperties | Add-Member ScriptMethod Create {
+                            $Global:xSPUPCoreCreateCalled = $true
+                            return @{
+                            Name="";
+                            DisplayName=""
+                           
+                            }
+                        } -PassThru  | Add-Member ScriptMethod RemoveSectionByName {
+                            $Global:xSPUPCoreRemovePropertyByNameCalled = $true
+                        } -PassThru | Add-Member ScriptMethod Add {
+                            $Global:xSPUPCoreAddCalled = $true
+                        } -PassThru -Force 
+
+
+        $userProfileSubTypePropertiesProperty = @{"ProfileInformation" = $subTypeProperty } | Add-Member ScriptMethod Create {
                             $Global:xSPUPSubTypeCreateCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
                             $Global:xSPUPSubTypeAddCalled = $true
                         } -PassThru -Force | Add-Member ScriptMethod GetSectionByName {
                             $Global:xSPUPGetSectionByNameCalled  = $true
-                            return $subTypePropertyUpdate
+                            return $subTypeProperty
                         } -PassThru
+                        #>
          #$userProfileSubTypePropertiesValidProperty.Add($subTypeProperty);
         mock Get-xSharePointUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
@@ -171,18 +172,16 @@ Describe "xSPUserProfileProperty" {
             })
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
-        $userProfileServiceValidConnection =  @{
+        $userProfileService =  @{
             Name = "User Profile Service Application"
             TypeName = "User Profile Service Application"
             ApplicationPool = "SharePoint Service Applications"
-            FarmAccount = $farmAccount 
             ServiceApplicationProxyGroup = "Proxy Group"
-            ConnectionManager=  @($connection) #New-Object System.Collections.ArrayList
         }
 
-        Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+        Mock Get-SPServiceApplication { return $userProfileService }
 
-        <#
+        
         Context "When section doesn't exist" {
             
             It "returns null from the Get method" {
@@ -207,13 +206,13 @@ Describe "xSPUserProfileProperty" {
             }
 
         }
-        #>
+        
         Context "When section exists and all properties match" {
             mock Get-xSharePointUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:xSPUPGetProfileSubtypeCalled = $true
                                 return @{
-                                Properties = $userProfileSubTypePropertiesUpdateProperty
+                                Properties = $userProfileSubTypePropertiesProperty
                                 }
                             } -PassThru 
                 return $result
@@ -239,19 +238,19 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
             }
         }
-
+       
         Context "When section exists and display name and display order are different" {
             mock Get-xSharePointUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:xSPUPGetProfileSubtypeCalled = $true
                                 return @{
-                                Properties = $userProfileSubTypePropertiesUpdateProperty
+                                Properties = $userProfileSubTypePropertiesProperty
                                 }
                             } -PassThru 
                 return $result
             }
-            $testPArams.DisplayOrder = 5401
-            $testPArams.DisplayName = "ProfileInformationUpdate"
+            $testParams.DisplayOrder = 5401
+            $testParams.DisplayName = "ProfileInformationUpdate"
 
             It "returns valid value from the Get method" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
@@ -273,13 +272,13 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
             }
         }
-
+         break
         Context "When section exists and ensure equals Absent" {
             mock Get-xSharePointUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:xSPUPGetProfileSubtypeCalled = $true
                                 return @{
-                                Properties = $userProfileSubTypePropertiesUpdateProperty
+                                Properties = $userProfileSubTypePropertiesProperty
                                 }
                             } -PassThru 
 
@@ -290,7 +289,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetSectionByNameCalled = $false
                 $Global:xSPUPCoreRemoveSectionByNameCalled=$false
-                Set-TargetResource @testParamsUpdate
+                Set-TargetResource @testParams 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetSectionByNameCalled | Should be $true
                 $Global:xSPUPCoreRemoveSectionByNameCalled | Should be $true

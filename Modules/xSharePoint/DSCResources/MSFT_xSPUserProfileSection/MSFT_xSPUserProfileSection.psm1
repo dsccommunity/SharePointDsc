@@ -29,14 +29,14 @@ function Get-TargetResource
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
         
         $userProfileProperty = $userProfileSubType.Properties.GetSectionByName($params.Name) 
-        if($null -eq $userProfileProperty ){
+        if($userProfileProperty -eq $null){
             return $null 
         }
         
         
         return @{
             Name = $userProfileProperty.Name 
-            UserProfileServiceAppName = $params.UserProfileService
+            UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             DisplayOrder =$userProfileProperty.DisplayOrder 
         }
