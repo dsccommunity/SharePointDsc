@@ -1,0 +1,34 @@
+﻿NAME
+    xSPSecureStoreServiceApp
+
+PARAMETERS
+    Name (Key, string)
+    ApplicationPool (Required, string)
+    AuditingEnabled (Required, boolean)
+    AuditlogMaxSize (Write, uint32)
+    DatabaseCredentials (Write, String)
+    DatabaseName (Write, string)
+    DatabaseServer (Write, string)
+    DatabaseAuthenticationType (Write, string, Allowed values: Windows, SQL)
+    FailoverDatabaseServer (Write, string)
+    PartitionMode (Write, boolean)
+    Sharing (Write, boolean)
+    InstallAccount (Write, String)
+
+DESCRIPTION
+
+This resource is responsible for provisioning and configuring the secure store service application. 
+The parameters passed in (except those related to database specifics) are validated and set when the resource is run, the database values are only used in provisioning of the service application. 
+
+EXAMPLE
+
+    xSPSecureStoreServiceApp SecureStoreServiceApp
+    {
+        Name            = "Secure Store Service Application"
+        ApplicationPool = "SharePoint Service Applications"
+        AuditingEnabled = $true
+        AuditlogMaxSize = 30
+        DatabaseName    = "SP_SecureStore"
+        InstallAccount  = $InstallAccount
+    }
+

@@ -1,0 +1,69 @@
+﻿NAME
+    xSPUserProfileProperty
+
+PARAMETERS
+    Name (Key, string)
+    Ensure (write, string, Allowed values: Present, Absent)
+    UserProfileService (required, string)
+    DisplayName (write, string)
+    Type (write, string, Allowed values: BigInteger, Binary, Boolean, Date, DateNoYear, DateTime, Email, Float, Guid, HTML, Integer, Person, String, StringMultiValue, TimeZone, URL)
+    Description (write, string)
+    PolicySetting (write, string, Allowed values: Mandatory, Optin, Optout, Disabled)
+    PrivacySetting (write, string, Allowed values: Public, Contacts, Organization, Manager, Private)
+    MappingConnectionName (write, string)
+    MappingPropertyName (write, string)
+    MappingDirection (write, string)
+    Length (write, uint32)
+    DisplayOrder (write, uint32)
+    IsEventLog (write, boolean)
+    IsVisibleOnEditor (write, boolean)
+    IsVisibleOnViewer (write, boolean)
+    IsUserEditable (write, boolean)
+    IsAlias (write, boolean)
+    IsSearchable (write, boolean)
+    UserOverridePrivacy (write, boolean)
+    TermStore (write, string)
+    TermGroup (write, string)
+    TermSet (write, string)
+    InstallAccount (Write, String)
+
+DESCRIPTION
+
+This resource will create a property in a user profile service application. 
+It creates, update or delete a property using the parameters that are passed in to it .
+
+The parameter DisplayOrder is absolute. ie.: If you want it to be placed as the 5th field of section Bla, which has propertyName value of 5000 then your DisplayOrder needs to be 5005
+If no DisplayOrder is added then SharePoint adds it as the last property of section X.
+
+Length is only relevant if Field type is "String".
+
+This Resource  doesn't currently support removing existing user profile properties
+
+EXAMPLE
+xSPUserProfileProperty WorkEmailProperty
+{
+    Name = "WorkEmail2"
+    UserProfileService = "User Profile Service Application"
+    DisplayName = "Work Email"
+    Type = "Email"
+    Description = "" #implementation isn't using it yet
+    PolicySetting = "Required"
+    PrivacySetting = "Everyone"
+    MappingConnectionName = "contoso.com"
+    MappingPropertyName = "mail"
+    MappingDirection = "Import"
+    Length = 10
+    DisplayOrder =25 
+    IsEventLog =$false
+    IsVisibleOnEditor=$true
+    IsVisibleOnViewer = $true
+    IsUserEditable = $true
+    IsAlias = $false 
+    IsSearchable = $false 
+    TermStore = ""
+    TermGroup = ""
+    TermSet = "" 
+    UserOverridePrivacy = $false
+}
+
+
