@@ -94,6 +94,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
+### 0.11.0.0
+
+ * Updates to module manifest file
+
 ### 0.10.0.0
 
  * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
