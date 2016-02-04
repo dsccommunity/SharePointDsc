@@ -94,12 +94,12 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
+ - xSPFarmSolution
+
 ### 0.10.0.0
 
  * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
  * Fixed issue with MinRole support in xSPJoinFarm
-
- * Added xSPFarmSolution resource
 
 ### 0.9.0.0
 
