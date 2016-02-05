@@ -93,12 +93,7 @@ function Set-TargetResource
 
             $appService = New-SPWorkManagementServiceApplication @newParams
             New-SPWorkManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -DefaultProxyGroup -ServiceApplication $appService | Out-Null
-            
-            while((Get-SPServiceApplication -Name $params.Name `
-                        | Where-Object { $_.TypeName -eq "Work Management Service Application"  }) -eq $null)
-            {
-                Sleep -Milliseconds 200
-            }
+            Sleep -Milliseconds 200
         }
         $setParams = @{}
         if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) { $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) }

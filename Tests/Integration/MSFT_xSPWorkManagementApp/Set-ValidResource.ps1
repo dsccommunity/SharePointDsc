@@ -36,4 +36,3 @@ WorkManagementServiceApp -ConfigurationData $ConfigData
 
 Remove-DscConfigurationDocument -Stage Current, Pending, Previous -Verbose
 Start-DscConfiguration .\WorkManagementServiceApp -ComputerName "localhost" -Wait -Verbose
-
