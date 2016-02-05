@@ -1,6 +1,8 @@
-#
-# xSharePoint.psm1
-#
+if ( (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue) -eq $null )
+{
+    Add-PsSnapin Microsoft.SharePoint.PowerShell
+}
+
 $Script:dscConfigContent = ""
 $Script:spCentralAdmin = Get-SPWebapplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
 
@@ -19,10 +21,13 @@ function Orchestrator{
 		Read-SPFarm
 		Read-SPWebApplications
 		Read-SPManagedPaths
+		Read-SPManagedAccounts
 		Read-SPServiceApplicationPools
 		Read-SPSites
 		Read-SPServiceInstance
 		Read-DiagnosticLoggingSettings
+		Read-UsageServiceApplication
+		Read-StateServiceApplication
 		Set-LCM
 		$Script:dscConfigContent += "    }`r`n"
 	}	
@@ -31,16 +36,16 @@ function Orchestrator{
 
 function Set-ConfigurationSettings
 {
-	$Script:dscConfigContent += "    xCredSSP CredSSPServer { Ensure = `"Present`"; Role = `"Server`"; } `r`n"
-    $Script:dscConfigContent += "    xCredSSP CredSSPClient { Ensure = `"Present`"; Role = `"Client`"; DelegateComputers = `"*." + (Get-WmiObject Win32_ComputerSystem).Domain + "`" }`r`n`r`n"
+	$Script:dscConfigContent += "        xCredSSP CredSSPServer { Ensure = `"Present`"; Role = `"Server`"; } `r`n"
+    $Script:dscConfigContent += "        xCredSSP CredSSPClient { Ensure = `"Present`"; Role = `"Client`"; DelegateComputers = `"*." + (Get-WmiObject Win32_ComputerSystem).Domain + "`" }`r`n`r`n"
 
-	$Script:dscConfigContent += "    xWebAppPool RemoveDotNet2Pool         { Name = `".NET v2.0`";            Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "    xWebAppPool RemoveDotNet2ClassicPool  { Name = `".NET v2.0 Classic`";    Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "    xWebAppPool RemoveDotNet45Pool        { Name = `".NET v4.5`";            Ensure = `"Absent`"; }`r`n"
-    $Script:dscConfigContent += "    xWebAppPool RemoveDotNet45ClassicPool { Name = `".NET v4.5 Classic`";    Ensure = `"Absent`"; }`r`n"
-    $Script:dscConfigContent += "    xWebAppPool RemoveClassicDotNetPool   { Name = `"Classic .NET AppPool`"; Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "    xWebAppPool RemoveDefaultAppPool      { Name = `"DefaultAppPool`";       Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "    xWebSite    RemoveDefaultWebSite      { Name = `"Default Web Site`";     Ensure = `"Absent`"; PhysicalPath = `"C:\inetpub\wwwroot`" }`r`n"
+	$Script:dscConfigContent += "        xWebAppPool RemoveDotNet2Pool         { Name = `".NET v2.0`";            Ensure = `"Absent`" }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2ClassicPool  { Name = `".NET v2.0 Classic`";    Ensure = `"Absent`" }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45Pool        { Name = `".NET v4.5`";            Ensure = `"Absent`"; }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45ClassicPool { Name = `".NET v4.5 Classic`";    Ensure = `"Absent`"; }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveClassicDotNetPool   { Name = `"Classic .NET AppPool`"; Ensure = `"Absent`" }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDefaultAppPool      { Name = `"DefaultAppPool`";       Ensure = `"Absent`" }`r`n"
+    $Script:dscConfigContent += "        xWebSite    RemoveDefaultWebSite      { Name = `"Default Web Site`";     Ensure = `"Absent`"; PhysicalPath = `"C:\inetpub\wwwroot`" }`r`n"
 }
 
 function Set-Imports
@@ -53,7 +58,7 @@ function Set-Imports
 
 function Check-Credentials([string] $userName)
 {
-	if($userName -and $Script:spCentralAdmin.ApplicationPool.ProcessAccount.Name)
+	if($userName -eq $Script:spCentralAdmin.ApplicationPool.ProcessAccount.Name)
 	{
 		return "`$FarmAccount"
 	}
@@ -269,10 +274,10 @@ function Read-SPManagedPaths
 
 function Read-SPManagedAccounts
 {
-	$managedAccounts = Get-SPManagedAccout
+	$managedAccounts = Get-SPManagedAccount
 	foreach($managedAccount in $managedAccounts)
 	{
-		$Script:dscConfigContent += "        xSPManagedAccount " + $managedAccount.Name + "`r`n"
+		$Script:dscConfigContent += "        xSPManagedAccount " + (Check-Credentials $managedAccount.Username).Replace("$","") + "`r`n"
 		$Script:dscConfigContent += "        {`r`n"
 		$Script:dscConfigContent += "            AccountName=`"" + $managedAccount.Username + "`"`r`n"
 		$Script:dscConfigContent += "            Account=" + (Check-Credentials $managedAccount.UserName) + "`r`n"
@@ -287,19 +292,49 @@ function Read-SPServiceInstance
 	$serviceInstances = Get-SPServiceInstance | Sort-Object -Property TypeName
 	foreach($serviceInstance in $serviceInstances)
 	{
-		$Script:dscConfigContent += "        xSPServiceInstance " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
-		$Script:dscConfigContent += "        {`r`n"
-		$Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
-
-		$status = "Present"
-		if($serviceInstances.Status -eq "Disabled")
+		if($serviceInstance.TypeName -eq "Distributed Cache")
 		{
-			$status = "Absent"
+			$Script:dscConfigContent += "        xSPDistributedCacheService " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
+			$Script:dscConfigContent += "        {`r`n"
+			$Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
+
+			$status = "Present"
+			if($serviceInstance.Status -eq "Disabled")
+			{
+				$status = "Absent"
+			}
+			$Script:dscConfigContent += "            Ensure=`"" + $status + "`"`r`n"
+
+			Use-CacheCluster
+			$cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
+			$computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
+            $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName -CachePort ($cacheHost | Where-Object { $_.HostName -eq $computerName }).PortNo -ErrorAction SilentlyContinue
+			$windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
+			$firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" -ErrorAction SilentlyContinue
+
+			$Script:dscConfigContent += "            CacheSizeInMB=" + $cacheHostConfig.Size + "`r`n"
+			$Script:dscConfigContent += "            ServiceAccount=" + (Check-Credentials $windowsService.StartName) + "`r`n"
+			$Script:dscConfigContent += "            CreateFirewallRules=`$" + ($firewallRule -ne $null) + "`r`n"
+			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+			$Script:dscConfigContent += "            DependsOn=@('[xSPCreateFarm]CreateSPFarm','[xSPManagedAccount]" + (Check-Credentials $windowsService.StartName).Replace("$", "") + "')`r`n"
+			$Script:dscConfigContent += "        }`r`n"
 		}
-		$Script:dscConfigContent += "            Ensure=`"" + $status + "`"`r`n"
-		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-		$Script:dscConfigContent += "            DependsOn=`"[xSPCreateFarm]CreateSPFarm`"`r`n"
-		$Script:dscConfigContent += "        }`r`n"
+		else
+		{
+			$Script:dscConfigContent += "        xSPServiceInstance " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
+			$Script:dscConfigContent += "        {`r`n"
+			$Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
+
+			$status = "Present"
+			if($serviceInstance.Status -eq "Disabled")
+			{
+				$status = "Absent"
+			}
+			$Script:dscConfigContent += "            Ensure=`"" + $status + "`"`r`n"
+			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+			$Script:dscConfigContent += "            DependsOn=`"[xSPCreateFarm]CreateSPFarm`"`r`n"
+			$Script:dscConfigContent += "        }`r`n"
+		}
 	}
 }
 
@@ -308,7 +343,7 @@ function Read-DiagnosticLoggingSettings
 	$diagConfig = Get-SPDiagnosticConfig
 	$Script:dscConfigContent += "        xSPDiagnosticLoggingSettings ApplyDiagnosticLogSettings`r`n"
 	$Script:dscConfigContent += "        {`r`n"
-    $Script:dscConfigContent += "            LogPath=`"" + $diagConfig.LogPath + "`"`r`n"
+    $Script:dscConfigContent += "            LogPath=`"" + $diagConfig.LogLocation + "`"`r`n"
     $Script:dscConfigContent += "            LogSpaceInGB=" + $diagConfig.LogDiskSpaceUsageGB + "`r`n"
 	$Script:dscConfigContent += "            AppAnalyticsAutomaticUploadEnabled=`$" + $diagConfig.AppAnalyticsAutomaticUploadEnabled + "`r`n"
     $Script:dscConfigContent += "            CustomerExperienceImprovementProgramEnabled=`$" + $diagConfig.CustomerExperienceImprovementProgramEnabled + "`r`n"
@@ -329,6 +364,45 @@ function Read-DiagnosticLoggingSettings
     $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
     $Script:dscConfigContent += "            DependsOn=@(`"[xSPCreateFarm]CreateSPFarm`", `"[xDisk]LogsDisk`")`r`n"
 	$Script:dscConfigContent += "        }`r`n"
+}
+
+function Read-UsageServiceApplication
+{
+		$usageApplication = Get-SPUsageApplication
+		if($usageApplication.Length -gt 0)
+		{
+		    $Script:dscConfigContent += "        xSPUsageApplication " + $usageApplication.TypeName.Replace(" ", "") + "`r`n"
+		    $Script:dscConfigContent += "        {`r`n"
+		    $Script:dscConfigContent += "            Name=`"" + $usageApplication.TypeName + "`"`r`n"
+		    $Script:dscConfigContent += "            DatabaseName=`"" + $usageApplication.UsageDatabase.Name + "`"`r`n"
+			$Script:dscConfigContent += "            DatabaseServer=`"" + $usageApplication.UsageDatabase.Server.Address + "`"`r`n"
+            $Script:dscConfigContent += "            UsageLogCutTime=`"" + $usageApplication.Service.UsageLogCutTime + "`"`r`n"
+            $Script:dscConfigContent += "            UsageLogLocation=`""  + $usageApplication.Service.UsageLogDir + "`"`r`n"
+            $Script:dscConfigContent += "            UsageLogMaxFileSizeKB=" + $usageApplication.Service.UsageLogMaxFileSize + "`r`n"
+			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		    $Script:dscConfigContent += "        }`r`n"
+		}
+}
+
+function Read-StateServiceApplication
+{
+	$stateApplications = Get-SPStateServiceApplication
+	foreach($stateApp in $stateApplications)
+	{
+		$Script:dscConfigContent += "        xSPStateServiceApp " + $stateApp.DisplayName.Replace(" ", "") + "`r`n"
+		$Script:dscConfigContent += "        {`r`n"
+		$Script:dscConfigContent += "            Name=`"" + $stateApp.DisplayName + "`"`r`n"
+
+		$stateDBName = ""
+		if($stateApp.Databases.Length -gt 0)
+		{
+		    $stateDBName = $stateApp.Databases.Name
+		    $Script:dscConfigContent += "            DatabaseServer=`"" + $stateApp.Databases.Server.Address + "`"`r`n"
+		}
+		$Script:dscConfigContent += "            DatabaseName=`"" + $stateDBName + "`"`r`n"        
+		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "        }`r`n"
+	}
 }
 
 function Set-LCM
