@@ -138,7 +138,7 @@ function Read-SPProductVersions
 
 function Read-SPFarm{
 	$spFarm = Get-SPFarm
-	$Script:dscConfigContent += "        xSPCreateFarm " + $spFarm.Name.Replace(" ", "") + "{`r`n"
+	$Script:dscConfigContent += "        xSPCreateFarm CreateSPFarm{`r`n"
 	$configDB = Get-SPDatabase | Where{$_.TypeName -eq "Configuration Database"}
 	$Script:dscConfigContent += "            DatabaseServer=`"" + $configDB.Server.Name + "`"`r`n"
 	$Script:dscConfigContent += "            AdminContentDatabaseName=`"" + $Script:spCentralAdmin.ContentDatabases.Name + "`"`r`n"
