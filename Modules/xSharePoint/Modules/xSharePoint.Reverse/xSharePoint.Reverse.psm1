@@ -28,6 +28,7 @@ function Orchestrator{
 		Read-DiagnosticLoggingSettings
 		Read-UsageServiceApplication
 		Read-StateServiceApplication
+		Read-CacheAccounts
 		Set-LCM
 		$Script:dscConfigContent += "    }`r`n"
 	}	
@@ -401,6 +402,22 @@ function Read-StateServiceApplication
 		}
 		$Script:dscConfigContent += "            DatabaseName=`"" + $stateDBName + "`"`r`n"        
 		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "        }`r`n"
+	}
+}
+
+function Read-CacheAccounts
+{
+	$webApps = Get-SPWebApplication
+	foreach($webApp in $webApplications)
+	{
+		$Script:dscConfigContent += "        xSPCacheAccounts " + $webApp.DisplayName.Replace(" ", "") + "CacheAccounts`r`n"
+		$Script:dscConfigContent += "        {`r`n"
+		$Script:dscConfigContent += "            WebAppUrl=`"" + $webApp.Url + "`"`r`n"
+		$Script:dscConfigContent += "            SuperUserAlias=`"" + $webApp.SuperUser + "`"`r`n"
+		$Script:dscConfigContent += "            SuperReaderAlias=`"" + $webApp.SuperReader + "`"`r`n"
+		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "            DependsOn=`"[xSPWebApplication]" + $webApp.DisplayName.Replace(" ", "") + "`"`r`n"
 		$Script:dscConfigContent += "        }`r`n"
 	}
 }
