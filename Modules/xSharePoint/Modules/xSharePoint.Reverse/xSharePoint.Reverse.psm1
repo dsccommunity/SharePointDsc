@@ -184,7 +184,8 @@ function Read-SPServiceApplicationPools
 
 	foreach($spServiceAppPool in $spServiceAppPools)
 	{
-		$Script:dscConfigContent += "        xSPServiceAppPool " + $spServiceAppPool.Name.Replace(" ", "") + "{`r`n"
+		$Script:dscConfigContent += "        xSPServiceAppPool " + $spServiceAppPool.Name.Replace(" ", "") + "`r`n"
+		$Script:dscConfigContent += "        {`r`n"
 		$Script:dscConfigContent += "            Name=`"" + $spServiceAppPool.Name + "`"`r`n"
 		$Script:dscConfigContent += "            ServiceAccount=" + (Check-Credentials $spServiceAppPool.ProcessAccount.Name) + "`r`n"
 		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
@@ -198,7 +199,8 @@ function Read-SPSites
 	$spSites = Get-SPSite -Limit All 
 	foreach($spsite in $spSites)
 	{
-		$Script:dscConfigContent += "        xSPSite " + $spSite.RootWeb.Title.Replace(" ", "") + "{`r`n"
+		$Script:dscConfigContent += "        xSPSite " + $spSite.RootWeb.Title.Replace(" ", "") + "`r`n"
+		$Script:dscConfigContent += "        {`r`n"
 		$Script:dscConfigContent += "            Name=`"" + $spSite.RootWeb.Title + "`"`r`n"
 		$Script:dscConfigContent += "            OwnerAlias=`"" + $spSite.Owner.DisplayName + "`"`r`n"
 
@@ -316,6 +318,23 @@ function Read-SPServiceInstance
 			$Script:dscConfigContent += "            CacheSizeInMB=" + $cacheHostConfig.Size + "`r`n"
 			$Script:dscConfigContent += "            ServiceAccount=" + (Check-Credentials $windowsService.StartName) + "`r`n"
 			$Script:dscConfigContent += "            CreateFirewallRules=`$" + ($firewallRule -ne $null) + "`r`n"
+			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+			$Script:dscConfigContent += "            DependsOn=@('[xSPCreateFarm]CreateSPFarm','[xSPManagedAccount]" + (Check-Credentials $windowsService.StartName).Replace("$", "") + "')`r`n"
+			$Script:dscConfigContent += "        }`r`n"
+		}
+		elseif($serviceInstance.TypeName -eq "User Profile Synchronization Service")
+		{
+			$Script:dscConfigContent += "        xSPUserProfileSyncService " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
+			$Script:dscConfigContent += "        {`r`n"
+			$Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
+
+			$status = "Present"
+			if($serviceInstance.Status -eq "Disabled")
+			{
+				$status = "Absent"
+			}
+			$Script:dscConfigContent += "            Ensure=`"" + $status + "`"`r`n"			
+			$Script:dscConfigContent += "            FramAccount=`$FarmAccount`r`n"
 			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
 			$Script:dscConfigContent += "            DependsOn=@('[xSPCreateFarm]CreateSPFarm','[xSPManagedAccount]" + (Check-Credentials $windowsService.StartName).Replace("$", "") + "')`r`n"
 			$Script:dscConfigContent += "        }`r`n"
