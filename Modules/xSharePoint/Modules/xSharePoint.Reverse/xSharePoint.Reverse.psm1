@@ -31,6 +31,9 @@ function Orchestrator{
 		Read-UserProfileServiceapplication
 		Read-CacheAccounts
 		Read-SecureStoreServiceApplication
+		Read-BCSServiceApplication
+		Read-SearchServiceApplication
+		Read-ManagedMetadataServiceApplication
 		Set-LCM
 		$Script:dscConfigContent += "    }`r`n"
 	}	
@@ -448,59 +451,126 @@ function Read-UserProfileServiceapplication
 	$ups = Get-SPServiceApplication | Where{$_.TypeName -eq "User Profile Service Application"}
 
 	$sites = Get-SPSite
-	$context = Get-SPServiceContext $sites[0]
-	$pm = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
-
-	if($ups -ne $null)
+	if($sites.Length -gt 0)
 	{
-		$Script:dscConfigContent += "        xSPUserProfileServiceApp UserProfileServiceApp`r`n"
-		$Script:dscConfigContent += "        {`r`n"
-		$Script:dscConfigContent += "            Name=`"" + $ups.Name + "`"`r`n"
-		$Script:dscConfigContent += "            ApplicationPool=`"" + $ups.ApplicationPool.Name + "`"`r`n"
-		$Script:dscConfigContent += "            MySiteHostLocation=`"" + $pm.MySiteHostUrl + "`"`r`n"
+		$context = Get-SPServiceContext $sites[0]
+		$pm = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
 
-		$profileDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.ProfileDatabase"}
-		$Script:dscConfigContent += "            ProfileDBName=`"" + $profileDB.Name + "`"`r`n"
-		$Script:dscConfigContent += "            ProfileDBServer=`"" + $profileDB.Server.Name + "`"`r`n"
+		if($ups -ne $null)
+		{
+			$Script:dscConfigContent += "        xSPUserProfileServiceApp UserProfileServiceApp`r`n"
+			$Script:dscConfigContent += "        {`r`n"
+			$Script:dscConfigContent += "            Name=`"" + $ups.Name + "`"`r`n"
+			$Script:dscConfigContent += "            ApplicationPool=`"" + $ups.ApplicationPool.Name + "`"`r`n"
+			$Script:dscConfigContent += "            MySiteHostLocation=`"" + $pm.MySiteHostUrl + "`"`r`n"
 
-		$socialDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.SocialDatabase"}
-		$Script:dscConfigContent += "            SocialDBName=`"" + $socialDB.Name + "`"`r`n"
-		$Script:dscConfigContent += "            SocialDBServer=`"" + $socialDB.Server.Name + "`"`r`n"
+			$profileDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.ProfileDatabase"}
+			$Script:dscConfigContent += "            ProfileDBName=`"" + $profileDB.Name + "`"`r`n"
+			$Script:dscConfigContent += "            ProfileDBServer=`"" + $profileDB.Server.Name + "`"`r`n"
 
-		$syncDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.SynchronizationDatabase"}
-		$Script:dscConfigContent += "            SyncDBName=`"" + $syncDB.Name + "`"`r`n"
-		$Script:dscConfigContent += "            SyncDBServer=`"" + $syncDB.Server.Name + "`"`r`n"
+			$socialDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.SocialDatabase"}
+			$Script:dscConfigContent += "            SocialDBName=`"" + $socialDB.Name + "`"`r`n"
+			$Script:dscConfigContent += "            SocialDBServer=`"" + $socialDB.Server.Name + "`"`r`n"
 
-		$Script:dscConfigContent += "            FarmAccount=`$FarmAccount`r`n"
-		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-		$Script:dscConfigContent += "        }`r`n"
+			$syncDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.SynchronizationDatabase"}
+			$Script:dscConfigContent += "            SyncDBName=`"" + $syncDB.Name + "`"`r`n"
+			$Script:dscConfigContent += "            SyncDBServer=`"" + $syncDB.Server.Name + "`"`r`n"
+
+			$Script:dscConfigContent += "            FarmAccount=`$FarmAccount`r`n"
+			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+			$Script:dscConfigContent += "        }`r`n"
+		}
 	}
 }
 
 function Read-SecureStoreServiceApplication
 {
 	$ssa = Get-SPServiceApplication | Where{$_.TypeName -eq "Secure Store Service Application"}
-	$Script:dscConfigContent += "        xSPSecureStoreServiceApp SecureStoreServiceApp`r`n"
-	$Script:dscConfigContent += "        {`r`n"
-	$Script:dscConfigContent += "            Name=`"" + "`"`r`n"
-	$Script:dscConfigContent += "            ApplicationPool=`"" + $ssa.ApplicationPool.Name + "`"`r`n"
 	
-	<## This is a little dirty, the only way I have found to retrieve the Audit information is by accessing the database directly;
-	Invoke-Command -Credential $Script:spCentralAdmin.ApplicationPool.ProcessAccount{
-		Add-PSSnapin SqlServerCmdletSnapin100
-		Add-PSSnapin SqlServerProviderSnapin100
-		Invoke-SqlCmd -Query "SELECT * FROM SSSConfig" -ServerInstance "MyComputer\MyInstance"
-	}#>
+	for($i = 0; $i -lt $ssa.Length; $i++)
+	{
+		$Script:dscConfigContent += "        xSPSecureStoreServiceApp " + $ssa[$i].Name.Replace(" ", "") + "`r`n"
+		$Script:dscConfigContent += "        {`r`n"
+		$Script:dscConfigContent += "            Name=`"" + "`"`r`n"
+		$Script:dscConfigContent += "            ApplicationPool=`"" + $ssa[$i].ApplicationPool.Name + "`"`r`n"
+	
+		<## This is a little dirty, the only way I have found to retrieve the Audit information is by accessing the database directly; #>
+		$ssDB = get-spdatabase | where{$_.Type -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceDatabase"}
+		$ssDBServer = $ssDB[$i].Server.Name
+		$ssDBName = $ssDB[$i].DisplayName
 
-	$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-	$Script:dscConfigContent += "        }`r`n"
+		Push-Location
+		$queryResults = Invoke-SqlCmd -Query "SELECT * FROM SSSConfig" -ServerInstance $ssDBServer -Database $ssDBName
+		Pop-Location
+
+		$logTime = $queryResults.PurgeAuditDays		
+		$Script:dscConfigContent += "            AuditingEnabled=`$" + $queryResults.EnableAudit + "`r`n"
+		$Script:dscConfigContent += "            AuditlogMaxSize=" + $logTime + "`r`n"
+		$Script:dscConfigContent += "            DatabaseName=`"" + $ssDBName + "`"`r`n"
+		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "        }`r`n"		
+	}
+}
+
+function Read-ManagedMetadataServiceApplication
+{
+	$mms = Get-SPServiceApplication | Where{$_.TypeName -eq "Managed Metadata Service"}
+	if (Get-Command "Get-SPMetadataServiceApplication" -errorAction SilentlyContinue)
+    {
+		foreach($mmsInstance in $mms)
+		{
+			$mmsa = Get-SPMetadataServiceApplication $mmsInstance
+			$Script:dscConfigContent += "        xSPManagedMetaDataServiceApp " + $mmsInstance.Name.Replace(" ", "") + "`r`n"
+			$Script:dscConfigContent += "        {`r`n"
+			$Script:dscConfigContent += "            Name=`"" + $mmsInstance.Name + "`"`r`n"
+			$Script:dscConfigContent += "            ApplicationPool=`"" + $mmsInstance.ApplicationPool.Name + "`"`r`n"
+			$Script:dscConfigContent += "            DatabaseName=`"" + $mmsa.Database.Name + "`"`r`n"
+			$Script:dscConfigContent += "            DatabaseServer=`"" + $mmsa.Database.Server.Name + "`"`r`n"
+			$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+			$Script:dscConfigContent += "        }`r`n"
+		}
+	}
+}
+
+function Read-BCSServiceApplication
+{
+    $bcsa = Get-SPServiceApplication | Where{$_.TypeName -eq "Business Data Connectivity Service Application"}
+	
+	foreach($bcsaInstance in $bcsa)
+	{
+		$Script:dscConfigContent += "        xSPBCSServiceApp " + $bcsaInstance.Name.Replace(" ", "") + "`r`n"
+		$Script:dscConfigContent += "        {`r`n"
+		$Script:dscConfigContent += "            Name=`"" + $bcsaInstance.Name + "`"`r`n"
+		$Script:dscConfigContent += "            ApplicationPool=`"" + $bcsaInstance.ApplicationPool.Name + "`"`r`n"
+		$Script:dscConfigContent += "            DatabaseName=`"" + $bcsaInstance.Database.Name + "`"`r`n"
+		$Script:dscConfigContent += "            DatabaseServer=`"" + $bcsaInstance.Database.Server.Name + "`"`r`n"
+		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "        }`r`n"		
+	}
+}
+
+function Read-SearchServiceApplication
+{
+    $searchSA = Get-SPServiceApplication | Where{$_.TypeName -eq "Search Service Application"}
+	
+	foreach($searchSAInstance in $searchSA)
+	{
+		$Script:dscConfigContent += "        xSPSearchServiceApp " + $searchSAInstance.Name.Replace(" ", "") + "`r`n"
+		$Script:dscConfigContent += "        {`r`n"
+		$Script:dscConfigContent += "            Name=`"" + $searchSAInstance.Name + "`"`r`n"
+		$Script:dscConfigContent += "            ApplicationPool=`"" + $searchSAInstance.ApplicationPool.Name + "`"`r`n"
+		$Script:dscConfigContent += "            DatabaseName=`"" + $searchSAInstance.Database.Name + "`"`r`n"
+		$Script:dscConfigContent += "            DatabaseServer=`"" + $searchSAInstance.Database.Server.Name + "`"`r`n"
+		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "        }`r`n"		
+	}
 }
 
 function Set-LCM
 {
 	$Script:dscConfigContent += "        LocalConfigurationManager"  + "`r`n"
 	$Script:dscConfigContent += "        {`r`n"
-	$Script:dscConfigContent += "            RebootNodeIfNeeded = `$true`r`n"
+	$Script:dscConfigContent += "            RebootNodeIfNeeded = `$True`r`n"
 	$Script:dscConfigContent += "        }`r`n"
 }
 
