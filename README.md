@@ -94,6 +94,8 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
+ * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
+
 ### 0.10.0.0
 
  * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
