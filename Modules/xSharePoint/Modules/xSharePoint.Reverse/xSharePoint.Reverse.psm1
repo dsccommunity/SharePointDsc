@@ -28,6 +28,7 @@ function Orchestrator{
 		Read-DiagnosticLoggingSettings
 		Read-UsageServiceApplication
 		Read-StateServiceApplication
+		Read-UserProfileServiceapplication
 		Read-CacheAccounts
 		Set-LCM
 		$Script:dscConfigContent += "    }`r`n"
@@ -428,15 +429,49 @@ function Read-StateServiceApplication
 function Read-CacheAccounts
 {
 	$webApps = Get-SPWebApplication
-	foreach($webApp in $webApplications)
+	foreach($webApp in $webApps)
 	{
 		$Script:dscConfigContent += "        xSPCacheAccounts " + $webApp.DisplayName.Replace(" ", "") + "CacheAccounts`r`n"
 		$Script:dscConfigContent += "        {`r`n"
 		$Script:dscConfigContent += "            WebAppUrl=`"" + $webApp.Url + "`"`r`n"
-		$Script:dscConfigContent += "            SuperUserAlias=`"" + $webApp.SuperUser + "`"`r`n"
-		$Script:dscConfigContent += "            SuperReaderAlias=`"" + $webApp.SuperReader + "`"`r`n"
+		$Script:dscConfigContent += "            SuperUserAlias=`"" + $webApp.Properties["portalsuperuseraccount"] + "`"`r`n"
+		$Script:dscConfigContent += "            SuperReaderAlias=`"" + $webApp.Properties["portalsuperreaderaccount"]  + "`"`r`n"
 		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
 		$Script:dscConfigContent += "            DependsOn=`"[xSPWebApplication]" + $webApp.DisplayName.Replace(" ", "") + "`"`r`n"
+		$Script:dscConfigContent += "        }`r`n"
+	}
+}
+
+function Read-UserProfileServiceapplication
+{
+	$ups = Get-SPServiceApplication | Where{$_.TypeName -eq "User Profile Service Application"}
+
+	$sites = Get-SPSite
+	$context = Get-SPServiceContext $sites[0]
+	$pm = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
+
+	if($ups -ne $null)
+	{
+		$Script:dscConfigContent += "        xSPUserProfileServiceApp UserProfileServiceApp`r`n"
+		$Script:dscConfigContent += "        {`r`n"
+		$Script:dscConfigContent += "            Name=`"" + $ups.Name + "`"`r`n"
+		$Script:dscConfigContent += "            ApplicationPool=`"" + $ups.ApplicationPool.Name + "`"`r`n"
+		$Script:dscConfigContent += "            MySiteHostLocation=`"" + $pm.MySiteHostUrl + "`"`r`n"
+
+		$profileDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.ProfileDatabase"}
+		$Script:dscConfigContent += "            ProfileDBName=`"" + $profileDB.Name + "`"`r`n"
+		$Script:dscConfigContent += "            ProfileDBServer=`"" + $profileDB.Server.Name + "`"`r`n"
+
+		$socialDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.SocialDatabase"}
+		$Script:dscConfigContent += "            SocialDBName=`"" + $socialDB.Name + "`"`r`n"
+		$Script:dscConfigContent += "            SocialDBServer=`"" + $socialDB.Server.Name + "`"`r`n"
+
+		$syncDB = Get-SPDatabase | Where{$_.Type -eq "Microsoft.Office.Server.Administration.SynchronizationDatabase"}
+		$Script:dscConfigContent += "            SyncDBName=`"" + $syncDB.Name + "`"`r`n"
+		$Script:dscConfigContent += "            SyncDBServer=`"" + $syncDB.Server.Name + "`"`r`n"
+
+		$Script:dscConfigContent += "            FarmAccount=`$FarmAccount`r`n"
+		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
 		$Script:dscConfigContent += "        }`r`n"
 	}
 }
