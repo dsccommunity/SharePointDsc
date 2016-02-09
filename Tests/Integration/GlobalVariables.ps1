@@ -1,0 +1,3 @@
+#
+# GlobalVariables.ps1
+#

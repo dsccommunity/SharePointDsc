@@ -37,3 +37,4 @@ class MSFT_xSPTimerJobState : OMI_BaseResource
     [Write] String Schedule;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
+
