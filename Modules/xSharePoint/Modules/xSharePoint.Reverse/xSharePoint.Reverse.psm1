@@ -30,6 +30,7 @@ function Orchestrator{
 		Read-StateServiceApplication
 		Read-UserProfileServiceapplication
 		Read-CacheAccounts
+		Read-SecureStoreServiceApplication
 		Set-LCM
 		$Script:dscConfigContent += "    }`r`n"
 	}	
@@ -474,6 +475,25 @@ function Read-UserProfileServiceapplication
 		$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
 		$Script:dscConfigContent += "        }`r`n"
 	}
+}
+
+function Read-SecureStoreServiceApplication
+{
+	$ssa = Get-SPServiceApplication | Where{$_.TypeName -eq "Secure Store Service Application"}
+	$Script:dscConfigContent += "        xSPSecureStoreServiceApp SecureStoreServiceApp`r`n"
+	$Script:dscConfigContent += "        {`r`n"
+	$Script:dscConfigContent += "            Name=`"" + "`"`r`n"
+	$Script:dscConfigContent += "            ApplicationPool=`"" + $ssa.ApplicationPool.Name + "`"`r`n"
+	
+	<## This is a little dirty, the only way I have found to retrieve the Audit information is by accessing the database directly;
+	Invoke-Command -Credential $Script:spCentralAdmin.ApplicationPool.ProcessAccount{
+		Add-PSSnapin SqlServerCmdletSnapin100
+		Add-PSSnapin SqlServerProviderSnapin100
+		Invoke-SqlCmd -Query "SELECT * FROM SSSConfig" -ServerInstance "MyComputer\MyInstance"
+	}#>
+
+	$Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+	$Script:dscConfigContent += "        }`r`n"
 }
 
 function Set-LCM
