@@ -575,4 +575,10 @@ function Set-LCM
 }
 
 Orchestrator
-$Script:dscConfigContent | Out-File "SP-Farm.DSC.ps1"
+$OutputDSCPath = Read-Host "Output Folder for DSC Configuration: "
+if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
+{
+	$OutputDSCPath += "\"
+}
+$OutputDSCPath += "SP-Farm.DSC.ps1"
+$Script:dscConfigContent | Out-File $OutputDSCPath
