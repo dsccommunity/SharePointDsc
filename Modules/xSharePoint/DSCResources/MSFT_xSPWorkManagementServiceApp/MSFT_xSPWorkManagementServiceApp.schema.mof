@@ -1,4 +1,4 @@
-/*
+﻿/*
 **Description**
 
 This resource is used to provision and manage an instance of the Work Management Services Service Application.
@@ -16,22 +16,21 @@ Remarks
    xSPWorkManagementServiceApp WorkManagementServiceApp
     {
         Name = "App Management Service Application"
-        AppPool = "SharePoint web services"
+        ApplicationPool = "SharePoint web services"
         MinimumTimeBetweenEwsSyncSubscriptionSearches = 10 
 }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("WorkManagementServiceApp")]
-class MSFT_WorkManagementServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("xSPWorkManagementServiceApp")]
+class MSFT_xSPWorkManagementServiceApp : OMI_BaseResource
 {
     [Key] string Name;
-    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Required] String ApplicationPool;
+    [write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [write] String ApplicationPool;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Write] System.UInt32 MinimumTimeBetweenEwsSyncSubscriptionSearches;
-    [Write] System.UInt32 MinimumTimeBetweenProviderRefreshes;
-    [Write] System.UInt32 MinimumTimeBetweenSearchQueries;
-    [Write] System.UInt32 NumberOfSubscriptionSyncsPerEwsSyncRun;
-    [Write] System.UInt32 NumberOfUsersEwsSyncWillProcessAtOnce;
-    [Write] System.UInt32 NumberOfUsersPerEwsSyncBatch;
+    [Write] uint32 MinimumTimeBetweenEwsSyncSubscriptionSearches;
+    [Write] uint32 MinimumTimeBetweenProviderRefreshes;
+    [Write] uint32 MinimumTimeBetweenSearchQueries;
+    [Write] uint32 NumberOfSubscriptionSyncsPerEwsSyncRun;
+    [Write] uint32 NumberOfUsersEwsSyncWillProcessAtOnce;
+    [Write] uint32 NumberOfUsersPerEwsSyncBatch;
 };
-
