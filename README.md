@@ -95,6 +95,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 ### Unreleased
 
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
+ * Fixed bug with xSPWorkManagementServiceApp schema
 
 ### 0.10.0.0
 
