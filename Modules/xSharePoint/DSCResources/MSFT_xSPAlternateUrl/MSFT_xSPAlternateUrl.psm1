@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [System.String] $Zone,
+        [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
         [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
@@ -38,7 +38,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [System.String] $Zone,
+        [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
         [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
@@ -67,7 +67,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $true)]  [System.String] $Zone,
+        [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
         [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
