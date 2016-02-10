@@ -84,7 +84,7 @@ function Set-TargetResource
         {
             #remove existing app
             
-            Remove-SPServiceApplication $appService -ErrorAction SilentlyContinue
+            Remove-SPServiceApplication $appService 
             return;
         } elseif ( $appService -eq $null){
             $newParams = @{}
