@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $true)]  [System.String] $FileShare,
+        [parameter(Mandatory = $false)] [System.String] $FileShare,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -32,7 +32,7 @@ function Get-TargetResource
 
         return @{
             DatabaseName = $params.DatabaseName
-            AGName = $params.AGName
+            AGName = $AGName
             FileShare = $params.FileShare
             Ensure = $Ensure
             InstallAccount = $params.InstallAccount
@@ -49,7 +49,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $true)]  [System.String] $FileShare,
+        [parameter(Mandatory = $false)] [System.String] $FileShare,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -113,7 +113,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $true)]  [System.String] $FileShare,
+        [parameter(Mandatory = $false)] [System.String] $FileShare,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
