@@ -44,7 +44,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
@@ -108,7 +107,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
