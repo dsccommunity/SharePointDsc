@@ -27,9 +27,32 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-xSharePointServiceContext {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true,Position=1)]
+        $ProxyGroup
+    )
+      Write-Verbose "Getting SPContext for Proxy group $($proxyGroup)"
+    return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
+}
+
 function Get-xSharePointContentService() {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
+}
+
+
+function Get-xSharePointUserProfileSubTypeManager {
+    [CmdletBinding()]
+    param
+    (
+        $Context
+    )
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
+    
+    return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($Context)
 }
 
 function Get-xSharePointInstalledProductVersion() {
@@ -111,16 +134,16 @@ function Rename-xSharePointParamValue() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] $params,
-        [parameter(Mandatory = $true,Position=2)] $oldName,
-        [parameter(Mandatory = $true,Position=3)] $newName
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] $Params,
+        [parameter(Mandatory = $true,Position=2)] $OldName,
+        [parameter(Mandatory = $true,Position=3)] $NewName
     )
 
-    if ($params.ContainsKey($oldName)) {
-        $params.Add($newName, $params.$oldName)
-        $params.Remove($oldName) | Out-Null
+    if ($Params.ContainsKey($OldName)) {
+        $Params.Add($NewName, $Params.$OldName)
+        $Params.Remove($OldName) | Out-Null
     }
-    return $params
+    return $Params
 }
 
 function Remove-xSharePointUserToLocalAdmin() {

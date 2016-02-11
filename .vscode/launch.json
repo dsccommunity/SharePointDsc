@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PowerShell",
+            "type": "PowerShell",
+            "request": "launch",
+            "program": "RunPesterTests.ps1"
+        }
+    ]
+}

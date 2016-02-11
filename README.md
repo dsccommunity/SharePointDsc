@@ -36,7 +36,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPAppCatalog
  - xSPAppDomain
  - xSPAppManagementServiceApp
- - xBCSServiceApp
+ - xSPBCSServiceApp
  - xSPCacheAccounts
  - xSPCreateFarm
  - xSPDesignerSettings
@@ -44,6 +44,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPDistributedCacheService
  - xSPFarmAdministrators
  - xSPFeature
+ - xSPHealthAnalyzerRuleState
  - xSPInstall
  - xSPInstallPreReqs
  - xSPJoinFarm
@@ -60,10 +61,11 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPServiceAppPool
  - xSPServiceInstance
  - xSPSessionStateService
+ - xSPShellAdmin
  - xSPSite
  - xSPStateServiceApp
- - xSPTimerJobState
  - xSPSubscriptionSettingsServiceApp
+ - xSPTimerJobState
  - xSPUsageApplication
  - xSPUserProfileServiceApp
  - xSPUserProfileSyncService
@@ -76,6 +78,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPWebAppSiteUseAndDeletion
  - xSPWebAppThrottlingSettings
  - xSPWebAppWorkflowSettings
+ - xSPWordAutomationServiceApp
 
 ## Preview status
 
@@ -89,10 +92,18 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### Unreleased 
- * Added xSPWordAutomationServiceApp resources
+### Unreleased
 
- * Added xSPHealthAnalyzerRuleState resources
+ - xSPFarmSolution
+
+ * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
+ * Added xSPDatabaseAAG resource
+ * Fixed bug with xSPWorkManagementServiceApp schema
+
+### 0.10.0.0
+
+ * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
+ * Fixed issue with MinRole support in xSPJoinFarm
 
 ### 0.9.0.0
 
