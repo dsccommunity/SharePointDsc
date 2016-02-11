@@ -90,6 +90,7 @@ function Get-TargetResource
             TermGroup = $termSet.TermGroup
             TermSet = $termSet.TermSet
             UserOverridePrivacy = $userProfileProperty.AllowPolicyOverride
+            Ensure = $params.Ensure
         }
 
     }
@@ -109,7 +110,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    #note for integration test: CA can take a couple of minutes to notice the change. don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
+    # note for integration test: CA can take a couple of minutes to notice the change. 
+    # don't try refreshing properties page. go through from a fresh from  Service Applications  page :)
 
     Write-Verbose -Message "Creating user profile property $Name"
     $test = $PSBoundParameters
@@ -161,7 +163,6 @@ function Set-TargetResource
         $userProfileProperty.CoreProperty.Commit()
 
         #region display order
-        # Set-DisplayOrder
         if($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
