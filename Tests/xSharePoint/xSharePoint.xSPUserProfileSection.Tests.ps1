@@ -249,7 +249,7 @@ Describe "xSPUserProfileProperty" {
 
             return $result
             }
-                    $testParamsUpdate.Ensure = "Absent"
+                    $testParams.Ensure = "Absent"
             It "deletes an user profile property in the set method" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetSectionByNameCalled = $false
