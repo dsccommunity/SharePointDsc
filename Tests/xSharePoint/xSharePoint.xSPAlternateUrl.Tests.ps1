@@ -17,6 +17,7 @@ Describe "xSPAlternateUrl" {
         $testParams = @{
             WebAppUrl = "http://test.constoso.local"
             Zone = "Default"
+            Ensure = "Present"
             Url = "http://something.contoso.local"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -29,8 +30,9 @@ Describe "xSPAlternateUrl" {
 
         Mock New-SPAlternateURL {}
         Mock Set-SPAlternateURL {}
+        Mock Remove-SPAlternateURL {}
         
-        Context "No alternate URL exists for the specified zone and web app" {
+        Context "No alternate URL exists for the specified zone and web app, and there should be" {
             
             Mock Get-SPAlternateUrl {
                 return @()
@@ -94,6 +96,29 @@ Describe "xSPAlternateUrl" {
 
             it "returns true from the test method" {
                 Test-targetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "A URL exists for the specified zone and web app, and it is correct" {
+            
+            Mock Get-SPAlternateUrl {
+                return @(
+                    @{
+                        IncomingUrl = $testParams.WebAppUrl
+                        Zone = $testParams.Zone
+                        PublicUrl = $testParams.Url
+                    }
+                )
+            }
+            $testParams.Ensure = "Absent"
+
+            it "returns false from the test method" {
+                Test-targetResource @testParams | Should Be $false
+            }
+
+            it "calls the remove cmdlet from the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPAlternateURL
             }
         }
     }

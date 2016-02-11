@@ -20,7 +20,8 @@ class MSFT_xSPAlternateUrl : OMI_BaseResource
 {
     [Key] String WebAppUrl;
     [Key, ValueMap{"Default","Intranet","Extranet","Custom","Internet"}, Values{"Default","Intranet","Extranet","Custom","Internet"}] String Zone;
-    [Required] String Url;
+    [Write] String Url;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
