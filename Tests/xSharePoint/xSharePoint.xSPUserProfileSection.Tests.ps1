@@ -73,7 +73,7 @@ Describe "xSPUserProfileProperty" {
                             DisplayName=""
                             }
                         } -PassThru  | Add-Member ScriptMethod RemoveSectionByName {
-                            $Global:xSPUPCoreRemovePropertyByNameCalled = $true
+                            $Global:xSPUPCoreRemoveSectionByNameCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
                             $Global:xSPUPCoreAddCalled = $true
                         } -PassThru -Force 
