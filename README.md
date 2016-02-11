@@ -96,6 +96,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
  - xSPFarmSolution
 
+ * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
+ * Added xSPDatabaseAAG resource
+ * Fixed bug with xSPWorkManagementServiceApp schema
+
 ### 0.10.0.0
 
  * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
