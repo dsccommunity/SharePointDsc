@@ -55,7 +55,7 @@ function Set-TargetResource
         if ([string]::IsNullOrEmpty($CurrentValues.Url)) {
             New-SPAlternateURL -WebApplication $params.WebAppUrl -Url $params.Url -Zone $params.Zone
         } else {
-            Set-SPAlternateURL -Identity $params.WebAppUrl -Url $params.Url -Zone $params.Zone
+            Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone | Set-SPAlternateURL -Url $params.Url
         }
     }
 }
