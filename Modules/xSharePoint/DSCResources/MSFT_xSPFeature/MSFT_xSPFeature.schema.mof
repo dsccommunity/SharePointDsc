@@ -13,7 +13,8 @@ The name property is the name of the feature based on its folder name in the FEA
         Url                  = "http://www.contoso.com"
         Ensure               = "Present"
         Scope                = "Site"
-        PsDscRunAsCredential = $SetupAccuount     
+        PsDscRunAsCredential = $SetupAccuount
+        Version              = "1.0.0.0"     
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPFeature")]
@@ -24,5 +25,6 @@ class MSFT_xSPFeature : OMI_BaseResource
     [Key] string Url;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write] string Version;
 };
 

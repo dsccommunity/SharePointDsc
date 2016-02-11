@@ -20,11 +20,12 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPFeature" {
     InModuleScope $ModuleName {
         $testParams = @{
-            Name = "DemoFeature"
+            Name         = "DemoFeature"
             FeatureScope = "Farm"
-            Url = "http://site.sharepoint.com"
-            Ensure = "Present"
+            Url          = "http://site.sharepoint.com"
+            Ensure       = "Present"
         }
+        
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
         Mock Invoke-xSharePointCommand { 
@@ -144,6 +145,30 @@ Describe "xSPFeature" {
 
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        Context "A site collection scoped features is enabled but has the wrong version" {
+            
+            Mock Get-SPFeature { return @{ Version = "1.0.0.0" } }
+            Mock Disable-SPFeature { } -Verifiable
+            
+            $testParams.FeatureScope = "Site"
+            $testParams.Version      = "1.1.0.0"
+
+            It "returns the version from the get method" {
+                (Get-TargetResource @testParams).Version | Should Be "1.0.0.0"
+            }
+            
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "reactivates the feature in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Disable-SPFeature -Times 1
+                Assert-MockCalled Enable-SPFeature -Times 1
             }
         }
     }
