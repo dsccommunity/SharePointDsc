@@ -17,7 +17,6 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        
         $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
         if ($null -eq $upsa) { 
             return $null 
@@ -29,67 +28,15 @@ function Get-TargetResource
         $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
         
-        $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
-        if($null -eq $userProfileProperty ){
+        $userProfileProperty = $userProfileSubType.Properties.GetSectionByName($params.Name) 
+        if($userProfileProperty -eq $null){
             return $null 
         }
-        
-        $termSet = @{
-            TermSet = ""
-            TermGroup =""
-            TermStore = ""
-        }
-
-        if($userProfileProperty.CoreProperty.TermSet -ne $null)
-        {
-            $termSet.TermSet = $userProfileProperty.CoreProperty.TermSet.Name
-            $termSet.TermGroup = $userProfileProperty.CoreProperty.TermSet.Group.Name
-            $termSet.TermStore = $userProfileProperty.CoreProperty.TermSet.TermStore.Name
-        }
-        $mapping  = @{
-            ConectionName = ""
-            PropertyName =""
-            Direction = ""
-        }
-        $syncConnection  = $userProfileConfigManager.ConnectionManager | ? {$_.PropertyMapping.Item($params.Name) -ne $null} 
-        if($syncConnection -ne $null) {
-            $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
-            if($currentMapping -ne $null)
-            {
-                $mapping.Direction = "Import"
-                $mapping.ConnectionName = $params.MappingConnectionName 
-                if($currentMapping.IsExport)
-                {
-                    $mapping.Direction = "Export"
-                }
-                $mapping.PropertyName = $currentMapping.DataSourcePropertyName
-            }
-        }
-        
-
         return @{
             Name = $userProfileProperty.Name 
-            UserProfileServiceAppName = $params.UserProfileService
+            UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
-            Type = $userProfileProperty.CoreProperty.Type.GetTypeCode()
-            Description = $userProfileProperty.Description 
-            PolicySetting = $userProfileProperty.PrivacyPolicy
-            PrivacySetting = $userProfileProperty.DefaultPrivacy
-            MappingConnectionName = $mapping.ConnectionName
-            MappingPropertyName = $mapping.PropertyName
-            MappingDirection = $Mapping.Direction
-            Length = $userProfileProperty.CoreProperty.Length
             DisplayOrder =$userProfileProperty.DisplayOrder 
-            IsEventLog =$userProfileProperty.TypeProperty.IsEventLog
-            IsVisibleOnEditor=$userProfileProperty.TypeProperty.IsVisibleOnEditor
-            IsVisibleOnViewer  =$userProfileProperty.TypeProperty.IsVisibleOnViewer
-            IsUserEditable = $userProfileProperty.IsUserEditable
-            IsAlias = $userProfileProperty.IsAlias 
-            IsSearchable = $userProfileProperty.CoreProperty.IsSearchable 
-            TermStore = $termSet.TermStore
-            TermGroup = $termSet.TermGroup
-            TermSet = $termSet.TermSet
-            UserOverridePrivacy = $userProfileProperty.AllowPolicyOverride
             Ensure = $params.Ensure
         }
 
@@ -111,7 +58,7 @@ function Set-TargetResource
     )
 
     # note for integration test: CA can take a couple of minutes to notice the change. 
-    # don't try refreshing properties page. go through from a fresh from  Service Applications  page :)
+    # don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
 
     Write-Verbose -Message "Creating user profile property $Name"
     $test = $PSBoundParameters
@@ -131,7 +78,7 @@ function Set-TargetResource
 
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         if($null -eq $userProfileConfigManager)
-        {   #if config manager returns when ups is available then isuee is permissions
+        {   #if config manager returns null when ups is available then isuee is permissions
             throw "account running process needs admin permission on user profile service application"
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
@@ -146,7 +93,7 @@ function Set-TargetResource
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
             if($userProfileProperty -ne $null)
             {
-                $coreProperties.RemovePropertyByName($params.Name)
+                $coreProperties.RemoveSectionByName($params.Name)
                 return;
             }
         } elseif($userProfileProperty -eq $null){
@@ -166,7 +113,7 @@ function Set-TargetResource
         if($params.ContainsKey("DisplayOrder"))
         {
             $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
-            $profileManager.Properties.SetDisplayOrderByPropertyName($params.Name,$params.DisplayOrder)
+            $profileManager.Properties.SetDisplayOrderBySectionName($params.Name,$params.DisplayOrder)
             $profileManager.Properties.CommitDisplayOrder()
         }
         #endregion
@@ -193,8 +140,10 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile property $Name"
     if ($null -eq $CurrentValues) { return $false  }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder")
 }
 
 Export-ModuleMember -Function *-TargetResource
+
+
 
