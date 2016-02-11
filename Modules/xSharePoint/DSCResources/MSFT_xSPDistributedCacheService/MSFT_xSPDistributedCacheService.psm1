@@ -9,6 +9,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount        
     )
 
@@ -40,6 +41,7 @@ function Get-TargetResource
                 ServiceAccount = $windowsService.StartName
                 CreateFirewallRules = ($firewallRule -ne $null)
                 Ensure = "Present"
+                ServerProvisionOrder = $params.ServerProvisionOrder
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -61,6 +63,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -90,7 +93,41 @@ function Set-TargetResource
             Write-Verbose -Message "Enabling distributed cache service"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                
+
+                if ($params.ContainsKey("ServerProvisionOrder")) {
+                    # Determine where in the order the current server sits
+
+                    #lowercase the server name array
+                    $i = 0
+                    while ($i -lt $params.ServerProvisionOrder.Length) {
+                        $params.ServerProvisionOrder[$i] = $params.ServerProvisionOrder[$i].ToString().ToLower()
+                        $i++
+                    }
+                    $CurrentDcacheNode = [Array]::IndexOf($params.ServerProvisionOrder, $env:COMPUTERNAME.ToLower())
+
+                    if ($CurrentDcacheNode -lt 0) {
+                        throw "The server $($env:COMPUTERNAME) was not found in the array for distributed cache servers"
+                    }
+
+                    if ($CurrentDcacheNode -gt 0) {
+                        # if its not the first in the queue, we need to wait for the server before it
+
+                        $previousServer = $params.ServerProvisionOrder[$CurrentDcacheNode - 1]
+
+                        $count = 0
+                        $maxCount = 30
+                        while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $previousServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Online" }) -ne $null)) {
+                            Start-Sleep -Seconds 60
+                            $count++
+                        }
+
+                        if ((Get-SPServiceInstance -Server $previousServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null) {
+                            Write-Warning "Server $previousServer is not running distributed cache after waiting 30 minutes. No longer waiting for this server to begin"
+                        }
+                    }
+                }
+
+
                 Add-SPDistributedCacheServiceInstance
 
                 Get-SPServiceInstance | Where-Object { $_.TypeName -eq "Distributed Cache" } | Stop-SPServiceInstance -Confirm:$false
@@ -157,6 +194,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
