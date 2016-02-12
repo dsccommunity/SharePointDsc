@@ -95,35 +95,30 @@ function Set-TargetResource
                 $params = $args[0]
 
                 if ($params.ContainsKey("ServerProvisionOrder")) {
-                    # Determine where in the order the current server sits
-
-                    #lowercase the server name array
-                    $i = 0
-                    while ($i -lt $params.ServerProvisionOrder.Length) {
-                        $params.ServerProvisionOrder[$i] = $params.ServerProvisionOrder[$i].ToString().ToLower()
-                        $i++
-                    }
-                    $CurrentDcacheNode = [Array]::IndexOf($params.ServerProvisionOrder, $env:COMPUTERNAME.ToLower())
-
-                    if ($CurrentDcacheNode -lt 0) {
-                        throw "The server $($env:COMPUTERNAME) was not found in the array for distributed cache servers"
-                    }
-
-                    if ($CurrentDcacheNode -gt 0) {
-                        # if its not the first in the queue, we need to wait for the server before it
-
-                        $previousServer = $params.ServerProvisionOrder[$CurrentDcacheNode - 1]
-
+                    
+                    $serverCount = 0
+                    $currentServer = $params.ServerProvisionOrder[$serverCount]
+                    
+                    while ($currentServer -ne $env:COMPUTERNAME) {
                         $count = 0
                         $maxCount = 30
-                        while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $previousServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Online" }) -ne $null)) {
+
+                        Write-Verbose "Waiting for cache on $currentServer"
+                        while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null)) {
                             Start-Sleep -Seconds 60
                             $count++
                         }
 
-                        if ((Get-SPServiceInstance -Server $previousServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null) {
-                            Write-Warning "Server $previousServer is not running distributed cache after waiting 30 minutes. No longer waiting for this server to begin"
+                        if ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null) {
+                            Write-Warning "Server $currentServer is not running distributed cache after waiting 30 minutes. No longer waiting for this server, progressing to next action"
                         }
+
+                        $serverCount++
+
+                        if ($ServerCount -ge $params.ServerProvisionOrder.Length) {
+                            throw "The server $($env:COMPUTERNAME) was not found in the array for distributed cache servers"
+                        }
+                        $currentServer = $params.ServerProvisionOrder[$serverCount]
                     }
                 }
 
