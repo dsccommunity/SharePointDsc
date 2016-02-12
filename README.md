@@ -94,11 +94,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
- - xSPFarmSolution
-
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
- * Added xSPDatabaseAAG resource
+ * Added xSPDatabaseAAG and xSPSolution resource
  * Fixed bug with xSPWorkManagementServiceApp schema
+ * Added support for SSL web apps to xSPWebApplication
 
 ### 0.10.0.0
 
