@@ -43,7 +43,7 @@ function Get-TargetResource
             Path = $wa.IisSettings[0].Path
             Port = (New-Object System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
-            UseSSL = [uri]::new($wa.Url).Scheme -eq "https"
+            UseSSL = (New-Object System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
         }
     }
