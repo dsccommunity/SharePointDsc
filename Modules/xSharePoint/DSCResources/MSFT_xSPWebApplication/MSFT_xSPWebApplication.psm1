@@ -14,6 +14,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $HostHeader,
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
+        [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -42,6 +43,7 @@ function Get-TargetResource
             Path = $wa.IisSettings[0].Path
             Port = (New-Object System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
+            UseSSL = [uri]::new($wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
         }
     }
@@ -64,6 +66,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $HostHeader,
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
+        [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -97,6 +100,7 @@ function Set-TargetResource
             if ($params.ContainsKey("HostHeader") -eq $true) { $newWebAppParams.Add("HostHeader", $params.HostHeader) }
             if ($params.ContainsKey("Path") -eq $true) { $newWebAppParams.Add("Path", $params.Path) }
             if ($params.ContainsKey("Port") -eq $true) { $newWebAppParams.Add("Port", $params.Port) } 
+            if ($params.ContainsKey("UseSSL") -eq $true) { $newWebAppParams.Add("SecureSocketsLayer", $params.UseSSL) } 
          
             $wa = New-SPWebApplication @newWebAppParams
         }
@@ -120,6 +124,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $HostHeader,
         [parameter(Mandatory = $false)] [System.String]  $Path,
         [parameter(Mandatory = $false)] [System.String]  $Port,
+        [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")] [System.String] $AuthenticationMethod,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )

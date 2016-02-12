@@ -34,6 +34,7 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write] string HostHeader;
     [Write] string Path;
     [Write] string Port;
+    [Write] boolen UseSSL;
     [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
 
