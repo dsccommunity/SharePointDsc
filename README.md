@@ -94,11 +94,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
- - xSPFarmSolution
-
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
- * Added xSPDatabaseAAG resource
+ * Added xSPDatabaseAAG and xSPFarmSolution resources
  * Fixed bug with xSPWorkManagementServiceApp schema
+ * Added support for xSPDistributedCacheService to allow provisionin across multiple servers in a specific sequence
 
 ### 0.10.0.0
 
