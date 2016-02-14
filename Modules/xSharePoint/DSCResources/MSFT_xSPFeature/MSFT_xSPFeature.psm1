@@ -53,35 +53,23 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $Version
     )
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        $params = $args[0]
-        
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
-        $runParams = @{ 
-            Identity = $params.Name 
-        }
+    $PSBoundParameters.Add("CurrentValues", $CurrentValues)
+
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        
+        $params = $args[0]
+        $currentValues = $params["CurrentValues"]
+
+        $runParams = @{ Identity = $params.Name }
 
         if ($params.FeatureScope -ne "Farm") {
             $runParams.Add("Url", $params.Url)
         }
-
-        # Parameters for get
-        $checkParams = @{ 
-            Identity = $params.Name    
-        }
         
-        if ($params.FeatureScope -eq "Farm") 
-        {
-            $checkParams.Add($params.FeatureScope, $true)
-        } 
-        else
-        {
-            $checkParams.Add($params.FeatureScope, $params.Url)
-        }
-        
-
         if ($params.Ensure -eq "Present") {
-            if (Get-SPFeature @checkParams -ErrorAction SilentlyContinue){
+            if ($currentValues.Ensure -eq "Present"){
                     
                 # Disable the feature first if it already exists.
                 $runParams.Add("Confirm", $false)    
