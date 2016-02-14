@@ -59,7 +59,6 @@ function Set-TargetResource
 
         $runParams = @{ 
             Identity = $params.Name 
-            Verbose = $false
         }
 
         if ($params.FeatureScope -ne "Farm") {
@@ -68,8 +67,7 @@ function Set-TargetResource
 
         # Parameters for get
         $checkParams = @{ 
-            Identity = $params.Name 
-            Verbose = $false    
+            Identity = $params.Name    
         }
         
         if ($params.FeatureScope -eq "Farm") 
@@ -121,11 +119,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
 
-    $valuesToCheck = @("Ensure")
-
-    if ($Version) {
-        $valuesToCheck += @("Version")
-    }
+    $valuesToCheck = @("Ensure", "Version")
 
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
