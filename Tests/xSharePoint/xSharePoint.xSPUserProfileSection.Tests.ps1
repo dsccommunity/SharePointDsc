@@ -23,14 +23,8 @@ Describe "xSPUserProfileProperty" {
            DisplayName = "Personal Information"
            DisplayOrder = 5000 
         }
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-      #  $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-        <#$testParamsUpdate = @{
-           Name = "PersonalInformation"
-           UserProfileService = "User Profile Service Application"
-           DisplayName = "Personal Information"
-           DisplayOrder = 5000        
-         }#>
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue  
+        
         
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
@@ -44,28 +38,6 @@ Describe "xSPUserProfileProperty" {
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
-      <#  $coreProperty = @{ 
-                           Name = "PersonalInformation"
-                           DisplayName = "Personal Information"
-                        } | Add-Member ScriptMethod Commit {
-                            $Global:xSPUPSPropertyCommitCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Delete {
-                            $Global:xSPUPSPropertyDeleteCalled = $true
-                        } -PassThru
-
-     
-                        
-        
-        #$typeProperties.Add($typeProperty)
-       $subTypePropertyUpdate = @{
-                            Name = "PersonalInformation"
-                            DisplayName = "Personal InformationUpdate"
-                            DisplayOrder =5000
-                        }| Add-Member ScriptMethod Commit {
-                            $Global:xSPUPPropertyCommitCalled = $true
-                        } -PassThru 
-                        #>
-
         $coreProperty = @{ 
                             DisplayName = $testParams.DisplayName
                             Name = $testParams.Name
@@ -79,9 +51,6 @@ Describe "xSPUserProfileProperty" {
                             DisplayName= $testParams.DisplayName
                             DisplayOrder =$testParams.DisplayOrder
                             CoreProperty = $coreProperty
-                            #TypeProperty = $typeProperty
-
-
                         }
         $userProfileSubTypePropertiesNoProperty = @{} | Add-Member ScriptMethod Create {
                             $Global:xSPUPSubTypeCreateCalled = $true
@@ -120,7 +89,6 @@ Describe "xSPUserProfileProperty" {
                             return $subTypeProperty
                         } -PassThru
                         #>
-         #$userProfileSubTypePropertiesValidProperty.Add($subTypeProperty);
         mock Get-xSharePointUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                             $Global:xSPUPGetProfileSubtypeCalled = $true
@@ -165,6 +133,14 @@ Describe "xSPUserProfileProperty" {
             } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
                 $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
                 return $userProfileSubTypePropertiesUpdateProperty; 
+            } -PassThru | Add-Member ScriptMethod GetPropertiesWithSection {
+                $Global:UpsConfigManagerGetPropertiesWithSectionCalled=$true;
+                return (@{}|Add-Member ScriptMethod Create {
+                    return @{Name = ""
+                            DisplayName=""
+                            DisplayOrder=0}|Add-Member ScriptBlock Commit {} -PassThru
+                    
+                } -PassThru) 
             } -PassThru     
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager

@@ -39,6 +39,7 @@ function Get-TargetResource
             UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             DisplayOrder =$userProfileProperty.DisplayOrder 
+            Ensure = $params.Ensure
         }
 
     }
@@ -50,10 +51,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.string ] $Name,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure,
-        [parameter(Mandatory = $true)] [System.string ] $UserProfileService,
-        [parameter(Mandatory = $false)] [System.string ] $DisplayName,
+        [parameter(Mandatory = $true)] [System.string] $Name,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string] $Ensure,
+        [parameter(Mandatory = $true)] [System.string] $UserProfileService,
+        [parameter(Mandatory = $false)] [System.string] $DisplayName,
         [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -61,16 +62,14 @@ function Set-TargetResource
     #note for integration test: CA can take a couple of minutes to notice the change. don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
 
     Write-Verbose -Message "Creating user profile property $Name"
-    $test = $PSBoundParameters
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        #region setting up objects 
-        $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+            $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
  
         If ($null -eq $ups)
         {
-            return $null
+               throw "service application $( $params.UserProfileService) not found"
         }
         
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
@@ -81,43 +80,34 @@ function Set-TargetResource
         {   #if config manager returns when ups is available then isuee is permissions
             throw "account running process needs admin permission on user profile service application"
         }
+        $properties = $userProfileConfigManager.GetPropertiesWithSection()
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
-        
         $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
-        $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
-        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
-        
-        
-        $userProfileProperty = $userProfileSubType.Properties.GetSectionByName($params.Name) 
+        $userProfileProperty = $coreProperties.GetSectionByName($params.Name) 
 
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
             if($userProfileProperty -ne $null)
             {
-                $coreProperties.RemoveSectionByName($params.Name)
-                return;
+                $properties.RemoveSectionByName($params.Name)
             }
+            return;
         } elseif($userProfileProperty -eq $null){
-            $coreProperty = $coreProperties.Create($false)
+            $coreProperty = $properties.Create($true)
             $coreProperty.Name = $params.Name
             $coreProperty.DisplayName = $params.DisplayName
-
-            $CoreProperties.Add($coreProperty)
+            $coreProperty.Commit()
         }else{
-            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
-
-        
+            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+            $userProfileProperty.Commit()
         }
-        $userProfileProperty.CoreProperty.Commit()
 
         #region display order
-        # Set-DisplayOrder
         if($params.ContainsKey("DisplayOrder"))
         {
-            $profileManager = New-Object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
-            $profileManager.Properties.SetDisplayOrderBySectionName($params.Name,$params.DisplayOrder)
-            $profileManager.Properties.CommitDisplayOrder()
+            $properties = $userProfileConfigManager.GetPropertiesWithSection()
+            $properties.SetDisplayOrderBySectionName($params.Name,$params.DisplayOrder)
+            $properties.CommitDisplayOrder()
         }
-        #endregion
 
     }
     return  $result

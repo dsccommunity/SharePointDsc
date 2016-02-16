@@ -21,17 +21,17 @@ Remarks
 }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("WorkManagementServiceApp")]
-class MSFT_WorkManagementServiceApp : OMI_BaseResource
+class MSFT_xSPWorkManagementServiceApp : OMI_BaseResource
 {
     [Key] string Name;
     [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Required] String ApplicationPool;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Write] System.UInt32 MinimumTimeBetweenEwsSyncSubscriptionSearches;
-    [Write] System.UInt32 MinimumTimeBetweenProviderRefreshes;
-    [Write] System.UInt32 MinimumTimeBetweenSearchQueries;
-    [Write] System.UInt32 NumberOfSubscriptionSyncsPerEwsSyncRun;
-    [Write] System.UInt32 NumberOfUsersEwsSyncWillProcessAtOnce;
-    [Write] System.UInt32 NumberOfUsersPerEwsSyncBatch;
+    [Write] UInt32 MinimumTimeBetweenEwsSyncSubscriptionSearches;
+    [Write] UInt32 MinimumTimeBetweenProviderRefreshes;
+    [Write] UInt32 MinimumTimeBetweenSearchQueries;
+    [Write] UInt32 NumberOfSubscriptionSyncsPerEwsSyncRun;
+    [Write] UInt32 NumberOfUsersEwsSyncWillProcessAtOnce;
+    [Write] UInt32 NumberOfUsersPerEwsSyncBatch;
 };
 
