@@ -26,9 +26,10 @@ function Get-TargetResource
         $userProfileConfigManager  = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         
         $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
-        $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
+        #$userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
+        $properties = $userProfileConfigManager.GetPropertiesWithSection()
         
-        $userProfileProperty = $userProfileSubType.Properties.GetSectionByName($params.Name) 
+        $userProfileProperty = $properties.GetSectionByName($params.Name) 
         if($userProfileProperty -eq $null){
             return $null 
         }
@@ -80,9 +81,7 @@ function Set-TargetResource
             throw "account running process needs admin permission on user profile service application"
         }
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
-        $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
-        $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
-        $userProfileProperty = $coreProperties.GetSectionByName($params.Name) 
+        $userProfileProperty = $properties.GetSectionByName($params.Name) 
 
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
             if($userProfileProperty -ne $null)

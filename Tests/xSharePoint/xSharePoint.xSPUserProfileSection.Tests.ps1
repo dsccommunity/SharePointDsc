@@ -51,8 +51,11 @@ Describe "xSPUserProfileProperty" {
                             DisplayName= $testParams.DisplayName
                             DisplayOrder =$testParams.DisplayOrder
                             CoreProperty = $coreProperty
-                        }
+                        }| Add-Member ScriptMethod Commit {
+                            $Global:xSPUPSPropertyCommitCalled = $true
+                        } -PassThru
         $userProfileSubTypePropertiesNoProperty = @{} | Add-Member ScriptMethod Create {
+        param($section)
                             $Global:xSPUPSubTypeCreateCalled = $true
                         } -PassThru  | Add-Member ScriptMethod GetSectionByName {
                             $result = $null
@@ -65,26 +68,11 @@ Describe "xSPUserProfileProperty" {
                             $Global:xSPUPSubTypeAddCalled = $true
                         } -PassThru -Force 
         $coreProperties = @{ProfileInformation = $coreProperty}
-
-        $coreProperties = $coreProperties | Add-Member ScriptMethod Create {
-                            $Global:xSPUPCoreCreateCalled = $true
-                            return @{
-                            Name="";
-                            DisplayName=""
-                           
-                            }
-                        } -PassThru  | Add-Member ScriptMethod RemoveSectionByName {
-                            $Global:xSPUPCoreRemovePropertyByNameCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPCoreAddCalled = $true
-                        } -PassThru -Force 
-
-
         $userProfileSubTypePropertiesProperty = @{"ProfileInformation" = $subTypeProperty } | Add-Member ScriptMethod Create {
                             $Global:xSPUPSubTypeCreateCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
                             $Global:xSPUPSubTypeAddCalled = $true
-                        } -PassThru -Force | Add-Member ScriptMethod GetSectionByName {
+                        } -PassThru -Force <#| Add-Member ScriptMethod GetSectionByName {
                             $Global:xSPUPGetSectionByNameCalled  = $true
                             return $subTypeProperty
                         } -PassThru
@@ -108,16 +96,7 @@ Describe "xSPUserProfileProperty" {
                         Url ="caURL"
                      })
         }  
-        Mock New-Object -MockWith {
-            return (@{
-                Properties = @{} | Add-Member ScriptMethod SetDisplayOrderBySectionName {
-                $Global:UpsSetDisplayOrderBySectionNameCalled=$true;
-                return $false; 
-            } -PassThru | Add-Member ScriptMethod CommitDisplayOrder {
-                $Global:UpsSetDisplayOrderBySectionNameCalled=$true;
-                return $false; 
-            } -PassThru    })
-        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" } 
+        
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
@@ -125,27 +104,51 @@ Describe "xSPUserProfileProperty" {
         
         Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
         
+        
         Mock New-Object -MockWith {
-            $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
-                $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
-
+            $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod RemoveSectionByName {
+                $Global:UpsConfigManagerRemoveSectionByNameCalled=$true;
                 return ($coreProperties); 
-            } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
-                $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
-                return $userProfileSubTypePropertiesUpdateProperty; 
-            } -PassThru | Add-Member ScriptMethod GetPropertiesWithSection {
-                $Global:UpsConfigManagerGetPropertiesWithSectionCalled=$true;
-                return (@{}|Add-Member ScriptMethod Create {
-                    return @{Name = ""
-                            DisplayName=""
-                            DisplayOrder=0}|Add-Member ScriptBlock Commit {} -PassThru
-                    
-                } -PassThru) 
-            } -PassThru     
+            } -PassThru       
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager
             ConnectionManager = $ConnnectionManager  
-            })
+            } | Add-Member ScriptMethod GetPropertiesWithSection {
+                $Global:UpsConfigManagerGetPropertiesWithSectionCalled=$true;
+
+                $result = (@{}|Add-Member ScriptMethod Create {
+                param ($section)
+
+
+                    $result = @{Name = ""
+                            DisplayName=""
+                            DisplayOrder=0}|Add-Member ScriptMethod Commit {
+                                $Global:UpsConfigManagerCommitCalled=$true;
+                            } -PassThru
+                    return $result
+                } -PassThru -Force | Add-Member ScriptMethod GetSectionByName {
+                           $result = $null
+                            if($Global:UpsConfigManagerGetSectionByNameCalled -eq $TRUE){
+                                $result = $subTypeProperty
+                            }
+                            $Global:UpsConfigManagerGetSectionByNameCalled=$true
+                            return $result
+
+
+;
+                return $userProfileSubTypePropertiesUpdateProperty; 
+            } -PassThru | Add-Member ScriptMethod SetDisplayOrderBySectionName {
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled=$true;
+                return $userProfileSubTypePropertiesUpdateProperty; 
+            } -PassThru | Add-Member ScriptMethod CommitDisplayOrder {
+                $Global:UpsConfigManagerCommitDisplayOrderCalled=$true;
+                return $userProfileSubTypePropertiesUpdateProperty; 
+            } -PassThru
+
+) 
+           return $result
+
+             } -PassThru )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
         $userProfileService =  @{
@@ -161,28 +164,30 @@ Describe "xSPUserProfileProperty" {
         Context "When section doesn't exist" {
             
             It "returns null from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetSectionByNameCalled = $false
+                $Global:UpsConfigManagerGetSectionByNameCalled = $false
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetSectionByNameCalled | Should be $true
+                $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetSectionByNameCalled = $false
+                $Global:UpsConfigManagerGetSectionByNameCalled = $false
                 Test-TargetResource @testParams | Should Be $false
-                $Global:xSPUPGetSectionByNameCalled | Should be $true
+                $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
             }
 
-            It "creates a new user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
+            It "creates a new user profile section in the set method" {
+                $Global:xSPUPSubTypeCreateCalled = $false
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
+                $Global:xSPUPSPropertyCommitCalled=$false;
+
                 Set-TargetResource @testParams
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
+                $Global:xSPUPSubTypeCreateCalled | should be $false
+                $Global:xSPUPSPropertyCommitCalled|should be $true                
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }
 
         }
-        
         Context "When section exists and all properties match" {
             mock Get-xSharePointUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
@@ -195,60 +200,28 @@ Describe "xSPUserProfileProperty" {
             }
                     
             It "returns valid value from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetSectionByNameCalled = $false
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                $Global:UpsConfigManagerGetSectionByNameCalled = $false
+                $currentValues = Get-TargetResource @testParams 
+                $currentValues | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetSectionByNameCalled | Should be $true
+                $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
             }
             
             It "returns true when the Test method is called" {
-                $Global:xSPUPGetSectionByNameCalled = $false
+                $Global:UpsConfigManagerGetSectionByNameCalled = $false
                 Test-TargetResource @testParams | Should Be $true
-                $Global:xSPUPGetSectionByNameCalled | Should be $true
+                $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
             }
             It "updates an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
+                $Global:UpsConfigManagerCommitCalled = $false
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
                 Set-TargetResource @testParams
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
+                $Global:UpsConfigManagerCommitCalled | should be $false
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }
         }
-       
-        Context "When section exists and display name and display order are different" {
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
-                                return @{
-                                Properties = $userProfileSubTypePropertiesProperty
-                                }
-                            } -PassThru 
-                return $result
-            }
-            $testParams.DisplayOrder = 5401
-            $testParams.DisplayName = "ProfileInformationUpdate"
-
-            It "returns valid value from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetSectionByNameCalled = $false
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetSectionByNameCalled | Should be $true
-            }
-            
-            It "returns false when the Test method is called" {
-                $Global:xSPUPGetSectionByNameCalled = $false
-                Test-TargetResource @testParams | Should Be $false
-                $Global:xSPUPGetSectionByNameCalled | Should be $true
-            }
-            It "updates an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                Set-TargetResource @testParams
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-            }
-        }
-         break
+        
+        break
         Context "When section exists and ensure equals Absent" {
             mock Get-xSharePointUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
@@ -260,16 +233,64 @@ Describe "xSPUserProfileProperty" {
 
             return $result
             }
-                    $testParamsUpdate.Ensure = "Absent"
+                    $testParams.Ensure = "Absent"
+
+            It "returns false when the Test method is called" {
+                $Global:xSPUPGetSectionByNameCalled = $false
+                Test-TargetResource @testParams | Should Be $true
+                $Global:xSPUPGetSectionByNameCalled | Should be $true
+            }
+
+
             It "deletes an user profile property in the set method" {
+                $Global:UpsConfigManagerGetSectionByNameCalled = $false
+                $Global:UpsConfigManagerRemoveSectionByNameCalled=$false
+                Set-TargetResource @testParams 
+                $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
+                $Global:UpsConfigManagerRemoveSectionByNameCalled | Should be $true
+            }           
+        }
+
+
+        Context "When section exists and display name and display order are different" {
+            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                return @{
+                                Properties = $userProfileSubTypePropertiesProperty
+                                }
+                            } -PassThru 
+                return $result
+            }
+            $testParams.Ensure = "Present"
+
+            $testParams.DisplayOrder = 5401
+            $testParams.DisplayName = "ProfileInformationUpdate"
+
+            It "returns valid value from the Get method" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetSectionByNameCalled = $false
-                $Global:xSPUPCoreRemoveSectionByNameCalled=$false
-                Set-TargetResource @testParams 
+                $currentValues = Get-TargetResource @testParams 
+                $currentValues | Should Not BeNullOrEmpty
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetSectionByNameCalled | Should be $true
-                $Global:xSPUPCoreRemoveSectionByNameCalled | Should be $true
-            }           
+            }
+            
+            It "returns false when the Test method is called" {
+                $Global:xSPUPGetSectionByNameCalled = $false
+                Test-TargetResource @testParams | Should Be $false
+                $Global:xSPUPGetSectionByNameCalled | Should be $true
+            }
+            It "updates an user profile property in the set method" {
+                $Global:xSPUPSubTypeCreateCalled = $false
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
+                $Global:xSPUPGetSectionByNameCalled=$true
+                Set-TargetResource @testParams
+                $Global:xSPUPSubTypeCreateCalled | should be $false
+                $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
+            }
         }
     }    
 }
+
