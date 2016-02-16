@@ -32,8 +32,6 @@ function Get-TargetResource
         if($userProfileProperty -eq $null){
             return $null 
         }
-        
-        
         return @{
             Name = $userProfileProperty.Name 
             UserProfileService = $params.UserProfileService
@@ -59,7 +57,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    #note for integration test: CA can take a couple of minutes to notice the change. don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
+    # note for integration test: CA can take a couple of minutes to notice the change. 
+    # don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
 
     Write-Verbose -Message "Creating user profile property $Name"
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -77,7 +76,7 @@ function Set-TargetResource
 
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         if($null -eq $userProfileConfigManager)
-        {   #if config manager returns when ups is available then isuee is permissions
+        {   #if config manager returns null when ups is available then isuee is permissions
             throw "account running process needs admin permission on user profile service application"
         }
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
@@ -135,4 +134,6 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
+
+
 

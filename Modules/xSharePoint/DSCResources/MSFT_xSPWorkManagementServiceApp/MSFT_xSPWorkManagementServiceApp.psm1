@@ -77,7 +77,7 @@ function Set-TargetResource
     Write-Verbose -Message "Creating work management Service Application $Name"
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $appService =  Get-SPServiceApplication -Name $params.Name `
+        $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
         | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
 
         if($appService -ne $null -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
@@ -92,8 +92,8 @@ function Set-TargetResource
             $newParams.Add("ApplicationPool", $params.ApplicationPool) 
 
             $appService = New-SPWorkManagementServiceApplication @newParams
-            New-SPWorkManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -DefaultProxyGroup -ServiceApplication $appService -ea Stop | Out-Null
-            
+            New-SPWorkManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -DefaultProxyGroup -ServiceApplication $appService | Out-Null
+            Sleep -Milliseconds 200
         }
         $setParams = @{}
         if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) { $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) }
