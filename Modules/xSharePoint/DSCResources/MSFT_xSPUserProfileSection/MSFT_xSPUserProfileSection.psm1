@@ -25,7 +25,7 @@ function Get-TargetResource
         $context = Get-SPServiceContext -Site $caURL 
         $userProfileConfigManager  = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         
-        $userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
+        #$userProfileSubTypeManager = Get-xSharePointUserProfileSubTypeManager $context
         #$userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
         
