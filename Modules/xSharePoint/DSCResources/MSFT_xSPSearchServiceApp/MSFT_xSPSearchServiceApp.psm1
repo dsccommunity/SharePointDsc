@@ -32,11 +32,10 @@ function Get-TargetResource
         If ($null -eq $serviceApp) { 
             return $null 
         } else {
-            $caWebApp = [Microsoft.SharePoint.Administration.SPAdministrationWebApplication]::Local
-            $caWebApp.Sites[0].Url
-            $s = new-Object Microsoft.SharePoint.SPSite($caWebApp.Sites[0].Url);
+            $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | where {$_.IsAdministrationWebApplication} 
+            $s = Get-SPSite $caWebApp.Url
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
-            $sc = new-Object Microsoft.Office.Server.Search.Administration.Content($c);
+            $sc = New-Object Microsoft.Office.Server.Search.Administration.Content($c);
             $defaultAccount = New-Object System.Management.Automation.PSCredential ($sc.DefaultGatheringAccount, (ConvertTo-SecureString "-" -AsPlainText -Force))
             
             $returnVal =  @{
