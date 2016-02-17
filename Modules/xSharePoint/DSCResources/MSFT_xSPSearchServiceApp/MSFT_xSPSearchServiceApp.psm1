@@ -35,8 +35,8 @@ function Get-TargetResource
             $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | where {$_.IsAdministrationWebApplication} 
             $s = Get-SPSite $caWebApp.Url
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
-            $sc = New-Object Microsoft.Office.Server.Search.Administration.Content($c);
-            $defaultAccount = New-Object System.Management.Automation.PSCredential ($sc.DefaultGatheringAccount, (ConvertTo-SecureString "-" -AsPlainText -Force))
+            $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
+            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, (ConvertTo-SecureString "-" -AsPlainText -Force))
             
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
@@ -72,12 +72,15 @@ function Set-TargetResource
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-
-            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
-
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local 
-            Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance -ErrorAction SilentlyContinue
-            $app = New-SPEnterpriseSearchServiceApplication @params
+            Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance -ErrorAction SilentlyContinue            
+            $newParams = @{
+                Name = $params.Name
+                ApplicationPool = $params.ApplicationPool
+            }
+            if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
+            if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
+            $app = New-SPEnterpriseSearchServiceApplication @newParams 
             if ($app) {
                 New-SPEnterpriseSearchServiceApplicationProxy -Name "$($params.Name) Proxy" -SearchApplication $app
                 if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
@@ -93,23 +96,22 @@ function Set-TargetResource
             }
         }
     } else {
-        if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false -and $ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose -Message "Updating Search Service Application $Name"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
-                
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
-                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
-                $setParams = @{
-                    ApplicationPool = $appPool
-                    Identity = $serviceApp
-                }
-                if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
-                    $setParams.Add("DefaultContentAccessAccountName", $params.DefaultContentAccessAccount.UserName)
-                    $setParams.Add("DefaultContentAccessAccountPassword ", (ConvertTo-SecureString -String $params.DefaultContentAccessAccount.GetNetworkCredential().Password -AsPlainText -Force))
-                } 
-                Set-SPEnterpriseSearchServiceApplication @setParams
+        Write-Verbose -Message "Updating Search Service Application $Name"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
+            $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+            $setParams = @{
+                ApplicationPool = $appPool
+                Identity = $serviceApp
             }
+            if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
+                $setParams.Add("DefaultContentAccessAccountName", $params.DefaultContentAccessAccount.UserName)
+                $password = ConvertTo-SecureString -String $params.DefaultContentAccessAccount.GetNetworkCredential().Password -AsPlainText -Force
+                $setParams.Add("DefaultContentAccessAccountPassword", $password)
+            } 
+            Set-SPEnterpriseSearchServiceApplication @setParams
         }
     }
 }
