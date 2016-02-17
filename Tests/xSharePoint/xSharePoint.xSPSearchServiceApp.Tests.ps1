@@ -214,5 +214,42 @@ Describe "xSPSearchServiceApp" {
                 Assert-MockCalled Set-SPEnterpriseSearchServiceApplication
             }
         }
+        
+        Context "When the default content access account does not match" {    
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
     }    
 }
