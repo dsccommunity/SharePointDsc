@@ -72,11 +72,7 @@ Describe "xSPUserProfileProperty" {
                             $Global:xSPUPSubTypeCreateCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
                             $Global:xSPUPSubTypeAddCalled = $true
-                        } -PassThru -Force <#| Add-Member ScriptMethod GetSectionByName {
-                            $Global:xSPUPGetSectionByNameCalled  = $true
-                            return $subTypeProperty
-                        } -PassThru
-                        #>
+                        } -PassThru -Force
         mock Get-xSharePointUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                             $Global:xSPUPGetProfileSubtypeCalled = $true
