@@ -1,0 +1,27 @@
+﻿/*
+**Description**
+
+This resource is used to define an alternate access mapping URL for a specified web application.
+
+
+**Example**
+
+    xSPAlternateUrl CentralAdminAAM
+    {
+        WebAppUrl            = "http://sharepoint1:9999"
+        Zone                 = "Intranet"
+        Url                  = "https://admin.sharepoint.contoso.com"
+        PsDscRunAsCredential = $SPSetupAccount
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPAlternateUrl")]
+class MSFT_xSPAlternateUrl : OMI_BaseResource
+{
+    [Key] String WebAppUrl;
+    [Key, ValueMap{"Default","Intranet","Extranet","Custom","Internet"}, Values{"Default","Intranet","Extranet","Custom","Internet"}] String Zone;
+    [Write] String Url;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
