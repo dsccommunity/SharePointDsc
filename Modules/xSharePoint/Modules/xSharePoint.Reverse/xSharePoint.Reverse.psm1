@@ -499,9 +499,17 @@ function Read-SecureStoreServiceApplication
         $ssDBServer = $ssDB[$i].Server.Name
         $ssDBName = $ssDB[$i].DisplayName
 
-        Push-Location
-        $queryResults = Invoke-SqlCmd -Query "SELECT * FROM SSSConfig" -ServerInstance $ssDBServer -Database $ssDBName
-        Pop-Location
+		<## We need to check to ensure that the proper SQL components oare installed on the server before trying to query the DB #>
+		if(Test-CommandExists "Invoke-SQLCmd")
+		{
+			Push-Location
+			$queryResults = Invoke-SqlCmd -Query "SELECT * FROM SSSConfig" -ServerInstance $ssDBServer -Database $ssDBName
+			Pop-Location
+		}
+		else
+		{
+			Write-Host "Unfortunately, it does not appear you have the SQL components installed"
+		}
 
         $logTime = $queryResults.PurgeAuditDays        
         $Script:dscConfigContent += "            AuditingEnabled=`$" + $queryResults.EnableAudit + "`r`n"
@@ -572,6 +580,17 @@ function Set-LCM
     $Script:dscConfigContent += "        {`r`n"
     $Script:dscConfigContent += "            RebootNodeIfNeeded = `$True`r`n"
     $Script:dscConfigContent += "        }`r`n"
+}
+
+Function Test-CommandExists
+{
+ Param ($command)
+
+ $oldPreference = $ErrorActionPreference
+ $ErrorActionPreference = ‘stop’
+ try {if(Get-Command $command){return $true}}
+ Catch {return $false}
+ Finally {$ErrorActionPreference=$oldPreference}
 }
 
 Orchestrator
