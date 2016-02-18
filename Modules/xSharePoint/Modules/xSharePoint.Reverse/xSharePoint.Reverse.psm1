@@ -16,26 +16,30 @@ function Orchestrator{
     Set-Imports
     foreach($spServer in $spServers)
     {
-        $Script:dscConfigContent += "`r`n    node " + $spServer.Name + "{`r`n"    
-        Set-ConfigurationSettings    
-        Read-SPFarm
-        Read-SPWebApplications
-        Read-SPManagedPaths
-        Read-SPManagedAccounts
-        Read-SPServiceApplicationPools
-        Read-SPSites
-        Read-SPServiceInstance
-        Read-DiagnosticLoggingSettings
-        Read-UsageServiceApplication
-        Read-StateServiceApplication
-        Read-UserProfileServiceapplication
-        Read-CacheAccounts
-        Read-SecureStoreServiceApplication
-        Read-BCSServiceApplication
-        Read-SearchServiceApplication
-        Read-ManagedMetadataServiceApplication
-        Set-LCM
-        $Script:dscConfigContent += "    }`r`n"
+		<## SQL Server are returned by Get-SPServer but they have a Role of 'Invalid'. Therefore we need to ignore these #>
+		if($spServer.Role -ne "Invalid")
+		{
+            $Script:dscConfigContent += "`r`n    node " + $spServer.Name + "{`r`n"    
+            Set-ConfigurationSettings    
+            Read-SPFarm
+            Read-SPWebApplications
+            Read-SPManagedPaths
+            Read-SPManagedAccounts
+            Read-SPServiceApplicationPools
+            Read-SPSites
+            Read-SPServiceInstance
+            Read-DiagnosticLoggingSettings
+            Read-UsageServiceApplication
+            Read-StateServiceApplication
+            Read-UserProfileServiceapplication
+            Read-CacheAccounts
+            Read-SecureStoreServiceApplication
+            Read-BCSServiceApplication
+            Read-SearchServiceApplication
+            Read-ManagedMetadataServiceApplication
+            Set-LCM
+            $Script:dscConfigContent += "    }`r`n"
+		}
     }    
     $Script:dscConfigContent += "}"
 }
