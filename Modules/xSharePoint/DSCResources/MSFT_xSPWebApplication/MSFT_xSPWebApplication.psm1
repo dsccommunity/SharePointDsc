@@ -83,14 +83,14 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("AuthenticationMethod") -eq $true) {
                 if ($params.AuthenticationMethod -eq "NTLM") {
-                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos 
+                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos:$true
                 } else {
-                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication
+                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication  -DisableKerberos:$false
                 }
                 $newWebAppParams.Add("AuthenticationProvider", $ap)
             }
             if ($params.ContainsKey("AllowAnonymous")) { 
-                $newWebAppParams.Add("AllowAnonymousAccess", $true)
+                $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
             }
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newWebAppParams.Add("DatabaseName", $params.DatabaseName) }
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer) }
