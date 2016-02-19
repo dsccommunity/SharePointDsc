@@ -1,11 +1,18 @@
-if ( (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue) -eq $null )
+<##############################################################
+ # This script is used to analyze an existing SharePoint (2010, 2013, 2016 or greater), and to produce the resulting PowerShell DSC Configuration Script representing it. Its purpose is to help SharePoint Admins and Devs replicate an existing SharePoint farm in an isolated area in order to troubleshoot an issue. This script needs to be executed directly on one of the SharePoint server in the far we wish to replicate. Upon finishing its execution, this Powershell script will prompt the user to specify a path to a FOLDER where the resulting PowerShell DSC Configuraton (.ps1) script will be generated. The resulting script will be named "SP-Farm.DSC.ps1" and will contain an exact description, in DSC notation, of the various components and configuration settings of the current SharePoint Farm. This script can then be used in an isolated environment to replicate the SharePoint server farm. The script could also be used as a simple textual (while in a DSC notation format) description of what the configuraton of the SharePoint farm looks like. This script is meant to be community driven, and everyone is encourage to participate and help improve and mature it. It is not officially endorsed by Microsoft, and support is 'offered' on a best effort basis by its contributors. Bugs suggestions should be reported through the issue system on GitHub. They will be looked at as time permits.
+ # v0.1 - Nik Charlebois
+ ##############################################################>
+<## Check to see if the SharePoint PowerShell snapin is already loaded, if not, load it in the current PowerShell session. #>
+if ((Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue) -eq $null )
 {
     Add-PsSnapin Microsoft.SharePoint.PowerShell
 }
 
+<## Scripts Variables #>
 $Script:dscConfigContent = ""
-$Script:spCentralAdmin = Get-SPWebapplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
+$Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
 
+<## This is the main function for this script. It acts as a call dispatcher, calling th various functions required in the proper order to get the full farm picture. #>
 function Orchestrator{    
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers    
@@ -16,7 +23,7 @@ function Orchestrator{
     Set-Imports
     foreach($spServer in $spServers)
     {
-		<## SQL Server are returned by Get-SPServer but they have a Role of 'Invalid'. Therefore we need to ignore these #>
+		<## SQL servers are returned by Get-SPServer but they have a Role of 'Invalid'. Therefore we need to ignore these. The resulting PowerShell DSC Configuration script does not take into account the configuration of the SQL server for the SharePoint Farm at this point in time. We are activaly working on giving our users an experience that is as painless as possible, and are planning on integrating the SQL DSC Configuration as part of our feature set. #>
 		if($spServer.Role -ne "Invalid")
 		{
             $Script:dscConfigContent += "`r`n    node " + $spServer.Name + "{`r`n"    
@@ -43,7 +50,8 @@ function Orchestrator{
     }    
     $Script:dscConfigContent += "}"
 }
-
+<## This function ensure all required Windows Features are properly installed on the server. #>
+<# TODO: Replace this by a logic that reads the feature from te actual server and writes them down instead of simply assuming they are required. #>
 function Set-ConfigurationSettings
 {
     $Script:dscConfigContent += "        xCredSSP CredSSPServer { Ensure = `"Present`"; Role = `"Server`"; } `r`n"
@@ -58,6 +66,7 @@ function Set-ConfigurationSettings
     $Script:dscConfigContent += "        xWebSite    RemoveDefaultWebSite      { Name = `"Default Web Site`";     Ensure = `"Absent`"; PhysicalPath = `"C:\inetpub\wwwroot`" }`r`n"
 }
 
+<## This function ensures all required DSC Modules are properly loaded into the current PowerShell session. #>
 function Set-Imports
 {
     $Script:dscConfigContent += "    Import-DscResource -ModuleName PSDesiredStateConfiguration`r`n"
@@ -66,6 +75,7 @@ function Set-Imports
     $Script:dscConfigContent += "    Import-DscResource -ModuleName xCredSSP`r`n"
 }
 
+<## This function receives a user name and returns the "Display Name" for that user. This function is primarly used to identify the Farm (System) account. #>
 function Check-Credentials([string] $userName)
 {
     if($userName -eq $Script:spCentralAdmin.ApplicationPool.ProcessAccount.Name)
@@ -84,6 +94,7 @@ function Check-Credentials([string] $userName)
     return $userName
 }
 
+<## This function defines variables of type Credential for the resulting DSC Configuraton Script. Each variable declared in this method will result in the user being prompted to manually input credentials when executing the resulting script. #>
 function Set-ObtainRequiredCredentials
 {
     # Farm Account
@@ -124,6 +135,7 @@ function Set-ObtainRequiredCredentials
     $Script:dscConfigContent += "`r`n"
 }
 
+<## This function really is mandatory, but helps provide valuable information about the various software components installed in the current SharePoint farm (i.e. Cummulative Updates, Language Packs, etc.). #>
 function Read-SPProductVersions
 {    
     $Script:dscConfigContent += "<#`r`n    SharePoint Product Versions Installed on this Farm`r`n-------------------------------------------`r`n"
@@ -146,6 +158,7 @@ function Read-SPProductVersions
     $Script:dscConfigContent += "#>`r`n"
 }
 
+<## This function declares the xSPCreateFarm object required to create the config and admin database for the resulting SharePoint Farm. #>
 function Read-SPFarm{
     $spFarm = Get-SPFarm
     $Script:dscConfigContent += "        xSPCreateFarm CreateSPFarm{`r`n"
@@ -159,6 +172,7 @@ function Read-SPFarm{
     $Script:dscConfigContent += "        }`r`n"        
 }
 
+<## This function obtains a reference to every Web Application in the farm and declares their properties (i.e. Port, Associated IIS Application Pool, etc.). #>
 function Read-SPWebApplications
 {
     $spWebApplications = Get-SPWebApplication | Sort-Object -Property Name
@@ -187,6 +201,7 @@ function Read-SPWebApplications
     }
 }
 
+<## This function loops through every IIS Application Pool that are associated with the various existing Service Applications in the SharePoint farm. ##>
 function Read-SPServiceApplicationPools
 {
     $spServiceAppPools = Get-SPServiceApplicationPool | Sort-Object -Property Name
@@ -203,6 +218,7 @@ function Read-SPServiceApplicationPools
     }
 }
 
+<## This function retrieves a list of all site collections, no matter what Web Application they belong to. The Url attribute helps the xSharePoint DSC Resource determine what Web Application they belong to. #>
 function Read-SPSites
 {
     $spSites = Get-SPSite -Limit All 
@@ -229,6 +245,7 @@ function Read-SPSites
     }
 }
 
+<## This function generates a list of all Managed Paths, no matter what their associated Web Application is. The xSharePoint DSC Resource uses the WebAppUrl attribute to identify what Web Applicaton they belong to. #>
 function Read-SPManagedPaths
 {
     $spWebApps = Get-SPWebApplication
@@ -284,6 +301,7 @@ function Read-SPManagedPaths
     }
 }
 
+<## This function retrieves all Managed Accounts in the SharePoint Farm. The Account attribute sets the associated credential variable (each managed account is declared as a variable and the user is prompted to Manually enter the credentials when first executing the script. See function "Set-ObtainRequiredCredentials" for more details on how these variales are set. #>
 function Read-SPManagedAccounts
 {
     $managedAccounts = Get-SPManagedAccount
@@ -299,6 +317,7 @@ function Read-SPManagedAccounts
     }
 }
 
+<## This function retrieves all Services in the SharePoint farm. It does not care if the service is enabled or not. It lists them all, and simply sets the "Ensure" attribute of those that are disabled to "Absent". #>
 function Read-SPServiceInstance
 {
     $serviceInstances = Get-SPServiceInstance | Sort-Object -Property TypeName
@@ -367,6 +386,7 @@ function Read-SPServiceInstance
     }
 }
 
+<## This function retrieves all settings related to Diagnostic Logging (ULS logs) on the SharePoint farm. #>
 function Read-DiagnosticLoggingSettings
 {
     $diagConfig = Get-SPDiagnosticConfig
@@ -395,6 +415,7 @@ function Read-DiagnosticLoggingSettings
     $Script:dscConfigContent += "        }`r`n"
 }
 
+<## This function retrieves all settings related to the SharePoint Usage Service Application, assuming it exists. #>
 function Read-UsageServiceApplication
 {
         $usageApplication = Get-SPUsageApplication
@@ -413,6 +434,7 @@ function Read-UsageServiceApplication
         }
 }
 
+<## This function retrieves settings associated with the State Service Application, assuming it exists. #>
 function Read-StateServiceApplication
 {
     $stateApplications = Get-SPStateServiceApplication
@@ -434,6 +456,7 @@ function Read-StateServiceApplication
     }
 }
 
+<## This function retrieves information about all the "Super" accounts (Super Reader & Super User) used for caching. #>
 function Read-CacheAccounts
 {
     $webApps = Get-SPWebApplication
@@ -450,6 +473,7 @@ function Read-CacheAccounts
     }
 }
 
+<## This function retrieves settings related to the User Profile Service Application. #>
 function Read-UserProfileServiceapplication
 {
     $ups = Get-SPServiceApplication | Where{$_.TypeName -eq "User Profile Service Application"}
@@ -487,6 +511,8 @@ function Read-UserProfileServiceapplication
     }
 }
 
+<## This function retrieves all settings related to the Secure Store Service Application. Currently this function makes a direct call to the Secure Store database on the farm's SQL server to retrieve information about the logging details. There are currently no publicly available hooks in the SharePoint/Office Server Object Model that allow us to do it. This forces the user executing this reverse DSC script to have to install the SQL Server Client components on the server on which they execute the script, which is not a "best practice". #>
+<# TODO: Change the logic to extract information about the logging from being a direct SQL call to something that uses the Object Model. #>
 function Read-SecureStoreServiceApplication
 {
     $ssa = Get-SPServiceApplication | Where{$_.TypeName -eq "Secure Store Service Application"}
@@ -524,6 +550,7 @@ function Read-SecureStoreServiceApplication
     }
 }
 
+<## This function retrieves settings related to the Managed Metadata Service Application. #>
 function Read-ManagedMetadataServiceApplication
 {
     $mms = Get-SPServiceApplication | Where{$_.TypeName -eq "Managed Metadata Service"}
@@ -544,6 +571,7 @@ function Read-ManagedMetadataServiceApplication
     }
 }
 
+<## This function retrieves settings related to the Business Connectivity Service Application. #>
 function Read-BCSServiceApplication
 {
     $bcsa = Get-SPServiceApplication | Where{$_.TypeName -eq "Business Data Connectivity Service Application"}
@@ -561,6 +589,7 @@ function Read-BCSServiceApplication
     }
 }
 
+<## This function retrieves settings related to the Search Service Application. #>
 function Read-SearchServiceApplication
 {
     $searchSA = Get-SPServiceApplication | Where{$_.TypeName -eq "Search Service Application"}
@@ -578,6 +607,7 @@ function Read-SearchServiceApplication
     }
 }
 
+<## This function sets the settings for the Local Configuration Manager (LCM) component on the server we will be configuring using our resulting DSC Configuration script. The LCM component is the one responsible for orchestrating all DSC configuration related activities and processes on a server. This method specifies settings telling the LCM to not hesitate rebooting the server we are configurating automatically if it requires a reboot (i.e. During the SharePoint Prerequisites installation). Setting this value helps reduce the amount of manual interaction that is required to automate the configuration of our SharePoint farm using our resulting DSC Configuration script. #>
 function Set-LCM
 {
     $Script:dscConfigContent += "        LocalConfigurationManager"  + "`r`n"
@@ -586,22 +616,36 @@ function Set-LCM
     $Script:dscConfigContent += "        }`r`n"
 }
 
-Function Test-CommandExists
+<## This method is used to determine if a specific PowerShell cmdlet is available in the current Powershell Session. It is currently used to determine wheter or not the user has access to call the Invoke-SqlCmd cmdlet or if he needs to install the SQL Client coponent first. It simply returns $true if the cmdlet is available to the user, or $false if it is not. #>
+function Test-CommandExists
 {
- Param ($command)
+    param ($command)
 
- $oldPreference = $ErrorActionPreference
- $ErrorActionPreference = ‘stop’
- try {if(Get-Command $command){return $true}}
- Catch {return $false}
- Finally {$ErrorActionPreference=$oldPreference}
+    $errorActionPreference = "stop"
+    try {
+        if(Get-Command $command)
+        {
+            return $true
+        }
+    }
+    catch
+    {
+        return $false
+    }
 }
 
+<## Call into our main function that is responsible for extracting all the information about our SharePoint farm. #>
 Orchestrator
+
+<## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
 $OutputDSCPath = Read-Host "Output Folder for DSC Configuration: "
+
+<## Ensures the path we specify ends with a Slash, in order to make sure the resulting file pathis properly structured. #>
 if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
 {
     $OutputDSCPath += "\"
 }
+
+<## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
 $OutputDSCPath += "SP-Farm.DSC.ps1"
 $Script:dscConfigContent | Out-File $OutputDSCPath
