@@ -28,12 +28,12 @@ This means you need to use [xSPDistributedCacheService](xSPDistributedCacheServi
 [ClassVersion("1.0.0.0"), FriendlyName("xSPCreateFarm")]
 class MSFT_xSPCreateFarm : OMI_BaseResource
 {
-    [Key] String FarmConfigDatabaseName;
-    [Key] String DatabaseServer;
-    [Required, EmbeddedInstance("MSFT_Credential")] String FarmAccount;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Required] String Passphrase;
-    [Required] String AdminContentDatabaseName;
-    [Write] uint32 CentralAdministrationPort;
-    [Write, ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
+    [Key, Description('Name of the configuration database')] String FarmConfigDatabaseName;
+    [Key, Description('Server that will host the configuration and admin content databases')] String DatabaseServer;
+    [Required, Description('The account to use as the main farm account'), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
+    [Required, Description('THe passphrase to use to allow servers to join this farm')] String Passphrase;
+    [Required, Description('The name of the admin content database')] String AdminContentDatabaseName;
+    [Write, Description('What port will Central Admin be provisioned to - default is 9999')] uint32 CentralAdministrationPort;
+    [Write, Description('SharePoint 2016 only - the MinRole role to enroll this server as'), ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

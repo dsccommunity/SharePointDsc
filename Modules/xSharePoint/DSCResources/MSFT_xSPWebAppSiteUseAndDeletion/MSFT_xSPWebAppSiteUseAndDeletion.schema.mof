@@ -20,10 +20,10 @@ You can enable or disable the Site Use and Deletion feature, specify the amount 
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppSiteUseAndDeletion")]
 Class MSFT_xSPWebAppSiteUseAndDeletion : OMI_BaseResource
 {
-    [Key] string Url;
-    [write] boolean SendUnusedSiteCollectionNotifications;
-    [write] uint32 UnusedSiteNotificationPeriod;
-    [write] boolean AutomaticallyDeleteUnusedSiteCollections;
-    [write] uint32 UnusedSiteNotificationsBeforeDeletion;
-    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Key, Description('the URL of the web application')] string Url;
+    [Write, Description('Should emails be sent to notify site owners of unused site collections')] boolean SendUnusedSiteCollectionNotifications;
+    [Write, Description('How many days should pass before a site is flagged as unused')] uint32 UnusedSiteNotificationPeriod;
+    [Write, Description('Should unused site collection be automatically deleted')] boolean AutomaticallyDeleteUnusedSiteCollections;
+    [Write, Description('How many days before an unused site is deleted should an email be sent to the owner')] uint32 UnusedSiteNotificationsBeforeDeletion;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

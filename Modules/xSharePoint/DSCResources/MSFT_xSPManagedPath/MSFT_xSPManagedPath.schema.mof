@@ -20,9 +20,9 @@ If you are using host named site collections set HostHeader to true and the path
 [ClassVersion("1.0.0.0"), FriendlyName("xSPManagedPath")]
 class MSFT_xSPManagedPath : OMI_BaseResource
 {
-    [Key] string WebAppUrl;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Key] string RelativeUrl;
-    [Required] boolean Explicit;
-    [Required] boolean HostHeader;
+    [Key, Description('The URL of the web application to apply the managed path to - this is ignored for host header web applications')] string WebAppUrl;
+    [Key, Description('The relative URL of the managed path')] string RelativeUrl;
+    [Required, Description('Should the host header be explicit? If false then it is a wildcard')] boolean Explicit;
+    [Required, Description('Is this a host header web application?')] boolean HostHeader;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

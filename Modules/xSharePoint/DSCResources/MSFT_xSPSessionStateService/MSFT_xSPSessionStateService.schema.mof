@@ -18,10 +18,10 @@ If session timeout is not provided it will default to 60.
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSessionStateService")]
 class MSFT_xSPSessionStateService : OMI_BaseResource
 {
-    [Key] string DatabaseName;
-    [Key] string DatabaseServer;
-    [Required, Write] boolean Enabled;
-    [Write] uint32 SessionTimeout;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description('The name of the database for the service')] string DatabaseName;
+    [Key, Description('The name of the database server for the database')] string DatabaseServer;
+    [Required, Description('Is the state service enabled'), Write] boolean Enabled;
+    [Write, Description('What is the timeout on sessions')] uint32 SessionTimeout;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

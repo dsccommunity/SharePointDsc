@@ -22,9 +22,9 @@ Both of these properties will only make changes to the file types in their list 
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppBlockedFileTypes")]
 Class MSFT_xSPWebAppBlockedFileTypes : OMI_BaseResource
 {
-    [Key] string Url;
-    [write] string Blocked[];
-    [write] string EnsureBlocked[];
-    [write] string EnsureAllowed[];
-    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Key, Description('The URL of the web application to set blocked file types for')] string Url;
+    [write, Description('This is a fixed list to use for blocked file types in this web app')] string Blocked[];
+    [write, Description('This list of file types that will always be added to the list for this web app. Types not in this list will be left in the list')] string EnsureBlocked[];
+    [write, Description('This list of file types that will always be removedfrom the list for this web app. Types not in this list will be left in the list')] string EnsureAllowed[];
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
