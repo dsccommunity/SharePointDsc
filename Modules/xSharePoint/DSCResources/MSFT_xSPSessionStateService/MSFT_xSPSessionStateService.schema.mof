@@ -20,7 +20,7 @@ class MSFT_xSPSessionStateService : OMI_BaseResource
 {
     [Key, Description('The name of the database for the service')] string DatabaseName;
     [Key, Description('The name of the database server for the database')] string DatabaseServer;
-    [Required, Description('Is the state service enabled'), Write] boolean Enabled;
+    [Required, Description('Is the state service enabled')] boolean Enabled;
     [Write, Description('What is the timeout on sessions')] uint32 SessionTimeout;
     [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

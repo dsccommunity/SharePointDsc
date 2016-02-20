@@ -16,7 +16,7 @@ The catalog site needs to have been created using the correct template (APPCATAL
 [ClassVersion("1.0.0.0"), FriendlyName("xSPAppCatalog")]
 class MSFT_xSPAppCatalog : OMI_BaseResource
 {
-    [Key] string SiteUrl;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description('The URL of the site collection that will be the app catalog for the web app that it is in')] string SiteUrl;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     
 };
