@@ -61,6 +61,7 @@ function Get-MofSchemaObject() {
                 ValueMap = $null
                 DataType = $null
                 Name = $null
+                Description = $null
                 IsArray = $false
             }
 
@@ -82,6 +83,11 @@ function Get-MofSchemaObject() {
                     $end = $textLine.IndexOf("}", $start)
                     $valueMap = $textLine.Substring($start, $end - $start)
                     $attributeValue.ValueMap = $valueMap.Replace("`"", "").Split(",")
+                }
+                if ($_.Trim().StartsWith("Description")) {
+                    $start = $textLine.IndexOf("Description('") + 13
+                    $end = $textLine.IndexOf("')", $start)
+                    $attributeValue.Description = $textLine.Substring($start, $end - $start)
                 }
             }
         
