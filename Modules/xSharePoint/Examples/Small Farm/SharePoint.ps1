@@ -52,6 +52,34 @@ Configuration SharePointServer
         xWebAppPool RemoveDefaultAppPool      { Name = "DefaultAppPool";       Ensure = "Absent"; }
         xWebSite    RemoveDefaultWebSite      { Name = "Default Web Site";     Ensure = "Absent"; PhysicalPath = "C:\inetpub\wwwroot"; }
         
+        #**********************************************************
+        # Install Binaries
+        #
+        # This section installs SharePoint and its Prerequisites
+        #**********************************************************
+        
+        xSPInstallPrereqs InstallPrereqs {
+            Ensure            = "Present"
+            InstallerPath     = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Path "prerequisiteinstaller.exe")
+            OnlineMode        = $false
+            SQLNCli           = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "sqlncli.msi")
+            PowerShell        = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "Windows6.1-KB2506143-x64.msu")
+            NETFX             = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "dotnetfx45_full_x86_x64.exe")
+            IDFX              = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "Windows6.1-KB974405-x64.msu")
+            Sync              = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "Synchronization.msi")
+            AppFabric         = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "WindowsServerAppFabricSetup_x64.exe")
+            IDFX11            = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "MicrosoftIdentityExtensions-64.msi")
+            MSIPCClient       = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "setup_msipc_x64.msi")
+            WCFDataServices   = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "WcfDataServices.exe")
+            KB2671763         = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "AppFabric1.1-RTM-KB2671763-x64-ENU.exe")
+            WCFDataServices56 = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "WcfDataServices56.exe")
+        }
+        xSPInstall InstallSharePoint {
+            Ensure = "Present"
+            BinaryDir = $ConfigurationData.NonNodeData.SharePoint.Binaries.Path
+            ProductKey = $ConfigurationData.NonNodeData.SharePoint.ProductKey
+            DependsOn = "[xSPInstallPrereqs]InstallPrereqs"
+        }
 
         #**********************************************************
         # Basic farm configuration
@@ -73,7 +101,7 @@ Configuration SharePointServer
                 FarmAccount              = $FarmAccount
                 PsDscRunAsCredential     = $SPSetupAccount
                 AdminContentDatabaseName = $ConfigurationData.NonNodeData.SharePoint.Farm.AdminContentDatabase
-                DependsOn                = "[xComputer]DomainJoin"
+                DependsOn                = "[xSPInstall]InstallSharePoint"
             }
 
             $FarmWaitTask = "[xSPCreateFarm]CreateSPFarm"

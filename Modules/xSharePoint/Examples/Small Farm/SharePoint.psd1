@@ -49,6 +49,13 @@
             FarmDatabaseServer = "sql1.contoso.local"
         }
         SharePoint = @{
+            ProductKey = "INSERT PRODUCT KEY HERE"
+            Binaries = @{
+                Path = "C:\Binaries\SharePoint"
+                Prereqs = @{
+                    OfflineInstallDir = "C:\Binaries\SharePoint\PrerequisitesInstallerfiles"
+                }
+            }
             Farm = @{
                 ConfigurationDatabase = "SP_Config"
                 Passphrase = "SharePoint156!"
