@@ -98,6 +98,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added xSPDatabaseAAG, xSPFarmSolution and xSPAlternateUrl resources
  * Fixed bug with xSPWorkManagementServiceApp schema
  * Added version as optional parameter for the xSPFeature resource to allow upgrading features to a specific version
+ * Updated examples to include installation resources
 
 ### 0.10.0.0
 
