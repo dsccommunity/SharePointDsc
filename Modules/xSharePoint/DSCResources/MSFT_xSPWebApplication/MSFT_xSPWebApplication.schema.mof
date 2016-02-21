@@ -29,7 +29,7 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Required, Description('The URL of the web application')] string Url;
     [Write, Description('Should anonymous access be enabled for this web app')] boolean AllowAnonymous;
     [Write, Description('What authentication mode should be used for the web app'), ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] string AuthenticationMethod;
-    [Write, Description('The name of the default content database for the web app')] string DatabaseName;
+    [Write, Description('The name of the first content database to be created with this web app')] string DatabaseName;
     [Write, Description('The name of the database server to host the default content DB')] string DatabaseServer;
     [Write, Description('The host header to use for the web app')] string HostHeader;
     [Write, Description('The path on the local servers to host the IIS web site from')] string Path;

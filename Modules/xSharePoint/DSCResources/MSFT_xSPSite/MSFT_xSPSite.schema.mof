@@ -23,10 +23,10 @@ class MSFT_xSPSite : OMI_BaseResource
 {
     [Key, Description('The URL of the site collection')] string Url;
     [Required, Description('The username of the site collection administrator')] string OwnerAlias;
-    [Write, Description('The compatability level of the site')] uint32 CompatibilityLevel;
+    [Write, Description('The compatibility level of the site')] uint32 CompatibilityLevel;
     [Write, Description('The name of the content database to create the site in')] string ContentDatabase;
     [Write, Description('The description to apply to the site collection')] string Description;
-    [Write, Description('The URL of the host header web application to crete this site in')] string HostHeaderWebApplication;
+    [Write, Description('The URL of the host header web application to create this site in')] string HostHeaderWebApplication;
     [Write, Description('The language code of the site')] uint32 Language;
     [Write, Description('The display name of the site collection')] string Name;
     [Write, Description('The email address of the site collection administrator')] string OwnerEmail;

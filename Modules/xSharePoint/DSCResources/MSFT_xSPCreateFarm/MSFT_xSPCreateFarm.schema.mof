@@ -31,7 +31,7 @@ class MSFT_xSPCreateFarm : OMI_BaseResource
     [Key, Description('Name of the configuration database')] String FarmConfigDatabaseName;
     [Key, Description('Server that will host the configuration and admin content databases')] String DatabaseServer;
     [Required, Description('The account to use as the main farm account'), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
-    [Required, Description('THe passphrase to use to allow servers to join this farm')] String Passphrase;
+    [Required, Description('The passphrase to use to allow servers to join this farm')] String Passphrase;
     [Required, Description('The name of the admin content database')] String AdminContentDatabaseName;
     [Write, Description('What port will Central Admin be provisioned to - default is 9999')] uint32 CentralAdministrationPort;
     [Write, Description('SharePoint 2016 only - the MinRole role to enroll this server as'), ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
