@@ -98,6 +98,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added xSPDatabaseAAG, xSPFarmSolution and xSPAlternateUrl resources
  * Fixed bug with xSPWorkManagementServiceApp schema
  * Added support for SSL web apps to xSPWebApplication
+ * Added support for xSPDistributedCacheService to allow provisionin across multiple servers in a specific sequence
  * Added version as optional parameter for the xSPFeature resource to allow upgrading features to a specific version
 
 ### 0.10.0.0
