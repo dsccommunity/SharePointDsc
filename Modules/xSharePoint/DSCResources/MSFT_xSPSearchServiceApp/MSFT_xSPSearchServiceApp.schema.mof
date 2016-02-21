@@ -1,4 +1,4 @@
-/*
+﻿/*
 **Description**
 
 This resource is responsible for provisioning the search service application. 
@@ -23,6 +23,7 @@ class MSFT_xSPSearchServiceApp : OMI_BaseResource
     [Required] string ApplicationPool;
     [Write] string DatabaseName;
     [Write] string DatabaseServer;
+    [Write, EmbeddedInstance("MSFT_Credential")] String DefaultContentAccessAccount;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
