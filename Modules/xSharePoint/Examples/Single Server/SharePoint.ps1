@@ -86,6 +86,7 @@ Configuration SharePointServer
             FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
             AdminContentDatabaseName = $ConfigurationData.NonNodeData.SharePoint.Farm.AdminContentDatabase
+            DependsOn                = "[xSPInstall]InstallSharePoint"
         }
         xSPManagedAccount ServicePoolManagedAccount
         {
