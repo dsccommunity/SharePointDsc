@@ -42,6 +42,16 @@ function Set-TargetResource
         throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
         return
     }
+    
+    $InstallerPath = Join-Path $BinaryDir "setup.exe"
+    $majorVersion = (Get-xSharePointAssemblyVersion -PathToAssembly $InstallerPath)
+    if ($majorVersion -eq 15) {
+        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
+        if ($dotNet46Check -ne $null -and $dotNet46Check.Length -gt 0) {
+            throw [Exception] "A known issue prevents installation of SharePoint 2013 on servers that have .NET 4.6 already installed. See details at https://support.microsoft.com/en-us/kb/3087184"
+            return
+        }    
+    }
 
     Write-Verbose -Message "Writing install config file"
 
