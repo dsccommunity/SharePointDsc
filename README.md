@@ -101,6 +101,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added support for SSL web apps to xSPWebApplication
  * Added support for xSPDistributedCacheService to allow provisionin across multiple servers in a specific sequence
  * Added version as optional parameter for the xSPFeature resource to allow upgrading features to a specific version
+ * Added MOF descriptions to all resources to improve editing experience in PowerShell ISE
  * Added a check to warn about issue when installing SharePoint 2013 on a server with .NET 4.6 installed
  * Updated examples to include installation resources
  * Fixed issues with kerberos and anonymous access in xSPWebApplication

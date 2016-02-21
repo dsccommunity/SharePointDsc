@@ -23,18 +23,18 @@ The resource will provision the web application with all of the current settings
 [ClassVersion("1.1.0.0"), FriendlyName("xSPWebApplication")]
 class MSFT_xSPWebApplication : OMI_BaseResource
 {
-    [Key] string Name;
-    [Required] string ApplicationPool;
-    [Required] string ApplicationPoolAccount;
-    [Required] string Url;
-    [Write] boolean AllowAnonymous;
-    [Write, ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] string AuthenticationMethod;
-    [Write] string DatabaseName;
-    [Write] string DatabaseServer;
-    [Write] string HostHeader;
-    [Write] string Path;
-    [Write] string Port;
-    [Write] boolean UseSSL;
-    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Key, Description('The name of the web application')] string Name;
+    [Required, Description('The name of the application pool to run this site in')] string ApplicationPool;
+    [Required, Description('The name of the managed account to run the app pool with')] string ApplicationPoolAccount;
+    [Required, Description('The URL of the web application')] string Url;
+    [Write, Description('Should anonymous access be enabled for this web app')] boolean AllowAnonymous;
+    [Write, Description('What authentication mode should be used for the web app'), ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] string AuthenticationMethod;
+    [Write, Description('The name of the first content database to be created with this web app')] string DatabaseName;
+    [Write, Description('The name of the database server to host the default content DB')] string DatabaseServer;
+    [Write, Description('The host header to use for the web app')] string HostHeader;
+    [Write, Description('The path on the local servers to host the IIS web site from')] string Path;
+    [Write, Description('The port to run the site on')] string Port;
+    [Write, Description('Should this web app use SSL')] boolean UseSSL;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
 

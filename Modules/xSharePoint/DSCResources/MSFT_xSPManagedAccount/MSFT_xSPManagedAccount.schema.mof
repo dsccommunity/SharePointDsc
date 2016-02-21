@@ -17,10 +17,10 @@ The settings for EmailNotification, PreExpireDays and Schedule all relate to ena
 [ClassVersion("1.0.0.0"), FriendlyName("xSPManagedAccount")]
 class MSFT_xSPManagedAccount : OMI_BaseResource
 {
-    [Key] string AccountName;
-    [Required, EmbeddedInstance("MSFT_Credential")] String Account;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Write] Uint32 EmailNotification;
-    [Write] Uint32 PreExpireDays;
-    [Write] string Schedule;
+    [Key, Description('The username of the account')] string AccountName;
+    [Required, Description('The credential with password of the account'), EmbeddedInstance("MSFT_Credential")] String Account;
+    [Write, Description('How many days before a password change should an email be sent')] Uint32 EmailNotification;
+    [Write, Description('How many days before a password expires should it be changed')] Uint32 PreExpireDays;
+    [Write, Description('What is the schedule for the password reset')] string Schedule;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

@@ -13,6 +13,6 @@ The resource will provision and configure the Visio Graphics Service Application
 [ClassVersion("1.0.0.0"), FriendlyName("xSPVisioServiceApp")]
 class MSFT_xSPVisioServiceApp : OMI_BaseResource
 {
-    [Key] string Name;
-    [Required] string ApplicationPool;
+    [Key, Description('The name of the service application')] string Name;
+    [Required, Description('The name of the application pool to run the service app in')] string ApplicationPool;
 };

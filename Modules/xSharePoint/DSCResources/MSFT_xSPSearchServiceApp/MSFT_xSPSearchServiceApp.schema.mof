@@ -19,11 +19,11 @@ The database name parameter is used as the prefix for all search databases (so y
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSearchServiceApp")]
 class MSFT_xSPSearchServiceApp : OMI_BaseResource
 {
-    [Key] string Name;
-    [Required] string ApplicationPool;
-    [Write] string DatabaseName;
-    [Write] string DatabaseServer;
-    [Write, EmbeddedInstance("MSFT_Credential")] String DefaultContentAccessAccount;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description('The name of the search service application')] string Name;
+    [Required, Description('The application pool that it should run in')] string ApplicationPool;
+    [Write, Description('The name of the database (noting that some search databases will use this as a prefix)')] string DatabaseName;
+    [Write, Description('The server that host the databases for this service application')] string DatabaseServer;
+    [Write, Description('The default content access account for this search service app'), EmbeddedInstance("MSFT_Credential")] String DefaultContentAccessAccount;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

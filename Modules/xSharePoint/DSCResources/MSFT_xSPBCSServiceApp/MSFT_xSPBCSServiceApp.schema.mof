@@ -20,10 +20,10 @@ Database names or server name will not be changed if the configuration does not 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPBCSServiceApp")]
 class MSFT_xSPBCSServiceApp : OMI_BaseResource
 {
-    [Key] string Name;
-    [Required] String ApplicationPool;
-    [Write] string DatabaseName;
-    [Write] String DatabaseServer;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description('The name of the BCS service app')] string Name;
+    [Required, Description('The application pool it should run in')] String ApplicationPool;
+    [Write, Description('Name of the database to create for the service app')] string DatabaseName;
+    [Write, Description('Name of the database server to host the database on')] String DatabaseServer;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
