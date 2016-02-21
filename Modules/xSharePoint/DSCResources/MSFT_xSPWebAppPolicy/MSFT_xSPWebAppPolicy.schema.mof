@@ -16,10 +16,10 @@ This resource is used to set the "super user" and "super reader" cache accounts 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPolicy")]
 class MSFT_xSPWebAppPolicy : OMI_BaseResource
 {
-    [Key] string WebAppUrl;
-    [Key] string UserName;
-    [Required, ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] string PermissionLevel;
-    [Write] boolean ActAsSystemUser;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description('The URL of the web application')] string WebAppUrl;
+    [Key, Description('The username for the policy')] string UserName;
+    [Required, Description('The policy to apply'), ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] string PermissionLevel;
+    [Write, Description('Should this user be treated as a system account')] boolean ActAsSystemUser;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

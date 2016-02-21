@@ -97,8 +97,15 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
  * Added xSPDatabaseAAG, xSPFarmSolution and xSPAlternateUrl resources
  * Fixed bug with xSPWorkManagementServiceApp schema
+ * Added support to xSPSearchServiceApp to configure the default content access account
+ * Added support for SSL web apps to xSPWebApplication
+ * Added support for xSPDistributedCacheService to allow provisionin across multiple servers in a specific sequence
  * Added version as optional parameter for the xSPFeature resource to allow upgrading features to a specific version
  * Fixed a bug with xSPUserProfileSyncConnection to ensure it gets the correct context 
+ * Added MOF descriptions to all resources to improve editing experience in PowerShell ISE
+ * Added a check to warn about issue when installing SharePoint 2013 on a server with .NET 4.6 installed
+ * Updated examples to include installation resources
+ * Fixed issues with kerberos and anonymous access in xSPWebApplication
 
 ### 0.10.0.0
 
@@ -139,7 +146,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### 0.4.0
 
-* Fixed issue with nested modules� cmdlets not being found
+* Fixed issue with nested modules cmdlets not being found
 
 ### 0.3.0
 

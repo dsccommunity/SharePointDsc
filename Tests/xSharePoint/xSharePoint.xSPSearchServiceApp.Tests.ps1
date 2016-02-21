@@ -24,7 +24,29 @@ Describe "xSPSearchServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue    
+        
+        Add-Type -TypeDefinition @"
+            namespace Microsoft.Office.Server.Search.Administration {
+                public static class SearchContext {
+                    public static object GetContext(object site) {
+                        return null;
+                    }
+                }
+            }
+"@
+
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
 
         Context "When no service applications exist in the current farm" {
 
@@ -85,6 +107,13 @@ Describe "xSPSearchServiceApp" {
         }
 
         Context "When a service application exists and is configured correctly" {
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Search Service Application"
@@ -108,6 +137,12 @@ Describe "xSPSearchServiceApp" {
         }
 
         Context "When a service application exists and the app pool is not configured correctly" {
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Search Service Application"
@@ -131,6 +166,89 @@ Describe "xSPSearchServiceApp" {
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPEnterpriseSearchServiceApplication
+            }
+        }
+        
+        $testParams.Add("DefaultContentAccessAccount", (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+        
+        Context "When the default content access account does not match" {    
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOESNOT\match"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "changes the content access account" {
+                Set-TargetResource @testParams 
+
+                Assert-MockCalled Get-SPServiceApplicationPool
+                Assert-MockCalled Set-SPEnterpriseSearchServiceApplication
+            }
+        }
+        
+        Context "When the default content access account does not match" {    
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    

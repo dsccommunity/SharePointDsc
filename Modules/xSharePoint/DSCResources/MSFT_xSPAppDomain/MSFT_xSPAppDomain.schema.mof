@@ -18,8 +18,8 @@ You can set the domain name and the prefix that is to be used for app URLs.
 [ClassVersion("1.0.0.0"), FriendlyName("xSPAppDomain")]
 class MSFT_xSPAppDomain : OMI_BaseResource
 {
-    [Key] string AppDomain;
-    [Required] string Prefix;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description('The domain name for apps to use in this farm')] string AppDomain;
+    [Required, Description('The prefix to go on to app URLs')] string Prefix;
+    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
     
 };
