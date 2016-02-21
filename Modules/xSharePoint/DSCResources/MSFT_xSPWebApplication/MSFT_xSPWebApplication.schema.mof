@@ -34,6 +34,7 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write, Description('The host header to use for the web app')] string HostHeader;
     [Write, Description('The path on the local servers to host the IIS web site from')] string Path;
     [Write, Description('The port to run the site on')] string Port;
+    [Write, Description('Should this web app use SSL')] boolean UseSSL;
     [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
 
