@@ -144,7 +144,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### 0.4.0
 
-* Fixed issue with nested modules� cmdlets not being found
+* Fixed issue with nested modules cmdlets not being found
 
 ### 0.3.0
 
