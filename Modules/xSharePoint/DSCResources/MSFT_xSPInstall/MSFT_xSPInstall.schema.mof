@@ -31,8 +31,8 @@ Currently SharePoint Foundation is not supported by xSPInstall (see [Issue #81](
 [ClassVersion("1.0.0.0"), FriendlyName("xSPInstall")]
 class MSFT_xSPInstall : OMI_BaseResource
 {
-    [Key, Description('The directory that contains all of the SharePoint binaries')] String BinaryDir;
-    [Required, Description('The product key to use during the installation')] String ProductKey;
-    [Required, Description('Present to install SharePoint. Absent is currently not supported'), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Key, Description("The directory that contains all of the SharePoint binaries")] String BinaryDir;
+    [Required, Description("The product key to use during the installation")] String ProductKey;
+    [Required, Description("Present to install SharePoint. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
 

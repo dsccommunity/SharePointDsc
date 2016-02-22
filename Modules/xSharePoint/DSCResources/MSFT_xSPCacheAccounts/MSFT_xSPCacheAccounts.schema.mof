@@ -16,9 +16,9 @@ This resource is used to set the "super user" and "super reader" cache accounts 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPCacheAccounts")]
 class MSFT_xSPCacheAccounts : OMI_BaseResource
 {
-    [Key, Description('The URL of the web application to set the accounts for')] string WebAppUrl;
-    [Required, Description('The account name for the super user')] string SuperUserAlias;
-    [Required, Description('The account name fo the super reader')] string SuperReaderAlias;
-    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description("The URL of the web application to set the accounts for")] string WebAppUrl;
+    [Required, Description("The account name for the super user")] string SuperUserAlias;
+    [Required, Description("The account name fo the super reader")] string SuperReaderAlias;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

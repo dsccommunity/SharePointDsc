@@ -19,10 +19,10 @@ Database names or server name will not be changed if the configuration does not 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSubscriptionSettingsServiceApp")]
 class MSFT_xSPSubscriptionSettingsServiceApp  : OMI_BaseResource
 {
-    [Key, Description('The name of the subscription settings service app')] string Name;
-    [Required, Description('The name of the application pool the service app runs in')] String ApplicationPool;
-    [Write, Description('The name of the database for the service app')] string DatabaseName;
-    [Write, Description('The name of the database server')] String DatabaseServer;
-    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description("The name of the subscription settings service app")] string Name;
+    [Required, Description("The name of the application pool the service app runs in")] String ApplicationPool;
+    [Write, Description("The name of the database for the service app")] string DatabaseName;
+    [Write, Description("The name of the database server")] String DatabaseServer;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

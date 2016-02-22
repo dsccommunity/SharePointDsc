@@ -19,8 +19,8 @@ Therefore this resource will add the FarmAccount credential to the local adminis
 [ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSyncService")]
 class MSFT_xSPUserProfileSyncService : OMI_BaseResource
 {
-    [Key, Description('The name of the user profile service for this sync instance')] string UserProfileServiceAppName;
-    [Required, Description('Present to ensure the service is running, absent to ensure it is not'), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Required, Description('The farm account, which is needed to provision the service app'), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
-    [Write, Description('POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5'), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description("The name of the user profile service for this sync instance")] string UserProfileServiceAppName;
+    [Required, Description("Present to ensure the service is running, absent to ensure it is not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Required, Description("The farm account, which is needed to provision the service app"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
