@@ -34,7 +34,7 @@ function Orchestrator{
             Read-SPManagedAccounts
             Read-SPServiceApplicationPools
             Read-SPSites
-            Read-SPServiceInstance
+            Read-SPServiceInstance -Server $spServer.Name
             Read-DiagnosticLoggingSettings
             Read-UsageServiceApplication
             Read-StateServiceApplication
@@ -320,12 +320,16 @@ function Read-SPManagedAccounts
 <## This function retrieves all Services in the SharePoint farm. It does not care if the service is enabled or not. It lists them all, and simply sets the "Ensure" attribute of those that are disabled to "Absent". #>
 function Read-SPServiceInstance
 {
-    $serviceInstances = Get-SPServiceInstance | Sort-Object -Property TypeName
+	param(
+       [Parameter(Mandatory=$true)]
+        [string]$Server
+	)
+    $serviceInstances = Get-SPServiceInstance | Where{$_.Server.Name -eq $Server} | Sort-Object -Property TypeName
     foreach($serviceInstance in $serviceInstances)
     {
         if($serviceInstance.TypeName -eq "Distributed Cache")
         {
-            $Script:dscConfigContent += "        xSPDistributedCacheService " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
+            $Script:dscConfigContent += "        xSPDistributedCacheService " + $serviceInstance.TypeName.Replace(" ", "") + "Instance`r`n"
             $Script:dscConfigContent += "        {`r`n"
             $Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
 
@@ -352,7 +356,7 @@ function Read-SPServiceInstance
         }
         elseif($serviceInstance.TypeName -eq "User Profile Synchronization Service")
         {
-            $Script:dscConfigContent += "        xSPUserProfileSyncService " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
+            $Script:dscConfigContent += "        xSPUserProfileSyncService " + $serviceInstance.TypeName.Replace(" ", "") + "Instance`r`n"
             $Script:dscConfigContent += "        {`r`n"
             $Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
 
@@ -369,7 +373,7 @@ function Read-SPServiceInstance
         }
         else
         {
-            $Script:dscConfigContent += "        xSPServiceInstance " + $serviceInstance.TypeName.Replace(" ", "") + "`r`n"
+            $Script:dscConfigContent += "        xSPServiceInstance " + $serviceInstance.TypeName.Replace(" ", "") + "Instance`r`n"
             $Script:dscConfigContent += "        {`r`n"
             $Script:dscConfigContent += "            Name=`"" + $serviceInstance.TypeName + "`"`r`n"
 
@@ -516,7 +520,6 @@ function Read-UserProfileServiceapplication
 function Read-SecureStoreServiceApplication
 {
     $ssa = Get-SPServiceApplication | Where{$_.TypeName -eq "Secure Store Service Application"}
-    
     for($i = 0; $i -lt $ssa.Length; $i++)
     {
         $Script:dscConfigContent += "        xSPSecureStoreServiceApp " + $ssa[$i].Name.Replace(" ", "") + "`r`n"
@@ -528,19 +531,10 @@ function Read-SecureStoreServiceApplication
         $ssDB = get-spdatabase | where{$_.Type -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceDatabase"}
         $ssDBServer = $ssDB[$i].Server.Name
         $ssDBName = $ssDB[$i].DisplayName
-
-		<## We need to check to ensure that the proper SQL components oare installed on the server before trying to query the DB #>
-		if(Test-CommandExists "Invoke-SQLCmd")
-		{
-			Push-Location
-			$queryResults = Invoke-SqlCmd -Query "SELECT * FROM SSSConfig" -ServerInstance $ssDBServer -Database $ssDBName
-			Pop-Location
-		}
-		else
-		{
-			Write-Host "Unfortunately, it does not appear you have the SQL components installed"
-		}
-
+		$query = "SELECT * FROM SSSConfig"
+			
+		$queryResults = Invoke-SQL -Server $ssDBServer -dbName $ssDBName -sqlQuery $query
+		
         $logTime = $queryResults.PurgeAuditDays        
         $Script:dscConfigContent += "            AuditingEnabled=`$" + $queryResults.EnableAudit + "`r`n"
         $Script:dscConfigContent += "            AuditlogMaxSize=" + $logTime + "`r`n"
@@ -616,6 +610,31 @@ function Set-LCM
     $Script:dscConfigContent += "        }`r`n"
 }
 
+function Invoke-SQL {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Server,
+        [Parameter(Mandatory=$true)]
+        [string]$dbName,
+        [Parameter(Mandatory=$true)]
+        [string]$sqlQuery
+    )
+ 
+    $ConnectString="Data Source=${Server}; Integrated Security=SSPI; Initial Catalog=${dbName}"
+ 
+    $Conn=New-Object System.Data.SqlClient.SQLConnection($ConnectString)
+    $Command = New-Object System.Data.SqlClient.SqlCommand($sqlQuery,$Conn)
+    $Conn.Open()
+ 
+    $Adapter = New-Object System.Data.SqlClient.SqlDataAdapter $Command
+    $DataSet = New-Object System.Data.DataSet
+    $Adapter.Fill($DataSet) | Out-Null
+ 
+    $Conn.Close()
+    $DataSet.Tables
+}
+
+
 <## This method is used to determine if a specific PowerShell cmdlet is available in the current Powershell Session. It is currently used to determine wheter or not the user has access to call the Invoke-SqlCmd cmdlet or if he needs to install the SQL Client coponent first. It simply returns $true if the cmdlet is available to the user, or $false if it is not. #>
 function Test-CommandExists
 {
@@ -638,7 +657,7 @@ function Test-CommandExists
 Orchestrator
 
 <## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
-$OutputDSCPath = Read-Host "Output Folder for DSC Configuration: "
+$OutputDSCPath = Read-Host "Output Folder for DSC Configuration"
 
 <## Ensures the path we specify ends with a Slash, in order to make sure the resulting file pathis properly structured. #>
 if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
