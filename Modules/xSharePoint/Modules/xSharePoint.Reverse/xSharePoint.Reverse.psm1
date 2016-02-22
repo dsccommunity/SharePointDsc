@@ -366,7 +366,7 @@ function Read-SPServiceInstance
                 $status = "Absent"
             }
             $Script:dscConfigContent += "            Ensure=`"" + $status + "`"`r`n"            
-            $Script:dscConfigContent += "            FramAccount=`$FarmAccount`r`n"
+            $Script:dscConfigContent += "            FarmAccount=`$FarmAccount`r`n"
             $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
             $Script:dscConfigContent += "            DependsOn=@('[xSPCreateFarm]CreateSPFarm','[xSPManagedAccount]" + (Check-Credentials $windowsService.StartName).Replace("$", "") + "')`r`n"
             $Script:dscConfigContent += "        }`r`n"
