@@ -486,7 +486,14 @@ function Read-UserProfileServiceapplication
     if($sites.Length -gt 0)
     {
         $context = Get-SPServiceContext $sites[0]
-        $pm = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
+        try
+        {
+            $pm = new-object Microsoft.Office.Server.UserProfiles.UserProfileManager($context)
+        }
+        catch{
+            $Script:dscConfigContent += "<# WARNING: It appears the farm account doesn't have Full Control to the User Profile Service Aplication. This is currently preventing the script from determining the exact path for the MySite Host (if configured). Please ensure the Farm account is granted Full Control on the User Profile Service Application. #>"
+            Write-Host "WARNING - Farm Account does not have Full Control on the User Profile Service Application." -BackgroundColor Yellow -ForegroundColor Black
+        }
 
         if($ups -ne $null)
         {
