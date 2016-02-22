@@ -16,6 +16,7 @@ $Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Wh
 function Orchestrator{    
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers    
+	Read-OperatingSystemVersion
     Read-SQLVersion
 	Read-SPProductVersions
     $Script:dscConfigContent += "Configuration SharePointFarm`r`n"
@@ -52,6 +53,21 @@ function Orchestrator{
     $Script:dscConfigContent += "}"
 }
 
+function Read-OperatingSystemVersion
+{
+	$servers = Get-SPServer
+	$Script:dscConfigContent += "<#`r`n    Operating Systems in this Farm`r`n-------------------------------------------`r`n"
+    $Script:dscConfigContent += "    Products and Language Packs`r`n"
+    $Script:dscConfigContent += "-------------------------------------------`r`n"
+	foreach($spServer in $servers)
+	{
+		$serverName = $spServer.Name
+		$osInfo = Get-WmiObject Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture
+	    $Script:dscConfigContent += "    [" + $serverName + "]: " + $osInfo.OSName + "(" + $osInfo.OSArchitecture + ")    ----    " + $osInfo.Version + "`r`n"
+	}	
+	$Script:dscConfigContent += "#>`r`n`r`n"
+}
+
 function Read-SQLVersion
 {
 	$uniqueServers = @()
@@ -72,7 +88,7 @@ function Read-SQLVersion
 			$Script:dscConfigContent += "<#`r`n    SQL Server Product Versions Installed on this Farm`r`n-------------------------------------------`r`n"
             $Script:dscConfigContent += "    Products and Language Packs`r`n"
             $Script:dscConfigContent += "-------------------------------------------`r`n"
-	        $Script:dscConfigContent += "    " + $sqlVersionInfo.SQLversion
+	        $Script:dscConfigContent += "    [" + $serverName + "]: " + $sqlVersionInfo.SQLversion + "`r`n#>`r`n`r`n"
         }
 	}
 }
