@@ -16,7 +16,8 @@ $Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Wh
 function Orchestrator{    
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers    
-    Read-SPProductVersions
+    Read-SQLVersion
+	Read-SPProductVersions
     $Script:dscConfigContent += "Configuration SharePointFarm`r`n"
     $Script:dscConfigContent += "{`r`n"
     Set-ObtainRequiredCredentials
@@ -50,6 +51,32 @@ function Orchestrator{
     }    
     $Script:dscConfigContent += "}"
 }
+
+function Read-SQLVersion
+{
+	$uniqueServers = @()
+	$sqlServers = Get-SPDatabase | select Server -Unique
+	foreach($sqlServer in $sqlServers)
+    {
+		$serverName = $sqlServer.Server.Name
+
+        if($serverName -eq $null)
+		{
+		    $serverName = $sqlServer.Server
+		}
+        
+        if(!($uniqueServers -contains $serverName))
+        {
+	        $sqlVersionInfo = Invoke-SQL -Server $serverName -dbName "Master" -sqlQuery "SELECT @@VERSION AS 'SQLVersion'"
+            $uniqueServers += $serverName.ToString()
+			$Script:dscConfigContent += "<#`r`n    SQL Server Product Versions Installed on this Farm`r`n-------------------------------------------`r`n"
+            $Script:dscConfigContent += "    Products and Language Packs`r`n"
+            $Script:dscConfigContent += "-------------------------------------------`r`n"
+	        $Script:dscConfigContent += "    " + $sqlVersionInfo.SQLversion
+        }
+	}
+}
+
 <## This function ensure all required Windows Features are properly installed on the server. #>
 <# TODO: Replace this by a logic that reads the feature from te actual server and writes them down instead of simply assuming they are required. #>
 function Set-ConfigurationSettings
@@ -629,7 +656,7 @@ function Invoke-SQL {
  
     $ConnectString="Data Source=${Server}; Integrated Security=SSPI; Initial Catalog=${dbName}"
  
-    $Conn=New-Object System.Data.SqlClient.SQLConnection($ConnectString)
+    $Conn= New-Object System.Data.SqlClient.SQLConnection($ConnectString)
     $Command = New-Object System.Data.SqlClient.SqlCommand($sqlQuery,$Conn)
     $Conn.Open()
  
