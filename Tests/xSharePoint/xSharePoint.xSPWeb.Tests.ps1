@@ -9,16 +9,19 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSite"
+$ModuleName = "MSFT_xSPWeb"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSite" {
+Describe "xSPWeb" {
+
     InModuleScope $ModuleName {
+
         $testParams = @{
             Url = "http://site.sharepoint.com/sites/web"
             Name = "Team Site"
             Description = "desc"
         }
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
         Mock Invoke-xSharePointCommand { 
@@ -27,128 +30,129 @@ Describe "xSPSite" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Mock New-SPSite { }
+        Context "The SPWeb doesn't exist yet and should" {
 
-        Context "The site doesn't exist yet and should" {
-            Mock Get-SPSite { return $null }
+            Mock Get-SPWeb { return $null }
 
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns 'Absent' from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new site from the set method" {
+            It "creates a new SPWeb from the set method" {
+
+                Mock New-SPWeb { } -Verifiable
+
                 Set-TargetResource @testParams
 
-                Assert-MockCalled New-SPSite
+                Assert-MockCalled New-SPWeb
             }
         }
 
-        Context "The site exists and is a host named site collection" {
-            Mock Get-SPSite { return @{
-                HostHeaderIsSiteName = $true
-                WebApplication = @{ 
-                    Url = $testParams.Url 
-                    UseClaimsAuthentication = $false
-                }
-                Url = $testParams.Url
-                Owner = @{ UserLogin = "DEMO\owner" }
-            }}
+        Context "The SPWeb exists and has the correct name and description" {
 
-            It "returns the site data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            Mock Get-SPWeb { 
+                return @{
+                    Url           = $testParams.Url
+                    Title         = $testParams.Name
+                    Description   = $testParams.Description
+                    WebTemplate   = "STS"
+                    WebTemplateId = "0"
+                    Navigation    = @{ UseShared = $true }
+                    Language      = 1033
+                    HasUniquePerm = $false
+                }
+            }
+
+            It "returns the SPWeb data from the get method" {
+                
+                $result = Get-TargetResource @testParams
+
+                $result.Ensure            | Should be "Present"
+                $result.Template          | Should be "STS#0"
+                $result.UniquePermissions | Should be $false
+                $result.UseParentTopNav   | Should be $true                
+
             }
 
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-
-        Context "The site exists and uses claims authentication" {
-            Mock Get-SPSite { return @{
-                HostHeaderIsSiteName = $false
-                WebApplication = @{ 
-                    Url = $testParams.Url 
-                    UseClaimsAuthentication = $true
-                }
-                Url = $testParams.Url
-                Owner = @{ UserLogin = "DEMO\owner" }
-            }}
-            Mock New-SPClaimsPrincipal { return @{ Value = $testParams.OwnerAlias }}
-
-            It "returns the site data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
-
-            It "returns true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-
-            Mock Get-SPSite { return @{
-                HostHeaderIsSiteName = $false
-                WebApplication = @{ 
-                    Url = $testParams.Url 
-                    UseClaimsAuthentication = $true
-                }
-                Url = $testParams.Url
-                Owner = $null
-            }}
-
-            It "returns the site data from the get method where a valid site collection admin does not exist" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
+        
+        context "The SPWeb exists and should not" {
             
-            Mock Get-SPSite { return @{
-                HostHeaderIsSiteName = $false
-                WebApplication = @{ 
-                    Url = $testParams.Url 
-                    UseClaimsAuthentication = $true
-                }
-                Url = $testParams.Url
-                Owner = @{ UserLogin = "DEMO\owner" }
-                SecondaryContact = @{ UserLogin = "DEMO\secondary" }
-            }}
+            $testParams.Ensure = "Absent"
 
-            It "returns the site data from the get method where a secondary site contact exists" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            Mock Get-SPWeb { 
+                return @{
+                    Url           = $testParams.Url
+                }
+            }
+
+            It "returns 'Present' from the get method" {
+                
+                (Get-TargetResource @testParams).Ensure | Should be "Present"             
+
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "removes the SPWeb in the set method" {
+
+                Mock Remove-SPWeb { } -Verifiable
+
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Remove-SPWeb
             }
         }
 
-        Context "The site exists and uses classic authentication" {
-            Mock Get-SPSite { return @{
-                HostHeaderIsSiteName = $false
-                WebApplication = @{ 
-                    Url = $testParams.Url 
-                    UseClaimsAuthentication = $false
-                }
-                Url = $testParams.Url
-                Owner = @{ UserLogin = "DEMO\owner" }
-            }}
+        context "The SPWeb exists but has the wrong editable values" {
 
-            It "returns the site data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            $testParams.Ensure = "Present"
+            $testParams.UseParentTopNav = $false
+            $testParams.UniquePermissions = $true
+            
+            $web = [pscustomobject] @{
+                Url           = $testParams.Url
+                Title         = "Another title"
+                Description   = "Another description"
+                Navigation    = @{ UseShared = $true }
+                HasUniquePerm = $false
             }
 
-            It "returns true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            $web |  Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+            Mock Get-SPWeb { $web }
+
+            It "returns the SPWeb data from the get method" {
+                
+                $result = Get-TargetResource @testParams
+
+                $result.Ensure            | Should be "Present"
+                $result.UniquePermissions | Should be $false
+                $result.UseParentTopNav   | Should be $true                
+
             }
 
-            Mock Get-SPSite { return @{
-                HostHeaderIsSiteName = $false
-                WebApplication = @{ 
-                    Url = $testParams.Url 
-                    UseClaimsAuthentication = $false
-                }
-                Url = $testParams.Url
-                Owner = @{ UserLogin = "DEMO\owner" }
-                SecondaryContact = @{ UserLogin = "DEMO\secondary" }
-            }}
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
 
-            It "returns the site data from the get method where a secondary site contact exists" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "updates the values in the set method" {
+                
+                Set-TargetResource @testParams
+
+                $web.Title       | Should be $testParams.Name
+                $web.Description | Should be $testParams.Description
+                $web.Navigation.UseShared | Should be $false
+                $web.HasUniquePerm | Should be $true
             }
         }
     }    
