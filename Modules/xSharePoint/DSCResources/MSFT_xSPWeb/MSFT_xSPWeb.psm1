@@ -81,7 +81,7 @@ function Set-TargetResource
             $params.Remove("InstallAccount") | Out-Null
             $params.Remove("Ensure") | Out-Null
 
-            New-SPWeb @params -Confirm:$false  | Out-Null
+            New-SPWeb @params | Out-Null
         }
         else
         {
