@@ -2,3 +2,5 @@
 *.user
 *.coverage
 .vs
+.psproj
+.sln

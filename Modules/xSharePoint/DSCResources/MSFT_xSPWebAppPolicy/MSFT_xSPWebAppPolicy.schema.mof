@@ -1,8 +1,11 @@
 /*
 **Description**
 
-############################# EDIT DESCRIPTION
-This resource is used to set the "super user" and "super reader" cache accounts for the specified web application object (as described in the TechNet article [Configure object cache user accounts in SharePoint Server 2013](https://technet.microsoft.com/en-us/library/ff758656.aspx)).
+This resource is used to set the User Policies for web applications.
+The usernames can be either specified in Classic or Claims format, both will be accepted.
+There are a number of approaches to how this can be implemented.
+The "Members" property will set a specific list of members for the group, making sure that every user/group in the list is in the group and all others that are members and who are not in this list will be removed.
+The "MembersToInclude" and "MembersToExclude" properties will allow you to control a specific set of users to add or remove, without changing any other members that are in the group already that may not be specified here, allowing for some manual management outside of this configuration resource.
 
 **Example**
 
@@ -56,10 +59,10 @@ Class MSFT_xSPWebPolicyPermissions
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPolicy")]
 class MSFT_xSPWebAppPolicy : OMI_BaseResource
 {
-    [Key] string WebAppUrl;
+    [Key], Description("The URL of the web application")] string WebAppUrl;
     [Write, Description("Exact list of accounts that will have to get Web Policy permissions"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Web Policy group"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have any Web Policy permissions"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String MembersToExclude[];
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
