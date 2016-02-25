@@ -9,6 +9,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount        
     )
 
@@ -40,6 +41,7 @@ function Get-TargetResource
                 ServiceAccount = $windowsService.StartName
                 CreateFirewallRules = ($firewallRule -ne $null)
                 Ensure = "Present"
+                ServerProvisionOrder = $params.ServerProvisionOrder
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -61,6 +63,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -90,7 +93,36 @@ function Set-TargetResource
             Write-Verbose -Message "Enabling distributed cache service"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
-                
+
+                if ($params.ContainsKey("ServerProvisionOrder")) {
+                    
+                    $serverCount = 0
+                    $currentServer = $params.ServerProvisionOrder[$serverCount]
+                    
+                    while ($currentServer -ne $env:COMPUTERNAME) {
+                        $count = 0
+                        $maxCount = 30
+
+                        Write-Verbose "Waiting for cache on $currentServer"
+                        while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null)) {
+                            Start-Sleep -Seconds 60
+                            $count++
+                        }
+
+                        if ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null) {
+                            Write-Warning "Server $currentServer is not running distributed cache after waiting 30 minutes. No longer waiting for this server, progressing to next action"
+                        }
+
+                        $serverCount++
+
+                        if ($ServerCount -ge $params.ServerProvisionOrder.Length) {
+                            throw "The server $($env:COMPUTERNAME) was not found in the array for distributed cache servers"
+                        }
+                        $currentServer = $params.ServerProvisionOrder[$serverCount]
+                    }
+                }
+
+
                 Add-SPDistributedCacheServiceInstance
 
                 Get-SPServiceInstance | Where-Object { $_.TypeName -eq "Distributed Cache" } | Stop-SPServiceInstance -Confirm:$false
@@ -157,6 +189,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
         [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 

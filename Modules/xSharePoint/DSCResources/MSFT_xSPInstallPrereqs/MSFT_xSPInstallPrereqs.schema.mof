@@ -46,25 +46,25 @@ Offline example:
 [ClassVersion("1.0.0.0"), FriendlyName("xSPInstallPrereqs")]
 class MSFT_xSPInstallPrereqs : OMI_BaseResource
 {
-    [Key] String InstallerPath;
-    [Required] Boolean OnlineMode;
-    [Write] String SQLNCli;
-    [Write] String PowerShell;
-    [Write] String NETFX;
-    [Write] String IDFX;
-    [Write] String Sync;
-    [Write] String AppFabric;
-    [Write] String IDFX11;
-    [Write] String MSIPCClient;
-    [Write] String WCFDataServices;
-    [Write] String KB2671763;
-    [Write] String WCFDataServices56;
-    [Write] String KB2898850;
-    [Write] String MSVCRT11;
-    [Write] String MSVCRT14;
-    [Write] String KB3092423;
-    [Write] String ODBC;
-    [Write] String DotNet452;
-    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Key, Description("The full path to prerequisiteinstaller.exe")] String InstallerPath;
+    [Required, Description("Should the installer download prerequisites from the internet or not")] Boolean OnlineMode;
+    [Write, Description("The path to the installer for this prerequisite")] String SQLNCli;
+    [Write, Description("The path to the installer for this prerequisite")] String PowerShell;
+    [Write, Description("The path to the installer for this prerequisite")] String NETFX;
+    [Write, Description("The path to the installer for this prerequisite")] String IDFX;
+    [Write, Description("The path to the installer for this prerequisite")] String Sync;
+    [Write, Description("The path to the installer for this prerequisite")] String AppFabric;
+    [Write, Description("The path to the installer for this prerequisite")] String IDFX11;
+    [Write, Description("The path to the installer for this prerequisite")] String MSIPCClient;
+    [Write, Description("The path to the installer for this prerequisite")] String WCFDataServices;
+    [Write, Description("The path to the installer for this prerequisite")] String KB2671763;
+    [Write, Description("The path to the installer for this prerequisite")] String WCFDataServices56;
+    [Write, Description("The path to the installer for this prerequisite")] String KB2898850;
+    [Write, Description("The path to the installer for this prerequisite")] String MSVCRT11;
+    [Write, Description("The path to the installer for this prerequisite")] String MSVCRT14;
+    [Write, Description("The path to the installer for this prerequisite")] String KB3092423;
+    [Write, Description("The path to the installer for this prerequisite")] String ODBC;
+    [Write, Description("The path to the installer for this prerequisite")] String DotNet452;
+    [Required, Description("Present to install the prerequisites. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
 

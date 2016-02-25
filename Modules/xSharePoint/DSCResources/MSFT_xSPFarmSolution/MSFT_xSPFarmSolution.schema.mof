@@ -1,0 +1,38 @@
+/*
+
+**Description**
+
+This resource is used to make sure that a specific farm solution is either present or absent in a farm.
+The Ensure property will dictate if the solution should be present or absent. 
+The name property is the name of the solution including the wsp extension (i.e. MySolution.wsp).
+The LiteralPath is required and points to the solution in the files system that is used to upload it if it does not exist.
+The Version will be stored in the property bag to determine later if the correct version is installed.
+I the version in the farm does not match the desired version an upgrade of the solution will be performed.
+
+The solution can be deployed to one or more web application passing an array of URL's to the WebApplications property. 
+If the solution contains resources scoped for web applications and no WebApplications are specified, the solution will be deployed to all web applications.
+If the solution does not contain resources scoped for web applications the property is ignored and the solution is deployed globally.
+
+**Example**
+
+    xSPFarmSolution SampleWsp
+    {
+        Name                 = "MySolution.wsp"
+        LiteralPath          = "C:\src\MySolution.wsp"
+        Ensure               = "Present"
+        Version              = "1.0.0"
+        WebApplications      = @("http://collaboration", "http://mysites")
+        PsDscRunAsCredential = $InstallAccount
+    }
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPFarmSolution")]
+class MSFT_xSPFarmSolution : OMI_BaseResource
+{
+    [Key, Description("The filename of the WSP package")] string Name;
+    [Required, Description("The full path to the WSP file")] string LiteralPath;
+    [Write, Description("A list of the web applications to deploy this to")] string WebApplications[];
+    [Write, Description("Present if the WSP should be deployed, or Absent if it should be removed")] string Ensure;
+    [Write, Description("The version of the package that is being modified")] string Version;
+    [Write, Description("Should the solution be deployed to the farm, or just installed to the farm")] Boolean Deployed;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};

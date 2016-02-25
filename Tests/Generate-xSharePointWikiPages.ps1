@@ -14,21 +14,19 @@ Get-ChildItem "$repoDir\modules\xSharePoint\**\*.schema.mof" -Recurse | `
         Write-Output "Generating wiki page for $($result.FriendlyName)"
         
         $output = "**Parameters**" + [Environment]::NewLine + [Environment]::NewLine
-
+        $output += "| Parameter | Attribute | DataType | Description | Allowed Values |" + [Environment]::NewLine
+        $output += "| --- | --- | --- | --- | --- |" + [Environment]::NewLine
         foreach($property in $result.Attributes) {
-            $output += " - $($property.Name) ($($property.State), $($property.DataType)"
+            $output += "| **$($property.Name)** | $($property.State) | $($property.DataType) | $($property.Description) | "
             if ([string]::IsNullOrEmpty($property.ValueMap) -ne $true) {
-                $output += ", Allowed values: "
                 $property.ValueMap | ForEach-Object {
                     $output += $_ + ", "
                 }
                 $output = $output.TrimEnd(" ")
                 $output = $output.TrimEnd(",")
             }
-            $output += ")" + [Environment]::NewLine
+            $output += "|" + [Environment]::NewLine
         }
-
         $output += [Environment]::NewLine + $result.Documentation
-
         $output | Out-File -FilePath (Join-Path $OutPutPath "$($result.FriendlyName).md") -Encoding utf8 -Force
     }
