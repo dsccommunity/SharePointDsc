@@ -1,6 +1,7 @@
 /*
 **Description**
 
+############################# EDIT DESCRIPTION
 This resource is used to set the "super user" and "super reader" cache accounts for the specified web application object (as described in the TechNet article [Configure object cache user accounts in SharePoint Server 2013](https://technet.microsoft.com/en-us/library/ff758656.aspx)).
 
 **Example**
@@ -8,37 +9,57 @@ This resource is used to set the "super user" and "super reader" cache accounts 
     xSPWebAppPolicy WebAppPolicy
     {
         WebAppUrl            = "http://sharepoint.contoso.com"
-        UserName             = "DEMO\account"
-        PermissionLevel      = "Full Control"
-        ActAsSystemUser      = $false
+        Members = @(
+            @(MSFT_xSPWebPolicyPermissions {
+                Username           = "contoso\user1"
+                PermissionLevel    = "Full Control"
+                ActAsSystemAccount = $true
+            })
+            @(MSFT_xSPWebPolicyPermissions {
+                Username        = "contoso\user2"
+                PermissionLevel = "Full Read"
+            })
+        )
         PsDscRunAsCredential = $InstallAccount
     }
 
     xSPWebAppPolicy WebAppPolicy
     {
         WebAppUrl            = "http://sharepoint.contoso.com"
-        UserName             = "DEMO\account"
-        FullControlAccounts  = ""
-        FullReadAccounts     = ""
-        DenyWriteAccounts    = ""
-        DenyAllAccounts      = ""
-        RemoveAccounts       = ""
-
-        Username             = ""
-        PermissionLevel      = "Full Control"
-        ActAsSystemUser      = $false
+        MembersToInclude = @(
+            @(MSFT_xSPWebPolicyPermissions {
+                Username        = "contoso\user1"
+                PermissionLevel = "Full Control"
+            })
+            @(MSFT_xSPWebPolicyPermissions {
+                Username        = "contoso\user2"
+                PermissionLevel = "Full Read"
+            })
+        )
+        MembersToExclude = @(
+            @(MSFT_xSPWebPolicyPermissions {
+                Username = "contoso\user3"
+            })
+        )
         PsDscRunAsCredential = $InstallAccount
     }
 
-
 */
+[ClassVersion("1.0.0")]
+Class MSFT_xSPWebPolicyPermissions
+{
+    [Key, Description("Name of the account")] String Username;
+    [Required, Description("Permission level of the account"), ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] String PermissionLevel;
+    [Write, Description("Specifies if the account is allowed to act as a system account")] Boolean ActAsSystemAccount;
+};
+
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPolicy")]
 class MSFT_xSPWebAppPolicy : OMI_BaseResource
 {
     [Key] string WebAppUrl;
-    [Key] string UserName;
-    [Required, ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] string PermissionLevel;
-    [Write] boolean ActAsSystemUser;
+    [Write, Description("Exact list of accounts that will have to get Web Policy permissions"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String Members[];
+    [Write, Description("List of all accounts that must be in the Web Policy group"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String MembersToInclude[];
+    [Write, Description("List of all accounts that are not allowed to have any Web Policy permissions"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String MembersToExclude[];
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
