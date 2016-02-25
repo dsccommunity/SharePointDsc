@@ -137,7 +137,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing SPWeb '$Url'"
 
-    $valuesToCheck = @("Url", "Name", "Description")
+    $valuesToCheck = @("Url", "Name", "Description", "UniquePermissions", "UseParentTopNav")
 
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
