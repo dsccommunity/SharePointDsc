@@ -92,7 +92,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### Unreleased
+### 0.12.0.0
 
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
  * Added xSPDatabaseAAG, xSPFarmSolution and xSPAlternateUrl resources
