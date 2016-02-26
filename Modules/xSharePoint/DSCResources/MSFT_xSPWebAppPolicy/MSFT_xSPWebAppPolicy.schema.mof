@@ -59,7 +59,7 @@ Class MSFT_xSPWebPolicyPermissions
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPolicy")]
 class MSFT_xSPWebAppPolicy : OMI_BaseResource
 {
-    [Key], Description("The URL of the web application")] string WebAppUrl;
+    [Key, Description("The URL of the web application")] string WebAppUrl;
     [Write, Description("Exact list of accounts that will have to get Web Policy permissions"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Web Policy group"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have any Web Policy permissions"), EmbeddedInstance("MSFT_xSPWebPolicyPermissions")] String MembersToExclude[];

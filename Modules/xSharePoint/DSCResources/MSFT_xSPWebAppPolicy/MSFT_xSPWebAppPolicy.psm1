@@ -32,7 +32,7 @@ function Get-TargetResource
         foreach ($policy in $wa.Policies) {
             $member = @{}
             $member.Username = $policy.UserName
-            $member.PermissionLevel = ($policy.PolicyRoleBindings.Name | Select-Object -First 1).Name
+            $member.PermissionLevel = ($policy.PolicyRoleBindings | Select-Object -First 1).Name
             $member.ActAsSystemAccount = $policy.IsSystemUser
             $members += $member
         }
@@ -71,28 +71,30 @@ function Set-TargetResource
         throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
 		$params = $args[0]
+        $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+
+        if ($null -eq $wa) { return $null }
 
         $denyAll     = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyAll)
 		$denyWrite   = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyWrite)
         $fullControl = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
         $fullRead    = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
 
-        if ($null -eq $wa) { return $null }
-
 		$members = @()
         foreach ($policy in $wa.Policies) {
             $member = @{}
             $member.Username = $policy.UserName
-            $member.PermissionLevel = ($policy.PolicyRoleBindings.Name | Select-Object -First 1).Name
+            $member.PermissionLevel = ($policy.PolicyRoleBindings | Select-Object -First 1).Name
             $member.ActAsSystemAccount = $policy.IsSystemUser
             $members += $member
         }
 
 		if ($params.Members) {
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
 			$differences = ComparePolicies $members $params.Members
 
 			foreach ($difference in $differences) {
@@ -102,12 +104,14 @@ function Set-TargetResource
 					Additional
 						{
 							## Policy contains additional account, remove this account
-							$wa.Policies.Remove($user)
+							Write-Verbose -Verbose "Removing $user"
+                            $wa.Policies.Remove($user)
 						}
 					Different
 						{
 							## Account exists but has the incorrect settings, correct this account
-							$policy = $wa.Policies[$user]
+							Write-Verbose -Verbose "Changing $user"
+							$policy = $wa.Policies | Where-Object { $_.UserName -eq $user }
 							$usersettings = GetUser $params.Members $user
 							if ($usersettings.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $usersettings.ActAsSystemAccount }
 							if ($usersettings.PermissionLevel -ne $policy.RoleBindings.Name) { 
@@ -135,6 +139,7 @@ function Set-TargetResource
 					Missing
 						{
 							## Account is missing, add this account
+							Write-Verbose -Verbose "Adding $user"
 							$usersettings = GetUser $params.Members $user
 							$newPolicy = $wa.Policies.Add($user, $user)
 							switch ($usersettings.PermissionLevel) {
@@ -151,8 +156,8 @@ function Set-TargetResource
 									$newPolicy.PolicyRoleBindings.Add($fullRead)
 								}
 							}
-							if ($usersettings.ContainsKey("ActAsSystemUser") -eq $true) {
-								$newPolicy.IsSystemUser = $usersettings.ActAsSystemUser
+							if ($usersettings.ActAsSystemAccount) {
+								$newPolicy.IsSystemUser = $usersettings.ActAsSystemAccount
 							}
 
 							$wa.Update()
@@ -173,7 +178,7 @@ function Set-TargetResource
 
 
 
-		# (New-SPClaimsPrincipal acme\adminyk -IdentityType WindowsSamAccountName).ToEncodedString()
+		<# (New-SPClaimsPrincipal acme\adminyk -IdentityType WindowsSamAccountName).ToEncodedString()
 
         switch($params.PermissionLevel) {
             "Deny All" {
@@ -202,8 +207,8 @@ function Set-TargetResource
         }
 
         if ($null -ne $policyObject) {
-            if ($params.ContainsKey("ActAsSystemUser") -eq $true) {
-                $policyObject.IsSystemUser = $params.ActAsSystemUser
+            if ($params.ContainsKey("ActAsSystemAccount") -eq $true) {
+                $policyObject.IsSystemUser = $params.ActAsSystemAccount
             }
             $policyObject.PolicyRoleBindings.RemoveAll()
             $policyObject.PolicyRoleBindings.Add($newRole)
@@ -213,12 +218,12 @@ function Set-TargetResource
             ##### Check if user exists before adding. Claims user ook
             $newPolicy = $wa.Policies.Add($params.UserName, $params.UserName)
             $newPolicy.PolicyRoleBindings.Add($newRole)
-            if ($params.ContainsKey("ActAsSystemUser") -eq $true) {
-                $newPolicy.IsSystemUser = $params.ActAsSystemUser
+            if ($params.ContainsKey("ActAsSystemAccount") -eq $true) {
+                $newPolicy.IsSystemUser = $params.ActAsSystemAccount
             }
 
             $wa.Update()
-        }
+        }#>
     }
 }
 
@@ -249,17 +254,20 @@ function Test-TargetResource
     if ($null -eq $CurrentValues) { return $false }
 
     if ($Members) {
-		$differences = ComparePolicies $currentValues.Members $Members
+        Write-Verbose "Processing Members - Start Test"
+        Import-Module (Join-Path $PsScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+		$differences = ComparePolicies $CurrentValues.Members $Members
 
-		if ($differences.Count -eq 0) { return $false } else { return $true }
+		if ($differences.Count -eq 0) { return $true } else { return $false }
 	}
 
     if ($MembersToInclude) {
+        Write-Verbose "Processing MembersToInclude - Start Test"
 		foreach ($member in $MembersToInclude) {
 			foreach ($policy in $CurrentValues.Members) {
 				if ($policy.Username -eq $member.Username) {
 					### CHECK PermissionLevel and SystemUser
-					if ($policy.ActAsSystemUser -ne $member.ActAsSystemUser) { return $false }
+					if ($policy.ActAsSystemAccount -ne $member.ActAsSystemAccount) { return $false }
 					if ($policy.PermissionLevel -ne $member.PermissionLevel) { return $false }
 				} else { return $false }
 			}
@@ -267,6 +275,7 @@ function Test-TargetResource
     }
 
     if ($MembersToExclude) {
+        Write-Verbose "Processing MembersToExclude - Start Test"
 		foreach ($member in $MembersToExclude) {
 			foreach ($policy in $CurrentValues.Members) {
 				if ($policy.Username -eq $member.Username) {
@@ -278,102 +287,5 @@ function Test-TargetResource
 
 	return $true
 }
-
-############ Supporting functions ############
-
-function GetUser() {
-	Param (
-        [Parameter(Mandatory=$true)] 
-        [Array] $dscsettings,
-        [Parameter(Mandatory=$true)] 
-        [String] $user
-	)
-
-	foreach ($setting in $dscsettings) {
-		if ($setting.Username -eq $user) { return $setting }
-	}
-
-	return $null
-}
-
-function CheckUser() {
-    Param (
-        [Array] $source,
-        [string] $str
-    )
-
-    ForEach ($entry in $source) {
-        if($entry.ContainsKey($str)) { return $true }
-    }
-    return $false
-}
-
-function ComparePolicies() {
-    Param (
-        [Parameter(Mandatory=$true)] 
-        [Array] $wapolicies,
-        [Parameter(Mandatory=$true)] 
-        [Array] $dscsettings
-    )
-
-    $diff = @()
-
-    $match=$true
-    foreach ($policy in $wapolicies) {
-        $memberexists = $false
-        foreach($setting in $dscsettings) {
-            if ($policy.Username.ToLower() -eq $setting.Username.ToLower()) {
-                $memberexists = $true
-                if ($policy.PermissionLevel.ToLower() -ne $setting.PermissionLevel.ToLower()) {
-                    if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                         $diff += @{$policy.Username.ToLower()="Different"}
-                        $match = $false
-                    }
-                }
-                if ($policy.ActAsSystemUser -ne $setting.ActAsSystemUser) {
-                    if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                         $diff += @{$policy.Username.ToLower()="Different"}
-                        $match = $false
-                    }
-                }
-            }
-        }
-        if (-not $memberexists) {
-            if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                $diff += @{$policy.Username.ToLower()="Additional"}
-                $match = $false
-            }
-        }
-    }
-
-    foreach ($setting in $dscsettings) {
-        $memberexists = $false
-        foreach($policy in $wapolicies) {
-            if ($policy.Username.ToLower() -eq $setting.Username.ToLower()) {
-                $memberexists = $true
-                if ($policy.PermissionLevel.ToLower() -ne $setting.PermissionLevel.ToLower()) {
-                    if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                        $diff += @{$setting.Username.ToLower()="Different"}
-                        $match = $false
-                    }
-                }
-                if ($policy.ActAsSystemUser -ne $setting.ActAsSystemUser) {
-                    if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                        $diff += @{$setting.Username.ToLower()="Different"}
-                        $match = $false
-                    }
-                }
-            }
-        }
-        if (-not $memberexists) {
-            if (-not (CheckUser $diff $setting.Username.ToLower())) {
-                $diff += @{$setting.Username.ToLower()="Missing"}
-                $match = $false
-            }
-        }
-    }
-    return $diff
-}
-
 
 Export-ModuleMember -Function *-TargetResource
