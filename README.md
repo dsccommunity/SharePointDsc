@@ -108,6 +108,10 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed issues with kerberos and anonymous access in xSPWebApplication
  * Add support for SharePoint 2016 on Windows Server 2016 Technical Preview to xSPInstallPrereqs
 
+### 0.11.0.0
+
+ * Updates to module manifest file
+
 ### 0.10.0.0
 
  * Added xSPWordAutomationServiceApp, xSPHealthAnalyzerRuleState, xSPUserProfileProperty, xSPWorkManagementApp, xSPUserProfileSyncConnection and xSPShellAdmin resources
