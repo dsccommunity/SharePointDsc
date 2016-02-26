@@ -1,0 +1,45 @@
+﻿.NAME
+    xSPSearchServiceApp
+
+.SYNOPSIS
+
+This resource is responsible for provisioning the search service application. 
+The current version lets you specify the database name and server, as well as the application pool.
+If the application pool is changed the DSC resource will set it back as per what is set in the resource.
+The database name parameter is used as the prefix for all search databases (so you will end up with one for the admin database which matches the name, and then "_analyticsreportingstore", "_crawlstore" and "_linkstore" databases as well).
+
+.EXAMPLE
+
+    xSPSearchServiceApp SearchServiceApp
+    {  
+        Name                  = "Search Service Application"
+        DatabaseName          = "SP_Search"
+        ApplicationPool       = "SharePoint Service Applications"
+        PsDscRunAsCredential  = $InstallAccount
+    }
+
+.PARAMETER Name
+    Key - string
+    The name of the search service application
+
+.PARAMETER ApplicationPool
+    Required - string
+    The application pool that it should run in
+
+.PARAMETER DatabaseName
+    Write - string
+    The name of the database (noting that some search databases will use this as a prefix)
+
+.PARAMETER DatabaseServer
+    Write - string
+    The server that host the databases for this service application
+
+.PARAMETER DefaultContentAccessAccount
+    Write - String
+    The default content access account for this search service app
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+

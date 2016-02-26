@@ -1,0 +1,26 @@
+﻿.NAME
+    xSPAppCatalog
+
+.SYNOPSIS
+
+This resource will ensure that a specific site collection is marked as the app catalog for the web application that the site is in.
+The catalog site needs to have been created using the correct template (APPCATALOG#0).
+
+.EXAMPLE
+
+    xSPAppCatalog MainAppCatalog
+    {
+        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+        PsDscRunAsCredential = $SPSetupAccount
+    }
+
+
+.PARAMETER SiteUrl
+    Key - string
+    The URL of the site collection that will be the app catalog for the web app that it is in
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+
