@@ -106,6 +106,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added a check to warn about issue when installing SharePoint 2013 on a server with .NET 4.6 installed
  * Updated examples to include installation resources
  * Fixed issues with kerberos and anonymous access in xSPWebApplication
+ * Add support for SharePoint 2016 on Windows Server 2016 Technical Preview to xSPInstallPrereqs
 
 ### 0.10.0.0
 
