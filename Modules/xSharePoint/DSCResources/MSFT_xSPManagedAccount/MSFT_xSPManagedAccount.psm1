@@ -19,8 +19,8 @@ function Get-TargetResource
         
         $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
         if ($null -eq $ma) { return $null }
-        $schdule = $null
-        if ($ma.ChangeSchedule -ne $null) { $schdule = $ma.ChangeSchedule.ToString() }
+        $schedule = $null
+        if ($ma.ChangeSchedule -ne $null) { $schedule = $ma.ChangeSchedule.ToString() }
         return @{
             AccountName = $ma.Username
             EmailNotification = $ma.DaysBeforeChangeToEmail
