@@ -23,7 +23,7 @@ function Get-TargetResource
             AccountName = $ma.Username
             EmailNotification = $ma.DaysBeforeChangeToEmail
             PreExpireDays = $ma.DaysBeforeExpiryToChange
-            Schedule = $ma.ChangeSchedule
+            Schedule = $ma.ChangeSchedule.ToString()
             Account = $params.Account
             InstallAccount = $params.InstallAccount
         }
