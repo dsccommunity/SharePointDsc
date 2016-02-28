@@ -92,6 +92,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
+### Unreleased
+
+ * Fixed bug in managed account schedule get method
+
 ### 0.12.0.0
 
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
