@@ -1,18 +1,3 @@
-function GetUser() {
-	Param (
-        [Parameter(Mandatory=$true)] 
-        [Array] $dscsettings,
-        [Parameter(Mandatory=$true)] 
-        [String] $user
-	)
-
-	foreach ($setting in $dscsettings) {
-		if ($setting.Username -eq $user) { return $setting }
-	}
-
-	return $null
-}
-
 function CheckUser() {
     Param (
         [Array] $source,
@@ -36,7 +21,6 @@ function ComparePolicies() {
 
     $diff = @()
 
-    $match=$true
     foreach ($policy in $wapolicies) {
         $memberexists = $false
         foreach($setting in $dscsettings) {
@@ -46,14 +30,12 @@ function ComparePolicies() {
                     Write-Verbose "Permission level different"
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
                         $diff += @{$policy.Username.ToLower()="Different"}
-                        $match = $false
                     }
                 }
                 if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
                     Write-Verbose "System User different"
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
                         $diff += @{$policy.Username.ToLower()="Different"}
-                        $match = $false
                     }
                 }
             }
@@ -61,7 +43,6 @@ function ComparePolicies() {
         if (-not $memberexists) {
             if (-not (CheckUser $diff $policy.Username.ToLower())) {
                 $diff += @{$policy.Username.ToLower()="Additional"}
-                $match = $false
             }
         }
     }
@@ -74,13 +55,11 @@ function ComparePolicies() {
                 if ($policy.PermissionLevel.ToLower() -ne $setting.PermissionLevel.ToLower()) {
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
                         $diff += @{$setting.Username.ToLower()="Different"}
-                        $match = $false
                     }
                 }
                 if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
                         $diff += @{$setting.Username.ToLower()="Different"}
-                        $match = $false
                     }
                 }
             }
@@ -88,9 +67,24 @@ function ComparePolicies() {
         if (-not $memberexists) {
             if (-not (CheckUser $diff $setting.Username.ToLower())) {
                 $diff += @{$setting.Username.ToLower()="Missing"}
-                $match = $false
             }
         }
     }
     return $diff
 }
+
+function GetUserFromCollection() {
+	Param (
+        [Parameter(Mandatory=$true)] 
+        [Array] $collection,
+        [Parameter(Mandatory=$true)] 
+        [String] $user
+	)
+
+	foreach ($item in $collection) {
+		if ($item.Username.ToLower() -eq $user.ToLower()) { return $setting }
+	}
+
+	return $null
+}
+

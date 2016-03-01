@@ -94,6 +94,7 @@ function Set-TargetResource
         }
 
 		if ($params.Members) {
+            Write-Verbose -Verbose "Processing Members parameter"
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
 			$differences = ComparePolicies $members $params.Members
 
@@ -112,35 +113,31 @@ function Set-TargetResource
 							## Account exists but has the incorrect settings, correct this account
 							Write-Verbose -Verbose "Changing $user"
 							$policy = $wa.Policies | Where-Object { $_.UserName -eq $user }
-							$usersettings = GetUser $params.Members $user
+							$usersettings = GetUserFromCollection $params.Members $user
 							if ($usersettings.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $usersettings.ActAsSystemAccount }
 							if ($usersettings.PermissionLevel -ne $policy.RoleBindings.Name) { 
+                                $policy.PolicyRoleBindings.RemoveAll()
 								switch ($usersettings.PermissionLevel) {
 									"Deny All" {
-										$policy.PolicyRoleBindings.RemoveAll()
 										$policy.PolicyRoleBindings.Add($denyAll)
 									}
 									"Deny Write" {
-										$policy.PolicyRoleBindings.RemoveAll()
 										$policy.PolicyRoleBindings.Add($denyWrite)
 									}
 									"Full Control" {
-										$policy.PolicyRoleBindings.RemoveAll()
 										$policy.PolicyRoleBindings.Add($fullControl)
 									}
 									"Full Read" {
-										$policy.PolicyRoleBindings.RemoveAll()
 										$policy.PolicyRoleBindings.Add($fullRead)
 									}
 								}
 							}
-							$wa.Update()
 						}
 					Missing
 						{
 							## Account is missing, add this account
 							Write-Verbose -Verbose "Adding $user"
-							$usersettings = GetUser $params.Members $user
+							$usersettings = GetUserFromCollection $params.Members $user
 							$newPolicy = $wa.Policies.Add($user, $user)
 							switch ($usersettings.PermissionLevel) {
 								"Deny All" {
@@ -159,71 +156,83 @@ function Set-TargetResource
 							if ($usersettings.ActAsSystemAccount) {
 								$newPolicy.IsSystemUser = $usersettings.ActAsSystemAccount
 							}
-
-							$wa.Update()
 						}
 				}
+                $wa.Update()
 			}
-
 		}
 
 		if ($params.MembersToInclude) {
+            Write-Verbose -Verbose "Processing MembersToInclude parameter"
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+            $wapolicies = $wa.Policies
+            
+			foreach ($member in $params.MembersToInclude) {
+                $userpol = GetUserFromCollection $wapolicies $member.UserName
 
+                if ($userpol -ne $null) {
+                    # User exists. Check permissions
+                    Write-Verbose -Verbose "User $user exists, correcting permissions"
+                    if ($member.ActAsSystemAccount -ne $userpol.IsSystemUser) { $userpol.IsSystemUser = $member.ActAsSystemAccount }
+                    if ($member.PermissionLevel -ne $userpol.RoleBindings.Name) { 
+                        $userpol.PolicyRoleBindings.RemoveAll()
+                        switch ($member.PermissionLevel) {
+                            "Deny All" {
+                                $userpol.PolicyRoleBindings.Add($denyAll)
+                            }
+                            "Deny Write" {
+                                $userpol.PolicyRoleBindings.Add($denyWrite)
+                            }
+                            "Full Control" {
+                                $userpol.PolicyRoleBindings.Add($fullControl)
+                            }
+                            "Full Read" {
+                                $userpol.PolicyRoleBindings.Add($fullRead)
+                            }
+                        }
+                    }
+                } else {
+                    # User does not exist. Add user
+                    Write-Verbose -Verbose "Adding $user"
+                    $usersettings = GetUserFromCollection $params.Members $user
+                    $newPolicy = $wa.Policies.Add($user, $user)
+                    switch ($usersettings.PermissionLevel) {
+                        "Deny All" {
+                            $newPolicy.PolicyRoleBindings.Add($denyAll)
+                        }
+                        "Deny Write" {
+                            $newPolicy.PolicyRoleBindings.Add($denyWrite)
+                        }
+                        "Full Control" {
+                            $newPolicy.PolicyRoleBindings.Add($fullControl)
+                        }
+                        "Full Read" {
+                            $newPolicy.PolicyRoleBindings.Add($fullRead)
+                        }
+                    }
+                    if ($usersettings.ActAsSystemAccount) {
+                        $newPolicy.IsSystemUser = $usersettings.ActAsSystemAccount
+                    }
+                }
+                $wa.Update()
+			}
 		}
 
 		if ($params.MembersToExclude) {
-
-		}
-
-
-
-
-		<# (New-SPClaimsPrincipal acme\adminyk -IdentityType WindowsSamAccountName).ToEncodedString()
-
-        switch($params.PermissionLevel) {
-            "Deny All" {
-                $newRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyAll)    
-            }
-            "Deny Write" {
-                $newRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyWrite)    
-            }
-            "Full Control" {
-                $newRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)    
-            }
-            "Full Read" {
-                $newRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)    
-            }
-        }
-        
-        if ($wa.Policies.UserName -contains $params.UserName) {
-            $policyObject = $wa.Policies | Where-Object { $_.UserName -eq $params.UserName }
-        } else {
-            foreach($userName in $wa.Policies.UserName) {
-                $claimsPrincipal = New-SPClaimsPrincipal -EncodedClaim $userName -ErrorAction SilentlyContinue
-                if (($null -ne $claimsPrincipal) -and ($claimsPrincipal.Value -eq $params.UserName)) {
-                    $policyObject = $wa.Policies | Where-Object { $_.UserName -eq $userName }
-                }
-            }
-        }
-
-        if ($null -ne $policyObject) {
-            if ($params.ContainsKey("ActAsSystemAccount") -eq $true) {
-                $policyObject.IsSystemUser = $params.ActAsSystemAccount
-            }
-            $policyObject.PolicyRoleBindings.RemoveAll()
-            $policyObject.PolicyRoleBindings.Add($newRole)
+            Write-Verbose -Verbose "Processing MembersToInclude parameter"
+            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+            $wapolicies = $wa.Policies
             
-            $wa.Update()
-        } else {
-            ##### Check if user exists before adding. Claims user ook
-            $newPolicy = $wa.Policies.Add($params.UserName, $params.UserName)
-            $newPolicy.PolicyRoleBindings.Add($newRole)
-            if ($params.ContainsKey("ActAsSystemAccount") -eq $true) {
-                $newPolicy.IsSystemUser = $params.ActAsSystemAccount
-            }
+			foreach ($member in $params.MembersToInclude) {
+                $userpol = GetUserFromCollection $wapolicies $member.UserName
 
-            $wa.Update()
-        }#>
+                if ($userpol -ne $null) {
+                    # User exists. Delete user
+                    $wa.Policies.Remove($member.UserName)
+                }
+                $wa.Update()
+			}
+		}
     }
 }
 
