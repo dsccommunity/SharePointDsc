@@ -89,7 +89,8 @@ function Get-TargetResource
             Default {
                 throw "xSharePoint does not currently support '$($source.Type)' content sources. Please use only 'SharePoint', 'FileShare' or 'Website'."
             }
-        }        
+        }
+        return $result     
     }
     return $result
 }
@@ -152,7 +153,7 @@ function Set-TargetResource
             $params = $args[0]            
             
             $OFS = ","
-            $startAddresses = "$(params.Addresses)"
+            $startAddresses = "$($params.Addresses)"
             
             $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name -ErrorAction SilentlyContinue
             if ($source -eq $null) {
@@ -165,46 +166,140 @@ function Set-TargetResource
             }
             
             $allSetArguments = @{
-                StartAddresses = $startAddresses
+                Identity = $params.Name
+                SearchApplication = $params.ServiceAppName
                 Confirm = $false
             }
             
+            if ($params.ContentSourceType -eq "SharePoint" -and $source.EnableContinuousCrawls -eq $true) {
+                Set-SPEnterpriseSearchCrawlContentSource @allSetArguments -EnableContinuousCrawls $false
+                Write-Verbose -Message "Pausing to allow Continuous Crawl to shut down correctly before continuing updating the configuration."
+                Start-Sleep -Seconds 300
+            }
+            
+            if ($source.CrawlStatus -ne "Idle") {
+                Write-Verbose "Content source '$($params.Name)' is not idle, stopping current crawls to allow settings to be updated"
+                $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name
+                $source.StopCrawl()
+                $loopCount = 0
+                
+                $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name
+                while ($sourceToWait.CrawlStatus -ne "Idle" -or $loopCount > 20) {
+                    $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name
+                    Write-Verbose -Message "Waiting for content source '$($params.Name)' to be idle."
+                    Start-Sleep -Seconds 30
+                    $loopCount++
+                }
+            }
+
+            $primarySetArgs = @{
+                StartAddresses = $startAddresses
+            }
+            if ($params.ContainsKey("ContinuousCrawl") -eq $true) {
+                $primarySetArgs.Add("EnableContinuousCrawls", $params.ContinuousCrawl)
+            }
+            if ($params.ContainsKey("Priority") -eq $true) {
+                switch ($params.Priority) {
+                    "High" { $primarySetArgs.Add("CrawlPriority", "2") }
+                    "Normal" { $primarySetArgs.Add("CrawlPriority", "1") }
+                }
+            }
+            Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @primarySetArgs            
+            
             # Set the incremental search values
-            if ($params.ContainsKey("IncrementalSchedule") -eq $true -or ($params.ContainsKey("ContinuousCrawl") -eq $true -and $params.ContinuousCrawl -eq $true)) {
+            if ($params.ContainsKey("IncrementalSchedule") -eq $true) {
                 $incrementalSetArgs = @{
                     ScheduleType = "Incremental"
-                    #TODO: YOURE UP TO HERE BRIAN! REMEMBER THIS IN THE MORNING! Build up the args for the first set, then rinse and repeat for the full crawl without the continuous flag
                 }
-                if ($params.ContainsKey("ContinuousCrawl") -eq $true -and $params.ContinuousCrawl -eq $true) {
-                    $incrementalSetArgs.Add("EnableContinuousCrawls", $true)
-                }
-                if ($params.ContainsKey("IncrementalSchedule") -eq $true) {
-                    switch ($params.IncrementalSchedule.ScheduleType) {
-                        "None" {  }
-                        "Daily" {  }
-                        "Weekly" {  }
-                        "Monthly" {  }
+                switch ($params.IncrementalSchedule.ScheduleType) {
+                    "None" { 
+                        $incrementalSetArgs.Add("RemoveCrawlSchedule", $true)
                     }
+                    "Daily" { 
+                        $incrementalSetArgs.Add("DailyCrawlSchedule", $true)
+                        }
+                    "Weekly" { 
+                        $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
+                        if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleDaysOfWeek") -eq $true) {
+                            foreach ($day in $params.IncrementalSchedule.CrawlScheduleDaysOfWeek) {
+                                $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
+                            }
+                            $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
+                        }
+                        }
+                    "Monthly" { 
+                        $incrementalSetArgs.Add("MonthlyCrawlSchedule", $true)
+                        if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleDaysOfMonth") -eq $true) {
+                            $incrementalSetArgs.Add("CrawlScheduleDaysOfMonth", $params.IncrementalSchedule.CrawlScheduleDaysOfMonth)
+                        }
+                        if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleMonthsOfYear") -eq $true) {
+                            foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear) {
+                                $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
+                            }
+                            $incrementalSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
+                        }
+                        }
                 }
+                
+                if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleRepeatDuration") -eq $true) {
+                    $incrementalSetArgs.Add("CrawlScheduleRepeatDuration", $params.IncrementalSchedule.CrawlScheduleRepeatDuration)
+                }
+                if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleRepeatInterval") -eq $true) {
+                    $incrementalSetArgs.Add("CrawlScheduleRepeatInterval", $params.IncrementalSchedule.CrawlScheduleRepeatInterval)
+                }
+                if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleRunEveryInterval") -eq $true) {
+                    $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval", $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
+                }
+                Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @incrementalSetArgs
             }
             
             # Set the full search values
-            
-            
+            if ($params.ContainsKey("FullSchedule") -eq $true) {
+                $fullSetArgs = @{
+                    ScheduleType = "Full"
+                }
+                switch ($params.FullSchedule.ScheduleType) {
+                    "None" { 
+                        $fullSetArgs.Add("RemoveCrawlSchedule", $true)
+                    }
+                    "Daily" { 
+                        $fullSetArgs.Add("DailyCrawlSchedule", $true)
+                        }
+                    "Weekly" { 
+                        $fullSetArgs.Add("WeeklyCrawlSchedule", $true)
+                        if ($params.FullSchedule.ContainsKey("CrawlScheduleDaysOfWeek") -eq $true) {
+                            foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek) {
+                                $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
+                            }
+                            $fullSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
+                        }
+                        }
+                    "Monthly" { 
+                        $fullSetArgs.Add("MonthlyCrawlSchedule", $true)
+                        if ($params.FullSchedule.ContainsKey("CrawlScheduleDaysOfMonth") -eq $true) {
+                            $fullSetArgs.Add("CrawlScheduleDaysOfMonth", $params.FullSchedule.CrawlScheduleDaysOfMonth)
+                        }
+                        if ($params.FullSchedule.ContainsKey("CrawlScheduleMonthsOfYear") -eq $true) {
+                            foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear) {
+                                $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
+                            }
+                            $fullSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
+                        }
+                        }
+                }
+                
+                if ($params.FullSchedule.ContainsKey("CrawlScheduleRepeatDuration") -eq $true) {
+                    $fullSetArgs.Add("CrawlScheduleRepeatDuration", $params.FullSchedule.CrawlScheduleRepeatDuration)
+                }
+                if ($params.FullSchedule.ContainsKey("CrawlScheduleRepeatInterval") -eq $true) {
+                    $fullSetArgs.Add("CrawlScheduleRepeatInterval", $params.FullSchedule.CrawlScheduleRepeatInterval)
+                }
+                if ($params.FullSchedule.ContainsKey("CrawlScheduleRunEveryInterval") -eq $true) {
+                    $fullSetArgs.Add("CrawlScheduleRunEveryInterval", $params.FullSchedule.CrawlScheduleRunEveryInterval)
+                }
+                Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @fullSetArgs
+            }
         }
-    }
-    
-    
-    
-    
-
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) -ScriptBlock {
-        $params = $args[0]
-        $CurrentValues = $args[1]
-        $ScriptRoot = $args[2]
-        
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.Search\xSPSearchContentSource.Schedules.psm1" -Resolve)
-        
     }
 }
 
@@ -251,7 +346,7 @@ function Test-TargetResource
     
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Search\xSPSearchContentSource.Schedules.psm1" -Resolve)
     
-    if (($PSBoundParameters.Contains("IncrementalSchedule") -eq $true) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
         return $false;
     }
     if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {

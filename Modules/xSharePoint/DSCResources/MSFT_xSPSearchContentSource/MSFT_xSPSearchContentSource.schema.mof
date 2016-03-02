@@ -56,8 +56,8 @@ This example is for a website content source
         DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchIndexPartition")]
-class MSFT_xSPSearchIndexPartition : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchContentSource")]
+class MSFT_xSPSearchContentSource : OMI_BaseResource
 {
     [Key, Description("The name of the content source")] String Name;
     [Key, Description("The name of the search service app that this content source exists within")] String ServiceAppName;

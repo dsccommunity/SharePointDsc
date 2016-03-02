@@ -37,6 +37,7 @@ function Get-xSPSearchCrawlSchedule {
             throw "An unknown schedule type was detected"
         }
     }
+    return $result
 }
 
 function Test-xSPSearchCrawlSchedule {
