@@ -79,7 +79,7 @@ function Get-TargetResource
                     ServiceAppName = $params.ServiceAppName
                     Ensure = "Present"
                     ContentSourceType = "FileShare"
-                    Addresses = $source.StartAddresses.AbsoluteUri
+                    Addresses = $source.StartAddresses.AbsoluteUri #TODO: Resolve these out from the file:///server/share URLs to native UNC \\server\share
                     CrawlSetting = $crawlSetting
                     IncrementalSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
                     FullSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
