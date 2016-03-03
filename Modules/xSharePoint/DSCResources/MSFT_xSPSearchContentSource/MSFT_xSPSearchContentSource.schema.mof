@@ -29,7 +29,13 @@ This example is for a SharePoint content source
         Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
         CrawlSetting         = "CrawlEverything"
         ContinuousCrawl      = $true
-        IncrementalSchedule  = $null
+        IncrementalSchedule  = MSFT_xSPSearchCrawlSchedule @{
+                                   ScheduleType = "Daily"
+                                   StartHour = "0"
+                                   StartMinute = "0"
+                                   CrawlScheduleRepeatDuration = "1440"
+                                   CrawlScheduleRepeatInterval = "5"
+                               }
         FullSchedule         = $null
         Priority             = "Normal"
         Ensure               = "Present"
@@ -48,8 +54,19 @@ This example is for a website content source
         CrawlSetting         = "Custom"
         LimitPageDepth       = 5
         LimitServerHops      = 0
-        IncrementalSchedule  = $null
-        FullSchedule         = $null
+        IncrementalSchedule  = MSFT_xSPSearchCrawlSchedule @{
+                                   ScheduleType = "Daily"
+                                   StartHour = "0"
+                                   StartMinute = "0"
+                                   CrawlScheduleRepeatDuration = "1440"
+                                   CrawlScheduleRepeatInterval = "5"
+                               }
+        FullSchedule         = MSFT_xSPSearchCrawlSchedule @{
+                                   ScheduleType = "Weekly"
+                                   CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
+                                   StartHour = "3"
+                                   StartMinute = "0"
+                               }
         Priority             = "Normal"
         Ensure               = "Present"
         PsDscRunAsCredential = $SPSetupAccount

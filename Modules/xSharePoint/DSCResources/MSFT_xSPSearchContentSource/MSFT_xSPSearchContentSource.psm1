@@ -31,6 +31,7 @@ function Get-TargetResource
             return @{
                 Name = $params.Name
                 ServiceAppName = $params.ServiceAppName
+                ContentSourceType = $params.ContentSourceType
                 Ensure = "Absent"
             }
         }
@@ -79,7 +80,7 @@ function Get-TargetResource
                     ServiceAppName = $params.ServiceAppName
                     Ensure = "Present"
                     ContentSourceType = "FileShare"
-                    Addresses = $source.StartAddresses.AbsoluteUri #TODO: Resolve these out from the file:///server/share URLs to native UNC \\server\share
+                    Addresses = $source.StartAddresses.AbsoluteUri.Replace("file:///","\\").Replace("/", "\")
                     CrawlSetting = $crawlSetting
                     IncrementalSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
                     FullSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
@@ -207,7 +208,7 @@ function Set-TargetResource
             Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @primarySetArgs            
             
             # Set the incremental search values
-            if ($params.ContainsKey("IncrementalSchedule") -eq $true) {
+            if ($params.ContainsKey("IncrementalSchedule") -eq $true -and $params.IncrementalSchedule -ne $null) {
                 $incrementalSetArgs = @{
                     ScheduleType = "Incremental"
                 }
@@ -217,37 +218,37 @@ function Set-TargetResource
                     }
                     "Daily" { 
                         $incrementalSetArgs.Add("DailyCrawlSchedule", $true)
-                        }
+                    }
                     "Weekly" { 
                         $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
-                        if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleDaysOfWeek") -eq $true) {
+                        if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
                             foreach ($day in $params.IncrementalSchedule.CrawlScheduleDaysOfWeek) {
                                 $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
                             }
                             $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
                         }
-                        }
+                    }
                     "Monthly" { 
                         $incrementalSetArgs.Add("MonthlyCrawlSchedule", $true)
-                        if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleDaysOfMonth") -eq $true) {
+                        if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true) {
                             $incrementalSetArgs.Add("CrawlScheduleDaysOfMonth", $params.IncrementalSchedule.CrawlScheduleDaysOfMonth)
                         }
-                        if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleMonthsOfYear") -eq $true) {
+                        if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true) {
                             foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear) {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
                             $incrementalSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
                         }
-                        }
+                    }
                 }
                 
-                if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleRepeatDuration") -eq $true) {
+                if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true) {
                     $incrementalSetArgs.Add("CrawlScheduleRepeatDuration", $params.IncrementalSchedule.CrawlScheduleRepeatDuration)
                 }
-                if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleRepeatInterval") -eq $true) {
+                if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true) {
                     $incrementalSetArgs.Add("CrawlScheduleRepeatInterval", $params.IncrementalSchedule.CrawlScheduleRepeatInterval)
                 }
-                if ($params.IncrementalSchedule.ContainsKey("CrawlScheduleRunEveryInterval") -eq $true) {
+                if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true) {
                     $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval", $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @incrementalSetArgs
@@ -264,37 +265,37 @@ function Set-TargetResource
                     }
                     "Daily" { 
                         $fullSetArgs.Add("DailyCrawlSchedule", $true)
-                        }
+                    }
                     "Weekly" { 
                         $fullSetArgs.Add("WeeklyCrawlSchedule", $true)
-                        if ($params.FullSchedule.ContainsKey("CrawlScheduleDaysOfWeek") -eq $true) {
+                        if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
                             foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek) {
                                 $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
                             }
                             $fullSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
                         }
-                        }
+                    }
                     "Monthly" { 
                         $fullSetArgs.Add("MonthlyCrawlSchedule", $true)
-                        if ($params.FullSchedule.ContainsKey("CrawlScheduleDaysOfMonth") -eq $true) {
+                        if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true) {
                             $fullSetArgs.Add("CrawlScheduleDaysOfMonth", $params.FullSchedule.CrawlScheduleDaysOfMonth)
                         }
-                        if ($params.FullSchedule.ContainsKey("CrawlScheduleMonthsOfYear") -eq $true) {
+                        if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true) {
                             foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear) {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
                             $fullSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
                         }
-                        }
+                    }
                 }
                 
-                if ($params.FullSchedule.ContainsKey("CrawlScheduleRepeatDuration") -eq $true) {
+                if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true) {
                     $fullSetArgs.Add("CrawlScheduleRepeatDuration", $params.FullSchedule.CrawlScheduleRepeatDuration)
                 }
-                if ($params.FullSchedule.ContainsKey("CrawlScheduleRepeatInterval") -eq $true) {
+                if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true) {
                     $fullSetArgs.Add("CrawlScheduleRepeatInterval", $params.FullSchedule.CrawlScheduleRepeatInterval)
                 }
-                if ($params.FullSchedule.ContainsKey("CrawlScheduleRunEveryInterval") -eq $true) {
+                if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true) {
                     $fullSetArgs.Add("CrawlScheduleRunEveryInterval", $params.FullSchedule.CrawlScheduleRunEveryInterval)
                 }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @fullSetArgs
@@ -346,13 +347,18 @@ function Test-TargetResource
     
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Search\xSPSearchContentSource.Schedules.psm1" -Resolve)
     
-    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($IncrementalSchedule -ne $null) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
         return $false;
     }
-    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($FullSchedule -ne $null) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {
         return $false;
     }
     
+    if ($Ensure -eq "Absent") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
+                                                  -DesiredValues $PSBoundParameters `
+                                                  -ValuesToCheck @("Ensure")
+    }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @("ContentSourceType", "Addresses", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")

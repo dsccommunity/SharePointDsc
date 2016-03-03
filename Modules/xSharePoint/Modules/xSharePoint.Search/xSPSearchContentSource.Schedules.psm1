@@ -10,7 +10,7 @@ function Get-xSPSearchCrawlSchedule {
         }
     }
     
-    $scheduleType = $schedule.GetType().Name
+    $scheduleType = $Schedule.GetType().Name
     $result = @{
         CrawlScheduleRepeatDuration = $Schedule.RepeatDuration
         CrawlScheduleRepeatInterval = $Schedule.RepeatInterval
@@ -48,28 +48,26 @@ function Test-xSPSearchCrawlSchedule {
         [parameter(Mandatory = $true)] $DesiredSchedule
     )
     
-    if ($CurrentSchedule.ScheduleType -ne $CurrentSchedule.ScheduleType) { return $false }
+    Import-Module (Join-Path $PSScriptRoot "..\xSharePoint.Util\xSharePoint.Util.psm1")
     
-    if ($CurrentSchedule.CrawlScheduleRepeatDuration -ne $CurrentSchedule.CrawlScheduleRepeatDuration) { return $false }
-    if ($CurrentSchedule.CrawlScheduleRepeatInterval -ne $CurrentSchedule.CrawlScheduleRepeatInterval) { return $false }
-    if ($CurrentSchedule.StartHour -ne $CurrentSchedule.StartHour) { return $false }
-    if ($CurrentSchedule.StartMinute -ne $CurrentSchedule.StartMinute) { return $false }
+    if ($CurrentSchedule.ScheduleType -ne $DesiredSchedule.ScheduleType) { return $false }
     
-    $scheduleType = $CurrentSchedule.GetType().Name
-    switch ($scheduleType) {
-        "DailySchedule" { 
-            if ($CurrentSchedule.CrawlScheduleRunEveryInterval -ne $CurrentSchedule.CrawlScheduleRunEveryInterval) { return $false }
+    if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true -and $CurrentSchedule.CrawlScheduleRepeatDuration -ne $DesiredSchedule.CrawlScheduleRepeatDuration) { return $false }
+    if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true -and $CurrentSchedule.CrawlScheduleRepeatInterval -ne $DesiredSchedule.CrawlScheduleRepeatInterval) { return $false }
+    if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "StartHour") -eq $true -and $CurrentSchedule.StartHour -ne $DesiredSchedule.StartHour) { return $false }
+    if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "StartMinute") -eq $true -and $CurrentSchedule.StartMinute -ne $DesiredSchedule.StartMinute) { return $false }
+    
+    switch ($CurrentSchedule.ScheduleType) {
+        "Daily" { 
+            if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true -and $CurrentSchedule.CrawlScheduleRunEveryInterval -ne $DesiredSchedule.CrawlScheduleRunEveryInterval) { return $false }
         }
-        "WeeklySchedule" { 
-            if ($CurrentSchedule.CrawlScheduleRunEveryInterval -ne $CurrentSchedule.CrawlScheduleRunEveryInterval) { return $false }
-            if ($CurrentSchedule.CrawlScheduleDaysOfWeek -ne $CurrentSchedule.CrawlScheduleDaysOfWeek) { return $false } #TODO: Compare items in this array
+        "Weekly" { 
+            if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true -and $CurrentSchedule.CrawlScheduleRunEveryInterval -ne $DesiredSchedule.CrawlScheduleRunEveryInterval) { return $false }
+            if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true -and (Compare-Object -ReferenceObject $CurrentSchedule.CrawlScheduleDaysOfWeek -DifferenceObject $DesiredSchedule.CrawlScheduleDaysOfWeek) -ne $null) { return $false } 
         }
-        "MonthlyDateSchedule" { 
-            if ($CurrentSchedule.CrawlScheduleDaysOfMonth -ne $CurrentSchedule.CrawlScheduleDaysOfMonth) { return $false }
-            if ($CurrentSchedule.CrawlScheduleMonthsOfYear -ne $CurrentSchedule.CrawlScheduleMonthsOfYear) { return $false } #TODO: Compare items in this array
-        }
-        Default {
-            throw "An unknown schedule type was detected"
+        "Monthly" { 
+            if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true -and $CurrentSchedule.CrawlScheduleDaysOfMonth -ne $DesiredSchedule.CrawlScheduleDaysOfMonth) { return $false }
+            if ((Test-xSharePointObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true -and (Compare-Object -ReferenceObject $CurrentSchedule.CrawlScheduleMonthsOfYear -DifferenceObject $DesiredSchedule.CrawlScheduleMonthsOfYear) -eq $null) { return $false }
         }
     }    
     return $true

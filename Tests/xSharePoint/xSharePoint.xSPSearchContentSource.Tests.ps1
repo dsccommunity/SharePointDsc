@@ -21,9 +21,47 @@ Describe "xSPSearchContentSource" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock Start-Sleep {}
-        Mock New-SPEnterpriseSearchCrawlContentSource {}
         Mock Set-SPEnterpriseSearchCrawlContentSource {}
         Mock Remove-SPEnterpriseSearchCrawlContentSource {}
+        
+        Add-Type -TypeDefinition @"
+public class DailySchedule { 
+    public int RepeatDuration {get; set;} 
+    public int RepeatInterval {get; set;} 
+    public int StartHour {get; set;}
+    public int StartMinute {get; set;}
+    public int DaysInterval {get; set;}
+}
+"@
+
+        Add-Type -TypeDefinition @"
+public class WeeklySchedule { 
+    public int RepeatDuration {get; set;} 
+    public int RepeatInterval {get; set;} 
+    public int StartHour {get; set;}
+    public int StartMinute {get; set;}
+    public int WeeksInterval {get; set;}
+    public string[] DaysOfWeek {get; set;}
+}
+"@
+
+    Add-Type -TypeDefinition @"
+namespace Microsoft.Office.Server.Search.Administration {
+    public enum DaysOfWeek {
+        Monday,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+        Sunday,
+        Weekdays,
+        Weekends,
+        AllDays
+    }    
+}
+
+"@
         
         Context "A SharePoint content source doesn't exist but should" {
             $testParams = @{
@@ -36,6 +74,22 @@ Describe "xSPSearchContentSource" {
             }
             Mock Get-SPEnterpriseSearchCrawlContentSource {
                 return $null
+            }
+            Mock New-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
             }
             
             It "should return absent from the get method" {
@@ -141,7 +195,6 @@ Describe "xSPSearchContentSource" {
                 Addresses = @("http://site.contoso.com")
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
-                CrawlStatus = "Idle"
             }
             Mock Get-SPEnterpriseSearchCrawlContentSource {
                 return $null
@@ -197,164 +250,547 @@ Describe "xSPSearchContentSource" {
         }
         
         Context "A website content source doesn't exist but should" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return $null
+            }
+            Mock New-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "Web"
+                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth = 0
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return absent from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
             }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should create the content source in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A website content source does exist and should" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "Web"
+                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth = 0
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return present from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
             }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A website content source does exist and shouldn't" {
             
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Absent"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "Web"
+                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
+                    MaxSiteEnumerationDepth = 0
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
+            
             It "should return present from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
             }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should remove the content source in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A website content source doesn't exist and shouldn't" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Absent"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return $null
+            }
             
             It "should return absent from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
             }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A website content source has incorrect crawl depth settings applied" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Website"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "Web"
+                    MaxPageEnumerationDepth = 0
+                    MaxSiteEnumerationDepth = 0
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should update the settings in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A file share content source doesn't exist but should" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Fileshare"
+                Addresses = @("\\server\share")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return $null
+            }
+            Mock New-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "File"
+                    FollowDirectories = $true
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "file:///server/share"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return absent from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
             }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should create the content source in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A file share content source does exist and should" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Fileshare"
+                Addresses = @("\\server\share")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "File"
+                    FollowDirectories = $true
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "file:///server/share"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return present from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
             }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A file share content source does exist and shouldn't" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Fileshare"
+                Addresses = @("\\server\share")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Absent"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "File"
+                    FollowDirectories = $true
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "file:///server/share"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return present from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
             }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should remove the content source in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A file share content source doesn't exist and shouldn't" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Fileshare"
+                Addresses = @("\\server\share")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Absent"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return $null
+            }
             
             It "should return absent from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
             }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A file share content source has incorrect crawl depth settings applied" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "Fileshare"
+                Addresses = @("\\server\share")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "File"
+                    FollowDirectories = $false
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "file:///server/share"
+                        }
+                    )
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should update the settings in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A content source has a full schedule that does not match the desired schedule" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+                FullSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                    ScheduleType = "Daily"
+                    StartHour = "0"
+                    StartMinute = "0"
+                    CrawlScheduleRepeatDuration = "1440"
+                    CrawlScheduleRepeatInterval = "5"
+                } -ClientOnly)
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                $schedule = New-Object -TypeName DailySchedule
+                $schedule.RepeatDuration = 1439 
+                $schedule.RepeatInterval = 5
+                $schedule.StartHour = 0
+                $schedule.StartMinute = 0
+                $schedule.DaysInterval = 1
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $schedule
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should update the schedule in the set method" {
-                
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $ScheduleType -eq "Full" }
             }
         }
         
         Context "A content source has a full schedule that does match the desired schedule" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+                FullSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                    ScheduleType = "Daily"
+                    StartHour = "0"
+                    StartMinute = "0"
+                    CrawlScheduleRepeatDuration = "1440"
+                    CrawlScheduleRepeatInterval = "5"
+                } -ClientOnly)
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                $schedule = New-Object -TypeName DailySchedule
+                $schedule.RepeatDuration = 1440 
+                $schedule.RepeatInterval = 5
+                $schedule.StartHour = 0
+                $schedule.StartMinute = 0
+                $schedule.DaysInterval = 1
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $schedule
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A content source has a incremental schedule that does not match the desired schedule" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+                IncrementalSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                    ScheduleType = "Weekly"
+                    StartHour = "0"
+                    StartMinute = "0"
+                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday")
+                } -ClientOnly)
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                $schedule = New-Object -TypeName WeeklySchedule
+                $schedule.StartHour = 0
+                $schedule.StartMinute = 0
+                $schedule.DaysOfWeek = @("Monday", "Wednesday", "Friday")
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $schedule
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should update the schedule in the set method" {
-                
+                Set-TargetResource @testParams
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $ScheduleType -eq "Incremental" }
             }
         }
         
         Context "A content source has a incremental schedule that does match the desired schedule" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+                IncrementalSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                    ScheduleType = "Weekly"
+                    StartHour = "0"
+                    StartMinute = "0"
+                    CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
+                } -ClientOnly)
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                $schedule = New-Object -TypeName WeeklySchedule
+                $schedule.StartHour = 0
+                $schedule.StartMinute = 0
+                $schedule.DaysOfWeek = @("Monday", "Wednesday", "Friday")
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $schedule
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }
