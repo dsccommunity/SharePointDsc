@@ -21,6 +21,9 @@ Describe "xSPSearchContentSource" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock Start-Sleep {}
+        Mock New-SPEnterpriseSearchCrawlContentSource {}
+        Mock Set-SPEnterpriseSearchCrawlContentSource {}
+        Mock Remove-SPEnterpriseSearchCrawlContentSource {}
         
         Context "A SharePoint content source doesn't exist but should" {
             $testParams = @{
@@ -30,6 +33,9 @@ Describe "xSPSearchContentSource" {
                 Addresses = @("http://site.contoso.com")
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return $null
             }
             
             It "should return absent from the get method" {
@@ -44,55 +50,149 @@ Describe "xSPSearchContentSource" {
             It "should create the content source in the set method" {
                 Set-TargetResource @testParams
                 
-                #TODO: Check mock calls
+                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A SharePoint content source does exist and should" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return present from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
             }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A SharePoint content source does exist and shouldn't" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Absent"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://site.contoso.com"
+                        }
+                    )
+                    EnableContinuousCrawls = $false
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return present from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
             }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should remove the content source in the set method" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
         
         Context "A SharePoint content source doesn't exist and shouldn't" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                Ensure = "Absent"
+                CrawlStatus = "Idle"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return $null
+            }
             
             It "should return absent from the get method" {
-                
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Absent"
             }
             
             It "should return true from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $true
             }
         }
         
         Context "A SharePoint source that uses continuous crawl has incorrect settings applied" {
+            $testParams = @{
+                Name = "Example content source"
+                ServiceAppName = "Search Service Application"
+                ContentSourceType = "SharePoint"
+                Addresses = @("http://site.contoso.com")
+                CrawlSetting = "CrawlEverything"
+                ContinuousCrawl = $true
+                Ensure = "Present"
+            }
+            Mock Get-SPEnterpriseSearchCrawlContentSource {
+                return @{
+                    Type = "SharePoint"
+                    SharePointCrawlBehavior = "CrawlVirtualServers"
+                    StartAddresses = @(
+                        @{
+                            AbsoluteUri = "http://wrong.site"
+                        }
+                    )
+                    EnableContinuousCrawls = $true
+                    IncrementalCrawlSchedule = $null
+                    FullCrawlSchedule = $null
+                    CrawlPriority = "Normal"
+                    CrawlStatus = "Idle"
+                }
+            }
             
             It "should return false from the test method" {
-                
+                Test-TargetResource @testParams | Should Be $false
             }
             
             It "should disable continuous crawl and then re-enable it when updating the content source" {
+                Set-TargetResource @testParams
                 
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $EnableContinuousCrawls -eq $false }
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $EnableContinuousCrawls -eq $true }
             }
         }
         
