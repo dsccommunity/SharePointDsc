@@ -16,18 +16,18 @@ $Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Wh
 function Orchestrator{    
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers    
-	Read-OperatingSystemVersion
+    Read-OperatingSystemVersion
     Read-SQLVersion
-	Read-SPProductVersions
+    Read-SPProductVersions
     $Script:dscConfigContent += "Configuration SharePointFarm`r`n"
     $Script:dscConfigContent += "{`r`n"
     Set-ObtainRequiredCredentials
     Set-Imports
     foreach($spServer in $spServers)
     {
-		<## SQL servers are returned by Get-SPServer but they have a Role of 'Invalid'. Therefore we need to ignore these. The resulting PowerShell DSC Configuration script does not take into account the configuration of the SQL server for the SharePoint Farm at this point in time. We are activaly working on giving our users an experience that is as painless as possible, and are planning on integrating the SQL DSC Configuration as part of our feature set. #>
-		if($spServer.Role -ne "Invalid")
-		{
+        <## SQL servers are returned by Get-SPServer but they have a Role of 'Invalid'. Therefore we need to ignore these. The resulting PowerShell DSC Configuration script does not take into account the configuration of the SQL server for the SharePoint Farm at this point in time. We are activaly working on giving our users an experience that is as painless as possible, and are planning on integrating the SQL DSC Configuration as part of our feature set. #>
+        if($spServer.Role -ne "Invalid")
+        {
             $Script:dscConfigContent += "`r`n    node " + $spServer.Name + "{`r`n"    
             Set-ConfigurationSettings    
             Read-SPFarm
@@ -48,49 +48,49 @@ function Orchestrator{
             Read-ManagedMetadataServiceApplication
             Set-LCM
             $Script:dscConfigContent += "    }`r`n"
-		}
+        }
     }    
     $Script:dscConfigContent += "}"
 }
 
 function Read-OperatingSystemVersion
 {
-	$servers = Get-SPServer
-	$Script:dscConfigContent += "<#`r`n    Operating Systems in this Farm`r`n-------------------------------------------`r`n"
+    $servers = Get-SPServer
+    $Script:dscConfigContent += "<#`r`n    Operating Systems in this Farm`r`n-------------------------------------------`r`n"
     $Script:dscConfigContent += "    Products and Language Packs`r`n"
     $Script:dscConfigContent += "-------------------------------------------`r`n"
-	foreach($spServer in $servers)
-	{
-		$serverName = $spServer.Name
-		$osInfo = Get-WmiObject Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture
-	    $Script:dscConfigContent += "    [" + $serverName + "]: " + $osInfo.OSName + "(" + $osInfo.OSArchitecture + ")    ----    " + $osInfo.Version + "`r`n"
-	}	
-	$Script:dscConfigContent += "#>`r`n`r`n"
+    foreach($spServer in $servers)
+    {
+        $serverName = $spServer.Name
+        $osInfo = Get-WmiObject Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture
+        $Script:dscConfigContent += "    [" + $serverName + "]: " + $osInfo.OSName + "(" + $osInfo.OSArchitecture + ")    ----    " + $osInfo.Version + "`r`n"
+    }    
+    $Script:dscConfigContent += "#>`r`n`r`n"
 }
 
 function Read-SQLVersion
 {
-	$uniqueServers = @()
-	$sqlServers = Get-SPDatabase | select Server -Unique
-	foreach($sqlServer in $sqlServers)
+    $uniqueServers = @()
+    $sqlServers = Get-SPDatabase | select Server -Unique
+    foreach($sqlServer in $sqlServers)
     {
-		$serverName = $sqlServer.Server.Name
+        $serverName = $sqlServer.Server.Name
 
         if($serverName -eq $null)
-		{
-		    $serverName = $sqlServer.Server
-		}
+        {
+            $serverName = $sqlServer.Server
+        }
         
         if(!($uniqueServers -contains $serverName))
         {
-	        $sqlVersionInfo = Invoke-SQL -Server $serverName -dbName "Master" -sqlQuery "SELECT @@VERSION AS 'SQLVersion'"
+            $sqlVersionInfo = Invoke-SQL -Server $serverName -dbName "Master" -sqlQuery "SELECT @@VERSION AS 'SQLVersion'"
             $uniqueServers += $serverName.ToString()
-			$Script:dscConfigContent += "<#`r`n    SQL Server Product Versions Installed on this Farm`r`n-------------------------------------------`r`n"
+            $Script:dscConfigContent += "<#`r`n    SQL Server Product Versions Installed on this Farm`r`n-------------------------------------------`r`n"
             $Script:dscConfigContent += "    Products and Language Packs`r`n"
             $Script:dscConfigContent += "-------------------------------------------`r`n"
-	        $Script:dscConfigContent += "    [" + $serverName + "]: " + $sqlVersionInfo.SQLversion + "`r`n#>`r`n`r`n"
+            $Script:dscConfigContent += "    [" + $serverName + "]: " + $sqlVersionInfo.SQLversion + "`r`n#>`r`n`r`n"
         }
-	}
+    }
 }
 
 <## This function ensure all required Windows Features are properly installed on the server. #>
@@ -178,7 +178,7 @@ function Set-ObtainRequiredCredentials
     $Script:dscConfigContent += "`r`n"
 }
 
-<## This function really is mandatory, but helps provide valuable information about the various software components installed in the current SharePoint farm (i.e. Cummulative Updates, Language Packs, etc.). #>
+<## This function really is optional, but helps provide valuable information about the various software components installed in the current SharePoint farm (i.e. Cummulative Updates, Language Packs, etc.). #>
 function Read-SPProductVersions
 {    
     $Script:dscConfigContent += "<#`r`n    SharePoint Product Versions Installed on this Farm`r`n-------------------------------------------`r`n"
@@ -192,7 +192,7 @@ function Read-SPProductVersions
     foreach($program in $programs)
     { 
         $productCodes = $_.ProductCodes
-        $component = @() + ($components |     where-object { $_.PSChildName -in $productCodes } | foreach {Get-ItemProperty $_.PsPath})
+        $component = @() + ($components |     where-object { $_.PSChildName -like $productCodes } | foreach {Get-ItemProperty $_.PsPath})
         foreach($component in $components)
         {
             $Script:dscConfigContent += "    " + $component.DisplayName + " -- " + $component.DisplayVersion + "`r`n"
@@ -363,10 +363,10 @@ function Read-SPManagedAccounts
 <## This function retrieves all Services in the SharePoint farm. It does not care if the service is enabled or not. It lists them all, and simply sets the "Ensure" attribute of those that are disabled to "Absent". #>
 function Read-SPServiceInstance
 {
-	param(
+    param(
        [Parameter(Mandatory=$true)]
         [string]$Server
-	)
+    )
     $serviceInstances = Get-SPServiceInstance | Where{$_.Server.Name -eq $Server} | Sort-Object -Property TypeName
     foreach($serviceInstance in $serviceInstances)
     {
@@ -487,19 +487,22 @@ function Read-StateServiceApplication
     $stateApplications = Get-SPStateServiceApplication
     foreach($stateApp in $stateApplications)
     {
-        $Script:dscConfigContent += "        xSPStateServiceApp " + $stateApp.DisplayName.Replace(" ", "") + "`r`n"
-        $Script:dscConfigContent += "        {`r`n"
-        $Script:dscConfigContent += "            Name=`"" + $stateApp.DisplayName + "`"`r`n"
-
-        $stateDBName = ""
-        if($stateApp.Databases.Length -gt 0)
+        if($stateApp -ne $null)
         {
-            $stateDBName = $stateApp.Databases.Name
-            $Script:dscConfigContent += "            DatabaseServer=`"" + $stateApp.Databases.Server.Address + "`"`r`n"
+            $Script:dscConfigContent += "        xSPStateServiceApp " + $stateApp.DisplayName.Replace(" ", "") + "`r`n"
+            $Script:dscConfigContent += "        {`r`n"
+            $Script:dscConfigContent += "            Name=`"" + $stateApp.DisplayName + "`"`r`n"
+
+            $stateDBName = ""
+            if($stateApp.Databases.Length -gt 0)
+            {
+                $stateDBName = $stateApp.Databases.Name
+                $Script:dscConfigContent += "            DatabaseServer=`"" + $stateApp.Databases.Server.Address + "`"`r`n"
+            }
+            $Script:dscConfigContent += "            DatabaseName=`"" + $stateDBName + "`"`r`n"        
+            $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+            $Script:dscConfigContent += "        }`r`n"
         }
-        $Script:dscConfigContent += "            DatabaseName=`"" + $stateDBName + "`"`r`n"        
-        $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-        $Script:dscConfigContent += "        }`r`n"
     }
 }
 
@@ -581,10 +584,10 @@ function Read-SecureStoreServiceApplication
         $ssDB = get-spdatabase | where{$_.Type -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceDatabase"}
         $ssDBServer = $ssDB[$i].Server.Name
         $ssDBName = $ssDB[$i].DisplayName
-		$query = "SELECT * FROM SSSConfig"
-			
-		$queryResults = Invoke-SQL -Server $ssDBServer -dbName $ssDBName -sqlQuery $query
-		
+        $query = "SELECT * FROM SSSConfig"
+            
+        $queryResults = Invoke-SQL -Server $ssDBServer -dbName $ssDBName -sqlQuery $query
+        
         $logTime = $queryResults.PurgeAuditDays        
         $Script:dscConfigContent += "            AuditingEnabled=`$" + $queryResults.EnableAudit + "`r`n"
         $Script:dscConfigContent += "            AuditlogMaxSize=" + $logTime + "`r`n"
@@ -602,15 +605,18 @@ function Read-ManagedMetadataServiceApplication
     {
         foreach($mmsInstance in $mms)
         {
-            $mmsa = Get-SPMetadataServiceApplication $mmsInstance
-            $Script:dscConfigContent += "        xSPManagedMetaDataServiceApp " + $mmsInstance.Name.Replace(" ", "") + "`r`n"
-            $Script:dscConfigContent += "        {`r`n"
-            $Script:dscConfigContent += "            Name=`"" + $mmsInstance.Name + "`"`r`n"
-            $Script:dscConfigContent += "            ApplicationPool=`"" + $mmsInstance.ApplicationPool.Name + "`"`r`n"
-            $Script:dscConfigContent += "            DatabaseName=`"" + $mmsa.Database.Name + "`"`r`n"
-            $Script:dscConfigContent += "            DatabaseServer=`"" + $mmsa.Database.Server.Name + "`"`r`n"
-            $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-            $Script:dscConfigContent += "        }`r`n"
+            if($mmsInstance -ne $null)
+            {
+                $mmsa = Get-SPMetadataServiceApplication $mmsInstance
+                $Script:dscConfigContent += "        xSPManagedMetaDataServiceApp " + $mmsInstance.Name.Replace(" ", "") + "`r`n"
+                $Script:dscConfigContent += "        {`r`n"
+                $Script:dscConfigContent += "            Name=`"" + $mmsInstance.Name + "`"`r`n"
+                $Script:dscConfigContent += "            ApplicationPool=`"" + $mmsInstance.ApplicationPool.Name + "`"`r`n"
+                $Script:dscConfigContent += "            DatabaseName=`"" + $mmsa.Database.Name + "`"`r`n"
+                $Script:dscConfigContent += "            DatabaseServer=`"" + $mmsa.Database.Server.Name + "`"`r`n"
+                $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+                $Script:dscConfigContent += "        }`r`n"
+            }
         }
     }
 }
@@ -622,14 +628,17 @@ function Read-BCSServiceApplication
     
     foreach($bcsaInstance in $bcsa)
     {
-        $Script:dscConfigContent += "        xSPBCSServiceApp " + $bcsaInstance.Name.Replace(" ", "") + "`r`n"
-        $Script:dscConfigContent += "        {`r`n"
-        $Script:dscConfigContent += "            Name=`"" + $bcsaInstance.Name + "`"`r`n"
-        $Script:dscConfigContent += "            ApplicationPool=`"" + $bcsaInstance.ApplicationPool.Name + "`"`r`n"
-        $Script:dscConfigContent += "            DatabaseName=`"" + $bcsaInstance.Database.Name + "`"`r`n"
-        $Script:dscConfigContent += "            DatabaseServer=`"" + $bcsaInstance.Database.Server.Name + "`"`r`n"
-        $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-        $Script:dscConfigContent += "        }`r`n"        
+        if($bcsaInstance -ne $null)
+        {
+            $Script:dscConfigContent += "        xSPBCSServiceApp " + $bcsaInstance.Name.Replace(" ", "") + "`r`n"
+            $Script:dscConfigContent += "        {`r`n"
+            $Script:dscConfigContent += "            Name=`"" + $bcsaInstance.Name + "`"`r`n"
+            $Script:dscConfigContent += "            ApplicationPool=`"" + $bcsaInstance.ApplicationPool.Name + "`"`r`n"
+            $Script:dscConfigContent += "            DatabaseName=`"" + $bcsaInstance.Database.Name + "`"`r`n"
+            $Script:dscConfigContent += "            DatabaseServer=`"" + $bcsaInstance.Database.Server.Name + "`"`r`n"
+            $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+            $Script:dscConfigContent += "        }`r`n"        
+        }
     }
 }
 
@@ -640,14 +649,17 @@ function Read-SearchServiceApplication
     
     foreach($searchSAInstance in $searchSA)
     {
-        $Script:dscConfigContent += "        xSPSearchServiceApp " + $searchSAInstance.Name.Replace(" ", "") + "`r`n"
-        $Script:dscConfigContent += "        {`r`n"
-        $Script:dscConfigContent += "            Name=`"" + $searchSAInstance.Name + "`"`r`n"
-        $Script:dscConfigContent += "            ApplicationPool=`"" + $searchSAInstance.ApplicationPool.Name + "`"`r`n"
-        $Script:dscConfigContent += "            DatabaseName=`"" + $searchSAInstance.Database.Name + "`"`r`n"
-        $Script:dscConfigContent += "            DatabaseServer=`"" + $searchSAInstance.Database.Server.Name + "`"`r`n"
-        $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
-        $Script:dscConfigContent += "        }`r`n"        
+        if($searchSA -ne $null)
+        {
+            $Script:dscConfigContent += "        xSPSearchServiceApp " + $searchSAInstance.Name.Replace(" ", "") + "`r`n"
+            $Script:dscConfigContent += "        {`r`n"
+            $Script:dscConfigContent += "            Name=`"" + $searchSAInstance.Name + "`"`r`n"
+            $Script:dscConfigContent += "            ApplicationPool=`"" + $searchSAInstance.ApplicationPool.Name + "`"`r`n"
+            $Script:dscConfigContent += "            DatabaseName=`"" + $searchSAInstance.Database.Name + "`"`r`n"
+            $Script:dscConfigContent += "            DatabaseServer=`"" + $searchSAInstance.Database.Server.Name + "`"`r`n"
+            $Script:dscConfigContent += "            PsDscRunAsCredential=`$FarmAccount`r`n"
+            $Script:dscConfigContent += "        }`r`n"  
+        }
     }
 }
 
