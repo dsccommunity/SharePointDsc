@@ -62,7 +62,7 @@ function Read-OperatingSystemVersion
     foreach($spServer in $servers)
     {
         $serverName = $spServer.Name
-        $osInfo = Get-WmiObject Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture
+        $osInfo = Get-WmiObject Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture -ErrorAction SilentlyContinue
         $Script:dscConfigContent += "    [" + $serverName + "]: " + $osInfo.OSName + "(" + $osInfo.OSArchitecture + ")    ----    " + $osInfo.Version + "`r`n"
     }    
     $Script:dscConfigContent += "#>`r`n`r`n"
