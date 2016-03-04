@@ -185,18 +185,31 @@ function Read-SPProductVersions
     $Script:dscConfigContent += "    Products and Language Packs`r`n"
     $Script:dscConfigContent += "-------------------------------------------`r`n"
 
-    $regLoc = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall
-    $programs = $regLoc | where-object { $_.PsPath -like "*\Office*" } | foreach {Get-ItemProperty $_.PsPath} 
-    $components = $regLoc | where-object { $_.PsPath -like "*1000-0000000FF1CE}" } | foreach {Get-ItemProperty $_.PsPath} 
+	if($PSVersionTable.PSVersion -like "2.*")
+	{
+        $RegLoc = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall
+        $Programs = $RegLoc | where-object { $_.PsPath -like "*\Office*" } | foreach {Get-ItemProperty $_.PsPath}        
 
-    foreach($program in $programs)
-    { 
-        $productCodes = $_.ProductCodes
-        $component = @() + ($components |     where-object { $_.PSChildName -like $productCodes } | foreach {Get-ItemProperty $_.PsPath})
-        foreach($component in $components)
+        foreach($program in $Programs)
         {
-            $Script:dscConfigContent += "    " + $component.DisplayName + " -- " + $component.DisplayVersion + "`r`n"
-        }        
+		    $Script:dscConfigContent += "    " +  $program.DisplayName + " -- " + $program.DisplayVersion + "`r`n"
+        }
+	}
+	else
+    {
+        $regLoc = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall
+        $programs = $regLoc | where-object { $_.PsPath -like "*\Office*" } | foreach {Get-ItemProperty $_.PsPath} 
+        $components = $regLoc | where-object { $_.PsPath -like "*1000-0000000FF1CE}" } | foreach {Get-ItemProperty $_.PsPath} 
+
+        foreach($program in $programs)
+        { 
+            $productCodes = $_.ProductCodes
+            $component = @() + ($components |     where-object { $_.PSChildName -in $productCodes } | foreach {Get-ItemProperty $_.PsPath})
+            foreach($component in $components)
+            {
+                $Script:dscConfigContent += "    " + $component.DisplayName + " -- " + $component.DisplayVersion + "`r`n"
+            }        
+        }
     }
     $Script:dscConfigContent += "#>`r`n"
 }
