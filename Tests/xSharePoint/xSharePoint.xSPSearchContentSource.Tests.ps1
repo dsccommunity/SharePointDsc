@@ -23,45 +23,43 @@ Describe "xSPSearchContentSource" {
         Mock Start-Sleep {}
         Mock Set-SPEnterpriseSearchCrawlContentSource {}
         Mock Remove-SPEnterpriseSearchCrawlContentSource {}
-        
+     
         Add-Type -TypeDefinition @"
-public class DailySchedule { 
-    public int RepeatDuration {get; set;} 
-    public int RepeatInterval {get; set;} 
-    public int StartHour {get; set;}
-    public int StartMinute {get; set;}
-    public int DaysInterval {get; set;}
-}
-"@
-
-        Add-Type -TypeDefinition @"
-public class WeeklySchedule { 
-    public int RepeatDuration {get; set;} 
-    public int RepeatInterval {get; set;} 
-    public int StartHour {get; set;}
-    public int StartMinute {get; set;}
-    public int WeeksInterval {get; set;}
-    public string[] DaysOfWeek {get; set;}
-}
-"@
-
-    Add-Type -TypeDefinition @"
 namespace Microsoft.Office.Server.Search.Administration {
+    [System.Flags]
     public enum DaysOfWeek {
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday,
-        Weekdays,
-        Weekends,
-        AllDays
+        Monday = 1,
+        Tuesday = 2,
+        Wednesday = 4,
+        Thursday = 8,
+        Friday = 16,
+        Saturday = 32,
+        Sunday = 64,
+        Weekdays = 128,
+        Weekends = 256,
+        AllDays = 512
     }    
-}
 
+    public class DailySchedule { 
+        public int RepeatDuration {get; set;} 
+        public int RepeatInterval {get; set;} 
+        public int StartHour {get; set;}
+        public int StartMinute {get; set;}
+        public int DaysInterval {get; set;}
+    }
+
+    public class WeeklySchedule { 
+        public int RepeatDuration {get; set;} 
+        public int RepeatInterval {get; set;} 
+        public int StartHour {get; set;}
+        public int StartMinute {get; set;}
+        public int WeeksInterval {get; set;}
+        public Microsoft.Office.Server.Search.Administration.DaysOfWeek DaysOfWeek {get; set;}
+    }
+}
 "@
+
+
         
         Context "A SharePoint content source doesn't exist but should" {
             $testParams = @{
@@ -631,7 +629,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 } -ClientOnly)
             }
             Mock Get-SPEnterpriseSearchCrawlContentSource {
-                $schedule = New-Object -TypeName DailySchedule
+                $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.DailySchedule
                 $schedule.RepeatDuration = 1439 
                 $schedule.RepeatInterval = 5
                 $schedule.StartHour = 0
@@ -680,7 +678,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 } -ClientOnly)
             }
             Mock Get-SPEnterpriseSearchCrawlContentSource {
-                $schedule = New-Object -TypeName DailySchedule
+                $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.DailySchedule
                 $schedule.RepeatDuration = 1440 
                 $schedule.RepeatInterval = 5
                 $schedule.StartHour = 0
@@ -723,10 +721,10 @@ namespace Microsoft.Office.Server.Search.Administration {
                 } -ClientOnly)
             }
             Mock Get-SPEnterpriseSearchCrawlContentSource {
-                $schedule = New-Object -TypeName WeeklySchedule
+                $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.WeeklySchedule
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
-                $schedule.DaysOfWeek = @("Monday", "Wednesday", "Friday")
+                $schedule.DaysOfWeek = [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Monday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Wednesday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Friday"
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
@@ -769,10 +767,10 @@ namespace Microsoft.Office.Server.Search.Administration {
                 } -ClientOnly)
             }
             Mock Get-SPEnterpriseSearchCrawlContentSource {
-                $schedule = New-Object -TypeName WeeklySchedule
+                $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.WeeklySchedule
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
-                $schedule.DaysOfWeek = @("Monday", "Wednesday", "Friday")
+                $schedule.DaysOfWeek = [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Monday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Wednesday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Friday"
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
