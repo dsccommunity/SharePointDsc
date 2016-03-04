@@ -222,10 +222,8 @@ function Set-TargetResource
                     "Weekly" { 
                         $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
                         if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
-                            foreach ($day in $params.IncrementalSchedule.CrawlScheduleDaysOfWeek) {
-                                $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
-                            }
-                            $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
+                            $OFS = ","
+                            $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "$($params.IncrementalSchedule.CrawlScheduleDaysOfWeek)"))                            
                         }
                     }
                     "Monthly" { 

@@ -724,7 +724,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.WeeklySchedule
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
-                $schedule.DaysOfWeek = [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Monday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Wednesday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Friday"
+                $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
@@ -770,7 +770,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.WeeklySchedule
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
-                $schedule.DaysOfWeek = [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Monday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Wednesday" + [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::"Friday"
+                $schedule.DaysOfWeek = [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "Monday, Wednesday, Friday")
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
