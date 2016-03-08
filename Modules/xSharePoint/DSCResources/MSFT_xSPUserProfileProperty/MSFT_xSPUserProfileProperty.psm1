@@ -89,7 +89,7 @@ function Get-TargetResource
             Name = $userProfileProperty.Name 
             UserProfileServiceAppName = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
-            Type = $userProfileProperty.CoreProperty.Type.GetTypeCode()
+            Type = $userProfileProperty.CoreProperty.Type
             Description = $userProfileProperty.Description 
             PolicySetting = $userProfileProperty.PrivacyPolicy
             PrivacySetting = $userProfileProperty.DefaultPrivacy
@@ -196,9 +196,9 @@ function Set-TargetResource
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
 
-        if($userProfileProperty -ne $null -and $userProfileProperty.CoreProperty.Type.GetTypeCode() -ne $params.Type )
+        if($userProfileProperty -ne $null -and $userProfileProperty.CoreProperty.Type -ne $params.Type )
         {
-            throw "Can't change property type. Current Type is $($userProfileProperty.CoreProperty.Type.GetTypeCode())"
+            throw "Can't change property type. Current Type  is $($userProfileProperty.CoreProperty.Type)"
         }
 
         #region retrieving term set 
