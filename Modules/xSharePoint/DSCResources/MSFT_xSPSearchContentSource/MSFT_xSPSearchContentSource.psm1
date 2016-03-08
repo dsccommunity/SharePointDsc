@@ -125,20 +125,20 @@ function Set-TargetResource
             if ($CrawlSetting -eq "Custom") { throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" }
         }
         "Website" {
-            if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) { throw "Parameter ContinuousCrawl is not valid for SharePoint content sources" }
-            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for SharePoint content sources" }
+            if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) { throw "Parameter ContinuousCrawl is not valid for website content sources" }
+            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for website content sources" }
         }
         "FileShare" {
-            if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) { throw "Parameter LimitPageDepth is not valid for SharePoint content sources" }
-            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for SharePoint content sources" }
+            if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) { throw "Parameter LimitPageDepth is not valid for file share content sources" }
+            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for file share content sources" }
             if ($CrawlSetting -eq "Custom") { throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" }
         }
-    }
+    }   
     
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
     if ($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $false) {
-        throw "The content type can not be changed from '$($CurrentValues.ContentSourceType)' to '$ContentSourceType' without deleting and adding it again. Specify 'Force = `$true' in order to allow DSC to do this, or manually remove the existing content source and re-run the configuration."
+        throw "The type of the a search content source can not be changed from '$($CurrentValues.ContentSourceType)' to '$ContentSourceType' without deleting and adding it again. Specify 'Force = `$true' in order to allow DSC to do this, or manually remove the existing content source and re-run the configuration."
     }
     if (($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $true) -or ($Ensure -eq "Absent" -and $CurrentValues.Ensure -ne $Ensure)) {
         # Remove the existing content source
@@ -332,12 +332,12 @@ function Test-TargetResource
             if ($CrawlSetting -eq "Custom") { throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" }
         }
         "Website" {
-            if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) { throw "Parameter ContinuousCrawl is not valid for SharePoint content sources" }
-            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for SharePoint content sources" }
+            if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) { throw "Parameter ContinuousCrawl is not valid for website content sources" }
+            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for website content sources" }
         }
         "FileShare" {
-            if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) { throw "Parameter LimitPageDepth is not valid for SharePoint content sources" }
-            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for SharePoint content sources" }
+            if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) { throw "Parameter LimitPageDepth is not valid for file share content sources" }
+            if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) { throw "Parameter LimitServerHops is not valid for file share content sources" }
             if ($CrawlSetting -eq "Custom") { throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" }
         }
     }   
