@@ -353,8 +353,8 @@ function Test-TargetResource
     }
     
     # Compare the addresses as Uri objects to handle things like trailing /'s on URLs 
-    $currentAddresses = $CurrentValues.Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_ }
-    $desiredAddresses = $Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_ }
+    $currentAddresses = $CurrentValues.Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_.ToString() } 
+    $desiredAddresses = $Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_.ToString() }
     if ((Compare-Object -ReferenceObject $currentAddresses -DifferenceObject $desiredAddresses) -ne $null) {
         return $false
     }
