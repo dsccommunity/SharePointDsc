@@ -352,9 +352,12 @@ function Test-TargetResource
         return $false;
     }
     
-    # Compare the addresses as Uri objects to handle things like trailing /'s on URLs 
-    $currentAddresses = $CurrentValues.Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_.ToString() } 
-    $desiredAddresses = $Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_.ToString() }
+    # Compare the addresses as Uri objects to handle things like trailing /'s on URLs
+    $currentAddresses = @()
+    foreach ($address in $CurrentValues.Addresses) { $currentAddresses += New-Object System.Uri -ArgumentList $address }
+    $desiredAddresses = @()
+    foreach ($address in $Addresses) { $desiredAddresses += New-Object System.Uri -ArgumentList $address }
+    
     if ((Compare-Object -ReferenceObject $currentAddresses -DifferenceObject $desiredAddresses) -ne $null) {
         return $false
     }
