@@ -352,6 +352,13 @@ function Test-TargetResource
         return $false;
     }
     
+    # Compare the addresses as Uri objects to handle things like trailing /'s on URLs 
+    $currentAddresses = $CurrentValues.Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_ }
+    $desiredAddresses = $Addresses | ForEach-Object { New-Object System.Uri -ArgumentList $_ }
+    if ((Compare-Object -ReferenceObject $currentAddresses -DifferenceObject $desiredAddresses) -ne $null) {
+        return $false
+    }
+    
     if ($Ensure -eq "Absent") {
         return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                                   -DesiredValues $PSBoundParameters `
