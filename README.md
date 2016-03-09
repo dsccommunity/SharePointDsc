@@ -96,6 +96,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
+ * Added xSPSearchContentSource resource
 
 ### 0.12.0.0
 
