@@ -31,6 +31,7 @@ Describe "xSPPerformancePointServiceApp" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPPerformancePointServiceApplication { }
+            Mock New-SPPerformancePointServiceApplicationProxy { }
 
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
