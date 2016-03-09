@@ -58,6 +58,20 @@ function Set-TargetResource
                                       -ServiceApplication $params.Name 
         }
     }
+    else {
+        if ($ApplicationPool -ne $result.ApplicationPool) {
+            Write-Verbose -Message "Updating Performance Point Service Application $Name"
+            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $params = $args[0]               
+
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+
+                Get-SPServiceApplication -Name $params.Name `
+                    | Where-Object { $_.TypeName -eq "Performance Point Service Application" } `
+                    | Set-SPPerformancePointServiceApplication -ServiceApplicationPool $appPool
+            }
+        }
+    }
 }
 
 function Test-TargetResource
