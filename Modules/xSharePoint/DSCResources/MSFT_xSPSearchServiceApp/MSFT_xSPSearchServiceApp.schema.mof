@@ -24,5 +24,6 @@ class MSFT_xSPSearchServiceApp : OMI_BaseResource
     [Write] string DatabaseName;
     [Write] string DatabaseServer;
     [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+	[Write] boolean CloudIndex;
 };
 
