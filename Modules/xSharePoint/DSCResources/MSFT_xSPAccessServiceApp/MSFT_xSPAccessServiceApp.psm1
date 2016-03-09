@@ -59,20 +59,6 @@ function Set-TargetResource
                                       -DatabaseServer $DatabaseName                                      
         }
     }
-    else {
-        if ($ApplicationPool -ne $result.ApplicationPool) {
-            Write-Verbose -Message "Updating Access Services Application $Name"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]               
-
-                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
-
-                Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object { $_.TypeName -eq "Access Services Application" } `
-                    | Set-SPAccessServicesApplication -ServiceApplicationPool $appPool
-            }
-        }
-    }
 }
 
 function Test-TargetResource

@@ -95,11 +95,9 @@ Describe "xSPAccessServiceApp" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPAppServiceUpdateCalled = $false
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplicationPool
-                $Global:xSPAppServiceUpdateCalled | Should Be $true
             }
         }
     }

@@ -68,7 +68,7 @@ function Set-TargetResource
 
                 Get-SPServiceApplication -Name $params.Name `
                     | Where-Object { $_.TypeName -eq "Performance Point Service Application" } `
-                    | Set-SPPerformancePointServiceApplication -ServiceApplicationPool $appPool
+                    | Set-SPPerformancePointServiceApplication -ApplicationPool $appPool
             }
         }
     }
