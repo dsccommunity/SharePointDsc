@@ -370,7 +370,7 @@ function Test-TargetResource
     
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
-                                              -ValuesToCheck @("ContentSourceType", "Addresses", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")
+                                              -ValuesToCheck @("ContentSourceType", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
