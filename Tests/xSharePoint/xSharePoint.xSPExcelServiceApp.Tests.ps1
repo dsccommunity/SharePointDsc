@@ -92,12 +92,6 @@ Describe "xSPExcelServiceApp" {
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
-
-            It "calls the update service app cmdlet from the set method" {
-                Set-TargetResource @testParams
-
-                Assert-MockCalled Get-SPServiceApplicationPool
-            }
         }
     }
 }
