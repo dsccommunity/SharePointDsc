@@ -16,7 +16,7 @@ Describe "xSPAccessServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test Access Services App"
-            DatabaseName = "AccessServices"
+            DatabaseName = "SP_Access"
             ApplicationPool = "Test App Pool"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -44,7 +44,7 @@ Describe "xSPAccessServiceApp" {
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPVisioServiceApplication 
+                Assert-MockCalled New-SPAccessServicesApplication 
             }
         }
 
@@ -95,10 +95,11 @@ Describe "xSPAccessServiceApp" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
+            $Global:xSPAppServiceUpdateCalled = $false
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Get-SPServiceApplicationPool
+                $Global:xSPAppServiceUpdateCalled | Should Be $true
             }
         }
     }

@@ -43,7 +43,7 @@ Describe "xSPExcelServiceApp" {
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPVisioServiceApplication 
+                Assert-MockCalled New-SPExcelServiceApplication 
             }
         }
 
