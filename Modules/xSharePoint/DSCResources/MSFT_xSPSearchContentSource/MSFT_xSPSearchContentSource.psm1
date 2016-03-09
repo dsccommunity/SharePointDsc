@@ -343,6 +343,12 @@ function Test-TargetResource
     }   
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
+    if ($Ensure -eq "Absent") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
+                                                  -DesiredValues $PSBoundParameters `
+                                                  -ValuesToCheck @("Ensure")
+    }
+    
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Search\xSPSearchContentSource.Schedules.psm1" -Resolve)
     
     if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($IncrementalSchedule -ne $null) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
@@ -362,11 +368,6 @@ function Test-TargetResource
         return $false
     }
     
-    if ($Ensure -eq "Absent") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
-                                                  -DesiredValues $PSBoundParameters `
-                                                  -ValuesToCheck @("Ensure")
-    }
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @("ContentSourceType", "Addresses", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")
