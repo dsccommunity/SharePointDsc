@@ -54,7 +54,7 @@ function Set-TargetResource
         New-SPPerformancePointServiceApplication -Name $params.Name `
                                       -ApplicationPool $params.ApplicationPool
 
-        New-SPPerformancePointServiceApplicationProxy -Name​ $params.Name `
+        New-SPPerformancePointServiceApplicationProxy -Name $params.Name `
                                       -ServiceApplication $params.Name 
         }
     }
