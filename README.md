@@ -95,6 +95,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 ### Unreleased
 
  * Fixed bug in managed account schedule get method
+ * Added xSPSearchContentSource resource
 
 ### 0.12.0.0
 
