@@ -22,9 +22,15 @@ function Get-TargetResource
         if ($null -eq $webApp) { 
             return $null
         }
+        
+        $mailServer = $null
+        if ($webApp.OutboundMailServiceInstance -ne $null) {
+            $mailServer = $webApp.OutboundMailServiceInstance.Server.Name
+        }
+        
         return @{
             WebAppUrl = $webApp.Url
-            SMTPServer= $webApp.OutboundMailServiceInstance
+            SMTPServer= $mailServer
             FromAddress= $webApp.OutboundMailSenderAddress
             ReplyToAddress= $webApp.OutboundMailReplyToAddress
             CharacterSet = $webApp.OutboundMailCodePage
