@@ -12,13 +12,29 @@ function Get-TargetResource
     )
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+        Write-Verbose -Verbose "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+        return $null
     }
 
     if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+        Write-Verbose -Verbose "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+        return $null
     }
 
+    foreach ($member in $Members) {
+        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) {
+            Write-Verbose -Verbose "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
+            return $null
+        }
+    }
+
+    foreach ($member in $MembersToInclude) {
+        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) {
+            Write-Verbose -Verbose "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
+            return $null
+        }
+    }
+    
     Write-Verbose -Message "Getting web app policy for $UserName at $WebAppUrl"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -32,7 +48,7 @@ function Get-TargetResource
         foreach ($policy in $wa.Policies) {
             $member = @{}
             $member.Username = $policy.UserName
-            $member.PermissionLevel = ($policy.PolicyRoleBindings | Select-Object -First 1).Name
+            $member.PermissionLevel = $policy.PolicyRoleBindings.Name
             $member.ActAsSystemAccount = $policy.IsSystemUser
             $members += $member
         }
@@ -71,6 +87,18 @@ function Set-TargetResource
         throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
     }
 
+    foreach ($member in $Members) {
+        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) {
+            throw "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
+        }
+    }
+
+    foreach ($member in $MembersToInclude) {
+        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) {
+            throw "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
+        }
+    }
+    
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
 		$params = $args[0]
         $ScriptRoot = $args[1]
@@ -115,22 +143,26 @@ function Set-TargetResource
 							$policy = $wa.Policies | Where-Object { $_.UserName -eq $user }
 							$usersettings = GetUserFromCollection $params.Members $user
 							if ($usersettings.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $usersettings.ActAsSystemAccount }
-							if ($usersettings.PermissionLevel -ne $policy.RoleBindings.Name) { 
+							
+                            $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $usersettings.PermissionLevel
+                            if ($polbinddiff -ne $null) {
                                 $policy.PolicyRoleBindings.RemoveAll()
-								switch ($usersettings.PermissionLevel) {
-									"Deny All" {
-										$policy.PolicyRoleBindings.Add($denyAll)
-									}
-									"Deny Write" {
-										$policy.PolicyRoleBindings.Add($denyWrite)
-									}
-									"Full Control" {
-										$policy.PolicyRoleBindings.Add($fullControl)
-									}
-									"Full Read" {
-										$policy.PolicyRoleBindings.Add($fullRead)
-									}
-								}
+                                foreach ($permissionLevel in $usersettings.PermissionLevel) {
+                                    switch ($permissionLevel) {
+                                        "Deny All" {
+                                            $policy.PolicyRoleBindings.Add($denyAll)
+                                        }
+                                        "Deny Write" {
+                                            $policy.PolicyRoleBindings.Add($denyWrite)
+                                        }
+                                        "Full Control" {
+                                            $policy.PolicyRoleBindings.Add($fullControl)
+                                        }
+                                        "Full Read" {
+                                            $policy.PolicyRoleBindings.Add($fullRead)
+                                        }
+                                    }
+                                }
 							}
 						}
 					Missing
@@ -139,20 +171,22 @@ function Set-TargetResource
 							Write-Verbose -Verbose "Adding $user"
 							$usersettings = GetUserFromCollection $params.Members $user
 							$newPolicy = $wa.Policies.Add($user, $user)
-							switch ($usersettings.PermissionLevel) {
-								"Deny All" {
-									$newPolicy.PolicyRoleBindings.Add($denyAll)
-								}
-								"Deny Write" {
-									$newPolicy.PolicyRoleBindings.Add($denyWrite)
-								}
-								"Full Control" {
-									$newPolicy.PolicyRoleBindings.Add($fullControl)
-								}
-								"Full Read" {
-									$newPolicy.PolicyRoleBindings.Add($fullRead)
-								}
-							}
+                            foreach ($permissionLevel in $usersettings.PermissionLevel) {
+                                switch ($permissionLevel) {
+                                    "Deny All" {
+                                        $newPolicy.PolicyRoleBindings.Add($denyAll)
+                                    }
+                                    "Deny Write" {
+                                        $newPolicy.PolicyRoleBindings.Add($denyWrite)
+                                    }
+                                    "Full Control" {
+                                        $newPolicy.PolicyRoleBindings.Add($fullControl)
+                                    }
+                                    "Full Read" {
+                                        $newPolicy.PolicyRoleBindings.Add($fullRead)
+                                    }
+                                }
+                            }
 							if ($usersettings.ActAsSystemAccount) {
 								$newPolicy.IsSystemUser = $usersettings.ActAsSystemAccount
 							}
@@ -165,53 +199,57 @@ function Set-TargetResource
 		if ($params.MembersToInclude) {
             Write-Verbose -Verbose "Processing MembersToInclude parameter"
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-            $wapolicies = $wa.Policies
             
 			foreach ($member in $params.MembersToInclude) {
-                $userpol = GetUserFromCollection $wapolicies $member.UserName
+                $policy = $wa.Policies | Where-Object { $_.UserName -eq $member.UserName }
 
-                if ($userpol -ne $null) {
+                if ($policy -ne $null) {
                     # User exists. Check permissions
-                    Write-Verbose -Verbose "User $user exists, correcting permissions"
-                    if ($member.ActAsSystemAccount -ne $userpol.IsSystemUser) { $userpol.IsSystemUser = $member.ActAsSystemAccount }
-                    if ($member.PermissionLevel -ne $userpol.RoleBindings.Name) { 
-                        $userpol.PolicyRoleBindings.RemoveAll()
-                        switch ($member.PermissionLevel) {
-                            "Deny All" {
-                                $userpol.PolicyRoleBindings.Add($denyAll)
-                            }
-                            "Deny Write" {
-                                $userpol.PolicyRoleBindings.Add($denyWrite)
-                            }
-                            "Full Control" {
-                                $userpol.PolicyRoleBindings.Add($fullControl)
-                            }
-                            "Full Read" {
-                                $userpol.PolicyRoleBindings.Add($fullRead)
+                    Write-Verbose -Verbose "User $($member.UserName) exists, checking permissions"
+                    if ($member.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $member.ActAsSystemAccount }
+
+                    $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $member.PermissionLevel
+                    if ($polbinddiff -ne $null) {
+                        $policy.PolicyRoleBindings.RemoveAll()
+                        foreach ($permissionLevel in $member.PermissionLevel) {
+                            switch ($permissionLevel) {
+                                "Deny All" {
+                                    $policy.PolicyRoleBindings.Add($denyAll)
+                                }
+                                "Deny Write" {
+                                    $policy.PolicyRoleBindings.Add($denyWrite)
+                                }
+                                "Full Control" {
+                                    $policy.PolicyRoleBindings.Add($fullControl)
+                                }
+                                "Full Read" {
+                                    $policy.PolicyRoleBindings.Add($fullRead)
+                                }
                             }
                         }
                     }
                 } else {
                     # User does not exist. Add user
-                    Write-Verbose -Verbose "Adding $user"
-                    $usersettings = GetUserFromCollection $params.Members $user
-                    $newPolicy = $wa.Policies.Add($user, $user)
-                    switch ($usersettings.PermissionLevel) {
-                        "Deny All" {
-                            $newPolicy.PolicyRoleBindings.Add($denyAll)
-                        }
-                        "Deny Write" {
-                            $newPolicy.PolicyRoleBindings.Add($denyWrite)
-                        }
-                        "Full Control" {
-                            $newPolicy.PolicyRoleBindings.Add($fullControl)
-                        }
-                        "Full Read" {
-                            $newPolicy.PolicyRoleBindings.Add($fullRead)
+                    Write-Verbose -Verbose "Adding $($member.UserName)"
+                    $newPolicy = $wa.Policies.Add($member.UserName, $member.UserName)
+                    foreach ($permissionLevel in $member.PermissionLevel) {
+                        switch ($permissionLevel) {
+                            "Deny All" {
+                                $newPolicy.PolicyRoleBindings.Add($denyAll)
+                            }
+                            "Deny Write" {
+                                $newPolicy.PolicyRoleBindings.Add($denyWrite)
+                            }
+                            "Full Control" {
+                                $newPolicy.PolicyRoleBindings.Add($fullControl)
+                            }
+                            "Full Read" {
+                                $newPolicy.PolicyRoleBindings.Add($fullRead)
+                            }
                         }
                     }
-                    if ($usersettings.ActAsSystemAccount) {
-                        $newPolicy.IsSystemUser = $usersettings.ActAsSystemAccount
+                    if ($member.ActAsSystemAccount) {
+                        $newPolicy.IsSystemUser = $member.ActAsSystemAccount
                     }
                 }
                 $wa.Update()
@@ -219,15 +257,15 @@ function Set-TargetResource
 		}
 
 		if ($params.MembersToExclude) {
-            Write-Verbose -Verbose "Processing MembersToInclude parameter"
+            Write-Verbose -Verbose "Processing MembersToExclude parameter"
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-            $wapolicies = $wa.Policies
             
-			foreach ($member in $params.MembersToInclude) {
-                $userpol = GetUserFromCollection $wapolicies $member.UserName
+			foreach ($member in $params.MembersToExclude) {
+                $policy = $wa.Policies | Where-Object { $_.UserName -eq $member.UserName }
 
-                if ($userpol -ne $null) {
+                if ($policy -ne $null) {
                     # User exists. Delete user
+                    Write-Verbose -Verbose "User $($member.UserName) exists, deleting"
                     $wa.Policies.Remove($member.UserName)
                 }
                 $wa.Update()
@@ -250,14 +288,6 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
-    }
-
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
-    }
-
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing web app policy for $UserName at $WebAppUrl"
     if ($null -eq $CurrentValues) { return $false }
@@ -272,29 +302,33 @@ function Test-TargetResource
 
     if ($MembersToInclude) {
         Write-Verbose "Processing MembersToInclude - Start Test"
-		foreach ($member in $MembersToInclude) {
-			foreach ($policy in $CurrentValues.Members) {
-				if ($policy.Username -eq $member.Username) {
-					### CHECK PermissionLevel and SystemUser
-					if ($policy.ActAsSystemAccount -ne $member.ActAsSystemAccount) { return $false }
-					if ($policy.PermissionLevel -ne $member.PermissionLevel) { return $false }
-				} else { return $false }
+        foreach ($member in $MembersToInclude) {			
+    		$match = $false
+            foreach ($policy in $CurrentValues.Members) {
+				if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
+					$match = $true
+					if ($policy.ActAsSystemAccount -ne $member.ActAsSystemAccount) { $match = $false }
+
+                    $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() -DifferenceObject $member.PermissionLevel.ToLower()
+                    if ($polbinddiff -ne $null) { $match = $false }
+				}
 			}
+            if ($match -eq $false) { return $match }
 		}
+        return $true
     }
 
     if ($MembersToExclude) {
         Write-Verbose "Processing MembersToExclude - Start Test"
 		foreach ($member in $MembersToExclude) {
 			foreach ($policy in $CurrentValues.Members) {
-				if ($policy.Username -eq $member.Username) {
+				if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
 					return $false
 				}
 			}
 		}
+    	return $true
     }
-
-	return $true
 }
 
 Export-ModuleMember -Function *-TargetResource

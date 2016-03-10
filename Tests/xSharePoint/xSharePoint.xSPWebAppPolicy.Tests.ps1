@@ -14,12 +14,21 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 
 Describe "xSPWebAppPolicy" {
     InModuleScope $ModuleName {
-        $testParams = @{
-            WebAppUrl = "http://sites.contoso.com"
-            UserName = "CONTOSO\Brian"
-            PermissionLevel = "Full Control"
-            ActAsSystemUser = $true
-        }
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $true
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user2"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -39,6 +48,128 @@ namespace Microsoft.SharePoint.Administration {
         }  
 
 
+# No valid Web app specified
+        Context "The web application doesn't exist" {
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "calls the new cmdlet from the set method" {
+                Set-TargetResource @testParams | Should BeNullOrEmpty
+            }
+        }
+        
+# Members specified with MembersToInclude
+        Context "Members and MembersToInclude parameters used simultaniously" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+
+            It "return null from the get method" {
+                Get-TargetResource @testParams | Should Be $null
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+            }
+        }
+        
+# Members specified with MembersToExclude
+        Context "No Member parameters at all" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+            }
+
+            It "return null from the get method" {
+                Get-TargetResource @testParams | Should Be $null
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+            }
+        }
+        
+# ActAsSystemAccount specified without Full Control in Members
+        Context "ActAsSystemAccount parameter specified without Full Control in Members" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $true
+                    } -ClientOnly)
+                )
+            }
+
+            It "return null from the get method" {
+                Get-TargetResource @testParams | Should Be $null
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
+            }
+        }
+
+# ActAsSystemAccount specified without Full Control in MembersToInclude
+        Context "ActAsSystemAccount parameter specified without Full Control in MembersToInclude" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $true
+                    } -ClientOnly)
+                )
+            }
+
+            It "return null from the get method" {
+                Get-TargetResource @testParams | Should Be $null
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
+            }
+        }
+
+# Members is missing users
         Context "No web app policy exists for the specified user" {
             Mock Get-SPWebApplication { 
                 $webApp = @{
@@ -76,6 +207,18 @@ namespace Microsoft.SharePoint.Administration {
                 $Global:xSPWebApplicationUpdateCalled | Should Be $true
             }
         }
+
+# MembersToInclude is missing users
+# MembersToExclude has extra users
+# Members user has incorrect settings: Permission level
+# MembersToInclude user has incorrect settings: Permission level
+# Members user has incorrect settings: Act as System Account
+# MembersToInclude user has incorrect settings: Act as System Account
+# Members is ok
+# MembersToInclude is ok
+# MembersToExclude is ok
+
+
 
         Context "A policy exists for the user but the policy permission applied is wrong" {
             Mock Get-SPWebApplication { 

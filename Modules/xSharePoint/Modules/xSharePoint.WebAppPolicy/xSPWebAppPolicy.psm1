@@ -26,12 +26,19 @@ function ComparePolicies() {
         foreach($setting in $dscsettings) {
             if ($policy.Username.ToLower() -eq $setting.Username.ToLower()) {
                 $memberexists = $true
-                if ($policy.PermissionLevel.ToLower() -ne $setting.PermissionLevel.ToLower()) {
+
+#$user = $policy.Username -replace "\\", "_"
+#$policy.PermissionLevel.ToLower() | out-file c:\temp\pol_$user.txt -Append
+#$setting.PermissionLevel.ToLower() | out-file c:\temp\set_$user.txt -Append
+
+                $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() -DifferenceObject $setting.PermissionLevel.ToLower()
+                if ($polbinddiff -ne $null) {
                     Write-Verbose "Permission level different"
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
                         $diff += @{$policy.Username.ToLower()="Different"}
                     }
                 }
+                
                 if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
                     Write-Verbose "System User different"
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
@@ -52,7 +59,9 @@ function ComparePolicies() {
         foreach($policy in $wapolicies) {
             if ($policy.Username.ToLower() -eq $setting.Username.ToLower()) {
                 $memberexists = $true
-                if ($policy.PermissionLevel.ToLower() -ne $setting.PermissionLevel.ToLower()) {
+
+                $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() -DifferenceObject $setting.PermissionLevel.ToLower()
+                if ($polbinddiff -ne $null) {
                     if (-not (CheckUser $diff $policy.Username.ToLower())) {
                         $diff += @{$setting.Username.ToLower()="Different"}
                     }
@@ -82,9 +91,8 @@ function GetUserFromCollection() {
 	)
 
 	foreach ($item in $collection) {
-		if ($item.Username.ToLower() -eq $user.ToLower()) { return $setting }
+		if ($item.Username.ToLower() -eq $user.ToLower()) { return $item }
 	}
 
 	return $null
 }
-
