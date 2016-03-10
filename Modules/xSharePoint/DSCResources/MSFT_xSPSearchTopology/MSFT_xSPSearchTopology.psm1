@@ -67,10 +67,9 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
-        $ScriptRoot = $args[2]
         $ConfirmPreference = 'None'
 
         $AllSearchServers = @()
@@ -83,7 +82,14 @@ function Set-TargetResource
 
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers) {
+            
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
+            if ($searchService -eq $null) {
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $searchServer = "$searchServer.$domain"
+                $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer    
+            }
+            
             if($searchService.Status -eq "Offline") {
                 Write-Verbose "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchServer
