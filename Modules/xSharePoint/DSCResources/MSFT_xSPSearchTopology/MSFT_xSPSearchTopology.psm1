@@ -121,7 +121,13 @@ function Set-TargetResource
         # Get all service service instances to assign topology components to
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers) {
-            $AllSearchServiceInstances.Add($server, (Get-SPEnterpriseSearchServiceInstance -Identity $server))
+            $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server
+            if ($searchService -eq $null) {
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $server = "$server.$domain"
+                $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server    
+            }
+            $AllSearchServiceInstances.Add($server, $serviceToAdd)
         }
 
         # Get current topology and prepare a new one

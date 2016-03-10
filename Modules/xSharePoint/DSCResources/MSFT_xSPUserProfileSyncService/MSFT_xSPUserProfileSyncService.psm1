@@ -104,7 +104,7 @@ function Set-TargetResource
                 throw [Exception] "No user profile service was found named $($params.UserProfileServiceAppName)"
             }
             $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
-            $ups.SetSynchronizationMachine($env:COMPUTERNAME, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
+            $ups.SetSynchronizationMachine($currentServer, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
 
             Start-SPServiceInstance -Identity $syncService.ID 
             
