@@ -94,6 +94,10 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
+ * Fixed bug in managed account schedule get method
+
+### 0.12.0.0
+
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
  * Added xSPDatabaseAAG, xSPFarmSolution and xSPAlternateUrl resources
  * Fixed bug with xSPWorkManagementServiceApp schema
@@ -106,6 +110,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added a check to warn about issue when installing SharePoint 2013 on a server with .NET 4.6 installed
  * Updated examples to include installation resources
  * Fixed issues with kerberos and anonymous access in xSPWebApplication
+ * Add support for SharePoint 2016 on Windows Server 2016 Technical Preview to xSPInstallPrereqs
 
 ### 0.10.0.0
 
