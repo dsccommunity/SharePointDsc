@@ -83,7 +83,7 @@ function Set-TargetResource
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers) {
             
-            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
+            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer -ErrorAction SilentlyContinue
             if ($searchService -eq $null) {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $searchServer = "$searchServer.$domain"
@@ -121,7 +121,7 @@ function Set-TargetResource
         # Get all service service instances to assign topology components to
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers) {
-            $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server
+            $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server -ErrorAction SilentlyContinue
             if ($searchService -eq $null) {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $server = "$server.$domain"
