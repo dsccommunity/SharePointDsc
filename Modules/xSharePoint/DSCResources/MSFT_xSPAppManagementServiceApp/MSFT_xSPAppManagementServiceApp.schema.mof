@@ -10,10 +10,11 @@ Database names or server name will not be changed if the configuration does not 
 
    xSPAppManagementServiceApp AppManagementServiceApp
     {
-        Name = "App Management Service Application"
-        AppPool = "SharePoint web services"
+        Name           = "App Management Service Application"
+        AppPool        = "SharePoint web services"
         DatabaseServer = "SQL01.contoso.com"
-        DatabaseName = "SP_ManagedMetadata"
+        DatabaseName   = "SP_ManagedMetadata"
+        Ensure         = "Present"
 }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPAppManagementServiceApp")]
