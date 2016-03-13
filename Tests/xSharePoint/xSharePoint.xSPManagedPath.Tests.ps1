@@ -15,10 +15,11 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPManagedPath" {
     InModuleScope $ModuleName {
         $testParams = @{
-            WebAppUrl = "http://sites.sharepoint.com"
+            WebAppUrl   = "http://sites.sharepoint.com"
             RelativeUrl = "teams"
-            Explicit = $false
-            HostHeader = $false
+            Explicit    = $false
+            HostHeader  = $false
+            Ensure      = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -28,12 +29,13 @@ Describe "xSPManagedPath" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         Mock New-SPManagedPath { }
+        Mock Remove-SPManagedPath { }
 
         Context "The managed path does not exist and should" {
             Mock Get-SPManagedPath { return $null }
 
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
@@ -80,11 +82,51 @@ Describe "xSPManagedPath" {
                 Type = "WildcardInclusion"
             } }
 
-            It "returns results from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams = @{
+            WebAppUrl   = "http://sites.sharepoint.com"
+            RelativeUrl = "teams"
+            Explicit    = $false
+            HostHeader  = $false
+            Ensure      = "Absent"
+        }
+        
+        Context "The managed path exists but shouldn't" {
+            Mock Get-SPManagedPath { return @{
+                Name = $testParams.RelativeUrl
+                Type = "WildcardInclusion"
+            } }
+            
+            It "should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should call the remove cmdlet from the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPManagedPath
+            }
+        }
+        
+        Context "The managed path doesn't exist and shouldn't" {
+            Mock Get-SPManagedPath { return $null }
+            
+            It "should return absent from the set method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+            
+            It "should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
