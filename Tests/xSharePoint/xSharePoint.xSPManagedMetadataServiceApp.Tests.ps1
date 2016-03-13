@@ -19,6 +19,7 @@ Describe "xSPManagedMetaDataServiceApp" {
             ApplicationPool = "SharePoint Service Applications"
             DatabaseServer = "databaseserver\instance"
             DatabaseName = "SP_MMS"
+            Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -26,7 +27,9 @@ Describe "xSPManagedMetaDataServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        
+        Mock Remove-SPServiceApplication { } 
 
         Context "When no service applications exist in the current farm" {
 
@@ -34,9 +37,8 @@ Describe "xSPManagedMetaDataServiceApp" {
             Mock New-SPMetadataServiceApplication { return @{} }
             Mock New-SPMetadataServiceApplicationProxy { return @{} }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "returns false when the Test method is called" {
@@ -62,9 +64,8 @@ Describe "xSPManagedMetaDataServiceApp" {
                 TypeName = "Some other service app type"
             }) }
             
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
             It "returns false when the Test method is called" {
@@ -85,9 +86,8 @@ Describe "xSPManagedMetaDataServiceApp" {
                 })
             }
 
-            It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
             }
 
             It "returns true when the Test method is called" {
@@ -119,6 +119,50 @@ Describe "xSPManagedMetaDataServiceApp" {
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            ApplicationPool = "-"
+            Ensure = "Absent"
+        }
+        Context "When the service application exists but it shouldn't" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Managed Metadata Service"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "calls the remove service application cmdlet in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+        
+        Context "When the serivce application doesn't exist and it shouldn't" {
+            Mock Get-SPServiceApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "returns true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    
