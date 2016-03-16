@@ -97,6 +97,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added xSPSearchContentSource resource
+ * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
 
 ### 0.12.0.0
 
