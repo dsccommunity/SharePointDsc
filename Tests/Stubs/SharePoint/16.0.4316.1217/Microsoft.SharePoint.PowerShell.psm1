@@ -16112,7 +16112,7 @@ param(
     [Parameter(ParameterSetName='RemoveSchedule')]
     [Parameter(ParameterSetName='MonthlyDate')]
     [Parameter(ParameterSetName='Daily', Mandatory=$true)]
-    [System.Nullable`1[[object]]]
+    [object]
     ${ScheduleType},
 
     [Parameter(ParameterSetName='Daily')]
