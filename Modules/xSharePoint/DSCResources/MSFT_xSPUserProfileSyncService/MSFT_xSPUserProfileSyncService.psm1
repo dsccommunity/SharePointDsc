@@ -23,7 +23,7 @@ function Get-TargetResource
         $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
         if ($null -eq $syncService) { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-            $currentServer = "$currentServer.$domain"
+            $currentServer = "$($env:COMPUTERNAME).$domain"
             $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
         }
 
