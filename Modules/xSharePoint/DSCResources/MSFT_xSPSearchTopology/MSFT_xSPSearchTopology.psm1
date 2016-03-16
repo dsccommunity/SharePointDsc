@@ -33,16 +33,18 @@ function Get-TargetResource
         $QueryProcessingComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object { ($_.GetType().Name -eq "QueryProcessingComponent") }).ServerName
         $IndexComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object { ($_.GetType().Name -eq "IndexComponent") -and ($_.IndexPartitionOrdinal -eq 0) }).ServerName
         
+        $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+        
         return @{
             ServiceAppName = $params.ServiceAppName
-            Admin = $AdminComponents
-            Crawler = $CrawlComponents
-            ContentProcessing = $ContentProcessingComponents
-            AnalyticsProcessing = $AnalyticsProcessingComponents
-            QueryProcessing = $QueryProcessingComponents
+            Admin = $AdminComponents -replace ".$domain"
+            Crawler = $CrawlComponents -replace ".$domain"
+            ContentProcessing = $ContentProcessingComponents -replace ".$domain"
+            AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
+            QueryProcessing = $QueryProcessingComponents -replace ".$domain"
             InstallAccount = $params.InstallAccount
             FirstPartitionDirectory = $params.FirstPartitionDirectory
-            IndexPartition = $IndexComponents
+            IndexPartition = $IndexComponents -replace ".$domain"
         }
     }
     return $result
@@ -127,6 +129,9 @@ function Set-TargetResource
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $server = "$server.$domain"
                 $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server    
+            }
+            if ($serviceToAdd -eq $null) {
+                throw "Unable to locate a search service instance on $serverName"
             }
             $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
         }

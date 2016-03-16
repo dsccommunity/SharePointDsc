@@ -172,7 +172,10 @@ function Set-TargetResource
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$currentServer.$domain"
                 $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $currentServer }
-            }                        
+            }
+            if ($serviceInstance -eq $null) {
+                throw "Unable to locate a distributed cache service instance on $($env:computername) to remove"
+            }               
             $serviceInstance.Delete() 
             
             Remove-SPDistributedCacheServiceInstance

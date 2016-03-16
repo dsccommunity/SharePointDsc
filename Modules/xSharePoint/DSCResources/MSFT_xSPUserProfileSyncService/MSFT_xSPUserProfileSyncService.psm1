@@ -96,6 +96,9 @@ function Set-TargetResource
             $currentServer = "$currentServer.$domain"
             $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
         }
+        if ($serviceInstance -eq $null) {
+            throw "Unable to locate a user profile service instance on $currentServer to start"
+        }
         
          # Start the Sync service if it should be running on this server
         if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
