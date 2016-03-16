@@ -60,7 +60,7 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the new cmdlet from the set method" {
+            It "returns null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
@@ -169,23 +169,55 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-# Members is missing users
-        Context "No web app policy exists for the specified user" {
+# Members parameter has extra users
+        Context "The Members parameter contains users that aren't configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user2"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
             Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Read"
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }
+                )
+                $policies = $policies | Add-Member ScriptMethod Add {
+                    $policy = @{
+                        IsSystemUser = $false
+                    }
+                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
+                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                    } -PassThru
+                    return $policy
+                } -PassThru -Force
+                 
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
-                    Policies = New-Object Object |
-                                    Add-Member ScriptMethod Add {
-                                        $policy = @{
-                                            IsSystemUser = $false
-                                        }
-                                        $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                                            return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
-                                        } -PassThru
-                                        return $policy
-                                    } -PassThru
+                    Policies = $policies
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
                     $Global:xSPWebApplicationUpdateCalled = $true
@@ -194,7 +226,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "returns false from the set method" {
@@ -202,46 +234,54 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             $Global:xSPWebApplicationUpdateCalled = $false
-            It "creates a new policy" {
+            It "add user policy from the set method" {
                 Set-TargetResource @testParams
                 $Global:xSPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-# MembersToInclude is missing users
-# MembersToExclude has extra users
-# Members user has incorrect settings: Permission level
-# MembersToInclude user has incorrect settings: Permission level
-# Members user has incorrect settings: Act as System Account
-# MembersToInclude user has incorrect settings: Act as System Account
-# Members is ok
-# MembersToInclude is ok
-# MembersToExclude is ok
-
-
-
-        Context "A policy exists for the user but the policy permission applied is wrong" {
+# Members parameter is missing users
+        Context "The Members parameter does not contains users that are configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
             Mock Get-SPWebApplication { 
                 $roleBindings = @(
                     @{
-                        Name = "Deny All"
+                        Name = "Full Read"
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
-                } -PassThru | Add-Member ScriptMethod Add {} -PassThru -Force
+                } -PassThru
 
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    },
+                    @{
+                        UserName = "contoso\user2"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+
+                )
+                $policies = $policies | Add-Member ScriptMethod Remove {} -PassThru -Force
+                 
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
-                    Policies = @(
-                        @{
-                            UserName = $testParams.UserName
-                            PolicyRoleBindings = $roleBindings
-                            IsSystemUser = $testParams.ActAsSystemUser
-                        }
-                    )
+                    Policies = $policies
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
                     $Global:xSPWebApplicationUpdateCalled = $true
@@ -249,7 +289,7 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "returns the current values from the get method" {
+            It "returns null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
@@ -258,36 +298,61 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             $Global:xSPWebApplicationUpdateCalled = $false
-            $Global:xSPWebAppPolicyRemoveAllCalled = $false
-            It "updates the existing policy" {
+            It "remove user policy from the set method" {
                 Set-TargetResource @testParams
                 $Global:xSPWebApplicationUpdateCalled | Should Be $true
-                $Global:xSPWebAppPolicyRemoveAllCalled | Should Be $true
             }
         }
 
-        Context "A policy exists for the user that is correct" {
+# MembersToInclude is missing users
+        Context "The MembersToInclude parameter contains users that are not configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user2"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
             Mock Get-SPWebApplication { 
                 $roleBindings = @(
                     @{
-                        Name = $testParams.PermissionLevel
+                        Name = "Full Read"
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                $policies = $policies | Add-Member ScriptMethod Add {
+                    $policy = @{
+                        IsSystemUser = $false
+                    }
+                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
+                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                    } -PassThru
+                    return $policy
+                } -PassThru -Force
+                 
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
-                    Policies = @(
-                        @{
-                            UserName = $testParams.UserName
-                            PolicyRoleBindings = $roleBindings
-                            IsSystemUser = $testParams.ActAsSystemUser
-                        }
-                    )
+                    Policies = $policies
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
                     $Global:xSPWebApplicationUpdateCalled = $true
@@ -295,15 +360,545 @@ namespace Microsoft.SharePoint.Administration {
                 return @($webApp)
             }
 
-            It "returns the current values from the get method" {
+            It "returns null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "add user policy from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+# MembersToInclude parameter does not contain users that are in the policy
+        Context "The MembersToInclude parameter contains users that are not configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Read"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    },
+                    @{
+                        UserName = "contoso\user2"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }
+                )
+
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                return @($webApp)
+            }
+
+
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
+# MembersToExclude has extra users
+        Context "The MembersToExclude parameter contains users that are configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToExclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Read"
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    },
+                    @{
+                        UserName = "contoso\user2"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+
+                )
+                $policies = $policies | Add-Member ScriptMethod Remove {} -PassThru -Force
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                $webApp = $webApp | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "remove user policy from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+# Members user has incorrect settings: Permission level
+        Context "The users in the Members parameter have different settings than configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Read"
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                    $Global:xSPWebAppPolicyAddCalled = $true
+                } -PassThru -Force
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                $policies = $policies | Add-Member ScriptMethod Add {
+                    $policy = @{
+                        IsSystemUser = $false
+                    }
+                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
+                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                    } -PassThru
+                    return $policy
+                } -PassThru -Force
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                $webApp = $webApp | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "correct user policy from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+# MembersToInclude user has incorrect settings: Permission level
+        Context "The users in the MembersToInclude parameter have different settings than configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Read"
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                    $Global:xSPWebAppPolicyAddCalled = $true
+                } -PassThru -Force
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                $policies = $policies | Add-Member ScriptMethod Add {
+                    $policy = @{
+                        IsSystemUser = $false
+                    }
+                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
+                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                    } -PassThru
+                    return $policy
+                } -PassThru -Force
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                $webApp = $webApp | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "correct user policy from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+# Members user has incorrect settings: Act as System Account
+        Context "The users in the Members parameter have different settings than configured in the policy - ActAsSystemAccount" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $true
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                    $Global:xSPWebAppPolicyAddCalled = $true
+                } -PassThru -Force
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                $policies = $policies | Add-Member ScriptMethod Add {
+                    $policy = @{
+                        IsSystemUser = $false
+                    }
+                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
+                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                    } -PassThru
+                    return $policy
+                } -PassThru -Force
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                $webApp = $webApp | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "correct user policy from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+# MembersToInclude user has incorrect settings: Act as System Account
+        Context "The users in the MembersToInclude parameter have different settings than configured in the policy - ActAsSystemAccount" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $true
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                    $Global:xSPWebAppPolicyAddCalled = $true
+                } -PassThru -Force
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                $policies = $policies | Add-Member ScriptMethod Add {
+                    $policy = @{
+                        IsSystemUser = $false
+                    }
+                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
+                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                    } -PassThru
+                    return $policy
+                } -PassThru -Force
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                $webApp = $webApp | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "correct user policy from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+# Members is ok
+        Context "The users in the Members parameter have the same settings as configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+# MembersToInclude is ok
+        Context "The users in the MembersToInclude parameter have the same  settings as configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+# MembersToExclude is ok
+        Context "The users in the MembersToExclude parameter aren't configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                MembersToExclude = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "contoso\user2"
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                }
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+<####################
         Context "Existing records with a claims based user name allow functions to still operate" {
              Mock Get-SPWebApplication { 
                 $roleBindings = @(
@@ -456,6 +1051,6 @@ namespace Microsoft.SharePoint.Administration {
                 Set-TargetResource @testParams
                 $Global:xSPWebApplicationUpdateCalled | Should Be $true
             }
-        }
+        }#>
     }    
 }

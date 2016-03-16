@@ -116,7 +116,7 @@ function Set-TargetResource
         foreach ($policy in $wa.Policies) {
             $member = @{}
             $member.Username = $policy.UserName
-            $member.PermissionLevel = ($policy.PolicyRoleBindings | Select-Object -First 1).Name
+            $member.PermissionLevel = $policy.PolicyRoleBindings.Name
             $member.ActAsSystemAccount = $policy.IsSystemUser
             $members += $member
         }
