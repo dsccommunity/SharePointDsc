@@ -213,7 +213,7 @@ function Test-TargetResource
     
     if ($Members) {
         Write-Verbose "Processing Members parameter"
-        $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members.Username
+        $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username -DifferenceObject $Members.Username
 
         if ($differences -eq $null) {
             Write-Verbose "Security list matches - checking that permissions match on each object"

@@ -17,20 +17,21 @@ The "MembersToInclude" and "MembersToExclude" properties will allow you to contr
 
 **Example**
 
+    $membersToInclude = @()
+    $membersToInclude += MSFT_xSPServiceAppSecurityEntry {
+                             Username    = "CONTOSO\SharePointFarmAccount"
+                             AccessLevel = "FullControl"
+                         }
+    $membersToInclude += MSFT_xSPServiceAppSecurityEntry {
+                             Username    = "CONTOSO\SharePointServiceApps"
+                             AccessLevel = "FullControl"
+                         }
     xSPServiceAppSecurity UserProfileServiceSecurity
     {
-        ServiceAppName       = "User Profile Service"
+        ServiceAppName       = "User Profile Service Application"
         SecurityType         = "SharingPermissions"
-        MembersToInclude     = @(
-            MSFT_xSPServiceAppSecurityEntry {
-                Username    = "CONTOSO\SharePointFarmAccount"
-                AccessLevel = "FullControl"
-            },
-            MSFT_xSPServiceAppSecurityEntry {
-                Username    = "CONTOSO\SharePointServiceApps"
-                AccessLevel = "FullControl"
-            }
-        )
+        MembersToInclude     = $membersToInclude
+        MembersToExclude     = @("CONTOSO\BadAccount1", "CONTOSO\BadAccount2")
         PsDscRunAsCredential = $SPSetupAccount 
     }
 */
