@@ -1,0 +1,35 @@
+
+/*
+**Description**
+
+This resource will create a section in a user profile service application. 
+It creates, update or delete a section using the parameters that are passed in to it .
+
+If no DisplayOrder is added then SharePoint will automatically assigned an ID to it.
+
+**Example**
+xSPUserProfileSection PersonalInformationSection
+{
+    Name = "PersonalInformationSection"
+    UserProfileService = "User Profile Service Application"
+    DisplayName = "Personal Information"
+    DisplayOrder =5000
+}
+
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSection")]
+class MSFT_xSPUserProfileSection: OMI_BaseResource
+{
+    [Key] string Name ;
+    [write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [required] string UserProfileService;
+    [write] string DisplayName ;
+    [write] uint32 DisplayOrder;
+    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
+
+
+
+

@@ -1,0 +1,93 @@
+
+[ClassVersion("1.0.0")]
+Class MSFT_xSPSearchCrawlSchedule
+{
+    [Required, Description("How frequently should this crawl be run"), ValueMap{"None","Daily","Weekly","Monthly"}, Values{"None","Daily","Weekly","Monthly"}] String ScheduleType;
+    [Write, Description("Monthly crawls only: Which day of the month should the crawl run on")] Uint32 CrawlScheduleDaysOfMonth;
+    [Write, Description("Weekly crawls only: What days should the crawl be run on"), ValueMap{"Everyday", "Weekdays", "Weekends", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}, Values{"Everyday", "Weekdays", "Weekends", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}] String CrawlScheduleDaysOfWeek[];
+    [Write, Description("Monthly crawls only: Which months should this crawl be run during"), ValueMap{"AllMonths", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}, Values{"AllMonths", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}] String CrawlScheduleMonthsOfYear[];
+    [Write, Description("The hour of the day that the schedule should begin")] Uint32 StartHour;
+    [Write, Description("The minute of the specified hour that the schedule should begin")] Uint32 StartMinute;
+    [Write, Description("Specifies the number of times to repeat the crawl within a day")] Uint32 CrawlScheduleRepeatDuration;
+    [Write, Description("Specifies the number of minutes between crawl repeats on a day")] Uint32 CrawlScheduleRepeatInterval;
+    [Write, Description("For daily crawls, this is the number of days between crawls. For weekly this is the number of weeks between crawls")] Uint32 CrawlScheduleRunEveryInterval;
+};
+/*
+**Description**
+
+This resource will deploy and configure a content source in a specified search service application.
+
+**Example**
+
+This example is for a SharePoint content source
+
+    xSPSearchContentSource LocalSharePointSites
+    {
+        Name                 = "Local SharePoint Sites"
+        ServiceAppName       = "Search Service Application"
+        ContentSourceType    = "SharePoint"
+        Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
+        CrawlSetting         = "CrawlEverything"
+        ContinuousCrawl      = $true
+        IncrementalSchedule  = MSFT_xSPSearchCrawlSchedule @{
+                                   ScheduleType = "Daily"
+                                   StartHour = "0"
+                                   StartMinute = "0"
+                                   CrawlScheduleRepeatDuration = "1440"
+                                   CrawlScheduleRepeatInterval = "5"
+                               }
+        FullSchedule         = $null
+        Priority             = "Normal"
+        Ensure               = "Present"
+        PsDscRunAsCredential = $SPSetupAccount
+        DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
+    }
+
+This example is for a website content source
+
+    xSPSearchContentSource LocalSharePointSites
+    {
+        Name                 = "Local SharePoint Sites"
+        ServiceAppName       = "Search Service Application"
+        ContentSourceType    = "Website"
+        Addresses            = @("http://www.contoso.com")
+        CrawlSetting         = "Custom"
+        LimitPageDepth       = 5
+        LimitServerHops      = 0
+        IncrementalSchedule  = MSFT_xSPSearchCrawlSchedule @{
+                                   ScheduleType = "Daily"
+                                   StartHour = "0"
+                                   StartMinute = "0"
+                                   CrawlScheduleRepeatDuration = "1440"
+                                   CrawlScheduleRepeatInterval = "5"
+                               }
+        FullSchedule         = MSFT_xSPSearchCrawlSchedule @{
+                                   ScheduleType = "Weekly"
+                                   CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
+                                   StartHour = "3"
+                                   StartMinute = "0"
+                               }
+        Priority             = "Normal"
+        Ensure               = "Present"
+        PsDscRunAsCredential = $SPSetupAccount
+        DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
+    }
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchContentSource")]
+class MSFT_xSPSearchContentSource : OMI_BaseResource
+{
+    [Key, Description("The name of the content source")] String Name;
+    [Key, Description("The name of the search service app that this content source exists within")] String ServiceAppName;
+    [Required, Description("The type of content source - currently only SharePoint, Website and File Shares are supported"), ValueMap{"SharePoint","Website","FileShare"}, Values{"SharePoint","Website","FileShare"}] String ContentSourceType;
+    [Required, Description("A list of the addresses this content source includes")] String Addresses[];
+    [Required, Description("Should the crawler index everything, just the first site or page, or a custom depth (applies to websites only)"), ValueMap{"CrawlEverything","CrawlFirstOnly","Custom"}, Values{"CrawlEverything","CrawlFirstOnly","Custom"}] String CrawlSetting;
+    [Write, Description("Should this content source use continuous crawl (SharePoint sites only)")] Boolean ContinuousCrawl;
+    [Write, Description("What is the incremental schedule for this content source"), EmbeddedInstance("MSFT_xSPSearchCrawlSchedule")] String IncrementalSchedule;
+    [Write, Description("What is the full schedule for this content source"), EmbeddedInstance("MSFT_xSPSearchCrawlSchedule")] String FullSchedule;
+    [Write, Description("What is the priority on this content source"), ValueMap{"Normal","High"}, Values{"Normal","High"}] String Priority;
+    [Write, Description("How many pages deep should the crawler go (-1 = unlimited, website sources only)")] Uint32 LimitPageDepth;
+    [Write, Description("How many server hops should the crawler make (-1 = unlimtied, website sources only)")] Uint32 LimitServerHops;
+    [Required, Description("Present if the source should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("Specify true if DSC is allowed to delete and recreate a content source to apply the correct settings, otherwise false will just report errors if a change can not be applied.")] Boolean Force;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
