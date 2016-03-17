@@ -33,16 +33,18 @@ function Get-TargetResource
         $QueryProcessingComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object { ($_.GetType().Name -eq "QueryProcessingComponent") }).ServerName
         $IndexComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | Where-Object { ($_.GetType().Name -eq "IndexComponent") -and ($_.IndexPartitionOrdinal -eq 0) }).ServerName
         
+        $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+        
         return @{
             ServiceAppName = $params.ServiceAppName
-            Admin = $AdminComponents
-            Crawler = $CrawlComponents
-            ContentProcessing = $ContentProcessingComponents
-            AnalyticsProcessing = $AnalyticsProcessingComponents
-            QueryProcessing = $QueryProcessingComponents
+            Admin = $AdminComponents -replace ".$domain"
+            Crawler = $CrawlComponents -replace ".$domain"
+            ContentProcessing = $ContentProcessingComponents -replace ".$domain"
+            AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
+            QueryProcessing = $QueryProcessingComponents -replace ".$domain"
             InstallAccount = $params.InstallAccount
             FirstPartitionDirectory = $params.FirstPartitionDirectory
-            IndexPartition = $IndexComponents
+            IndexPartition = $IndexComponents -replace ".$domain"
         }
     }
     return $result
@@ -67,10 +69,9 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues, $PSScriptRoot) -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
-        $ScriptRoot = $args[2]
         $ConfirmPreference = 'None'
 
         $AllSearchServers = @()
@@ -83,7 +84,14 @@ function Set-TargetResource
 
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers) {
-            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
+            
+            $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer -ErrorAction SilentlyContinue
+            if ($searchService -eq $null) {
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $searchServer = "$searchServer.$domain"
+                $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer    
+            }
+            
             if($searchService.Status -eq "Offline") {
                 Write-Verbose "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchServer
@@ -115,7 +123,17 @@ function Set-TargetResource
         # Get all service service instances to assign topology components to
         $AllSearchServiceInstances = @{}
         foreach ($server in $AllSearchServers) {
-            $AllSearchServiceInstances.Add($server, (Get-SPEnterpriseSearchServiceInstance -Identity $server))
+            $serverName = $server
+            $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server -ErrorAction SilentlyContinue
+            if ($serviceToAdd -eq $null) {
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $server = "$server.$domain"
+                $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server    
+            }
+            if ($serviceToAdd -eq $null) {
+                throw "Unable to locate a search service instance on $serverName"
+            }
+            $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
         }
 
         # Get current topology and prepare a new one
