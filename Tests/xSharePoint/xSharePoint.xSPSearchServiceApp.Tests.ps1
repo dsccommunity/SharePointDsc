@@ -215,7 +215,7 @@ Describe "xSPSearchServiceApp" {
             }
         }
         
-        Context "When the default content access account does not match" {    
+        Context "When the default content access account does match" {    
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Search Service Application"
@@ -248,6 +248,84 @@ Describe "xSPSearchServiceApp" {
             } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
             
             It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams.Add("SearchCenterUrl", "http://search.sp.contoso.com")
+        
+        Context "When the search center URL does not match" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                    SearchCenterUrl = "http://wrong.url.here"
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+        
+        Context "When the search center URL does match" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                    SearchCenterUrl = "http://search.sp.contoso.com"
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
