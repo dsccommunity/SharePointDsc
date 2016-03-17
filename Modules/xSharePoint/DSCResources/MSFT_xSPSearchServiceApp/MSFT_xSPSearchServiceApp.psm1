@@ -1,13 +1,16 @@
+# revisit this https://blogs.msdn.microsoft.com/spses/2015/09/15/cloud-hybrid-search-service-application/
+
 function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -38,12 +41,18 @@ function Get-TargetResource
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
             $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, (ConvertTo-SecureString "-" -AsPlainText -Force))
             
+            $cloudIndex = $false
+            $version = Get-xSharePointInstalledProductVersion
+            if(($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
+                $cloudIndex = $serviceApps.CloudIndex
+            }
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Database.Name
                 DatabaseServer = $serviceApp.Database.Server.Name
                 DefaultContentAccessAccount = $defaultAccount
+                CloudIndex = $cloudIndex
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -58,10 +67,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -123,10 +133,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseServer,
+        [parameter(Mandatory = $false)] [System.String]  $DatabaseName,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
