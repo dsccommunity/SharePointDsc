@@ -99,6 +99,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added xSPSearchContentSource resource
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
+ * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
 
 ### 0.12.0.0
 
