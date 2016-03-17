@@ -8,6 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $Members,
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToInclude,
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToExclude,
+        [parameter(Mandatory = $false)] [System.Boolean] $SetCacheAccountsPolicy,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -74,6 +75,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $Members,
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToInclude,
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToExclude,
+        [parameter(Mandatory = $false)] [System.Boolean] $SetCacheAccountsPolicy,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -123,6 +125,22 @@ function Set-TargetResource
 
 		if ($params.Members) {
             Write-Verbose -Verbose "Processing Members parameter"
+            
+            if ($params.SetCacheAccountsPolicy) {
+                Write-Verbose -Verbose "Adding Cache Accounts to Members parameter"
+                $psuAccount = @{
+                    UserName = $wa.Properties["portalsuperuseraccount"]
+                    PermissionLevel = "Full Read"
+                }
+                $params.Members += $psuAccount
+                
+                $psrAccount = @{
+                    UserName = $wa.Properties["portalsuperreaderaccount"]
+                    PermissionLevel = "Full Read"
+                }
+                $params.Members += $psrAccount
+            }
+            
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
 			$differences = ComparePolicies $members $params.Members
 
@@ -134,7 +152,7 @@ function Set-TargetResource
 						{
 							## Policy contains additional account, remove this account
 							Write-Verbose -Verbose "Removing $user"
-                            $wa.Policies.Remove($user)
+                            RemovePolicy $wa.Policies $user
 						}
 					Different
 						{
@@ -198,6 +216,22 @@ function Set-TargetResource
 
 		if ($params.MembersToInclude) {
             Write-Verbose -Verbose "Processing MembersToInclude parameter"
+
+            if ($params.SetCacheAccountsPolicy) {
+                Write-Verbose -Verbose "Adding Cache Accounts to MembersToInclude parameter"
+                $psuAccount = @{
+                    UserName = $wa.Properties["portalsuperuseraccount"]
+                    PermissionLevel = "Full Read"
+                }
+                $params.Members += $psuAccount
+                
+                $psrAccount = @{
+                    UserName = $wa.Properties["portalsuperreaderaccount"]
+                    PermissionLevel = "Full Read"
+                }
+                $params.Members += $psrAccount
+            }
+            
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
             
 			foreach ($member in $params.MembersToInclude) {
@@ -258,15 +292,23 @@ function Set-TargetResource
 
 		if ($params.MembersToExclude) {
             Write-Verbose -Verbose "Processing MembersToExclude parameter"
+
+            $psuAccount = $wa.Properties["portalsuperuseraccount"]
+            $psrAccount = $wa.Properties["portalsuperreaderaccount"]
+
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
             
 			foreach ($member in $params.MembersToExclude) {
+                if (($wa.Properties["portalsuperuseraccount"] -eq $member.UserName) -or ($wa.Properties["portalsuperreaderaccount"] -eq $member.UserName)) {
+                    throw "You cannot exclude the Cache accounts from the Web Application Policy"
+                }
+
                 $policy = $wa.Policies | Where-Object { $_.UserName -eq $member.UserName }
 
                 if ($policy -ne $null) {
                     # User exists. Delete user
                     Write-Verbose -Verbose "User $($member.UserName) exists, deleting"
-                    $wa.Policies.Remove($member.UserName)
+                    RemovePolicy $wa.Policies $member.UserName
                 }
                 $wa.Update()
 			}
@@ -285,6 +327,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $Members,
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToInclude,
         [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToExclude,
+        [parameter(Mandatory = $false)] [System.Boolean] $SetCacheAccountsPolicy,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -292,8 +335,40 @@ function Test-TargetResource
     Write-Verbose -Message "Testing web app policy for $UserName at $WebAppUrl"
     if ($null -eq $CurrentValues) { return $false }
 
+    $cacheAccounts = ""
+    if ($SetCacheAccountsPolicy) {
+        $cacheAccounts = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+
+            $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+
+            if ($null -eq $wa) { return $null }
+            
+            $cacheAccounts = @{}
+            if ($wa.Properties["portalsuperuseraccount"]) { $cacheAccounts.SuperUserAccount = $wa.Properties["portalsuperuseraccount"] }
+            if ($wa.Properties["portalsuperreaderaccount"]) { $cacheAccounts.SuperReaderAccount = $wa.Properties["portalsuperreaderaccount"] }
+            
+            return $cacheAccounts
+        }
+    }
+    
     if ($Members) {
         Write-Verbose "Processing Members - Start Test"
+        if ($SetCacheAccountsPolicy) {
+            Write-Verbose -Verbose "Adding Cache Accounts to Members parameter"
+            $psuAccount = @{
+                UserName = $cacheAccounts.SuperUserAccount
+                PermissionLevel = "Full Read"
+            }
+            $Members += $psuAccount
+            
+            $psrAccount = @{
+                UserName = $cacheAccounts.SuperReaderAccount
+                PermissionLevel = "Full Read"
+            }
+            $Members += $psrAccount 
+        }
+
         Import-Module (Join-Path $PsScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
 		$differences = ComparePolicies $CurrentValues.Members $Members
 
@@ -302,6 +377,22 @@ function Test-TargetResource
 
     if ($MembersToInclude) {
         Write-Verbose "Processing MembersToInclude - Start Test"
+
+        if ($SetCacheAccountsPolicy) {
+            Write-Verbose -Verbose "Adding Cache Accounts to MembersToInclude parameter"
+            $psuAccount = @{
+                UserName = $cacheAccounts.SuperUserAccount
+                PermissionLevel = "Full Read"
+            }
+            $MembersToInclude += $psuAccount
+            
+            $psrAccount = @{
+                UserName = $cacheAccounts.SuperReaderAccount
+                PermissionLevel = "Full Read"
+            }
+            $MembersToInclude += $psrAccount 
+        }
+
         foreach ($member in $MembersToInclude) {			
     		$match = $false
             foreach ($policy in $CurrentValues.Members) {

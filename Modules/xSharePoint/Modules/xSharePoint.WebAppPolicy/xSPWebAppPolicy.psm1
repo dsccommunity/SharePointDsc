@@ -27,10 +27,6 @@ function ComparePolicies() {
             if ($policy.Username.ToLower() -eq $setting.Username.ToLower()) {
                 $memberexists = $true
 
-#$user = $policy.Username -replace "\\", "_"
-#$policy.PermissionLevel.ToLower() | out-file c:\temp\pol_$user.txt -Append
-#$setting.PermissionLevel.ToLower() | out-file c:\temp\set_$user.txt -Append
-
                 $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() -DifferenceObject $setting.PermissionLevel.ToLower()
                 if ($polbinddiff -ne $null) {
                     Write-Verbose "Permission level different"
@@ -95,4 +91,14 @@ function GetUserFromCollection() {
 	}
 
 	return $null
+}
+
+# Due to issues with unit testing, this function has been created so we are able to mock this function.
+function RemovePolicy {
+    param (
+        $policies,
+        $item
+    )
+    
+    $policies.Remove($item)
 }

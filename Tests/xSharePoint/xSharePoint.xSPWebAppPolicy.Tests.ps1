@@ -47,6 +47,8 @@ namespace Microsoft.SharePoint.Administration {
 "@
         }  
 
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1")
+        Mock RemovePolicy -MockWith { }
 
 # No valid Web app specified
         Context "The web application doesn't exist" {
@@ -262,20 +264,17 @@ namespace Microsoft.SharePoint.Administration {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
-                $policies = @(
-                    @{
+                $policies = New-Object System.Collections.ArrayList
+                $policies.Add(@{
                         UserName = "contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                    },
-                    @{
+                                })
+                $policies.Add(@{
                         UserName = "contoso\user2"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                    }   
-
-                )
-                $policies = $policies | Add-Member ScriptMethod Remove {} -PassThru -Force
+                                })
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
@@ -447,20 +446,17 @@ namespace Microsoft.SharePoint.Administration {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
-                $policies = @(
-                    @{
+                $policies = New-Object System.Collections.ArrayList
+                $policies.Add(@{
                         UserName = "contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                    },
-                    @{
+                                })
+                $policies.Add(@{
                         UserName = "contoso\user2"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                    }   
-
-                )
-                $policies = $policies | Add-Member ScriptMethod Remove {} -PassThru -Force
+                                })
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
