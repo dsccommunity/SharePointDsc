@@ -92,13 +92,3 @@ function GetUserFromCollection() {
 
 	return $null
 }
-
-# Due to issues with unit testing, this function has been created so we are able to mock this function.
-function RemovePolicy {
-    param (
-        $policies,
-        $item
-    )
-    
-    $policies.Remove($item)
-}

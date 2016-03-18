@@ -152,7 +152,7 @@ function Set-TargetResource
 						{
 							## Policy contains additional account, remove this account
 							Write-Verbose -Verbose "Removing $user"
-                            RemovePolicy $wa.Policies $user
+                            Remove-WebAppPolicy $wa.Policies $user
 						}
 					Different
 						{
@@ -299,7 +299,7 @@ function Set-TargetResource
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
             
 			foreach ($member in $params.MembersToExclude) {
-                if (($wa.Properties["portalsuperuseraccount"] -eq $member.UserName) -or ($wa.Properties["portalsuperreaderaccount"] -eq $member.UserName)) {
+                if (($psuAccount -eq $member.UserName) -or ($psrAccount -eq $member.UserName)) {
                     throw "You cannot exclude the Cache accounts from the Web Application Policy"
                 }
 
@@ -308,7 +308,7 @@ function Set-TargetResource
                 if ($policy -ne $null) {
                     # User exists. Delete user
                     Write-Verbose -Verbose "User $($member.UserName) exists, deleting"
-                    RemovePolicy $wa.Policies $member.UserName
+                    Remove-WebAppPolicy $wa.Policies $member.UserName
                 }
                 $wa.Update()
 			}

@@ -35,6 +35,8 @@ Describe "xSPWebAppPolicy" {
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
+
+        Mock Remove-WebAppPolicy { }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
@@ -47,8 +49,6 @@ namespace Microsoft.SharePoint.Administration {
 "@
         }  
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1")
-        Mock RemovePolicy -MockWith { }
 
 # No valid Web app specified
         Context "The web application doesn't exist" {
@@ -264,17 +264,18 @@ namespace Microsoft.SharePoint.Administration {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
-                $policies = New-Object System.Collections.ArrayList
-                $policies.Add(@{
+                $policies = @(
+                    @{
                         UserName = "contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                                })
-                $policies.Add(@{
+                    }
+                    @{
                         UserName = "contoso\user2"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                                })
+                    }
+                )
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
@@ -446,17 +447,18 @@ namespace Microsoft.SharePoint.Administration {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
-                $policies = New-Object System.Collections.ArrayList
-                $policies.Add(@{
+                $policies = @(
+                    @{
                         UserName = "contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                                })
-                $policies.Add(@{
+                    }
+                    @{
                         UserName = "contoso\user2"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
-                                })
+                    }
+                )
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
@@ -466,7 +468,8 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
                     $Global:xSPWebApplicationUpdateCalled = $true
-                } -PassThru
+                } -PassThru | 
+                Add-Member NoteProperty Properties @{} -PassThru
                 return @($webApp)
             }
 
