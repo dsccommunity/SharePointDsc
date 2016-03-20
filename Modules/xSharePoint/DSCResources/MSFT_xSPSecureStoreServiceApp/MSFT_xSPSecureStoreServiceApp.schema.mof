@@ -14,6 +14,7 @@ The parameters passed in (except those related to database specifics) are valida
         AuditlogMaxSize = 30
         DatabaseName    = "SP_SecureStore"
         InstallAccount  = $InstallAccount
+        Ensure          = "Present"
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPSecureStoreServiceApp")]
@@ -30,6 +31,7 @@ class MSFT_xSPSecureStoreServiceApp : OMI_BaseResource
     [Write, Description("The name of the database server hosting a failover instance of the database")] string FailoverDatabaseServer;
     [Write, Description("Is partition mode enabled for this service app")] boolean PartitionMode;
     [Write, Description("Is sharing enabled for this service app")] boolean Sharing;
+    [Required, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
