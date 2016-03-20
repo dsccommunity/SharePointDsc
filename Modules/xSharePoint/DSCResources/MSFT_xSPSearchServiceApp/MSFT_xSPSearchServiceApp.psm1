@@ -61,7 +61,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -141,7 +140,6 @@ function Set-TargetResource
         }
     }
 }
-
 
 function Test-TargetResource
 {
