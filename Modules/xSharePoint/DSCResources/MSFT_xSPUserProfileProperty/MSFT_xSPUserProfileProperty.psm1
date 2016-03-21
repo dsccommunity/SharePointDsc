@@ -36,9 +36,14 @@ function Get-TargetResource
         $params = $args[0]
         
         
-        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            UserProfileService = $params.UserProfileService
+            Ensure = "Absent"
+        } 
         if ($null -eq $upsa) { 
-            return $null 
+            return $nullReturn 
         }
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext -Site $caURL 
@@ -49,7 +54,7 @@ function Get-TargetResource
         
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
         if($null -eq $userProfileProperty ){
-            return $null 
+            return $nullReturn 
         }
         
         $termSet = @{
