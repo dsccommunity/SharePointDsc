@@ -26,6 +26,7 @@ Describe "xSPPerformancePointServiceApp" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Remove-SPServiceApplication { }
 
         Context "When no service applications exist in the current farm" {
 
@@ -33,9 +34,8 @@ Describe "xSPPerformancePointServiceApp" {
             Mock New-SPPerformancePointServiceApplication { }
             Mock New-SPPerformancePointServiceApplicationProxy { }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "returns false when the Test method is called" {
@@ -54,9 +54,8 @@ Describe "xSPPerformancePointServiceApp" {
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
         }
@@ -70,9 +69,8 @@ Describe "xSPPerformancePointServiceApp" {
                 })
             }
 
-            It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns true when the Test method is called" {
@@ -98,6 +96,46 @@ Describe "xSPPerformancePointServiceApp" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            ApplicationPool = "-"
+            Ensure = "Absent"
+        }
+        Context "When the service application exists but it shouldn't" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Performance Point Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                })
+            }
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "calls the remove service application cmdlet in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+        
+        Context "When the serivce application doesn't exist and it shouldn't" {
+            Mock Get-SPServiceApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "returns true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }
