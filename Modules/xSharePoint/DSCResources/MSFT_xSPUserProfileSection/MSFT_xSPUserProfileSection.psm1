@@ -17,9 +17,14 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            Ensure = "Absent"
+            UserProfileService = $params.UserProfileService
+        } 
         if ($null -eq $upsa) { 
-            return $null 
+            return $nullReturn 
         }
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext -Site $caURL 
@@ -28,14 +33,14 @@ function Get-TargetResource
         
         $userProfileProperty = $properties.GetSectionByName($params.Name) 
         if($userProfileProperty -eq $null){
-            return $null 
+            return $nullReturn
         }
         return @{
             Name = $userProfileProperty.Name 
             UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             DisplayOrder =$userProfileProperty.DisplayOrder 
-            Ensure = $params.Ensure
+            Ensure = "Present"
         }
 
     }
