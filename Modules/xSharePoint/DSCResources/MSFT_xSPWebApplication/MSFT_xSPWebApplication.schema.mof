@@ -17,6 +17,7 @@ The resource will provision the web application with all of the current settings
         DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
         Url                    = "http://example.contoso.local"
         Port                   = 80
+        Ensure                 = "Present"
         PsDscRunAsCredential   = $InstallAccount
     }
 */
@@ -35,6 +36,7 @@ class MSFT_xSPWebApplication : OMI_BaseResource
     [Write, Description("The path on the local servers to host the IIS web site from")] string Path;
     [Write, Description("The port to run the site on")] string Port;
     [Write, Description("Should this web app use SSL")] boolean UseSSL;
+    [Required, Description("Present if the web app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
 
