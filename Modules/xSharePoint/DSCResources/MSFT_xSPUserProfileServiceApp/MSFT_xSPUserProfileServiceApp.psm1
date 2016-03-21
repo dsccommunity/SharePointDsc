@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
         [parameter(Mandatory = $false)] [System.String] $ProfileDBName,
         [parameter(Mandatory = $false)] [System.String] $ProfileDBServer,
@@ -14,6 +14,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -21,17 +22,20 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            Ensure = "Absent"
+        } 
         if ($null -eq $serviceApps) { 
-            return $null 
+            return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
 
         If ($null -eq $serviceApp)
         {
-            return $null
+            return $nullReturn
         }
         else
         {
@@ -67,6 +71,7 @@ function Get-TargetResource
                 SyncDBName = $databases.SynchronizationDatabase.Name
                 SyncDBServer = $databases.SynchronizationDatabase.Server.Name
                 InstallAccount = $params.InstallAccount
+                Ensure = "Present"
             }
         }
     }
@@ -80,7 +85,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
         [parameter(Mandatory = $false)] [System.String] $ProfileDBName,
         [parameter(Mandatory = $false)] [System.String] $ProfileDBServer,
@@ -88,43 +93,64 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Creating user profile service application $Name"
-
-    # Add the FarmAccount to the local Administrators group, if it's not already there
-    $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $FarmAccount.UserName
-
-    if (!$isLocalAdmin)
-    {
-        Add-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
-    }
-
-    $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
-        $params = $args[0]
+    if ($Ensure -eq "Present") {
         
+        if ($PSBoundParameters.ContainsKey("FarmAccount") -eq $false) {
+            throw "Unable to provision the user profile service without the Farm Account. Please specify the FarmAccount parameter and try again"
+            return
+        }
+        
+        Write-Verbose -Message "Creating user profile service application $Name"
+        
+        # Add the FarmAccount to the local Administrators group, if it's not already there
+        $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $FarmAccount.UserName
 
-        if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
-        $params.Remove("FarmAccount") | Out-Null
+        if (!$isLocalAdmin)
+        {
+            Add-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+        }
 
-        $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
-        $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
+        $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            
 
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
-        if ($null -eq $serviceApps) { 
-            $app = New-SPProfileServiceApplication @params
-            if ($null -ne $app) {
-                New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
+            if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+            if ($params.ContainsKey("Ensure")) { $params.Remove("Ensure") | Out-Null }
+            $params.Remove("FarmAccount") | Out-Null
+
+            $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
+            $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
+
+            $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+            if ($null -eq $serviceApps) { 
+                $app = New-SPProfileServiceApplication @params
+                if ($null -ne $app) {
+                    New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
+                }
             }
         }
-    }
 
-    # Remove the FarmAccount from the local Administrators group, if it was added above
-    if (!$isLocalAdmin)
-    {
-        Remove-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+        # Remove the FarmAccount from the local Administrators group, if it was added above
+        if (!$isLocalAdmin)
+        {
+            Remove-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+        }
     }
+    
+    if ($Ensure -eq "Absent") {
+        Write-Verbose -Message "Removing user profile service application $Name"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            
+            $service = Get-SPServiceApplication -Name $params.Name `
+                    | Where-Object { $_.TypeName -eq "User Profile Service Application" }
+            Remove-SPServiceApplication $service -Confirm:$false
+        }
+    }        
 }
 
 
@@ -136,7 +162,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
         [parameter(Mandatory = $false)] [System.String] $ProfileDBName,
         [parameter(Mandatory = $false)] [System.String] $ProfileDBServer,
@@ -144,13 +170,13 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
-    if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
