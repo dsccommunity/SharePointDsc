@@ -61,10 +61,12 @@ function Set-TargetResource
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-            New-SPAccessServicesApplication -Name $params.Name `
-                                            -ApplicationPool $params.ApplicationPool `
-                                            -Default `
-                                            -DatabaseServer $params.DatabaseServer                                      
+            $app = New-SPAccessServicesApplication -Name $params.Name `
+                                                   -ApplicationPool $params.ApplicationPool `
+                                                   -Default `
+                                                   -DatabaseServer $params.DatabaseServer
+                                                   
+            $app | New-SPAccessServicesApplicationProxy | Out-Null
         }
     }
     if ($Ensure -eq "Absent") {
