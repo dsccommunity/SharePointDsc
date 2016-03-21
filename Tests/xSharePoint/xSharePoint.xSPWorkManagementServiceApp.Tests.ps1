@@ -52,7 +52,7 @@ Describe "xSPWorkManagement" {
             Mock Remove-SPServiceApplication{ }
 
             It "returns true when the Test method is called" {
-                Test-TargetResource @testParamsAbsent | Should Be $true
+                Test-TargetResource @testParamsAbsent | Should Be $false
             }
 
             It "calls the remove service app cmdlet from the set method" {
