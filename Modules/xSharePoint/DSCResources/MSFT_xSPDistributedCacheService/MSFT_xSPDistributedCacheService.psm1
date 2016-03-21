@@ -103,6 +103,13 @@ function Set-TargetResource
                         $count = 0
                         $maxCount = 30
 
+                        # Attempt to see if we can find the service with just the computer name, or if we need to use the FQDN
+                        $si = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "Distributed Cache" }                    
+                        if ($null -eq $si) { 
+                            $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                            $currentServer = "$currentServer.$domain"
+                        }
+                        
                         Write-Verbose "Waiting for cache on $currentServer"
                         while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null)) {
                             Start-Sleep -Seconds 60
@@ -161,6 +168,14 @@ function Set-TargetResource
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
             $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $env:computername }
+            if ($null -eq $serviceInstance) { 
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $currentServer = "$currentServer.$domain"
+                $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $currentServer }
+            }
+            if ($serviceInstance -eq $null) {
+                throw "Unable to locate a distributed cache service instance on $($env:computername) to remove"
+            }               
             $serviceInstance.Delete() 
             
             Remove-SPDistributedCacheServiceInstance

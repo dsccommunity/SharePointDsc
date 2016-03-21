@@ -16,11 +16,20 @@ function Get-TargetResource
         
 
         $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
-        if ($null -eq $si) { return @{
-            Name = $params.Name
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
-        } }
+        
+        if ($null -eq $si) { 
+            $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+            $fqdn = "$($env:COMPUTERNAME).$domain"
+            $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+        }
+        
+        if ($null -eq $si) { 
+            return @{
+                Name = $params.Name
+                Ensure = "Absent"
+                InstallAccount = $params.InstallAccount
+            } 
+        }
         if ($si.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
         
         return @{
@@ -52,6 +61,11 @@ function Set-TargetResource
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
             if ($null -eq $si) { 
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $fqdn = "$($env:COMPUTERNAME).$domain"
+                $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+            }
+            if ($null -eq $si) { 
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
             Start-SPServiceInstance -Identity $si 
@@ -62,8 +76,12 @@ function Set-TargetResource
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            if ($null -eq $si) { 
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $fqdn = "$($env:COMPUTERNAME).$domain"
+                $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+            }
             if ($null -eq $si) {
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }

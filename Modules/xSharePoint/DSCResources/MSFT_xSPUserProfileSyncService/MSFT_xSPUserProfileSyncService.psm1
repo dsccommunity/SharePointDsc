@@ -21,6 +21,11 @@ function Get-TargetResource
         
 
         $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+        if ($null -eq $syncService) { 
+            $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+            $currentServer = "$($env:COMPUTERNAME).$domain"
+            $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+        }
 
         if ($null -eq $syncService) { return @{
             UserProfileServiceAppName = $params.UserProfileServiceAppName
@@ -85,8 +90,16 @@ function Set-TargetResource
     Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-
-        $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+        $currentServer = $env:COMPUTERNAME
+        $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+        if ($null -eq $syncService) { 
+            $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+            $currentServer = "$currentServer.$domain"
+            $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+        }
+        if ($syncService -eq $null) {
+            throw "Unable to locate a user profile service instance on $currentServer to start"
+        }
         
          # Start the Sync service if it should be running on this server
         if (($params.Ensure -eq "Present") -and ($syncService.Status -ne "Online")) {
@@ -95,7 +108,7 @@ function Set-TargetResource
                 throw [Exception] "No user profile service was found named $($params.UserProfileServiceAppName)"
             }
             $ups = $serviceApps | Where-Object { $_.TypeName -eq "User Profile Service Application" }
-            $ups.SetSynchronizationMachine($env:COMPUTERNAME, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
+            $ups.SetSynchronizationMachine($currentServer, $syncService.ID, $params.FarmAccount.UserName, $params.FarmAccount.GetNetworkCredential().Password)
 
             Start-SPServiceInstance -Identity $syncService.ID 
             
@@ -113,7 +126,7 @@ function Set-TargetResource
         while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState)) {
             if ($syncService.Status -ne $desiredState) { Start-Sleep -Seconds 60 }
             # Get the current status of the Sync service
-            $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
+            $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
             $count++
         }
     }
