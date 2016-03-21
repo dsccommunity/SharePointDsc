@@ -1,18 +1,18 @@
 /*
 **Description**
 
-This resource is responsible for creating Visio Graphics Service Application instances within the local SharePoint farm.
-The resource will provision and configure the Visio Graphics Service Application.
+This resource is responsible for creating Excel Services Application instances within the local SharePoint farm.
+The resource will provision and configure the Excel Services Service Application.
 **Example**
-    xSPVisioServiceApp VisioServices
+    xSPExcelServiceApp ExcelServices
     {
-        Name = "Visio Graphics Service Application"
+        Name = "Excel Services Service Application"
         ApplicationPool = "SharePoint Web Services"
         InstallAccount  = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPVisioServiceApp")]
-class MSFT_xSPVisioServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("xSPExcelServiceApp")]
+class MSFT_xSPExcelServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the service application")] string Name;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
