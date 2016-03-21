@@ -6,7 +6,8 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -15,20 +16,26 @@ function Get-TargetResource
         $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            ApplicationPool = $params.ApplicationPool
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        } 
         if ($null -eq $serviceApps) { 
-            return $null 
+            return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Access Services Application" }
 
         If ($null -eq $serviceApp) { 
-            return $null 
+            return $nullReturn 
         } else {
-            $returnVal =  @{
+            return @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
+                Ensure = "Present"
             }
-            return $returnVal
         }
     }
     return $result
@@ -42,22 +49,32 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result -eq $null) { 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating Access Services Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
-        New-SPAccessServicesApplication -Name $params.Name `
-                                      -ApplicationPool $params.ApplicationPool `
-                                      -Default `
-                                      -DatabaseServer $DatabaseName                                      
+            New-SPAccessServicesApplication -Name $params.Name `
+                                            -ApplicationPool $params.ApplicationPool `
+                                            -Default `
+                                            -DatabaseServer $params.DatabaseServer                                      
         }
+    }
+    if ($Ensure -eq "Absent") {
+        Write-Verbose -Message "Removing Access Service Application $Name"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $params = $args[0]
+                
+                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Access Services Application"  }
+                Remove-SPServiceApplication $appService -Confirm:$false
+            }
     }
 }
 
@@ -69,15 +86,15 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
+        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     
+    $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for Access Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
