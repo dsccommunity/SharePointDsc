@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     Write-Verbose -Message "Getting Subscription Settings Service '$Name'"
@@ -53,7 +53,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -109,12 +109,13 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     
     Write-Verbose -Message "Testing for Subscription Settings Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    $PSBoundParameters.Ensure = $Ensure
     
     if ($Ensure -eq "Present") {
         return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")    

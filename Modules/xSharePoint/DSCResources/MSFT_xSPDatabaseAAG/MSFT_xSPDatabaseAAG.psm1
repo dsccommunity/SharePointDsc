@@ -7,7 +7,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $AGName,
         [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -49,7 +49,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $AGName,
         [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -113,10 +113,11 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $AGName,
         [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
+    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Checking AAG configuration for $DatabaseName"

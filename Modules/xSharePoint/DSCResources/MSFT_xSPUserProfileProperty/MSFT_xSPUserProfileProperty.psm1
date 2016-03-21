@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.string] $Name ,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $true)] [System.string] $UserProfileService ,
         [parameter(Mandatory = $false)] [System.string] $DisplayName ,
         [parameter(Mandatory = $false)] [ValidateSet("BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL")] [System.string] $Type ,
@@ -108,6 +108,7 @@ function Get-TargetResource
             TermGroup = $termSet.TermGroup
             TermSet = $termSet.TermSet
             UserOverridePrivacy = $userProfileProperty.AllowPolicyOverride
+            Ensure = "Present"
         }
 
     }
@@ -120,7 +121,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.string ] $Name ,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $true)] [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)] [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)] [ValidateSet("BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL")][System.string ] $Type ,
@@ -148,6 +149,8 @@ function Set-TargetResource
     #note for integration test: CA can take a couple of minutes to notice the change. don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
 
     Write-Verbose -Message "Creating user profile property $Name"
+    $PSBoundParameters.Ensure = $Ensure
+
     $test = $PSBoundParameters
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
         $params = $args[0]
@@ -350,7 +353,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.string ] $Name ,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $true)] [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)] [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)] [ValidateSet("BigInteger", "Binary", "Boolean", "Date", "DateNoYear", "DateTime", "Email", "Float", "Guid", "HTML", "Integer", "Person", "String",  "StringMultiValue", "TimeZone", "URL")][System.string ] $Type ,
@@ -378,8 +381,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile property $Name"
-    if ($null -eq $CurrentValues) { return $false  }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet")
+    $PSBoundParameters.Ensure = $Ensure
+    if ($Ensure -eq "Present") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName","Type", "Description", "PolicySetting", "PrivacySetting","MappingConnectionName","MappingPropertyName", "MappingDirection", "Length", "DisplayOrder", "IsEventLog", "IsVisibleOnEditor", "IsVisibleOnViewer","IsUserEditable", "IsAlias", "IsSearchabe", "UserOverridePrivacy", "TermGroup", "TermStore", "TermSet", "Ensure")
+    } else {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    }    
 }
 
 Export-ModuleMember -Function *-TargetResource

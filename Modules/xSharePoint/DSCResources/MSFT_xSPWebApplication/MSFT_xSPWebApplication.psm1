@@ -16,7 +16,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]  [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -76,7 +76,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]  [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -152,12 +152,13 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $Port,
         [parameter(Mandatory = $false)] [System.Boolean] $UseSSL,
         [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]  [System.String] $AuthenticationMethod,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
+    $PSBoundParameters.Ensure = $Ensure
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure")

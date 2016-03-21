@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
         [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
         [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -16,7 +16,6 @@ function Get-TargetResource
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
         $getParams = @{
             Identity = $params.RelativeUrl 
@@ -58,7 +57,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
         [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
         [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -113,12 +112,13 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String]  $RelativeUrl,
         [parameter(Mandatory = $true)]  [System.Boolean] $Explicit,
         [parameter(Mandatory = $true)]  [System.Boolean] $HostHeader,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
+    $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader", "Ensure")
 }
 

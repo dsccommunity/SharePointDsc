@@ -4,8 +4,8 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $false)]  [System.Management.Automation.PSCredential] $Account,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Account,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
         [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
@@ -45,8 +45,8 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)]  [System.Management.Automation.PSCredential] $Account,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Account,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
         [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
@@ -100,8 +100,8 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)]  [System.Management.Automation.PSCredential] $Account,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Account,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
         [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
@@ -111,6 +111,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
+    $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification", "Ensure") 
 }
 

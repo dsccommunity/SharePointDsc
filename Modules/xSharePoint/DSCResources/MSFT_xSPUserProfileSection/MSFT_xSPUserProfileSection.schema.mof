@@ -22,12 +22,12 @@ xSPUserProfileSection PersonalInformationSection
 [ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSection")]
 class MSFT_xSPUserProfileSection: OMI_BaseResource
 {
-    [Key] string Name ;
-    [write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [required] string UserProfileService;
-    [write] string DisplayName ;
-    [write] uint32 DisplayOrder;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description(The internal name of the user profile section")] string Name ;
+    [Write, Description("Present if the section should exist, absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Required, Description("The name of the user profile service application this section exists in")] string UserProfileService;
+    [Write, Description("The display name of the section")] string DisplayName ;
+    [Write, Description("A number used to sort sections by")] uint32 DisplayOrder;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
 

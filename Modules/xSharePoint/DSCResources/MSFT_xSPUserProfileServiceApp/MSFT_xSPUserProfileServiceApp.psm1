@@ -14,7 +14,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -93,7 +93,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -170,12 +170,13 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
+    $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
 }
 

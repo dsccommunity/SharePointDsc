@@ -14,7 +14,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
         [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
         [parameter(Mandatory = $false)] [ValidateSet("Windows", "SQL")]   [System.String] $DatabaseAuthenticationType,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -69,7 +69,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
         [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
         [parameter(Mandatory = $false)] [ValidateSet("Windows", "SQL")]   [System.String] $DatabaseAuthenticationType,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -104,7 +104,7 @@ function Set-TargetResource
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $params -ScriptBlock {
             $params = $args[0]
             
-            $params.Remove("Ensure")
+            if ($params.ContainsKey("Ensure")) { $params.Remove("Ensure") | Out-Null }
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
 
             if($params.ContainsKey("DatabaseAuthenticationType")) {
@@ -171,13 +171,14 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Boolean] $PartitionMode,
         [parameter(Mandatory = $false)] [System.Boolean] $Sharing,
         [parameter(Mandatory = $false)] [ValidateSet("Windows", "SQL")]   [System.String] $DatabaseAuthenticationType,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing secure store service application $Name"
+    $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
