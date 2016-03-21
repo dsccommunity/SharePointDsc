@@ -14,6 +14,7 @@ xSPUserProfileSection PersonalInformationSection
     UserProfileService = "User Profile Service Application"
     DisplayName = "Personal Information"
     DisplayOrder =5000
+    Ensure = "Present"
 }
 
 */
