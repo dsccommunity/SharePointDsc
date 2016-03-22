@@ -253,7 +253,7 @@ Describe "xSPSearchServiceApp" {
         }
         
         $testParams.Add("SearchCenterUrl", "http://search.sp.contoso.com")
-        
+        $Global:xSharePointSearchURLUpdated = $false
         Context "When the search center URL does not match" {
             Mock Get-SPServiceApplication { 
                 return @(@{
@@ -265,7 +265,9 @@ Describe "xSPSearchServiceApp" {
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                     SearchCenterUrl = "http://wrong.url.here"
-                })
+                } | Add-Member ScriptMethod Update {
+                    $Global:xSharePointSearchURLUpdated = $true
+                } -PassThru)
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
@@ -289,6 +291,11 @@ Describe "xSPSearchServiceApp" {
             
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should update the service app in the set method" {
+                Set-TargetResource @testParams
+                $Global:xSharePointSearchURLUpdated | Should Be $true
             }
         }
         
