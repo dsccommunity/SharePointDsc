@@ -100,6 +100,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
  * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Updated xSPWebAppPolicy to allow addition and removal of accounts, including the Cache Accounts, to the web application policy.
 
 ### 0.12.0.0
 
