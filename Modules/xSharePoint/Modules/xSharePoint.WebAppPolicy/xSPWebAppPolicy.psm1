@@ -35,10 +35,12 @@ function ComparePolicies() {
                     }
                 }
                 
-                if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
-                    Write-Verbose "System User different"
-                    if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                        $diff += @{$policy.Username.ToLower()="Different"}
+                if ($setting.ActAsSystemAccount) {
+                    if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
+                        Write-Verbose "System User different"
+                        if (-not (CheckUser $diff $policy.Username.ToLower())) {
+                            $diff += @{$policy.Username.ToLower()="Different"}
+                        }
                     }
                 }
             }
@@ -62,9 +64,12 @@ function ComparePolicies() {
                         $diff += @{$setting.Username.ToLower()="Different"}
                     }
                 }
-                if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
-                    if (-not (CheckUser $diff $policy.Username.ToLower())) {
-                        $diff += @{$setting.Username.ToLower()="Different"}
+
+                if ($setting.ActAsSystemAccount) {
+                    if ($policy.ActAsSystemAccount -ne $setting.ActAsSystemAccount) {
+                        if (-not (CheckUser $diff $policy.Username.ToLower())) {
+                            $diff += @{$setting.Username.ToLower()="Different"}
+                        }
                     }
                 }
             }
