@@ -99,6 +99,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added xSPSearchContentSource, xSPAccessServiceApp, xSPExcelServiceApp and xSPPerformancePointServiceApp resources
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
+ * Added SearchCenterUrl property to xSPSearchServiceApp
  * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
  * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
 
