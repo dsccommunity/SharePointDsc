@@ -204,7 +204,7 @@ function Test-TargetResource
     if ($MembersToInclude) {
         Write-Verbose "Processing MembersToInclude parameter"
         ForEach ($member in $MembersToInclude) {
-            if (-not($CurrentValues.Members.Contains($member))) {
+            if (-not($CurrentValues.Members -contains $member)) {
                 Write-Verbose "$member is not a Farm Administrator. Set result to false"
                 $result = $false
             } else {
@@ -216,7 +216,7 @@ function Test-TargetResource
     if ($MembersToExclude) {
         Write-Verbose "Processing MembersToExclude parameter"
         ForEach ($member in $MembersToExclude) {
-            if ($CurrentValues.Members.Contains($member)) {
+            if ($CurrentValues.Members -contains $member) {
                 Write-Verbose "$member is a Farm Administrator. Set result to false"
                 $result = $false
             } else {

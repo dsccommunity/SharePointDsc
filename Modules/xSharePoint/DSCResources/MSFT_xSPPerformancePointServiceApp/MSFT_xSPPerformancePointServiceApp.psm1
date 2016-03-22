@@ -6,6 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -14,20 +15,26 @@ function Get-TargetResource
         $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            ApplicationPool = $params.ApplicationPool
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        } 
         if ($null -eq $serviceApps) { 
-            return $null 
+            return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Performance Point Service Application" }
 
-        If ($null -eq $serviceApp) { 
-            return $null 
+        if ($null -eq $serviceApp) { 
+            return $nullReturn 
         } else {
-            $returnVal =  @{
+            return @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
+                Ensure = "Present"
             }
-            return $returnVal
         }
     }
     return $result
@@ -41,24 +48,25 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result -eq $null) { 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating Performance Point Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
         
-        New-SPPerformancePointServiceApplication -Name $params.Name `
-                                      -ApplicationPool $params.ApplicationPool
+            New-SPPerformancePointServiceApplication -Name $params.Name `
+                                                     -ApplicationPool $params.ApplicationPool
 
-        New-SPPerformancePointServiceApplicationProxy -Name $params.Name `
-                                      -ServiceApplication $params.Name 
+            New-SPPerformancePointServiceApplicationProxy -Name $params.Name `
+                                                          -ServiceApplication $params.Name 
         }
     }
-    else {
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") {
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Performance Point Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -72,6 +80,15 @@ function Set-TargetResource
             }
         }
     }
+    if ($Ensure -eq "Absent") {
+        Write-Verbose -Message "Removing PerformancePoint Service Application $Name"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $params = $args[0]
+                
+                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Performance Point Service Application"  }
+                Remove-SPServiceApplication $appService -Confirm:$false
+            }
+    }
 }
 
 function Test-TargetResource
@@ -82,14 +99,14 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     
     Write-Verbose -Message "Testing for Performance Point Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+    $PSBoundParameters.Ensure = $Ensure
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

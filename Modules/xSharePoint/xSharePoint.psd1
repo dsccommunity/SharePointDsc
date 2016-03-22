@@ -24,7 +24,7 @@ Author = 'Microsoft Corporation'
 CompanyName = 'Microsoft Corporation'
 
 # Copyright statement for this module
-Copyright = '(c) 2015 - 2016 Microsoft Corporation. All rights reserved.'
+Copyright = '(c) 2015 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'This DSC module is used to deploy and configure SharePoint Server 2013, and convers a wide range of areas including web apps, service apps and farm configuration.'
