@@ -8,9 +8,10 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
         [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort,
+        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
@@ -45,9 +46,10 @@ function Get-TargetResource
             DatabaseServer = $configDb.Server.Name
             FarmAccount = $farmAccount
             InstallAccount = $params.InstallAccount
-            Passphrase = $params.Passphrase
+            Passphrase = $params.Passphrase.password 
             AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
             CentralAdministrationPort = (New-Object System.Uri $centralAdminSite.Url).Port
+            CentralAdministrationAuth = $params.CentralAdministrationAuth
         }
         return $returnValue
     }
@@ -63,9 +65,10 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
         [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort,
+        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
     
@@ -74,7 +77,8 @@ function Set-TargetResource
     }
 
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) { $PSBoundParameters.Add("CentralAdministrationPort", 9999) }
-
+    if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth")) { $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM") }
+    
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
@@ -83,7 +87,7 @@ function Set-TargetResource
             DatabaseName = $params.FarmConfigDatabaseName
             FarmCredentials = $params.FarmAccount
             AdministrationContentDatabaseName = $params.AdminContentDatabaseName
-            Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+            Passphrase = ($params.Passphrase).Password
             SkipRegisterAsDistributedCacheHost = $true
         }
         
@@ -110,7 +114,7 @@ function Set-TargetResource
         Initialize-SPResourceSecurity
         Install-SPService
         Install-SPFeature -AllExistingFeatures -Force 
-        New-SPCentralAdministration -Port $params.CentralAdministrationPort -WindowsAuthProvider "NTLM"
+        New-SPCentralAdministration -Port $params.CentralAdministrationPort -WindowsAuthProvider $params.CentralAdministrationAuth
         Install-SPApplicationContent
     }
 }
@@ -125,9 +129,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
         [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort,
+        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 

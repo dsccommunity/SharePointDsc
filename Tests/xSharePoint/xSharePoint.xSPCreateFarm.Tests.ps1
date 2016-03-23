@@ -18,8 +18,9 @@ Describe "xSPCreateFarm" {
             FarmConfigDatabaseName = "SP_Config"
             DatabaseServer = "DatabaseServer\Instance"
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            Passphrase = "passphrase"
+            Passphrase =  New-Object System.Management.Automation.PSCredential ("PASSPHRASEUSER", (ConvertTo-SecureString "MyFarmPassphrase" -AsPlainText -Force))
             AdminContentDatabaseName = "Admin_Content"
+            CentralAdministrationAuth = "Kerberos"
             CentralAdministrationPort = 1234
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -159,6 +160,15 @@ Describe "xSPCreateFarm" {
             It "uses a default value for the central admin port" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPCentralAdministration -ParameterFilter { $Port -eq 9999 }
+            }
+        }
+        
+        Context "no farm is configured locally, a supported version is installed and no central admin auth is specified" {
+            $testParams.Remove("CentralAdministrationAuth")
+
+            It "uses NTLM for the Central Admin web application authentication" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPCentralAdministration -ParameterFilter { $WindowsAuthProvider -eq "NTLM" }
             }
         }
     }    
