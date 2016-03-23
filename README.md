@@ -103,6 +103,8 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added SearchCenterUrl property to xSPSearchServiceApp
  * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
  * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
+ * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
 
 ### 0.12.0.0
 
