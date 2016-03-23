@@ -8,6 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -43,6 +44,7 @@ function Get-TargetResource
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Database.Name
                 DatabaseServer = $serviceApp.Database.Server.Name
+                SearchCenterUrl = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
                 InstallAccount = $params.InstallAccount
             }
@@ -62,6 +64,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -93,6 +96,12 @@ function Set-TargetResource
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 } 
+                
+                if ($params.ContainsKey("SearchCenterUrl") -eq $true) {
+                    $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
+                    $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                    $serviceApp.Update()
+                }
             }
         }
     } else {
@@ -112,6 +121,12 @@ function Set-TargetResource
                 $setParams.Add("DefaultContentAccessAccountPassword", $password)
             } 
             Set-SPEnterpriseSearchServiceApplication @setParams
+            
+            if ($params.ContainsKey("SearchCenterUrl") -eq $true) {
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
+                $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                $serviceApp.Update()
+            }
         }
     }
 }
@@ -127,6 +142,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -139,7 +155,7 @@ function Test-TargetResource
             return $false
         }
     }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "SearchCenterUrl")
 }
 
 Export-ModuleMember -Function *-TargetResource

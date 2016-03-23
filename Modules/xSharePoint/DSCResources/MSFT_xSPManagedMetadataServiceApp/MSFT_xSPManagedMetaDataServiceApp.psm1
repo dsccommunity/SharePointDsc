@@ -8,6 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $ContentTypeHubUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount      
     )
 
@@ -50,6 +51,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $ContentTypeHubUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount      
     )
 
@@ -62,6 +64,10 @@ function Set-TargetResource
             
 
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+            if ($params.ContainsKey("ContentTypeHubUrl")) {
+                $params.Add("HubUri", $params.ContentTypeHubUrl)
+                $params.Remove("ContentTypeHubUrl")
+            }
 
             $app = New-SPMetadataServiceApplication @params 
             if ($null -ne $app)
@@ -101,6 +107,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
+        [parameter(Mandatory = $false)] [System.String] $ContentTypeHubUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount      
     )
 
