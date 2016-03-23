@@ -84,16 +84,16 @@ function ComparePolicies() {
 }
 
 function GetUserFromCollection() {
-	Param (
+    Param (
         [Parameter(Mandatory=$true)] 
         [Array] $collection,
         [Parameter(Mandatory=$true)] 
         [String] $user
-	)
+    )
 
-	foreach ($item in $collection) {
-		if ($item.Username.ToLower() -eq $user.ToLower()) { return $item }
-	}
+    foreach ($item in $collection) {
+        if ($item.Username.ToLower() -eq $user.ToLower()) { return $item }
+    }
 
-	return $null
+    return $null
 }

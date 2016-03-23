@@ -127,7 +127,7 @@ function Set-TargetResource
             throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
         }
         
-		$members = @()
+        $members = @()
         foreach ($policy in $wa.Policies) {
             $member = @{}
             $member.Username = $policy.UserName
@@ -160,26 +160,26 @@ function Set-TargetResource
             }
 
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-			$differences = ComparePolicies $members $allMembers
+            $differences = ComparePolicies $members $allMembers
 
-			foreach ($difference in $differences) {
-				$user = $difference.Keys[0]
-				$change = $difference[$user]
-				switch ($change) {
-					Additional
-						{
-							## Policy contains additional account, remove this account
-							Write-Verbose -Verbose "Removing $user"
+            foreach ($difference in $differences) {
+                $user = $difference.Keys[0]
+                $change = $difference[$user]
+                switch ($change) {
+                    Additional
+                        {
+                            ## Policy contains additional account, remove this account
+                            Write-Verbose -Verbose "Removing $user"
                             Remove-WebAppPolicy $wa.Policies $user
-						}
-					Different
-						{
-							## Account exists but has the incorrect settings, correct this account
-							Write-Verbose -Verbose "Changing $user"
-							$policy = $wa.Policies | Where-Object { $_.UserName -eq $user }
-							$usersettings = GetUserFromCollection $allMembers $user
-							if ($usersettings.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $usersettings.ActAsSystemAccount }
-							
+                        }
+                    Different
+                        {
+                            ## Account exists but has the incorrect settings, correct this account
+                            Write-Verbose -Verbose "Changing $user"
+                            $policy = $wa.Policies | Where-Object { $_.UserName -eq $user }
+                            $usersettings = GetUserFromCollection $allMembers $user
+                            if ($usersettings.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $usersettings.ActAsSystemAccount }
+                            
                             $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $usersettings.PermissionLevel
                             if ($polbinddiff -ne $null) {
                                 $policy.PolicyRoleBindings.RemoveAll()
@@ -199,14 +199,14 @@ function Set-TargetResource
                                         }
                                     }
                                 }
-							}
-						}
-					Missing
-						{
-							## Account is missing, add this account
-							Write-Verbose -Verbose "Adding $user"
-							$usersettings = GetUserFromCollection $allMembers $user
-							$newPolicy = $wa.Policies.Add($user, $user)
+                            }
+                        }
+                    Missing
+                        {
+                            ## Account is missing, add this account
+                            Write-Verbose -Verbose "Adding $user"
+                            $usersettings = GetUserFromCollection $allMembers $user
+                            $newPolicy = $wa.Policies.Add($user, $user)
                             foreach ($permissionLevel in $usersettings.PermissionLevel) {
                                 switch ($permissionLevel) {
                                     "Deny All" {
@@ -257,7 +257,7 @@ function Set-TargetResource
             
             Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
             
-			foreach ($member in $allMembers) {
+            foreach ($member in $allMembers) {
                 $policy = $wa.Policies | Where-Object { $_.UserName -eq $member.UserName }
 
                 if ($policy -ne $null) {
@@ -414,13 +414,13 @@ function Test-TargetResource
             $allMembers += $psrAccount
         }
         
-        foreach ($member in $allMembers) {			
-    		$match = $false
+        foreach ($member in $allMembers) {            
+            $match = $false
             foreach ($policy in $CurrentValues.Members) {
-				if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
-					$match = $true
+                if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
+                    $match = $true
                     if ($member.ActAsSystemAccount) {
-	    				if ($policy.ActAsSystemAccount -ne $member.ActAsSystemAccount) { $match = $false }
+                        if ($policy.ActAsSystemAccount -ne $member.ActAsSystemAccount) { $match = $false }
                     }
 
                     $polbinddiff = Compare-Object -ReferenceObject $policy.PermissionLevel.ToLower() -DifferenceObject $member.PermissionLevel.ToLower()
@@ -434,7 +434,7 @@ function Test-TargetResource
 
     if ($MembersToExclude) {
         Write-Verbose "Processing MembersToExclude - Start Test"
-		foreach ($member in $MembersToExclude) {
+        foreach ($member in $MembersToExclude) {
             Write-Verbose "$($CurrentValues.SuperUserAccount) - $($CurrentValues.SuperReaderAccount) - $($member.Username)"
             
             if (($CurrentValues.SuperUserAccount -eq $member.Username) -or ($CurrentValues.SuperReaderAccount -eq $member.Username)) {
@@ -442,12 +442,12 @@ function Test-TargetResource
             }
             
             foreach ($policy in $CurrentValues.Members) {
-				if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
-					return $false
-				}
-			}
-		}
-    	return $true
+                if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
+                    return $false
+                }
+            }
+        }
+        return $true
     }
 }
 
