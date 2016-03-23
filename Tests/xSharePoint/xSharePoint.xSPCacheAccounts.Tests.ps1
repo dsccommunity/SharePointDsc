@@ -80,7 +80,8 @@ namespace Microsoft.SharePoint.Administration {
                     New-Object Object |
                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                 ) -PassThru |
-                Add-Member ScriptMethod Update {} -PassThru
+                Add-Member ScriptMethod Update {} -PassThru |
+                Add-Member NoteProperty UseClaimsAuthentication ($true) -PassThru
             }
 
             It "returns empty strings from the Get method" {
@@ -122,7 +123,8 @@ namespace Microsoft.SharePoint.Administration {
                     New-Object Object |
                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                 ) -PassThru |
-                Add-Member ScriptMethod Update {} -PassThru
+                Add-Member ScriptMethod Update {} -PassThru|
+                Add-Member NoteProperty UseClaimsAuthentication ($true) -PassThru
             }
 
             It "returns the values from the get method" {
@@ -156,7 +158,8 @@ namespace Microsoft.SharePoint.Administration {
                     New-Object Object |
                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                 ) -PassThru |
-                Add-Member ScriptMethod Update {} -PassThru
+                Add-Member ScriptMethod Update {} -PassThru|
+                Add-Member NoteProperty UseClaimsAuthentication ($true) -PassThru
             }
 
             It "returns false from the test method" {
@@ -188,7 +191,8 @@ namespace Microsoft.SharePoint.Administration {
                     New-Object Object |
                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                 ) -PassThru |
-                Add-Member ScriptMethod Update {} -PassThru
+                Add-Member ScriptMethod Update {} -PassThru|
+                Add-Member NoteProperty UseClaimsAuthentication ($true) -PassThru
             }
 
             It "returns false from the test method" {
