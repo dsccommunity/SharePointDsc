@@ -11,7 +11,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
         [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort,
-        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
@@ -68,7 +68,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
         [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort,
-        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
     
@@ -132,7 +132,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $true)]  [System.String] $AdminContentDatabaseName,
         [parameter(Mandatory = $false)] [System.UInt32] $CentralAdministrationPort,
-        [parameter(Mandatory = $false)] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
+        [parameter(Mandatory = $false)] [System.String] [ValidateSet("NTLM","Kerberos")]$CentralAdministrationAuth,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
