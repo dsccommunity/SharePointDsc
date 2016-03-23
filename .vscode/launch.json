@@ -1,11 +1,17 @@
 {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "configurations": [
         {
-            "name": "PowerShell",
+            "name": "Debug current file",
             "type": "PowerShell",
             "request": "launch",
-            "program": "RunPesterTests.ps1"
+            "program": "${file}"
+        },
+        {
+            "name": "Run all tests",
+            "type": "PowerShell",
+            "request": "launch",
+            "program": "${workspaceRoot}/RunPesterTests.ps1"
         }
     ]
 }
