@@ -22,7 +22,7 @@ xSPUserProfileSection PersonalInformationSection
 [ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSection")]
 class MSFT_xSPUserProfileSection: OMI_BaseResource
 {
-    [Key, Description(The internal name of the user profile section")] string Name ;
+    [Key, Description("The internal name of the user profile section")] string Name ;
     [Write, Description("Present if the section should exist, absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Required, Description("The name of the user profile service application this section exists in")] string UserProfileService;
     [Write, Description("The display name of the section")] string DisplayName ;
