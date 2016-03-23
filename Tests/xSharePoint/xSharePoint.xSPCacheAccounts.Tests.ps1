@@ -36,11 +36,22 @@ namespace Microsoft.SharePoint.Administration {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
+        Mock New-SPClaimsPrincipal { 
+            $Global:xSharePointClaimsPrincipalUser = $Identity
+            return (
+                New-Object Object | Add-Member ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:xSharePointClaimsPrincipalUser)" 
+                } -PassThru
+            )
+        }
+        
         Context "The web application specified does not exist" {
             Mock Get-SPWebApplication { return $null }
 
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns empty values from the get method" {
+                $results = Get-TargetResource @testParams
+                $results.SuperUserAlias | Should BeNullOrEmpty
+                $results.SuperReaderAlias | Should BeNullOrEmpty
             }
 
             It "returns false from the test method" {
@@ -62,7 +73,8 @@ namespace Microsoft.SharePoint.Administration {
                             New-Object Object |
                             Add-Member ScriptMethod Add {} -PassThru
                         ) -PassThru
-                    } -PassThru
+                    } -PassThru | 
+                    Add-Member ScriptMethod Remove {} -PassThru
                 ) -PassThru |
                 Add-Member NoteProperty PolicyRoles (
                     New-Object Object |
@@ -92,15 +104,20 @@ namespace Microsoft.SharePoint.Administration {
                     portalsuperuseraccount = $testParams.SuperUserAlias
                     portalsuperreaderaccount = $testParams.SuperReaderAlias
                 } -PassThru |
-                Add-Member NoteProperty Policies (
-                    New-Object Object |
-                    Add-Member ScriptMethod Add { return New-Object Object |
-                        Add-Member NoteProperty PolicyRoleBindings (
-                            New-Object Object |
-                            Add-Member ScriptMethod Add {} -PassThru
-                        ) -PassThru
-                    } -PassThru
-                ) -PassThru |
+                Add-Member NoteProperty Policies @(
+                        @{
+                            UserName = $testParams.SuperUserAlias
+                        },
+                        @{
+                            UserName = $testParams.SuperReaderAlias
+                        },
+                        @{
+                            UserName = "i:0#.w|$($testParams.SuperUserAlias)"
+                        },
+                        @{
+                            UserName = "i:0#.w|$($testParams.SuperReaderAlias)"
+                        }
+                    ) -PassThru |
                 Add-Member NoteProperty PolicyRoles (
                     New-Object Object |
                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
@@ -132,7 +149,8 @@ namespace Microsoft.SharePoint.Administration {
                             New-Object Object |
                             Add-Member ScriptMethod Add {} -PassThru
                         ) -PassThru
-                    } -PassThru
+                    } -PassThru | 
+                    Add-Member ScriptMethod Remove {} -PassThru
                 ) -PassThru |
                 Add-Member NoteProperty PolicyRoles (
                     New-Object Object |
@@ -163,7 +181,8 @@ namespace Microsoft.SharePoint.Administration {
                             New-Object Object |
                             Add-Member ScriptMethod Add {} -PassThru
                         ) -PassThru
-                    } -PassThru
+                    } -PassThru | 
+                    Add-Member ScriptMethod Remove {} -PassThru
                 ) -PassThru |
                 Add-Member NoteProperty PolicyRoles (
                     New-Object Object |
