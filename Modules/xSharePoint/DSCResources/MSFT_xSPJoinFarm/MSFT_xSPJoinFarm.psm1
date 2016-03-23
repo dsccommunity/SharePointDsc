@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
@@ -35,7 +35,7 @@ function Get-TargetResource
             FarmConfigDatabaseName = $spFarm.Name
             DatabaseServer = $configDb.Server.Name
             InstallAccount = $params.InstallAccount
-            Passphrase = $params.Passphrase
+            Passphrase = $params.Passphrase.password 
         }
     }
     return $result
@@ -49,7 +49,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
@@ -67,7 +67,7 @@ function Set-TargetResource
         $joinFarmArgs = @{
             DatabaseServer = $params.DatabaseServer
             DatabaseName = $params.FarmConfigDatabaseName
-            Passphrase = (ConvertTo-SecureString -String $params.Passphrase -AsPlainText -force)
+            Passphrase = $params.Passphrase.password
             SkipRegisterAsDistributedCacheHost = $true
         }
         
@@ -115,7 +115,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $FarmConfigDatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $Passphrase,
+        [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $Passphrase,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
