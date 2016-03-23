@@ -58,7 +58,7 @@ function Set-TargetResource
     $PSBoundParameters.Add("CurrentValues", $CurrentValues)
     $PSBoundParameters.Ensure = $Ensure 
 
-    if ($Ensure = "Present") {
+    if ($Ensure -eq "Present") {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
@@ -81,7 +81,7 @@ function Set-TargetResource
             Enable-SPFeature @runParams
         }
     }
-    if ($Ensure = "Absent") {
+    if ($Ensure -eq "Absent") {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             
             $params = $args[0]
