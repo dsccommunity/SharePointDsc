@@ -102,6 +102,8 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added SearchCenterUrl property to xSPSearchServiceApp
  * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
  * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Fixed bug with claims accounts not being added to web app policy in xSPCacheAccounts
+ * Added option to not apply cache accounts in xSPCacheAccounts
 
 ### 0.12.0.0
 
