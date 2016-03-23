@@ -94,14 +94,14 @@ function Set-TargetResource
             if ($wa.Policies.UserName -contains $params.SuperReaderAlias) { 
                 $wa.Policies.Remove($params.SuperReaderAlias)
             }
-            $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, $params.SuperReaderAlias)
+            $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
             $readPolicyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
             $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
             
             if ($wa.Policies.UserName -contains $params.SuperUserAlias) { 
                 $wa.Policies.Remove($params.SuperUserAlias)
             }
-            $policy = $wa.Policies.Add($params.SuperUserAlias, $params.SuperUserAlias)
+            $policy = $wa.Policies.Add($params.SuperUserAlias, "Super User")
             $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
             $policy.PolicyRoleBindings.Add($policyRole)
             
@@ -109,7 +109,7 @@ function Set-TargetResource
             if ($wa.Policies.UserName -contains $claimsReader) { 
                 $wa.Policies.Remove($claimsReader)
             }
-            $policy = $wa.Policies.Add($claimsReader, $claimsReader)
+            $policy = $wa.Policies.Add($claimsReader, "Super Reader (Claims)")
             $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
             $policy.PolicyRoleBindings.Add($policyRole)
             
@@ -117,7 +117,7 @@ function Set-TargetResource
             if ($wa.Policies.UserName -contains $claimsSuper) { 
                 $wa.Policies.Remove($claimsSuper)
             }
-            $policy = $wa.Policies.Add($claimsSuper, $claimsSuper)
+            $policy = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
             $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
             $policy.PolicyRoleBindings.Add($policyRole)
         }
