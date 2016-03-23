@@ -56,6 +56,7 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $PSBoundParameters.Add("CurrentValues", $CurrentValues)
+    $PSBoundParameters.Ensure = $Ensure 
 
     if ($Ensure = "Present") {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
