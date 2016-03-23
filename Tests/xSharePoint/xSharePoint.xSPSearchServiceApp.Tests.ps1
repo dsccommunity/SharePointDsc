@@ -211,6 +211,91 @@ Describe "xSPSearchServiceApp" {
             }
         }
         
+        $testParams.Add("SearchCenterUrl", "http://search.sp.contoso.com")
+        $Global:xSharePointSearchURLUpdated = $false
+        Context "When the search center URL does not match" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                    SearchCenterUrl = "http://wrong.url.here"
+                } | Add-Member ScriptMethod Update {
+                    $Global:xSharePointSearchURLUpdated = $true
+                } -PassThru)
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should update the service app in the set method" {
+                Set-TargetResource @testParams
+                $Global:xSharePointSearchURLUpdated | Should Be $true
+            }
+        }
+        
+        Context "When the search center URL does match" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                    SearchCenterUrl = "http://search.sp.contoso.com"
+                })
+            }
+            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+            Mock New-SPBusinessDataCatalogServiceApplication { }
+            Mock Start-SPEnterpriseSearchServiceInstance { }
+            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
+            Mock Set-SPEnterpriseSearchServiceApplication { } 
+            
+            Mock Get-SPWebApplication { return @(@{
+                Url = "http://centraladmin.contoso.com"
+                IsAdministrationWebApplication = $true
+            }) }
+            Mock Get-SPSite { @{} }
+            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "DOMAIN\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            
+            It "should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
         $testParams.Ensure = "Absent"
         
         Context "When the service app exists but it shouldn't" {

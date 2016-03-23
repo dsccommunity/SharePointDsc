@@ -17,9 +17,18 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $aam = Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone | Select -First 1
+        $aam = Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone -ErrorAction SilentlyContinue | Select -First 1
         $url = $null
         $Ensure = "Absent"
+        
+        if (($aam -eq $null) -and ($params.Zone -eq "Default")) {
+            # The default zone URL will change the URL of the web app, so assuming it has been applied
+            # correctly then the first call there will fail as the WebAppUrl parameter will no longer
+            # be the URL of the web app. So the assumption is that if a matching default entry with
+            # the new public URL is found then it can be returned and will pass a test.
+            $aam = Get-SPAlternateURL -Zone $params.Zone | Where-Object { $_.PublicUrl -eq $params.Url } | Select -First 1
+        }
+        
         if ($aam -ne $null) {
             $url = $aam.PublicUrl
             $Ensure = "Present"

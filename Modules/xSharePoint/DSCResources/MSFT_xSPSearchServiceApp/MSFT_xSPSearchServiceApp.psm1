@@ -9,6 +9,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
+        [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -52,6 +53,7 @@ function Get-TargetResource
                 DatabaseName = $serviceApp.Database.Name
                 DatabaseServer = $serviceApp.Database.Server.Name
                 Ensure = "Present"
+                SearchCenterUrl = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
                 InstallAccount = $params.InstallAccount
             }
@@ -71,6 +73,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
+        [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -104,6 +107,12 @@ function Set-TargetResource
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 } 
+                
+                if ($params.ContainsKey("SearchCenterUrl") -eq $true) {
+                    $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
+                    $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                    $serviceApp.Update()
+                }
             }
         }
     }
@@ -126,6 +135,12 @@ function Set-TargetResource
                 $setParams.Add("DefaultContentAccessAccountPassword", $password)
             } 
             Set-SPEnterpriseSearchServiceApplication @setParams
+            
+            if ($params.ContainsKey("SearchCenterUrl") -eq $true) {
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
+                $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
+                $serviceApp.Update()
+            }
         }
     }
     
@@ -152,6 +167,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
+        [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -164,9 +180,17 @@ function Test-TargetResource
             return $false
         }
     }
+    
     $PSBoundParameters.Ensure = $Ensure
+    if ($Ensure -eq "Present") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "ApplicationPool", "SearchCenterUrl")    
+    } else {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    }
+    
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "ApplicationPool")
+    
+    
 }
 
 Export-ModuleMember -Function *-TargetResource
