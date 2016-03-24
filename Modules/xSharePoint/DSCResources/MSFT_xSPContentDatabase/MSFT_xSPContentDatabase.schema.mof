@@ -29,7 +29,7 @@ class MSFT_xSPContentDatabase : OMI_BaseResource
     [Write, Description("Should the database be enabled")] Boolean Enabled;
     [Write, Description("Specify the site collection warning limit for the content database")] Uint16 WarningSiteCount;
     [Write, Description("Specify the site collection maximum limit for the content database")] Uint16 MaximumSiteCount;
-    [Required, Description("Present to create this template, absent to ensure it does not exist"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("Present to create this template, absent to ensure it does not exist"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
