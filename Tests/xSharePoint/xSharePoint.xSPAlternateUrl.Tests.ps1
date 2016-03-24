@@ -121,6 +121,27 @@ Describe "xSPAlternateUrl" {
                 Assert-MockCalled Remove-SPAlternateURL
             }
         }
+        
+        Context "The default zone URL for a web app was changed using this resource" {
+            
+            Mock Get-SPAlternateUrl {
+                return @()
+            } -ParameterFilter { $WebApplication -eq $testParams.WebAppUrl }
+            Mock Get-SPAlternateUrl {
+                return @(
+                    @{
+                        IncomingUrl = $testParams.Url
+                        Zone = $testParams.Zone
+                        PublicUrl = $testParams.Url
+                    }
+                )
+            } -ParameterFilter { $WebApplication -eq $null }
+            $testParams.Ensure = "Present"
+            
+            it "should still return true in the test method despite the web app URL being different" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
     }
 }
 
