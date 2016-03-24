@@ -5,6 +5,7 @@ function MountContentDatabase() {
     )
     if ($params.ContainsKey("Enabled")) { $params.Remove("Enabled") }
     if ($params.ContainsKey("Ensure")) { $params.Remove("Ensure") }
+    if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") }
     if ($params.ContainsKey("MaximumSiteCount")) {
         $params.MaxSiteCount = $params.MaximumSiteCount
         $params.Remove("MaximumSiteCount")
