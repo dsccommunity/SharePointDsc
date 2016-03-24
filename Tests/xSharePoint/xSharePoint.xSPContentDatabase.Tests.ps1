@@ -11,6 +11,7 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPContentDatabase"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.ContentDatabase\xSPContentDatabase.psm1")
 
 Describe "xSPContentDatabase" {
     InModuleScope $ModuleName {
@@ -117,7 +118,7 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
-            Mock Mount-SPContentDatabase { 
+            Mock Mount-SPContentDatabase -ModuleName xSPContentDatabase { 
                 $returnval = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
@@ -224,7 +225,7 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
             Mock Dismount-SPContentDatabase { }
-            Mock Mount-SPContentDatabase { 
+            Mock Mount-SPContentDatabase -ModuleName xSPContentDatabase { 
                 $returnVal = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
