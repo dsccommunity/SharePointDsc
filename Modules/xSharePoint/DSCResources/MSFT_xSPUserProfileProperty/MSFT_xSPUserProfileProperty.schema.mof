@@ -20,8 +20,8 @@ xSPUserProfileProperty WorkEmailProperty
     DisplayName = "Work Email"
     Type = "Email"
     Description = "" #implementation isn't using it yet
-    PolicySetting = "Required"
-    PrivacySetting = "Everyone"
+    PolicySetting = "Mandatory"
+    PrivacySetting = "Public"
     MappingConnectionName = "contoso.com"
     MappingPropertyName = "mail"
     MappingDirection = "Import"

@@ -94,6 +94,19 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ### Unreleased
 
+ * Fixed bug in managed account schedule get method
+ * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
+ * Added xSPSearchContentSource, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp and xSPPerformancePointServiceApp resources
+ * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
+ * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
+ * Added SearchCenterUrl property to xSPSearchServiceApp
+ * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
+ * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
+ * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
+
+### 0.12.0.0
+
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
  * Added xSPDatabaseAAG, xSPFarmSolution and xSPAlternateUrl resources
  * Fixed bug with xSPWorkManagementServiceApp schema
@@ -106,6 +119,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added a check to warn about issue when installing SharePoint 2013 on a server with .NET 4.6 installed
  * Updated examples to include installation resources
  * Fixed issues with kerberos and anonymous access in xSPWebApplication
+ * Add support for SharePoint 2016 on Windows Server 2016 Technical Preview to xSPInstallPrereqs
 
 ### 0.10.0.0
 
