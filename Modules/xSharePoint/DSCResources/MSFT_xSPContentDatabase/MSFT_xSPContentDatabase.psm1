@@ -19,7 +19,7 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $cdb = Get-SPContentDatabase | Where-Object { $_.Name -eq $params.Name}
+        $cdb = Get-SPDatabase | Where-Object { $_.Type -eq "Content Database" -and $_.Name -eq $params.Name }
 
         if ($cdb -eq $null) {
             # Database does not exist
@@ -37,16 +37,19 @@ function Get-TargetResource
             # Database exists
             if ($cdb.Status -eq "Online") { $cdbenabled = $true } else { $cdbenabled = $false }
 
-            return @{
+            if ($cdb.WebApplication.Url.Substring($cdb.WebApplication.Url.Length-1,1) -eq "/") { $cdbwebappurl = $cdb.WebApplication.Url.Substring(0,$cdb.WebApplication.Url.Length-1) } else { $cdbwebappurl = $cdb.WebApplication.Url }
+
+            $returnVal = @{
                 Name = $params.Name
                 DatabaseServer = $cdb.Server
-                WebAppUrl = $cdb.WebApplication.Url
+                WebAppUrl = $cdbwebappurl
                 Enabled = $cdbenabled
                 WarningSiteCount = $cdb.WarningSiteCount
                 MaximumSiteCount = $cdb.MaximumSiteCount
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }
+            return $returnVal
         }
     }
 
@@ -86,6 +89,10 @@ function Set-TargetResource
 
             # Check if database exists
             if ($cdb -ne $null) {
+                if ($cdb.Server -ne $params.DatabaseServer) {
+                    throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
+                }
+
                 # Check and change attached web application. Dismount and mount to correct web application
                 if ($params.WebAppUrl.Substring($params.WebAppUrl.Length-1,1) -ne "/") { 
                     $paramwebappurl = $params.WebAppUrl + "/"
@@ -94,7 +101,8 @@ function Set-TargetResource
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
                     if ($params.ContainsKey("Enabled")) { $enabled = $params.Enabled } else { $enabled = $true }
-                    $cdb = MountContentDatabase $params.Clone() $enabled
+                    $parameters = @{} + $params
+                    $cdb = MountContentDatabase $parameters $enabled
                 }
 
                 # Check and change database status
@@ -112,7 +120,8 @@ function Set-TargetResource
             } else {
                 # Database does not exist, but should. Create/mount database
                 if ($params.ContainsKey("Enabled")) { $enabled = $params.Enabled } else { $enabled = $true }
-                $cdb = MountContentDatabase $params.Clone() $enabled
+                $parameters = @{} + $params
+                $cdb = MountContentDatabase $parameters $enabled
             }
             $cdb.Update()
         } else {
@@ -144,8 +153,11 @@ function Test-TargetResource
     Write-Verbose -Message "Testing content database configuration settings"
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $PSBoundParameters.Ensure = $Ensure
+    if ($CurrentValues.DatabaseServer -ne $DatabaseServer) {
+        throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
+    }
 
+    $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
