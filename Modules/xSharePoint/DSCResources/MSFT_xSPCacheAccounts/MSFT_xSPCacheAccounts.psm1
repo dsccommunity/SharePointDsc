@@ -41,12 +41,13 @@ function Get-TargetResource
         $returnVal.Add("InstallAccount", $params.InstallAccount)
         
         $policiesSet = $true
-        if ($wa.Policies.UserName -notcontains $params.SuperReaderAlias) { $policiesSet = $false }
-        if ($wa.Policies.UserName -notcontains $params.SuperUserAlias) { $policiesSet = $false }
-        
-        if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperReaderAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }
-        if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperUserAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }
-        
+        if ($wa.UseClaimsAuthentication -eq $true) {
+            if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperReaderAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }
+            if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperUserAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }    
+        } else {
+            if ($wa.Policies.UserName -notcontains $params.SuperReaderAlias) { $policiesSet = $false }
+            if ($wa.Policies.UserName -notcontains $params.SuperUserAlias) { $policiesSet = $false }
+        }
         $returnVal.Add("SetWebAppPolicy", $policiesSet)
         
         return $returnVal
@@ -79,24 +80,15 @@ function Set-TargetResource
             throw [Exception] "The web applications $($params.WebAppUrl) can not be found to set cache accounts"
         }
         
-        $wa.Properties["portalsuperuseraccount"] = $params.SuperUserAlias
-        $wa.Properties["portalsuperreaderaccount"] = $params.SuperReaderAlias
+        if ($wa.UseClaimsAuthentication -eq $true) {
+            $wa.Properties["portalsuperuseraccount"] = (New-SPClaimsPrincipal -Identity $params.SuperUserAlias -IdentityType WindowsSamAccountName).ToEncodedString()
+            $wa.Properties["portalsuperreaderaccount"] = (New-SPClaimsPrincipal -Identity $params.SuperReaderAlias -IdentityType WindowsSamAccountName).ToEncodedString()
+        } else {
+            $wa.Properties["portalsuperuseraccount"] = $params.SuperUserAlias
+            $wa.Properties["portalsuperreaderaccount"] = $params.SuperReaderAlias
+        }
         
         if ($params.SetWebAppPolicy -eq $true) {
-            if ($wa.Policies.UserName -contains $params.SuperReaderAlias) { 
-                $wa.Policies.Remove($params.SuperReaderAlias)
-            }
-            $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
-            $readPolicyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
-            $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
-            
-            if ($wa.Policies.UserName -contains $params.SuperUserAlias) { 
-                $wa.Policies.Remove($params.SuperUserAlias)
-            }
-            $policy = $wa.Policies.Add($params.SuperUserAlias, "Super User")
-            $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
-            $policy.PolicyRoleBindings.Add($policyRole)
-            
             if ($wa.UseClaimsAuthentication -eq $true) {
                 $claimsReader = (New-SPClaimsPrincipal -Identity $params.SuperReaderAlias -IdentityType WindowsSamAccountName).ToEncodedString()
                 if ($wa.Policies.UserName -contains $claimsReader) { 
@@ -111,6 +103,20 @@ function Set-TargetResource
                     $wa.Policies.Remove($claimsSuper)
                 }
                 $policy = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
+                $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
+                $policy.PolicyRoleBindings.Add($policyRole)
+            } else {
+                if ($wa.Policies.UserName -contains $params.SuperReaderAlias) { 
+                    $wa.Policies.Remove($params.SuperReaderAlias)
+                }
+                $readPolicy = $wa.Policies.Add($params.SuperReaderAlias, "Super Reader")
+                $readPolicyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
+                $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
+                
+                if ($wa.Policies.UserName -contains $params.SuperUserAlias) { 
+                    $wa.Policies.Remove($params.SuperUserAlias)
+                }
+                $policy = $wa.Policies.Add($params.SuperUserAlias, "Super User")
                 $policyRole = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
                 $policy.PolicyRoleBindings.Add($policyRole)
             }
