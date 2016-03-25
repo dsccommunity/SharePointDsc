@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.string] $Name ,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $true)] [System.string] $UserProfileService ,
         [parameter(Mandatory = $false)] [System.string] $DisplayName ,
         [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder ,
@@ -17,9 +17,14 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
+        $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            Ensure = "Absent"
+            UserProfileService = $params.UserProfileService
+        } 
         if ($null -eq $upsa) { 
-            return $null 
+            return $nullReturn 
         }
         $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext -Site $caURL 
@@ -28,14 +33,14 @@ function Get-TargetResource
         
         $userProfileProperty = $properties.GetSectionByName($params.Name) 
         if($userProfileProperty -eq $null){
-            return $null 
+            return $nullReturn
         }
         return @{
             Name = $userProfileProperty.Name 
             UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             DisplayOrder =$userProfileProperty.DisplayOrder 
-            Ensure = $params.Ensure
+            Ensure = "Present"
         }
 
     }
@@ -48,7 +53,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.string] $Name,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $true)] [System.string] $UserProfileService,
         [parameter(Mandatory = $false)] [System.string] $DisplayName,
         [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder,
@@ -57,7 +62,8 @@ function Set-TargetResource
 
     # note for integration test: CA can take a couple of minutes to notice the change. 
     # don't try refreshing properties page. go through from a fresh "flow" from Service apps page :)
-
+    $PSBoundParameters.Ensure = $Ensure
+    
     Write-Verbose -Message "Creating user profile property $Name"
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -115,7 +121,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)] [System.string ] $Name ,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.string ] $Ensure ,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $true)] [System.string ] $UserProfileService ,
         [parameter(Mandatory = $false)] [System.string ] $DisplayName ,
         [parameter(Mandatory = $false)] [System.uint32] $DisplayOrder ,
@@ -126,7 +132,13 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile property $Name"
     if ($null -eq $CurrentValues) { return $false  }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder")
+    $PSBoundParameters.Ensure = $Ensure
+    if ($Ensure -eq "Present") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder", "Ensure")
+    } else {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    }  
+    
 }
 
 Export-ModuleMember -Function *-TargetResource

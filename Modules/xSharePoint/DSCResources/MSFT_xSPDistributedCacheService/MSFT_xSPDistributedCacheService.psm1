@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $CacheSizeInMB,
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount        
     )
@@ -62,7 +62,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $CacheSizeInMB,
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -203,12 +203,13 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $CacheSizeInMB,
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for distributed cache configuration"
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }
