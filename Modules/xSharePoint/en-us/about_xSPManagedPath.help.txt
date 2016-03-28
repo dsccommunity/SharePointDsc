@@ -1,21 +1,14 @@
-﻿NAME
+﻿.NAME
     xSPManagedPath
 
-PARAMETERS
-    WebAppUrl (Key, string)
-    InstallAccount (Write, String)
-    RelativeUrl (Key, string)
-    Explicit (Required, boolean)
-    HostHeader (Required, boolean)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is responsible for creating managed paths associated with a specific web application. 
 The WebAppUrl parameter is used to specify the web application to create the path against, and the RelativeUrl parameter lets you set the URL.
 Explicit when set to true will create an explicit inclusion path, if set to false the path is created as wildcard inclusion.
 If you are using host named site collections set HostHeader to true and the path will be created as a host header path to be applied for host named site collections.
 
-EXAMPLE
+.EXAMPLE
 
     xSPManagedPath TeamsManagedPath 
     {
@@ -25,4 +18,25 @@ EXAMPLE
         Explicit       = $false
         HostHeader     = $true
     }
+
+.PARAMETER WebAppUrl
+    Key - string
+    The URL of the web application to apply the managed path to - this is ignored for host header web applications
+
+.PARAMETER RelativeUrl
+    Key - string
+    The relative URL of the managed path
+
+.PARAMETER Explicit
+    Required - boolean
+    Should the host header be explicit? If false then it is a wildcard
+
+.PARAMETER HostHeader
+    Required - boolean
+    Is this a host header web application?
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

@@ -1,14 +1,7 @@
-﻿NAME
+﻿.NAME
     xSPSearchIndexPartition
 
-PARAMETERS
-    Index (Key, Uint32)
-    Servers (Required, String)
-    RootDirectory (Write, String)
-    ServiceAppName (Required, String)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is responsible for creating search indexes.
 It works by creating the index topology components and updating the topology from the server that runs this resource.
@@ -21,7 +14,7 @@ Note that for the search topology to apply correctly, the path specified for Roo
 For example, if the below example was executed on "Server1" it would also need to ensure that it was able to create the index path at I:\.
 If no disk labeled I: was available on server1, this would fail, even though it will not hold an actual index component.
 
-EXAMPLE
+.EXAMPLE
 
     xSPSearchIndexPartition MainSearchPartition
     {
@@ -32,4 +25,25 @@ EXAMPLE
         PsDscRunAsCredential = $SPSetupAccount
         DependsOn            = "[xSPSearchRoles]LocalSearchRoles"
     }
+
+.PARAMETER Index
+    Key - Uint32
+    The number of the partition in this farm
+
+.PARAMETER Servers
+    Required - String
+    A list of the servers that this partition should exist on
+
+.PARAMETER RootDirectory
+    Write - String
+    The directory that the index should use locally on each server to store data
+
+.PARAMETER ServiceAppName
+    Required - String
+    The name of the search service application
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

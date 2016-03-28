@@ -25,6 +25,21 @@ Describe "xSPInstallPrereqs" {
             function Get-WindowsFeature() { }
         }
         
+        Mock Get-ChildItem {
+            return @(
+                @{
+                    Version = "4.5.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                },
+                @{
+                    Version = "4.5.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                }
+            )
+        }
+        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
@@ -219,6 +234,27 @@ Describe "xSPInstallPrereqs" {
                 Mock Test-Path { return $false }
 
                 {Set-TargetResource @testParams} | Should Throw
+            }
+        }
+        
+        Context "SharePoint 2013 is installing on a server with .NET 4.6" {
+            Mock Get-ChildItem {
+                return @(
+                    @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    },
+                    @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    }
+                )
+            }
+            
+            It "throws an error in the set method" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    

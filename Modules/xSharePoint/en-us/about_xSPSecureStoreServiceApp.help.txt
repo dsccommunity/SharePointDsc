@@ -1,26 +1,12 @@
-﻿NAME
+﻿.NAME
     xSPSecureStoreServiceApp
 
-PARAMETERS
-    Name (Key, string)
-    ApplicationPool (Required, string)
-    AuditingEnabled (Required, boolean)
-    AuditlogMaxSize (Write, uint32)
-    DatabaseCredentials (Write, String)
-    DatabaseName (Write, string)
-    DatabaseServer (Write, string)
-    DatabaseAuthenticationType (Write, string, Allowed values: Windows, SQL)
-    FailoverDatabaseServer (Write, string)
-    PartitionMode (Write, boolean)
-    Sharing (Write, boolean)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is responsible for provisioning and configuring the secure store service application. 
 The parameters passed in (except those related to database specifics) are validated and set when the resource is run, the database values are only used in provisioning of the service application. 
 
-EXAMPLE
+.EXAMPLE
 
     xSPSecureStoreServiceApp SecureStoreServiceApp
     {
@@ -31,4 +17,54 @@ EXAMPLE
         DatabaseName    = "SP_SecureStore"
         InstallAccount  = $InstallAccount
     }
+
+.PARAMETER Name
+    Key - string
+    The name of the secure store service app
+
+.PARAMETER ApplicationPool
+    Required - string
+    The name of the application pool it will run in
+
+.PARAMETER AuditingEnabled
+    Required - boolean
+    Is auditing enabled for this service app
+
+.PARAMETER AuditlogMaxSize
+    Write - uint32
+    What is the maximum size of the audit log in MB
+
+.PARAMETER DatabaseCredentials
+    Write - String
+    What SQL credentials should be used to access the database
+
+.PARAMETER DatabaseName
+    Write - string
+    The name of the database for the service app
+
+.PARAMETER DatabaseServer
+    Write - string
+    The name of the database server to host the database
+
+.PARAMETER DatabaseAuthenticationType
+    Write - string
+    Allowed values: Windows, SQL
+    What type of authentication should be used to access the database
+
+.PARAMETER FailoverDatabaseServer
+    Write - string
+    The name of the database server hosting a failover instance of the database
+
+.PARAMETER PartitionMode
+    Write - boolean
+    Is partition mode enabled for this service app
+
+.PARAMETER Sharing
+    Write - boolean
+    Is sharing enabled for this service app
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

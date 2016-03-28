@@ -1,14 +1,7 @@
-﻿NAME
+﻿.NAME
     xSPTimerJobState
 
-PARAMETERS
-    Name (Key, String)
-    WebApplication (Write, String)
-    Enabled (Write, Boolean)
-    Schedule (Write, String)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is used to configure a timer job and make sure it is in a specific state.
 The resource can be used to enable or disabled the job and configure the schedule of the job.
@@ -25,7 +18,7 @@ Examples are:
 NOTE: Make sure you use the internal timer job name, not the display name!
 Use "Get-SPTimerJob -WebApplication "http://servername" | select Name, DisplayName" to find the internal name for each Timer Job.
 
-EXAMPLE
+.EXAMPLE
 
     xSPTimerJobState DisableTimerJob_DeadSiteDelete
     {
@@ -35,4 +28,25 @@ EXAMPLE
         Schedule                ="weekly at sat 5:00"
         PsDscRunAsCredential    = $InstallAccount
     }
+
+.PARAMETER Name
+    Key - String
+    The internal name of the timer job (not the display name)
+
+.PARAMETER WebApplication
+    Write - String
+    The name of the web application that the timer job belongs to
+
+.PARAMETER Enabled
+    Write - Boolean
+    Should the timer job be enabled or not
+
+.PARAMETER Schedule
+    Write - String
+    The schedule for the timer job to execute on
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

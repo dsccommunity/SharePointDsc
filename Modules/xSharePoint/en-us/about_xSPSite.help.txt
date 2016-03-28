@@ -1,30 +1,14 @@
-﻿NAME
+﻿.NAME
     xSPSite
 
-PARAMETERS
-    Url (Key, string)
-    OwnerAlias (Required, string)
-    CompatibilityLevel (Write, uint32)
-    ContentDatabase (Write, string)
-    Description (Write, string)
-    HostHeaderWebApplication (Write, string)
-    Language (Write, uint32)
-    Name (Write, string)
-    OwnerEmail (Write, string)
-    QuotaTemplate (Write, string)
-    SecondaryEmail (Write, string)
-    SecondaryOwnerAlias (Write, string)
-    Template (Write, string)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource will provision a site collection to the current farm, based on the settings that are passed through. 
 These settings map to the New-SPSite cmdlet and accept the same values and types. 
 
 The current version of xSharePoint is only able to check for the existence of a site collection, the additional parameters are not checked for yet, but will be in a later release
 
-EXAMPLE
+.EXAMPLE
 
     xSPSite TeamSite
     {
@@ -35,4 +19,61 @@ EXAMPLE
         Template                 = "STS#0"
         PsDscRunAsCredential     = $InstallAccount
     }
+
+.PARAMETER Url
+    Key - string
+    The URL of the site collection
+
+.PARAMETER OwnerAlias
+    Required - string
+    The username of the site collection administrator
+
+.PARAMETER CompatibilityLevel
+    Write - uint32
+    The compatibility level of the site
+
+.PARAMETER ContentDatabase
+    Write - string
+    The name of the content database to create the site in
+
+.PARAMETER Description
+    Write - string
+    The description to apply to the site collection
+
+.PARAMETER HostHeaderWebApplication
+    Write - string
+    The URL of the host header web application to create this site in
+
+.PARAMETER Language
+    Write - uint32
+    The language code of the site
+
+.PARAMETER Name
+    Write - string
+    The display name of the site collection
+
+.PARAMETER OwnerEmail
+    Write - string
+    The email address of the site collection administrator
+
+.PARAMETER QuotaTemplate
+    Write - string
+    The quota template to apply to the site collection
+
+.PARAMETER SecondaryEmail
+    Write - string
+    The secondary site collection admin email address
+
+.PARAMETER SecondaryOwnerAlias
+    Write - string
+    The secondary site collection admin username
+
+.PARAMETER Template
+    Write - string
+    The template to apply to the site collection
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

@@ -1,20 +1,12 @@
-﻿NAME
+﻿.NAME
     xSPHealthAnalyzerRuleState
 
-PARAMETERS
-    Name (Key, String)
-    Enabled (Required, Boolean)
-    RuleScope (Write, String, Allowed values: All Servers, Any Server)
-    Schedule (Write, String, Allowed values: Hourly, Daily, Weekly, Monthly, OnDemandOnly)
-    FixAutomatically (Write, Boolean)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is used to configure Health Analyzer rules for the local farm.
 The resource is able to enable/disable and configure the specified rule.
 
-EXAMPLE
+.EXAMPLE
 
     xSPHealthAnalyzerRuleState DisableDiskSpaceRule
     {
@@ -25,4 +17,31 @@ EXAMPLE
         FixAutomatically = $false
         InstallAccount = $InstallAccount
     }
+
+.PARAMETER Name
+    Key - String
+    The name of the rule exactly as it appears in central admin
+
+.PARAMETER Enabled
+    Required - Boolean
+    Should the rule be enabled?
+
+.PARAMETER RuleScope
+    Write - String
+    Allowed values: All Servers, Any Server
+    What is the scope of this rule
+
+.PARAMETER Schedule
+    Write - String
+    Allowed values: Hourly, Daily, Weekly, Monthly, OnDemandOnly
+    How often should the rule check
+
+.PARAMETER FixAutomatically
+    Write - Boolean
+    Should the rule fix itself automatically
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

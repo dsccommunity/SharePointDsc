@@ -1,22 +1,7 @@
-﻿NAME
+﻿.NAME
     xSPWebAppThrottlingSettings
 
-PARAMETERS
-    Url (Key, string)
-    ListViewThreshold (write, uint32)
-    AllowObjectModelOverride (write, boolean)
-    AdminThreshold (write, uint32)
-    ListViewLookupThreshold (write, uint32)
-    HappyHourEnabled (write, boolean)
-    HappyHour (Write, string)
-    UniquePermissionThreshold (write, uint32)
-    RequestThrottling (write, boolean)
-    ChangeLogEnabled (write, boolean)
-    ChangeLogExpiryDays (write, uint32)
-    EventHandlersEnabled (write, boolean)
-    InstallAccount (Write, string)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is responsible for setting web application settings that are found under the "resource throttling" screen in central admin.
 The web application is specified through the URL property, and then any combination of settings can be applied.
@@ -24,7 +9,7 @@ Any settings not included will be left as the default (or whatever they have bee
 Happy hour is the setting used to control the window where threshold do not apply throughout the day.
 You can specify the start time of this window as well as how many hours it will last.
 
-EXAMPLE
+.EXAMPLE
 
     xSPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
     {
@@ -39,4 +24,57 @@ EXAMPLE
         }
         PsDscRunAsCredential     = $InstallAccount
     }
+
+.PARAMETER Url
+    Key - string
+    The URL of the web application
+
+.PARAMETER ListViewThreshold
+    Write - uint32
+    What should the list view threshold for this site be set to
+
+.PARAMETER AllowObjectModelOverride
+    Write - boolean
+    Should object model code be able to be override the list view threshold
+
+.PARAMETER AdminThreshold
+    Write - uint32
+    What is the list view threshold for site administrators
+
+.PARAMETER ListViewLookupThreshold
+    Write - uint32
+    What is the maximum number of lookup fields in a single list view
+
+.PARAMETER HappyHourEnabled
+    Write - boolean
+    Should the happy hour window be enabled for this web app
+
+.PARAMETER HappyHour
+    Write - string
+    The time window for happy hour
+
+.PARAMETER UniquePermissionThreshold
+    Write - uint32
+    What is the limit for unique permissions on a single object in this web app
+
+.PARAMETER RequestThrottling
+    Write - boolean
+    Is request throttling enabled on this web app
+
+.PARAMETER ChangeLogEnabled
+    Write - boolean
+    Is the change log enabled for this web app
+
+.PARAMETER ChangeLogExpiryDays
+    Write - uint32
+    How many days does the change log store data for
+
+.PARAMETER EventHandlersEnabled
+    Write - boolean
+    Are event handlers enabled in the web application
+
+.PARAMETER InstallAccount
+    Write - string
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

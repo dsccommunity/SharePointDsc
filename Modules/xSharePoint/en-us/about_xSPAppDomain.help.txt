@@ -1,18 +1,13 @@
-﻿NAME
+﻿.NAME
     xSPAppDomain
 
-PARAMETERS
-    AppDomain (Key, string)
-    Prefix (Required, string)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource will set the value for the app domain settings at the farm level.
 You can set the domain name and the prefix that is to be used for app URLs.
 
 
-EXAMPLE
+.EXAMPLE
 
     xSPAppDomain LocalFarmAppUrls
     {
@@ -20,5 +15,18 @@ EXAMPLE
         Prefix = "app"
         PsDscRunAsCredential = $InstallAccount
     }
+
+
+.PARAMETER AppDomain
+    Key - string
+    The domain name for apps to use in this farm
+
+.PARAMETER Prefix
+    Required - string
+    The prefix to go on to app URLs
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
 
 

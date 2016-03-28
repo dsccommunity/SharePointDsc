@@ -1,16 +1,7 @@
-﻿NAME
+﻿.NAME
     xSPShellAdmins
 
-PARAMETERS
-    Name (Key, String)
-    Members (Write, String)
-    MembersToInclude (Write, String)
-    MembersToExclude (Write, String)
-    ContentDatabases (Write, String)
-    AllContentDatabases (Write, Boolean)
-    InstallAccount (Write, String)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is used to manage the users with Shell Admin permissions.
 There are a number of approaches to how this can be implemented.
@@ -28,7 +19,7 @@ Notes:
 When this is true, you cannot add it to the Shell Admins (common for AllContentDatabases parameter) and the resource will throw an error.
 Workaround: Change database owner in SQL Server.
 
-EXAMPLE
+.EXAMPLE
 
     xSPShellAdmins ShellAdmins
     {
@@ -52,5 +43,34 @@ EXAMPLE
             })
         )
     }
+
+
+.PARAMETER Name
+    Key - String
+    Name for the config, used for administration purposes
+
+.PARAMETER Members
+    Write - String
+    Exact list of accounts that will have to get Shell Admin permissions
+
+.PARAMETER MembersToInclude
+    Write - String
+    List of all accounts that must be in the Shell Admins group
+
+.PARAMETER MembersToExclude
+    Write - String
+    List of all accounts that are not allowed to have Shell Admin permissions
+
+.PARAMETER ContentDatabases
+    Write - String
+    Shell Admin configuration of Content Databases
+
+.PARAMETER AllContentDatabases
+    Write - Boolean
+    Specify if all content databases must get the same config as the general config
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
 
 

@@ -1,12 +1,7 @@
-﻿NAME
+﻿.NAME
     xSPServiceInstance
 
-PARAMETERS
-    Name (Key, string)
-    InstallAccount (Write, String)
-    Ensure (Required, string, Allowed values: Present, Absent)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is used to specify if a specific service should be running (Ensure = "Present") or not running (Ensure = "Absent") on the current server. 
 The name is the display name of the service as shown in the Central Admin website.
@@ -26,4 +21,18 @@ The name is the display name of the service as shown in the Central Admin websit
         Ensure         = "Absent"
         InstallAccount = $InstallAccount
     }
+
+.PARAMETER Name
+    Key - string
+    The name of the service instance to manage
+
+.PARAMETER Ensure
+    Required - string
+    Allowed values: Present, Absent
+    Present to ensure it runs on this server, or absent to ensure it is stopped
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

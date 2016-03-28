@@ -18,9 +18,9 @@ Any settings not included will be left as the default (or whatever they have bee
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppWorkflowSettings")]
 Class MSFT_xSPWebAppWorkflowSettings : OMI_BaseResource
 {
-    [Key] string Url;
-    [write] boolean ExternalWorkflowParticipantsEnabled;
-    [write] boolean UserDefinedWorkflowsEnabled;
-    [write] boolean EmailToNoPermissionWorkflowParticipantsEnable;
-    [Write, EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Key, Description("The URL of the web application")] string Url;
+    [Write, Description("Are external workflow participants enabled in the web app")] boolean ExternalWorkflowParticipantsEnabled;
+    [Write, Description("Are user defined workflows enabled in this web app")] boolean UserDefinedWorkflowsEnabled;
+    [Write, Description("Are documents sent via email to external participants of workflow")] boolean EmailToNoPermissionWorkflowParticipantsEnable;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

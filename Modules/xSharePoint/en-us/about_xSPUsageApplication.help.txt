@@ -1,24 +1,12 @@
-﻿NAME
+﻿.NAME
     xSPUsageApplication
 
-PARAMETERS
-    Name (Key, string)
-    InstallAccount (Write, String)
-    DatabaseName (Write, string)
-    DatabaseServer (Write, string)
-    DatabaseCredentials (Write, String)
-    FailoverDatabaseServer (Write, string)
-    UsageLogCutTime (Write, uint32)
-    UsageLogLocation (Write, string)
-    UsageLogMaxFileSizeKB (Write, uint32)
-    UsageLogMaxSpaceGB (Write, uint32)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource provisions an instance of the usage and health monitoring service application.
 The database settings are only used for initial provisioning, but the usage settings can be changed and will be enforced as the resource is executed. 
 
-EXAMPLE
+.EXAMPLE
 
     xSPUsageApplication UsageApplication 
     {
@@ -29,4 +17,45 @@ EXAMPLE
         UsageLogMaxFileSizeKB = 1024
         InstallAccount        = $InstallAccount
     }
+
+.PARAMETER Name
+    Key - string
+    The name of the service application
+
+.PARAMETER DatabaseName
+    Write - string
+    The name of the database for the service app
+
+.PARAMETER DatabaseServer
+    Write - string
+    The name of the database server
+
+.PARAMETER DatabaseCredentials
+    Write - String
+    The credentials to use to access the database
+
+.PARAMETER FailoverDatabaseServer
+    Write - string
+    The name of the failover database server
+
+.PARAMETER UsageLogCutTime
+    Write - uint32
+    The time in minutes to cut over to new log files
+
+.PARAMETER UsageLogLocation
+    Write - string
+    The location on each server to store the log files
+
+.PARAMETER UsageLogMaxFileSizeKB
+    Write - uint32
+    The maximum file size for log files in KB
+
+.PARAMETER UsageLogMaxSpaceGB
+    Write - uint32
+    The total space of all log files on disk in GB
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

@@ -1,20 +1,13 @@
-﻿NAME
+﻿.NAME
     xSPJoinFarm
 
-PARAMETERS
-    FarmConfigDatabaseName (Key, string)
-    DatabaseServer (Key, string)
-    InstallAccount (Write, String)
-    Passphrase (Required, string)
-    ServerRole (Write, string, Allowed values: Application, Custom, DistributedCache, Search, SingleServer, SingleServerFarm, SpecialLoad, WebFrontEnd)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource will be responsible for joining a server to an existing SharePoint farm.
 To create a new farm use the [xSPCreateFarm](xSPCreateFarm) resource on a different server to begin with, and then pass the same database server and configuration database name parameters to the additional servers using this resource.
 After the server has joined the farm, the process will wait for 5 minutes to allow farm specific configuration to take place on the server, before allowing further DSC configuration to take place.
 
-EXAMPLE
+.EXAMPLE
 
     xSPJoinFarm JoinSPFarm
     {
@@ -23,4 +16,26 @@ EXAMPLE
         Passphrase               = $FarmPassPhrase
         PsDscRunAsCredential     = $InstallAccount
     }
+
+.PARAMETER FarmConfigDatabaseName
+    Key - string
+    The name of the config database to connect to
+
+.PARAMETER DatabaseServer
+    Key - string
+    The server that hosts the config database
+
+.PARAMETER Passphrase
+    Required - string
+    The passphrase that should be used to join the farm
+
+.PARAMETER ServerRole
+    Write - string
+    Allowed values: Application, Custom, DistributedCache, Search, SingleServer, SingleServerFarm, SpecialLoad, WebFrontEnd
+    SharePoint 2016 only - the MinRole role to enroll this server as
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

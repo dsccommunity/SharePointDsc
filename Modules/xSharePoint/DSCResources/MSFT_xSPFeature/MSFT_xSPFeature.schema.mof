@@ -13,16 +13,19 @@ The name property is the name of the feature based on its folder name in the FEA
         Url                  = "http://www.contoso.com"
         Ensure               = "Present"
         Scope                = "Site"
-        PsDscRunAsCredential = $SetupAccuount     
+        PsDscRunAsCredential = $SetupAccuount
+        Version              = "1.0.0.0"     
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPFeature")]
 class MSFT_xSPFeature : OMI_BaseResource
 {
-    [Key] string Name;
-    [Required, ValueMap{"Farm","WebApplication","Site","Web"}, Values{"Farm","WebApplication","Site","Web"}] string FeatureScope;
-    [Key] string Url;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Key, Description("The name of the feature")] string Name;
+    [Required, Description("The scope to change the feature at - Farm, WebApplication, SiteCollection or Site"), ValueMap{"Farm","WebApplication","Site","Web"}, Values{"Farm","WebApplication","Site","Web"}] string FeatureScope;
+    [Key, Description("The URL to change the feature at")] string Url;
+    [Required, Description("Present if the feature is to be enabled, Absent if it is to be disabled"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("The version of the feature to check against")] string Version;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
+
 

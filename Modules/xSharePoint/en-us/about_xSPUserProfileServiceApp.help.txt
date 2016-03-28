@@ -1,27 +1,14 @@
-﻿NAME
+﻿.NAME
     xSPUserProfileServiceApp
 
-PARAMETERS
-    Name (Key, string)
-    ApplicationPool (Required, string)
-    FarmAccount (Required, String)
-    InstallAccount (Write, String)
-    MySiteHostLocation (Write, string)
-    ProfileDBName (Write, string)
-    ProfileDBServer (Write, string)
-    SocialDBName (Write, string)
-    SocialDBServer (Write, string)
-    SyncDBName (Write, string)
-    SyncDBServer (Write, string)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource will provision an instance of the user profile service to the farm. 
 It creates the required databases using the parameters that are passed in to it (although these are only used during the initial provisioning).
 The farm account is used during the provisioning of the service only (in the set method), and the install account is used in the get and test methods.
 This is done to ensure that the databases are created with the correct schema owners and allow the user profile sync service to operate correctly. 
 
-EXAMPLE
+.EXAMPLE
 
     xSPUserProfileServiceApp UserProfileServiceApp
     {
@@ -37,4 +24,49 @@ EXAMPLE
         FarmAccount          = $FarmAccount
         PsDscRunAsCredential = $SetupAccount
     }
+
+.PARAMETER Name
+    Key - string
+    The name of the user profile service
+
+.PARAMETER ApplicationPool
+    Required - string
+    The name of the application pool to run the service app in
+
+.PARAMETER FarmAccount
+    Required - String
+    The farm account to use when provisioning the app
+
+.PARAMETER MySiteHostLocation
+    Write - string
+    The URL of the my site host collection
+
+.PARAMETER ProfileDBName
+    Write - string
+    The name of the profile database
+
+.PARAMETER ProfileDBServer
+    Write - string
+    The name of the server to host the profile database
+
+.PARAMETER SocialDBName
+    Write - string
+    The name of the social database
+
+.PARAMETER SocialDBServer
+    Write - string
+    The name of the database server to host the social database
+
+.PARAMETER SyncDBName
+    Write - string
+    The name of the sync database
+
+.PARAMETER SyncDBServer
+    Write - string
+    The name of the database server to host the sync database
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 

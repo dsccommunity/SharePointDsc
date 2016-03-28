@@ -1,30 +1,59 @@
-﻿NAME
+﻿.NAME
     xSPDistributedCacheService
 
-PARAMETERS
-    Name (Key, String)
-    Ensure (Required, string, Allowed values: Present, Absent)
-    CacheSizeInMB (Required, UInt32)
-    ServiceAccount (Required, String)
-    InstallAccount (Write, String)
-    CreateFirewallRules (Required, Boolean)
-
-DESCRIPTION
+.SYNOPSIS
 
 This resource is responsible for provisioning the distributed cache to the service it runs on. 
 This is required in your farm on at least one server (as the behavior of [xSPCreateFarm](xSPCreateFarm) and [xSPJoinFarm](xSPJoinFarm) is to not enroll every server as a cache server). 
 The service will be provisioned or de-provisioned based on the Ensure property, and when provisioned the CacheSizeInMB property and ServiceAccount property will be used to configure it.
 The property createFirewallRules is used to determine if exceptions should be added to the windows firewall to allow communication between servers on the appropriate ports.
 
-EXAMPLE
+The ServerProvisionOrder optional property is used when a pull server is handing out configurations to nodes in order to tell this resource about a specific order of enabling the caches.
+This allows for multiple servers to receive the same configuration, but they will always check for the server before them in the list first to ensure that it is running distributed cache.
+By doing this you can ensure that you do not create conflicts with two or more servers provisioning a cache at the same time.
+Note, this approach only makes a server check the others for distributed cache, it does not provision the cache automatically on all servers.
+If a previous server in the sequence does not appear to be running distributed cache after 30 minutes, the local server that was waiting will begin anyway.
+
+.EXAMPLE
 
     xSPDistributedCacheService EnableDistributedCache
     {
-        Name                = "AppFabricCachingService"
-        Ensure              = "Present"
-        CacheSizeInMB       = 8192
-        ServiceAccount      = "DEMO\ServiceAccount"
-        InstallAccount      = $InstallAccount
-        CreateFirewallRules = $true
+        Name                 = "AppFabricCachingService"
+        Ensure               = "Present"
+        CacheSizeInMB        = 8192
+        ServiceAccount       = "DEMO\ServiceAccount"
+        InstallAccount       = $InstallAccount
+        ServerProvisionOrder = @("server1", "server2")
+        CreateFirewallRules  = $true
     }
+
+.PARAMETER Name
+    Key - String
+    A name to assign to this resource - not really used. For example - AppFabricCachingService
+
+.PARAMETER Ensure
+    Required - string
+    Allowed values: Present, Absent
+    Present to ensure the current server should be running distributed cache, absent to ensure that it isn't running
+
+.PARAMETER CacheSizeInMB
+    Required - UInt32
+    How many MB should be used for the cache. The maximum supported is 16384
+
+.PARAMETER ServiceAccount
+    Required - String
+    The name of the service account to run the service as. This should already be registered as a managed account in SharePoint
+
+.PARAMETER ServerProvisionOrder
+    Write - String
+    A list of servers which specifies the order they should provision the cache in to ensure that two servers do not do it at the same time
+
+.PARAMETER CreateFirewallRules
+    Required - Boolean
+    Should the Windows Firewall rules for distributed cache be created?
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
 
