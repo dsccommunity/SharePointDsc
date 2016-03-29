@@ -84,11 +84,29 @@ function Get-TargetResource
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}) -ne $null))    
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}) -ne $null))            
     }
-    
-    $results = @{}
-    foreach($key in $PSBoundParameters.Keys) {
-        $results.Add($key, $PSBoundParameters.$key)
+        
+    $results = @{
+        InstallerPath = $InstallerPath
+        OnlineMode = $OnlineMode
+        SQLNCli = $SQLNCli      
+        PowerShell = $PowerShell        
+        NETFX = $NETFX    
+        IDFX = $IDFX        
+        Sync = $Sync        
+        AppFabric = $AppFabric        
+        IDFX11 = $IDFX11      
+        MSIPCClient = $MSIPCClient        
+        WCFDataServices = $WCFDataServices        
+        KB2671763 = $KB2671763   
+        WCFDataServices56 = $WCFDataServices56        
+        KB2898850 = $KB2898850 
+        MSVCRT11 = $MSVCRT11
+        MSVCRT14 = $MSVCRT14
+        KB3092423 = $KB3092423
+        ODBC = $ODBC
+        DotNet452 = $DotNet452
     }
+    
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
         $results.Ensure = "Absent"
     } else {
