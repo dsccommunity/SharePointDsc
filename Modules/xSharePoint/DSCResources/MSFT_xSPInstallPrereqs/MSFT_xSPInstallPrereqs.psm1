@@ -85,7 +85,10 @@ function Get-TargetResource
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}) -ne $null))            
     }
     
-    $results = $PSBoundParameters
+    $results = @{}
+    foreach($key in $PSBoundParameters.Keys) {
+        $results.Add($key, $PSBoundParameters.$key)
+    }
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
         $results.Ensure = "Absent"
     } else {
@@ -185,6 +188,17 @@ function Set-TargetResource
             throw "The prerequisite installer ran with the following unknown exit code $($process.ExitCode)"
         }
     }
+    
+    if ( `
+        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
+         -or `
+        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+        -or `
+        ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+        ) {
+            Write-Verbose -Message "xSPInstallPrereqs has detected the server has pending a reboot. Flagging to the DSC engine that the server should reboot before continuing."
+            $global:DSCMachineStatus = 1   
+        }
 }
 
 
