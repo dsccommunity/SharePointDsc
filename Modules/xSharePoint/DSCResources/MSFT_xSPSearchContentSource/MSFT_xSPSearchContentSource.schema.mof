@@ -87,7 +87,7 @@ class MSFT_xSPSearchContentSource : OMI_BaseResource
     [Write, Description("What is the priority on this content source"), ValueMap{"Normal","High"}, Values{"Normal","High"}] String Priority;
     [Write, Description("How many pages deep should the crawler go (-1 = unlimited, website sources only)")] Uint32 LimitPageDepth;
     [Write, Description("How many server hops should the crawler make (-1 = unlimtied, website sources only)")] Uint32 LimitServerHops;
-    [Required, Description("Present if the source should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("Present if the source should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("Specify true if DSC is allowed to delete and recreate a content source to apply the correct settings, otherwise false will just report errors if a change can not be applied.")] Boolean Force;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

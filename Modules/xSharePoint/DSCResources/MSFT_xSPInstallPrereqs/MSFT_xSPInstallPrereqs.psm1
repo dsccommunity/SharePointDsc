@@ -23,7 +23,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
     
     $returnValue = @{}
@@ -122,7 +122,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -227,7 +227,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -235,6 +235,7 @@ function Test-TargetResource
         return
     }
 
+    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Checking installation of SharePoint prerequisites"
