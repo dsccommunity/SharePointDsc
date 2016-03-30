@@ -11,7 +11,6 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_xSPContentDatabase"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.ContentDatabase\xSPContentDatabase.psm1")
 
 Describe "xSPContentDatabase" {
     InModuleScope $ModuleName {
@@ -55,12 +54,12 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
 
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "return Ensure=Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "throws an exception in the test method to say the databaseserver parameter does not match" {
-                { Test-TargetResource @testParams } | Should throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
+            It "returns false and display message to indicate the databaseserver parameter does not match" {
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "throws an exception in the test method to say the databaseserver parameter does not match" {
@@ -82,8 +81,8 @@ namespace Microsoft.SharePoint.Administration {
             }
             Get-SPWebApplication { return $null }
 
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "return Ensure=Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns false from the test method" {
@@ -118,7 +117,7 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
-            Mock Mount-SPContentDatabase -ModuleName xSPContentDatabase { 
+            Mock Mount-SPContentDatabase { 
                 $returnval = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
@@ -131,8 +130,8 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
 
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "return Ensure=Absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
@@ -162,8 +161,8 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
 
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "return Ensure=Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns false from the test method" {
@@ -196,8 +195,8 @@ namespace Microsoft.SharePoint.Administration {
             
             $testParams.Ensure = "Absent"
             
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "return Ensure=Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns false from the test method" {
@@ -225,7 +224,7 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
             Mock Dismount-SPContentDatabase { }
-            Mock Mount-SPContentDatabase -ModuleName xSPContentDatabase { 
+            Mock Mount-SPContentDatabase { 
                 $returnVal = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
@@ -240,8 +239,8 @@ namespace Microsoft.SharePoint.Administration {
 
             $testParams.Ensure = "Present"
                         
-            It "return values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "return Ensure=Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns false from the test method" {
@@ -270,9 +269,8 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
                         
-            It "return values from the get method" {
-                $test = Get-TargetResource @testParams
-                $test.Ensure | Should Be "Present"
+            It "return Ensure=Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns true from the test method" {
@@ -289,9 +287,8 @@ namespace Microsoft.SharePoint.Administration {
 
             $testParams.Ensure = "Absent"
                         
-            It "return values from the get method" {
-                $test = Get-TargetResource @testParams
-                $test.Ensure | Should Be "Absent"
+            It "return Ensure=Absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns true from the test method" {

@@ -37,12 +37,10 @@ function Get-TargetResource
             # Database exists
             if ($cdb.Status -eq "Online") { $cdbenabled = $true } else { $cdbenabled = $false }
 
-            if ($cdb.WebApplication.Url.Substring($cdb.WebApplication.Url.Length-1,1) -eq "/") { $cdbwebappurl = $cdb.WebApplication.Url.Substring(0,$cdb.WebApplication.Url.Length-1) } else { $cdbwebappurl = $cdb.WebApplication.Url }
-
             $returnVal = @{
                 Name = $params.Name
                 DatabaseServer = $cdb.Server
-                WebAppUrl = $cdbwebappurl
+                WebAppUrl = $cdb.WebApplication.Url.Trim("/")
                 Enabled = $cdbenabled
                 WarningSiteCount = $cdb.WarningSiteCount
                 MaximumSiteCount = $cdb.MaximumSiteCount
@@ -74,18 +72,15 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting content database configuration settings"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $ScriptRoot = $args[1]
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase does not return disabled databases.
         $cdb = Get-SPDatabase | Where-Object { $_.Type -eq "Content Database" -and $_.Name -eq $params.Name }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.ContentDatabase\xSPContentDatabase.psm1" -Resolve)
-
         if ($params.Ensure -eq "Present") {
             # Check if specified web application exists and throw exception when this is not the case
-            $webapp = Get-SPWebApplication | Where-Object { $_.Url -eq $params.WebAppUrl + "/"}
+            $webapp = Get-SPWebApplication | Where-Object { $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/") }
             if ($webapp -eq $null) {
                 throw "Specified web application does not exist."
             }
@@ -97,10 +92,7 @@ function Set-TargetResource
                 }
 
                 # Check and change attached web application. Dismount and mount to correct web application
-                if ($params.WebAppUrl.Substring($params.WebAppUrl.Length-1,1) -ne "/") { 
-                    $paramwebappurl = $params.WebAppUrl + "/"
-                }
-                if ($paramwebappurl -ne $cdb.WebApplication.Url) {
+                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/")) {
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
                     if ($params.ContainsKey("Enabled")) { $enabled = $params.Enabled } else { $enabled = $true }
@@ -157,11 +149,46 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer) {
-        throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
+        Write-Verbose -Verbose "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
+        return $false
     }
 
     $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
+### Exception Test-TargetResource with different DBServer to message and false
+
 Export-ModuleMember -Function *-TargetResource
+
+function MountContentDatabase() {
+    Param (
+        $params,
+        $enabled
+    )
+    if ($params.ContainsKey("Enabled")) { $params.Remove("Enabled") }
+    if ($params.ContainsKey("Ensure")) { $params.Remove("Ensure") }
+    if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") }
+    if ($params.ContainsKey("MaximumSiteCount")) {
+        $params.MaxSiteCount = $params.MaximumSiteCount
+        $params.Remove("MaximumSiteCount")
+    }
+    if ($params.ContainsKey("WebAppUrl")) {
+        $params.WebApplication = $params.WebAppUrl
+        $params.Remove("WebAppUrl")
+    }
+    try {
+        $cdb = Mount-SPContentDatabase @params
+    } catch {
+        throw "Error occurred while mounting content database. Content database is not mounted. Error details: $($_.Exception.Message)"
+    }
+    if ($cdb.Status -eq "Online") { $cdbenabled = $true } else { $cdbenabled = $false }
+    if ($enabled -ne $cdbenabled) {
+        switch ($params.Enabled) {
+            $true  { $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online }
+            $false { $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled }
+        }
+    }
+
+    return $cdb
+}

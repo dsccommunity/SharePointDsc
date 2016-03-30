@@ -2,8 +2,7 @@
 **Description**
 
 This resource is used to add and remove Content Databases to web applications and and configure these databases.
-Note:
-- The resource cannot be used to move the database to a different SQL instance.
+Note: The resource cannot be used to move the database to a different SQL instance.
 It will throw an error when it detects that the specified SQL instance is a different instance that is currently in use. 
 
 **Example**
@@ -11,7 +10,7 @@ It will throw an error when it detects that the specified SQL instance is a diff
     xSPContentDatabase ContentDB {
         Name = "SharePoint_Content_01"
         DatabaseServer = "SQL.contoso.local\SQLINSTANCE"
-        WebAppUrl = "http://sharepoint.contoso.com"      # DISMOUNT EN REMOUNT TO NEW WEBAPP
+        WebAppUrl = "http://sharepoint.contoso.com"
         Enabled = $true
         WarningSiteCount = 2000
         MaximumSiteCount = 5000
@@ -29,7 +28,7 @@ class MSFT_xSPContentDatabase : OMI_BaseResource
     [Write, Description("Should the database be enabled")] Boolean Enabled;
     [Write, Description("Specify the site collection warning limit for the content database")] Uint16 WarningSiteCount;
     [Write, Description("Specify the site collection maximum limit for the content database")] Uint16 MaximumSiteCount;
-    [Write, Description("Present to create this template, absent to ensure it does not exist"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("Present to create this database, absent to ensure it does not exist"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
