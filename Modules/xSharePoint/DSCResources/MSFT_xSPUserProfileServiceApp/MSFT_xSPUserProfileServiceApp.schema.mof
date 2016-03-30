@@ -28,7 +28,7 @@ class MSFT_xSPUserProfileServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the user profile service")] string Name;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
-    [Required, Description("The farm account to use when provisioning the app"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
+    [Write, Description("The farm account to use when provisioning the app"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
     [Write, Description("The URL of the my site host collection")] string MySiteHostLocation;
     [Write, Description("The name of the profile database")] string ProfileDBName;
     [Write, Description("The name of the server to host the profile database")] string ProfileDBServer;
@@ -36,5 +36,6 @@ class MSFT_xSPUserProfileServiceApp : OMI_BaseResource
     [Write, Description("The name of the database server to host the social database")] string SocialDBServer;
     [Write, Description("The name of the sync database")] string SyncDBName;
     [Write, Description("The name of the database server to host the sync database")] string SyncDBServer;
+    [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

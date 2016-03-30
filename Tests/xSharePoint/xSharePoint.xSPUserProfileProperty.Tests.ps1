@@ -360,7 +360,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsNewProperty | Should BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -409,7 +409,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsNewProperty | Should BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -448,7 +448,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsNewProperty | Should BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -483,7 +483,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsNewProperty | Should BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -518,7 +518,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsNewProperty | Should BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -563,7 +563,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsUpdateProperty | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -606,7 +606,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsUpdateProperty | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -653,7 +653,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsUpdateProperty | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true
@@ -695,7 +695,7 @@ Describe "xSPUserProfileProperty" {
                 $Global:xSPUPGetProfileSubtypeCalled = $false
                 $Global:xSPUPGetPropertyByNameCalled = $false
                 $Global:xSPUPSMappingItemCalled = $false
-                Get-TargetResource @testParamsUpdateProperty | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
                 $Global:xSPUPGetProfileSubtypeCalled | Should be $true
                 $Global:xSPUPGetPropertyByNameCalled | Should be $true

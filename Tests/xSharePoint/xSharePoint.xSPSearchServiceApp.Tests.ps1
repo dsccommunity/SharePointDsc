@@ -17,6 +17,7 @@ Describe "xSPSearchServiceApp" {
         $testParams = @{
             Name = "Search Service Application"
             ApplicationPool = "SharePoint Search Services"
+            Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -24,7 +25,15 @@ Describe "xSPSearchServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue    
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        
+        Mock Start-SPEnterpriseSearchServiceInstance {}
+        Mock Remove-SPServiceApplication {}   
+        Mock New-SPEnterpriseSearchServiceApplicationProxy {}
+        Mock Set-SPEnterpriseSearchServiceApplication {} 
+        Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
+        Mock New-SPEnterpriseSearchServiceApplication { return @{} }
+        Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
         
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
@@ -51,16 +60,9 @@ Describe "xSPSearchServiceApp" {
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
-
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "returns false when the Test method is called" {
@@ -81,19 +83,13 @@ Describe "xSPSearchServiceApp" {
         }
 
         Context "When service applications exist in the current farm but the specific search app does not" {
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
+
             Mock Get-SPServiceApplication { return @(@{
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "returns false when the Test method is called" {
@@ -107,12 +103,6 @@ Describe "xSPSearchServiceApp" {
         }
 
         Context "When a service application exists and is configured correctly" {
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
             
             Mock Get-SPServiceApplication { 
                 return @(@{
@@ -126,8 +116,8 @@ Describe "xSPSearchServiceApp" {
                 })
             }
 
-            It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
 
@@ -137,11 +127,6 @@ Describe "xSPSearchServiceApp" {
         }
 
         Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
 
             Mock Get-SPServiceApplication { 
                 return @(@{
@@ -183,19 +168,6 @@ Describe "xSPSearchServiceApp" {
                     }
                 })
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
-            
-            Mock Get-SPWebApplication { return @(@{
-                Url = "http://centraladmin.contoso.com"
-                IsAdministrationWebApplication = $true
-            }) }
-            Mock Get-SPSite { @{} }
             
             Mock New-Object {
                 return @{
@@ -227,19 +199,6 @@ Describe "xSPSearchServiceApp" {
                     }
                 })
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
-            
-            Mock Get-SPWebApplication { return @(@{
-                Url = "http://centraladmin.contoso.com"
-                IsAdministrationWebApplication = $true
-            }) }
-            Mock Get-SPSite { @{} }
             
             Mock New-Object {
                 return @{
@@ -333,6 +292,47 @@ Describe "xSPSearchServiceApp" {
             } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
             
             It "should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams.Ensure = "Absent"
+        
+        Context "When the service app exists but it shouldn't" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should remove the service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+        
+        Context "When the service app doesn't exist and shouldn't" {
+            Mock Get-SPServiceApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

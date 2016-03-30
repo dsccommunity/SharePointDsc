@@ -21,6 +21,7 @@ Describe "xSPWebApplication" {
             ApplicationPoolAccount = "DEMO\ServiceAccount"
             Url = "http://sites.sharepoint.com"
             AuthenticationMethod = "NTLM"
+            Ensure = "Present"
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -33,12 +34,13 @@ Describe "xSPWebApplication" {
         
         Mock New-SPAuthenticationProvider { }
         Mock New-SPWebApplication { }
+        Mock Remove-SPWebApplication { }
 
         Context "The web application that uses NTLM doesn't exist but should" {
             Mock Get-SPWebApplication { return $null }
 
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
@@ -76,8 +78,8 @@ Describe "xSPWebApplication" {
         Context "The web application that uses Kerberos doesn't exist but should" {
             Mock Get-SPWebApplication { return $null }
 
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
@@ -113,8 +115,8 @@ Describe "xSPWebApplication" {
                 Url = $testParams.Url
             })}
 
-            It "returns the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns true from the test method" {
@@ -144,11 +146,66 @@ Describe "xSPWebApplication" {
                 Url = $testParams.Url
             })}
 
-            It "returns the current data from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams = @{
+            Name = "SharePoint Sites"
+            ApplicationPool = "SharePoint Web Apps"
+            ApplicationPoolAccount = "DEMO\ServiceAccount"
+            Url = "http://sites.sharepoint.com"
+            AuthenticationMethod = "NTLM"
+            Ensure = "Absent"
+        }
+        
+        Context "A web application exists but shouldn't" {
+            Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
+            Mock Get-SPWebApplication { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+            })}
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should remove the web application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPWebApplication
+            }
+        }
+        
+        Context "A web application doesn't exist and shouldn't" {
+            Mock Get-SPWebApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
