@@ -59,14 +59,8 @@ function Get-TargetResource
                 Members = $members
                 MembersToInclude = $params.MembersToInclude
                 MembersToExclude = $params.MembersToExclude
+                SetCacheAccountsPolicy = $params.SetCacheAccountsPolicy
                 InstallAccount = $params.InstallAccount
-        }
-
-        if ($wa.Properties.ContainsKey("portalsuperuseraccount")) {
-            $returnval.SuperUserAccount = $wa.Properties["portalsuperuseraccount"]
-        }
-        if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) {
-            $returnval.SuperReaderAccount = $wa.Properties["portalsuperreaderaccount"]
         }
         
         return $returnval
@@ -109,166 +103,204 @@ function Set-TargetResource
             throw "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
         }
     }
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
-        $params = $args[0]
-        $ScriptRoot = $args[1]
+    if ($CurrentValues -eq $null) {
+        throw "Web application does not exist"
+    }
+
+    $cacheAccounts = Get-CacheAccounts @PSBoundParameters
+    
+    if ($SetCacheAccountsPolicy) {
+        if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "") {
+            throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
+        }
+    }        
+
+    $changeUsers = @()
+        
+    if ($Members) {
+        Write-Verbose "Processing Members - Start Set"
+        
+        $allMembers = @()
+        foreach ($member in $Members) {
+            $allMembers += $member
+        }
+
+        if ($SetCacheAccountsPolicy) {
+            Write-Verbose "SetCacheAccountsPolicy is True. Adding Cache Accounts to list"
+            $psuAccount = @{
+                UserName = $cacheAccounts.SuperUserAccount
+                PermissionLevel = "Full Control"
+            }
+            $allMembers += $psuAccount
+            
+            $psrAccount = @{
+                UserName = $cacheAccounts.SuperReaderAccount
+                PermissionLevel = "Full Read"
+            }
+            $allMembers += $psrAccount
+        }
+
+        Import-Module (Join-Path $PsScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+        $differences = ComparePolicies $CurrentValues.Members $allMembers
+
+        foreach ($difference in $differences) {
+            $username = $difference.Keys[0]
+            $change = $difference[$username]
+            $usersettings = GetUserFromCollection $allMembers $username
+            switch ($change) {
+                Additional {
+                    $user = @{
+                        Type     = "Delete"
+                        Username = $username
+                    }
+                }
+                Different {
+                    $user = @{
+                        Type     = "Change"
+                        Username = $username
+                        PermissionLevel    = $usersettings.PermissionLevel
+                        ActAsSystemAccount = $usersettings.ActAsSystemAccount
+                    }
+                }
+                Missing {
+                    $user = @{
+                        Type     = "Add"
+                        Username = $username
+                        PermissionLevel    = $usersettings.PermissionLevel
+                        ActAsSystemAccount = $usersettings.ActAsSystemAccount
+                    }
+                }
+            }
+            $changeUsers += $user
+        }
+    }
+
+    if ($MembersToInclude) {
+        Write-Verbose "Processing MembersToInclude - Start Set"
+
+        $allMembers = @()
+        foreach ($member in $MembersToInclude) {
+            $allMembers += $member
+        }
+
+        if ($SetCacheAccountsPolicy) {
+            Write-Verbose "SetCacheAccountsPolicy is True. Adding Cache Accounts to list"
+            $psuAccount = @{
+                UserName = $cacheAccounts.SuperUserAccount
+                PermissionLevel = "Full Control"
+            }
+            $allMembers += $psuAccount
+            
+            $psrAccount = @{
+                UserName = $cacheAccounts.SuperReaderAccount
+                PermissionLevel = "Full Read"
+            }
+            $allMembers += $psrAccount
+        }
+        
+        foreach ($member in $allMembers) {
+            $policy = $CurrentValues.Members | Where-Object { $_.UserName -eq $member.UserName }
+            
+            if ($policy -ne $null) {
+                $user = @{
+                    Type     = "Change"
+                    Username = $member.UserName
+                    PermissionLevel    = $member.PermissionLevel
+                    ActAsSystemAccount = $member.ActAsSystemAccount
+                }
+            } else {
+                $user = @{
+                    Type     = "Add"
+                    Username = $member.UserName
+                    PermissionLevel    = $member.PermissionLevel
+                    ActAsSystemAccount = $member.ActAsSystemAccount
+                }                
+            }
+            $changeUsers += $user
+        }
+    }
+
+    if ($MembersToExclude) {
+        Write-Verbose "Processing MembersToExclude - Start Set"
+
+        foreach ($member in $MembersToExclude) {
+            $policy = $CurrentValues.Members | Where-Object { $_.UserName -eq $member.UserName }
+
+            if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or ($cacheAccounts.SuperReaderAccount -eq $member.Username)) {
+                throw "You cannot exclude the Cache accounts from the Web Application Policy"
+            }
+
+            if ($policy -ne $null) {
+                $user = @{
+                    Type     = "Delete"
+                    Username = $member.UserName
+                }
+            }
+            $changeUsers += $user
+        }
+    }
+    
+    ## Perform changes
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) -ScriptBlock {
+        $params      = $args[0]
+        $scriptRoot  = $args[1]
+        $changeUsers = $args[2]
+
+        Import-Module (Join-Path $scriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
-        if ($null -eq $wa) { return $null }
+        if ($null -eq $wa) {
+            throw "Specified web application could not be found."
+        }
 
         $denyAll     = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyAll)
         $denyWrite   = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::DenyWrite)
         $fullControl = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl)
         $fullRead    = $wa.PolicyRoles.GetSpecialRole([Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead)
 
-        if (($SetCacheAccountsPolicy) -and (-not($wa.Properties.ContainsKey("portalsuperuseraccount")) -or -not($wa.Properties.ContainsKey("portalsuperreaderaccount")))) {
-            throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
-        }
-        
-        $members = @()
-        foreach ($policy in $wa.Policies) {
-            $member = @{}
-            $member.Username = $policy.UserName
-            $member.PermissionLevel = $policy.PolicyRoleBindings.Name
-            $member.ActAsSystemAccount = $policy.IsSystemUser
-            $members += $member
-        }
+        Write-Verbose -Verbose "Processing changes"
 
-        if ($params.Members) {
-            Write-Verbose -Verbose "Processing Members parameter"
-
-            $allMembers = @()
-            foreach ($member in $params.Members) {
-                $allMembers += $member
-            }
-
-            if ($params.SetCacheAccountsPolicy) {
-                Write-Verbose -Verbose "Adding Cache Accounts to Members parameter"
-                $psuAccount = @{
-                    UserName = $wa.Properties["portalsuperuseraccount"]
-                    PermissionLevel = "Full Read"
-                }
-                $allMembers += $psuAccount
-                
-                $psrAccount = @{
-                    UserName = $wa.Properties["portalsuperreaderaccount"]
-                    PermissionLevel = "Full Read"
-                }
-                $allMembers += $psrAccount
-            }
-
-            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-            $differences = ComparePolicies $members $allMembers
-
-            foreach ($difference in $differences) {
-                $user = $difference.Keys[0]
-                $change = $difference[$user]
-                switch ($change) {
-                    Additional
-                        {
-                            ## Policy contains additional account, remove this account
-                            Write-Verbose -Verbose "Removing $user"
-                            Remove-WebAppPolicy $wa.Policies $user
-                        }
-                    Different
-                        {
-                            ## Account exists but has the incorrect settings, correct this account
-                            Write-Verbose -Verbose "Changing $user"
-                            $policy = $wa.Policies | Where-Object { $_.UserName -eq $user }
-                            $usersettings = GetUserFromCollection $allMembers $user
-                            if ($usersettings.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $usersettings.ActAsSystemAccount }
-                            
-                            $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $usersettings.PermissionLevel
-                            if ($polbinddiff -ne $null) {
-                                $policy.PolicyRoleBindings.RemoveAll()
-                                foreach ($permissionLevel in $usersettings.PermissionLevel) {
-                                    switch ($permissionLevel) {
-                                        "Deny All" {
-                                            $policy.PolicyRoleBindings.Add($denyAll)
-                                        }
-                                        "Deny Write" {
-                                            $policy.PolicyRoleBindings.Add($denyWrite)
-                                        }
-                                        "Full Control" {
-                                            $policy.PolicyRoleBindings.Add($fullControl)
-                                        }
-                                        "Full Read" {
-                                            $policy.PolicyRoleBindings.Add($fullRead)
-                                        }
-                                    }
-                                }
+        foreach ($user in $changeUsers) {
+            switch ($user.Type) {
+                "Add"    {
+                    # User does not exist. Add user
+                    Write-Verbose -Verbose "Adding $($user.Username)"
+                    $newPolicy = $wa.Policies.Add($user.UserName, $user.UserName)
+                    foreach ($permissionLevel in $user.PermissionLevel) {
+                        switch ($permissionLevel) {
+                            "Deny All" {
+                                $newPolicy.PolicyRoleBindings.Add($denyAll)
+                            }
+                            "Deny Write" {
+                                $newPolicy.PolicyRoleBindings.Add($denyWrite)
+                            }
+                            "Full Control" {
+                                $newPolicy.PolicyRoleBindings.Add($fullControl)
+                            }
+                            "Full Read" {
+                                $newPolicy.PolicyRoleBindings.Add($fullRead)
                             }
                         }
-                    Missing
-                        {
-                            ## Account is missing, add this account
-                            Write-Verbose -Verbose "Adding $user"
-                            $usersettings = GetUserFromCollection $allMembers $user
-                            $newPolicy = $wa.Policies.Add($user, $user)
-                            foreach ($permissionLevel in $usersettings.PermissionLevel) {
-                                switch ($permissionLevel) {
-                                    "Deny All" {
-                                        $newPolicy.PolicyRoleBindings.Add($denyAll)
-                                    }
-                                    "Deny Write" {
-                                        $newPolicy.PolicyRoleBindings.Add($denyWrite)
-                                    }
-                                    "Full Control" {
-                                        $newPolicy.PolicyRoleBindings.Add($fullControl)
-                                    }
-                                    "Full Read" {
-                                        $newPolicy.PolicyRoleBindings.Add($fullRead)
-                                    }
-                                }
-                            }
-                            if ($usersettings.ActAsSystemAccount) {
-                                $newPolicy.IsSystemUser = $usersettings.ActAsSystemAccount
-                            }
-                        }
+                    }
+                    if ($user.ActAsSystemAccount) {
+                        $newPolicy.IsSystemUser = $user.ActAsSystemAccount
+                    }                    
                 }
-                $wa.Update()
-            }
-        }
-
-        if ($params.MembersToInclude) {
-            Write-Verbose -Verbose "Processing MembersToInclude parameter"
-
-            $allMembers = @()
-            foreach ($member in $MembersToInclude) {
-                $allMembers += $member
-            }
-
-            if ($params.SetCacheAccountsPolicy) {
-                Write-Verbose -Verbose "Adding Cache Accounts to MembersToInclude parameter"
-                $psuAccount = @{
-                    UserName = $wa.Properties["portalsuperuseraccount"]
-                    PermissionLevel = "Full Read"
-                }
-                $allMembers += $psuAccount
-                
-                $psrAccount = @{
-                    UserName = $wa.Properties["portalsuperreaderaccount"]
-                    PermissionLevel = "Full Read"
-                }
-                $allMembers += $psrAccount
-            }
-            
-            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-            
-            foreach ($member in $allMembers) {
-                $policy = $wa.Policies | Where-Object { $_.UserName -eq $member.UserName }
-
-                if ($policy -ne $null) {
+                "Change" {
                     # User exists. Check permissions
-                    Write-Verbose -Verbose "User $($member.UserName) exists, checking permissions"
-                    if ($member.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $member.ActAsSystemAccount }
+                    $policy = $wa.Policies | Where-Object { $_.UserName -eq $user.Username }
 
-                    $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $member.PermissionLevel
+                    Write-Verbose -Verbose "User $($user.Username) exists, checking permissions"
+                    if ($user.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $user.ActAsSystemAccount }
+
+                    $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $user.PermissionLevel
                     if ($polbinddiff -ne $null) {
                         $policy.PolicyRoleBindings.RemoveAll()
-                        foreach ($permissionLevel in $member.PermissionLevel) {
+                        foreach ($permissionLevel in $user.PermissionLevel) {
                             switch ($permissionLevel) {
                                 "Deny All" {
                                     $policy.PolicyRoleBindings.Add($denyAll)
@@ -285,57 +317,15 @@ function Set-TargetResource
                             }
                         }
                     }
-                } else {
-                    # User does not exist. Add user
-                    Write-Verbose -Verbose "Adding $($member.UserName)"
-                    $newPolicy = $wa.Policies.Add($member.UserName, $member.UserName)
-                    foreach ($permissionLevel in $member.PermissionLevel) {
-                        switch ($permissionLevel) {
-                            "Deny All" {
-                                $newPolicy.PolicyRoleBindings.Add($denyAll)
-                            }
-                            "Deny Write" {
-                                $newPolicy.PolicyRoleBindings.Add($denyWrite)
-                            }
-                            "Full Control" {
-                                $newPolicy.PolicyRoleBindings.Add($fullControl)
-                            }
-                            "Full Read" {
-                                $newPolicy.PolicyRoleBindings.Add($fullRead)
-                            }
-                        }
-                    }
-                    if ($member.ActAsSystemAccount) {
-                        $newPolicy.IsSystemUser = $member.ActAsSystemAccount
-                    }
                 }
-                $wa.Update()
+                "Delete" {
+                    Write-Verbose -Verbose "Removing $($user.Username)"
+                    Remove-WebAppPolicy $wa.Policies $user.Username
+                }
             }
         }
-
-        if ($params.MembersToExclude) {
-            Write-Verbose -Verbose "Processing MembersToExclude parameter"
-
-            $psuAccount = $wa.Properties["portalsuperuseraccount"]
-            $psrAccount = $wa.Properties["portalsuperreaderaccount"]
-
-            Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-            
-            foreach ($member in $params.MembersToExclude) {
-                if (($psuAccount -eq $member.UserName) -or ($psrAccount -eq $member.UserName)) {
-                    throw "You cannot exclude the Cache accounts from the Web Application Policy"
-                }
-
-                $policy = $wa.Policies | Where-Object { $_.UserName -eq $member.UserName }
-
-                if ($policy -ne $null) {
-                    # User exists. Delete user
-                    Write-Verbose -Verbose "User $($member.UserName) exists, deleting"
-                    Remove-WebAppPolicy $wa.Policies $member.UserName
-                }
-                $wa.Update()
-            }
-        }
+ 
+        $wa.Update()
     }
 }
 
@@ -355,11 +345,18 @@ function Test-TargetResource
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    
     Write-Verbose -Message "Testing web app policy for $UserName at $WebAppUrl"
+    
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+
     if ($null -eq $CurrentValues) { return $false }
 
-    if (($SetCacheAccountsPolicy) -and (-not($CurrentValues.ContainsKey("SuperUserAccount")) -or -not($CurrentValues.ContainsKey("SuperReaderAccount")))) {
-        throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
+    $cacheAccounts = Get-CacheAccounts @PSBoundParameters
+    if ($SetCacheAccountsPolicy) {
+        if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "") {
+            throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
+        }
     }
     
     if ($Members) {
@@ -373,13 +370,13 @@ function Test-TargetResource
         if ($SetCacheAccountsPolicy) {
             Write-Verbose "SetCacheAccountsPolicy is True. Adding Cache Accounts to list"
             $psuAccount = @{
-                UserName = $CurrentValues.SuperUserAccount
-                PermissionLevel = "Full Read"
+                UserName = $cacheAccounts.SuperUserAccount
+                PermissionLevel = "Full Control"
             }
             $allMembers += $psuAccount
             
             $psrAccount = @{
-                UserName = $CurrentValues.SuperReaderAccount
+                UserName = $cacheAccounts.SuperReaderAccount
                 PermissionLevel = "Full Read"
             }
             $allMembers += $psrAccount
@@ -402,13 +399,13 @@ function Test-TargetResource
         if ($SetCacheAccountsPolicy) {
             Write-Verbose "SetCacheAccountsPolicy is True. Adding Cache Accounts to list"
             $psuAccount = @{
-                UserName = $CurrentValues.SuperUserAccount
-                PermissionLevel = "Full Read"
+                UserName = $cacheAccounts.SuperUserAccount
+                PermissionLevel = "Full Control"
             }
             $allMembers += $psuAccount
             
             $psrAccount = @{
-                UserName = $CurrentValues.SuperReaderAccount
+                UserName = $cacheAccounts.SuperReaderAccount
                 PermissionLevel = "Full Read"
             }
             $allMembers += $psrAccount
@@ -417,7 +414,7 @@ function Test-TargetResource
         foreach ($member in $allMembers) {            
             $match = $false
             foreach ($policy in $CurrentValues.Members) {
-                if ($policy.Username.ToLower() -eq $member.Username.ToLower()) {
+                if ($policy.Username -eq $member.Username) {
                     $match = $true
                     if ($member.ActAsSystemAccount) {
                         if ($policy.ActAsSystemAccount -ne $member.ActAsSystemAccount) { $match = $false }
@@ -435,9 +432,7 @@ function Test-TargetResource
     if ($MembersToExclude) {
         Write-Verbose "Processing MembersToExclude - Start Test"
         foreach ($member in $MembersToExclude) {
-            Write-Verbose "$($CurrentValues.SuperUserAccount) - $($CurrentValues.SuperReaderAccount) - $($member.Username)"
-            
-            if (($CurrentValues.SuperUserAccount -eq $member.Username) -or ($CurrentValues.SuperReaderAccount -eq $member.Username)) {
+            if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or ($cacheAccounts.SuperReaderAccount -eq $member.Username)) {
                 throw "You cannot exclude the Cache accounts from the Web Application Policy"
             }
             
@@ -452,3 +447,37 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
+
+function Get-CacheAccounts() {
+    Param (
+        $InputParameters
+    )
+    
+    $cacheAccounts = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $InputParameters -ScriptBlock {
+        $params = $args[0]
+
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+
+        if ($null -eq $wa) {
+            throw "Specified web application could not be found."
+        }
+
+        $returnval = @{
+            SuperUserAccount = ""               
+            SuperReaderAccount = ""
+        }
+
+        if ($wa.Properties.ContainsKey("portalsuperuseraccount")) {
+            $returnval.SuperUserAccount = $wa.Properties["portalsuperuseraccount"]
+        }
+        if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) {
+            $returnval.SuperReaderAccount = $wa.Properties["portalsuperreaderaccount"]
+        }
+        
+        return $returnval
+    }
+
+    return $cacheAccounts
+}
+
+#Verplaatsen methode naar eigen utils module

@@ -62,7 +62,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "returns null from the set method" {
-                Set-TargetResource @testParams | Should BeNullOrEmpty
+                { Set-TargetResource @testParams } | Should throw "Web application does not exist"
             }
         }
         
@@ -370,11 +370,11 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
+                { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
 
             It "should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
+                { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
         }
 
@@ -438,11 +438,11 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "should throw exception in the test method" {
-                { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
+                { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
 
             It "should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount properties is not configured."
+                { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
         }
 
@@ -459,29 +459,38 @@ namespace Microsoft.SharePoint.Administration {
                 SetCacheAccounts=$true
             }
             Mock Get-SPWebApplication { 
-                $roleBindings = @(
+                $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+
+                $roleBindingsFC = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+                $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
                     @{
                         UserName = "contoso\user1"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                     @{
                         UserName = "contoso\sp_psu"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFC
                         IsSystemUser = $false
                     }
                     @{
                         UserName = "contoso\sp_psr"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                 )
@@ -535,29 +544,38 @@ namespace Microsoft.SharePoint.Administration {
                 SetCacheAccounts=$true
             }
             Mock Get-SPWebApplication { 
-                $roleBindings = @(
+                $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+
+                $roleBindingsFC = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+                $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
                     @{
                         UserName = "contoso\user1"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                     @{
                         UserName = "contoso\sp_psu"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFC
                         IsSystemUser = $false
                     }
                     @{
                         UserName = "contoso\sp_psr"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                 )
@@ -610,29 +628,38 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
             Mock Get-SPWebApplication { 
-                $roleBindings = @(
+                $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
+                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                } -PassThru
+
+                $roleBindingsFC = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+                $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
                     $Global:xSPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
                     @{
                         UserName = "contoso\user1"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                     @{
                         UserName = "contoso\sp_psu"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFC
                         IsSystemUser = $false
                     }
                     @{
                         UserName = "contoso\sp_psr"
-                        PolicyRoleBindings = $roleBindings
+                        PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                 )
@@ -1291,6 +1318,51 @@ namespace Microsoft.SharePoint.Administration {
                 $policies = @(
                     @{
                         UserName = "contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                    Properties = @{}
+                }
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "The users in the Members parameter have the same settings as configured in the policy, in Claims format" {
+            $testParams = @{
+                WebAppUrl   = "http:/sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                        Username           = "i:0#.w|contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "i:0#.w|contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
                     }   

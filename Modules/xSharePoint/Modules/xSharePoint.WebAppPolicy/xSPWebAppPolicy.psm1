@@ -92,7 +92,7 @@ function GetUserFromCollection() {
     )
 
     foreach ($item in $collection) {
-        if ($item.Username.ToLower() -eq $user.ToLower()) { return $item }
+        if ($item.Username -eq $user) { return $item }
     }
 
     return $null
