@@ -4,9 +4,9 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting install status of SP binaries"
@@ -33,9 +33,9 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -99,9 +99,9 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -109,6 +109,7 @@ function Test-TargetResource
         return
     }
 
+    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Testing for installation of SharePoint"

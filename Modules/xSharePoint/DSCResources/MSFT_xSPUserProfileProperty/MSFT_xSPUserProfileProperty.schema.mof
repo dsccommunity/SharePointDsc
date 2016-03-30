@@ -16,6 +16,7 @@ This Resource  doesn't currently support removing existing user profile properti
 xSPUserProfileProperty WorkEmailProperty
 {
     Name = "WorkEmail2"
+    Ensure = "Present"
     UserProfileService = "User Profile Service Application"
     DisplayName = "Work Email"
     Type = "Email"

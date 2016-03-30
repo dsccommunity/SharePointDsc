@@ -19,6 +19,7 @@ Describe "xSPBCSServiceApp" {
             ApplicationPool = "Test App Pool"
             DatabaseName = "Test_DB"
             DatabaseServer = "TestServer\Instance"
+            Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
 
@@ -29,13 +30,15 @@ Describe "xSPBCSServiceApp" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
-        Context "When no service applications exist in the current farm" {
+        Mock Remove-SPServiceApplication { }
+        
+        Context "When no service applications exist in the current farm and it should" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPBusinessDataCatalogServiceApplication { }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
 
@@ -49,20 +52,20 @@ Describe "xSPBCSServiceApp" {
             }
         }
 
-        Context "When service applications exist in the current farm but the specific BCS app does not" {
+        Context "When service applications exist in the current farm with the same name but is the wrong type" {
 
             Mock Get-SPServiceApplication { return @(@{
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
 
         }
 
-        Context "When a service application exists and is configured correctly" {
+        Context "When a service application exists and it should, and is also configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Business Data Connectivity Service Application"
@@ -76,7 +79,7 @@ Describe "xSPBCSServiceApp" {
             }
 
             It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
 
@@ -85,7 +88,7 @@ Describe "xSPBCSServiceApp" {
             }
         }
 
-        Context "When a service application exists and the app pool is not configured correctly" {
+        Context "When a service application exists and it should, but the app pool is not configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
                     TypeName = "Business Data Connectivity Service Application"
@@ -109,6 +112,50 @@ Describe "xSPBCSServiceApp" {
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPBusinessDataCatalogServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            ApplicationPool = "-"
+            Ensure = "Absent"
+        }
+        Context "When the service application exists but it shouldn't" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Business Data Connectivity Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "calls the remove service application cmdlet in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+        
+        Context "When the serivce application doesn't exist and it shouldn't" {
+            Mock Get-SPServiceApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "returns true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }

@@ -52,7 +52,7 @@ Describe "xSPWorkManagement" {
             Mock Remove-SPServiceApplication{ }
 
             It "returns true when the Test method is called" {
-                Test-TargetResource @testParamsAbsent | Should Be $true
+                Test-TargetResource @testParamsAbsent | Should Be $false
             }
 
             It "calls the remove service app cmdlet from the set method" {
@@ -69,8 +69,7 @@ Describe "xSPWorkManagement" {
 
             Mock New-SPWorkManagementServiceApplicationProxy { }
             It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "returns false when the Test method is called" {
@@ -102,12 +101,11 @@ Describe "xSPWorkManagement" {
             
         
             It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "creates  new app from the Get method" {
-                Set-TargetResource @testParams | Should BeNullOrEmpty
+                Set-TargetResource @testParams 
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
                 Assert-MockCalled Set-SPWorkManagementServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
@@ -134,8 +132,7 @@ Describe "xSPWorkManagement" {
             }
 
             It "returns values from the get method" {
-                Get-TargetResource @testParamsComplete | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsComplete.Name } 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
             It "returns true when the Test method is called" {
