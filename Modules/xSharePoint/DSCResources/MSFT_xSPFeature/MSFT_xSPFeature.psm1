@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $Version
     )
 
@@ -49,26 +49,26 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $Version
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $PSBoundParameters.Add("CurrentValues", $CurrentValues)
+    $PSBoundParameters.Ensure = $Ensure 
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        
-        $params = $args[0]
-        $currentValues = $params["CurrentValues"]
+    if ($Ensure -eq "Present") {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            $currentValues = $params["CurrentValues"]
 
-        $runParams = @{ Identity = $params.Name }
+            $runParams = @{ Identity = $params.Name }
 
-        if ($params.FeatureScope -ne "Farm") {
-            $runParams.Add("Url", $params.Url)
-        }
-        
-        if ($params.Ensure -eq "Present") {
+            if ($params.FeatureScope -ne "Farm") {
+                $runParams.Add("Url", $params.Url)
+            }
+            
             if ($currentValues.Ensure -eq "Present"){
                     
                 # Disable the feature first if it already exists.
@@ -79,14 +79,26 @@ function Set-TargetResource
 
             Write-Verbose "Enable Feature '$($params.Name)' at scope '$($params.FeatureScope)'..."
             Enable-SPFeature @runParams
+        }
+    }
+    if ($Ensure -eq "Absent") {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            
+            $params = $args[0]
+            $currentValues = $params["CurrentValues"]
 
-        } else {
+            $runParams = @{ Identity = $params.Name }
 
+            if ($params.FeatureScope -ne "Farm") {
+                $runParams.Add("Url", $params.Url)
+            }
+            
             $runParams.Add("Confirm", $false)   
             Write-Verbose "Disable Feature '$($params.Name)' because 'Ensure' is '$($params.Ensure)'..." 
             Disable-SPFeature @runParams
-        }
+        }        
     }
+    
 }
 
 
@@ -100,16 +112,16 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Url,
         [parameter(Mandatory = $true)]  [ValidateSet("Farm","WebApplication","Site","Web")] [System.String] $FeatureScope,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $Version
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
 
-    $valuesToCheck = @("Ensure", "Version")
+    $PSBoundParameters.Ensure = $Ensure 
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "Version")
 }
 
 Export-ModuleMember -Function *-TargetResource

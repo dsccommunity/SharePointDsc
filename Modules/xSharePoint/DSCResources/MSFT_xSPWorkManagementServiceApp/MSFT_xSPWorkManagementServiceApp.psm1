@@ -5,8 +5,8 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.UInt32] $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         [parameter(Mandatory = $false)] [System.UInt32] $MinimumTimeBetweenProviderRefreshes, 
@@ -20,16 +20,20 @@ function Get-TargetResource
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            Ensure = "Absent"
+        } 
         if ($null -eq $serviceApps) { 
-            return $null 
+            return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Work Management Service Application" }
 
         If ($null -eq $serviceApp) { 
-            return $null 
+            return $nullReturn 
         } else {
-            $returnVal =  @{
+            return @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 MinimumTimeBetweenEwsSyncSubscriptionSearches =  $serviceApp.AdminSettings.MinimumTimeBetweenEwsSyncSubscriptionSearches.TotalMinutes 
@@ -38,8 +42,8 @@ function Get-TargetResource
                 NumberOfSubscriptionSyncsPerEwsSyncRun=  $serviceApp.AdminSettings.NumberOfSubscriptionSyncsPerEwsSyncRun
                 NumberOfUsersEwsSyncWillProcessAtOnce=  $serviceApp.AdminSettings.NumberOfUsersEwsSyncWillProcessAtOnce
                 NumberOfUsersPerEwsSyncBatch=  $serviceApp.AdminSettings.NumberOfUsersPerEwsSyncBatch
+                Ensure = "Present"
             }
-            return $returnVal
         }
     }
     return $result
@@ -52,8 +56,8 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.UInt32] $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         [parameter(Mandatory = $false)] [System.UInt32] $MinimumTimeBetweenProviderRefreshes, 
@@ -65,16 +69,9 @@ function Set-TargetResource
     if($Ensure -ne "Absent" -and $ApplicationPool -eq $null){
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
-    <#
-    if ($Ensure -eq  "Absent") {
-        if($result -ne $null){
-            Write-Verbose -Message "Removing Work management Service Application $Name"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters  -ScriptBlock {
-            $params = $args[0]
-            }
-        }
-    }#>
+
     Write-Verbose -Message "Creating work management Service Application $Name"
+    $PSBoundParameters.Ensure = $Ensure
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
@@ -131,8 +128,8 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
         [parameter(Mandatory = $false)] [System.UInt32] $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         [parameter(Mandatory = $false)] [System.UInt32] $MinimumTimeBetweenProviderRefreshes, 
@@ -144,23 +141,22 @@ function Test-TargetResource
     
     Write-Verbose -Message "Testing for App management Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($null -eq $CurrentValues) { return $false 
-    }else{
-        if($Ensure -eq "Absent")
-        { #Ensure = Absent doesn't care state
-            return $true
-        }
+    $PSBoundParameters.Ensure = $Ensure
+    if ($Ensure -eq "Present") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+                                                                                                                                    "MinimumTimeBetweenEwsSyncSubscriptionSearches",
+                                                                                                                                    "MinimumTimeBetweenProviderRefreshes",
+                                                                                                                                    "MinimumTimeBetweenSearchQueries",
+                                                                                                                                    "Name",
+                                                                                                                                    "NumberOfSubscriptionSyncsPerEwsSyncRun",
+                                                                                                                                    "NumberOfUsersEwsSyncWillProcessAtOnce",
+                                                                                                                                    "NumberOfUsersPerEwsSyncBatch",
+                                                                                                                                    "Ensure"
+                                                                                                                                    )
+    } else {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
-                                                                                                                                "MinimumTimeBetweenEwsSyncSubscriptionSearches",
-                                                                                                                                "MinimumTimeBetweenProviderRefreshes",
-                                                                                                                                "MinimumTimeBetweenSearchQueries",
-                                                                                                                                "Name",
-                                                                                                                                "NumberOfSubscriptionSyncsPerEwsSyncRun",
-                                                                                                                                "NumberOfUsersEwsSyncWillProcessAtOnce",
-                                                                                                                                "NumberOfUsersPerEwsSyncBatch"
-                                                                                                                               )
 }
 
 Export-ModuleMember -Function *-TargetResource

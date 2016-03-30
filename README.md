@@ -96,6 +96,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
+ * Added ensure properties to multiple resources to standardise schemas
  * Added xSPSearchContentSource, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp and xSPPerformancePointServiceApp resources
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
@@ -103,6 +104,8 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
  * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
  * Updated xSPWebAppPolicy to allow addition and removal of accounts, including the Cache Accounts, to the web application policy.
+ * Fixed bug with claims accounts not being added to web app policy in xSPCacheAccounts
+ * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
  * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
  * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
 

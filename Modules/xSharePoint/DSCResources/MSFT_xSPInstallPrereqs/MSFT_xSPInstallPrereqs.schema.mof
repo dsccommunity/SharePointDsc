@@ -65,6 +65,6 @@ class MSFT_xSPInstallPrereqs : OMI_BaseResource
     [Write, Description("The path to the installer for this prerequisite")] String KB3092423;
     [Write, Description("The path to the installer for this prerequisite")] String ODBC;
     [Write, Description("The path to the installer for this prerequisite")] String DotNet452;
-    [Required, Description("Present to install the prerequisites. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("Present to install the prerequisites. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
 

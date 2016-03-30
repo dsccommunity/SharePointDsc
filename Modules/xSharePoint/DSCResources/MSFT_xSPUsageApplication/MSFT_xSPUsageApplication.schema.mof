@@ -13,6 +13,7 @@ The database settings are only used for initial provisioning, but the usage sett
         UsageLogCutTime       = 5
         UsageLogLocation      = "L:\UsageLogs"
         UsageLogMaxFileSizeKB = 1024
+        Ensure                = "Present"
         InstallAccount        = $InstallAccount
     }
 */
@@ -28,5 +29,6 @@ class MSFT_xSPUsageApplication : OMI_BaseResource
     [Write, Description("The location on each server to store the log files")] string UsageLogLocation;
     [Write, Description("The maximum file size for log files in KB")] uint32 UsageLogMaxFileSizeKB;
     [Write, Description("The total space of all log files on disk in GB")] uint32 UsageLogMaxSpaceGB;
+    [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
