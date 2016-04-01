@@ -32,6 +32,7 @@ after_test:
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
         New-DscChecksum -Path $env:APPVEYOR_BUILD_FOLDER -Outpath $env:APPVEYOR_BUILD_FOLDER
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName.checksum" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
         cd "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint"
         New-Nuspec -packageName $env:APPVEYOR_PROJECT_NAME -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription $env:APPVEYOR_PROJECT_NAME -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
