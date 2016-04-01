@@ -107,6 +107,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
  * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
  * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
+ * Added xSPContentDatabase resource
 
 ### 0.12.0.0
 
