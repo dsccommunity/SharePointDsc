@@ -6,28 +6,35 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-        Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
+    Write-Verbose -Message "Getting Visio Graphics service app '$Name'"
 
-        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
+    
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name = $params.Name
+            ApplicationPool = $params.ApplicationPool
+            Ensure = "Absent"
+        } 
         if ($null -eq $serviceApps) { 
-            return $null 
+            return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Visio Graphics Service Application" }
 
-        If ($null -eq $serviceApp) { 
-            return $null 
+        if ($null -eq $serviceApp) { 
+            return $nullReturn
         } else {
-            $returnVal =  @{
+            return @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
+                Ensure = "Present"
+                InstallAccount = $params.InstallAccount
             }
-            return $returnVal
         }
     }
     return $result
@@ -41,12 +48,13 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result -eq $null) { 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -56,7 +64,7 @@ function Set-TargetResource
                                       -ApplicationPool $params.ApplicationPool
         }
     }
-    else {
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") {
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating Visio Graphics Service Application $Name"
             Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -70,6 +78,17 @@ function Set-TargetResource
             }
         }
     }
+    
+    if ($Ensure -eq "Absent") {
+        Write-Verbose -Message "Removing Visio service application $Name"
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            
+            $service = Get-SPServiceApplication -Name $params.Name `
+                    | Where-Object { $_.TypeName -eq "Visio Graphics Service Application" }
+            Remove-SPServiceApplication $service -Confirm:$false
+        }
+    }   
 }
 
 function Test-TargetResource
@@ -80,14 +99,14 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     
     Write-Verbose -Message "Testing for Visio Graphics Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool")
+    $PSBoundParameters.Ensure = $Ensure
+    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

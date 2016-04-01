@@ -17,20 +17,33 @@ Describe 'xSharePoint whole of module tests' {
     Context "Validate the MOF schemas for the DSC resources" {
 
         It "should not list InstallAccount as required if it does have that attribute" {
-            $mofFilesWithNoInstallAccount = 0
+            $mofFilesWithRequiredInstallAccount = 0
             $mofFiles | ForEach-Object {
-                $fileHasInstallAccount = $false
-
                 $mofSchemas = Get-MofSchemaObject $_.FullName
                 foreach($mofSchema in $mofSchemas) {
                     $installAccount = $mofSchema.Attributes | Where-Object { $_.Name -eq "InstallAccount" }
                     if (($null -ne $installAccount) -and ($installAccount.State -eq "Required")) {
-                        $mofFilesWithNoInstallAccount += 1
+                        $mofFilesWithRequiredInstallAccount += 1
                         Write-Warning "File $($_.FullName) has InstallAccount listed as a required parameter. After v0.6 of xSharePoint this should be changed to 'write' instead of 'required'"
                     }
                 }
             }
-            $mofFilesWithNoInstallAccount | Should Be 0
+            $mofFilesWithRequiredInstallAccount | Should Be 0
+        }
+        
+        It "should not list Ensure as required if it does have that attribute" {
+            $mofFilesWithRequiredEnsure = 0
+            $mofFiles | ForEach-Object {
+                $mofSchemas = Get-MofSchemaObject $_.FullName
+                foreach($mofSchema in $mofSchemas) {
+                    $installAccount = $mofSchema.Attributes | Where-Object { $_.Name -eq "Ensure" }
+                    if (($null -ne $installAccount) -and ($installAccount.State -eq "Required")) {
+                        $mofFilesWithRequiredEnsure += 1
+                        Write-Warning "File $($_.FullName) has Ensure listed as a required parameter. This should be 'write' and a default of 'present' should exist within the modules logic"
+                    }
+                }
+            }
+            $mofFilesWithRequiredEnsure | Should Be 0
         }
 
         It "uses MOF schemas that match the functions used in the corresponding PowerShell module for each resource" {
@@ -65,7 +78,7 @@ Describe 'xSharePoint whole of module tests' {
                 $totalTabsCount = 0
                 $allTextFiles | %{
                     $fileName = $_.FullName
-                    $tabStrings = (cat $_.FullName -Raw) | Select-String "`t" | % {
+                    (cat $_.FullName -Raw) | Select-String "`t" | % {
                         Write-Warning "There are tab in $fileName. Use Fixer 'Get-TextFilesList `$pwd | ConvertTo-SpaceIndentation'."
                         $totalTabsCount++
                     }

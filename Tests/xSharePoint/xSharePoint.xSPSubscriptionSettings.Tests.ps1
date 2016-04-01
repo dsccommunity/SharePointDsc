@@ -19,6 +19,7 @@ Describe "xSPSubscriptionSettingsServiceApp" {
             ApplicationPool = "Test App Pool"
             DatabaseName = "Test_DB"
             DatabaseServer = "TestServer\Instance"
+            Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
 
@@ -28,15 +29,15 @@ Describe "xSPSubscriptionSettingsServiceApp" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Remove-SPServiceApplication {}
 
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPSubscriptionSettingsServiceApplication { return @{}}
             Mock New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
             It "returns false when the Test method is called" {
@@ -56,9 +57,8 @@ Describe "xSPSubscriptionSettingsServiceApp" {
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
         }
@@ -76,9 +76,8 @@ Describe "xSPSubscriptionSettingsServiceApp" {
                 })
             }
 
-            It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
             }
 
             It "returns true when the Test method is called" {
@@ -125,6 +124,7 @@ Describe "xSPSubscriptionSettingsServiceApp" {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "Test App Pool"
+                Ensure = "Present"
             }
 
             Mock Get-SPServiceApplication { return $null }
@@ -135,6 +135,51 @@ Describe "xSPSubscriptionSettingsServiceApp" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            ApplicationPool = "-"
+            Ensure = "Absent"
+        }
+        
+        Context "When the service app exists but it shouldn't" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = "Database"
+                        Server = @{ Name = "Server" }
+                    }
+                })
+            }
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should remove the service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+        
+        Context "When the service app doesn't exist and shouldn't" {
+            Mock Get-SPServiceApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }

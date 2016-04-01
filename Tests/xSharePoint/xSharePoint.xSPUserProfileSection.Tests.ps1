@@ -15,7 +15,7 @@ $ModuleName = "MSFT_xSPUserProfileSection"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-Describe "xSPUserProfileProperty" {
+Describe "xSPUserProfileSection" {
     InModuleScope $ModuleName {
         $testParams= @{
            Name = "PersonalInformation"
@@ -158,7 +158,7 @@ Describe "xSPUserProfileProperty" {
             
             It "returns null from the Get method" {
                 $Global:UpsConfigManagerGetSectionByNameCalled = $false
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
                 $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
             }
@@ -184,10 +184,8 @@ Describe "xSPUserProfileProperty" {
         Context "When section exists and all properties match" {
             It "returns valid value from the Get method" {
                 $Global:UpsConfigManagerGetSectionByNameCalled = $true
-                
-                $currentValues = Get-TargetResource @testParams 
-                $currentValues | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
+  
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
                 $Global:UpsConfigManagerGetSectionByNameCalled | Should be $true
             }
             
@@ -218,7 +216,7 @@ Describe "xSPUserProfileProperty" {
 
             It "returns true when the Test method is called" {
                 $Global:xSPUPGetSectionByNameCalled = $true
-                Test-TargetResource @testParams | Should Be $true
+                Test-TargetResource @testParams | Should Be $false
 
             }
 
@@ -249,7 +247,7 @@ Describe "xSPUserProfileProperty" {
             It "returns valid value from the Get method" {
                 $Global:xSPUPGetSectionByNameCalled = $true
                 $currentValues = Get-TargetResource @testParams 
-                $currentValues | Should Not BeNullOrEmpty
+                $currentValues.Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
             

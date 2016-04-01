@@ -7,7 +7,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
         [parameter(Mandatory = $false)] [System.String] $Url,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
     )
@@ -53,7 +53,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
         [parameter(Mandatory = $false)] [System.String] $Url,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
     )
@@ -94,11 +94,13 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $true)]  [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] [System.String] $Zone,
         [parameter(Mandatory = $false)] [System.String] $Url,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
 
     )
 
+    $PSBoundParameters.Ensure = $Ensure
+    
     if ([string]::IsNullOrEmpty($Url) -and $Ensure -eq "Present") {
         throw "URL must be specified when ensure is set to present"
     }
