@@ -44,8 +44,7 @@ function Get-TargetResource
                 InstallAccount = $params.InstallAccount
                 DatabaseName = $serviceApp.UsageDatabase.Name
                 DatabaseServer = $serviceApp.UsageDatabase.Server.Name
-                DatabasePassword = $serviceApp.UsageDatabase.Password
-                DatabaseUsername = $serviceApp.UsageDatabase.Username
+                DatabaseCredentials = $params.DatabaseCredentials
                 FailoverDatabaseServer = $serviceApp.UsageDatabase.FailoverServer
                 UsageLogCutTime = $service.UsageLogCutTime
                 UsageLogLocation = $service.UsageLogDir

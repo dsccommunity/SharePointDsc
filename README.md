@@ -108,6 +108,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
  * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
  * Added xSPContentDatabase resource
+ * Fixed bug with get output of xSPUSageApplication
 
 ### 0.12.0.0
 
