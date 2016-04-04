@@ -109,6 +109,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
  * Added xSPContentDatabase resource
  * Fixed nuget package format for development feed from AppVeyor
+ * Fixed bug with get output of xSPUSageApplication
 
 ### 0.12.0.0
 
