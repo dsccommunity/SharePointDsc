@@ -84,8 +84,29 @@ function Get-TargetResource
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}) -ne $null))    
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}) -ne $null))            
     }
+        
+    $results = @{
+        InstallerPath = $InstallerPath
+        OnlineMode = $OnlineMode
+        SQLNCli = $SQLNCli      
+        PowerShell = $PowerShell        
+        NETFX = $NETFX    
+        IDFX = $IDFX        
+        Sync = $Sync        
+        AppFabric = $AppFabric        
+        IDFX11 = $IDFX11      
+        MSIPCClient = $MSIPCClient        
+        WCFDataServices = $WCFDataServices        
+        KB2671763 = $KB2671763   
+        WCFDataServices56 = $WCFDataServices56        
+        KB2898850 = $KB2898850 
+        MSVCRT11 = $MSVCRT11
+        MSVCRT14 = $MSVCRT14
+        KB3092423 = $KB3092423
+        ODBC = $ODBC
+        DotNet452 = $DotNet452
+    }
     
-    $results = $PSBoundParameters
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
         $results.Ensure = "Absent"
     } else {
@@ -185,6 +206,17 @@ function Set-TargetResource
             throw "The prerequisite installer ran with the following unknown exit code $($process.ExitCode)"
         }
     }
+    
+    if ( `
+        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
+         -or `
+        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+        -or `
+        ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+        ) {
+            Write-Verbose -Message "xSPInstallPrereqs has detected the server has pending a reboot. Flagging to the DSC engine that the server should reboot before continuing."
+            $global:DSCMachineStatus = 1   
+        }
 }
 
 
