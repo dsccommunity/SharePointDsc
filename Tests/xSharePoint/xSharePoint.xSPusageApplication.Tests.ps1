@@ -41,7 +41,10 @@ Describe "xSPUsageApplication" {
             UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
             UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
         }}
-        Mock Remove-SPSErviceApplication
+        Mock Remove-SPServiceApplication
+        Mock Get-SPServiceApplicationProxy {
+            return (New-Object Object | Add-Member ScriptMethod Provision {} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Online" -PassThru  | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+        }
 
         Context "When no service applications exist in the current farm" {
 
@@ -201,6 +204,41 @@ Describe "xSPUsageApplication" {
             
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            Ensure = "Present"
+        }
+        
+        Context "The proxy for the service app is offline when it should be running" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Usage and Health Data Collection Service Application"
+                    DisplayName = $testParams.Name
+                    UsageDatabase = @{
+                        Name = "db"
+                        Server = @{ Name = "server" }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationProxy {
+                return (New-Object Object | Add-Member ScriptMethod Provision {$Global:xSharePointUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+            }    
+            $Global:xSharePointUSageAppProxyStarted = $false
+            
+            It "should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should start the proxy in the set method" {
+                Set-TargetResource @testParams
+                $Global:xSharePointUSageAppProxyStarted | Should Be $true
             }
         }
     }    
