@@ -132,7 +132,7 @@ function Set-TargetResource
         throw "Web application does not exist"
     }
 
-    $cacheAccounts = Get-CacheAccounts @PSBoundParameters
+    $cacheAccounts = Get-CacheAccounts $WebAppUrl
     
     if ($SetCacheAccountsPolicy) {
         if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "") {
@@ -374,7 +374,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues) { return $false }
 
-    $cacheAccounts = Get-CacheAccounts @PSBoundParameters
+    $cacheAccounts = Get-CacheAccounts $WebAppUrl
     if ($SetCacheAccountsPolicy) {
         if ($cacheAccounts.SuperUserAccount -eq "" -or $cacheAccounts.SuperReaderAccount -eq "") {
             throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
@@ -476,9 +476,10 @@ function Get-CacheAccounts() {
     )
     
     $cacheAccounts = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $InputParameters -ScriptBlock {
+        Write-Verbose -Verbose "Retrieving CacheAccounts"
         $params = $args[0]
 
-        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params -ErrorAction SilentlyContinue
 
         if ($null -eq $wa) {
             throw "Specified web application could not be found."
