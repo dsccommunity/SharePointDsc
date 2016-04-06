@@ -45,6 +45,28 @@ function Get-TargetResource
 
         if ($null -eq $wa) { return $null }
 
+        $SetCacheAccountsPolicy = $false
+        if ($param.SetCacheAccountsPolicy) {
+            if ($wa.Properties.ContainsKey("portalsuperuseraccount") -and $wa.Properties.ContainsKey("portalsuperreaderaccount")) {
+                $correctPSU = $false
+                $correctPSR = $false
+
+                $psu = $wa.Policies[$wa.Properties["portalsuperuseraccount"]]
+                if ($psu -ne $null) {
+                    if ($psu.PolicyRoleBindings.Name -contains "Full Control") { $correctPSU = $true }
+                }
+
+                $psr = $wa.Policies[$wa.Properties["portalsuperreaderaccount"]]
+                if ($psr -ne $null) {
+                    if ($psr.PolicyRoleBindings.Name -contains "Full Read") { $correctPSR = $true }
+                }
+
+                if ($correctPSU -eq $true -and $correctPSR -eq $true) {
+                    $SetCacheAccountsPolicy = $true
+                }
+            }
+        }
+           
         $members = @()
         foreach ($policy in $wa.Policies) {
             $member = @{}
@@ -59,7 +81,7 @@ function Get-TargetResource
                 Members = $members
                 MembersToInclude = $params.MembersToInclude
                 MembersToExclude = $params.MembersToExclude
-                SetCacheAccountsPolicy = $params.SetCacheAccountsPolicy
+                SetCacheAccountsPolicy = $SetCacheAccountsPolicy
                 InstallAccount = $params.InstallAccount
         }
         
