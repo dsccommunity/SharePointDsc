@@ -38,20 +38,25 @@ function Get-TargetResource
         }
         else
         {
+            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Proxy" }
+            $Ensure = "Present"
+            if($spUsageApplicationProxy.Status -eq "Disabled") {
+                $Ensure = "Absent"
+            }
+            
             $service = Get-SPUsageService
             return @{
                 Name = $serviceApp.DisplayName
                 InstallAccount = $params.InstallAccount
                 DatabaseName = $serviceApp.UsageDatabase.Name
                 DatabaseServer = $serviceApp.UsageDatabase.Server.Name
-                DatabasePassword = $serviceApp.UsageDatabase.Password
-                DatabaseUsername = $serviceApp.UsageDatabase.Username
+                DatabaseCredentials = $params.DatabaseCredentials
                 FailoverDatabaseServer = $serviceApp.UsageDatabase.FailoverServer
                 UsageLogCutTime = $service.UsageLogCutTime
                 UsageLogLocation = $service.UsageLogDir
                 UsageLogMaxFileSizeKB = $service.UsageLogMaxFileSize / 1024
                 UsageLogMaxSpaceGB = $service.UsageLogMaxSpaceGB
-                Ensure = "Present"
+                Ensure = $Ensure
             }
         }
     }
@@ -84,7 +89,7 @@ function Set-TargetResource
     if ($CurrentState.Ensure -eq "Absent" -and $Ensure -eq "Present") {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-        
+            
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
@@ -103,6 +108,11 @@ function Set-TargetResource
         Write-Verbose -Message "Configuring usage application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
+            
+            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Proxy" }
+            if($spUsageApplicationProxy.Status -eq "Disabled") {
+                $spUsageApplicationProxy.Provision()
+            }
             
             $setParams = @{}
             $setParams.Add("LoggingEnabled", $true)
