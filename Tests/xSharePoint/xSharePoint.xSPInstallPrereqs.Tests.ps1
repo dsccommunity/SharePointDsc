@@ -25,6 +25,21 @@ Describe "xSPInstallPrereqs" {
             function Get-WindowsFeature() { }
         }
         
+        Mock Get-ChildItem {
+            return @(
+                @{
+                    Version = "4.5.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                },
+                @{
+                    Version = "4.5.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                }
+            )
+        }
+        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
@@ -221,5 +236,78 @@ Describe "xSPInstallPrereqs" {
                 {Set-TargetResource @testParams} | Should Throw
             }
         }
+        
+        Context "SharePoint 2013 is installing on a server with .NET 4.6" {
+            Mock Get-ChildItem {
+                return @(
+                    @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    },
+                    @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    }
+                )
+            }
+            
+            It "throws an error in the set method" {
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
+        
+      Context "Prerequisites are not installed but should be and are to be installed in offline mode, with SXSstore specified" {
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $false
+                SXSpath = "C:\SPInstall\SXS"
+                Ensure = "Present"
+            }
+
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
+            Mock Get-CimInstance { return @() }
+            Mock Get-ChildItem { return @() }
+
+            if ($majorBuildNumber -eq 15) {
+                $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+            }
+            if ($majorBuildNumber -eq 16) {
+                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
+            }
+            $requiredParams | ForEach-Object {
+                $testParams.Add($_, "C:\fake\value.exe")
+            }
+
+            It "installs required Windows features from specified path" {
+                Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $true ; restartneeded = "no"})  }
+                Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path { return $true }
+
+                Set-TargetResource @testParams
+                Assert-MockCalled Install-WindowsFeature -Scope It 
+            }
+            
+             It "feature install requires a reboot" {
+                Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $true ; restartneeded = "yes"})  }
+                Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path { return $true }
+
+                Set-TargetResource @testParams
+                $global:DSCMachineStatus | Should Be 1
+                 
+            }
+            
+             It "feature install failure throws an error" {
+                Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $false ; restartneeded = "no"})  }
+                Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path { return $true }
+
+                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"
+                
+            }
+            
+        } 
     }    
 }

@@ -10,15 +10,17 @@ The database specific parameters are only used during initial provisioning of th
     {
         Name                 = "State Service Application"
         DatabaseName         = "SP_State"
+        Ensure               = "Present"
         PsDscRunAsCredential = $InstallAccount
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPStateServiceApp")]
 class MSFT_xSPStateServiceApp : OMI_BaseResource
 {
-    [Key] string Name;
-    [Write, EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
-    [Required] string DatabaseName;
-    [Write] string DatabaseServer;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description("The name of the state service app")] string Name;
+    [Write, Description("The database credentials for accessing the database"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;
+    [Required, Description("The name of the database for the service app")] string DatabaseName;
+    [Write, Description("The name of the database server")] string DatabaseServer;
+    [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

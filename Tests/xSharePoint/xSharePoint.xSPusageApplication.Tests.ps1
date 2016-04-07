@@ -23,6 +23,7 @@ Describe "xSPUsageApplication" {
             DatabaseName = "SP_Usage"
             DatabaseServer = "sql.test.domain"
             FailoverDatabaseServer = "anothersql.test.domain"
+            Ensure = "Present"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
@@ -40,14 +41,17 @@ Describe "xSPUsageApplication" {
             UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
             UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
         }}
+        Mock Remove-SPServiceApplication
+        Mock Get-SPServiceApplicationProxy {
+            return (New-Object Object | Add-Member ScriptMethod Provision {} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Online" -PassThru  | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+        }
 
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
 
             It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
             It "returns false when the Test method is called" {
@@ -72,9 +76,8 @@ Describe "xSPUsageApplication" {
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns null from the Get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
             It "returns false when the Test method is called" {
@@ -95,8 +98,7 @@ Describe "xSPUsageApplication" {
             }
 
             It "returns values from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
             }
 
             It "returns true when the Test method is called" {
@@ -159,6 +161,84 @@ Describe "xSPUsageApplication" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Set-SPUsageService
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            Ensure = "Absent"
+        }
+        
+        Context "When the service app exists but it shouldn't" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Usage and Health Data Collection Service Application"
+                    DisplayName = $testParams.Name
+                    UsageDatabase = @{
+                        Name = "db"
+                        Server = @{ Name = "server" }
+                    }
+                })
+            }
+            
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should remove the service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
+            }
+        }
+        
+        Context "When the service app doesn't exist and shouldn't" {
+            Mock Get-SPServiceApplication { return $null }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams = @{
+            Name = "Test App"
+            Ensure = "Present"
+        }
+        
+        Context "The proxy for the service app is offline when it should be running" {
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Usage and Health Data Collection Service Application"
+                    DisplayName = $testParams.Name
+                    UsageDatabase = @{
+                        Name = "db"
+                        Server = @{ Name = "server" }
+                    }
+                })
+            }
+            Mock Get-SPServiceApplicationProxy {
+                return (New-Object Object | Add-Member ScriptMethod Provision {$Global:xSharePointUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+            }    
+            $Global:xSharePointUSageAppProxyStarted = $false
+            
+            It "should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            
+            It "should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "should start the proxy in the set method" {
+                Set-TargetResource @testParams
+                $Global:xSharePointUSageAppProxyStarted | Should Be $true
             }
         }
     }    

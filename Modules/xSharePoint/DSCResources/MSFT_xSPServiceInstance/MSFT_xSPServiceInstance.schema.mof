@@ -23,7 +23,7 @@ The name is the display name of the service as shown in the Central Admin websit
 [ClassVersion("1.0.0.0"), FriendlyName("xSPServiceInstance")]
 class MSFT_xSPServiceInstance : OMI_BaseResource
 {
-    [Key] string Name;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Key, Description("The name of the service instance to manage")] string Name;
+    [Write, Description("Present to ensure it runs on this server, or absent to ensure it is stopped"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

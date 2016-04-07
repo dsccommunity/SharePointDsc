@@ -4,9 +4,9 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting install status of SP binaries"
@@ -33,14 +33,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
         throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
         return
+    }
+    
+    $InstallerPath = Join-Path $BinaryDir "setup.exe"
+    $majorVersion = (Get-xSharePointAssemblyVersion -PathToAssembly $InstallerPath)
+    if ($majorVersion -eq 15) {
+        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
+        if ($dotNet46Check -ne $null -and $dotNet46Check.Length -gt 0) {
+            throw [Exception] "A known issue prevents installation of SharePoint 2013 on servers that have .NET 4.6 already installed. See details at https://support.microsoft.com/en-us/kb/3087184"
+            return
+        }    
     }
 
     Write-Verbose -Message "Writing install config file"
@@ -71,15 +81,27 @@ function Set-TargetResource
     
     $setup = Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait -PassThru
 
-    if ($setup.ExitCode -eq 0) {
-        Write-Verbose -Message "SharePoint binary installation complete"
-        $global:DSCMachineStatus = 1
+    switch ($setup.ExitCode) {
+        0 {  
+            Write-Verbose -Message "SharePoint binary installation complete"
+            $global:DSCMachineStatus = 1
+        }
+        30066 {
+            if (    ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
+                -or ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+                -or ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+                ) {
+                    
+                Write-Verbose -Message "xSPInstall has detected the server has pending a reboot. Flagging to the DSC engine that the server should reboot before continuing."
+                $global:DSCMachineStatus = 1
+            } else {
+                throw "SharePoint installation has failed due to an issue with prerequisites not being installed correctly. Please review the setup logs."
+            }
+        }
+        Default {
+            throw "SharePoint install failed, exit code was $($setup.ExitCode)"
+        }
     }
-    else
-    {
-        throw "SharePoint install failed, exit code was $($setup.ExitCode)"
-    }
-    
 }
 
 
@@ -89,9 +111,9 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -99,6 +121,7 @@ function Test-TargetResource
         return
     }
 
+    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Testing for installation of SharePoint"

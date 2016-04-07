@@ -52,7 +52,11 @@ Describe "xSPOutgoingEmailSettings" {
             Mock Get-SPWebApplication { 
                 return @{
                         Url= "http://sharepoint.contoso.com"
-                        OutboundMailServiceInstance= "smtp.contoso.com"
+                        OutboundMailServiceInstance= @{
+                            Server = @{
+                                Name = "smtp.contoso.com"
+                            }
+                        }
                         OutboundMailSenderAddress = "from@email.com"
                         OutboundMailReplyToAddress= "reply@email.com"
                         OutboundMailCodePage= "65001"
@@ -73,7 +77,11 @@ Describe "xSPOutgoingEmailSettings" {
             Mock Get-SPWebApplication { 
                 $result = @{
                         Url= "http://sharepoint.contoso.com"
-                        OutboundMailServiceInstance= "smtp2.contoso.com"
+                        OutboundMailServiceInstance= @{
+                            Server = @{
+                                Name = "smtp2.contoso.com"
+                            }
+                        }
                         OutboundMailSenderAddress = "from@email.com"
                         OutboundMailReplyToAddress= "reply@email.com"
                         OutboundMailCodePage= "65001"

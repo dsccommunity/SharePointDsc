@@ -18,10 +18,9 @@ After the server has joined the farm, the process will wait for 5 minutes to all
 [ClassVersion("1.0.0.0"), FriendlyName("xSPJoinFarm")]
 class MSFT_xSPJoinFarm : OMI_BaseResource
 {
-    [Key] string FarmConfigDatabaseName;
-    [Key] string DatabaseServer;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
-    [Required] string Passphrase;
-    [Write, ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
+    [Key, Description("The name of the config database to connect to")] string FarmConfigDatabaseName;
+    [Key, Description("The server that hosts the config database")] string DatabaseServer;
+    [Required, Description("The passphrase that should be used to join the farm") , EmbeddedInstance("MSFT_Credential")] string Passphrase;
+    [Write, Description("SharePoint 2016 only - the MinRole role to enroll this server as"), ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
-

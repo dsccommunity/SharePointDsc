@@ -10,19 +10,21 @@ Database names or server name will not be changed if the configuration does not 
 
    xSPAppManagementServiceApp AppManagementServiceApp
     {
-        Name = "App Management Service Application"
-        AppPool = "SharePoint web services"
+        Name           = "App Management Service Application"
+        AppPool        = "SharePoint web services"
         DatabaseServer = "SQL01.contoso.com"
-        DatabaseName = "SP_ManagedMetadata"
+        DatabaseName   = "SP_ManagedMetadata"
+        Ensure         = "Present"
 }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPAppManagementServiceApp")]
 class MSFT_xSPAppManagementServiceApp : OMI_BaseResource
 {
-    [Key] string Name;
-    [Required] String ApplicationPool;
-    [Write] string DatabaseName;
-    [Write] String DatabaseServer;
-    [Write, EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Key, Description("The name of the app management service application")] string Name;
+    [Required, Description("The app pool that should be used to run the service app")] String ApplicationPool;
+    [Write, Description("The name of the database for the service application")] string DatabaseName;
+    [Write, Description("The name of the server for the database")] String DatabaseServer;
+    [Write, Description("Present ensures service app exists, absent ensures it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

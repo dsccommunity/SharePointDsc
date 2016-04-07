@@ -17,7 +17,7 @@ Describe "xSPJoinFarm" {
         $testParams = @{
             FarmConfigDatabaseName = "SP_Config"
             DatabaseServer = "DatabaseServer\Instance"
-            Passphrase = "passphrase"
+            Passphrase =  New-Object System.Management.Automation.PSCredential ("PASSPHRASEUSER", (ConvertTo-SecureString "MyFarmPassphrase" -AsPlainText -Force))
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         

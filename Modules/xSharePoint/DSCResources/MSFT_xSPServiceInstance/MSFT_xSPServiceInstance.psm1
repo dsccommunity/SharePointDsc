@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting service instance '$Name'"
@@ -16,11 +16,20 @@ function Get-TargetResource
         
 
         $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
-        if ($null -eq $si) { return @{
-            Name = $params.Name
-            Ensure = "Absent"
-            InstallAccount = $params.InstallAccount
-        } }
+        
+        if ($null -eq $si) { 
+            $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+            $fqdn = "$($env:COMPUTERNAME).$domain"
+            $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+        }
+        
+        if ($null -eq $si) { 
+            return @{
+                Name = $params.Name
+                Ensure = "Absent"
+                InstallAccount = $params.InstallAccount
+            } 
+        }
         if ($si.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
         
         return @{
@@ -40,7 +49,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Present") {
@@ -52,6 +61,11 @@ function Set-TargetResource
 
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
             if ($null -eq $si) { 
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $fqdn = "$($env:COMPUTERNAME).$domain"
+                $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+            }
+            if ($null -eq $si) { 
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
             Start-SPServiceInstance -Identity $si 
@@ -62,8 +76,12 @@ function Set-TargetResource
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            if ($null -eq $si) { 
+                $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                $fqdn = "$($env:COMPUTERNAME).$domain"
+                $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+            }
             if ($null -eq $si) {
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
@@ -81,11 +99,12 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Getting service instance '$Name'"
+    $PSBoundParameters.Ensure = $Ensure
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
 }
 

@@ -20,6 +20,25 @@ Describe "xSPInstall" {
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
         
+        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
+        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+        Mock Get-xSharePointAssemblyVersion { return $majorBuildNumber }
+        
+        Mock Get-ChildItem {
+            return @(
+                @{
+                    Version = "4.5.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                },
+                @{
+                    Version = "4.5.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                }
+            )
+        }
+        
         Mock Invoke-xSharePointCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
@@ -77,6 +96,27 @@ Describe "xSPInstall" {
             }
 
             It "throws in the set method because uninstall is unsupported" {
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
+        
+        Context "SharePoint 2013 is installing on a server with .NET 4.6" {
+            Mock Get-ChildItem {
+                return @(
+                    @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    },
+                    @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    }
+                )
+            }
+            
+            It "throws an error in the set method" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
