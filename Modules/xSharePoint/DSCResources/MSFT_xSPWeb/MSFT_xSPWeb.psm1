@@ -66,7 +66,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)]   [System.Boolean] $UseParentTopNav,
         [parameter(Mandatory = $false)]   [System.Boolean] $AddToQuickLaunch,
         [parameter(Mandatory = $false)]   [System.Boolean] $AddToTopNav,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)]   [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Creating SPWeb '$Url'"
@@ -133,7 +133,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]   [System.Boolean] $UseParentTopNav,
         [parameter(Mandatory = $false)]   [System.Boolean] $AddToQuickLaunch,
         [parameter(Mandatory = $false)]   [System.Boolean] $AddToTopNav,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)]   [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

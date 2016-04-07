@@ -30,6 +30,11 @@ Describe "xSPWeb" {
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
+        $fakeWebApp = [PSCustomObject]@{ }
+        $fakeWebApp | Add-Member -MemberType ScriptMethod -Name GrantAccessToProcessIdentity -PassThru -Value { }
+
+        Mock New-Object { [PSCustomObject]@{ WebApplication = $fakeWebApp} } -Verifiable
+
         Context "The SPWeb doesn't exist yet and should" {
 
             Mock Get-SPWeb { return $null }
@@ -43,12 +48,12 @@ Describe "xSPWeb" {
             }
 
             It "creates a new SPWeb from the set method" {
-
                 Mock New-SPWeb { } -Verifiable
 
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWeb
+                Assert-MockCalled New-Object
             }
         }
 
@@ -153,6 +158,8 @@ Describe "xSPWeb" {
                 $web.Description | Should be $testParams.Description
                 $web.Navigation.UseShared | Should be $false
                 $web.HasUniquePerm | Should be $true
+
+                Assert-MockCalled New-Object
             }
         }
     }    
