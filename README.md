@@ -112,6 +112,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed nuget package format for development feed from AppVeyor
  * Fixed bug with get output of xSPUSageApplication
  * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
+ * Added xSPWeb resource to provision subwebs.
 
 ### 0.12.0.0
 
