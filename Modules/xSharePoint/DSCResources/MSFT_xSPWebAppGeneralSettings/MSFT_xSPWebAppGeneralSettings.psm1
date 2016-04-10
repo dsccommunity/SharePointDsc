@@ -13,6 +13,8 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Boolean] $BlogAPIAuthenticated,
         [parameter(Mandatory = $false)] [ValidateSet("Strict","Permissive")] [System.String] $BrowserFileHandling,
         [parameter(Mandatory = $false)] [System.Boolean] $SecurityValidation,
+        [parameter(Mandatory = $false)] [System.Boolean] $SecurityValidationExpires,
+        [parameter(Mandatory = $false)] [System.Uint32]  $SecurityValidationTimeoutMinutes,
         [parameter(Mandatory = $false)] [System.Boolean] $RecycleBinEnabled,
         [parameter(Mandatory = $false)] [System.Boolean] $RecycleBinCleanupEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $RecycleBinRetentionPeriod,
@@ -20,10 +22,15 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.UInt32]  $MaximumUploadSize,
         [parameter(Mandatory = $false)] [System.Boolean] $CustomerExperienceProgram,
         [parameter(Mandatory = $false)] [System.Boolean] $PresenceEnabled,
+        [parameter(Mandatory = $false)] [System.Boolean] $AllowOnlineWebPartCatalog,
+        [parameter(Mandatory = $false)] [System.Boolean] $SelfServiceSiteCreationEnabled,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting web application '$url' general settings"
+
+    if ($SecurityValidationTimeoutMinutes)
+      { [timespan]$SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $SecurityValidationTimeoutMinutes }
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
@@ -48,7 +55,7 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-    (
+       (
         [parameter(Mandatory = $true)]  [System.String]  $Url,
         [parameter(Mandatory = $false)] [System.UInt32]  $TimeZone,
         [parameter(Mandatory = $false)] [System.Boolean] $Alerts,
@@ -58,6 +65,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Boolean] $BlogAPIAuthenticated,
         [parameter(Mandatory = $false)] [ValidateSet("Strict","Permissive")] [System.String] $BrowserFileHandling,
         [parameter(Mandatory = $false)] [System.Boolean] $SecurityValidation,
+        [parameter(Mandatory = $false)] [System.Boolean] $SecurityValidationExpires,
+        [parameter(Mandatory = $false)] [System.Uint32]  $SecurityValidationTimeoutMinutes,
         [parameter(Mandatory = $false)] [System.Boolean] $RecycleBinEnabled,
         [parameter(Mandatory = $false)] [System.Boolean] $RecycleBinCleanupEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $RecycleBinRetentionPeriod,
@@ -65,10 +74,16 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.UInt32]  $MaximumUploadSize,
         [parameter(Mandatory = $false)] [System.Boolean] $CustomerExperienceProgram,
         [parameter(Mandatory = $false)] [System.Boolean] $PresenceEnabled,
+        [parameter(Mandatory = $false)] [System.Boolean] $AllowOnlineWebPartCatalog,
+        [parameter(Mandatory = $false)] [System.Boolean] $SelfServiceSiteCreationEnabled,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Applying general settings '$Url'"
+    
+    if ($SecurityValidationTimeoutMinutes)
+      { [timespan]$SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $SecurityValidationTimeoutMinutes }
+
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -91,7 +106,7 @@ function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
-    (
+     (
         [parameter(Mandatory = $true)]  [System.String]  $Url,
         [parameter(Mandatory = $false)] [System.UInt32]  $TimeZone,
         [parameter(Mandatory = $false)] [System.Boolean] $Alerts,
@@ -101,6 +116,8 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Boolean] $BlogAPIAuthenticated,
         [parameter(Mandatory = $false)] [ValidateSet("Strict","Permissive")] [System.String] $BrowserFileHandling,
         [parameter(Mandatory = $false)] [System.Boolean] $SecurityValidation,
+        [parameter(Mandatory = $false)] [System.Boolean] $SecurityValidationExpires,
+        [parameter(Mandatory = $false)] [System.Uint32]  $SecurityValidationTimeoutMinutes,
         [parameter(Mandatory = $false)] [System.Boolean] $RecycleBinEnabled,
         [parameter(Mandatory = $false)] [System.Boolean] $RecycleBinCleanupEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $RecycleBinRetentionPeriod,
@@ -108,12 +125,17 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.UInt32]  $MaximumUploadSize,
         [parameter(Mandatory = $false)] [System.Boolean] $CustomerExperienceProgram,
         [parameter(Mandatory = $false)] [System.Boolean] $PresenceEnabled,
+        [parameter(Mandatory = $false)] [System.Boolean] $AllowOnlineWebPartCatalog,
+        [parameter(Mandatory = $false)] [System.Boolean] $SelfServiceSiteCreationEnabled,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application general settings '$Url'"
     if ($null -eq $CurrentValues) { return $false }
+
+    if ($SecurityValidationTimeoutMinutes)
+      { $PSBoundParameters.SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $SecurityValidationTimeoutMinutes }
 
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
     return Test-xSPWebApplicationGeneralSettings -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters

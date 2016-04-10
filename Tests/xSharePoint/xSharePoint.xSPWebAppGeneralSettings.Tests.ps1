@@ -25,6 +25,8 @@ Describe "xSPWebAppGeneralSettings" {
             BlogAPIAuthenticated = $true
             BrowserFileHandling = "Permissive"
             SecurityValidation = $true
+            SecurityValidationExpires = $true
+            SecurityValidationTimeoutMinutes = 10
             RecycleBinEnabled = $true
             RecycleBinCleanupEnabled = $true
             RecycleBinRetentionPeriod = 30
@@ -73,6 +75,8 @@ Describe "xSPWebAppGeneralSettings" {
                     BrowserFileHandling = $testParams.BrowserFileHandling
                     FormDigestSettings = @{
                         Enabled = $testParams.SecurityValidation
+                        Expires = $testParams.SecurityValidationExpires
+                        Timeout = (new-timespan -minutes $testParams.SecurityValidationTimeoutMinutes)
                     }
                     RecycleBinEnabled = $testParams.RecycleBinEnabled
                     RecycleBinCleanupEnabled = $testParams.RecycleBinCleanupEnabled
