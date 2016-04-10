@@ -11,4 +11,4 @@ Thank you for contributing.
 Your feedback and support is greatly appreciated.
 
 If you are able to resolve this issue or add new features, you may submit a Pull Request against this project.
-Please see the [Contribution Guideliness](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md) for information on how to contribute.
+Please see the [Contribution Guideliness](https://github.com/powershell/xSharePoint/wiki/Contributing%20to%20xSharePoint) for information on how to contribute.
