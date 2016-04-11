@@ -1,13 +1,12 @@
+Thank you for contributing.
+
 Before submitting an issue to this project, please take a moment to provide the following details if possible:
 
-- [ ] Is this a bug request or an enhancement request?
-- [ ] Version of PowerShell the DSC Target Node is running.
-- [ ] Operating system the DSC Target Node is running.
-- [ ] Version of this DSC resource you're using.
-- [ ] Details of the error that is occurring.
+- [ ] Version of the Operating System and PowerShell the DSC Target Node is running.
+- [ ] Version of the DSC module you're using.
+- [ ] Details of the scenario you try and problem that is occurring.
 - [ ] The DSC configuration that is using the resource.
 
-Thank you for contributing.
 Your feedback and support is greatly appreciated.
 
 If you are able to resolve this issue or add new features, you may submit a Pull Request against this project.
