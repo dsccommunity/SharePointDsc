@@ -1,4 +1,4 @@
-﻿# xSharePoint
+# xSharePoint
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
@@ -96,9 +96,24 @@ Additional detailed documentation is included on the wiki on GitHub.
 
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
- * Added xSPSearchContentSource resource
+ * Added ensure properties to multiple resources to standardise schemas
+ * Added xSPSearchContentSource, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp and xSPPerformancePointServiceApp resources
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
+ * Fixed a bug with reboot detection in xSPInstallPrereqs
+ * Added SearchCenterUrl property to xSPSearchServiceApp
+ * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
+ * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Updated xSPWebAppPolicy to allow addition and removal of accounts, including the Cache Accounts, to the web application policy.
+ * Fixed bug with claims accounts not being added to web app policy in xSPCacheAccounts
+ * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
+ * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
+ * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
+ * Added xSPContentDatabase resource
+ * Fixed nuget package format for development feed from AppVeyor
+ * Fixed bug with get output of xSPUSageApplication
+ * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
+ * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
 
 ### 0.12.0.0
 
@@ -107,7 +122,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug with xSPWorkManagementServiceApp schema
  * Added support to xSPSearchServiceApp to configure the default content access account
  * Added support for SSL web apps to xSPWebApplication
- * Added support for xSPDistributedCacheService to allow provisionin across multiple servers in a specific sequence
+ * Added support for xSPDistributedCacheService to allow provisioning across multiple servers in a specific sequence
  * Added version as optional parameter for the xSPFeature resource to allow upgrading features to a specific version
  * Fixed a bug with xSPUserProfileSyncConnection to ensure it gets the correct context 
  * Added MOF descriptions to all resources to improve editing experience in PowerShell ISE
@@ -115,6 +130,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Updated examples to include installation resources
  * Fixed issues with kerberos and anonymous access in xSPWebApplication
  * Add support for SharePoint 2016 on Windows Server 2016 Technical Preview to xSPInstallPrereqs
+ * Fixed bug for provisioning of proxy for Usage app in xSPUsageApplication
 
 ### 0.10.0.0
 

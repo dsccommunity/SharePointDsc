@@ -49,7 +49,7 @@ Make sure the service application does not exist and remove when it does
 class MSFT_xSPWordAutomationServiceApp : OMI_BaseResource 
 { 
     [Key, Description("THe name of the service application")] string Name; 
-    [Required, Description("Present to ensure the app exists, absent to ensure that it does not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("Present to ensure the app exists, absent to ensure that it does not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("The name of the application pool to run the service app in")] string ApplicationPool; 
     [Write, Description("The name of the database for the service app")] string DatabaseName; 
     [Write, Description("The name of the server that will host the database")] string DatabaseServer; 

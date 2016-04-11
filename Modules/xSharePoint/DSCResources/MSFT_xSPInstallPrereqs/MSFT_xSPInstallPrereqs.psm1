@@ -6,6 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String]  $InstallerPath,
         [parameter(Mandatory = $true)]  [System.Boolean] $OnlineMode,
+        [parameter(Mandatory = $false)] [System.String]  $SXSpath,
         [parameter(Mandatory = $false)] [System.String]  $SQLNCli,        
         [parameter(Mandatory = $false)] [System.String]  $PowerShell,        
         [parameter(Mandatory = $false)] [System.String]  $NETFX,        
@@ -23,7 +24,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
     
     $returnValue = @{}
@@ -84,8 +85,29 @@ function Get-TargetResource
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}) -ne $null))    
         $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}) -ne $null))            
     }
+        
+    $results = @{
+        InstallerPath = $InstallerPath
+        OnlineMode = $OnlineMode
+        SQLNCli = $SQLNCli      
+        PowerShell = $PowerShell        
+        NETFX = $NETFX    
+        IDFX = $IDFX        
+        Sync = $Sync        
+        AppFabric = $AppFabric        
+        IDFX11 = $IDFX11      
+        MSIPCClient = $MSIPCClient        
+        WCFDataServices = $WCFDataServices        
+        KB2671763 = $KB2671763   
+        WCFDataServices56 = $WCFDataServices56        
+        KB2898850 = $KB2898850 
+        MSVCRT11 = $MSVCRT11
+        MSVCRT14 = $MSVCRT14
+        KB3092423 = $KB3092423
+        ODBC = $ODBC
+        DotNet452 = $DotNet452
+    }
     
-    $results = $PSBoundParameters
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
         $results.Ensure = "Absent"
     } else {
@@ -102,6 +124,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String]  $InstallerPath,
         [parameter(Mandatory = $true)]  [System.Boolean] $OnlineMode,
+        [parameter(Mandatory = $false)] [System.String]  $SXSpath,
         [parameter(Mandatory = $false)] [System.String]  $SQLNCli,        
         [parameter(Mandatory = $false)] [System.String]  $PowerShell,        
         [parameter(Mandatory = $false)] [System.String]  $NETFX,        
@@ -119,7 +142,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -127,7 +150,7 @@ function Set-TargetResource
         return
     }
 
-    Write-Verbose -Message "Detecting SharePoint version from binaries"
+Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = (Get-xSharePointAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
         $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
@@ -138,10 +161,37 @@ function Set-TargetResource
         
         Write-Verbose -Message "Version: SharePoint 2013"
         $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
+        $WindowsFeatures = Get-WindowsFeature -Name Application-Server, AS-NET-Framework, AS-TCP-Port-Sharing, AS-Web-Support, AS-WAS-Support, AS-HTTP-Activation, AS-Named-Pipes, AS-TCP-Activation, Web-Server, Web-WebServer, Web-Common-Http, Web-Default-Doc, Web-Dir-Browsing, Web-Http-Errors, Web-Static-Content, Web-Http-Redirect, Web-Health, Web-Http-Logging, Web-Log-Libraries, Web-Request-Monitor, Web-Http-Tracing, Web-Performance, Web-Stat-Compression, Web-Dyn-Compression, Web-Security, Web-Filtering, Web-Basic-Auth, Web-Client-Auth, Web-Digest-Auth, Web-Cert-Auth, Web-IP-Security, Web-Url-Auth, Web-Windows-Auth, Web-App-Dev, Web-Net-Ext, Web-Net-Ext45, Web-Asp-Net, Web-Asp-Net45, Web-ISAPI-Ext, Web-ISAPI-Filter, Web-Mgmt-Tools, Web-Mgmt-Console, Web-Mgmt-Compat, Web-Metabase, Web-Lgcy-Scripting, Web-WMI, Web-Scripting-Tools, NET-Framework-Features, NET-Framework-Core, NET-Framework-45-ASPNET, NET-WCF-HTTP-Activation45, NET-WCF-Pipe-Activation45, NET-WCF-TCP-Activation45, Server-Media-Foundation, Windows-Identity-Foundation, PowerShell-V2, WAS, WAS-Process-Model, WAS-NET-Environment, WAS-Config-APIs, XPS-Viewer
     }
     if ($majorVersion -eq 16) {
         Write-Verbose -Message "Version: SharePoint 2016"
         $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
+        $osVersion = [System.Environment]::OSVersion.Version.Major
+        if ($osVersion -eq 10) {
+            # Server 2016
+            $WindowsFeatures = Get-WindowsFeature -Name Web-Server, Web-WebServer, Web-Common-Http, Web-Default-Doc, Web-Dir-Browsing, Web-Http-Errors, Web-Static-Content, Web-Health, Web-Http-Logging, Web-Log-Libraries, Web-Request-Monitor, Web-Http-Tracing, Web-Performance, Web-Stat-Compression, Web-Dyn-Compression, Web-Security, Web-Filering, Web-Basic-Auth, Web-Digest-Auth, Web-Windows-Auth, Web-App-Dev, Web-Net-Ext, Web-Net-Ext45Web-Asp-Net, Web-Asp-Net45, Web-ISAPI-Ext, Web-ISAPI-Filter, Web-Mgmt-Tools, Web-Mgmt-Console, Web-Mgmt-Compat, Web-Metabase, Web-Lgcy-Scripting, Web-WMI, NET-Framework-Features, NET-HTTP-Activation, NET-Non-HTTP-Activ, NET-Framework-45-ASPNET, NET-WCF-Pipe-Activation45, Windows-Identity-Foundation, WAS, WAS-Process-Model, WAS-NET-Environment, WAS-Config-APIs, XPS-Viewer
+        } else {
+            # Server 2012 R2
+            $WindowsFeatures = Get-WindowsFeature -Name Application-Server, AS-NET-Framework, AS-Web-Support, Web-Server, Web-WebServer, Web-Common-Http, Web-Default-Doc, Web-Dir-Browsing, Web-Http-Errors, Web-Static-Content, Web-Http-Redirect, Web-Health, Web-Http-Logging, Web-Log-Libraries, Web-Request-Monitor, Web-Performance, Web-Stat-Compression, Web-Dyn-Compression, Web-Security, Web-Filtering, Web-Basic-Auth, Web-Client-Auth, Web-Digest-Auth, Web-Cert-Auth, Web-IP-Security, Web-Url-Auth, Web-Windows-Auth, Web-App-Dev, Web-Net-Ext, Web-Net-Ext45, Web-Asp-Net45, Web-ISAPI-Ext, Web-ISAPI-Filter, Web-Mgmt-Tools, Web-Mgmt-Console, Web-Mgmt-Compat, Web-Metabase, Web-Lgcy-Mgmt-Console, Web-Lgcy-Scripting, Web-WMI, Web-Scripting-Tools, NET-Framework-Features, NET-Framework-Core, NET-HTTP-Activation, NET-Non-HTTP-Activ, NET-Framework-45-ASPNET, NET-WCF-HTTP-Activation45, Windows-Identity-Foundation, PowerShell-V2, WAS, WAS-Process-Model, WAS-NET-Environment, WAS-Config-APIs    
+        }
+    }
+    
+    if ($SXSpath){ #SXSstore for feature install specified, we will manually install features from the store, rather then relying on the prereq installer to download them
+        Write-Verbose -Message "Getting installed windows features"
+        foreach ($feature in $WindowsFeatures) {
+         if ($feature.Installed -ne $true) {
+            $FeatureParms = @{name = $feature.name}
+            $FeatureParms.Add("Source",$SXSpath) 
+            Write-Verbose "Installing $($feature.name)"
+            $FeatureInstallResult = Install-WindowsFeature @FeatureParms
+            if ($FeatureInstallResult.restartneeded -eq "yes") {$global:DSCMachineStatus = 1}
+            if ($FeatureInstallResult.Success -ne $true) { throw "Error installing $($feature.name) "}
+         }
+       }
+    
+       #see if we need to reboot after feature install
+       if ($global:DSCMachineStatus -eq 1) {return} 
+    
     }
     
     $prereqArgs = "/unattended"
@@ -185,6 +235,17 @@ function Set-TargetResource
             throw "The prerequisite installer ran with the following unknown exit code $($process.ExitCode)"
         }
     }
+    
+    if ( `
+        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
+         -or `
+        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+        -or `
+        ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+        ) {
+            Write-Verbose -Message "xSPInstallPrereqs has detected the server has pending a reboot. Flagging to the DSC engine that the server should reboot before continuing."
+            $global:DSCMachineStatus = 1   
+        }
 }
 
 
@@ -196,6 +257,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String]  $InstallerPath,
         [parameter(Mandatory = $true)]  [System.Boolean] $OnlineMode,
+        [parameter(Mandatory = $false)] [System.String]  $SXSpath,
         [parameter(Mandatory = $false)] [System.String]  $SQLNCli,        
         [parameter(Mandatory = $false)] [System.String]  $PowerShell,        
         [parameter(Mandatory = $false)] [System.String]  $NETFX,        
@@ -213,7 +275,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNet452,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -221,6 +283,7 @@ function Test-TargetResource
         return
     }
 
+    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Checking installation of SharePoint prerequisites"

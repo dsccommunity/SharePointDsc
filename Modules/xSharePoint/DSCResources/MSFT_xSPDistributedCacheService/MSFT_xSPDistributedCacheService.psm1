@@ -8,7 +8,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $CacheSizeInMB,
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount        
     )
@@ -62,7 +62,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $CacheSizeInMB,
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -167,11 +167,11 @@ function Set-TargetResource
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
-            $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $env:computername }
+            $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object { $_.TypeName -eq "Distributed Cache" }
             if ($null -eq $serviceInstance) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-                $currentServer = "$currentServer.$domain"
-                $serviceInstance = Get-SPServiceInstance | Where-Object { ($_.Service.Tostring()) -eq "SPDistributedCacheService Name=AppFabricCachingService" -and ($_.Server.Name) -eq $currentServer }
+                $currentServer = "$($env:computername).$domain"
+                $serviceInstance = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "Distributed Cache" }
             }
             if ($serviceInstance -eq $null) {
                 throw "Unable to locate a distributed cache service instance on $($env:computername) to remove"
@@ -203,12 +203,13 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.UInt32]  $CacheSizeInMB,
         [parameter(Mandatory = $true)]  [System.String]  $ServiceAccount,
         [parameter(Mandatory = $true)]  [System.Boolean] $CreateFirewallRules,
-        [parameter(Mandatory = $true)]  [ValidateSet("Present","Absent")] [System.String] $Ensure,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServerProvisionOrder,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for distributed cache configuration"
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }

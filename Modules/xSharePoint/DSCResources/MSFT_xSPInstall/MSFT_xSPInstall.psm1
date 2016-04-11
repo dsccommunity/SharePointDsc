@@ -4,9 +4,9 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     Write-Verbose -Message "Getting install status of SP binaries"
@@ -33,9 +33,9 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -81,15 +81,27 @@ function Set-TargetResource
     
     $setup = Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait -PassThru
 
-    if ($setup.ExitCode -eq 0) {
-        Write-Verbose -Message "SharePoint binary installation complete"
-        $global:DSCMachineStatus = 1
+    switch ($setup.ExitCode) {
+        0 {  
+            Write-Verbose -Message "SharePoint binary installation complete"
+            $global:DSCMachineStatus = 1
+        }
+        30066 {
+            if (    ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
+                -or ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+                -or ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+                ) {
+                    
+                Write-Verbose -Message "xSPInstall has detected the server has pending a reboot. Flagging to the DSC engine that the server should reboot before continuing."
+                $global:DSCMachineStatus = 1
+            } else {
+                throw "SharePoint installation has failed due to an issue with prerequisites not being installed correctly. Please review the setup logs."
+            }
+        }
+        Default {
+            throw "SharePoint install failed, exit code was $($setup.ExitCode)"
+        }
     }
-    else
-    {
-        throw "SharePoint install failed, exit code was $($setup.ExitCode)"
-    }
-    
 }
 
 
@@ -99,9 +111,9 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)] [System.String] $ProductKey,
-        [parameter(Mandatory = $true)] [ValidateSet("Present","Absent")] [System.String] $Ensure
+        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
+        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
     if ($Ensure -eq "Absent") {
@@ -109,6 +121,7 @@ function Test-TargetResource
         return
     }
 
+    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Testing for installation of SharePoint"

@@ -6,8 +6,8 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)]  [System.UInt32] $SessionTimeout,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
+        [parameter(Mandatory = $false)] [System.UInt32] $SessionTimeout,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -17,11 +17,14 @@ function Get-TargetResource
         $params = $args[0]
         
         $svc = Get-SPSessionStateService
-        
+        $Ensure = "Absent"
+        if ($svc.SessionStateEnabled -eq $true) {
+            $Ensure = "Present"
+        }
         return @{
             DatabaseName = $svc.DatabaseId
             DatabaseServer = $svc.DatabaseServer
-            Enabled = $svc.SessionStateEnabled
+            Ensure = $Ensure
             SessionTimeout = $svc.Timeout.TotalMinutes
         }
     }
@@ -36,8 +39,8 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)]  [System.UInt32] $SessionTimeout,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
+        [parameter(Mandatory = $false)] [System.UInt32] $SessionTimeout,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -45,12 +48,12 @@ function Set-TargetResource
     {
         $SessionTimeout = 60    
     }
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-        $params = $args[0]
-        
-        $svc = Get-SPSessionStateService
-        if($params.Enabled) 
-        {
+    
+    if ($Ensure -eq "Present") {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            
+            $svc = Get-SPSessionStateService
             if($svc.SessionStateEnabled)
             {
                 if($svc.Timeout.TotalMinutes -ne $params.SessionTimeout){
@@ -66,8 +69,12 @@ function Set-TargetResource
                     -SessionTimeout $params.SessionTimeout
             }
         }
-        else 
-        {
+    }
+    if ($Ensure -eq "Absent") {
+        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+            
+            $svc = Get-SPSessionStateService
             if($svc.SessionStateEnabled)
             {
                 Write-Verbose -Message "Disabling SPSessionState"
@@ -76,11 +83,10 @@ function Set-TargetResource
             else 
             {
                 Write-Verbose -Message "Keeping SPSessionState disabled"    
-            }         
+            } 
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -90,13 +96,20 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
         [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)]  [System.UInt32] $SessionTimeout,
+        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
+        [parameter(Mandatory = $false)] [System.UInt32] $SessionTimeout,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Enabled","SessionTimeout")
+    $PSBoundParameters.Ensure = $Ensure
+
+    if ($Ensure -eq "Present") {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure","SessionTimeout")
+    } else {
+        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
+    }   
+    
 }
 
 Export-ModuleMember -Function *-TargetResource
