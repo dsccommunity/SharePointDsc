@@ -104,8 +104,15 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
-            if($params.ContainsKey("CloudIndex") -eq $true -and (($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))) {
-                $newParams.Add("CloudIndex", $params.CloudIndex)
+            
+            if ($params.ContainsKey("CloudIndex") -eq $true) {
+                $version = Get-xSharePointInstalledProductVersion
+                if (($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
+                    $newParams.Add("CloudIndex", $params.CloudIndex)    
+                } else {
+                    throw "Please install SharePoint 2016 or SharePoint 2013 with August 2015 CU or higher before attempting to create a cloud enabled search service application"
+                }
+                
             }
             
             $app = New-SPEnterpriseSearchServiceApplication @newParams 

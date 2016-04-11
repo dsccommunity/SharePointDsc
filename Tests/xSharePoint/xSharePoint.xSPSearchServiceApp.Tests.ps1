@@ -362,13 +362,13 @@ Describe "xSPSearchServiceApp" {
                     }
                 })
             }
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 0 } }
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
             
             It "should return false if the version is too low" {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $false
             }
             
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 5000 } }
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
             
             It "should return that the web app is hybrid enabled from the get method" {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $true
@@ -379,8 +379,16 @@ Describe "xSPSearchServiceApp" {
             
             Mock Get-SPServiceApplication { return $null }
             
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            
             It "creates the service app in the set method" {
                 Set-TargetResource @testParams
+            }
+            
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            
+            It "throws an error in the set method if the version of SharePoint isn't high enough" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    
