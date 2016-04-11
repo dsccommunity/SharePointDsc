@@ -115,6 +115,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
  * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
  * Added options to customise the installation directories used when installing SharePoint with xSPInstall
+ * Added xSPIrmSettings resource
 
 ### 0.12.0.0
 
