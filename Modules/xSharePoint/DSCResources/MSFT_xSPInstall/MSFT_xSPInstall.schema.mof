@@ -16,7 +16,8 @@ This module depends on the prerequisites already being installed, which can be d
 
 **Installing SharePoint Foundation 2013**
 
-Currently SharePoint Foundation is not supported by xSPInstall (see [Issue #81](https://github.com/PowerShell/xSharePoint/issues/81) for the details). A workaround for this is to use the package resource as demonstrated below.
+SharePoint Foundation 2013 is not supported by xSPInstall (see [Issue #81](https://github.com/PowerShell/xSharePoint/issues/81) for the details). 
+A workaround for this is to use the package resource as demonstrated below.
 
     Package InstallSharePointFoundation
     {
@@ -33,6 +34,8 @@ class MSFT_xSPInstall : OMI_BaseResource
 {
     [Key, Description("The directory that contains all of the SharePoint binaries")] String BinaryDir;
     [Required, Description("The product key to use during the installation")] String ProductKey;
+    [Write, Description("The install directory to use in the installation, leave blank to use the setup defaults")] String InstallPath;
+    [Write, Description("The data directory to use in the installation, leave blank to use the setup defaults")] String DataPath;
     [Write, Description("Present to install SharePoint. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
 };
 
