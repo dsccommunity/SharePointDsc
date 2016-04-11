@@ -104,6 +104,9 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
+            
+            #if ($params.ContainsKey("CloudIndex") -eq $true) { $newParams.Add("CloudIndex", $params.CloudIndex) }
+            
             $app = New-SPEnterpriseSearchServiceApplication @newParams 
             if ($app) {
                 New-SPEnterpriseSearchServiceApplicationProxy -Name "$($params.Name) Proxy" -SearchApplication $app
