@@ -126,6 +126,7 @@ function Set-TargetResource
         while (($count -lt $maxCount) -and ($syncService.Status -ne $desiredState)) {
             if ($syncService.Status -ne $desiredState) { Start-Sleep -Seconds 60 }
             # Get the current status of the Sync service
+            Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for user profile sync service to become '$desiredState' (waited $count of $maxCount minutes)"
             $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
             $count++
         }
