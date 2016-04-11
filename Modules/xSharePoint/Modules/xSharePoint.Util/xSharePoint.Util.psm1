@@ -310,4 +310,15 @@ function Set-xSharePointObjectPropertyIfValueExists() {
     }
 }
 
+# Due to issues with unit testing, this function has been created so we are able to mock this function.
+function Remove-WebAppPolicy() {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $true)] [object] $policies,
+        [parameter(Mandatory = $true)] [string] $item
+    )
+    
+    $policies.Remove($item)
+}
+
 Export-ModuleMember -Function *
