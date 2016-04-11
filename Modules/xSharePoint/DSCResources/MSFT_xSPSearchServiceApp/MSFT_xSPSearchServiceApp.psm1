@@ -53,7 +53,7 @@ function Get-TargetResource
             $cloudIndex = $false
             $version = Get-xSharePointInstalledProductVersion
             if(($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
-                $cloudIndex = $serviceApps.CloudIndex
+                $cloudIndex = $serviceApp.CloudIndex
             }
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
