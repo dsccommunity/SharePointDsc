@@ -11,7 +11,8 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex
     )
 
     Write-Verbose -Message "Getting Search service application '$Name'"
@@ -57,6 +58,12 @@ function Get-TargetResource
                 DefaultContentAccessAccount = $defaultAccount
                 InstallAccount = $params.InstallAccount
             }
+
+            if((Get-xSharePointInstalledProductVersion).FileMajorPart -ge 15 -and (Get-xSharePointInstalledProductVersion).FileBuildPart -ge 4745)
+            {
+                $returnVal.Add("CloudIndex", $serviceApps.CloudIndex) 
+            }
+
             return $returnVal
         }
     }
@@ -75,7 +82,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex
     )
     $result = Get-TargetResource @PSBoundParameters
 
@@ -88,6 +96,12 @@ function Set-TargetResource
             
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local 
             Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance -ErrorAction SilentlyContinue            
+            
+            if(((Get-xSharePointInstalledProductVersion).FileMajorPart -lt 15) -or ((Get-xSharePointInstalledProductVersion).FileMajorPart -eq 15 -and (Get-xSharePointInstalledProductVersion).FileBuildPart -lt 4745))
+            {
+                if ($params.ContainsKey("CloudIndex")) { $params.Remove("CloudIndex") | Out-Null }
+            }
+
             $newParams = @{
                 Name = $params.Name
                 ApplicationPool = $params.ApplicationPool
@@ -169,7 +183,8 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

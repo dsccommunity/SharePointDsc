@@ -27,5 +27,6 @@ class MSFT_xSPSearchServiceApp : OMI_BaseResource
     [Write, Description("The default content access account for this search service app"), EmbeddedInstance("MSFT_Credential")] String DefaultContentAccessAccount;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("SharePoint 2016 or SharePoint 2013 with August 2015 CU or greater ONLY: Determines if the Search Service Application is hybrid or not")] boolean CloudIndex;
 };
 
