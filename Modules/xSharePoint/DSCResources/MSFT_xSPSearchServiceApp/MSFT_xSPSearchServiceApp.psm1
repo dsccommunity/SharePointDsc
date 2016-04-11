@@ -47,10 +47,14 @@ function Get-TargetResource
                 DefaultContentAccessAccount = $defaultAccount
                 InstallAccount = $params.InstallAccount
             }
-
-            if((Get-xSharePointInstalledProductVersion).FileMajorPart -ge 15 -and (Get-xSharePointInstalledProductVersion).FileBuildPart -ge 4745)
+            
+            $version = Get-xSharePointInstalledProductVersion
+            if($version.FileMajorPart -gt 15 -or ($version.FileMajorPart -ge 15 -and $version.FileBuildPart -ge 4745))
             {
                 $returnVal.Add("CloudIndex", $serviceApps.CloudIndex) 
+            }
+            else {
+                Write-Verbose -Message "Product Version lower than required for Cloud Index. The value will not be retrieved."
             }
 
             return $returnVal
@@ -83,9 +87,13 @@ function Set-TargetResource
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local 
             Start-SPEnterpriseSearchServiceInstance -Identity $serviceInstance -ErrorAction SilentlyContinue            
             
-            if(((Get-xSharePointInstalledProductVersion).FileMajorPart -lt 15) -or ((Get-xSharePointInstalledProductVersion).FileMajorPart -eq 15 -and (Get-xSharePointInstalledProductVersion).FileBuildPart -lt 4745))
+            $version = Get-xSharePointInstalledProductVersion
+            if(($version.FileMajorPart -lt 15) -or ($version.FileMajorPart -eq 15 -and (Get-xSharePointInstalledProductVersion).FileBuildPart -lt 4745))
             {
                 if ($params.ContainsKey("CloudIndex")) { $params.Remove("CloudIndex") | Out-Null }
+            }
+            else {
+                throw "Product version is lower then required to pass the Cloud Index parameter."
             }
 
             $newParams = @{
