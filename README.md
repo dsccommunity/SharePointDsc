@@ -114,6 +114,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug with get output of xSPUSageApplication
  * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
  * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
+ * Added timestamps to verbose logging for resources that pause for responses from SharePoint
 
 ### 0.12.0.0
 
