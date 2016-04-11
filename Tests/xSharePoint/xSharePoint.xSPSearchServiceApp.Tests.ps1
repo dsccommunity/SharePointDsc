@@ -35,6 +35,10 @@ Describe "xSPSearchServiceApp" {
         Mock New-SPEnterpriseSearchServiceApplication { return @{} }
         Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
         
+        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
+        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 0 } }
+        
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
                 public static class SearchContext {

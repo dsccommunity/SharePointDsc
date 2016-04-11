@@ -104,8 +104,9 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
-            
-            #if ($params.ContainsKey("CloudIndex") -eq $true) { $newParams.Add("CloudIndex", $params.CloudIndex) }
+            if($params.ContainsKey("CloudIndex") -eq $true -and (($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745))) {
+                $newParams.Add("CloudIndex", $params.CloudIndex)
+            }
             
             $app = New-SPEnterpriseSearchServiceApplication @newParams 
             if ($app) {
