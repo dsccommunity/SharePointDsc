@@ -5,7 +5,6 @@ install:
     - cinst -y pester -version 3.3.14 
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
-        New-item Modules -ItemType Directory
         Move-Item .\DscResource.Tests\ .\Modules\DscResource.Tests
         Import-Module .\Modules\DscResource.Tests\TestHelper.psm1 -force
         
