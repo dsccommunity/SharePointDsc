@@ -8,10 +8,16 @@
             "program": "${file}"
         },
         {
+            "name": "Run core DSC resource tests only",
+            "type": "PowerShell",
+            "request": "launch",
+            "program": "${workspaceRoot}/.vscode/RunGlobalTests.ps1"
+        },
+        {
             "name": "Run all tests",
             "type": "PowerShell",
             "request": "launch",
-            "program": "${workspaceRoot}/RunPesterTests.ps1"
+            "program": "${workspaceRoot}/.vscode/RunPesterTests.ps1"
         }
     ]
 }

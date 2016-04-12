@@ -46,7 +46,7 @@ function Get-TargetResource
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
             
-            [Diagnostics.CodeAnalysis.SuppressMessageAttribute("AvoidUsingConvertToSecureStringWithPlainText", Scope="Variable", Target="dummyPassword")]
+            
             $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
             $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
             

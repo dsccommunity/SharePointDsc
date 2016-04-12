@@ -43,7 +43,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,

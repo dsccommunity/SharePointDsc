@@ -1,4 +1,4 @@
-﻿[ClassVersion("1.0.0")]
+[ClassVersion("1.0.0")]
 Class MSFT_xSPWebApplicationHappyHour
 {
     [write] uint32 Hour;
@@ -32,7 +32,7 @@ You can specify the start time of this window as well as how many hours it will 
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppThrottlingSettings")]
-Class MSFT_xSPWebAppThrottlingSettings : OMI_BaseResource
+class MSFT_xSPWebAppThrottlingSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string Url;
     [Write, Description("What should the list view threshold for this site be set to")] uint32 ListViewThreshold;

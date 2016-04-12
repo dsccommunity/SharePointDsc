@@ -4,4 +4,4 @@
 .vs
 .psproj
 .sln
-Modules/DscResource.Tests/*
+Modules/xSharePoint/DscResource.Tests/*
