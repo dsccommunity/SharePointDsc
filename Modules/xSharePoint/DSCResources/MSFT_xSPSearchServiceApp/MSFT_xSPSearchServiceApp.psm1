@@ -2,6 +2,8 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
+    # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")] 
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
@@ -45,7 +47,6 @@ function Get-TargetResource
             $s = Get-SPSite $caWebApp.Url
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
-            
             
             $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
             $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
