@@ -1,14 +1,15 @@
-Before submitting an issue to this project, please take a moment to provide the following details if possible:
+_Please provide the following information regarding your issue (place N/A if certain fields don't apply in your case:_
 
-- [ ] Is this a bug request or an enhancement request?
-- [ ] Version of PowerShell the DSC Target Node is running.
-- [ ] Operating system the DSC Target Node is running.
-- [ ] Version of this DSC resource you're using.
-- [ ] Details of the error that is occurring.
-- [ ] The DSC configuration that is using the resource.
+**Details of the scenario you try and problem that is occurring:**
 
-Thank you for contributing.
-Your feedback and support is greatly appreciated.
+**The DSC configuration that is using the resource:**
 
-If you are able to resolve this issue or add new features, you may submit a Pull Request against this project.
-Please see the [Contribution Guideliness](https://github.com/powershell/xSharePoint/wiki/Contributing%20to%20xSharePoint) for information on how to contribute.
+**Version of the Operating System and PowerShell the DSC Target Node is running:**
+
+**Version of the DSC module you're using:**
+
+_Your feedback and support is greatly appreciated._
+
+
+_If you are able to resolve this issue or add new features, you may submit a Pull Request against this project._
+_Please see the [Contribution Guideliness](https://github.com/powershell/xSharePoint/wiki/Contributing%20to%20xSharePoint) for information on how to contribute._
