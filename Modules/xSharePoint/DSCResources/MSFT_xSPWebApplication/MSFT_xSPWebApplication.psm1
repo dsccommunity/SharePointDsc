@@ -94,9 +94,30 @@ function Set-TargetResource
                 $newWebAppParams = @{
                     Name = $params.Name
                     ApplicationPool = $params.ApplicationPool
-                    ApplicationPoolAccount = $params.ApplicationPoolAccount
                     Url = $params.Url
                 }
+
+                # Get a reference to the Administration WebService
+                $admService = Get-xSharePointContentService
+                $appPools = $admService.ApplicationPools | Where-Object { $_.Name -eq $params.ApplicationPool }
+                if ($appPools -eq $null) {
+                    # Application pool does not exist, create a new one.
+                    # Test if the specified managed account exists. If so, add ApplicationPoolAccount parameter to create the application pool
+                    try {
+                        Get-SPManagedAccount $params.ApplicationPoolAccount -ErrorAction Stop
+                        $newWebAppParams.Add("ApplicationPoolAccount", $params.ApplicationPoolAccount)
+                    }
+                    catch {
+                        if ($_.Exception.Message -like "*No matching accounts were found*") {
+                            throw "The specified managed account was not found. Please make sure the managed account exists before continuing."
+                            return
+                        } else {
+                            throw "Error occurred. Web application was not created. Error details: $($_.Exception.Message)"
+                            return
+                        }
+                    }
+                }
+                
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true) {
                     if ($params.AuthenticationMethod -eq "NTLM") {
                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication -DisableKerberos:$true
