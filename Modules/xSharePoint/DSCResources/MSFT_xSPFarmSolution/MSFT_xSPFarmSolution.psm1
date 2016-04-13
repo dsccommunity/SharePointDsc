@@ -313,7 +313,7 @@ function WaitFor-SolutionJob
             Write-Verbose "Waiting for solution '$($params.Name)'..."
 
             while ($solution.JobExists){
-               
+                Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for a job for solution '$($params.Name)' to complete"
                 start-sleep -s 5
             }
 
