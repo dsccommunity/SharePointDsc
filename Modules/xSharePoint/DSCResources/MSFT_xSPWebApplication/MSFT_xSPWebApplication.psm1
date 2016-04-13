@@ -82,8 +82,6 @@ function Set-TargetResource
 
     Write-Verbose -Message "Creating web application '$Name'"
     
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    
     if ($Ensure -eq "Present") {
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
             $params = $args[0]
@@ -126,9 +124,8 @@ function Set-TargetResource
                     }
                     $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
-                if ($params.ContainsKey("AllowAnonymous")) { 
-                    $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
-                }
+                
+                if ($params.ContainsKey("AllowAnonymous") -eq $true) { $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) }
                 if ($params.ContainsKey("DatabaseName") -eq $true) { $newWebAppParams.Add("DatabaseName", $params.DatabaseName) }
                 if ($params.ContainsKey("DatabaseServer") -eq $true) { $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer) }
                 if ($params.ContainsKey("HostHeader") -eq $true) { $newWebAppParams.Add("HostHeader", $params.HostHeader) }
@@ -148,7 +145,7 @@ function Set-TargetResource
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -ne $wa) {
-                $wa | Remove-SPWebApplication -Confirm:$false
+                $wa | Remove-SPWebApplication -Confirm:$false -DeleteIISSite
             }
         }
     }
