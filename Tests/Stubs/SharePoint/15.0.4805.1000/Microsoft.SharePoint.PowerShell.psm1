@@ -1,4 +1,4 @@
-﻿function Add-DatabaseToAvailabilityGroup { 
+function Add-DatabaseToAvailabilityGroup { 
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -322,11 +322,11 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Availability},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${OutgoingScheme},
 
     [System.Nullable[int]]
@@ -558,8 +558,8 @@ param(
     [object]
     ${ProfileServiceApplicationProxy},
 
-    [Parameter(ParameterSetName='MySiteSettings', Mandatory=$true, ValueFromPipeline=$true)]
     [Parameter(ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='MySiteSettings', Mandatory=$true, ValueFromPipeline=$true)]
     [object]
     ${MySiteHostLocation},
 
@@ -3056,7 +3056,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [string]
@@ -4233,6 +4233,17 @@ param(
  } 
 
 
+function Get-SPO365LinkSettings { 
+  [CmdletBinding()]
+param(
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
 function Get-SPODataConnectionSetting { 
   [CmdletBinding()]
 param(
@@ -4479,7 +4490,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Availability},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -4597,7 +4608,7 @@ param(
     [int]
     ${Count},
 
-    [object]
+    [System.Nullable[object]]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -4743,7 +4754,7 @@ param(
     [int]
     ${Count},
 
-    [object]
+    [System.Nullable[object]]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -8071,7 +8082,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlPriority},
 
     [System.Nullable[int]]
@@ -8080,7 +8091,7 @@ param(
     [System.Nullable[int]]
     ${MaxSiteEnumerationDepth},
 
-    [object]
+    [System.Nullable[object]]
     ${SharePointCrawlBehavior},
 
     [object]
@@ -8238,7 +8249,7 @@ param(
     [string]
     ${ContentClass},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -8322,7 +8333,7 @@ param(
     ${SearchApplication},
 
     [Parameter(Mandatory=$true)]
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [Parameter(Mandatory=$true)]
@@ -8919,7 +8930,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -9002,6 +9013,9 @@ param(
 
     [object]
     ${AdminApplicationPool},
+
+    [bool]
+    ${CloudIndex},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -9963,13 +9977,13 @@ param(
 
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=1)]
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Property},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
     [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${MatchType},
 
     [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
@@ -11905,7 +11919,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [string]
@@ -15279,7 +15293,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlPriority},
 
     [Parameter(ParameterSetName='Weekly')]
@@ -15336,7 +15350,7 @@ param(
     ${CrawlScheduleRunEveryInterval},
 
     [Parameter(ParameterSetName='Weekly')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlScheduleDaysOfWeek},
 
     [Parameter(ParameterSetName='MonthlyDate')]
@@ -15345,7 +15359,7 @@ param(
 
     [Parameter(ParameterSetName='MonthlyDate')]
     [Alias('month')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlScheduleMonthsOfYear},
 
     [System.Nullable[int]]
@@ -15443,7 +15457,7 @@ param(
     ${SearchApplication},
 
     [Alias('t')]
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [System.Nullable[bool]]
@@ -15467,7 +15481,7 @@ param(
     [string]
     ${ContentClass},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -15950,7 +15964,7 @@ param(
     [System.Nullable[bool]]
     ${SecurityTrimmingEnabled},
 
-    [object]
+    [System.Nullable[object]]
     ${SpellingDictionary},
 
     [System.Nullable[timespan]]
@@ -16079,7 +16093,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -16157,7 +16171,7 @@ param(
     [string]
     ${DiacriticSensitive},
 
-    [object]
+    [System.Nullable[object]]
     ${DefaultSearchProvider},
 
     [string]
@@ -16971,6 +16985,30 @@ param(
  } 
 
 
+function Set-SPO365LinkSettings { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+    [AllowEmptyString()]
+    [string]
+    ${MySiteHostUrl},
+
+    [Parameter(ValueFromPipelineByPropertyName=$true)]
+    [string[]]
+    ${Audiences},
+
+    [Parameter(ValueFromPipelineByPropertyName=$true)]
+    [bool]
+    ${RedirectSites},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
 function Set-SPODataConnectionSetting { 
   [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
@@ -16990,7 +17028,7 @@ param(
     ${ServiceAddressURL},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -17033,7 +17071,7 @@ param(
     ${ServiceAddressMetadataURL},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -17297,8 +17335,8 @@ param(
     [string]
     ${ProfileSyncDBFailoverServer},
 
-    [Parameter(ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='MySiteSettings', Mandatory=$true, ValueFromPipeline=$true)]
+    [Parameter(ValueFromPipeline=$true)]
     [object]
     ${MySiteHostLocation},
 
@@ -17408,7 +17446,7 @@ param(
     ${ThrottlingEnabled},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${RoutingScheme},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -17428,11 +17466,11 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Availability},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${OutgoingScheme},
 
     [ValidateRange(1, 65535)]
@@ -19825,6 +19863,21 @@ param(
  } 
 
 
+function Test-SPO365LinkSettings { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+    [uri]
+    ${MySiteHostUrl},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
 function Test-SPSite { 
   [CmdletBinding()]
 param(
@@ -20549,6 +20602,3 @@ param(
 
  
  } 
-
-
-

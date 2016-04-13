@@ -21,7 +21,7 @@ function Invoke-xSharePointTests() {
         @{
             'Path' = "$repoDir\Tests"
             'Parameters' = @{ 
-                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1")
+                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1")
             }
         },
         @{
