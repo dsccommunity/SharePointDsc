@@ -6,6 +6,7 @@ install:
     - ps: |
         Remove-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests" -Recurse -Force -ErrorAction SilentlyContinue
         git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests\TestHelper.psm1" -force
         
 
 build: off
@@ -23,11 +24,11 @@ test_script:
 
 after_test:
     - ps: |
-        Remove-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests" -Recurse -Force
+        Move-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests" "$env:APPVEYOR_BUILD_FOLDER\"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\TestHelper.psm1" -force
         New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US" -ItemType Directory
         & "$env:APPVEYOR_BUILD_FOLDER\Tests\Generate-xSharePointHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US"
 
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests\TestHelper.psm1" -force
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint" "xSharePoint.psd1"
         (Get-Content $manifest -Raw).Replace("0.12.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
         Add-Type -assemblyname System.IO.Compression.FileSystem
