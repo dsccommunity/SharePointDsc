@@ -36,8 +36,10 @@ Describe "xSPWorkManagement" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-                Context "When a service application exists and Ensure equals 'absent'" {
+        
+        Context "When a service application exists and Ensure equals 'absent'" {
             $testParamsAbsent = @{
                 Name = "Test Work Management App"
                 Ensure = "Absent"

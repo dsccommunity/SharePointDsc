@@ -8,7 +8,6 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-$ModuleName = "xSharePoint.Util"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 
 Describe "xSharePoint.Util" {

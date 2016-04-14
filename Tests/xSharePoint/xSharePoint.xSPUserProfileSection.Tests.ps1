@@ -23,6 +23,7 @@ Describe "xSPUserProfileSection" {
            DisplayName = "Personal Information"
            DisplayOrder = 5000 
         }
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue  
         
         

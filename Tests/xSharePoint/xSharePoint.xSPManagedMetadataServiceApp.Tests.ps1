@@ -27,6 +27,7 @@ Describe "xSPManagedMetaDataServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
         Mock Remove-SPServiceApplication { } 

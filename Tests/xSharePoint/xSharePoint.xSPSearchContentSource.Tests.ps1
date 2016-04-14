@@ -15,6 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName
 Describe "xSPSearchContentSource" {
     InModuleScope $ModuleName {
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Mock Invoke-xSharePointCommand { 

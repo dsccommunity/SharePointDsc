@@ -21,6 +21,7 @@ Describe "xSPSearchIndexPartition" {
             ServiceAppName = "Search Service Application"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Mock Invoke-xSharePointCommand { 

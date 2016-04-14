@@ -32,6 +32,7 @@ Describe "xSPFarmSolution" {
             Verbose         = $true
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Context "The solution isn't installed, but should be" {

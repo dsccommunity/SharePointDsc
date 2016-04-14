@@ -592,7 +592,7 @@ function Add-SPUserLicenseMapping {
 param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true, ValueFromRemainingArguments=$true)]
     [ValidateNotNullOrEmpty()]
-    [System.Collections.Generic.List`1[[object]
+    [object]
     ${Mapping},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -14757,7 +14757,7 @@ param(
     [Parameter(ParameterSetName='RemoveSchedule')]
     [Parameter(ParameterSetName='MonthlyDate')]
     [Parameter(ParameterSetName='Daily', Mandatory=$true)]
-    [System.Nullable`1[[object]
+    [object]
     ${ScheduleType},
 
     [Parameter(ParameterSetName='Daily')]
