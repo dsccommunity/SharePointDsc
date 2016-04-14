@@ -5,8 +5,8 @@ install:
     - cinst -y pester -version 3.3.14 
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
-        Move-Item .\DscResource.Tests\ .\Modules\xSharePoint\DscResource.Tests
-        Import-Module .\Modules\xSharePoint\DscResource.Tests\TestHelper.psm1 -force
+        Move-Item "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests" "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests\TestHelper.psm1" -force
         
 
 build: off
