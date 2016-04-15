@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -26,7 +26,6 @@ Describe "xSPSecureStoreServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
@@ -128,27 +127,6 @@ Describe "xSPSecureStoreServiceApp" {
 
                 Assert-MockCalled Get-SPServiceApplicationPool
                 Assert-MockCalled Set-SPSecureStoreServiceApplication
-            }
-        }
-
-        Context "When an unsupported version of SharePoint is installed" {
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Secure Store Service Application"
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                    Database = @{
-                        Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
-                    }
-                })
-            }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPSecureStoreServiceApplication { }
-
-            It "the set method throws an exception" {
-                { Set-TargetResource @testParams } | Should Throw
             }
         }
 
