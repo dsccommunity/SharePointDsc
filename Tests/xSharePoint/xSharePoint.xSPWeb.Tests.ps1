@@ -29,11 +29,13 @@ Describe "xSPWeb" {
         }
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-
+        
         $fakeWebApp = [PSCustomObject]@{ }
         $fakeWebApp | Add-Member -MemberType ScriptMethod -Name GrantAccessToProcessIdentity -PassThru -Value { }
 
-        Mock New-Object { [PSCustomObject]@{ WebApplication = $fakeWebApp} } -Verifiable
+        Mock New-Object { [PSCustomObject]@{ WebApplication = $fakeWebApp} } -Verifiable -ParameterFilter { $TypeName -eq "Microsoft.SharePoint.SPSite" }
+        
+        Mock Remove-SPWeb { } -Verifiable
 
         Context "The SPWeb doesn't exist yet and should" {
 
@@ -110,8 +112,6 @@ Describe "xSPWeb" {
 
             It "removes the SPWeb in the set method" {
 
-                Mock Remove-SPWeb { } -Verifiable
-
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Remove-SPWeb
@@ -123,18 +123,20 @@ Describe "xSPWeb" {
             $testParams.Ensure = "Present"
             $testParams.UseParentTopNav = $false
             $testParams.UniquePermissions = $true
-            
-            $web = [pscustomobject] @{
-                Url           = $testParams.Url
-                Title         = "Another title"
-                Description   = "Another description"
-                Navigation    = @{ UseShared = $true }
-                HasUniquePerm = $false
+
+            Mock Get-SPWeb { 
+                $web = [pscustomobject] @{
+                    Url           = $testParams.Url
+                    Title         = "Another title"
+                    Description   = "Another description"
+                    Navigation    = @{ UseShared = $true }
+                    HasUniquePerm = $false
+                }
+
+                $web |  Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                
+                $web
             }
-
-            $web |  Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-
-            Mock Get-SPWeb { $web }
 
             It "returns the SPWeb data from the get method" {
                 
