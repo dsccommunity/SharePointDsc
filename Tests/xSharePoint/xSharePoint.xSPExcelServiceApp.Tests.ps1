@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -25,6 +25,7 @@ Describe "xSPExcelServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Mock Remove-SPServiceApplication { }
@@ -63,7 +64,7 @@ Describe "xSPExcelServiceApp" {
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Excel Services Application"
+                    TypeName = "Excel Services Application Web Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 })
@@ -86,7 +87,7 @@ Describe "xSPExcelServiceApp" {
         Context "When the service application exists but it shouldn't" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Excel Services Application"
+                    TypeName = "Excel Services Application Web Service Application"
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatabaseServer
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }

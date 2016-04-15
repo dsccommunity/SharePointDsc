@@ -6,6 +6,8 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
         [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [System.String] $InstallPath,
+        [parameter(Mandatory = $false)] [System.String] $DataPath,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
@@ -16,12 +18,16 @@ function Get-TargetResource
         return @{
             BinaryDir = $BinaryDir
             ProductKey = $ProductKey
+            InstallPath = $InstallPath
+            DataPath = $DataPath
             Ensure = "Present"
         }
     } else {
         return @{
             BinaryDir = $BinaryDir
             ProductKey = $ProductKey
+            InstallPath = $InstallPath
+            DataPath = $DataPath
             Ensure = "Absent"
         }
     }
@@ -35,6 +41,8 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
         [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [System.String] $InstallPath,
+        [parameter(Mandatory = $false)] [System.String] $DataPath,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
@@ -57,7 +65,7 @@ function Set-TargetResource
 
     $configPath = "$env:temp\SPInstallConfig.xml" 
 
-"<Configuration>
+    $configData = "<Configuration>
     <Package Id=`"sts`">
         <Setting Id=`"LAUNCHEDFROMSETUPSTS`" Value=`"Yes`"/>
     </Package>
@@ -69,11 +77,23 @@ function Set-TargetResource
     <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint Server Setup(*).log`"/>
     <PIDKEY Value=`"$ProductKey`" />
     <Display Level=`"none`" CompletionNotice=`"no`" />
-    <Setting Id=`"SERVERROLE`" Value=`"APPLICATION`"/>
+"
+
+    if ($PSBoundParameters.ContainsKey("InstallPath") -eq $true) {
+        $configData += "    <INSTALLLOCATION Value=`"$InstallPath`" />
+"
+    }
+    if ($PSBoundParameters.ContainsKey("DataPath") -eq $true) {
+        $configData += "    <DATADIR Value=`"$DataPath`"/>
+"
+    }
+    $configData += "    <Setting Id=`"SERVERROLE`" Value=`"APPLICATION`"/>
     <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
     <Setting Id=`"SETUP_REBOOT`" Value=`"Never`" />
     <Setting Id=`"SETUPTYPE`" Value=`"CLEAN_INSTALL`"/>
-</Configuration>" | Out-File -FilePath $configPath
+</Configuration>"
+
+    $configData | Out-File -FilePath $configPath
 
     Write-Verbose -Message "Beginning installation of SharePoint"
     
@@ -113,6 +133,8 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
         [parameter(Mandatory = $true)]  [System.String] $ProductKey,
+        [parameter(Mandatory = $false)] [System.String] $InstallPath,
+        [parameter(Mandatory = $false)] [System.String] $DataPath,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 

@@ -114,6 +114,10 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug with get output of xSPUSageApplication
  * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
  * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
+ * Added timestamps to verbose logging for resources that pause for responses from SharePoint
+ * Added options to customise the installation directories used when installing SharePoint with xSPInstall
+ * Aligned testing to common DSC resource test module
+ * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
 
 ### 0.12.0.0
 

@@ -1,7 +1,8 @@
 function Invoke-xSharePointTests() {
     param
     (
-        [parameter(Mandatory = $false)] [System.String] $testResultsFile
+        [parameter(Mandatory = $false)] [System.String] $testResultsFile,
+        [parameter(Mandatory = $false)] [System.String] $DscTestsPath
     )
 
     $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
@@ -15,21 +16,30 @@ function Invoke-xSharePointTests() {
         $testResultSettings.Add("OutputFile", $testResultsFile)
     }
     Import-Module "$repoDir\modules\xSharePoint\xSharePoint.psd1"
-
-    $results = Invoke-Pester -Script @(
+    Import-Module (Join-Path $repoDir "\Tests\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1")
+    
+    $testsToRun = @(
         @{
             'Path' = "$repoDir\Tests"
             'Parameters' = @{ 
-                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1")
+                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1")
             }
         },
         @{
             'Path' = "$repoDir\Tests"
             'Parameters' = @{ 
-                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\16.0.4316.1217\Microsoft.SharePoint.PowerShell.psm1") 
+                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Stubs\SharePoint\16.0.4327.1000\Microsoft.SharePoint.PowerShell.psm1") 
             }
         }
-    ) -CodeCoverage $testCoverageFiles -PassThru @testResultSettings
+    )
+    
+    if ($PSBoundParameters.ContainsKey("DscTestsPath") -eq $true) {
+        $testsToRun += @{
+            'Path' = $DscTestsPath
+            'Parameters' = @{ }
+        }
+    }
+    $results = Invoke-Pester -Script $testsToRun -CodeCoverage $testCoverageFiles -PassThru @testResultSettings
 
     return $results
 }

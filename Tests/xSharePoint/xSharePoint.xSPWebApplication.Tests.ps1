@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -30,14 +30,33 @@ Describe "xSPWebApplication" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
+
         Mock New-SPAuthenticationProvider { }
         Mock New-SPWebApplication { }
         Mock Remove-SPWebApplication { }
 
+        Context "The specified Managed Account does not exist" {
+            Mock Get-SPWebApplication { return $null }
+            Mock Get-xSharePointContentService {
+                return @{ Name = "PlaceHolder" }
+            }
+            Mock Get-SPManagedAccount {
+                Throw "No matching accounts were found"
+            }
+
+            It "retrieving Managed Account fails in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "The specified managed account was not found. Please make sure the managed account exists before continuing."
+            }
+        }
+
         Context "The web application that uses NTLM doesn't exist but should" {
             Mock Get-SPWebApplication { return $null }
+            Mock Get-xSharePointContentService {
+                return @{ Name = "PlaceHolder" }
+            }
+            Mock Get-SPManagedAccount {}
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -77,6 +96,10 @@ Describe "xSPWebApplication" {
 
         Context "The web application that uses Kerberos doesn't exist but should" {
             Mock Get-SPWebApplication { return $null }
+            Mock Get-xSharePointContentService {
+                return @{ Name = "PlaceHolder" }
+            }
+            Mock Get-SPManagedAccount {}
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
