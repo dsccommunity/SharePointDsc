@@ -28,7 +28,7 @@ Describe "xSPQuotaTemplate" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force        
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Add-Type -TypeDefinition "namespace Microsoft.SharePoint.Administration { public class SPQuotaTemplate { public string Name { get; set; } public long StorageMaximumLevel { get; set; } public long StorageWarningLevel { get; set; } public double UserCodeMaximumLevel { get; set; } public double UserCodeWarningLevel { get; set; }}}"

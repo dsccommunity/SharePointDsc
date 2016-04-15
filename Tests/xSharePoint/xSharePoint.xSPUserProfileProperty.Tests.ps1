@@ -41,7 +41,7 @@ Describe "xSPUserProfileProperty" {
            TermSet = "Department" 
            UserOverridePrivacy = $false
         }
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         $testParamsUpdateProperty = @{

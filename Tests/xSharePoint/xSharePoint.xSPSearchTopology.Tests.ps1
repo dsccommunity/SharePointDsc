@@ -25,7 +25,7 @@ Describe "xSPSearchTopology" {
             FirstPartitionDirectory = "I:\SearchIndexes\0"
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Mock Invoke-xSharePointCommand { 

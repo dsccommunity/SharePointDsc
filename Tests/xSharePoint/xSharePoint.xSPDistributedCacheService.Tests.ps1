@@ -27,7 +27,7 @@ Describe "xSPDistributedCacheService" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
         Import-Module "$RepoRoot\Tests\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue

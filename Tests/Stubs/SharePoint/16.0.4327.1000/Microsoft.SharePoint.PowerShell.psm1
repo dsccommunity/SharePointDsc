@@ -269,11 +269,11 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Availability},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${OutgoingScheme},
 
     [System.Nullable[int]]
@@ -1094,7 +1094,7 @@ param(
     ${DatabaseFailOverPartner},
 
     [ValidateSet('Application','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd')]
-    [System.Nullable[object]]
+    [object]
     ${LocalServerRole},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -3124,7 +3124,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [string]
@@ -4620,7 +4620,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Availability},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -4738,7 +4738,7 @@ param(
     [int]
     ${Count},
 
-    [System.Nullable[object]]
+    [object]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -4884,7 +4884,7 @@ param(
     [int]
     ${Count},
 
-    [System.Nullable[object]]
+    [object]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -7767,7 +7767,7 @@ param(
     ${DatabaseFailOverServer},
 
     [ValidateSet('Application','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd')]
-    [System.Nullable[object]]
+    [object]
     ${LocalServerRole},
 
     [switch]
@@ -8066,7 +8066,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlPriority},
 
     [System.Nullable[int]]
@@ -8075,7 +8075,7 @@ param(
     [System.Nullable[int]]
     ${MaxSiteEnumerationDepth},
 
-    [System.Nullable[object]]
+    [object]
     ${SharePointCrawlBehavior},
 
     [object]
@@ -8233,7 +8233,7 @@ param(
     [string]
     ${ContentClass},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -8317,7 +8317,7 @@ param(
     ${SearchApplication},
 
     [Parameter(Mandatory=$true)]
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [Parameter(Mandatory=$true)]
@@ -8914,7 +8914,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -9739,13 +9739,13 @@ param(
 
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=1)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Property},
 
     [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${MatchType},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
@@ -11626,7 +11626,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [string]
@@ -14750,7 +14750,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlPriority},
 
     [Parameter(ParameterSetName='Weekly')]
@@ -14807,7 +14807,7 @@ param(
     ${CrawlScheduleRunEveryInterval},
 
     [Parameter(ParameterSetName='Weekly')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlScheduleDaysOfWeek},
 
     [Parameter(ParameterSetName='MonthlyDate')]
@@ -14816,7 +14816,7 @@ param(
 
     [Parameter(ParameterSetName='MonthlyDate')]
     [Alias('month')]
-    [System.Nullable[object]]
+    [object]
     ${CrawlScheduleMonthsOfYear},
 
     [System.Nullable[int]]
@@ -14914,7 +14914,7 @@ param(
     ${SearchApplication},
 
     [Alias('t')]
-    [System.Nullable[object]]
+    [object]
     ${Type},
 
     [System.Nullable[bool]]
@@ -14938,7 +14938,7 @@ param(
     [string]
     ${ContentClass},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -15422,7 +15422,7 @@ param(
     [System.Nullable[bool]]
     ${SecurityTrimmingEnabled},
 
-    [System.Nullable[object]]
+    [object]
     ${SpellingDictionary},
 
     [System.Nullable[timespan]]
@@ -15551,7 +15551,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationType},
 
     [string]
@@ -15629,7 +15629,7 @@ param(
     [string]
     ${DiacriticSensitive},
 
-    [System.Nullable[object]]
+    [object]
     ${DefaultSearchProvider},
 
     [string]
@@ -15754,7 +15754,7 @@ param(
     [string]
     ${ServiceConnectionPointBindingInformation},
 
-    [System.Nullable[object]]
+    [object]
     ${SiteMasterMode},
 
     [System.Nullable[uint32]]
@@ -16285,7 +16285,7 @@ param(
     ${ServiceAddressURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -16328,7 +16328,7 @@ param(
     ${ServiceAddressMetadataURL},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${AuthenticationMode},
 
     [ValidateNotNull()]
@@ -17014,7 +17014,7 @@ param(
     ${ThrottlingEnabled},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${RoutingScheme},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -17034,11 +17034,11 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${Availability},
 
     [ValidateNotNull()]
-    [System.Nullable[object]]
+    [object]
     ${OutgoingScheme},
 
     [ValidateNotNull()]
@@ -17360,11 +17360,11 @@ param(
     [object]
     ${Identity},
 
-    [System.Nullable[object]]
+    [object]
     ${Status},
 
     [ValidateSet('WebFrontEnd','Application','DistributedCache','Search','SingleServerFarm','Custom')]
-    [System.Nullable[object]]
+    [object]
     ${Role},
 
     [Parameter(ValueFromPipeline=$true)]

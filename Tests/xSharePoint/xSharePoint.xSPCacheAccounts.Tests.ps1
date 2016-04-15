@@ -34,7 +34,7 @@ namespace Microsoft.SharePoint.Administration {
 "@
         }    
         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
         Mock New-SPClaimsPrincipal { 

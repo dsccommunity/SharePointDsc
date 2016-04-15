@@ -38,7 +38,7 @@ Describe "xSPWebAppPolicy" {
 
         Mock Remove-WebAppPolicy { }
         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         try { [Microsoft.SharePoint.Administration.SPPolicyRoleType] }
