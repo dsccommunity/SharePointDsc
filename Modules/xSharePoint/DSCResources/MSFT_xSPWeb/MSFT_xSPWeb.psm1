@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]    [System.String]  $Url,
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] [System.String]  $Ensure = "Present",
         [parameter(Mandatory = $false)]   [System.String]  $Description,
         [parameter(Mandatory = $false)]   [System.String]  $Name,
@@ -57,6 +58,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]    [System.String]  $Url,
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] [System.String]  $Ensure = "Present",
         [parameter(Mandatory = $false)]   [System.String]  $Description,
         [parameter(Mandatory = $false)]   [System.String]  $Name,
@@ -70,8 +72,10 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Creating SPWeb '$Url'"
+    
+    $PSBoundParameters.Ensure = $Ensure
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         Write-Verbose "Grant user '$($params.InstallAccount.UserName)' Access To Process Identity for '$($params.Url)'..."  
@@ -92,23 +96,30 @@ function Set-TargetResource
                 Remove-SPweb $params.Url -confirm:$false
             }else{
                 
+                $changedWeb = $false
+                
                 if ($web.Title -ne $params.Name) {
                     $web.Title = $params.Name
-                    $web.Update()
+                    $changedWeb = $true
                 }
 
                 if ($web.Description -ne $params.Description) {
                     $web.Description = $params.Description
-                    $web.Update()
+                    $changedWeb = $true
                 }
 
                 if ($web.Navigation.UseShared -ne $params.UseParentTopNav) {
                     $web.Navigation.UseShared = $params.UseParentTopNav
-                    $web.Update()
+                    $changedWeb = $true
                 }
 
                 if ($web.HasUniquePerm -ne $params.UniquePermissions) {
                     $web.HasUniquePerm = $params.UniquePermissions
+                    $changedWeb = $true
+                }
+                
+                if ($changedWeb) {
+                    
                     $web.Update()
                 }
             }
@@ -124,6 +135,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]    [System.String]  $Url,
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] [System.String]  $Ensure = "Present",
         [parameter(Mandatory = $false)]   [System.String]  $Description,
         [parameter(Mandatory = $false)]   [System.String]  $Name,
@@ -136,11 +148,13 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]   [System.Management.Automation.PSCredential] $InstallAccount
     )
 
+    $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     Write-Verbose -Message "Testing SPWeb '$Url'"
 
-    $valuesToCheck = @("Url", "Name", "Description", "UniquePermissions", "UseParentTopNav")
+    $valuesToCheck = @("Url", "Name", "Description", "UniquePermissions", "UseParentTopNav", "Ensure")
 
     return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
