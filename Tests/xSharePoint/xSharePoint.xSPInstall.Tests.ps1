@@ -7,6 +7,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_xSPInstall"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
@@ -118,6 +119,33 @@ Describe "xSPInstall" {
             
             It "throws an error in the set method" {
                 { Set-TargetResource @testParams } | Should Throw
+            }
+        }
+        
+        
+        $testParams = @{
+            BinaryDir = "C:\SPInstall"
+            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            Ensure = "Present"
+            InstallPath = "C:\somewhere"
+            DataPath = "C:\somewhere\else"
+        }
+        Context "SharePoint is not installed and should be, using custom install directories" {
+            Mock Get-CimInstance { return $null }
+
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "returns false from the test method"  {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            Mock Start-Process { @{ ExitCode = 0 }}
+
+            It "reboots the server after a successful installation" {
+                Set-TargetResource @testParams
+                $global:DSCMachineStatus | Should Be 1
             }
         }
     }    

@@ -185,10 +185,10 @@ function Set-TargetResource
                 $loopCount = 0
                 
                 $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name
-                while ($sourceToWait.CrawlStatus -ne "Idle" -or $loopCount > 20) {
+                while ($sourceToWait.CrawlStatus -ne "Idle" -or $loopCount > 15) {
                     $sourceToWait = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name
-                    Write-Verbose -Message "Waiting for content source '$($params.Name)' to be idle."
-                    Start-Sleep -Seconds 30
+                    Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for content source '$($params.Name)' to be idle (waited $loopCount of 15 minutes)"
+                    Start-Sleep -Seconds 60
                     $loopCount++
                 }
             }

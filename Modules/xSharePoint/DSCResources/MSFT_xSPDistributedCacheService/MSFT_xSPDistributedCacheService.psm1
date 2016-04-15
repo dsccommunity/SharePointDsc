@@ -112,6 +112,7 @@ function Set-TargetResource
                         
                         Write-Verbose "Waiting for cache on $currentServer"
                         while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null)) {
+                            Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for distributed cache to start on $currentServer (waited $count of $maxCount minutes)"
                             Start-Sleep -Seconds 60
                             $count++
                         }
@@ -137,6 +138,7 @@ function Set-TargetResource
                 $count = 0
                 $maxCount = 30
                 while (($count -lt $maxCount) -and ((Get-SPServiceInstance | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Disabled" }) -ne $null)) {
+                    Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for distributed cache to stop on all servers (waited $count of $maxCount minutes)"
                     Start-Sleep -Seconds 60
                     $count++
                 }
@@ -148,6 +150,7 @@ function Set-TargetResource
                 $count = 0
                 $maxCount = 30
                 while (($count -lt $maxCount) -and ((Get-SPServiceInstance | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Online" }) -ne $null)) {
+                    Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for distributed cache to start on all servers (waited $count of $maxCount minutes)"
                     Start-Sleep -Seconds 60
                     $count++
                 }

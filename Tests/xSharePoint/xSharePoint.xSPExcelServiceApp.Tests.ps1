@@ -63,7 +63,7 @@ Describe "xSPExcelServiceApp" {
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Excel Services Application"
+                    TypeName = "Excel Services Application Web Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 })
@@ -86,7 +86,7 @@ Describe "xSPExcelServiceApp" {
         Context "When the service application exists but it shouldn't" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Excel Services Application"
+                    TypeName = "Excel Services Application Web Service Application"
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatabaseServer
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }

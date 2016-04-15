@@ -1,4 +1,4 @@
-﻿# xSharePoint
+# xSharePoint
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
@@ -104,6 +104,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added SearchCenterUrl property to xSPSearchServiceApp
  * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
  * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Updated xSPWebAppPolicy to allow addition and removal of accounts, including the Cache Accounts, to the web application policy.
  * Fixed bug with claims accounts not being added to web app policy in xSPCacheAccounts
  * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
  * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
@@ -113,6 +114,11 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug with get output of xSPUSageApplication
  * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
  * Added xSPWeb resource to provision subwebs.
+ * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
+ * Added timestamps to verbose logging for resources that pause for responses from SharePoint
+ * Added options to customise the installation directories used when installing SharePoint with xSPInstall
+ * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
+ * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
 
 ### 0.12.0.0
 

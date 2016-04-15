@@ -14,6 +14,8 @@ function Get-xSPWebApplicationGeneralSettings {
         BlogAPIAuthenticated = $WebApplication.MetaWeblogAuthenticationEnabled
         BrowserFileHandling = $WebApplication.BrowserFileHandling
         SecurityValidation = $WebApplication.FormDigestSettings.Enabled
+        SecurityValidationExpires = $WebApplication.FormDigestSettings.Expires
+        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.timeout
         RecycleBinEnabled = $WebApplication.RecycleBinEnabled
         RecycleBinCleanupEnabled = $WebApplication.RecycleBinCleanupEnabled
         RecycleBinRetentionPeriod = $WebApplication.RecycleBinRetentionPeriod
@@ -21,6 +23,8 @@ function Get-xSPWebApplicationGeneralSettings {
         MaximumUploadSize = $WebApplication.MaximumFileSize
         CustomerExperienceProgram = $WebApplication.BrowserCEIPEnabled
         PresenceEnabled = $WebApplication.PresenceEnabled
+        AllowOnlineWebPartCatalog = $WebApplication.AllowAccessToWebPartCatalog
+        SelfServiceSiteCreationEnabled = $WebApplication.SelfServiceSiteCreationEnabled
     }
 }
 
@@ -47,6 +51,8 @@ function Set-xSPWebApplicationGeneralSettings {
         SecondStageRecycleBinQuota = "SecondStageRecycleBinQuota"
         BrowserCEIPEnabled = "CustomerExperienceProgram"
         PresenceEnabled = "Presence"
+        AllowAccessToWebPartCatalog = "AllowOnlineWebPartCatalog"
+        SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
     } 
     $mapping.Keys | ForEach-Object {
         Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication `
@@ -55,11 +61,21 @@ function Set-xSPWebApplicationGeneralSettings {
                                                    -ParamKey $mapping[$_]
     }
 
-    # Set form digest setting child property
+    # Set form digest settings child properties
     Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
                                                -PropertyToSet "Enabled" `
                                                -ParamsValue $settings `
                                                -ParamKey "SecurityValidation"
+   
+   Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
+                                               -PropertyToSet "Expires" `
+                                               -ParamsValue $settings `
+                                               -ParamKey "SecurityValidationExpires"
+ 
+    Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
+                                               -PropertyToSet "Timeout" `
+                                               -ParamsValue $settings `
+                                               -ParamKey "SecurityValidationTimeOutMinutes"            
 }
 
 function Test-xSPWebApplicationGeneralSettings {
@@ -74,7 +90,7 @@ function Test-xSPWebApplicationGeneralSettings {
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
     $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
-                                                     -ValuesToCheck @("TimeZone", "Alerts", "AlertsLimit", "RSS", "BlogAPI", "BlogAPIAuthenticated", "BrowserFileHandling", "SecurityValidation", "RecycleBinEnabled", "RecycleBinCleanupEnabled", "RecycleBinRetentionPeriod", "SecondStageRecycleBinQuota", "MaximumUploadSize", "CustomerExperienceProgram", "PresenceEnabled")
+                                                     -ValuesToCheck @("TimeZone", "Alerts", "AlertsLimit", "RSS", "BlogAPI", "BlogAPIAuthenticated", "BrowserFileHandling", "SecurityValidation", "SecurityValidationExpires","SecurityValidationTimeoutMinutes", "RecycleBinEnabled", "RecycleBinCleanupEnabled", "RecycleBinRetentionPeriod", "SecondStageRecycleBinQuota", "MaximumUploadSize", "CustomerExperienceProgram", "PresenceEnabled","AllowOnlineWebPartCatalog","SelfServiceSiteCreationEnabled"                                )
     return $testReturn
 }
 
