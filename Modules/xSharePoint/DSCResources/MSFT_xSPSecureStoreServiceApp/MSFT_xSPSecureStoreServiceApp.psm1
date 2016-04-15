@@ -96,7 +96,7 @@ function Set-TargetResource
             if($params.ContainsKey("DatabaseAuthenticationType")) {
                 if ($params.DatabaseAuthenticationType -eq "SQL") {
                     $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
-                    $params.Add("DatabasePassword", (ConvertTo-SecureString $params.DatabaseCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+                    $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
                 }
                 $params.Remove("DatabaseAuthenticationType")
             }
