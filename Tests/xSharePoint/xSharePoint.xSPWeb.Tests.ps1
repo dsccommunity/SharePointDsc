@@ -124,19 +124,17 @@ Describe "xSPWeb" {
             $testParams.UseParentTopNav = $false
             $testParams.UniquePermissions = $true
 
-            Mock Get-SPWeb { 
-                $web = [pscustomobject] @{
-                    Url           = $testParams.Url
-                    Title         = "Another title"
-                    Description   = "Another description"
-                    Navigation    = @{ UseShared = $true }
-                    HasUniquePerm = $false
-                }
-
-                $web |  Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-                
-                $web
+            $web = [pscustomobject] @{
+                Url           = $testParams.Url
+                Title         = "Another title"
+                Description   = "Another description"
+                Navigation    = @{ UseShared = $true }
+                HasUniquePerm = $false
             }
+
+            $web |  Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+            Mock Get-SPWeb { $web }
 
             It "returns the SPWeb data from the get method" {
                 
