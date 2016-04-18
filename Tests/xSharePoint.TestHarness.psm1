@@ -5,10 +5,16 @@ function Invoke-xSharePointTests() {
         [parameter(Mandatory = $false)] [System.String] $DscTestsPath
     )
 
+    Write-Verbose "Commencing xSharePoint unit tests"
+
     $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 
     $testCoverageFiles = @()
-    Get-ChildItem "$repoDir\modules\xSharePoint\**\*.psm1" -Recurse | ForEach-Object { $testCoverageFiles += $_.FullName }
+    Get-ChildItem "$repoDir\modules\xSharePoint\**\*.psm1" -Recurse | ForEach-Object { 
+        if ($_.FullName -like "*\DSCResource.Tests\*") {
+            $testCoverageFiles += $_.FullName    
+        }
+    }
 
     $testResultSettings = @{ }
     if ([string]::IsNullOrEmpty($testResultsFile) -eq $false) {
