@@ -39,6 +39,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPBCSServiceApp
  - xSPCacheAccounts
  - xSPCreateFarm
+ - xSPContentDatabase
  - xSPDesignerSettings
  - xSPDiagnosticLoggingSettings
  - xSPDistributedCacheService
@@ -47,6 +48,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPHealthAnalyzerRuleState
  - xSPInstall
  - xSPInstallPreReqs
+ - xSPIrmSettings
  - xSPJoinFarm
  - xSPManagedAccount
  - xSPManagedMetadataServiceApp

@@ -19,7 +19,7 @@ function Get-TargetResource
             $spFarm = Get-SPFarm
         } catch {
             Write-Verbose -Verbose "No local SharePoint farm was detected. IRM settings will not be applied"
-            return $null
+            return @{ Ensure = "Absent" }
         }
 
         # Get a reference to the Administration WebService
@@ -68,17 +68,17 @@ function Set-TargetResource
         
         $admService = Get-xSharePointContentService
         
-        if ($UseADRMS -and ($RMSserver -ne $null)) {
+        if ($params.UseADRMS -and ($params.RMSserver -ne $null)) {
             throw "Cannot specify both an RMSserver and set UseADRMS to True"
         }
         
-        if ($UseADRMS -ne $true) { $UseADRMS = $false }
+        if ($params.UseADRMS -ne $true) { $params.UseADRMS = $false }
         
-        if ($Ensure -eq "Present")
+        if ($params.Ensure -eq "Present")
         {
             $admService.IrmSettings.IrmRMSEnabled = $true
-            $admService.IrmSettings.IrmRMSUseAD = $UseADRMS
-            $admService.IrmSettings.IrmRMSCertServer = $RMSserver 
+            $admService.IrmSettings.IrmRMSUseAD = $params.UseADRMS
+            $admService.IrmSettings.IrmRMSCertServer = $params.RMSserver 
         } else {
             $admService.IrmSettings.IrmRMSEnabled = $false
             $admService.IrmSettings.IrmRMSUseAD = $false 

@@ -34,7 +34,7 @@ Describe "xSPIrmSettings" {
             }
         
             It "return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
@@ -69,7 +69,7 @@ Describe "xSPIrmSettings" {
             }
             
             It "Get returns current settings" {
-                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
             
             It "Test returns True" {
@@ -100,7 +100,7 @@ Describe "xSPIrmSettings" {
             }
             
             It "Get returns current settings" {
-                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
             
             It "Test returns False" {
