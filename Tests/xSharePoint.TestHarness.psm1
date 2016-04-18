@@ -11,7 +11,7 @@ function Invoke-xSharePointTests() {
 
     $testCoverageFiles = @()
     Get-ChildItem "$repoDir\modules\xSharePoint\**\*.psm1" -Recurse | ForEach-Object { 
-        if ($_.FullName -like "*\DSCResource.Tests\*") {
+        if ($_.FullName -notlike "*\DSCResource.Tests\*") {
             $testCoverageFiles += $_.FullName    
         }
     }
