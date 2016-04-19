@@ -52,7 +52,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]  [String]   $Name,
@@ -265,6 +264,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [OutputType([Boolean])]
     param
     (
         [parameter(Mandatory = $true)]  [String]   $Name,

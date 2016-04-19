@@ -130,27 +130,6 @@ Describe "xSPSecureStoreServiceApp" {
             }
         }
 
-        Context "When an unsupported version of SharePoint is installed" {
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Secure Store Service Application"
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                    Database = @{
-                        Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
-                    }
-                })
-            }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPSecureStoreServiceApplication { }
-
-            It "the set method throws an exception" {
-                { Set-TargetResource @testParams } | Should Throw
-            }
-        }
-
         Context "When specific windows credentials are to be used for the database" {
             $testParams = @{
                 Name = "Secure Store Service Application"
