@@ -119,6 +119,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Aligned testing to common DSC resource test module
  * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
  * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
+ * Fixed bug in xSPWebAppGeneralSettings that prevented setting a security validation timeout value
 
 ### 0.12.0.0
 
