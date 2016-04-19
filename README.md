@@ -1,91 +1,99 @@
-# xSharePoint
+# SharePointDSC
 
 Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce04iy5j4qcd4/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xsharepoint/branch/master)
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PowerShell/xSharePoint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+The SharePointDSC PowerShell module (formerly known as xSharePoint) provides DSC resources that can be used to deploy and manage a SharePoint farm. 
 
-The xSharePoint PowerShell module provides DSC resources that can be used to deploy and manage a SharePoint farm. 
+Please leave comments, feature requests, and bug reports in the issues tab for this module.
 
-This module is provided AS IS, and is not supported through any Microsoft standard support program or service. 
-The "x" in xSharePoint stands for experimental, which means that these resources will be fix forward and monitored by the module owner(s).
-
-Please leave comments, feature requests, and bug reports in the Q & A tab for this module.
-
-If you would like to modify xSharePoint module, please feel free. 
-When modifying, please update the module name, resource friendly name, and MOF class name (instructions below). 
+If you would like to modify SharePointDSC module, please feel free.  
 As specified in the license, you may copy or modify this resource as long as they are used on the Windows Platform.
 Please refer to the [Contribution Guidelines](https://github.com/PowerShell/xSharePoint/wiki/Contributing%20to%20xSharePoint) for information about style guides, testing and patterns for contributing to DSC resources.
 
 ## Installation
 
-To install the xSharePoint module:
+To manually install the module, download the source code and unzip the contents of the \Modules\SharePointDSC directory to the $env:ProgramFiles\WindowsPowerShell\Modules folder 
 
-Unzip the content under $env:ProgramFiles\WindowsPowerShell\Modules folder 
+To install from the PowerShell gallery using PowerShellGet (in PowerShell 5.0) run the following command:
 
-To confirm installation:
+    Find-Module -Name SharePointDSC -Repository PSGallery | Install-Module
 
-Run Get-DSCResource to see that xSharePoint is among the DSC Resources listed. Requirements This module requires the latest version of PowerShell (v4.0, which ships in Windows 8.1 or Windows Server 2012R2). 
-To easily use PowerShell 4.0 on older operating systems, install WMF 4.0. 
-Please read the installation instructions that are present on both the download page and the release notes for WMF 4.0
+To confirm installation, run the below command and ensure you see the SharePoint DSC resoures available:
+
+    Get-DscResource -Module SharePointDSC
+
+
+## Requirements 
+The minimum PowerShell version required is 4.0, which ships in Windows 8.1 or Windows Server 2012R2 (or higher versions).
+The preferred version is PowerShell 5.0 or higher, which ships with Windows 10 or Windows Server 2016. 
+This is discussed [on the SharePointDSC wiki](https://github.com/PowerShell/xSharePoint/wiki/Remote%20sessions%20and%20the%20InstallAccount%20variable), but generally PowerShell 5 will run the SharePoint DSC resources faster and with improved verbose level logging.
+
 
 ## DSC Resources
 
-Below is a list of DSC resource types that are currently provided by xSharePoint:
+Below is a list of DSC resource types that are currently provided by SharePointDSC:
 
- - xSPAntivirusSettings
- - xSPAppCatalog
- - xSPAppDomain
- - xSPAppManagementServiceApp
- - xSPBCSServiceApp
- - xSPCacheAccounts
- - xSPCreateFarm
- - xSPContentDatabase
- - xSPDesignerSettings
- - xSPDiagnosticLoggingSettings
- - xSPDistributedCacheService
- - xSPFarmAdministrators
- - xSPFeature
- - xSPHealthAnalyzerRuleState
- - xSPInstall
- - xSPInstallPreReqs
- - xSPIrmSettings
- - xSPJoinFarm
- - xSPManagedAccount
- - xSPManagedMetadataServiceApp
- - xSPManagedPath
- - xSPOutgoingEmailSettings
- - xSPPasswordChangeSettings
- - xSPQuotaTemplate
- - xSPSearchIndexPartition
- - xSPSearchServiceApp
- - xSPSearchTopology
- - xSPSecureStoreServiceApp
- - xSPServiceAppPool
- - xSPServiceInstance
- - xSPSessionStateService
- - xSPShellAdmin
- - xSPSite
- - xSPStateServiceApp
- - xSPSubscriptionSettingsServiceApp
- - xSPTimerJobState
- - xSPUsageApplication
- - xSPUserProfileServiceApp
- - xSPUserProfileSyncService
- - xSPVisioServiceApp
- - xSPWebAppBlockedFileTypes
- - xSPWebAppGeneralSettings
- - xSPWebApplication
- - xSPWebApplicationAppDomain
- - xSPWebAppPolicy
- - xSPWebAppSiteUseAndDeletion
- - xSPWebAppThrottlingSettings
- - xSPWebAppWorkflowSettings
- - xSPWordAutomationServiceApp
-
-## Preview status
-
-Currently the xSharePoint resource is a work in progress that is not yet feature complete. 
-Review the documentation on the wiki of the project on GitHub for details on current functionality, as well as any known issues as the team works towards a feature complete version 1.0
+ - SPAccessServiceApp
+ - SPAlternateUrl
+ - SPAntivirusSettings
+ - SPAppCatalog
+ - SPAppDomain
+ - SPAppManagementServiceApp
+ - SPBCSServiceApp
+ - SPCacheAccounts
+ - SPContentDatabase
+ - SPCreateFarm
+ - SPDatabaseAAG
+ - SPDesignerSettings
+ - SPDiagnosticLoggingSettings
+ - SPDistributedCacheService
+ - SPExcelServiceApp
+ - SPFarmAdministrators
+ - SPFarmSolution
+ - SPFeature
+ - SPHealthAnalyzerRuleState
+ - SPInstall
+ - SPInstallPrereqs
+ - SPIrmSettings
+ - SPJoinFarm
+ - SPManagedAccount
+ - SPManagedMetadataServiceApp
+ - SPManagedPath
+ - SPOutgoingEmailSettings
+ - SPPasswordChangeSettings
+ - SPPerformancePointServiceApp
+ - SPQuotaTemplate
+ - SPSearchContentSource
+ - SPSearchIndexPartition
+ - SPSearchServiceApp
+ - SPSearchTopology
+ - SPSecureStoreServiceApp
+ - SPServiceAppPool
+ - SPServiceAppSecurity
+ - SPServiceInstance
+ - SPSessionStateService
+ - SPShellAdmins
+ - SPSite
+ - SPStateServiceApp
+ - SPSubscriptionSettingsServiceApp
+ - SPTimerJobState
+ - SPUsageApplication
+ - SPUserProfileProperty
+ - SPUserProfileSection
+ - SPUserProfileServiceApp
+ - SPUserProfileSyncConnection
+ - SPUserProfileSyncService
+ - SPVisioServiceApp
+ - SPWebAppBlockedFileTypes
+ - SPWebAppGeneralSettings
+ - SPWebApplication
+ - SPWebApplicationAppDomain
+ - SPWebAppPolicy
+ - SPWebAppSiteUseAndDeletion
+ - SPWebAppThrottlingSettings
+ - SPWebAppWorkflowSettings
+ - SPWordAutomationServiceApp
+ - SPWorkManagementServiceApp
 
 ## Examples
 
@@ -94,7 +102,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 
 ## Version History
 
-### Unreleased
+### 1.0
 
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
@@ -174,7 +182,7 @@ Additional detailed documentation is included on the wiki on GitHub.
 * Fixed bug with detection of version in create farm
 * Minor fixes
 * Added support for SharePoint 2016 installation
-* MSFT_xSPCreateFarm: Added CentraladministrationPort parameter
+* xSPCreateFarm: Added CentraladministrationPort parameter
 * Fixed issue with PowerShell session timeouts
 
 ### 0.4.0
