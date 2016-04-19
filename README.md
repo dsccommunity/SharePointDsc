@@ -97,13 +97,14 @@ Below is a list of DSC resource types that are currently provided by SharePointD
 
 ## Examples
 
-Review the "examples" directory in the xSharePoint resource for some general examples of how the overall module can be used.
+Review the "examples" directory in the SharePointDSC resource for some general examples of how the overall module can be used.
 Additional detailed documentation is included on the wiki on GitHub. 
 
 ## Version History
 
 ### 1.0
 
+ * Renamed module from xSharePoint to SharePointDSC
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added ensure properties to multiple resources to standardise schemas
