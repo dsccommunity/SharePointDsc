@@ -1,4 +1,4 @@
-function Get-xSPWebApplicationGeneralSettings {
+function Get-SPDSCWebApplicationGeneralSettings {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
@@ -28,7 +28,7 @@ function Get-xSPWebApplicationGeneralSettings {
     }
 }
 
-function Set-xSPWebApplicationGeneralSettings {
+function Set-SPDSCWebApplicationGeneralSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
@@ -59,30 +59,30 @@ function Set-xSPWebApplicationGeneralSettings {
         SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
     } 
     $mapping.Keys | ForEach-Object {
-        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication `
+        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication `
                                                    -PropertyToSet $_ `
                                                    -ParamsValue $settings `
                                                    -ParamKey $mapping[$_]
     }
 
     # Set form digest settings child properties
-    Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
+    Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
                                                -PropertyToSet "Enabled" `
                                                -ParamsValue $settings `
                                                -ParamKey "SecurityValidation"
    
-   Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
+   Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
                                                -PropertyToSet "Expires" `
                                                -ParamsValue $settings `
                                                -ParamKey "SecurityValidationExpires"
  
-    Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
+    Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
                                                -PropertyToSet "Timeout" `
                                                -ParamsValue $settings `
                                                -ParamKey "SecurityValidationTimeOutMinutes"            
 }
 
-function Test-xSPWebApplicationGeneralSettings {
+function Test-SPDSCWebApplicationGeneralSettings {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
@@ -91,8 +91,8 @@ function Test-xSPWebApplicationGeneralSettings {
     )
 
 
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
-    $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.Util\SharePointDSC.Util.psm1" -Resolve)
+    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @("TimeZone", "Alerts", "AlertsLimit", "RSS", "BlogAPI", "BlogAPIAuthenticated", "BrowserFileHandling", "SecurityValidation", "SecurityValidationExpires","SecurityValidationTimeoutMinutes", "RecycleBinEnabled", "RecycleBinCleanupEnabled", "RecycleBinRetentionPeriod", "SecondStageRecycleBinQuota", "MaximumUploadSize", "CustomerExperienceProgram", "PresenceEnabled","AllowOnlineWebPartCatalog","SelfServiceSiteCreationEnabled"                                )
     return $testReturn

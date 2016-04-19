@@ -1,4 +1,4 @@
-function Get-xSPWebApplicationThrottlingSettings {
+function Get-SPDSCWebApplicationThrottlingSettings {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
@@ -23,7 +23,7 @@ function Get-xSPWebApplicationThrottlingSettings {
     }
 }
 
-function Set-xSPWebApplicationThrottlingSettings {
+function Set-SPDSCWebApplicationThrottlingSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
@@ -61,7 +61,7 @@ function Set-xSPWebApplicationThrottlingSettings {
 }
 
 
-function Set-xSPWebApplicationHappyHourSettings {
+function Set-SPDSCWebApplicationHappyHourSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
@@ -84,7 +84,7 @@ function Set-xSPWebApplicationHappyHourSettings {
     }
 }
 
-function Test-xSPWebApplicationThrottlingSettings {
+function Test-SPDSCWebApplicationThrottlingSettings {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(

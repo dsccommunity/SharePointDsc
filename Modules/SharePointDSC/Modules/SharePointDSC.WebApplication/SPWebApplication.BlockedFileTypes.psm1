@@ -1,4 +1,4 @@
-function Get-xSPWebApplicationBlockedFileTypes {
+function Get-SPDSCWebApplicationBlockedFileTypes {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
@@ -11,7 +11,7 @@ function Get-xSPWebApplicationBlockedFileTypes {
     }
 }
 
-function Set-xSPWebApplicationBlockedFileTypes {
+function Set-SPDSCWebApplicationBlockedFileTypes {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
@@ -50,7 +50,7 @@ function Set-xSPWebApplicationBlockedFileTypes {
     }
 }
 
-function Test-xSPWebApplicationBlockedFileTypes {
+function Test-SPDSCWebApplicationBlockedFileTypes {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(

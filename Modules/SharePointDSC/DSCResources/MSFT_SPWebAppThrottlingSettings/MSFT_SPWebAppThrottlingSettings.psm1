@@ -21,16 +21,16 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$url' throttling settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return $null }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.Throttling.psm1" -Resolve)
 
-        $result = Get-xSPWebApplicationThrottlingSettings -WebApplication $wa
+        $result = Get-SPDSCWebApplicationThrottlingSettings -WebApplication $wa
         $result.Add("Url", $params.Url)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -60,7 +60,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting web application '$Url' throttling settings"
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -70,15 +70,15 @@ function Set-TargetResource
             return
         }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
-        Set-xSPWebApplicationThrottlingSettings -WebApplication $wa -Settings $params
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.Throttling.psm1" -Resolve)
+        Set-SPDSCWebApplicationThrottlingSettings -WebApplication $wa -Settings $params
         $wa.Update()
 
         # Happy hour settings
         if ($params.ContainsKey("HappyHour") -eq $true) {
             # Happy hour settins use separate update method so use a fresh web app to update these
             $wa2 = Get-SPWebApplication -Identity $params.Url
-            Set-xSPWebApplicationHappyHourSettings -WebApplication $wa2 -Settings $params.HappyHour
+            Set-SPDSCWebApplicationHappyHourSettings -WebApplication $wa2 -Settings $params.HappyHour
         }
     }
 }
@@ -109,8 +109,8 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$Url' throttling settings"
     if ($null -eq $CurrentValues) { return $false }
 
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Throttling.psm1" -Resolve)
-    return Test-xSPWebApplicationThrottlingSettings -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.Throttling.psm1" -Resolve)
+    return Test-SPDSCWebApplicationThrottlingSettings -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
 

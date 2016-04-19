@@ -1,4 +1,4 @@
-function Get-xSPWebApplicationWorkflowSettings {
+function Get-SPDSCWebApplicationWorkflowSettings {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
@@ -11,7 +11,7 @@ function Get-xSPWebApplicationWorkflowSettings {
     }
 }
 
-function Set-xSPWebApplicationWorkflowSettings {
+function Set-SPDSCWebApplicationWorkflowSettings {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] $WebApplication,
@@ -29,7 +29,7 @@ function Set-xSPWebApplicationWorkflowSettings {
     $WebApplication.UpdateWorkflowConfigurationSettings();
 }
 
-function Test-xSPWebApplicationWorkflowSettings {
+function Test-SPDSCWebApplicationWorkflowSettings {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(

@@ -13,7 +13,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$url' workflow settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
         
@@ -21,9 +21,9 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return $null }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.Workflow.psm1" -Resolve)
 
-        $result = Get-xSPWebApplicationWorkflowSettings -WebApplication $wa
+        $result = Get-SPDSCWebApplicationWorkflowSettings -WebApplication $wa
         $result.Add("Url", $params.Url)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -45,7 +45,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting web application '$Url' workflow settings"
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
@@ -55,8 +55,8 @@ function Set-TargetResource
             return
         }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
-        Set-xSPWebApplicationWorkflowSettings -WebApplication $wa -Settings $params
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.Workflow.psm1" -Resolve)
+        Set-SPDSCWebApplicationWorkflowSettings -WebApplication $wa -Settings $params
     }
 }
 
@@ -78,8 +78,8 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$Url' workflow settings"
     if ($null -eq $CurrentValues) { return $false }
 
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.Workflow.psm1" -Resolve)
-    return Test-xSPWebApplicationWorkflowSettings -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.Workflow.psm1" -Resolve)
+    return Test-SPDSCWebApplicationWorkflowSettings -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
 
