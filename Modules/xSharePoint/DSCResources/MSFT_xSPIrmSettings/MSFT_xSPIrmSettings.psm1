@@ -19,7 +19,11 @@ function Get-TargetResource
             $spFarm = Get-SPFarm
         } catch {
             Write-Verbose -Verbose "No local SharePoint farm was detected. IRM settings will not be applied"
-            return @{ Ensure = "Absent" }
+            return @{ 
+                    Ensure = "Absent" 
+                    UseADRMS =  $UseADRMS
+                    RMSserver = $RMSserver 
+                   }
         }
 
         # Get a reference to the Administration WebService
