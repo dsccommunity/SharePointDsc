@@ -6,7 +6,7 @@ The database settings are only used for initial provisioning, but the usage sett
 
 **Example**
 
-    xSPUsageApplication UsageApplication 
+    SPUsageApplication UsageApplication 
     {
         Name                  = "Usage Service Application"
         DatabaseName          = "SP_Usage"
@@ -17,8 +17,8 @@ The database settings are only used for initial provisioning, but the usage sett
         InstallAccount        = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPUsageApplication")]
-class MSFT_xSPUsageApplication : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPUsageApplication")]
+class MSFT_SPUsageApplication : OMI_BaseResource
 {
     [Key, Description("The name of the service application")] string Name;
     [Write, Description("The name of the database for the service app")] string DatabaseName;

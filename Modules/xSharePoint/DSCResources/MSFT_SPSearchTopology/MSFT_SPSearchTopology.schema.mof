@@ -6,7 +6,7 @@ It allows the configuration to dictate the search topology roles that the curren
 Any combination of roles can be specified and the topology will be upaded to reflect the current servers new roles.
 If this is the first server to apply topology to a farm, then at least one search index must be provided. 
 To this end, the FirstPartitionIndex, FirstPartitionDirectory and FirstPartitionServers allow configuring where the first index partition will belong.
-This will behave the same as the xSPSearchIndexPartition resource.  
+This will behave the same as the SPSearchIndexPartition resource.  
 
 Note that for the search topology to apply correctly, the path specified for FirstPartitionDirectory needs to exist on the server that is executing this resource.
 For example, if the below example was executed on "Server1" it would also need to ensure that it was able to create the index path at I:\.
@@ -14,7 +14,7 @@ If no disk labeled I: was available on server1, this would fail, even though it 
 
 **Example**
 
-    xSPSearchRoles LocalSearchRoles
+    SPSearchRoles LocalSearchRoles
     {
         ServiceAppName          = "Search Service Application"
         Admin                   = @("Server1","Server2")
@@ -27,8 +27,8 @@ If no disk labeled I: was available on server1, this would fail, even though it 
         IndexPartition          = @("Server3","Server4")
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchTopology")]
-class MSFT_xSPSearchTopology : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPSearchTopology")]
+class MSFT_SPSearchTopology : OMI_BaseResource
 {
     [Key, Description("The name of the search service application for this topology")] String ServiceAppName;
     [Required, Description("A list of servers that will run the admin component")] String Admin[];

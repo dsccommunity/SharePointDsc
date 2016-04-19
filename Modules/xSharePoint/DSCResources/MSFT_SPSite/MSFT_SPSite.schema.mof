@@ -8,7 +8,7 @@ The current version of xSharePoint is only able to check for the existence of a 
 
 **Example**
 
-    xSPSite TeamSite
+    SPSite TeamSite
     {
         Url                      = "http://sharepoint.contoso.com"
         OwnerAlias               = "CONTOSO\ExampleUser"
@@ -18,8 +18,8 @@ The current version of xSharePoint is only able to check for the existence of a 
         PsDscRunAsCredential     = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSite")]
-class MSFT_xSPSite : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPSite")]
+class MSFT_SPSite : OMI_BaseResource
 {
     [Key, Description("The URL of the site collection")] string Url;
     [Required, Description("The username of the site collection administrator")] string OwnerAlias;

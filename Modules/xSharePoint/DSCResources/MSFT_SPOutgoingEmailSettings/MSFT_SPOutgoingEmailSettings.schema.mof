@@ -7,7 +7,7 @@ It is possible to set the outgoing server, from address, reply to address and th
 
 **Example**
 
-    xSPOutgoingEmailSettings FarmWideEmailSettings
+    SPOutgoingEmailSettings FarmWideEmailSettings
     {  
         WebAppUrl             = "http://sharepoint1:2013"
         SMTPServer            = "smtp.contoso.com"
@@ -16,8 +16,8 @@ It is possible to set the outgoing server, from address, reply to address and th
         PsDscRunAsCredential  = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPOutgoingEmailSettings")]
-class MSFT_xSPOutgoingEmailSettings : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPOutgoingEmailSettings")]
+class MSFT_SPOutgoingEmailSettings : OMI_BaseResource
 {
     [key, Description("The URL of the web application. If you want to set the global settings use the Central Admin URL")] string WebAppUrl;
     [Required, Description("The SMTP server for outgoing mail")] string SMTPServer;

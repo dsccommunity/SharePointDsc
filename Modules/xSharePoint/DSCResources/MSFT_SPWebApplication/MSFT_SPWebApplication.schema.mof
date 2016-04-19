@@ -6,7 +6,7 @@ The resource will provision the web application with all of the current settings
 
 **Example**
 
-    xSPWebApplication HostNameSiteCollectionWebApp
+    SPWebApplication HostNameSiteCollectionWebApp
     {
         Name                   = "SharePoint Sites"
         ApplicationPool        = "SharePoint Sites"
@@ -21,8 +21,8 @@ The resource will provision the web application with all of the current settings
         PsDscRunAsCredential   = $InstallAccount
     }
 */
-[ClassVersion("1.1.0.0"), FriendlyName("xSPWebApplication")]
-class MSFT_xSPWebApplication : OMI_BaseResource
+[ClassVersion("1.1.0.0"), FriendlyName("SPWebApplication")]
+class MSFT_SPWebApplication : OMI_BaseResource
 {
     [Key, Description("The name of the web application")] string Name;
     [Required, Description("The name of the application pool to run this site in")] string ApplicationPool;

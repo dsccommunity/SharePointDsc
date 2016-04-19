@@ -3,12 +3,12 @@
 
 This resource will configure the App Domain at a specific zone for the given Web Application.
 The configuration is done per zone on the specified web application, allowing for the setting of unique app domains for each extension of a web application.
-The app prefix should still be set using the xSPAppDomain resource before this is applied to customise a specific zone. 
+The app prefix should still be set using the SPAppDomain resource before this is applied to customise a specific zone. 
 
  
 **Example**
 
-    xSPWebApplicationAppDomain Domain
+    SPWebApplicationAppDomain Domain
     {
         AppDomain = "contosointranetapps.com"
         WebApplication ="http://portal.contoso.com";
@@ -19,8 +19,8 @@ The app prefix should still be set using the xSPAppDomain resource before this i
     }
 
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWebApplicationAppDomain")]
-class MSFT_xSPWebApplicationAppDomain : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPWebApplicationAppDomain")]
+class MSFT_SPWebApplicationAppDomain : OMI_BaseResource
 {
     [Key, Description("The URL of the web application to set the app domain for")] string WebApplication;
     [Key, Description("The zone that this app domain applies to"), ValueMap{"Default","Internet","Intranet","Extranet","Custom"}, Values{"Default","Internet","Intranet","Extranet","Custom"}] string Zone;

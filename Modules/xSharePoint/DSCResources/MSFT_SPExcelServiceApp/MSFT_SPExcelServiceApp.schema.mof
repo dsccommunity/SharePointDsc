@@ -6,7 +6,7 @@ The resource will provision and configure the Excel Services Service Application
 
 **Example**
 
-    xSPExcelServiceApp ExcelServices
+    SPExcelServiceApp ExcelServices
     {
         Name = "Excel Services Service Application"
         ApplicationPool = "SharePoint Web Services"
@@ -14,8 +14,8 @@ The resource will provision and configure the Excel Services Service Application
     }
 
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPExcelServiceApp")]
-class MSFT_xSPExcelServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPExcelServiceApp")]
+class MSFT_SPExcelServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the service application")] string Name;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;

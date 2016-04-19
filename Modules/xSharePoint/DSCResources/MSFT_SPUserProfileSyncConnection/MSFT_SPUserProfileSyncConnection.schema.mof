@@ -6,7 +6,7 @@ This resource will ensure a specifc user profile sync connection is in place and
 This resource currently supports AD only.
 **Example**
 
-  xSPUserProfileSyncConnection MainDomain
+  SPUserProfileSyncConnection MainDomain
     {
         UserProfileService = "User Profile Service Application"
         Forest = "contoso.com"
@@ -20,8 +20,8 @@ This resource currently supports AD only.
         ConnectionType = "ActiveDirectory"
 }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileSyncConnection")]
-class MSFT_xSPUserProfileSyncConnection : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileSyncConnection")]
+class MSFT_SPUserProfileSyncConnection : OMI_BaseResource
 {   
     [Key, Description("The name of the connection")] string Name;
     [Required, Description("The name of the AD forest to read from")] string Forest;

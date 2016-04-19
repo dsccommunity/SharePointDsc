@@ -15,7 +15,7 @@ Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential co
 
 **Example**
 
-    xSPDesignerSettings MainWebAppSPDSettings
+    SPDesignerSettings MainWebAppSPDSettings
     {
         Url                                     = "https://intranet.sharepoint.contoso.com"
         SettingsScope                           = "WebApplication"
@@ -30,8 +30,8 @@ Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential co
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPDesignerSettings")]
-class MSFT_xSPDesignerSettings : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPDesignerSettings")]
+class MSFT_SPDesignerSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application or site collection to configure")] string Url;
     [Required, Description("Define the scope of the configuration - either WebApplication or SiteCollection"), ValueMap{"WebApplication","SiteCollection"}, Values{"WebApplication","SiteCollection"}] string SettingsScope; 

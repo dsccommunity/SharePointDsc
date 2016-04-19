@@ -6,7 +6,7 @@ The database specific parameters are only used during initial provisioning of th
 
 **Example**
 
-    xSPStateServiceApp StateServiceApp
+    SPStateServiceApp StateServiceApp
     {
         Name                 = "State Service Application"
         DatabaseName         = "SP_State"
@@ -14,8 +14,8 @@ The database specific parameters are only used during initial provisioning of th
         PsDscRunAsCredential = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPStateServiceApp")]
-class MSFT_xSPStateServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPStateServiceApp")]
+class MSFT_SPStateServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the state service app")] string Name;
     [Write, Description("The database credentials for accessing the database"), EmbeddedInstance("MSFT_Credential")] String DatabaseCredentials;

@@ -19,7 +19,7 @@ Additionally, the process of installing the prerequisites on a Windows Server us
 
 Online example:
 
-    xSPInstallPrereqs InstallPrerequisites
+    SPInstallPrereqs InstallPrerequisites
     {
         InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
         OnlineMode        = $true
@@ -27,7 +27,7 @@ Online example:
 
 Offline example:
 
-    xSPInstallPrereqs InstallPrerequisites
+    SPInstallPrereqs InstallPrerequisites
     {
         InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
         OnlineMode        = $false
@@ -46,7 +46,7 @@ Offline example:
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("xSPInstallPrereqs")]
-class MSFT_xSPInstallPrereqs : OMI_BaseResource
+class MSFT_SPInstallPrereqs : OMI_BaseResource
 {
     [Key, Description("The full path to prerequisiteinstaller.exe")] String InstallerPath;
     [Required, Description("Should the installer download prerequisites from the internet or not")] Boolean OnlineMode;

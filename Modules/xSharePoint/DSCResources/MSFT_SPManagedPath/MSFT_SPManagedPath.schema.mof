@@ -8,7 +8,7 @@ If you are using host named site collections set HostHeader to true and the path
 
 **Example**
 
-    xSPManagedPath TeamsManagedPath 
+    SPManagedPath TeamsManagedPath 
     {
         WebAppUrl      = "http://sharepoint.contoso.com"
         InstallAccount = $InstallAccount
@@ -18,8 +18,8 @@ If you are using host named site collections set HostHeader to true and the path
         HostHeader     = $true
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPManagedPath")]
-class MSFT_xSPManagedPath : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPManagedPath")]
+class MSFT_SPManagedPath : OMI_BaseResource
 {
     [Key, Description("The URL of the web application to apply the managed path to - this is ignored for host header web applications")] string WebAppUrl;
     [Key, Description("The relative URL of the managed path")] string RelativeUrl;

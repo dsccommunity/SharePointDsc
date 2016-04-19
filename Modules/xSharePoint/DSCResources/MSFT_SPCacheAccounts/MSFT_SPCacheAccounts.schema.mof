@@ -5,7 +5,7 @@ This resource is used to set the "super user" and "super reader" cache accounts 
 
 **Example**
 
-    xSPCacheAccounts SetCacheAccounts
+    SPCacheAccounts SetCacheAccounts
     {
         WebAppUrl            = "http://sharepoint.contoso.com"
         SuperUserAlias       = "DEMO\svcSPSuperUser"
@@ -13,8 +13,8 @@ This resource is used to set the "super user" and "super reader" cache accounts 
         PsDscRunAsCredential = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPCacheAccounts")]
-class MSFT_xSPCacheAccounts : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPCacheAccounts")]
+class MSFT_SPCacheAccounts : OMI_BaseResource
 {
     [Key, Description("The URL of the web application to set the accounts for")] string WebAppUrl;
     [Required, Description("The account name for the super user")] string SuperUserAlias;

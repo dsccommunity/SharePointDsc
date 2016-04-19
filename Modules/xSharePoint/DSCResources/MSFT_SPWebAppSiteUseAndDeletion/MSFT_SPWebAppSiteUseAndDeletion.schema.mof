@@ -6,7 +6,7 @@ You can enable or disable the Site Use and Deletion feature, specify the amount 
 
 **Example**
 
-    xSPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
+    SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
     {
         Url                                      = "http://example.contoso.local"
         SendUnusedSiteCollectionNotifications    = $true
@@ -17,8 +17,8 @@ You can enable or disable the Site Use and Deletion feature, specify the amount 
     }
 */
 
-[ClassVersion("1.0.0"), FriendlyName("xSPWebAppSiteUseAndDeletion")]
-class MSFT_xSPWebAppSiteUseAndDeletion : OMI_BaseResource
+[ClassVersion("1.0.0"), FriendlyName("SPWebAppSiteUseAndDeletion")]
+class MSFT_SPWebAppSiteUseAndDeletion : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string Url;
     [Write, Description("Should emails be sent to notify site owners of unused site collections")] boolean SendUnusedSiteCollectionNotifications;

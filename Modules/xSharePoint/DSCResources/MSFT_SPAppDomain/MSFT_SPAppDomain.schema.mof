@@ -7,7 +7,7 @@ You can set the domain name and the prefix that is to be used for app URLs.
 
 **Example**
 
-    xSPAppDomain LocalFarmAppUrls
+    SPAppDomain LocalFarmAppUrls
     {
         AppDomain = "contosointranetapps.com"
         Prefix = "app"
@@ -15,8 +15,8 @@ You can set the domain name and the prefix that is to be used for app URLs.
     }
 
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPAppDomain")]
-class MSFT_xSPAppDomain : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPAppDomain")]
+class MSFT_SPAppDomain : OMI_BaseResource
 {
     [Key, Description("The domain name for apps to use in this farm")] string AppDomain;
     [Required, Description("The prefix to go on to app URLs")] string Prefix;

@@ -2,7 +2,7 @@
 **Description**
 
 This resource is responsible for provisioning the distributed cache to the service it runs on. 
-This is required in your farm on at least one server (as the behavior of [xSPCreateFarm](xSPCreateFarm) and [xSPJoinFarm](xSPJoinFarm) is to not enroll every server as a cache server). 
+This is required in your farm on at least one server (as the behavior of [SPCreateFarm](SPCreateFarm) and [SPJoinFarm](SPJoinFarm) is to not enroll every server as a cache server). 
 The service will be provisioned or de-provisioned based on the Ensure property, and when provisioned the CacheSizeInMB property and ServiceAccount property will be used to configure it.
 The property createFirewallRules is used to determine if exceptions should be added to the windows firewall to allow communication between servers on the appropriate ports.
 
@@ -14,7 +14,7 @@ If a previous server in the sequence does not appear to be running distributed c
 
 **Example**
 
-    xSPDistributedCacheService EnableDistributedCache
+    SPDistributedCacheService EnableDistributedCache
     {
         Name                 = "AppFabricCachingService"
         Ensure               = "Present"
@@ -25,8 +25,8 @@ If a previous server in the sequence does not appear to be running distributed c
         CreateFirewallRules  = $true
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPDistributedCacheService")]
-class MSFT_xSPDistributedCacheService : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPDistributedCacheService")]
+class MSFT_SPDistributedCacheService : OMI_BaseResource
 {
     [Key, Description("A name to assign to this resource - not really used. For example - AppFabricCachingService")] String Name;
     [Write, Description("Present to ensure the current server should be running distributed cache, absent to ensure that it isn't running"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;

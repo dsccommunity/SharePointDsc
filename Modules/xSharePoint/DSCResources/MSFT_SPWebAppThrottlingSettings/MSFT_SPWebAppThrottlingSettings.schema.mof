@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0")]
-Class MSFT_xSPWebApplicationHappyHour
+Class MSFT_SPWebApplicationHappyHour
 {
     [write] uint32 Hour;
     [write] uint32 Minute;
@@ -17,13 +17,13 @@ You can specify the start time of this window as well as how many hours it will 
 
 **Example**
 
-    xSPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
+    SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
     {
         Url                      = "Shttp://exmaple.contoso.local"
         ListViewThreshold        = 5000
         AllowObjectModelOverride = $false
         HappyHourEnabled         = $true
-        HappyHour                = MSFT_xSPWebApplicationHappyHour {
+        HappyHour                = MSFT_SPWebApplicationHappyHour {
             Hour     = 3
             Minute   = 0
             Duration = 1
@@ -31,8 +31,8 @@ You can specify the start time of this window as well as how many hours it will 
         PsDscRunAsCredential     = $InstallAccount
     }
 */
-[ClassVersion("1.0.0"), FriendlyName("xSPWebAppThrottlingSettings")]
-class MSFT_xSPWebAppThrottlingSettings : OMI_BaseResource
+[ClassVersion("1.0.0"), FriendlyName("SPWebAppThrottlingSettings")]
+class MSFT_SPWebAppThrottlingSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string Url;
     [Write, Description("What should the list view threshold for this site be set to")] uint32 ListViewThreshold;
@@ -40,7 +40,7 @@ class MSFT_xSPWebAppThrottlingSettings : OMI_BaseResource
     [Write, Description("What is the list view threshold for site administrators")] uint32 AdminThreshold;
     [Write, Description("What is the maximum number of lookup fields in a single list view")] uint32 ListViewLookupThreshold;
     [Write, Description("Should the happy hour window be enabled for this web app")] boolean HappyHourEnabled;
-    [Write, Description("The time window for happy hour"), EmbeddedInstance("MSFT_xSPWebApplicationHappyHour")] string HappyHour;
+    [Write, Description("The time window for happy hour"), EmbeddedInstance("MSFT_SPWebApplicationHappyHour")] string HappyHour;
     [Write, Description("What is the limit for unique permissions on a single object in this web app")] uint32 UniquePermissionThreshold;
     [Write, Description("Is request throttling enabled on this web app")] boolean RequestThrottling;
     [Write, Description("Is the change log enabled for this web app")] boolean ChangeLogEnabled;

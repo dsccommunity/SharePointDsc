@@ -6,7 +6,7 @@ The parameters passed in (except those related to database specifics) are valida
 
 **Example**
 
-    xSPSecureStoreServiceApp SecureStoreServiceApp
+    SPSecureStoreServiceApp SecureStoreServiceApp
     {
         Name            = "Secure Store Service Application"
         ApplicationPool = "SharePoint Service Applications"
@@ -17,8 +17,8 @@ The parameters passed in (except those related to database specifics) are valida
         Ensure          = "Present"
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSecureStoreServiceApp")]
-class MSFT_xSPSecureStoreServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPSecureStoreServiceApp")]
+class MSFT_SPSecureStoreServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the secure store service app")] string Name;
     [Required, Description("The name of the application pool it will run in")] string ApplicationPool;

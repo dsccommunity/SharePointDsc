@@ -15,7 +15,7 @@ If the solution does not contain resources scoped for web applications the prope
 
 **Example**
 
-    xSPFarmSolution SampleWsp
+    SPFarmSolution SampleWsp
     {
         Name                 = "MySolution.wsp"
         LiteralPath          = "C:\src\MySolution.wsp"
@@ -25,8 +25,8 @@ If the solution does not contain resources scoped for web applications the prope
         PsDscRunAsCredential = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPFarmSolution")]
-class MSFT_xSPFarmSolution : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPFarmSolution")]
+class MSFT_SPFarmSolution : OMI_BaseResource
 {
     [Key, Description("The filename of the WSP package")] string Name;
     [Required, Description("The full path to the WSP file")] string LiteralPath;

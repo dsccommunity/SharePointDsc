@@ -6,7 +6,7 @@ These settings will be used to make sure a certain quota template exists or not.
 
 **Example**
 
-    xSPQuotaTemplate TeamsiteTemplate
+    SPQuotaTemplate TeamsiteTemplate
     {
         Name = "Teamsite"
         StorageMaxInMB = 1024
@@ -17,8 +17,8 @@ These settings will be used to make sure a certain quota template exists or not.
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPQuotaTemplate")]
-class MSFT_xSPQuotaTemplate : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPQuotaTemplate")]
+class MSFT_SPQuotaTemplate : OMI_BaseResource
 {
     [Key, Description("The name of the quota template")] string Name;
     [Write, Description("The maximum storage for sites of this template in MB")] uint32 StorageMaxInMB;

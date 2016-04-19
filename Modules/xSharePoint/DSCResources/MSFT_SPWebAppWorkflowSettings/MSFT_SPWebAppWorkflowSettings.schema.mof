@@ -7,7 +7,7 @@ Any settings not included will be left as the default (or whatever they have bee
 
 **Example**
 
-    xSPWebAppWorkflowSettings PrimaryWebAppWorkflowSettings
+    SPWebAppWorkflowSettings PrimaryWebAppWorkflowSettings
     {
         Url                                           = "Shttp://exmaple.contoso.local"
         ExternalWorkflowParticipantsEnabled           = $false
@@ -15,8 +15,8 @@ Any settings not included will be left as the default (or whatever they have bee
         PsDscRunAsCredential                          = $InstallAccount
     }
 */
-[ClassVersion("1.0.0"), FriendlyName("xSPWebAppWorkflowSettings")]
-class MSFT_xSPWebAppWorkflowSettings : OMI_BaseResource
+[ClassVersion("1.0.0"), FriendlyName("SPWebAppWorkflowSettings")]
+class MSFT_SPWebAppWorkflowSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string Url;
     [Write, Description("Are external workflow participants enabled in the web app")] boolean ExternalWorkflowParticipantsEnabled;

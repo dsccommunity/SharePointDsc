@@ -7,7 +7,7 @@ The name property is the name of the feature based on its folder name in the FEA
 
 **Example**
 
-    xSPFeature EnableViewFormsLockDown
+    SPFeature EnableViewFormsLockDown
     {
         Name                 = "ViewFormPagesLockDown"
         Url                  = "http://www.contoso.com"
@@ -17,8 +17,8 @@ The name property is the name of the feature based on its folder name in the FEA
         Version              = "1.0.0.0"     
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPFeature")]
-class MSFT_xSPFeature : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPFeature")]
+class MSFT_SPFeature : OMI_BaseResource
 {
     [Key, Description("The name of the feature")] string Name;
     [Required, Description("The scope to change the feature at - Farm, WebApplication, SiteCollection or Site"), ValueMap{"Farm","WebApplication","Site","Web"}, Values{"Farm","WebApplication","Site","Web"}] string FeatureScope;

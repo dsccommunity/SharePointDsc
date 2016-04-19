@@ -5,7 +5,7 @@ This resource is used to manipulate the IRM settings in SharePoint, integrating 
 
 **Example**
 
-    xSPIrmSettings ContosoRMS
+    SPIrmSettings ContosoRMS
     {
       Ensure = "Present"
       RMSserver = "https://rms.contoso.com"    
@@ -13,8 +13,8 @@ This resource is used to manipulate the IRM settings in SharePoint, integrating 
 
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPIrmSettings")]
-class MSFT_xSPIrmSettings : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPIrmSettings")]
+class MSFT_SPIrmSettings : OMI_BaseResource
 {
     [Key, Description("Enable or Disable IRM on this farm"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Write, Description("Use the RMS server published in this farm's Active Directory")] Boolean UseADRMS;

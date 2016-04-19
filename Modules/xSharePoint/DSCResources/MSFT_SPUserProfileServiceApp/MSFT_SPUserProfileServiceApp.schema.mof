@@ -8,7 +8,7 @@ This is done to ensure that the databases are created with the correct schema ow
 
 **Example**
 
-    xSPUserProfileServiceApp UserProfileServiceApp
+    SPUserProfileServiceApp UserProfileServiceApp
     {
         Name                 = "User Profile Service Application"
         ApplicationPool      = "SharePoint Service Applications"
@@ -23,8 +23,8 @@ This is done to ensure that the databases are created with the correct schema ow
         PsDscRunAsCredential = $SetupAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileServiceApp")]
-class MSFT_xSPUserProfileServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileServiceApp")]
+class MSFT_SPUserProfileServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the user profile service")] string Name;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;

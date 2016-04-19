@@ -4,11 +4,11 @@
 This resource is used to install the SharePoint binaries.
 The BinaryDir parameter should point to the path that setup.exe is located (not to setup.exe itself).
 The ProductKey parameter is used to inject in to the configuration file and validate the license key during the installation process. 
-This module depends on the prerequisites already being installed, which can be done through the use of [xSPInstallPreReqs](xSPInstallPreReqs).
+This module depends on the prerequisites already being installed, which can be done through the use of [SPInstallPreReqs](SPInstallPreReqs).
 
 **Example**
 
-    xSPInstall InstallBinaries
+    SPInstall InstallBinaries
     {
         BinaryDir  = "C:\SPInstall"
         ProductKey = $ProductKey
@@ -16,7 +16,7 @@ This module depends on the prerequisites already being installed, which can be d
 
 **Installing SharePoint Foundation 2013**
 
-SharePoint Foundation 2013 is not supported by xSPInstall (see [Issue #81](https://github.com/PowerShell/xSharePoint/issues/81) for the details). 
+SharePoint Foundation 2013 is not supported by SPInstall (see [Issue #81](https://github.com/PowerShell/xSharePoint/issues/81) for the details). 
 A workaround for this is to use the package resource as demonstrated below.
 
     Package InstallSharePointFoundation
@@ -29,8 +29,8 @@ A workaround for this is to use the package resource as demonstrated below.
         ReturnCode         = 0
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPInstall")]
-class MSFT_xSPInstall : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPInstall")]
+class MSFT_SPInstall : OMI_BaseResource
 {
     [Key, Description("The directory that contains all of the SharePoint binaries")] String BinaryDir;
     [Required, Description("The product key to use during the installation")] String ProductKey;

@@ -7,7 +7,7 @@ The settings for EmailNotification, PreExpireDays and Schedule all relate to ena
 
 **Example**
 
-    xSPManagedAccount WebPoolManagedAccount
+    SPManagedAccount WebPoolManagedAccount
     {
         AccountName          = $WebPoolManagedAccount.UserName
         Account              = $WebPoolManagedAccount
@@ -15,8 +15,8 @@ The settings for EmailNotification, PreExpireDays and Schedule all relate to ena
         PsDscRunAsCredential = $InstallAccount
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPManagedAccount")]
-class MSFT_xSPManagedAccount : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPManagedAccount")]
+class MSFT_SPManagedAccount : OMI_BaseResource
 {
     [Key, Description("The username of the account")] string AccountName;
     [Write, Description("The credential with password of the account"), EmbeddedInstance("MSFT_Credential")] String Account;

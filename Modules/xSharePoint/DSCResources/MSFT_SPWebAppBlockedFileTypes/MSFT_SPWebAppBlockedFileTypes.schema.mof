@@ -11,7 +11,7 @@ Both of these properties will only make changes to the file types in their list 
 
 **Example**
 
-    xSPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
+    SPWebAppBlockedFileTypes PrimaryWebAppBlockedFileTypes
     {
         Url                    = "Shttp://exmaple.contoso.local"
         EnsureBlocked          = @("exe", "dll", "msi")
@@ -19,8 +19,8 @@ Both of these properties will only make changes to the file types in their list 
         PsDscRunAsCredential   = $InstallAccount
     }
 */
-[ClassVersion("1.0.0"), FriendlyName("xSPWebAppBlockedFileTypes")]
-class MSFT_xSPWebAppBlockedFileTypes : OMI_BaseResource
+[ClassVersion("1.0.0"), FriendlyName("SPWebAppBlockedFileTypes")]
+class MSFT_SPWebAppBlockedFileTypes : OMI_BaseResource
 {
     [Key, Description("The URL of the web application to set blocked file types for")] string Url;
     [write, Description("This is a fixed list to use for blocked file types in this web app")] string Blocked[];

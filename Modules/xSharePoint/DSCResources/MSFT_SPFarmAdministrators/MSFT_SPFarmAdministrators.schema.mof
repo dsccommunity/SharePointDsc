@@ -8,15 +8,15 @@ The "MembersToInclude" and "MembersToExclude" properties will allow you to contr
 
 **Example**
 
-    xSPFarmAdministrators LocalFarmAdmins
+    SPFarmAdministrators LocalFarmAdmins
     {
         Name            = "Farm Administrators"
         Members         = @("CONTOSO\user1", "CONTOSO\user2")
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPFarmAdministrators")]
-class MSFT_xSPFarmAdministrators : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPFarmAdministrators")]
+class MSFT_SPFarmAdministrators : OMI_BaseResource
 {
     [Key, Description("A generic name for this resource, its value is not important")] String Name;
     [Write, Description("A list of members to set the group to. Those not in this list will be removed")] String Members[];

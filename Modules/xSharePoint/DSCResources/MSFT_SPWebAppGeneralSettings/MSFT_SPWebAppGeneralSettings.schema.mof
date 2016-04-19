@@ -7,7 +7,7 @@ Any settings not included will be left as the default (or whatever they have bee
 
 **Example**
 
-    xSPWebAppGeneralSettings PrimaryWebAppGeneralSettings
+    SPWebAppGeneralSettings PrimaryWebAppGeneralSettings
     {
         Url                    = "Shttp://exmaple.contoso.local"
         TimeZone               = 76
@@ -16,8 +16,8 @@ Any settings not included will be left as the default (or whatever they have bee
         PsDscRunAsCredential   = $InstallAccount
     }
 */
-[ClassVersion("1.0.0"), FriendlyName("xSPWebAppGeneralSettings")]
-class MSFT_xSPWebAppGeneralSettings : OMI_BaseResource
+[ClassVersion("1.0.0"), FriendlyName("SPWebAppGeneralSettings")]
+class MSFT_SPWebAppGeneralSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web app to set the general settings for")] string Url;
     [Write, Description("The timezone code to use for this web app. A full list is at https://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.spregionalsettings.timezones.aspx")] uint32 TimeZone;

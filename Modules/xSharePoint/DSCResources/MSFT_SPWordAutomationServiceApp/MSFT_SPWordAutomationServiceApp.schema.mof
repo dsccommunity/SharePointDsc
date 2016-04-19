@@ -12,7 +12,7 @@ When you specify Ensure=Absent, no other parameters are allowed (with the except
 
 Make sure the service application exists and has a specific configuration
 
-    xSPWordAutomationServiceApp Word Automation 
+    SPWordAutomationServiceApp Word Automation 
     { 
         Name = "Word Automation Service Application" 
         Ensure = "Present"
@@ -37,7 +37,7 @@ Make sure the service application exists and has a specific configuration
 
 Make sure the service application does not exist and remove when it does
 
-    xSPWordAutomationServiceApp Word Automation 
+    SPWordAutomationServiceApp Word Automation 
     { 
         Name = "Word Automation Service Application" 
         Ensure = "Absent"
@@ -45,8 +45,8 @@ Make sure the service application does not exist and remove when it does
     } 
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWordAutomationServiceApp")] 
-class MSFT_xSPWordAutomationServiceApp : OMI_BaseResource 
+[ClassVersion("1.0.0.0"), FriendlyName("SPWordAutomationServiceApp")] 
+class MSFT_SPWordAutomationServiceApp : OMI_BaseResource 
 { 
     [Key, Description("THe name of the service application")] string Name; 
     [Write, Description("Present to ensure the app exists, absent to ensure that it does not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;

@@ -8,7 +8,7 @@ Database names or server name will not be changed if the configuration does not 
 
 **Example**
 
-    xSPBCSServiceApp BCSServiceApp
+    SPBCSServiceApp BCSServiceApp
     {
         Name            = "BCS Service Application"
         ApplicationPool = "SharePoint Service Applications"
@@ -18,8 +18,8 @@ Database names or server name will not be changed if the configuration does not 
         Ensure          = "Present"
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPBCSServiceApp")]
-class MSFT_xSPBCSServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPBCSServiceApp")]
+class MSFT_SPBCSServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the BCS service app")] string Name;
     [Required, Description("The application pool it should run in")] String ApplicationPool;

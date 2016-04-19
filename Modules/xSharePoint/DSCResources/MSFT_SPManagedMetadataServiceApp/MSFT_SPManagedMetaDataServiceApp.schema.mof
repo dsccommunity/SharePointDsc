@@ -7,7 +7,7 @@ The database server and database name properties are only used during provisioni
 
 **Example**
 
-    xSPManagedMetaDataServiceApp ManagedMetadataServiceApp
+    SPManagedMetaDataServiceApp ManagedMetadataServiceApp
     {  
         Name              = "Managed Metadata Service Application"
         InstallAccount    = $InstallAccount
@@ -16,8 +16,8 @@ The database server and database name properties are only used during provisioni
         DatabaseName      = "SP_ManagedMetadata"
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPManagedMetaDataServiceApp")]
-class MSFT_xSPManagedMetaDataServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPManagedMetaDataServiceApp")]
+class MSFT_SPManagedMetaDataServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the managed metadata service application")] string Name;
     [Required, Description("The application pool that the service app will use")] string ApplicationPool;

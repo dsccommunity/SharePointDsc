@@ -6,7 +6,7 @@ This resource is used to define an alternate access mapping URL for a specified 
 
 **Example**
 
-    xSPAlternateUrl CentralAdminAAM
+    SPAlternateUrl CentralAdminAAM
     {
         WebAppUrl            = "http://sharepoint1:9999"
         Zone                 = "Intranet"
@@ -15,8 +15,8 @@ This resource is used to define an alternate access mapping URL for a specified 
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPAlternateUrl")]
-class MSFT_xSPAlternateUrl : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPAlternateUrl")]
+class MSFT_SPAlternateUrl : OMI_BaseResource
 {
     [Key, Description("The URL of the web application to apply the alternate URL to")] String WebAppUrl;
     [Key, Description("The Zone to use for the alternate URL"), ValueMap{"Default","Intranet","Extranet","Custom","Internet"}, Values{"Default","Intranet","Extranet","Custom","Internet"}] String Zone;

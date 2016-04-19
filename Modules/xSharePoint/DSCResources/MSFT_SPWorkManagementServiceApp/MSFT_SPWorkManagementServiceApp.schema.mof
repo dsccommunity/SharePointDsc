@@ -13,15 +13,15 @@ Remarks
 
 **Example**
 
-   xSPWorkManagementServiceApp WorkManagementServiceApp
+   SPWorkManagementServiceApp WorkManagementServiceApp
     {
         Name = "App Management Service Application"
         ApplicationPool = "SharePoint web services"
         MinimumTimeBetweenEwsSyncSubscriptionSearches = 10 
 }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWorkManagementServiceApp")]
-class MSFT_xSPWorkManagementServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPWorkManagementServiceApp")]
+class MSFT_SPWorkManagementServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the work management service application")] string Name;
     [Write, Description("Present to ensure the app exists, Absent to ensure it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;

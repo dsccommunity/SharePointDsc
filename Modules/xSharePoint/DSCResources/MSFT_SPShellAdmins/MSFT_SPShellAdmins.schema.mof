@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0")]
-Class MSFT_xSPContentDatabasePermissions
+Class MSFT_SPContentDatabasePermissions
 {
     [Key, Description("Name of the Content Database")] String Name;
     [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
@@ -27,23 +27,23 @@ Workaround: Change database owner in SQL Server.
 
 **Example**
 
-    xSPShellAdmins ShellAdmins
+    SPShellAdmins ShellAdmins
     {
         Name                = "Shell Admins"
         Members             = "CONTOSO\user1", "CONTOSO\user2"
         AllContentDatabases = $true
     }
 
-    xSPShellAdmins ShellAdmins
+    SPShellAdmins ShellAdmins
     {
         Name                = "Shell Admins"
         Members             = "CONTOSO\user1", "CONTOSO\user2"
         ContentDatabases    = @(
-            @(MSFT_xSPContentDatabasePermissions {
+            @(MSFT_SPContentDatabasePermissions {
                 Name = "SharePoint_Content_1"
                 Members = "CONTOSO\user2", "CONTOSO\user3"
             })
-            @(MSFT_xSPContentDatabasePermissions {
+            @(MSFT_SPContentDatabasePermissions {
                 Name = "SharePoint_Content_2"
                 Members = "CONTOSO\user3", "CONTOSO\user4"
             })
@@ -51,14 +51,14 @@ Workaround: Change database owner in SQL Server.
     }
 
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPShellAdmins")]
-class MSFT_xSPShellAdmins : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPShellAdmins")]
+class MSFT_SPShellAdmins : OMI_BaseResource
 {
     [Key, Description("Name for the config, used for administration purposes")] String Name;
     [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
     [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];
-    [Write, Description("Shell Admin configuration of Content Databases"), EmbeddedInstance("MSFT_xSPContentDatabasePermissions")] String ContentDatabases[];
+    [Write, Description("Shell Admin configuration of Content Databases"), EmbeddedInstance("MSFT_SPContentDatabasePermissions")] String ContentDatabases[];
     [Write, Description("Specify if all content databases must get the same config as the general config")] Boolean AllContentDatabases;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

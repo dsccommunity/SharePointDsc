@@ -8,7 +8,7 @@ Database names or server name will not be changed if the configuration does not 
 
 **Example**
 
-   xSPAppManagementServiceApp AppManagementServiceApp
+   SPAppManagementServiceApp AppManagementServiceApp
     {
         Name           = "App Management Service Application"
         AppPool        = "SharePoint web services"
@@ -17,8 +17,8 @@ Database names or server name will not be changed if the configuration does not 
         Ensure         = "Present"
 }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPAppManagementServiceApp")]
-class MSFT_xSPAppManagementServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPAppManagementServiceApp")]
+class MSFT_SPAppManagementServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the app management service application")] string Name;
     [Required, Description("The app pool that should be used to run the service app")] String ApplicationPool;

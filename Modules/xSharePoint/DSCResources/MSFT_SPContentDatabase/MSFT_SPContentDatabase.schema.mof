@@ -7,7 +7,7 @@ It will throw an error when it detects that the specified SQL instance is a diff
 
 **Example**
 
-    xSPContentDatabase ContentDB {
+    SPContentDatabase ContentDB {
         Name = "SharePoint_Content_01"
         DatabaseServer = "SQL.contoso.local\SQLINSTANCE"
         WebAppUrl = "http://sharepoint.contoso.com"
@@ -19,8 +19,8 @@ It will throw an error when it detects that the specified SQL instance is a diff
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPContentDatabase")]
-class MSFT_xSPContentDatabase : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPContentDatabase")]
+class MSFT_SPContentDatabase : OMI_BaseResource
 {
     [Key, Description("Specifies the name of the content database")] String Name;
     [Write, Description("The name of the database server to host the content DB")] string DatabaseServer;

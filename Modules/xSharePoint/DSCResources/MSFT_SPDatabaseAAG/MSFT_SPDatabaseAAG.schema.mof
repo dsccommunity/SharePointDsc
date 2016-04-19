@@ -8,7 +8,7 @@ It simply adds the specified database to the group.
 
 **Example**
 
-    xSPDatabaseAAG ConfigDBAAG
+    SPDatabaseAAG ConfigDBAAG
     {
         DatabaseName         = "SP_Config"
         AGName               = "MyAvailabilityGroup"
@@ -17,8 +17,8 @@ It simply adds the specified database to the group.
         PsDscRunAsCredential = $InstallAccount
     }s
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPDatabaseAAG")]
-class MSFT_xSPDatabaseAAG : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPDatabaseAAG")]
+class MSFT_SPDatabaseAAG : OMI_BaseResource
 {
     [Key, Description("The name of the database to put in the AlwaysOn group")] string DatabaseName;
     [Required, Description("Name of the AlwaysOn group on the SQL server - this must already exist")] string AGName;

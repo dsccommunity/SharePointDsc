@@ -13,7 +13,7 @@ Length is only relevant if Field type is "String".
 This Resource  doesn't currently support removing existing user profile properties
 
 **Example**
-xSPUserProfileProperty WorkEmailProperty
+SPUserProfileProperty WorkEmailProperty
 {
     Name = "WorkEmail2"
     Ensure = "Present"
@@ -43,8 +43,8 @@ xSPUserProfileProperty WorkEmailProperty
 */
 
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPUserProfileProperty")]
-class MSFT_xSPUserProfileProperty : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileProperty")]
+class MSFT_SPUserProfileProperty : OMI_BaseResource
 {
     [Key, Description("The internal name of the user profile property")] string Name;
     [Write, Description("Present if the property should exist, absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;

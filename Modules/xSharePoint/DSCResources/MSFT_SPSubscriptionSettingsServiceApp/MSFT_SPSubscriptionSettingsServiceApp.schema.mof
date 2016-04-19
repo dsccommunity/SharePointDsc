@@ -8,7 +8,7 @@ Database names or server name will not be changed if the configuration does not 
 
 **Example**
 
-   xSPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
+   SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
     {
         Name = "Subscription Settings Service Application"
         AppPool = "SharePoint web services"
@@ -16,8 +16,8 @@ Database names or server name will not be changed if the configuration does not 
         DatabaseName = "SP_ManagedMetadata"
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSubscriptionSettingsServiceApp")]
-class MSFT_xSPSubscriptionSettingsServiceApp  : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPSubscriptionSettingsServiceApp")]
+class MSFT_SPSubscriptionSettingsServiceApp  : OMI_BaseResource
 {
     [Key, Description("The name of the subscription settings service app")] string Name;
     [Required, Description("The name of the application pool the service app runs in")] String ApplicationPool;
