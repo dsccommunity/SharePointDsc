@@ -29,9 +29,6 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$url' general settings"
 
-    if ($SecurityValidationTimeoutMinutes)
-      { [timespan]$SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $SecurityValidationTimeoutMinutes }
-
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -81,9 +78,6 @@ function Set-TargetResource
 
     Write-Verbose -Message "Applying general settings '$Url'"
     
-    if ($SecurityValidationTimeoutMinutes)
-      { [timespan]$SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $SecurityValidationTimeoutMinutes }
-
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -133,9 +127,6 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application general settings '$Url'"
     if ($null -eq $CurrentValues) { return $false }
-
-    if ($SecurityValidationTimeoutMinutes)
-      { $PSBoundParameters.SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $SecurityValidationTimeoutMinutes }
 
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebApplication\xSPWebApplication.GeneralSettings.psm1" -Resolve)
     return Test-xSPWebApplicationGeneralSettings -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
