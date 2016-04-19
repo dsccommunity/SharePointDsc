@@ -163,7 +163,6 @@ Write-Verbose -Message "Detecting SharePoint version from binaries"
     }
     if ($majorVersion -eq 16) {
         Write-Verbose -Message "Version: SharePoint 2016"
-        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56",           "MSVCRT11","MSVCRT14","ODBC","DotNet452")
         $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
         $osVersion = [System.Environment]::OSVersion.Version.Major
         if ($osVersion -eq 10) {
