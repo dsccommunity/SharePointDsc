@@ -1,4 +1,4 @@
-﻿function Add-DatabaseToAvailabilityGroup { 
+function Add-DatabaseToAvailabilityGroup { 
   [CmdletBinding(DefaultParameterSetName='Default')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
@@ -558,8 +558,8 @@ param(
     [object]
     ${ProfileServiceApplicationProxy},
 
-    [Parameter(ParameterSetName='MySiteSettings', Mandatory=$true, ValueFromPipeline=$true)]
     [Parameter(ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='MySiteSettings', Mandatory=$true, ValueFromPipeline=$true)]
     [object]
     ${MySiteHostLocation},
 
@@ -4225,6 +4225,17 @@ param(
     [object]
     ${WebApplication},
 
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Get-SPO365LinkSettings { 
+  [CmdletBinding()]
+param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
@@ -9002,6 +9013,9 @@ param(
 
     [object]
     ${AdminApplicationPool},
+
+    [bool]
+    ${CloudIndex},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -16971,6 +16985,30 @@ param(
  } 
 
 
+function Set-SPO365LinkSettings { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+    [AllowEmptyString()]
+    [string]
+    ${MySiteHostUrl},
+
+    [Parameter(ValueFromPipelineByPropertyName=$true)]
+    [string[]]
+    ${Audiences},
+
+    [Parameter(ValueFromPipelineByPropertyName=$true)]
+    [bool]
+    ${RedirectSites},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
 function Set-SPODataConnectionSetting { 
   [CmdletBinding(DefaultParameterSetName='Name', SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
@@ -17297,8 +17335,8 @@ param(
     [string]
     ${ProfileSyncDBFailoverServer},
 
-    [Parameter(ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='MySiteSettings', Mandatory=$true, ValueFromPipeline=$true)]
+    [Parameter(ValueFromPipeline=$true)]
     [object]
     ${MySiteHostLocation},
 
@@ -19825,6 +19863,21 @@ param(
  } 
 
 
+function Test-SPO365LinkSettings { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+    [uri]
+    ${MySiteHostUrl},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
 function Test-SPSite { 
   [CmdletBinding()]
 param(
@@ -20549,6 +20602,3 @@ param(
 
  
  } 
-
-
-

@@ -1,3 +1,11 @@
+[ClassVersion("1.0.0")]
+Class MSFT_xSPWebPolicyPermissions
+{
+    [Key, Description("Name of the account")] String Username;
+    [Write, Description("Permission level of the account"), ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] String PermissionLevel[];
+    [Write, Description("Specifies if the account is allowed to act as a system account")] Boolean ActAsSystemAccount;
+};
+
 /*
 **Description**
 
@@ -53,14 +61,6 @@ Do not set the ActAsSystemAccount property to $true without setting the permissi
         PsDscRunAsCredential   = $InstallAccount
     }
 */
-
-[ClassVersion("1.0.0")]
-Class MSFT_xSPWebPolicyPermissions
-{
-    [Key, Description("Name of the account")] String Username;
-    [Write, Description("Permission level of the account"), ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] String PermissionLevel[];
-    [Write, Description("Specifies if the account is allowed to act as a system account")] Boolean ActAsSystemAccount;
-};
 
 [ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPolicy")]
 class MSFT_xSPWebAppPolicy : OMI_BaseResource

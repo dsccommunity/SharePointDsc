@@ -2,6 +2,8 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
+    # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")] 
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
@@ -45,7 +47,9 @@ function Get-TargetResource
             $s = Get-SPSite $caWebApp.Url
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
-            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, (ConvertTo-SecureString "-" -AsPlainText -Force))
+            
+            $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
+            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
             
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
@@ -103,7 +107,7 @@ function Set-TargetResource
                         ApplicationPool = $appPool
                         Identity = $app
                         DefaultContentAccessAccountName = $params.DefaultContentAccessAccount.UserName
-                        DefaultContentAccessAccountPassword = (ConvertTo-SecureString -String $params.DefaultContentAccessAccount.GetNetworkCredential().Password -AsPlainText -Force)
+                        DefaultContentAccessAccountPassword = $params.DefaultContentAccessAccount.Password
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 } 
@@ -131,8 +135,7 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
                 $setParams.Add("DefaultContentAccessAccountName", $params.DefaultContentAccessAccount.UserName)
-                $password = ConvertTo-SecureString -String $params.DefaultContentAccessAccount.GetNetworkCredential().Password -AsPlainText -Force
-                $setParams.Add("DefaultContentAccessAccountPassword", $password)
+                $setParams.Add("DefaultContentAccessAccountPassword", $params.DefaultContentAccessAccount.Password)
             } 
             Set-SPEnterpriseSearchServiceApplication @setParams
             

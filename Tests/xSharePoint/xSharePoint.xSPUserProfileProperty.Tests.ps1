@@ -1,7 +1,7 @@
 
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 Add-PSSnapin Microsoft.SharePoint.PowerShell -ea 0 
 
@@ -41,6 +41,7 @@ Describe "xSPUserProfileProperty" {
            TermSet = "Department" 
            UserOverridePrivacy = $false
         }
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         $testParamsUpdateProperty = @{
