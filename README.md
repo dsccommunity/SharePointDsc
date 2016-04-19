@@ -118,6 +118,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added options to customise the installation directories used when installing SharePoint with xSPInstall
  * Aligned testing to common DSC resource test module
  * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
+ * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
 
 ### 0.12.0.0
 
