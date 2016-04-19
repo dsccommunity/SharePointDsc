@@ -1,4 +1,4 @@
-function Get-xSPSearchCrawlSchedule {
+function Get-SPDSCSearchCrawlSchedule {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $false)] $Schedule
@@ -40,7 +40,7 @@ function Get-xSPSearchCrawlSchedule {
     return $result
 }
 
-function Test-xSPSearchCrawlSchedule {
+function Test-SPDSCSearchCrawlSchedule {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
@@ -48,7 +48,7 @@ function Test-xSPSearchCrawlSchedule {
         [parameter(Mandatory = $true)] $DesiredSchedule
     )
     
-    Import-Module (Join-Path $PSScriptRoot "..\xSharePoint.Util\xSharePoint.Util.psm1")
+    Import-Module (Join-Path $PSScriptRoot "..\SharePointDSC.Util\SharePointDSC.Util.psm1")
     
     if ($CurrentSchedule.ScheduleType -ne $DesiredSchedule.ScheduleType) { return $false }
     

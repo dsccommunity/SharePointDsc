@@ -20,11 +20,11 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
    
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
         
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\xSharePoint.Search\xSPSearchContentSource.Schedules.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.Search\SPSearchContentSource.Schedules.psm1" -Resolve)
         
         $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $source) {
@@ -48,8 +48,8 @@ function Get-TargetResource
                     Addresses = $source.StartAddresses.AbsoluteUri
                     CrawlSetting = $crawlSetting
                     ContinuousCrawl = $source.EnableContinuousCrawls
-                    IncrementalSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
-                    FullSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
+                    IncrementalSchedule = (Get-SPDSCSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
+                    FullSchedule = (Get-SPDSCSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
                     Priority = $source.CrawlPriority
                     InstallAccount = $params.InstallAccount
                 }       
@@ -65,8 +65,8 @@ function Get-TargetResource
                     ContentSourceType = "Website"
                     Addresses = $source.StartAddresses.AbsoluteUri
                     CrawlSetting = $crawlSetting
-                    IncrementalSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
-                    FullSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
+                    IncrementalSchedule = (Get-SPDSCSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
+                    FullSchedule = (Get-SPDSCSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
                     LimitPageDepth = $source.MaxPageEnumerationDepth
                     LimitServerHops = $source.MaxSiteEnumerationDepth
                     Priority = $source.CrawlPriority
@@ -82,13 +82,13 @@ function Get-TargetResource
                     ContentSourceType = "FileShare"
                     Addresses = $source.StartAddresses.AbsoluteUri.Replace("file:///","\\").Replace("/", "\")
                     CrawlSetting = $crawlSetting
-                    IncrementalSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
-                    FullSchedule = (Get-xSPSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
+                    IncrementalSchedule = (Get-SPDSCSearchCrawlSchedule -Schedule $source.IncrementalCrawlSchedule)
+                    FullSchedule = (Get-SPDSCSearchCrawlSchedule -Schedule $source.FullCrawlSchedule)
                     Priority = $source.CrawlPriority
                 }
             }
             Default {
-                throw "xSharePoint does not currently support '$($source.Type)' content sources. Please use only 'SharePoint', 'FileShare' or 'Website'."
+                throw "SharePointDSC does not currently support '$($source.Type)' content sources. Please use only 'SharePoint', 'FileShare' or 'Website'."
             }
         }
         return $result     
@@ -142,7 +142,7 @@ function Set-TargetResource
     }
     if (($ContentSourceType -ne $CurrentValues.ContentSourceType -and $Force -eq $true) -or ($Ensure -eq "Absent" -and $CurrentValues.Ensure -ne $Ensure)) {
         # Remove the existing content source
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters) -ScriptBlock {
             $params = $args[0]            
             Remove-SPEnterpriseSearchCrawlContentSource -Identity $params.Name -SearchApplication $params.ServiceAppName -Confirm:$false
         }    
@@ -150,7 +150,7 @@ function Set-TargetResource
     
     if ($Ensure -eq "Present") {
         # Create the new content source and then apply settings to it
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters) -ScriptBlock {
             $params = $args[0]            
             
             $OFS = ","
@@ -221,17 +221,17 @@ function Set-TargetResource
                     }
                     "Weekly" { 
                         $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
-                        if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
+                        if ((Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
                             $OFS = ","
                             $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", [enum]::Parse([Microsoft.Office.Server.Search.Administration.DaysOfWeek], "$($params.IncrementalSchedule.CrawlScheduleDaysOfWeek)"))                            
                         }
                     }
                     "Monthly" { 
                         $incrementalSetArgs.Add("MonthlyCrawlSchedule", $true)
-                        if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true) {
+                        if ((Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true) {
                             $incrementalSetArgs.Add("CrawlScheduleDaysOfMonth", $params.IncrementalSchedule.CrawlScheduleDaysOfMonth)
                         }
-                        if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true) {
+                        if ((Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true) {
                             foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear) {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
@@ -240,13 +240,13 @@ function Set-TargetResource
                     }
                 }
                 
-                if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true) {
+                if ((Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true) {
                     $incrementalSetArgs.Add("CrawlScheduleRepeatDuration", $params.IncrementalSchedule.CrawlScheduleRepeatDuration)
                 }
-                if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true) {
+                if ((Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true) {
                     $incrementalSetArgs.Add("CrawlScheduleRepeatInterval", $params.IncrementalSchedule.CrawlScheduleRepeatInterval)
                 }
-                if ((Test-xSharePointObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true) {
+                if ((Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true) {
                     $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval", $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @incrementalSetArgs
@@ -266,7 +266,7 @@ function Set-TargetResource
                     }
                     "Weekly" { 
                         $fullSetArgs.Add("WeeklyCrawlSchedule", $true)
-                        if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
+                        if ((Test-SPDSCObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true) {
                             foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek) {
                                 $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
                             }
@@ -275,10 +275,10 @@ function Set-TargetResource
                     }
                     "Monthly" { 
                         $fullSetArgs.Add("MonthlyCrawlSchedule", $true)
-                        if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true) {
+                        if ((Test-SPDSCObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true) {
                             $fullSetArgs.Add("CrawlScheduleDaysOfMonth", $params.FullSchedule.CrawlScheduleDaysOfMonth)
                         }
-                        if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true) {
+                        if ((Test-SPDSCObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true) {
                             foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear) {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
@@ -287,13 +287,13 @@ function Set-TargetResource
                     }
                 }
                 
-                if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true) {
+                if ((Test-SPDSCObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRepeatDuration") -eq $true) {
                     $fullSetArgs.Add("CrawlScheduleRepeatDuration", $params.FullSchedule.CrawlScheduleRepeatDuration)
                 }
-                if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true) {
+                if ((Test-SPDSCObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRepeatInterval") -eq $true) {
                     $fullSetArgs.Add("CrawlScheduleRepeatInterval", $params.FullSchedule.CrawlScheduleRepeatInterval)
                 }
-                if ((Test-xSharePointObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true) {
+                if ((Test-SPDSCObjectHasProperty -Object $params.FullSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true) {
                     $fullSetArgs.Add("CrawlScheduleRunEveryInterval", $params.FullSchedule.CrawlScheduleRunEveryInterval)
                 }
                 Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @fullSetArgs
@@ -346,17 +346,17 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     
     if ($Ensure -eq "Absent") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
-                                                  -DesiredValues $PSBoundParameters `
-                                                  -ValuesToCheck @("Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+                                            -DesiredValues $PSBoundParameters `
+                                            -ValuesToCheck @("Ensure")
     }
     
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Search\xSPSearchContentSource.Schedules.psm1" -Resolve)
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.Search\SPSearchContentSource.Schedules.psm1" -Resolve)
     
-    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($IncrementalSchedule -ne $null) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($IncrementalSchedule -ne $null) -and ((Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
         return $false;
     }
-    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($FullSchedule -ne $null) -and ((Test-xSPSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($FullSchedule -ne $null) -and ((Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {
         return $false;
     }
     
@@ -370,9 +370,9 @@ function Test-TargetResource
         return $false
     }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
-                                              -DesiredValues $PSBoundParameters `
-                                              -ValuesToCheck @("ContentSourceType", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("ContentSourceType", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
