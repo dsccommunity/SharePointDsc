@@ -69,18 +69,18 @@ NestedModules = @("modules\SharePointDSC.Util\SharePointDSC.Util.psm1")
 FunctionsToExport = '*'
 
 # Cmdlets to export from this module
-CmdletsToExport = @("Invoke-SharePointDSCCommand",
-                    "Get-SharePointDSCInstalledProductVersion",
-                    "Get-SharePointDSCContentService",
-                    "Rename-SharePointDSCParamValue",
-                    "Add-SharePointDSCUserToLocalAdmin",
-                    "Remove-SharePointDSCUserToLocalAdmin",
-                    "Test-SharePointDSCObjectHasProperty",
-                    "Test-SharePointDSCRunAsCredential",
-                    "Test-SharePointDSCUserIsLocalAdmin",
-                    "Test-SharePointDSCSpecificParameters",
-                    "Set-SharePointDSCObjectPropertyIfValueExists",
-                    "Get-SharePointDSCUserProfileSubTypeManager")
+CmdletsToExport = @("Invoke-SPDSCCommand",
+                    "Get-SPDSCInstalledProductVersion",
+                    "Get-SPDSCContentService",
+                    "Rename-SPDSCParamValue",
+                    "Add-SPDSCUserToLocalAdmin",
+                    "Remove-SPDSCUserToLocalAdmin",
+                    "Test-SPDSCObjectHasProperty",
+                    "Test-SPDSCRunAsCredential",
+                    "Test-SPDSCUserIsLocalAdmin",
+                    "Test-SPDSCSpecificParameters",
+                    "Set-SPDSCObjectPropertyIfValueExists",
+                    "Get-SPDSCUserProfileSubTypeManager")
 
 # Variables to export from this module
 VariablesToExport = '*'

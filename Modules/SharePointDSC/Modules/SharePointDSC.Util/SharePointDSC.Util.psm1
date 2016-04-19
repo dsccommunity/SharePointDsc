@@ -1,4 +1,4 @@
-function Add-xSharePointUserToLocalAdmin() {
+function Add-SPDSCUserToLocalAdmin() {
     [CmdletBinding()]
     param
     (
@@ -16,7 +16,7 @@ function Add-xSharePointUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
 }
 
-function Get-xSharePointAssemblyVersion() {
+function Get-SPDSCAssemblyVersion() {
     [CmdletBinding()]
     param
     (
@@ -27,7 +27,7 @@ function Get-xSharePointAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
-function Get-xSharePointServiceContext {
+function Get-SPDSCServiceContext {
     [CmdletBinding()]
     param
     (
@@ -38,13 +38,13 @@ function Get-xSharePointServiceContext {
     return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
 }
 
-function Get-xSharePointContentService() {
+function Get-SPDSCContentService() {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
 }
 
 
-function Get-xSharePointUserProfileSubTypeManager {
+function Get-SPDSCUserProfileSubTypeManager {
     [CmdletBinding()]
     param
     (
@@ -55,13 +55,13 @@ function Get-xSharePointUserProfileSubTypeManager {
     return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($Context)
 }
 
-function Get-xSharePointInstalledProductVersion() {
+function Get-SPDSCInstalledProductVersion() {
     $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
     $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
     return (Get-Command $fullPath).FileVersionInfo
 }
 
-function Invoke-xSharePointCommand() {
+function Invoke-SPDSCCommand() {
     [CmdletBinding()]
     param
     (
@@ -130,7 +130,7 @@ function Invoke-xSharePointCommand() {
     }
 }
 
-function Rename-xSharePointParamValue() {
+function Rename-SPDSCParamValue() {
     [CmdletBinding()]
     param
     (
@@ -146,7 +146,7 @@ function Rename-xSharePointParamValue() {
     return $Params
 }
 
-function Remove-xSharePointUserToLocalAdmin() {
+function Remove-SPDSCUserToLocalAdmin() {
     [CmdletBinding()]
     param
     (
@@ -164,7 +164,7 @@ function Remove-xSharePointUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
-function Test-xSharePointObjectHasProperty() {
+function Test-SPDSCObjectHasProperty() {
     [CmdletBinding()]
     param
     (
@@ -179,7 +179,7 @@ function Test-xSharePointObjectHasProperty() {
     return $false
 }
 
-function Test-xSharePointRunAsCredential() {
+function Test-SPDSCRunAsCredential() {
     [CmdletBinding()]
     param
     (
@@ -192,7 +192,7 @@ function Test-xSharePointRunAsCredential() {
     return $false
 }
 
-function Test-xSharePointSpecificParameters() {
+function Test-SPDSCSpecificParameters() {
     [CmdletBinding()]
     param
     (
@@ -206,7 +206,7 @@ function Test-xSharePointSpecificParameters() {
     if (($DesiredValues.GetType().Name -ne "HashTable") `
         -and ($DesiredValues.GetType().Name -ne "CimInstance") `
         -and ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary")) {
-        throw "Property 'DesiredValues' in Test-xSharePointSpecificParameters must be either a Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)"
+        throw "Property 'DesiredValues' in Test-SPDSCSpecificParameters must be either a Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)"
     }
 
     if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck)) {
@@ -227,7 +227,7 @@ function Test-xSharePointSpecificParameters() {
                     
                     $CheckDesiredValue = $DesiredValues.ContainsKey($_)
                 } else {
-                    $CheckDesiredValue = Test-xSharePointObjectHasProperty $DesiredValues $_
+                    $CheckDesiredValue = Test-SPDSCObjectHasProperty $DesiredValues $_
                 }
 
                 if ($CheckDesiredValue) {
@@ -271,7 +271,7 @@ function Test-xSharePointSpecificParameters() {
     return $returnValue
 }
 
-function Test-xSharePointUserIsLocalAdmin() {
+function Test-SPDSCUserIsLocalAdmin() {
     [CmdletBinding()]
     param
     (
@@ -290,7 +290,7 @@ function Test-xSharePointUserIsLocalAdmin() {
         Where-Object { $_ -eq $accountName }
 }
 
-function Set-xSharePointObjectPropertyIfValueExists() {
+function Set-SPDSCObjectPropertyIfValueExists() {
     [CmdletBinding()]
     param
     (
@@ -304,7 +304,7 @@ function Set-xSharePointObjectPropertyIfValueExists() {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
     } else {
-        if (((Test-xSharePointObjectHasProperty $ParamsValue $ParamKey) -eq $true) -and ($null -ne $ParamsValue.$ParamKey)) {
+        if (((Test-SPDSCObjectHasProperty $ParamsValue $ParamKey) -eq $true) -and ($null -ne $ParamsValue.$ParamKey)) {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
     }
