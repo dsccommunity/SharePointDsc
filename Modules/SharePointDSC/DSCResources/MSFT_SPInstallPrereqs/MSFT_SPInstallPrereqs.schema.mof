@@ -45,7 +45,7 @@ Offline example:
         WCFDataServices56 = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices56.exe"
     }
 */
-[ClassVersion("1.0.0.0"), FriendlyName("xSPInstallPrereqs")]
+[ClassVersion("1.0.0.0"), FriendlyName("SPInstallPrereqs")]
 class MSFT_SPInstallPrereqs : OMI_BaseResource
 {
     [Key, Description("The full path to prerequisiteinstaller.exe")] String InstallerPath;

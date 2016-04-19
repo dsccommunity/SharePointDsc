@@ -9,7 +9,7 @@ Configuration SharePointServer
     )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
-    Import-DscResource -ModuleName xSharePoint
+    Import-DscResource -ModuleName SharePointDSC
     Import-DscResource -ModuleName xWebAdministration
     Import-DscResource -ModuleName xCredSSP
 
@@ -48,7 +48,7 @@ Configuration SharePointServer
         # This section installs SharePoint and its Prerequisites
         #**********************************************************
         
-        xSPInstallPrereqs InstallPrereqs {
+        SPInstallPrereqs InstallPrereqs {
             Ensure            = "Present"
             InstallerPath     = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Path "prerequisiteinstaller.exe")
             OnlineMode        = $false
@@ -64,11 +64,11 @@ Configuration SharePointServer
             KB2671763         = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "AppFabric1.1-RTM-KB2671763-x64-ENU.exe")
             WCFDataServices56 = (Join-Path $ConfigurationData.NonNodeData.SharePoint.Binaries.Prereqs.OfflineInstallDir "WcfDataServices56.exe")
         }
-        xSPInstall InstallSharePoint {
+        SPInstall InstallSharePoint {
             Ensure = "Present"
             BinaryDir = $ConfigurationData.NonNodeData.SharePoint.Binaries.Path
             ProductKey = $ConfigurationData.NonNodeData.SharePoint.ProductKey
-            DependsOn = "[xSPInstallPrereqs]InstallPrereqs"
+            DependsOn = "[SPInstallPrereqs]InstallPrereqs"
         }
 
         #**********************************************************
@@ -78,7 +78,7 @@ Configuration SharePointServer
         # provisions generic services and components used by the
         # whole farm
         #**********************************************************
-        xSPCreateFarm CreateSPFarm
+        SPCreateFarm CreateSPFarm
         {
             DatabaseServer           = $ConfigurationData.NonNodeData.SQLServer.FarmDatabaseServer
             FarmConfigDatabaseName   = $ConfigurationData.NonNodeData.SharePoint.Farm.ConfigurationDatabase
@@ -86,23 +86,23 @@ Configuration SharePointServer
             FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
             AdminContentDatabaseName = $ConfigurationData.NonNodeData.SharePoint.Farm.AdminContentDatabase
-            DependsOn                = "[xSPInstall]InstallSharePoint"
+            DependsOn                = "[SPInstall]InstallSharePoint"
         }
-        xSPManagedAccount ServicePoolManagedAccount
+        SPManagedAccount ServicePoolManagedAccount
         {
             AccountName          = $ServicePoolManagedAccount.UserName
             Account              = $ServicePoolManagedAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
-        xSPManagedAccount WebPoolManagedAccount
+        SPManagedAccount WebPoolManagedAccount
         {
             AccountName          = $WebPoolManagedAccount.UserName
             Account              = $WebPoolManagedAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
-        xSPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
+        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
         {
             PsDscRunAsCredential                        = $SPSetupAccount
             LogPath                                     = $ConfigurationData.NonNodeData.SharePoint.DiagnosticLogs.Path
@@ -123,9 +123,9 @@ Configuration SharePointServer
             ScriptErrorReportingDelay                   = 30
             ScriptErrorReportingEnabled                 = $true
             ScriptErrorReportingRequireAuth             = $true
-            DependsOn                                   = @("[xSPCreateFarm]CreateSPFarm", "[xDisk]LogsDisk")
+            DependsOn                                   = @("[SPCreateFarm]CreateSPFarm", "[xDisk]LogsDisk")
         }
-        xSPUsageApplication UsageApplication 
+        SPUsageApplication UsageApplication 
         {
             Name                  = "Usage Service Application"
             DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.UsageLogs.DatabaseName
@@ -133,16 +133,16 @@ Configuration SharePointServer
             UsageLogLocation      = $ConfigurationData.NonNodeData.SharePoint.UsageLogs.Path
             UsageLogMaxFileSizeKB = 1024
             PsDscRunAsCredential  = $SPSetupAccount
-            DependsOn             = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn             = "[SPCreateFarm]CreateSPFarm"
         }
-        xSPStateServiceApp StateServiceApp
+        SPStateServiceApp StateServiceApp
         {
             Name                 = "State Service Application"
             DatabaseName         = $ConfigurationData.NonNodeData.SharePoint.StateService.DatabaseName
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
-        xSPDistributedCacheService EnableDistributedCache
+        SPDistributedCacheService EnableDistributedCache
         {
             Name                 = "AppFabricCachingService"
             Ensure               = "Present"
@@ -150,7 +150,7 @@ Configuration SharePointServer
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
             CreateFirewallRules  = $true
-            DependsOn            = @('[xSPCreateFarm]CreateSPFarm','[xSPManagedAccount]ServicePoolManagedAccount')
+            DependsOn            = @('[SPCreateFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
         }
 
         #**********************************************************
@@ -163,7 +163,7 @@ Configuration SharePointServer
 
         foreach($webApp in $ConfigurationData.NonNodeData.SharePoint.WebApplications) {
             $webAppInternalName = $webApp.Name.Replace(" ", "")
-            xSPWebApplication $webAppInternalName
+            SPWebApplication $webAppInternalName
             {
                 Name                   = $webApp.Name
                 ApplicationPool        = $webApp.AppPool
@@ -175,34 +175,34 @@ Configuration SharePointServer
                 Url                    = $webApp.Url
                 Port                   = [Uri]::new($webApp.Url).Port
                 PsDscRunAsCredential   = $SPSetupAccount
-                DependsOn              = "[xSPManagedAccount]WebPoolManagedAccount"
+                DependsOn              = "[SPManagedAccount]WebPoolManagedAccount"
             }
 
             foreach($managedPath in $webApp.ManagedPaths) {
-                xSPManagedPath "$($webAppInternalName)Path$($managedPath.Path)" 
+                SPManagedPath "$($webAppInternalName)Path$($managedPath.Path)" 
                 {
                     WebAppUrl            = $webApp.Url
                     PsDscRunAsCredential = $SPSetupAccount
                     RelativeUrl          = $managedPath.Path
                     Explicit             = $managedPath.Explicit
                     HostHeader           = $webApp.UseHostNamedSiteCollections
-                    DependsOn            = "[xSPWebApplication]$webAppInternalName"
+                    DependsOn            = "[SPWebApplication]$webAppInternalName"
                 }
             }
             
-            xSPCacheAccounts "$($webAppInternalName)CacheAccounts"
+            SPCacheAccounts "$($webAppInternalName)CacheAccounts"
             {
                 WebAppUrl              = $webApp.Url
                 SuperUserAlias         = $webApp.SuperUser
                 SuperReaderAlias       = $webApp.SuperReader
                 PsDscRunAsCredential   = $SPSetupAccount
-                DependsOn              = "[xSPWebApplication]$webAppInternalName"
+                DependsOn              = "[SPWebApplication]$webAppInternalName"
             }
 
             foreach($siteCollection in $webApp.SiteCollections) {
                 $internalSiteName = "$($webAppInternalName)Site$($siteCollection.Name.Replace(' ', ''))"
                 if ($webApp.UseHostNamedSiteCollections -eq $true) {
-                    xSPSite $internalSiteName
+                    SPSite $internalSiteName
                     {
                         Url                      = $siteCollection.Url
                         OwnerAlias               = $siteCollection.Owner
@@ -210,17 +210,17 @@ Configuration SharePointServer
                         Name                     = $siteCollection.Name
                         Template                 = $siteCollection.Template
                         PsDscRunAsCredential     = $SPSetupAccount
-                        DependsOn                = "[xSPWebApplication]$webAppInternalName"
+                        DependsOn                = "[SPWebApplication]$webAppInternalName"
                     }
                 } else {
-                    xSPSite $internalSiteName
+                    SPSite $internalSiteName
                     {
                         Url                      = $siteCollection.Url
                         OwnerAlias               = $siteCollection.Owner
                         Name                     = $siteCollection.Name
                         Template                 = $siteCollection.Template
                         PsDscRunAsCredential     = $SPSetupAccount
-                        DependsOn                = "[xSPWebApplication]$webAppInternalName"
+                        DependsOn                = "[SPWebApplication]$webAppInternalName"
                     }
                 }
             }
@@ -234,65 +234,65 @@ Configuration SharePointServer
         # and not running on the server
         #**********************************************************
 
-        xSPServiceInstance ClaimsToWindowsTokenServiceInstance
+        SPServiceInstance ClaimsToWindowsTokenServiceInstance
         {  
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
 
         # App server service instances
         if ($Node.ServiceRoles.AppServer -eq $true) {
-            xSPServiceInstance UserProfileServiceInstance
+            SPServiceInstance UserProfileServiceInstance
             {  
                 Name                 = "User Profile Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
-                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+                DependsOn            = "[SPCreateFarm]CreateSPFarm"
             }        
-            xSPServiceInstance SecureStoreServiceInstance
+            SPServiceInstance SecureStoreServiceInstance
             {  
                 Name                 = "Secure Store Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
-                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+                DependsOn            = "[SPCreateFarm]CreateSPFarm"
             }
 
-            xSPUserProfileSyncService UserProfileSyncService
+            SPUserProfileSyncService UserProfileSyncService
             {  
                 UserProfileServiceAppName = "User Profile Service Application"
                 Ensure                    = "Present"
                 FarmAccount               = $FarmAccount
                 PsDscRunAsCredential      = $SPSetupAccount
-                DependsOn                 = "[xSPUserProfileServiceApp]UserProfileServiceApp"
+                DependsOn                 = "[SPUserProfileServiceApp]UserProfileServiceApp"
             }
         }
         
         # Front end service instances
         if ($Node.ServiceRoles.WebFrontEnd -eq $true) {
-            xSPServiceInstance ManagedMetadataServiceInstance
+            SPServiceInstance ManagedMetadataServiceInstance
             {  
                 Name                 = "Managed Metadata Web Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
-                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+                DependsOn            = "[SPCreateFarm]CreateSPFarm"
             }
-            xSPServiceInstance BCSServiceInstance
+            SPServiceInstance BCSServiceInstance
             {  
                 Name                 = "Business Data Connectivity Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
-                DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+                DependsOn            = "[SPCreateFarm]CreateSPFarm"
             }
         }
         
-        xSPServiceInstance SearchServiceInstance
+        SPServiceInstance SearchServiceInstance
         {  
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
         
         #**********************************************************
@@ -303,14 +303,14 @@ Configuration SharePointServer
         #**********************************************************
 
         $serviceAppPoolName = "SharePoint Service Applications"
-        xSPServiceAppPool MainServiceAppPool
+        SPServiceAppPool MainServiceAppPool
         {
             Name                 = $serviceAppPoolName
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[xSPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
-        xSPUserProfileServiceApp UserProfileServiceApp
+        SPUserProfileServiceApp UserProfileServiceApp
         {
             Name                 = "User Profile Service Application"
             ApplicationPool      = $serviceAppPoolName
@@ -323,9 +323,9 @@ Configuration SharePointServer
             SyncDBServer         = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
             FarmAccount          = $FarmAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = @('[xSPServiceAppPool]MainServiceAppPool', '[xSPManagedMetaDataServiceApp]ManagedMetadataServiceApp', '[xSPSearchServiceApp]SearchServiceApp')
+            DependsOn            = @('[SPServiceAppPool]MainServiceAppPool', '[SPManagedMetaDataServiceApp]ManagedMetadataServiceApp', '[SPSearchServiceApp]SearchServiceApp')
         }
-        xSPSecureStoreServiceApp SecureStoreServiceApp
+        SPSecureStoreServiceApp SecureStoreServiceApp
         {
             Name                  = "Secure Store Service Application"
             ApplicationPool       = $serviceAppPoolName
@@ -333,34 +333,34 @@ Configuration SharePointServer
             AuditlogMaxSize       = 30
             DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.SecureStoreService.DatabaseName
             PsDscRunAsCredential  = $SPSetupAccount
-            DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
+            DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
-        xSPManagedMetaDataServiceApp ManagedMetadataServiceApp
+        SPManagedMetaDataServiceApp ManagedMetadataServiceApp
         {  
             Name                 = "Managed Metadata Service Application"
             PsDscRunAsCredential = $SPSetupAccount
             ApplicationPool      = $serviceAppPoolName
             DatabaseServer       = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
             DatabaseName         = $ConfigurationData.NonNodeData.SharePoint.ManagedMetadataService.DatabaseName
-            DependsOn            = "[xSPServiceAppPool]MainServiceAppPool"
+            DependsOn            = "[SPServiceAppPool]MainServiceAppPool"
         }
-        xSPBCSServiceApp BCSServiceApp
+        SPBCSServiceApp BCSServiceApp
         {
             Name                  = "BCS Service Application"
             ApplicationPool       = $serviceAppPoolName
             DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.BCSService.DatabaseName
             DatabaseServer        = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
             PsDscRunAsCredential  = $SPSetupAccount
-            DependsOn             = @('[xSPServiceAppPool]MainServiceAppPool', '[xSPSecureStoreServiceApp]SecureStoreServiceApp')
+            DependsOn             = @('[SPServiceAppPool]MainServiceAppPool', '[SPSecureStoreServiceApp]SecureStoreServiceApp')
         }
-        xSPSearchServiceApp SearchServiceApp
+        SPSearchServiceApp SearchServiceApp
         {  
             Name                  = "Search Service Application"
             DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.Search.DatabaseName
             DatabaseServer        = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
             ApplicationPool       = $serviceAppPoolName
             PsDscRunAsCredential  = $SPSetupAccount
-            DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
+            DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
 
         #**********************************************************
