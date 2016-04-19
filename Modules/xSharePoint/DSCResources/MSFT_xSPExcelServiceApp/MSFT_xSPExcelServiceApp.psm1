@@ -25,7 +25,7 @@ function Get-TargetResource
         if ($null -eq $serviceApps) { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Excel Services Application" }
+        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Excel Services Application Web Service Application" }
 
         If ($null -eq $serviceApp) { 
             return $nullReturn
@@ -70,7 +70,7 @@ function Set-TargetResource
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
-                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Excel Services Application"  }
+                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Excel Services Application Web Service Application"  }
                 Remove-SPServiceApplication $appService -Confirm:$false
             }
     }
