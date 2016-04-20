@@ -30,20 +30,20 @@ function Get-TargetResource
         }
          
         if ($null -eq $serviceApps) {
-            Write-Verbose "Service Application $($params.ServiceAppName) not found"
+            Write-Verbose -Verbose "Service Application $($params.ServiceAppName) not found"
             return $nullReturn 
         }
         
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Search Service Application" }
 
         If ($null -eq $serviceApp) { 
-            Write-Verbose "Service Application $($params.ServiceAppName) not found"
+            Write-Verbose -Verbose "Service Application $($params.ServiceAppName) not found"
             return $nullReturn
         } else {
             $crawlRule = Get-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName | Where-Object { $_.Path -eq $params.Path }
 
             if ($crawlRule -eq $null) {
-                Write-Output "Crawl rule $($params.Path) not found"
+                Write-Verbose -Verbose "Crawl rule $($params.Path) not found"
                 return $nullReturn
             } else {
                 $crawlConfigurationRules = @()
@@ -205,8 +205,14 @@ function Test-TargetResource
     
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        if ((Compare-Object -ReferenceObject $CrawlConfigurationRules -DifferenceObject $CurrentValues.CrawlConfigurationRules) -ne $null) { return $false }
-        if ($AuthenticationCredentials) { if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials) { return $false } }
+        if ($CurrentValues.ContainsKey("CrawlConfigurationRules")) {
+            if ((Compare-Object -ReferenceObject $CrawlConfigurationRules -DifferenceObject $CurrentValues.CrawlConfigurationRules) -ne $null) { return $false }
+        } else { return $false }
+
+        if ($CurrentValues.ContainsKey("AuthenticationCredentials") -and $AuthenticationCredentials) { 
+            if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials) { return $false }
+        }
+        
         return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AuthenticationType", "Type", "CertificateName")    
     } else {
         return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")

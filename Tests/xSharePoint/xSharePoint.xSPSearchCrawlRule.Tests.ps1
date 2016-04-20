@@ -78,13 +78,15 @@ Describe "xSPSearchCrawlRule" {
             Mock Get-SPEnterpriseSearchCrawlRule { return @{
                     Path = "http://www.contoso.com"
                     Type = "InclusionRule"
-                    SuppressIndexing = 1
-                    FollowComplexUrls = 1
-                    CrawlAsHttp = 1
+                    SuppressIndexing = $true
+                    FollowComplexUrls = $true
+                    CrawlAsHttp = $true
                     AuthenticationType = "DefaultRuleAccess"
-                    Ensure = "Present"
                 }
             }
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
             
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -100,13 +102,16 @@ Describe "xSPSearchCrawlRule" {
             Mock Get-SPEnterpriseSearchCrawlRule { return @{
                     Path = "http://www.contoso.com"
                     Type = "InclusionRule"
-                    SuppressIndexing = 1
-                    FollowComplexUrls = 1
-                    CrawlAsHttp = 1
+                    SuppressIndexing = $false
+                    FollowComplexUrls = $true
+                    CrawlAsHttp = $true
                     AuthenticationType = "DefaultRuleAccess"
                     Ensure = "Present"
                 }
             }
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
 
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
