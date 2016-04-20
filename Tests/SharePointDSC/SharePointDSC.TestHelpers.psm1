@@ -133,10 +133,6 @@ function Assert-MofSchemaScriptParameters() {
             $parameters = $functionAst.FindAll( {$args[0] -is [System.Management.Automation.Language.ParameterAst]}, $true)
 
             foreach ($mofParameter in $mofData.Attributes) {
-
-                if ($mofParameter.IsArray -eq $true) {
-                    $t = "t"
-                }
                 # Check the parameter exists
                 $paramToCheck = $parameters | Where-Object { $_.Name.ToString() -eq "`$$($mofParameter.Name)" }
 
