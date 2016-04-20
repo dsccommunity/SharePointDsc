@@ -85,20 +85,6 @@ function Set-TargetResource
         return;
     }
 
-    switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
-        16 {
-            $hasOptionalParams = $false
-            @("AuditlogMaxSize","DatabaseName","DatabaseServer","FailoverDatabaseServer",`
-                "PartitionMode","Sharing","DatabaseCredentials") | ForEach-Object {
-                if ($PSBoundParameters.ContainsKey($_) -eq $true) { $hasOptionalParams = $true }
-            }
-            if ($hasOptionalParams -eq $false) {
-                # Add the MinDB param to ensure that the cmdlet call gets differentiated without the optional params being set
-                $params.Add("EnableMinDB", $false)
-            }
-        }
-    }
-
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $params -ScriptBlock {
@@ -110,7 +96,7 @@ function Set-TargetResource
             if($params.ContainsKey("DatabaseAuthenticationType")) {
                 if ($params.DatabaseAuthenticationType -eq "SQL") {
                     $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
-                    $params.Add("DatabasePassword", (ConvertTo-SecureString $params.DatabaseCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+                    $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
                 }
                 $params.Remove("DatabaseAuthenticationType")
             }
@@ -127,17 +113,7 @@ function Set-TargetResource
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Secure Store Service Application" }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
-                switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
-                    15 {
-                        Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool
-                    }
-                    16 {
-                        Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool -EnableMinDB:$false
-                    }
-                    Default {
-                        throw [Exception] "An unknown version of SharePoint (Major version $_) was detected. Only versions 15 (SharePoint 2013) or 16 (SharePoint 2016) are supported."
-                    }
-                }
+                Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool
             }
         }
     }

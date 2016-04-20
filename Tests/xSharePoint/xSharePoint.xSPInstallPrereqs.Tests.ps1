@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -40,6 +40,7 @@ Describe "xSPInstallPrereqs" {
             )
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
@@ -190,7 +191,7 @@ Describe "xSPInstallPrereqs" {
                 $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
             }
             if ($majorBuildNumber -eq 16) {
-                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
+                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
             }
             $requiredParams | ForEach-Object {
                 $testParams.Add($_, "C:\fake\value.exe")
@@ -223,7 +224,7 @@ Describe "xSPInstallPrereqs" {
                 $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
             }
             if ($majorBuildNumber -eq 16) {
-                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
+                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
             }
             $requiredParams | ForEach-Object {
                 $testParams.Add($_, "C:\fake\value.exe")
@@ -274,7 +275,7 @@ Describe "xSPInstallPrereqs" {
                 $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
             }
             if ($majorBuildNumber -eq 16) {
-                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
+                $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
             }
             $requiredParams | ForEach-Object {
                 $testParams.Add($_, "C:\fake\value.exe")

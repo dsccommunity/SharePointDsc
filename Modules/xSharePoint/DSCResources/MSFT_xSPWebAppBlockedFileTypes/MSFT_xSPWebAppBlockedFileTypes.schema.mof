@@ -1,4 +1,4 @@
-﻿/*
+/*
 **Description**
 
 This resource is responsible for controlling the blocked file type setting on a specific web application.
@@ -20,7 +20,7 @@ Both of these properties will only make changes to the file types in their list 
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppBlockedFileTypes")]
-Class MSFT_xSPWebAppBlockedFileTypes : OMI_BaseResource
+class MSFT_xSPWebAppBlockedFileTypes : OMI_BaseResource
 {
     [Key, Description("The URL of the web application to set blocked file types for")] string Url;
     [write, Description("This is a fixed list to use for blocked file types in this web app")] string Blocked[];

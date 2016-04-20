@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -8,7 +8,6 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-$ModuleName = "xSharePoint.Util"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint")
 
 Describe "xSharePoint.Util" {

@@ -15,7 +15,7 @@ function Get-xSPWebApplicationGeneralSettings {
         BrowserFileHandling = $WebApplication.BrowserFileHandling
         SecurityValidation = $WebApplication.FormDigestSettings.Enabled
         SecurityValidationExpires = $WebApplication.FormDigestSettings.Expires
-        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.timeout
+        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.timeout.minutes
         RecycleBinEnabled = $WebApplication.RecycleBinEnabled
         RecycleBinCleanupEnabled = $WebApplication.RecycleBinCleanupEnabled
         RecycleBinRetentionPeriod = $WebApplication.RecycleBinRetentionPeriod
@@ -34,6 +34,10 @@ function Set-xSPWebApplicationGeneralSettings {
         [parameter(Mandatory = $true)] $WebApplication,
         [parameter(Mandatory = $true)] $Settings
     )
+
+    if ($Settings.SecurityValidationTimeoutMinutes)
+      {  write-verbose "timeout minutes: $($Settings.SecurityValidationTimeOutMinutes)"
+          $Settings.SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $Settings.SecurityValidationTimeoutMinutes }
 
     # Format here is SPWebApplication property = Custom settings property
     $mapping = @{

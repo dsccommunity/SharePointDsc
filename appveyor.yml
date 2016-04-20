@@ -1,10 +1,11 @@
 version: 0.12.{build}.0
+image: WMF 5
 
 install:
-    - cinst -y pester -version 3.3.14 
-    - git clone https://github.com/PowerShell/DscResource.Tests
+    - cinst -y pester -version 3.3.14  
     - ps: |
-        Import-Module .\DscResource.Tests\TestHelper.psm1 -force
+        git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests\TestHelper.psm1" -force
         
 
 build: off
@@ -14,7 +15,7 @@ test_script:
         $testResultsFile = ".\TestsResults.xml"
         $testCoverageFiles = @()
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\Tests\xSharePoint.TestHarness.psm1"
-        $res = Invoke-xSharePointTests $testResultsFile
+        $res = Invoke-xSharePointTests -testResultsFile $testResultsFile -DscTestsPath "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests"
         (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
         if ($res.FailedCount -gt 0) { 
             throw "$($res.FailedCount) tests failed."
@@ -22,6 +23,8 @@ test_script:
 
 after_test:
     - ps: |
+        Move-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\xSharePoint\DscResource.Tests" "$env:APPVEYOR_BUILD_FOLDER\"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\TestHelper.psm1" -force
         New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US" -ItemType Directory
         & "$env:APPVEYOR_BUILD_FOLDER\Tests\Generate-xSharePointHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\xSharePoint\en-US"
 

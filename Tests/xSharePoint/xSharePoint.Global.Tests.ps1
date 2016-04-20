@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
@@ -53,57 +53,6 @@ Describe 'xSharePoint whole of module tests' {
                 if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
             }
             $filesWithErrors | Should Be 0
-        }
-    }
-
-    $DSCTestsPath = (Get-Item (Join-Path $RepoRoot "..\**\DSCResource.Tests\MetaFixers.psm1" -Resolve)).FullName
-    if ($null -ne $DSCTestsPath) {
-        Import-Module $DSCTestsPath
-        Context "Validate the format and structure of all text files in the module" {
-
-            $allTextFiles = Get-TextFilesList $RepoRoot
-
-            It "has no files that aren't in UTF-8 encoding" {
-                $unicodeFilesCount = 0
-                $allTextFiles | %{
-                    if (Test-FileUnicode $_) {
-                        $unicodeFilesCount += 1
-                        Write-Warning "File $($_.FullName) contains 0x00 bytes. It's probably uses Unicode and need to be converted to UTF-8. Use Fixer 'Get-UnicodeFilesList `$pwd | ConvertTo-UTF8'."
-                    }
-                }
-                $unicodeFilesCount | Should Be 0
-            }
-
-            It "has no files with tabs in the content" {
-                $totalTabsCount = 0
-                $allTextFiles | %{
-                    $fileName = $_.FullName
-                    (cat $_.FullName -Raw) | Select-String "`t" | % {
-                        Write-Warning "There are tab in $fileName. Use Fixer 'Get-TextFilesList `$pwd | ConvertTo-SpaceIndentation'."
-                        $totalTabsCount++
-                    }
-                }
-                $totalTabsCount | Should Be 0
-            }
-        }
-    }
-
-    Context "Validate the PowerShell modules used throughout the module" {
-        $psm1Files = @(ls $RepoRoot -Recurse -Filter "*.psm1" -File | ? {
-            ($_.FullName -like "*\DscResources\*" -or  $_.FullName -like "*\Modules\xSharePoint.*") -and (-not ($_.Name -like "*.schema.psm1"))
-        })
-
-        It 'has valid PowerShell syntax in all module files' {
-            $errors = @()
-            $psm1Files | ForEach-Object { 
-                $localErrors = Get-ParseErrors $_.FullName
-                if ($localErrors) {
-                    Write-Warning "There are parsing errors in $($_.FullName)"
-                    Write-Warning ($localErrors | Format-List | Out-String)
-                }
-                $errors += $localErrors
-            }
-            $errors.Count | Should Be 0
         }
     }
 }
