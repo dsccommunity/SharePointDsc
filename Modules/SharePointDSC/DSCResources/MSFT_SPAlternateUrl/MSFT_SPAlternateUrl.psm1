@@ -14,7 +14,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Alternate URL for $Zone in $WebAppUrl"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $aam = Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone -ErrorAction SilentlyContinue | Select -First 1
@@ -67,7 +67,7 @@ function Set-TargetResource
             throw "URL must be specified when ensure is set to present"
         }
 
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
             $params = $args[0]
             $CurrentValues = $args[1]
 
@@ -78,7 +78,7 @@ function Set-TargetResource
             }
         }
     } else {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.Zone | Remove-SPAlternateURL -Confirm:$false
         }
@@ -107,6 +107,6 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing alternate URL configuration"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Url", "Ensure") 
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Url", "Ensure") 
 }
 

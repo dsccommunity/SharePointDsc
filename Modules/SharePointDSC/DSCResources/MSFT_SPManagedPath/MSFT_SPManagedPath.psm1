@@ -14,7 +14,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $getParams = @{
@@ -65,7 +65,7 @@ function Set-TargetResource
 
     if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $newParams = @{}
@@ -84,7 +84,7 @@ function Set-TargetResource
     
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing the managed path $RelativeUrl from $WebAppUrl"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $removeParams = @{}
@@ -119,7 +119,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader", "Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("WebAppUrl","RelativeUrl","Explicit","HostHeader", "Ensure")
 }
 
 

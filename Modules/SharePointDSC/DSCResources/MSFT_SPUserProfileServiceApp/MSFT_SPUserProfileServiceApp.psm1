@@ -20,7 +20,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile service application $Name"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -107,14 +107,14 @@ function Set-TargetResource
         Write-Verbose -Message "Creating user profile service application $Name"
         
         # Add the FarmAccount to the local Administrators group, if it's not already there
-        $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $FarmAccount.UserName
+        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
 
         if (!$isLocalAdmin)
         {
-            Add-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+            Add-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
         }
 
-        $result = Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
 
@@ -122,8 +122,8 @@ function Set-TargetResource
             if ($params.ContainsKey("Ensure")) { $params.Remove("Ensure") | Out-Null }
             $params.Remove("FarmAccount") | Out-Null
 
-            $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
-            $params = Rename-xSharePointParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
+            $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
+            $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
             if ($null -eq $serviceApps) { 
@@ -137,13 +137,13 @@ function Set-TargetResource
         # Remove the FarmAccount from the local Administrators group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+            Remove-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
         }
     }
     
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing user profile service application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $service = Get-SPServiceApplication -Name $params.Name `
@@ -177,7 +177,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

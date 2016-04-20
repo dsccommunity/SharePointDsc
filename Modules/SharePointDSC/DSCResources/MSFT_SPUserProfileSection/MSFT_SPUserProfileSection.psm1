@@ -14,7 +14,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile service application $Name"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $upsa = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue
@@ -65,7 +65,7 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     
     Write-Verbose -Message "Creating user profile property $Name"
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
             $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
@@ -98,7 +98,7 @@ function Set-TargetResource
             $coreProperty.DisplayName = $params.DisplayName
             $coreProperty.Commit()
         }else{
-            Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+            Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
             $userProfileProperty.Commit()
         }
 
@@ -134,9 +134,9 @@ function Test-TargetResource
     if ($null -eq $CurrentValues) { return $false  }
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder", "Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder", "Ensure")
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }  
     
 }

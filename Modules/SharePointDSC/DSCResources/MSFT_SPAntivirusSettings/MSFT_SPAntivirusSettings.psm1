@@ -15,7 +15,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting antivirus configuration settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         try {
@@ -26,7 +26,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-xSharePointContentService
+        $admService = Get-SPDSCContentService
         
         return @{
             # Set the antivirus settings
@@ -60,7 +60,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting antivirus configuration settings"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {
@@ -71,7 +71,7 @@ function Set-TargetResource
         }
         
         Write-Verbose -Message "Start update"
-        $admService = Get-xSharePointContentService
+        $admService = Get-SPDSCContentService
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected")) { 
@@ -112,7 +112,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues) { return $false }
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

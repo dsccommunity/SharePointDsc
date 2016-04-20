@@ -14,7 +14,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting state service application '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
@@ -53,7 +53,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Creating State Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $dbParams = @{}
@@ -68,7 +68,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing State Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $serviceApp =  Get-SPStateServiceApplication -Name $params.Name
@@ -95,7 +95,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for state service application $Name"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Ensure")
 }
 
 

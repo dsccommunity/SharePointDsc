@@ -13,7 +13,7 @@ function Get-TargetResource
     )
     Write-Verbose -Message "Getting BCS service app '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
@@ -67,7 +67,7 @@ function Set-TargetResource
         # The service app doesn't exist but should
         
         Write-Verbose -Message "Creating BCS Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
 
@@ -83,7 +83,7 @@ function Set-TargetResource
         
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating BCS Service Application $Name"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
 
@@ -99,7 +99,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent") {
         # The service app should not exit
         Write-Verbose -Message "Removing BCS Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
                 $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Business Data Connectivity Service Application"  }
@@ -127,7 +127,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for BCS Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -14,7 +14,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$url' site use and deletion settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         try {
@@ -58,7 +58,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting web application '$Url' Site Use and Deletion settings"
 
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {
@@ -108,7 +108,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($null -eq $CurrentValues) { return $false }
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

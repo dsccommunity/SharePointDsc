@@ -15,7 +15,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $ConfirmPreference = 'None'
 
@@ -69,7 +69,7 @@ function Set-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         $ConfirmPreference = 'None'
@@ -241,9 +241,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($CurrentValues -eq $null) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
-                                              -DesiredValues $PSBoundParameters `
-                                              -ValuesToCheck @(
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @(
                                                   "Admin", 
                                                   "Crawler", 
                                                   "ContentProcessing", 

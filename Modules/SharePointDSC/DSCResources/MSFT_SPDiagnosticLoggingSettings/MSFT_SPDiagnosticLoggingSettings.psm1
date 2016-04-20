@@ -27,7 +27,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting diagnostic configuration settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
@@ -88,13 +88,13 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting diagnostic configuration settings"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null } 
-        $params = $params | Rename-xSharePointParamValue -oldName "LogPath" -newName "LogLocation" `
-                          | Rename-xSharePointParamValue -oldName "LogSpaceInGB" -newName "LogDiskSpaceUsageGB"
+        $params = $params | Rename-SPDSCParamValue -oldName "LogPath" -newName "LogLocation" `
+                          | Rename-SPDSCParamValue -oldName "LogSpaceInGB" -newName "LogDiskSpaceUsageGB"
 
         Set-SPDiagnosticConfig @params
     }
@@ -131,7 +131,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing diagnostic configuration settings"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($null -eq $CurrentValues) { return $false }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 

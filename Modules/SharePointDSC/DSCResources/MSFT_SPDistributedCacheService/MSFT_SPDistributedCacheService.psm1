@@ -15,7 +15,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the cache host information"
     
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $nullReturnValue = @{
             Name = $params.Name
@@ -73,7 +73,7 @@ function Set-TargetResource
         Write-Verbose -Message "Adding the distributed cache to the server"
         if($createFirewallRules -eq $true) {
             Write-Verbose -Message "Create a firewall rule for AppFabric"
-            Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
                 $icmpFirewallRule = Get-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -ErrorAction SilentlyContinue
                 if($null -eq $icmpFirewallRule ) {
                     New-NetFirewallRule -Name Allow_Ping -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -Description "Allow ICMPv4 ping" -Protocol ICMPv4 -IcmpType 8 -Enabled True -Profile Any -Action Allow 
@@ -91,7 +91,7 @@ function Set-TargetResource
         Write-Verbose "Current state is '$($CurrentState.Ensure)' and desired state is '$Ensure'"
         if ($CurrentState.Ensure -ne $Ensure) {
             Write-Verbose -Message "Enabling distributed cache service"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
 
                 if ($params.ContainsKey("ServerProvisionOrder")) {
@@ -169,7 +169,7 @@ function Set-TargetResource
         }
     } else {
         Write-Verbose -Message "Removing distributed cache to the server"
-        Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
             $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object { $_.TypeName -eq "Distributed Cache" }
             if ($null -eq $serviceInstance) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
@@ -184,7 +184,7 @@ function Set-TargetResource
             Remove-SPDistributedCacheServiceInstance
         }
         if ($CreateFirewallRules -eq $true) {
-            Invoke-xSharePointCommand -Credential $InstallAccount -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
                 $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distribute Cache" -ErrorAction SilentlyContinue
                 if($null -ne $firewallRule) {
                     Write-Verbose -Message "Disabling firewall rules."
@@ -214,7 +214,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for distributed cache configuration"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }
 
 

@@ -13,7 +13,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPSessionStateService info"
     
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $svc = Get-SPSessionStateService
@@ -50,7 +50,7 @@ function Set-TargetResource
     }
     
     if ($Ensure -eq "Present") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $svc = Get-SPSessionStateService
@@ -71,7 +71,7 @@ function Set-TargetResource
         }
     }
     if ($Ensure -eq "Absent") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $svc = Get-SPSessionStateService
@@ -105,9 +105,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     if ($Ensure -eq "Present") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure","SessionTimeout")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure","SessionTimeout")
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
     }   
     
 }

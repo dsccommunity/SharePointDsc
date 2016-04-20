@@ -1,5 +1,3 @@
-# revisit this https://blogs.msdn.microsoft.com/spses/2015/09/15/cloud-hybrid-search-service-application/
-
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -21,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Search service application '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
@@ -55,7 +53,7 @@ function Get-TargetResource
             $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
             
             $cloudIndex = $false
-            $version = Get-xSharePointInstalledProductVersion
+            $version = Get-SPDSCInstalledProductVersion
             if(($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
                 $cloudIndex = $serviceApp.CloudIndex
             }
@@ -97,7 +95,7 @@ function Set-TargetResource
         # Create the service app as it doesn't exist
          
         Write-Verbose -Message "Creating Search Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $serviceInstance = Get-SPEnterpriseSearchServiceInstance -Local 
@@ -110,7 +108,7 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
             
             if ($params.ContainsKey("CloudIndex") -eq $true) {
-                $version = Get-xSharePointInstalledProductVersion
+                $version = Get-SPDSCInstalledProductVersion
                 if (($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
                     $newParams.Add("CloudIndex", $params.CloudIndex)    
                 } else {
@@ -145,7 +143,7 @@ function Set-TargetResource
         # Update the service app that already exists
         
         Write-Verbose -Message "Updating Search Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application" }
@@ -171,7 +169,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent") {
         # The service app should not exit
         Write-Verbose -Message "Removing Search Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Search Service Application"  }
@@ -208,9 +206,9 @@ function Test-TargetResource
     
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "ApplicationPool", "SearchCenterUrl")    
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "ApplicationPool", "SearchCenterUrl")    
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 

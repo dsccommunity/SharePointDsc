@@ -19,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting usage application '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -87,7 +87,7 @@ function Set-TargetResource
     $CurrentState = Get-TargetResource @PSBoundParameters
 
     if ($CurrentState.Ensure -eq "Absent" -and $Ensure -eq "Present") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $newParams = @{}
@@ -106,7 +106,7 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Configuring usage application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Proxy" }
@@ -126,7 +126,7 @@ function Set-TargetResource
     
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing usage application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $service = Get-SPServiceApplication -Name $params.Name `
@@ -160,9 +160,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for usage application '$Name'"
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("UsageLogCutTime", "UsageLogLocation", "UsageLogMaxFileSizeKB", "UsageLogMaxSpaceGB", "Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("UsageLogCutTime", "UsageLogLocation", "UsageLogMaxFileSizeKB", "UsageLogMaxSpaceGB", "Ensure")
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
 }
 

@@ -13,11 +13,11 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for local SP Farm"
 
-    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
@@ -56,11 +56,11 @@ function Set-TargetResource
 
     Write-Verbose -Message "Joining existing farm configuration database"
 
-    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
@@ -71,7 +71,7 @@ function Set-TargetResource
             SkipRegisterAsDistributedCacheHost = $true
         }
         
-        switch((Get-xSharePointInstalledProductVersion).FileMajorPart) {
+        switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
@@ -120,13 +120,13 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] [ValidateSet("Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd")] $ServerRole
     )
 
-    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-xSharePointInstalledProductVersion).FileMajorPart -ne 16) {
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose "Testing for local farm presence"
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName") 
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("FarmConfigDatabaseName") 
 }
 
 

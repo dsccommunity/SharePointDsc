@@ -13,7 +13,7 @@ function Get-TargetResource
 
         Write-Verbose -Message "Getting Access Services service app '$Name'"
 
-        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -57,7 +57,7 @@ function Set-TargetResource
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating Access Services Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $app = New-SPAccessServicesApplication -Name $params.Name `
@@ -70,7 +70,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing Access Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
                 $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Access Services Application"  }
@@ -95,7 +95,7 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for Access Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

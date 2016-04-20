@@ -12,7 +12,7 @@ function Get-TargetResource
     
    write-verbose "Getting SharePoint IRM Settings"
     
-   $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+   $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         try {
@@ -27,7 +27,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-xSharePointContentService
+        $admService = Get-SPDSCContentService
         
         if ($admService.IrmSettings.IrmRMSEnabled)
          { $Ensure = "Present" }
@@ -60,7 +60,7 @@ function Set-TargetResource
     
     write-verbose "Applying SharePoint IRM settings"
      
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {
@@ -70,7 +70,7 @@ function Set-TargetResource
             return
         }
         
-        $admService = Get-xSharePointContentService
+        $admService = Get-SPDSCContentService
         
         if ($params.UseADRMS -and ($params.RMSserver -ne $null)) {
             throw "Cannot specify both an RMSserver and set UseADRMS to True"
@@ -115,7 +115,7 @@ function Test-TargetResource
 
     if ($UseADRMS -ne $true) { $PSBoundParameters.UseADRMS = $false }
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
     
 }
 

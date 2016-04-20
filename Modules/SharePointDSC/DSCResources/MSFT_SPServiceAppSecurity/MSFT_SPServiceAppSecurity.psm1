@@ -22,7 +22,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
@@ -99,7 +99,7 @@ function Set-TargetResource
         throw "Unable to locate service application $ServiceAppName"
     }
     
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
         

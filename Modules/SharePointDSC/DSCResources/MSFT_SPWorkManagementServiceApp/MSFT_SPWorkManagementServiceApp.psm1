@@ -17,7 +17,7 @@ function Get-TargetResource
     )
     Write-Verbose -Message "Getting Work management service app '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -72,7 +72,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Creating work management Service Application $Name"
     $PSBoundParameters.Ensure = $Ensure
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
         | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
@@ -143,18 +143,18 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
-                                                                                                                                    "MinimumTimeBetweenEwsSyncSubscriptionSearches",
-                                                                                                                                    "MinimumTimeBetweenProviderRefreshes",
-                                                                                                                                    "MinimumTimeBetweenSearchQueries",
-                                                                                                                                    "Name",
-                                                                                                                                    "NumberOfSubscriptionSyncsPerEwsSyncRun",
-                                                                                                                                    "NumberOfUsersEwsSyncWillProcessAtOnce",
-                                                                                                                                    "NumberOfUsersPerEwsSyncBatch",
-                                                                                                                                    "Ensure"
-                                                                                                                                    )
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+                                                                                                                             "MinimumTimeBetweenEwsSyncSubscriptionSearches",
+                                                                                                                             "MinimumTimeBetweenProviderRefreshes",
+                                                                                                                             "MinimumTimeBetweenSearchQueries",
+                                                                                                                             "Name",
+                                                                                                                             "NumberOfSubscriptionSyncsPerEwsSyncRun",
+                                                                                                                             "NumberOfUsersEwsSyncWillProcessAtOnce",
+                                                                                                                             "NumberOfUsersPerEwsSyncBatch",
+                                                                                                                             "Ensure"
+                                                                                                                            )
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 }

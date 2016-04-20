@@ -20,7 +20,7 @@ function Get-TargetResource
 
     switch ($SettingsScope) {
         "WebApplication" {
-            $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
         
                 try {
@@ -56,8 +56,8 @@ function Get-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-xSharePointRunAsCredential -Credential $InstallAccount) -eq $true) {
-                $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true) {
+                $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                     $params = $args[0]
         
                     try {
@@ -119,7 +119,7 @@ function Set-TargetResource
 
     switch ($SettingsScope) {
         "WebApplication" {
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
 
                 try {
@@ -150,8 +150,8 @@ function Set-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-xSharePointRunAsCredential -Credential $InstallAccount) -eq $true) {
-                Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true) {
+                Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                     $params = $args[0]
 
                     try {
@@ -210,7 +210,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues) { return $false }
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

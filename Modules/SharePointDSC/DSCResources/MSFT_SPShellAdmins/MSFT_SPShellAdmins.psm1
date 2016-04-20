@@ -44,7 +44,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting all Shell Admins"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {
@@ -122,7 +122,7 @@ function Set-TargetResource
         throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         try {

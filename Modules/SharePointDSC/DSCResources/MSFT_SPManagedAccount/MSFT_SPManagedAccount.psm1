@@ -15,7 +15,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Checking for managed account $AccountName"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
@@ -62,7 +62,7 @@ function Set-TargetResource
     $currentValues = Get-TargetResource @PSBoundParameters
     if ($currentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") {
         Write-Verbose "Managed account does not exist but should, creating the managed account"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             New-SPManagedAccount -Credential $params.Account
         }
@@ -70,7 +70,7 @@ function Set-TargetResource
     
     if ($Ensure -eq "Present") {
         Write-Verbose -Message "Updating settings for managed account"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $updateParams = @{ 
@@ -84,7 +84,7 @@ function Set-TargetResource
         }    
     } else {
         Write-Verbose -Message "Removing managed account"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             Remove-SPManagedAccount -Identity $params.AccountName -Confirm:$false
         }
@@ -112,7 +112,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification", "Ensure") 
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification", "Ensure") 
 }
 
 

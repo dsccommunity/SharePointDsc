@@ -16,7 +16,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting farm solution '$Name'..."
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $solution = Get-SPSolution -Identity $params.Name -ErrorAction SilentlyContinue -Verbose:$false
@@ -77,7 +77,7 @@ function Set-TargetResource
         {
             Write-Verbose "Upload solution to the farm."
 
-            $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
         
                 $runParams = @{}
@@ -103,7 +103,7 @@ function Set-TargetResource
             {
                 Write-Verbose "Remove current version ('$($CurrentValues.Version)') of solution..."
 
-                $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                     $params = $args[0]
         
                     $runParams = @{}
@@ -131,7 +131,7 @@ function Set-TargetResource
             {
                 Write-Verbose "Update solution from '$($CurrentValues.Version)' to $Version..."
 
-                $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                     $params = $args[0]
         
                     $runParams = @{}
@@ -167,7 +167,7 @@ function Set-TargetResource
         if ($CurrentValues.Deployed) 
         { 
             # Retract Solution globally 
-            $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
         
                 $runParams = @{}
@@ -202,7 +202,7 @@ function Set-TargetResource
         else 
         { 
             # Deploy solution 
-            $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
        
                 $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
@@ -242,11 +242,11 @@ function Set-TargetResource
        
      } 
 
-     WaitFor-SolutionJob -SolutionName $Name -InstallAccount $InstallAccount
+     Wait-SPDSCSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
 
     if ($Ensure -eq "Absent")
     {
-        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
         
             $runParams = @{ 
@@ -288,10 +288,10 @@ function Test-TargetResource
         $valuesToCheck = @("Ensure", "Version", "Deployed")
     }
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
 
-function WaitFor-SolutionJob
+function Wait-SPDSCSolutionJob
 {
     [CmdletBinding()]
     param
@@ -302,7 +302,7 @@ function WaitFor-SolutionJob
 
     start-sleep -s 5
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @{ Name = $SolutionName } -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @{ Name = $SolutionName } -ScriptBlock {
         $params = $args[0]
 
         $gc = Start-SPAssignment -Verbose:$false

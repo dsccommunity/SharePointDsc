@@ -19,7 +19,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting user profile service sync connection $ConnectionDomain"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
@@ -31,7 +31,7 @@ function Get-TargetResource
         }
         else
         {
-            $context = Get-xSharePointServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup 
+            $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup 
             $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
 
             $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
@@ -82,7 +82,7 @@ function Set-TargetResource
     Write-Verbose -Message "Creating user profile service application $Name"
 
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
@@ -91,7 +91,7 @@ function Set-TargetResource
         if ($null -eq $ups) { 
             throw "User Profile Service Application $($params.UserProfileService) not found"
         }
-        $context = Get-xSharePointServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
+        $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
 
         Write-Verbose -Message "retrieving UserProfileConfigManager "
         $upcm = New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
@@ -215,7 +215,7 @@ function Test-TargetResource
     {
         return $false 
     }    
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
 }
 
 Export-ModuleMember -Function *-TargetResource

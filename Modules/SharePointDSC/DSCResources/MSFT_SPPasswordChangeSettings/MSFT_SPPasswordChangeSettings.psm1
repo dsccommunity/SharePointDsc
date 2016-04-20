@@ -13,7 +13,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Retrieving farm wide automatic password change settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $farm = Get-SPFarm
@@ -41,7 +41,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Updating farm wide automatic password change settings"
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $farm = Get-SPFarm -ErrorAction Continue 
 
@@ -79,7 +79,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing retrieving farm wide automatic password change settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
 }
 
 

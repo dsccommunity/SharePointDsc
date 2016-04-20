@@ -11,7 +11,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $site = Get-SPSite $params.SiteUrl -ErrorAction SilentlyContinue
@@ -44,7 +44,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Updating app domain settings for $SiteUrl"
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false 
     }
@@ -65,7 +65,7 @@ function Test-TargetResource
     if($CurrentValues -eq $null){
         return $false
     }
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 
 }
 
 Export-ModuleMember -Function *-TargetResource

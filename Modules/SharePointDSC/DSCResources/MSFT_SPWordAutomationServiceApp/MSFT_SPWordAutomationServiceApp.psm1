@@ -35,7 +35,7 @@ function Get-TargetResource
         throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
         $params = $args[0] 
           
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue | Where-Object { $_.TypeName -eq "Word Automation Services" }
@@ -131,7 +131,7 @@ function Set-TargetResource
     switch ($Ensure) {
         "Present" {
             Write-Verbose -Message "Creating and/or configuring Word Automation Service Application $Name" 
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
                 $params = $args[0] 
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue | Where-Object { $_.TypeName -eq "Word Automation Services" }
@@ -218,7 +218,7 @@ function Set-TargetResource
         }
         "Absent" {
             Write-Verbose -Message "Removing Word Automation Service Application $Name" 
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
                 $params = $args[0] 
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue | Where-Object { $_.TypeName -eq "Word Automation Services" }
@@ -272,7 +272,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters 
      
     if ($null -eq $CurrentValues) { return $false } 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 } 
 
 Export-ModuleMember -Function *-TargetResource 

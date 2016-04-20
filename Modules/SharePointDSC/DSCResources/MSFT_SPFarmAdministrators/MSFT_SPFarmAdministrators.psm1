@@ -21,7 +21,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting all Farm Administrators"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
@@ -155,7 +155,7 @@ function Set-TargetResource
 
     if ($runChange) {
         Write-Verbose "Apply changes"
-        Change-SPFarmAdministrators $changeUsers
+        Update-SPDSCFarmAdministrators $changeUsers
     }
 }
 
@@ -228,10 +228,10 @@ function Test-TargetResource
     return $result
 }
 
-function Change-SPFarmAdministrators {
-Param ([Hashtable] $changeUsers)
+function Update-SPDSCFarmAdministrators {
+    param ([Hashtable] $changeUsers)
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $changeUsers -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $changeUsers -ScriptBlock {
         $changeUsers = $args[0]
 
         $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}

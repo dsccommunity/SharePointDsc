@@ -22,7 +22,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
         
@@ -83,7 +83,7 @@ function Set-TargetResource
     Write-Verbose -Message "Creating web application '$Name'"
     
     if ($Ensure -eq "Present") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
             $params = $args[0]
             $ScriptRoot = $args[1]
 
@@ -96,7 +96,7 @@ function Set-TargetResource
                 }
 
                 # Get a reference to the Administration WebService
-                $admService = Get-xSharePointContentService
+                $admService = Get-SPDSCContentService
                 $appPools = $admService.ApplicationPools | Where-Object { $_.Name -eq $params.ApplicationPool }
                 if ($appPools -eq $null) {
                     # Application pool does not exist, create a new one.
@@ -139,7 +139,7 @@ function Set-TargetResource
     }
     
     if ($Ensure -eq "Absent") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
             $params = $args[0]
             $ScriptRoot = $args[1]
 
@@ -177,7 +177,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
     $PSBoundParameters.Ensure = $Ensure
-    $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
+    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure")
     return $testReturn

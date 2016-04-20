@@ -16,7 +16,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting content database configuration settings"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $cdb = Get-SPDatabase | Where-Object { $_.Type -eq "Content Database" -and $_.Name -eq $params.Name }
@@ -72,7 +72,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting content database configuration settings"
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase does not return disabled databases.
@@ -154,7 +154,7 @@ function Test-TargetResource
     }
 
     $PSBoundParameters.Ensure = $Ensure
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 ### Exception Test-TargetResource with different DBServer to message and false

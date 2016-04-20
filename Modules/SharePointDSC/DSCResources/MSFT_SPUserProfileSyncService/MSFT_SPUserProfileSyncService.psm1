@@ -10,13 +10,13 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    if ((Get-xSharePointInstalledProductVersion).FileMajorPart -ne 15) {
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
         throw [Exception] "Only SharePoint 2013 is supported to deploy the user profile sync service via DSC, as 2016 does not use the FIM based sync service."
     }
 
     Write-Verbose -Message "Getting the local user profile sync service instance"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
 
@@ -70,24 +70,24 @@ function Set-TargetResource
     )
 
     $PSBoundParameters.Ensure = $Ensure
-    if ((Get-xSharePointInstalledProductVersion).FileMajorPart -ne 15) {
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
         throw [Exception] "Only SharePoint 2013 is supported to deploy the user profile sync service via DSC, as 2016 does not use the FIM based sync service."
     }
 
     Write-Verbose -Message "Setting User Profile Synchronization Service"
 
     # Add the FarmAccount to the local Admins group, if it's not already there
-    $isLocalAdmin = Test-xSharePointUserIsLocalAdmin -UserName $FarmAccount.UserName
+    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
 
     if (!$isLocalAdmin)
     {
-        Add-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+        Add-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
 
         # Cycle the Timer Service so that it picks up the local Admin token
         Restart-Service -Name "SPTimerV4"
     }
 
-    Invoke-xSharePointCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $currentServer = $env:COMPUTERNAME
@@ -135,7 +135,7 @@ function Set-TargetResource
     # Remove the FarmAccount from the local Admins group, if it was added above
     if (!$isLocalAdmin)
     {
-        Remove-xSharePointUserToLocalAdmin -UserName $FarmAccount.UserName
+        Remove-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
     }
 }
 
@@ -151,14 +151,14 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    if ((Get-xSharePointInstalledProductVersion).FileMajorPart -ne 15) {
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
         throw [Exception] "Only SharePoint 2013 is supported to deploy the user profile sync service via DSC, as 2016 does not use the FIM based sync service."
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 

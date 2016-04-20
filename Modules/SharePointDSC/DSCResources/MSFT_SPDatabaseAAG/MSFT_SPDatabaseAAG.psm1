@@ -13,7 +13,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting current AAG config for $DatabaseName"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $database = Get-SPDatabase | Where-Object { $_.Name -eq $params.DatabaseName }
@@ -60,7 +60,7 @@ function Set-TargetResource
     # Move to a new AG
     if ($CurrentValues.AGName -ne $AGName -and $Ensure -eq "Present") {
         Write-Verbose -Message "Moving $DatabaseName from previous AAG to $AGName"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
             $params = $args[0]
             $CurrentValues = $args[1]
             
@@ -81,7 +81,7 @@ function Set-TargetResource
         if ($Ensure -eq "Present") {
             # Add to AG
             Write-Verbose -Message "Adding $DatabaseName from $AGName"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
 
                 $cmdParams = @{
@@ -96,7 +96,7 @@ function Set-TargetResource
         } else {
             # Remove from the AG
             Write-Verbose -Message "Removing $DatabaseName from $AGName"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName -DatabaseName $params.DatabaseName -Force
             }
@@ -122,6 +122,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Checking AAG configuration for $DatabaseName"
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
 }
 

@@ -22,7 +22,7 @@ function Get-TargetResource
         Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         try {
@@ -33,7 +33,7 @@ function Get-TargetResource
         }
 
         # Get a reference to the Administration WebService
-        $admService = Get-xSharePointContentService
+        $admService = Get-SPDSCContentService
 
         $template = $admService.QuotaTemplates[$params.Name]
         if ($null -eq $template) { 
@@ -85,7 +85,7 @@ function Set-TargetResource
     switch ($Ensure) {
         "Present" {
             Write-Verbose "Ensure is set to Present - Add or update template"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
         
                 try {
@@ -97,7 +97,7 @@ function Set-TargetResource
 
                 Write-Verbose -Message "Start update"
                 # Get a reference to the Administration WebService
-                $admService = Get-xSharePointContentService
+                $admService = Get-SPDSCContentService
 
                 $template = $admService.QuotaTemplates[$params.Name]
 
@@ -128,7 +128,7 @@ function Set-TargetResource
                 Throw "Do not use StorageMaxInMB, StorageWarningInMB, MaximumUsagePointsSolutions or WarningUsagePointsSolutions when Ensure is specified as Absent"
             }
 
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
         
                 try {
@@ -140,7 +140,7 @@ function Set-TargetResource
 
                 Write-Verbose -Message "Start update"
                 # Get a reference to the Administration WebService
-                $admService = Get-xSharePointContentService
+                $admService = Get-SPDSCContentService
 
                 # Delete template, function does not throw an error when the template does not exist. So safe to call without error handling.
                 $admService.QuotaTemplates.Delete($params.Name)
@@ -178,7 +178,7 @@ function Test-TargetResource
         "Present" {
             $CurrentValues = Get-TargetResource @PSBoundParameters
             if (($CurrentValues.Ensure -eq "Absent") -or ($CurrentValues -eq $null)) { return $false }
-            return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+            return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
         }
         "Absent" {
             if ($StorageMaxInMB -or $StorageWarningInMB -or $MaximumUsagePointsSolutions -or $WarningUsagePointsSolutions) {

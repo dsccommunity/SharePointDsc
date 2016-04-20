@@ -28,7 +28,7 @@ function Get-TargetResource
     
     $returnValue = @{}
     Write-Verbose -Message "Detecting SharePoint version from binaries"
-    $majorVersion = (Get-xSharePointAssemblyVersion -PathToAssembly $InstallerPath)
+    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
         Write-Verbose -Message "Version: SharePoint 2013"
     }
@@ -144,12 +144,12 @@ function Set-TargetResource
     )
 
     if ($Ensure -eq "Absent") {
-        throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
+        throw [Exception] "SharePOintDSC does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
         return
     }
 
 Write-Verbose -Message "Detecting SharePoint version from binaries"
-    $majorVersion = (Get-xSharePointAssemblyVersion -PathToAssembly $InstallerPath)
+    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
         $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
         if ($dotNet46Check -ne $null -and $dotNet46Check.Length -gt 0) {
@@ -276,7 +276,7 @@ function Test-TargetResource
     )
 
     if ($Ensure -eq "Absent") {
-        throw [Exception] "xSharePoint does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
+        throw [Exception] "SharePointDSC does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
         return
     }
 
@@ -285,7 +285,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Checking installation of SharePoint prerequisites"
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

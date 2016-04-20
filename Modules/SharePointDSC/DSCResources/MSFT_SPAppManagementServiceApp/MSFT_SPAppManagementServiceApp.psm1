@@ -13,7 +13,7 @@ function Get-TargetResource
     )
     Write-Verbose -Message "Getting App management service app '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -66,7 +66,7 @@ function Set-TargetResource
         # The service app doesn't exist but should
         
         Write-Verbose -Message "Creating App management Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $newParams = @{
@@ -85,7 +85,7 @@ function Set-TargetResource
          
         if ($ApplicationPool -ne $result.ApplicationPool) {
             Write-Verbose -Message "Updating App management Service Application $Name"
-            Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 
@@ -98,7 +98,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent") {
         # The service app should not exit
         Write-Verbose -Message "Removing App management Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
                 $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "App Management Service Application"  }
@@ -126,7 +126,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for App management Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

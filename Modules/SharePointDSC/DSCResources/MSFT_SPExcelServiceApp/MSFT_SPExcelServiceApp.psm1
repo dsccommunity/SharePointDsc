@@ -12,7 +12,7 @@ function Get-TargetResource
 
         Write-Verbose -Message "Getting Excel Services service app '$Name'"
 
-        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -57,7 +57,7 @@ function Set-TargetResource
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
         Write-Verbose -Message "Creating Excel Services Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             New-SPExcelServiceApplication -Name $params.Name `
@@ -66,7 +66,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing Excel Service Application $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
                 
                 $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Excel Services Application Web Service Application"  }
@@ -90,7 +90,7 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for Excel Services Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

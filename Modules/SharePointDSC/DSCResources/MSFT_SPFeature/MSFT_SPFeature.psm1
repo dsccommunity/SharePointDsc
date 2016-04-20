@@ -14,7 +14,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting feature $Name at $FeatureScope scope"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $checkParams = @{ Identity = $params.Name }
@@ -59,7 +59,7 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure 
 
     if ($Ensure -eq "Present") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
 
@@ -82,7 +82,7 @@ function Set-TargetResource
         }
     }
     if ($Ensure -eq "Absent") {
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
@@ -121,7 +121,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure 
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "Version")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "Version")
 }
 
 Export-ModuleMember -Function *-TargetResource

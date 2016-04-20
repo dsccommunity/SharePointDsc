@@ -15,7 +15,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Retrieving outgoing email settings configuration "
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $webApp = Get-SPWebApplication $params.WebAppUrl -IncludeCentralAdministration -ErrorAction SilentlyContinue
 
@@ -53,7 +53,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Updating outgoing email settings configuration for $WebAppUrl"
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         $webApp = $null
         Write-Verbose -Message "retrieving $($params.WebAppUrl)  settings"
@@ -85,7 +85,7 @@ function Test-TargetResource
     Write-Verbose -Message "Comparing Current and Target Outgoing email settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
 }
 
 

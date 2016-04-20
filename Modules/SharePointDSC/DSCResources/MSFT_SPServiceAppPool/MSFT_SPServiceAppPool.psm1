@@ -12,7 +12,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting service application pool '$Name'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
@@ -51,7 +51,7 @@ function Set-TargetResource
 
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") {
         Write-Verbose -Message "Creating Service Application Pool $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             New-SPServiceApplicationPool -Name $params.Name  -Account $params.ServiceAccount
@@ -68,7 +68,7 @@ function Set-TargetResource
     }
     if ($CurrentValues.Ensure -eq "Present" -and $Ensure -eq "Present") {
         Write-Verbose -Message "Updating Service Application Pool $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $sap = Get-SPServiceApplicationPool -Identity $params.Name -ErrorAction SilentlyContinue
@@ -79,7 +79,7 @@ function Set-TargetResource
     }
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing Service Application Pool $Name"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             Remove-SPServiceApplicationPool -Identity $params.Name -Confirm:$false
@@ -103,9 +103,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing service application pool '$Name'"
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount", "Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount", "Ensure")
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
     }    
 }
 
