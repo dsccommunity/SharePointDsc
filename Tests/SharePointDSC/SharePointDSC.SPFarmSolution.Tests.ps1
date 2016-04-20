@@ -52,7 +52,7 @@ Describe "SPFarmSolution" {
                 return $solution
             } -Verifiable
             Mock Install-SPSolution { } -Verifiable
-            Mock WaitFor-SolutionJob { } -Verifiable
+            Mock Wait-SPDSCSolutionJob { } -Verifiable
 
             $getResults = Get-TargetResource @testParams
 
@@ -71,7 +71,7 @@ Describe "SPFarmSolution" {
 
                 Assert-MockCalled Add-SPSolution 
                 Assert-MockCalled Install-SPSolution
-                Assert-MockCalled WaitFor-SolutionJob 
+                Assert-MockCalled Wait-SPDSCSolutionJob 
             }
         }
 
@@ -89,7 +89,7 @@ Describe "SPFarmSolution" {
             } -Verifiable
 
             Mock Uninstall-SPSolution { } -Verifiable
-            Mock WaitFor-SolutionJob { } -Verifiable
+            Mock Wait-SPDSCSolutionJob { } -Verifiable
             Mock Remove-SPSolution { } -Verifiable
             
 
@@ -109,7 +109,7 @@ Describe "SPFarmSolution" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Uninstall-SPSolution
-                Assert-MockCalled WaitFor-SolutionJob 
+                Assert-MockCalled Wait-SPDSCSolutionJob 
                 Assert-MockCalled Remove-SPSolution 
             }
         }
@@ -159,7 +159,7 @@ Describe "SPFarmSolution" {
             $getResults = Get-TargetResource @testParams
 
             Mock Update-SPSolution { } -Verifiable
-            Mock WaitFor-SolutionJob { } -Verifiable
+            Mock Wait-SPDSCSolutionJob { } -Verifiable
             Mock Install-SPFeature { } -Verifiable
 
             $getResults = Get-TargetResource @testParams
@@ -179,7 +179,7 @@ Describe "SPFarmSolution" {
 
                 Assert-MockCalled Update-SPSolution
                 Assert-MockCalled Install-SPFeature
-                Assert-MockCalled WaitFor-SolutionJob 
+                Assert-MockCalled Wait-SPDSCSolutionJob 
             }
         }
 
@@ -231,7 +231,7 @@ Describe "SPFarmSolution" {
             Mock Add-SPSolution { $solution } -Verifiable
 
             Mock Install-SPSolution { } -Verifiable
-            Mock WaitFor-SolutionJob { } -Verifiable
+            Mock Wait-SPDSCSolutionJob { } -Verifiable
 
             $getResults = Get-TargetResource @testParams
 
@@ -251,7 +251,7 @@ Describe "SPFarmSolution" {
                 Assert-MockCalled Remove-SPSolution
                 Assert-MockCalled Add-SPSolution
                 Assert-MockCalled Install-SPSolution
-                Assert-MockCalled WaitFor-SolutionJob 
+                Assert-MockCalled Wait-SPDSCSolutionJob 
             }
         }
     }   

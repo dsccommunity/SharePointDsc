@@ -165,7 +165,7 @@ function Set-TargetResource
             $allMembers += $psrAccount
         }
 
-        Import-Module (Join-Path $PsScriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+        Import-Module (Join-Path $PsScriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
         $differences = ComparePolicies $CurrentValues.Members $allMembers
 
         foreach ($difference in $differences) {
@@ -271,7 +271,7 @@ function Set-TargetResource
         $scriptRoot  = $args[1]
         $changeUsers = $args[2]
 
-        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
@@ -370,7 +370,7 @@ function Test-TargetResource
     
     Write-Verbose -Message "Testing web app policy for $UserName at $WebAppUrl"
     
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
 
     if ($null -eq $CurrentValues) { return $false }
 
@@ -404,7 +404,7 @@ function Test-TargetResource
             $allMembers += $psrAccount
         }
 
-        Import-Module (Join-Path $PsScriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
+        Import-Module (Join-Path $PsScriptRoot "..\..\Modules\SharePointDSC.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
         $differences = ComparePolicies $CurrentValues.Members $allMembers
 
         if ($differences.Count -eq 0) { return $true } else { return $false }

@@ -160,15 +160,15 @@ Describe "SPDesignerSettings" {
             Mock Get-SPFarm { return @{} }
 
             It "throws an exception in the get method to say that this is not supported" {
-                { Get-TargetResource @testParams } | Should throw "http://aka.ms/SPDSCRemoteIssues"
+                { Get-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
             }
 
             It "throws an exception in the test method to say that this is not supported" {
-                { Test-TargetResource @testParams } | Should throw "http://aka.ms/SPDSCRemoteIssues"
+                { Test-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
             }
 
             It "throws an exception in the set method to say that this is not supported" {
-                { Set-TargetResource @testParams } | Should throw "http://aka.ms/SPDSCRemoteIssues"
+                { Set-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
             }
         }
 

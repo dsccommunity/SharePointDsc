@@ -37,7 +37,7 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
         if ($null -eq $wa) { return $null }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPDSCWebApplication.GeneralSettings.psm1" -Resolve)
+        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDSC.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
 
         $result = Get-SPDSCWebApplicationGeneralSettings -WebApplication $wa
         $result.Add("Url", $params.Url)
