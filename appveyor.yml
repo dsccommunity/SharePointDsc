@@ -15,7 +15,7 @@ test_script:
         $testResultsFile = ".\TestsResults.xml"
         $testCoverageFiles = @()
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\Tests\SharePointDSC.TestHarness.psm1"
-        $res = Invoke-SharePointDSCTests -testResultsFile $testResultsFile -DscTestsPath "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDSC\DscResource.Tests"
+        $res = Invoke-SPDSCTests -testResultsFile $testResultsFile -DscTestsPath "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDSC\DscResource.Tests"
         (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
         if ($res.FailedCount -gt 0) { 
             throw "$($res.FailedCount) tests failed."
