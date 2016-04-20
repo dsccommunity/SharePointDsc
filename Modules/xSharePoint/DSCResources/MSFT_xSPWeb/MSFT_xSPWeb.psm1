@@ -78,8 +78,17 @@ function Set-TargetResource
     Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        Write-Verbose "Grant user '$($params.InstallAccount.UserName)' Access To Process Identity for '$($params.Url)'..."  
-        (New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url).WebApplication.GrantAccessToProcessIdentity($params.InstallAccount.UserName)  
+        if ($null -eq $params.InstallAccount) 
+        {    
+            $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
+        } 
+        else
+        {    
+            $currentUserName = $params.InstallAccount.UserName
+        }
+        
+        Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."  
+        (New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url).WebApplication.GrantAccessToProcessIdentity($currentUserName)  
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
