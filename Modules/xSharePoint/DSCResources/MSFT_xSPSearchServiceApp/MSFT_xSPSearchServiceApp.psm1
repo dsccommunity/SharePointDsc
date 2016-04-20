@@ -1,7 +1,11 @@
+# revisit this https://blogs.msdn.microsoft.com/spses/2015/09/15/cloud-hybrid-search-service-application/
+
 function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
+    # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")] 
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
@@ -10,6 +14,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -45,8 +50,15 @@ function Get-TargetResource
             $s = Get-SPSite $caWebApp.Url
             $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
-            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, (ConvertTo-SecureString "-" -AsPlainText -Force))
             
+            $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
+            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+            
+            $cloudIndex = $false
+            $version = Get-xSharePointInstalledProductVersion
+            if(($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
+                $cloudIndex = $serviceApp.CloudIndex
+            }
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
@@ -55,6 +67,7 @@ function Get-TargetResource
                 Ensure = "Present"
                 SearchCenterUrl = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
+                CloudIndex = $cloudIndex
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -74,6 +87,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -94,6 +108,17 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("DatabaseName") -eq $true) { $newParams.Add("DatabaseName", $params.DatabaseName) }
+            
+            if ($params.ContainsKey("CloudIndex") -eq $true) {
+                $version = Get-xSharePointInstalledProductVersion
+                if (($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
+                    $newParams.Add("CloudIndex", $params.CloudIndex)    
+                } else {
+                    throw "Please install SharePoint 2016 or SharePoint 2013 with August 2015 CU or higher before attempting to create a cloud enabled search service application"
+                }
+                
+            }
+            
             $app = New-SPEnterpriseSearchServiceApplication @newParams 
             if ($app) {
                 New-SPEnterpriseSearchServiceApplicationProxy -Name "$($params.Name) Proxy" -SearchApplication $app
@@ -103,7 +128,7 @@ function Set-TargetResource
                         ApplicationPool = $appPool
                         Identity = $app
                         DefaultContentAccessAccountName = $params.DefaultContentAccessAccount.UserName
-                        DefaultContentAccessAccountPassword = (ConvertTo-SecureString -String $params.DefaultContentAccessAccount.GetNetworkCredential().Password -AsPlainText -Force)
+                        DefaultContentAccessAccountPassword = $params.DefaultContentAccessAccount.Password
                     }
                     Set-SPEnterpriseSearchServiceApplication @setParams
                 } 
@@ -131,8 +156,7 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
                 $setParams.Add("DefaultContentAccessAccountName", $params.DefaultContentAccessAccount.UserName)
-                $password = ConvertTo-SecureString -String $params.DefaultContentAccessAccount.GetNetworkCredential().Password -AsPlainText -Force
-                $setParams.Add("DefaultContentAccessAccountPassword", $password)
+                $setParams.Add("DefaultContentAccessAccountPassword", $params.DefaultContentAccessAccount.Password)
             } 
             Set-SPEnterpriseSearchServiceApplication @setParams
             
@@ -168,6 +192,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String] $SearchCenterUrl,
+        [parameter(Mandatory = $false)] [System.Boolean] $CloudIndex,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DefaultContentAccessAccount,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )

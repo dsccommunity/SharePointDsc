@@ -39,6 +39,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPBCSServiceApp
  - xSPCacheAccounts
  - xSPCreateFarm
+ - xSPContentDatabase
  - xSPDesignerSettings
  - xSPDiagnosticLoggingSettings
  - xSPDistributedCacheService
@@ -47,6 +48,7 @@ Below is a list of DSC resource types that are currently provided by xSharePoint
  - xSPHealthAnalyzerRuleState
  - xSPInstall
  - xSPInstallPreReqs
+ - xSPIrmSettings
  - xSPJoinFarm
  - xSPManagedAccount
  - xSPManagedMetadataServiceApp
@@ -97,7 +99,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added ensure properties to multiple resources to standardise schemas
- * Added xSPSearchContentSource, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp and xSPPerformancePointServiceApp resources
+ * Added xSPSearchContentSource, xSPContentDatabase, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp, xSPPerformancePointServiceApp, xSPIrmSettings resources
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
  * Fixed a bug with reboot detection in xSPInstallPrereqs
@@ -109,7 +111,6 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
  * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
  * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
- * Added xSPContentDatabase resource
  * Fixed nuget package format for development feed from AppVeyor
  * Fixed bug with get output of xSPUSageApplication
  * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
@@ -117,8 +118,11 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
  * Added timestamps to verbose logging for resources that pause for responses from SharePoint
  * Added options to customise the installation directories used when installing SharePoint with xSPInstall
+ * Aligned testing to common DSC resource test module
  * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
  * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
+ * Added support for cloud search index to xSPSearchServiceApp
+ * Fixed bug in xSPWebAppGeneralSettings that prevented setting a security validation timeout value
 
 ### 0.12.0.0
 
