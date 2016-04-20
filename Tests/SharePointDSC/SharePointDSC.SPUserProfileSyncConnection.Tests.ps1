@@ -9,11 +9,11 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
-$ModuleName = "MSFT_xSPUserProfileSyncConnection"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPUserProfileSyncConnection"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-Describe "xSPUserProfileSyncConnection" {
+Describe "SPUserProfileSyncConnection" {
     InModuleScope $ModuleName {
         $testParams = @{
             UserProfileService = "User Profile Service Application"
@@ -35,18 +35,18 @@ Describe "xSPUserProfileSyncConnection" {
                 }        
 "@ -ErrorAction SilentlyContinue 
         }   
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Get-xSharePointServiceContext {return @{}}
+        Mock Get-SPDSCServiceContext {return @{}}
 
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
         Mock Get-SPWebApplication { 
                 return @{
                         Url="http://ca"
@@ -62,14 +62,14 @@ Describe "xSPUserProfileSyncConnection" {
             Type= "ActiveDirectory"
         }
         $connection = $connection  | Add-Member ScriptMethod RefreshSchema {
-                            $Global:xSPUPSSyncConnectionRefreshSchemaCalled = $true
+                            $Global:SPUPSSyncConnectionRefreshSchemaCalled = $true
                         } -PassThru | Add-Member ScriptMethod Update {
-                            $Global:xSPUPSSyncConnectionUpdateCalled = $true
+                            $Global:SPUPSSyncConnectionUpdateCalled = $true
                         } -PassThru | Add-Member ScriptMethod SetCredentials {
                                 param($userAccount,$securePassword )
-                            $Global:xSPUPSSyncConnectionSetCredentialsCalled  = $true
+                            $Global:SPUPSSyncConnectionSetCredentialsCalled  = $true
                         } -PassThru | Add-Member ScriptMethod Delete {
-                            $Global:xSPUPSSyncConnectionDeleteCalled = $true
+                            $Global:SPUPSSyncConnectionDeleteCalled = $true
                         } -PassThru
 
         $namingContext =@{ 
@@ -93,7 +93,7 @@ Describe "xSPUserProfileSyncConnection" {
                                                 $p1, $p2 `
                                             )
 
-        $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
+        $Global:SPUPSAddActiveDirectoryConnectionCalled =$true
         } -PassThru
             
         Mock New-Object -MockWith {
@@ -142,9 +142,9 @@ Describe "xSPUserProfileSyncConnection" {
             }
 
             It "creates a new service application in the set method" {
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$false
+                $Global:SPUPSAddActiveDirectoryConnectionCalled =$false
                 Set-TargetResource @testParams
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $true
+                $Global:SPUPSAddActiveDirectoryConnectionCalled | Should be $true
             }
         }
 
@@ -163,11 +163,11 @@ Describe "xSPUserProfileSyncConnection" {
             }
 
             It "execute update credentials" {
-                $Global:xSPUPSSyncConnectionSetCredentialsCalled=$false
-                $Global:xSPUPSSyncConnectionRefreshSchemaCalled=$false
+                $Global:SPUPSSyncConnectionSetCredentialsCalled=$false
+                $Global:SPUPSSyncConnectionRefreshSchemaCalled=$false
                 Set-TargetResource @testParams
-                $Global:xSPUPSSyncConnectionSetCredentialsCalled | Should be $true
-                $Global:xSPUPSSyncConnectionRefreshSchemaCalled | Should be $true
+                $Global:SPUPSSyncConnectionSetCredentialsCalled | Should be $true
+                $Global:SPUPSSyncConnectionRefreshSchemaCalled | Should be $true
             }
         }
         
@@ -182,7 +182,7 @@ Describe "xSPUserProfileSyncConnection" {
             }
             $litWareconnection.NamingContexts.Add($namingContext);
             $litWareconnection = $litWareconnection | Add-Member ScriptMethod Delete {
-                    $Global:xSPUPSSyncConnectionDeleteCalled = $true
+                    $Global:SPUPSSyncConnectionDeleteCalled = $true
                 } -PassThru
             $userProfileServiceValidConnection =  @{
                 Name = "User Profile Service Application"
@@ -206,7 +206,7 @@ Describe "xSPUserProfileSyncConnection" {
                                                     $p1, $p2 `
                                                 )
 
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
+                $Global:SPUPSAddActiveDirectoryConnectionCalled =$true
             } -PassThru            
             $litwareConnnectionManager.Add($litWareconnection)
 
@@ -230,9 +230,9 @@ Describe "xSPUserProfileSyncConnection" {
             }
 
             It "throws exception as force isn't specified" {
-                $Global:xSPUPSSyncConnectionDeleteCalled=$false
+                $Global:SPUPSSyncConnectionDeleteCalled=$false
                 {Set-TargetResource @testParams} | should throw
-                $Global:xSPUPSSyncConnectionDeleteCalled | Should be $false
+                $Global:SPUPSSyncConnectionDeleteCalled | Should be $false
             }
 
             $forceTestParams = @{
@@ -248,11 +248,11 @@ Describe "xSPUserProfileSyncConnection" {
             }
          
             It "delete and create as force is specified" {
-                $Global:xSPUPSSyncConnectionDeleteCalled=$false
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$false
+                $Global:SPUPSSyncConnectionDeleteCalled=$false
+                $Global:SPUPSAddActiveDirectoryConnectionCalled =$false
                 Set-TargetResource @forceTestParams 
-                $Global:xSPUPSSyncConnectionDeleteCalled | Should be $true
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $true
+                $Global:SPUPSSyncConnectionDeleteCalled | Should be $true
+                $Global:SPUPSAddActiveDirectoryConnectionCalled | Should be $true
             }
         }
 
@@ -272,12 +272,12 @@ Describe "xSPUserProfileSyncConnection" {
 
             It "attempts to execute method but synchronization is running" {
                 $Global:UpsSyncIsSynchronizationRunning=$false
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled =$false
+                $Global:SPUPSAddActiveDirectoryConnectionCalled =$false
                 {Set-TargetResource @testParams }| Should throw
                 Assert-MockCalled Get-SPServiceApplication
                 Assert-MockCalled New-Object -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
                 $Global:UpsSyncIsSynchronizationRunning| Should be $true;
-                $Global:xSPUPSAddActiveDirectoryConnectionCalled | Should be $false;
+                $Global:SPUPSAddActiveDirectoryConnectionCalled | Should be $false;
             }
 
         }
@@ -317,13 +317,13 @@ Describe "xSPUserProfileSyncConnection" {
             }
 
             It "updates OU lists" {
-                $Global:xSPUPSSyncConnectionUpdateCalled= $false
-                $Global:xSPUPSSyncConnectionSetCredentialsCalled  = $false
-                $Global:xSPUPSSyncConnectionRefreshSchemaCalled =$false
+                $Global:SPUPSSyncConnectionUpdateCalled= $false
+                $Global:SPUPSSyncConnectionSetCredentialsCalled  = $false
+                $Global:SPUPSSyncConnectionRefreshSchemaCalled =$false
                 Set-TargetResource @difOUsTestParams
-                $Global:xSPUPSSyncConnectionUpdateCalled | Should be $true
-                $Global:xSPUPSSyncConnectionSetCredentialsCalled  | Should be $true
-                $Global:xSPUPSSyncConnectionRefreshSchemaCalled | Should be $true
+                $Global:SPUPSSyncConnectionUpdateCalled | Should be $true
+                $Global:SPUPSSyncConnectionSetCredentialsCalled  | Should be $true
+                $Global:SPUPSSyncConnectionRefreshSchemaCalled | Should be $true
             }
         }
     }    

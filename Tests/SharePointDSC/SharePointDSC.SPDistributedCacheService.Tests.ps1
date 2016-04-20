@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPDistributedCacheService"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPDistributedCacheService"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPDistributedCacheService" {
+Describe "SPDistributedCacheService" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "AppFabricCache"
@@ -21,9 +21,9 @@ Describe "xSPDistributedCacheService" {
             ServiceAccount = "DOMAIN\user"
             CreateFirewallRules = $true
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -41,9 +41,9 @@ Describe "xSPDistributedCacheService" {
         Mock Add-SPDistributedCacheServiceInstance { } 
         Mock Update-SPDistributedCacheSize { } 
         Mock Get-SPManagedAccount { return @{} } 
-        Mock Add-xSharePointUserToLocalAdmin { } 
-        Mock Test-xSharePointUserIsLocalAdmin { return $false }
-        Mock Remove-xSharePointUserToLocalAdmin { }
+        Mock Add-SPDSCUserToLocalAdmin { } 
+        Mock Test-SPDSCUserIsLocalAdmin { return $false }
+        Mock Remove-SPDSCUserToLocalAdmin { }
         Mock Restart-Service { }
         Mock Get-SPFarm { return @{ 
             Services = @(@{ 
@@ -55,11 +55,11 @@ Describe "xSPDistributedCacheService" {
                                     Add-Member ScriptMethod Deploy {} -PassThru  
             }) 
         } }
-        Mock Stop-SPServiceInstance { $Global:xSharePointDCacheOnline = $false }
-        Mock Start-SPServiceInstance { $Global:xSharePointDCacheOnline = $true }
+        Mock Stop-SPServiceInstance { $Global:SPDSCDCacheOnline = $false }
+        Mock Start-SPServiceInstance { $Global:SPDSCDCacheOnline = $true }
 
         Mock Get-SPServiceInstance { 
-                if ($Global:xSharePointDCacheOnline -eq $false) {
+                if ($Global:SPDSCDCacheOnline -eq $false) {
                     return @(New-Object Object |            
                                 Add-Member NoteProperty TypeName "Distributed Cache" -PassThru |
                                 Add-Member NoteProperty Status "Disabled" -PassThru |
@@ -79,7 +79,7 @@ Describe "xSPDistributedCacheService" {
 
         Context "Distributed cache is not configured" {
             Mock Use-CacheCluster { throw [Exception] "ERRPS001 Error in reading provider and connection string values." }
-            $Global:xSharePointDCacheOnline = $false
+            $Global:SPDSCDCacheOnline = $false
             
             It "returns null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -96,7 +96,7 @@ Describe "xSPDistributedCacheService" {
         }
 
         Context "Distributed cache is configured correctly and running as required" {
-            $Global:xSharePointDCacheOnline = $true
+            $Global:SPDSCDCacheOnline = $true
 
             Mock Get-AFCacheHostConfiguration { return @{
                 Size = $testParams.CacheSizeInMB
@@ -109,7 +109,7 @@ Describe "xSPDistributedCacheService" {
         }
 
         Context "Distributed cache is configured but the required firewall rules are not deployed" {
-            $Global:xSharePointDCacheOnline = $true
+            $Global:SPDSCDCacheOnline = $true
             Mock Get-NetFirewallRule { return $null }
 
             It "returns false from the test method" {
@@ -123,7 +123,7 @@ Describe "xSPDistributedCacheService" {
         }
 
         Context "Distributed cache is confgured but should not be running on this machine" {
-            $Global:xSharePointDCacheOnline = $true
+            $Global:SPDSCDCacheOnline = $true
             $testParams.Ensure = "Absent"
             Mock Get-AFCacheHostConfiguration { return @{
                 Size = $testParams.CacheSizeInMB

@@ -9,21 +9,21 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPInstall"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPInstall"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPInstall" {
+Describe "SPInstall" {
     InModuleScope $ModuleName {
         $testParams = @{
             BinaryDir = "C:\SPInstall"
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-xSharePointAssemblyVersion { return $majorBuildNumber }
+        Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber }
         
         Mock Get-ChildItem {
             return @(
@@ -40,7 +40,7 @@ Describe "xSPInstall" {
             )
         }
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         

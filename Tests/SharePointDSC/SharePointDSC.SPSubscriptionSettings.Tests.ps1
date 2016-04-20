@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSubscriptionSettingsServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPSubscriptionSettingsServiceApp"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSubscriptionSettingsServiceApp" {
+Describe "SPSubscriptionSettingsServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test App"
@@ -21,10 +21,10 @@ Describe "xSPSubscriptionSettingsServiceApp" {
             DatabaseServer = "TestServer\Instance"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
 
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -99,7 +99,7 @@ Describe "xSPSubscriptionSettingsServiceApp" {
                 })
                     
                 $service = $service | Add-Member ScriptMethod Update {
-                    $Global:xSPSubscriptionServiceUpdateCalled = $true
+                    $Global:SPSubscriptionServiceUpdateCalled = $true
                 } -PassThru 
                 return $service
 
@@ -112,12 +112,12 @@ Describe "xSPSubscriptionSettingsServiceApp" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPSubscriptionServiceUpdateCalled = $false
+            $Global:SPSubscriptionServiceUpdateCalled = $false
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
-                $Global:xSPSubscriptionServiceUpdateCalled | Should Be $true
+                $Global:SPSubscriptionServiceUpdateCalled | Should Be $true
             }
         }
 

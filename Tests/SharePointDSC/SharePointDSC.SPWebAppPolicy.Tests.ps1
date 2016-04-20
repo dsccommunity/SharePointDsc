@@ -9,20 +9,20 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebAppPolicy"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPWebAppPolicy"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebAppPolicy" {
+Describe "SPWebAppPolicy" {
     InModuleScope $ModuleName {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $true
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -30,9 +30,9 @@ Describe "xSPWebAppPolicy" {
                 )
             }
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
@@ -71,14 +71,14 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -121,7 +121,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $true
@@ -146,7 +146,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $true
@@ -171,7 +171,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -186,7 +186,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -218,7 +218,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -232,10 +232,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -243,7 +243,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -258,7 +258,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -290,7 +290,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -304,10 +304,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -315,7 +315,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -330,7 +330,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -360,7 +360,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -383,7 +383,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -398,7 +398,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -428,7 +428,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -451,7 +451,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -466,7 +466,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $roleBindingsFC = @(
@@ -475,7 +475,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -517,7 +517,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -536,7 +536,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -551,7 +551,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $roleBindingsFC = @(
@@ -560,7 +560,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -602,7 +602,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -621,7 +621,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToExclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\sp_psr"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -635,7 +635,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $roleBindingsFC = @(
@@ -644,7 +644,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -686,7 +686,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -709,12 +709,12 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -728,7 +728,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -756,7 +756,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -769,10 +769,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -780,7 +780,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -794,7 +794,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -818,7 +818,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -831,10 +831,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "remove user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -842,12 +842,12 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -861,7 +861,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -889,7 +889,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -902,10 +902,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -913,7 +913,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
                         ActAsSystemAccount = $false
@@ -965,7 +965,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToExclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                     } -ClientOnly)
                 )
@@ -977,7 +977,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -1001,7 +1001,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru | 
                 Add-Member NoteProperty Properties @{} -PassThru
                 return @($webApp)
@@ -1015,10 +1015,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "remove user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -1026,7 +1026,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -1040,10 +1040,10 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
                 $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
-                    $Global:xSPWebAppPolicyAddCalled = $true
+                    $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1071,7 +1071,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1084,10 +1084,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -1095,7 +1095,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -1109,10 +1109,10 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
                 $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
-                    $Global:xSPWebAppPolicyAddCalled = $true
+                    $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1140,7 +1140,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1153,10 +1153,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -1164,7 +1164,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $true
@@ -1178,10 +1178,10 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
                 $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
-                    $Global:xSPWebAppPolicyAddCalled = $true
+                    $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1209,7 +1209,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1222,10 +1222,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -1233,7 +1233,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $true
@@ -1247,10 +1247,10 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
-                    $Global:xSPWebAppPolicyRemoveAllCalled = $true
+                    $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
                 $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
-                    $Global:xSPWebAppPolicyAddCalled = $true
+                    $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1278,7 +1278,7 @@ namespace Microsoft.SharePoint.Administration {
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1291,10 +1291,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -1302,7 +1302,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -1347,7 +1347,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "i:0#.w|contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -1392,7 +1392,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
@@ -1437,7 +1437,7 @@ namespace Microsoft.SharePoint.Administration {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 MembersToExclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                     } -ClientOnly)
                 )

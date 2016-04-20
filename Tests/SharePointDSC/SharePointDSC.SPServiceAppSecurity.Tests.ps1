@@ -9,28 +9,28 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPServiceAppSecurity"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPServiceAppSecurity"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPServiceAppSecurity" {
+Describe "SPServiceAppSecurity" {
     InModuleScope $ModuleName {
         $testParams = @{
             ServiceAppName = "Example Service App"
             SecurityType = "SharingPermissions"
             Members = @(
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user1"
                     AccessLevel = "Full Control"
                 }),
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user2"
                     AccessLevel = "Full Control"
                 })
             )
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
@@ -78,13 +78,13 @@ Describe "xSPServiceAppSecurity" {
             ServiceAppName = "Example Service App"
             SecurityType = "SharingPermissions"
             Members = @(
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user1"
                     AccessLevel = "Full Control"
                 })
             )
             MembersToInclude = @(
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user1"
                     AccessLevel = "Full Control"
                 })
@@ -107,11 +107,11 @@ Describe "xSPServiceAppSecurity" {
             ServiceAppName = "Example Service App"
             SecurityType = "SharingPermissions"
             Members = @(
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user1"
                     AccessLevel = "Full Control"
                 }),
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user2"
                     AccessLevel = "Full Control"
                 })
@@ -175,7 +175,7 @@ Describe "xSPServiceAppSecurity" {
             ServiceAppName = "Example Service App"
             SecurityType = "SharingPermissions"
             MembersToInclude = @(
-                (New-CimInstance -ClassName "MSFT_xSPServiceAppSecurityEntry" -ClientOnly -Property @{
+                (New-CimInstance -ClassName "MSFT_SPServiceAppSecurityEntry" -ClientOnly -Property @{
                     Username = "CONTOSO\user1"
                     AccessLevel = "Full Control"
                 })

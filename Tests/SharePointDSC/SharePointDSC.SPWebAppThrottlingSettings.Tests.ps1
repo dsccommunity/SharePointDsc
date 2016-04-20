@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebAppThrottlingSettings"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPWebAppThrottlingSettings"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebAppThrottlingSettings" {
+Describe "SPWebAppThrottlingSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "http://sites.sharepoint.com"
@@ -21,7 +21,7 @@ Describe "xSPWebAppThrottlingSettings" {
             AdminThreshold = 2000
             ListViewLookupThreshold = 12
             HappyHourEnabled = $true
-            HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+            HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
                 Hour = 2
                 Minute = 0
                 Duration = 1
@@ -33,9 +33,9 @@ Describe "xSPWebAppThrottlingSettings" {
             EventHandlersEnabled = $true
         }
         
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -128,9 +128,9 @@ Describe "xSPWebAppThrottlingSettings" {
                     EventHandlersEnabled = $testParams.EventHandlersEnabled
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru | Add-Member ScriptMethod SetDailyUnthrottledPrivilegedOperationWindow {
-                    $Global:xSPWebApplicationUpdateHappyHourCalled = $true
+                    $Global:SPWebApplicationUpdateHappyHourCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -143,11 +143,11 @@ Describe "xSPWebAppThrottlingSettings" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
-            $Global:xSPWebApplicationUpdateHappyHourCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateHappyHourCalled = $false
             It "updates the throttling settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
 
             $testParams = @{
@@ -157,7 +157,7 @@ Describe "xSPWebAppThrottlingSettings" {
                 AdminThreshold = 2000
                 ListViewLookupThreshold = 12
                 HappyHourEnabled = $true
-                HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+                HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
                     Hour = 5
                     Minute = 0
                     Duration = 1
@@ -168,12 +168,12 @@ Describe "xSPWebAppThrottlingSettings" {
                 ChangeLogExpiryDays = 30
                 EventHandlersEnabled = $true
             }
-            $Global:xSPWebApplicationUpdateCalled = $false
-            $Global:xSPWebApplicationUpdateHappyHourCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateHappyHourCalled = $false
             It "updates the incorrect happy hour settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
-                $Global:xSPWebApplicationUpdateHappyHourCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateHappyHourCalled | Should Be $true
             }
 
             it "throws exceptions where invalid happy hour settings are provided" {
@@ -183,9 +183,9 @@ Describe "xSPWebAppThrottlingSettings" {
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
                     Url = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
+                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
-                        HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+                        HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
                             Hour = 100
                             Minute = 0
                             Duration = 1
@@ -200,9 +200,9 @@ Describe "xSPWebAppThrottlingSettings" {
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
                     Url = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
+                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
-                        HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+                        HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
                             Hour = 5
                             Minute = 100
                             Duration = 1
@@ -217,9 +217,9 @@ Describe "xSPWebAppThrottlingSettings" {
                     ApplicationPoolAccount = "DEMO\ServiceAccount"
                     Url = "http://sites.sharepoint.com"
                     AuthenticationMethod = "NTLM"
-                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_xSPWebApplicationThrottling -Property @{
+                    ThrottlingSettings = (New-CimInstance -ClassName MSFT_SPWebApplicationThrottling -Property @{
                         HappyHourEnabled = $true
-                        HappyHour = (New-CimInstance -ClassName MSFT_xSPWebApplicationHappyHour -Property @{
+                        HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
                             Hour = 5
                             Minute = 0
                             Duration = 100

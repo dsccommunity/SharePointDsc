@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path 
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule  
 
-$ModuleName = "MSFT_xSPWordAutomationServiceApp" 
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1") 
+$ModuleName = "MSFT_SPWordAutomationServiceApp" 
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") 
 
-Describe "xSPWordAutomationServiceApp" { 
+Describe "SPWordAutomationServiceApp" { 
     InModuleScope $ModuleName { 
         $testParams = @{ 
             Name = "Word Automation Service Application" 
@@ -34,9 +34,9 @@ Describe "xSPWordAutomationServiceApp" {
             KeepAliveTimeout = 30
             MaximumConversionTime = 300
         } 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint") 
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC") 
 
-        Mock Invoke-xSharePointCommand {  
+        Mock Invoke-SPDSCCommand {  
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope 
         } 
          
@@ -68,7 +68,7 @@ Describe "xSPWordAutomationServiceApp" {
                     KeepAliveTimeout = 30
                     MaximumConversionTime = 300
                 })
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnval
             } 
             Mock Get-SPServiceApplicationPool {
@@ -92,11 +92,11 @@ Describe "xSPWordAutomationServiceApp" {
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-            $Global:xSharePointSiteUseUpdated = $false
+            $Global:SPDSCSiteUseUpdated = $false
             It "creates a new service application in the set method" { 
                 Set-TargetResource @testParams 
                 Assert-MockCalled New-SPWordConversionServiceApplication  
-                $Global:xSharePointSiteUseUpdated | Should Be $true
+                $Global:SPDSCSiteUseUpdated | Should Be $true
             } 
         } 
 
@@ -188,7 +188,7 @@ Describe "xSPWordAutomationServiceApp" {
                     KeepAliveTimeout = 30
                     MaximumConversionTime = 300
                 }) 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnval
             } 
 
@@ -205,13 +205,13 @@ Describe "xSPWordAutomationServiceApp" {
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-            $Global:xSharePointSiteUseUpdated = $false
+            $Global:SPDSCSiteUseUpdated = $false
             It "calls the update service app cmdlet from the set method" { 
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled Get-SPServiceApplicationPool 
                 Assert-MockCalled Set-SPWordConversionServiceApplication 
-                $Global:xSharePointSiteUseUpdated | Should Be $true
+                $Global:SPDSCSiteUseUpdated | Should Be $true
             } 
         } 
 
@@ -241,7 +241,7 @@ Describe "xSPWordAutomationServiceApp" {
                     KeepAliveTimeout = 30
                     MaximumConversionTime = 300
                 })
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnval
             } 
 
@@ -258,11 +258,11 @@ Describe "xSPWordAutomationServiceApp" {
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-            $Global:xSharePointSiteUseUpdated = $false
+            $Global:SPDSCSiteUseUpdated = $false
             It "calls the update service app cmdlet from the set method" { 
                 Set-TargetResource @testParams 
                 Assert-MockCalled Get-SPServiceApplication
-                $Global:xSharePointSiteUseUpdated | Should Be $true
+                $Global:SPDSCSiteUseUpdated | Should Be $true
             } 
         }
 

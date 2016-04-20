@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPQuotaTemplate"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPQuotaTemplate"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPQuotaTemplate" {
+Describe "SPQuotaTemplate" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test"
@@ -22,9 +22,9 @@ Describe "xSPQuotaTemplate" {
             WarningUsagePointsSolutions = 800
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -50,7 +50,7 @@ Describe "xSPQuotaTemplate" {
         }
 
         Context "The server is in a farm and the incorrect settings have been applied to the template" {
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 $quotaTemplates = @(@{
                         Test = @{
                             StorageMaximumLevel = 512
@@ -66,7 +66,7 @@ Describe "xSPQuotaTemplate" {
                     QuotaTemplates = $quotaTemplatesCol
                 } 
 
-                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:SPDSCQuotaTemplatesUpdated = $true } -PassThru
                 return $contentService
             }
 
@@ -80,15 +80,15 @@ Describe "xSPQuotaTemplate" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointQuotaTemplatesUpdated = $false
+            $Global:SPDSCQuotaTemplatesUpdated = $false
             It "updates the quota template settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointQuotaTemplatesUpdated | Should Be $true
+                $Global:SPDSCQuotaTemplatesUpdated | Should Be $true
             }
         }
 
         Context "The server is in a farm and the template doesn't exist" {
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 $quotaTemplates = @(@{
                         Test = $null
                     })
@@ -99,7 +99,7 @@ Describe "xSPQuotaTemplate" {
                     QuotaTemplates = $quotaTemplatesCol
                 } 
 
-                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru
+                $contentService = $contentService | Add-Member ScriptMethod Update { $Global:SPDSCQuotaTemplatesUpdated = $true } -PassThru
                 return $contentService
             }
 
@@ -113,15 +113,15 @@ Describe "xSPQuotaTemplate" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointQuotaTemplatesUpdated = $false
+            $Global:SPDSCQuotaTemplatesUpdated = $false
             It "creates a new quota template" {
                 Set-TargetResource @testParams
-                $Global:xSharePointQuotaTemplatesUpdated | Should Be $true
+                $Global:SPDSCQuotaTemplatesUpdated | Should Be $true
             }
         }
 
         Context "The server is in a farm and the correct settings have been applied" {
-             Mock Get-xSharePointContentService { 
+             Mock Get-SPDSCContentService { 
                  $returnVal = @{ 
                      QuotaTemplates = @{ 
                          Test = @{ 
@@ -132,7 +132,7 @@ Describe "xSPQuotaTemplate" {
                          } 
                      } 
                  }  
-                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointQuotaTemplatesUpdated = $true } -PassThru 
+                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCQuotaTemplatesUpdated = $true } -PassThru 
                  return $returnVal 
              } 
 

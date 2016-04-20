@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPHealthAnalyzerRuleState"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPHealthAnalyzerRuleState"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPHealthAnalyzerRuleState" {
+Describe "SPHealthAnalyzerRuleState" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Drives are at risk of running out of free space."
@@ -21,9 +21,9 @@ Describe "xSPHealthAnalyzerRuleState" {
             Schedule = "Daily"
             FixAutomatically = $false
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -122,7 +122,7 @@ Describe "xSPHealthAnalyzerRuleState" {
                                 HealthRuleScope = "Any Server";
                                 HealthRuleSchedule = "Weekly";
                                 HealthRuleAutoRepairEnabled = $true
-                            } | Add-Member ScriptMethod Update { $Global:xSharePointHealthRulesUpdated = $true } -PassThru )
+                            } | Add-Member ScriptMethod Update { $Global:SPDSCHealthRulesUpdated = $true } -PassThru )
                             return ,$itemcol
                         } -PassThru
                 }
@@ -142,10 +142,10 @@ Describe "xSPHealthAnalyzerRuleState" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointHealthRulesUpdated = $false
+            $Global:SPDSCHealthRulesUpdated = $false
             It "set the configured values for the specific Health Analyzer Rule" {
                 Set-TargetResource @testParams
-                $Global:xSharePointHealthRulesUpdated | Should Be $true
+                $Global:SPDSCHealthRulesUpdated | Should Be $true
             }
         }
 
@@ -161,7 +161,7 @@ Describe "xSPHealthAnalyzerRuleState" {
                                 HealthRuleScope = "All Servers";
                                 HealthRuleSchedule = "Daily";
                                 HealthRuleAutoRepairEnabled = $false
-                            } | Add-Member ScriptMethod Update { $Global:xSharePointHealthRulesUpdated = $true } -PassThru )
+                            } | Add-Member ScriptMethod Update { $Global:SPDSCHealthRulesUpdated = $true } -PassThru )
                             return ,$itemcol
                         } -PassThru
                 }

@@ -9,16 +9,16 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSearchContentSource"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPSearchContentSource"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSearchContentSource" {
+Describe "SPSearchContentSource" {
     InModuleScope $ModuleName {
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock Start-Sleep {}
@@ -621,7 +621,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 Addresses = @("http://site.contoso.com")
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
-                FullSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                FullSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                     ScheduleType = "Daily"
                     StartHour = "0"
                     StartMinute = "0"
@@ -670,7 +670,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 Addresses = @("http://site.contoso.com")
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
-                FullSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                FullSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                     ScheduleType = "Daily"
                     StartHour = "0"
                     StartMinute = "0"
@@ -714,7 +714,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 Addresses = @("http://site.contoso.com")
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
-                IncrementalSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                     ScheduleType = "Weekly"
                     StartHour = "0"
                     StartMinute = "0"
@@ -760,7 +760,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 Addresses = @("http://site.contoso.com")
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
-                IncrementalSchedule = (New-CimInstance -ClassName MSFT_xSPSearchCrawlSchedule -Property @{
+                IncrementalSchedule = (New-CimInstance -ClassName MSFT_SPSearchCrawlSchedule -Property @{
                     ScheduleType = "Weekly"
                     StartHour = "0"
                     StartMinute = "0"

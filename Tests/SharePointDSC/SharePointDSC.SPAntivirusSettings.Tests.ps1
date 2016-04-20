@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPAntivirusSettings"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPAntivirusSettings"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPAntivirusSettings" {
+Describe "SPAntivirusSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             ScanOnDownload = $true
@@ -22,9 +22,9 @@ Describe "xSPAntivirusSettings" {
             TimeoutDuration = 60
             NumberOfThreads = 5
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
                 
@@ -48,7 +48,7 @@ Describe "xSPAntivirusSettings" {
         }
 
         Context "The server is in a farm and the incorrect settings have been applied" {
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $false
@@ -61,7 +61,7 @@ Describe "xSPAntivirusSettings" {
                         }
                     }
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointAntivirusUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCAntivirusUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPFarm { return @{} }
@@ -74,15 +74,15 @@ Describe "xSPAntivirusSettings" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointAntivirusUpdated = $false
+            $Global:SPDSCAntivirusUpdated = $false
             It "updates the antivirus settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointAntivirusUpdated | Should Be $true
+                $Global:SPDSCAntivirusUpdated | Should Be $true
             }
         }
 
         Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $true
@@ -95,7 +95,7 @@ Describe "xSPAntivirusSettings" {
                         }
                     }
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointAntivirusUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCAntivirusUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPFarm { return @{} }

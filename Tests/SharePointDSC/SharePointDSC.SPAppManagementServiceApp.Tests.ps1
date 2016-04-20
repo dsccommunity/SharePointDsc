@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPAppManagementServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPAppManagementServiceApp"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPAppManagementServiceApp" {
+Describe "SPAppManagementServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test App"
@@ -21,10 +21,10 @@ Describe "xSPAppManagementServiceApp" {
             Ensure = "Present"
             DatabaseServer = "TestServer\Instance"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
 
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -102,7 +102,7 @@ Describe "xSPAppManagementServiceApp" {
                 })
                     
                 $service = $service | Add-Member ScriptMethod Update {
-                    $Global:xSPAppServiceUpdateCalled = $true
+                    $Global:SPAppServiceUpdateCalled = $true
                 } -PassThru 
                 return $service
             }
@@ -113,11 +113,11 @@ Describe "xSPAppManagementServiceApp" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPAppServiceUpdateCalled = $false
+            $Global:SPAppServiceUpdateCalled = $false
             It "calls the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplicationPool
-                $Global:xSPAppServiceUpdateCalled | Should Be $true
+                $Global:SPAppServiceUpdateCalled | Should Be $true
             }
         }
 

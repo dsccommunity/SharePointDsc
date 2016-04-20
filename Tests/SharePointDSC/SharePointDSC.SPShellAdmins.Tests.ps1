@@ -9,19 +9,19 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPShellAdmins"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPShellAdmins"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPShellAdmins" {
+Describe "SPShellAdmins" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name         = "ShellAdmins"
             Members      = "contoso\user1", "contoso\user2"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
 
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -86,7 +86,7 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name             = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                         MembersToInclude = "contoso\user1", "contoso\user2"
@@ -111,7 +111,7 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name             = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                     } -ClientOnly)
                 )
@@ -134,7 +134,7 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name             = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name    = "SharePoint_Content_Contoso3"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -307,11 +307,11 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso2"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -360,11 +360,11 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso2"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -460,11 +460,11 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -511,11 +511,11 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -610,11 +610,11 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToExclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToExclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -661,11 +661,11 @@ Describe "xSPShellAdmins" {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToExclude = "contoso\user3", "contoso\user4"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToExclude = "contoso\user5", "contoso\user6"
                     } -ClientOnly)

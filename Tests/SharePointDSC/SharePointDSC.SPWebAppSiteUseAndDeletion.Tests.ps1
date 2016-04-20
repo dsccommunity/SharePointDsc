@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPWebAppSiteUseAndDeletion"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPWebAppSiteUseAndDeletion"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebAppSiteUseAndDeletion" {
+Describe "SPWebAppSiteUseAndDeletion" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url                                      = "http://example.contoso.local"
@@ -21,9 +21,9 @@ Describe "xSPWebAppSiteUseAndDeletion" {
             AutomaticallyDeleteUnusedSiteCollections = $true
             UnusedSiteNotificationsBeforeDeletion    = 30
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -71,7 +71,7 @@ Describe "xSPWebAppSiteUseAndDeletion" {
                         AutomaticallyDeleteUnusedSiteCollections = $false
                         UnusedSiteNotificationsBeforeDeletion    = 28
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
 
@@ -85,10 +85,10 @@ Describe "xSPWebAppSiteUseAndDeletion" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointSiteUseUpdated = $false
+            $Global:SPDSCSiteUseUpdated = $false
             It "updates the Site Use and Deletion settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointSiteUseUpdated | Should Be $true
+                $Global:SPDSCSiteUseUpdated | Should Be $true
             }
         }
 
@@ -100,7 +100,7 @@ Describe "xSPWebAppSiteUseAndDeletion" {
                     AutomaticallyDeleteUnusedSiteCollections = $true
                     UnusedSiteNotificationsBeforeDeletion    = 30
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPFarm { return @{} }

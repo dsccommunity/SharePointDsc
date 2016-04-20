@@ -9,19 +9,19 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPSearchServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPSearchServiceApp"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSearchServiceApp" {
+Describe "SPSearchServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Search Service Application"
             ApplicationPool = "SharePoint Search Services"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -38,7 +38,7 @@ Describe "xSPSearchServiceApp" {
         
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 0 } }
+        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 0 } }
         
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
@@ -217,7 +217,7 @@ Describe "xSPSearchServiceApp" {
         }
         
         $testParams.Add("SearchCenterUrl", "http://search.sp.contoso.com")
-        $Global:xSharePointSearchURLUpdated = $false
+        $Global:SPDSCSearchURLUpdated = $false
         Context "When the search center URL does not match" {
             Mock Get-SPServiceApplication { 
                 return @(@{
@@ -230,7 +230,7 @@ Describe "xSPSearchServiceApp" {
                     }
                     SearchCenterUrl = "http://wrong.url.here"
                 } | Add-Member ScriptMethod Update {
-                    $Global:xSharePointSearchURLUpdated = $true
+                    $Global:SPDSCSearchURLUpdated = $true
                 } -PassThru)
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
@@ -259,7 +259,7 @@ Describe "xSPSearchServiceApp" {
             
             It "should update the service app in the set method" {
                 Set-TargetResource @testParams
-                $Global:xSharePointSearchURLUpdated | Should Be $true
+                $Global:SPDSCSearchURLUpdated | Should Be $true
             }
         }
         
@@ -363,13 +363,13 @@ Describe "xSPSearchServiceApp" {
                     }
                 })
             }
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
             
             It "should return false if the version is too low" {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $false
             }
             
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
             
             It "should return that the web app is hybrid enabled from the get method" {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $true
@@ -380,13 +380,13 @@ Describe "xSPSearchServiceApp" {
             
             Mock Get-SPServiceApplication { return $null }
             
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
             
             It "creates the service app in the set method" {
                 Set-TargetResource @testParams
             }
             
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
             
             It "throws an error in the set method if the version of SharePoint isn't high enough" {
                 { Set-TargetResource @testParams } | Should Throw

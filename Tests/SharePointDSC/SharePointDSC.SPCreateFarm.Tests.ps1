@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPCreateFarm"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPCreateFarm"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPCreateFarm" {
+Describe "SPCreateFarm" {
     InModuleScope $ModuleName {
         $testParams = @{
             FarmConfigDatabaseName = "SP_Config"
@@ -23,9 +23,9 @@ Describe "xSPCreateFarm" {
             CentralAdministrationAuth = "Kerberos"
             CentralAdministrationPort = 1234
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -41,7 +41,7 @@ Describe "xSPCreateFarm" {
 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
+        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
 
         Context "no farm is configured locally and a supported version of SharePoint is installed" {
             Mock Get-SPFarm { throw "Unable to detect local farm" }
@@ -102,7 +102,7 @@ Describe "xSPCreateFarm" {
         }
 
         Context "no farm is configured locally and an unsupported version of SharePoint is installed on the server" {
-            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 14 } }
+            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 14 } }
 
             It "throws when an unsupported version is installed and set is called" {
                 { Set-TargetResource @testParams } | Should throw

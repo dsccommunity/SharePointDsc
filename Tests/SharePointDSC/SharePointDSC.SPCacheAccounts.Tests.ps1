@@ -9,19 +9,19 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPCacheAccounts"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPCacheAccounts"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPCacheAccounts" {
+Describe "SPCacheAccounts" {
     InModuleScope $ModuleName {
         $testParams = @{
             WebAppUrl = "http://test.sharepoint.com"
             SuperUserAlias = "DEMO\SuperUser"
             SuperReaderAlias = "DEMO\SuperReader"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
@@ -38,10 +38,10 @@ namespace Microsoft.SharePoint.Administration {
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
         Mock New-SPClaimsPrincipal { 
-            $Global:xSharePointClaimsPrincipalUser = $Identity
+            $Global:SPDSCClaimsPrincipalUser = $Identity
             return (
                 New-Object Object | Add-Member ScriptMethod ToEncodedString { 
-                    return "i:0#.w|$($Global:xSharePointClaimsPrincipalUser)" 
+                    return "i:0#.w|$($Global:SPDSCClaimsPrincipalUser)" 
                 } -PassThru
             )
         }

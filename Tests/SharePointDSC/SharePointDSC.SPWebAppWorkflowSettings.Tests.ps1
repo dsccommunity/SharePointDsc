@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebAppWorkflowSettings"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPWebAppWorkflowSettings"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebAppWorkflowSettings" {
+Describe "SPWebAppWorkflowSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "http://sites.sharepoint.com"
@@ -21,9 +21,9 @@ Describe "xSPWebAppWorkflowSettings" {
             EmailToNoPermissionWorkflowParticipantsEnable = $true
         }
         
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -88,9 +88,9 @@ Describe "xSPWebAppWorkflowSettings" {
                     ExternalWorkflowParticipantsEnabled = $false
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru | Add-Member ScriptMethod UpdateWorkflowConfigurationSettings {
-                    $Global:xSPWebApplicationUpdateWorkflowCalled = $true
+                    $Global:SPWebApplicationUpdateWorkflowCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -103,11 +103,11 @@ Describe "xSPWebAppWorkflowSettings" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
-            $Global:xSPWebApplicationUpdateWorkflowCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateWorkflowCalled = $false
             It "updates the workflow settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateWorkflowCalled | Should Be $true
+                $Global:SPWebApplicationUpdateWorkflowCalled | Should Be $true
             }
         }
     }    

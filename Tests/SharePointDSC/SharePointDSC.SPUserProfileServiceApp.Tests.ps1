@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
-$ModuleName = "MSFT_xSPUserProfileServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPUserProfileServiceApp"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPUserProfileServiceApp" {
+Describe "SPUserProfileServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "User Profile Service App"
@@ -20,9 +20,9 @@ Describe "xSPUserProfileServiceApp" {
             FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -34,10 +34,10 @@ Describe "xSPUserProfileServiceApp" {
         }}
         Mock New-SPProfileServiceApplication { return @{} }
         Mock New-SPProfileServiceApplicationProxy { }
-        Mock Add-xSharePointUserToLocalAdmin { } 
-        Mock Test-xSharePointUserIsLocalAdmin { return $false }
-        Mock Remove-xSharePointUserToLocalAdmin { }
-        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+        Mock Add-SPDSCUserToLocalAdmin { } 
+        Mock Test-SPDSCUserIsLocalAdmin { return $false }
+        Mock Remove-SPDSCUserToLocalAdmin { }
+        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
         Mock Remove-SPServiceApplication { } 
 
         Context "When no service applications exist in the current farm" {

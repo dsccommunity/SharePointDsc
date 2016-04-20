@@ -9,24 +9,24 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPUserProfileSyncService"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPUserProfileSyncService"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPUserProfileSyncService" {
+Describe "SPUserProfileSyncService" {
     InModuleScope $ModuleName {
         $testParams = @{
             UserProfileServiceAppName = "User Profile Service Service App"
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
+        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
 
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -39,10 +39,10 @@ Describe "xSPUserProfileSyncService" {
         Mock Start-SPServiceInstance { }
         Mock Stop-SPServiceInstance { }
         Mock Restart-Service { }
-        Mock Add-xSharePointUserToLocalAdmin { } 
-        Mock Test-xSharePointUserIsLocalAdmin { return $false }
-        Mock Remove-xSharePointUserToLocalAdmin { }
-        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+        Mock Add-SPDSCUserToLocalAdmin { } 
+        Mock Test-SPDSCUserIsLocalAdmin { return $false }
+        Mock Remove-SPDSCUserToLocalAdmin { }
+        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
         Mock Start-Sleep { }
 
         switch ($majorBuildNumber) {
@@ -51,14 +51,14 @@ Describe "xSPUserProfileSyncService" {
                     Mock Get-SPServiceInstance { return $null }
 
                     It "returns absent from the get method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
                 }
 
                 Context "User profile sync service is not running and should be" {
-                    Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
-                            $Global:xSharePointUPACheck = $true
+                    Mock Get-SPServiceInstance { if ($Global:SPDSCUPACheck -eq $false) {
+                            $Global:SPDSCUPACheck = $true
                             return @( @{ 
                                 Status = "Disabled"
                                 ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
@@ -84,17 +84,17 @@ Describe "xSPUserProfileSyncService" {
                     )} 
 
                     It "returns absent from the get method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
                     }
 
                     It "returns false from the test method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         Test-TargetResource @testParams | Should Be $false
                     }
 
                     It "calls the start service cmdlet from the set method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         Set-TargetResource @testParams 
 
                         Assert-MockCalled Start-SPServiceInstance
@@ -108,7 +108,7 @@ Describe "xSPUserProfileSyncService" {
                         Get-TargetResource @testParams | Should Not BeNullOrEmpty
                     }
 
-                    $Global:xSharePointUPACheck = $false
+                    $Global:SPDSCUPACheck = $false
                     Mock Get-SPServiceApplication { return $null } 
                     It "throws in the set method if the user profile service app can't be found" {
                         { Set-TargetResource @testParams } | Should Throw
@@ -136,8 +136,8 @@ Describe "xSPUserProfileSyncService" {
                 $testParams.Ensure = "Absent"
 
                 Context "User profile sync service is running and shouldn't be" {
-                    Mock Get-SPServiceInstance { if ($Global:xSharePointUPACheck -eq $false) {
-                            $Global:xSharePointUPACheck = $true
+                    Mock Get-SPServiceInstance { if ($Global:SPDSCUPACheck -eq $false) {
+                            $Global:SPDSCUPACheck = $true
                             return @( @{ 
                                 Status = "Online"
                                 ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
@@ -155,17 +155,17 @@ Describe "xSPUserProfileSyncService" {
                     } 
 
                     It "returns present from the get method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
 
                     It "returns false from the test method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         Test-TargetResource @testParams | Should Be $false
                     }
 
                     It "calls the start service cmdlet from the set method" {
-                        $Global:xSharePointUPACheck = $false
+                        $Global:SPDSCUPACheck = $false
                         Set-TargetResource @testParams 
 
                         Assert-MockCalled Stop-SPServiceInstance

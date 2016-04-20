@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSearchIndexPartition"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPSearchIndexPartition"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSearchIndexPartition" {
+Describe "SPSearchIndexPartition" {
     InModuleScope $ModuleName {
         $testParams = @{
             Index = "0"
@@ -20,11 +20,11 @@ Describe "xSPSearchIndexPartition" {
             RootDirectory = "C:\SearchIndex\0"
             ServiceAppName = "Search Service Application"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock New-PSSession {
@@ -39,10 +39,10 @@ Describe "xSPSearchIndexPartition" {
         } 
         Mock New-SPEnterpriseSearchTopology { return @{} }
 
-        $Global:xSharePointSearchRoleInstanceCallCount = 0
+        $Global:SPDSCSearchRoleInstanceCallCount = 0
         Mock Get-SPEnterpriseSearchServiceInstance  {
-            if ($Global:xSharePointSearchRoleInstanceCallCount -eq 2) {
-                $Global:xSharePointSearchRoleInstanceCallCount = 0
+            if ($Global:SPDSCSearchRoleInstanceCallCount -eq 2) {
+                $Global:SPDSCSearchRoleInstanceCallCount = 0
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME
@@ -50,7 +50,7 @@ Describe "xSPSearchIndexPartition" {
                     Status = "Online"
                 }
             } else {
-                $Global:xSharePointSearchRoleInstanceCallCount++
+                $Global:SPDSCSearchRoleInstanceCallCount++
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME
@@ -71,7 +71,7 @@ Describe "xSPSearchIndexPartition" {
         
         Context "Search index doesn't exist and it should" {
             Mock Get-SPEnterpriseSearchComponent { return @() }
-            $Global:xSharePointSearchRoleInstanceCallCount = 0
+            $Global:SPDSCSearchRoleInstanceCallCount = 0
 
             It "returns an empty server list from the get method" {
                 $result = Get-TargetResource @testParams

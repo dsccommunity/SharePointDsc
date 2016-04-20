@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPContentDatabase"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPContentDatabase"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPContentDatabase" {
+Describe "SPContentDatabase" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "SharePoint_Content_01"
@@ -23,9 +23,9 @@ Describe "xSPContentDatabase" {
             MaximumSiteCount = 5000
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -98,7 +98,7 @@ namespace Microsoft.SharePoint.Administration {
         Context "Mount database throws an error" {
             Mock Get-SPDatabase { 
                 $returnVal = @{}
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointContentDatabaseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCContentDatabaseUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
@@ -114,7 +114,7 @@ namespace Microsoft.SharePoint.Administration {
         Context "Content database does not exist, but has to be" {
             Mock Get-SPDatabase { 
                 $returnVal = @{}
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointContentDatabaseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCContentDatabaseUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
@@ -127,7 +127,7 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointContentDatabaseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCContentDatabaseUpdated = $true } -PassThru
                 return $returnVal
             }
 
@@ -139,10 +139,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointContentDatabaseUpdated = $false
+            $Global:SPDSCContentDatabaseUpdated = $false
             It "mounts a (new) content database" {
                 Set-TargetResource @testParams
-                $Global:xSharePointContentDatabaseUpdated | Should Be $true
+                $Global:SPDSCContentDatabaseUpdated | Should Be $true
             }
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 1000
                     MaximumSiteCount = 2000
                 }
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointContentDatabaseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCContentDatabaseUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
@@ -170,10 +170,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointContentDatabaseUpdated = $false
+            $Global:SPDSCContentDatabaseUpdated = $false
             It "updates the content database settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointContentDatabaseUpdated | Should Be $true
+                $Global:SPDSCContentDatabaseUpdated | Should Be $true
             }
         }
         
@@ -188,7 +188,7 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 1000
                     MaximumSiteCount = 2000
                 }
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointContentDatabaseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCContentDatabaseUpdated = $true } -PassThru
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
@@ -234,7 +234,7 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointContentDatabaseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCContentDatabaseUpdated = $true } -PassThru
                 return $returnVal
             }
 
@@ -248,10 +248,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointContentDatabaseUpdated = $false
+            $Global:SPDSCContentDatabaseUpdated = $false
             It "move the content database to the specified web application via set method" {
                 Set-TargetResource @testParams
-                $Global:xSharePointContentDatabaseUpdated | Should Be $true
+                $Global:SPDSCContentDatabaseUpdated | Should Be $true
             }
         }
 

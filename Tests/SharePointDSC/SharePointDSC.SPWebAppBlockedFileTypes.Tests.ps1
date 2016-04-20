@@ -9,19 +9,19 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebAppBlockedFileTypes"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPWebAppBlockedFileTypes"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebAppBlockedFileTypes" {
+Describe "SPWebAppBlockedFileTypes" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "http://sites.sharepoint.com"
             Blocked = @("exe", "dll", "ps1")
         }
         
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -54,7 +54,7 @@ Describe "xSPWebAppBlockedFileTypes" {
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru 
                 return @($webApp)
             }
@@ -90,7 +90,7 @@ Describe "xSPWebAppBlockedFileTypes" {
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru 
                 return @($webApp)
             }
@@ -103,10 +103,10 @@ Describe "xSPWebAppBlockedFileTypes" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "updates the workflow settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -138,7 +138,7 @@ Describe "xSPWebAppBlockedFileTypes" {
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru 
                 return @($webApp)
             }
@@ -174,7 +174,7 @@ Describe "xSPWebAppBlockedFileTypes" {
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru 
                 return @($webApp)
             }
@@ -187,10 +187,10 @@ Describe "xSPWebAppBlockedFileTypes" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSPWebApplicationUpdateCalled = $false
+            $Global:SPWebApplicationUpdateCalled = $false
             It "updates the workflow settings" {
                 Set-TargetResource @testParams
-                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPWebApplicationUpdateCalled | Should Be $true
             }
         }
 
@@ -216,7 +216,7 @@ Describe "xSPWebAppBlockedFileTypes" {
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru 
                 return @($webApp)
             }
@@ -259,7 +259,7 @@ Describe "xSPWebAppBlockedFileTypes" {
                     BlockedFileExtensions = $CurrentBlockedFiles
                 }
                 $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:xSPWebApplicationUpdateCalled = $true
+                    $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru 
                 return @($webApp)
             }

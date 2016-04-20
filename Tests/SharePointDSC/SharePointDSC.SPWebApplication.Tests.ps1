@@ -9,11 +9,11 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebApplication"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\Modules\xSharePoint.Util\xSharePoint.Util.psm1")
+$ModuleName = "MSFT_SPWebApplication"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\Modules\SharePointDSC.Util\SharePointDSC.Util.psm1")
 
-Describe "xSPWebApplication" {
+Describe "SPWebApplication" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "SharePoint Sites"
@@ -24,9 +24,9 @@ Describe "xSPWebApplication" {
             Ensure = "Present"
         }
         
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -39,7 +39,7 @@ Describe "xSPWebApplication" {
 
         Context "The specified Managed Account does not exist" {
             Mock Get-SPWebApplication { return $null }
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 return @{ Name = "PlaceHolder" }
             }
             Mock Get-SPManagedAccount {
@@ -53,7 +53,7 @@ Describe "xSPWebApplication" {
 
         Context "The web application that uses NTLM doesn't exist but should" {
             Mock Get-SPWebApplication { return $null }
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 return @{ Name = "PlaceHolder" }
             }
             Mock Get-SPManagedAccount {}
@@ -96,7 +96,7 @@ Describe "xSPWebApplication" {
 
         Context "The web application that uses Kerberos doesn't exist but should" {
             Mock Get-SPWebApplication { return $null }
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
                 return @{ Name = "PlaceHolder" }
             }
             Mock Get-SPManagedAccount {}

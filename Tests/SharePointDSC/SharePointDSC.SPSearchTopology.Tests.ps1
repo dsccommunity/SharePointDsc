@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPSearchTopology"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPSearchTopology"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPSearchTopology" {
+Describe "SPSearchTopology" {
     InModuleScope $ModuleName {
         $testParams = @{
             ServiceAppName          = "Search Service Application"
@@ -24,11 +24,11 @@ Describe "xSPSearchTopology" {
             IndexPartition          = @($env:COMPUTERNAME)
             FirstPartitionDirectory = "I:\SearchIndexes\0"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock Start-Sleep {}
@@ -118,15 +118,15 @@ Describe "xSPSearchTopology" {
             Mock Get-SPEnterpriseSearchComponent {
                 return @{}
             }
-            $Global:xSharePointSearchRoleInstanceCalLCount = 0
+            $Global:SPDSCSearchRoleInstanceCalLCount = 0
             Mock Get-SPEnterpriseSearchServiceInstance  {
-                if ($Global:xSharePointSearchRoleInstanceCalLCount -eq 2) {
-                    $Global:xSharePointSearchRoleInstanceCalLCount = 0
+                if ($Global:SPDSCSearchRoleInstanceCalLCount -eq 2) {
+                    $Global:SPDSCSearchRoleInstanceCalLCount = 0
                     return @{
                         Status = "Online"
                     }
                 } else {
-                    $Global:xSharePointSearchRoleInstanceCalLCount++
+                    $Global:SPDSCSearchRoleInstanceCalLCount++
                     return @{
                         Status = "Offline"
                     }

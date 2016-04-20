@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPDesignerSettings"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPDesignerSettings"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPDesignerSettings" {
+Describe "SPDesignerSettings" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url = "https://intranet.sharepoint.contoso.com"
@@ -25,9 +25,9 @@ Describe "xSPDesignerSettings" {
             AllowSavePublishDeclarativeWorkflow = $false
             AllowSaveDeclarativeWorkflowAsTemplate = $false
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -67,7 +67,7 @@ Describe "xSPDesignerSettings" {
                 $result.DisplayName = "Test"
                 $result.Url = "https://intranet.sharepoint.contoso.com"
 
-                $result = $result | Add-Member ScriptMethod Update { $Global:xSharePointDesignerUpdated = $true } -PassThru
+                $result = $result | Add-Member ScriptMethod Update { $Global:SPDSCDesignerUpdated = $true } -PassThru
 
                 return $result
             }
@@ -82,10 +82,10 @@ Describe "xSPDesignerSettings" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:xSharePointDesignerUpdated = $false
+            $Global:SPDSCDesignerUpdated = $false
             It "updates the SharePoint Designer settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointDesignerUpdated | Should Be $true
+                $Global:SPDSCDesignerUpdated | Should Be $true
             }
         }
 
@@ -114,7 +114,7 @@ Describe "xSPDesignerSettings" {
                 } 
             }
 
-            Mock Test-xSharePointRunAsCredential { return $true }
+            Mock Test-SPDSCRunAsCredential { return $true }
 
             Mock Get-SPFarm { return @{} }
 
@@ -155,20 +155,20 @@ Describe "xSPDesignerSettings" {
                         AllowSaveDeclarativeWorkflowAsTemplate = $true
                 } 
             }
-            Mock Test-xSharePointRunAsCredential { return $false }
+            Mock Test-SPDSCRunAsCredential { return $false }
 
             Mock Get-SPFarm { return @{} }
 
             It "throws an exception in the get method to say that this is not supported" {
-                { Get-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+                { Get-TargetResource @testParams } | Should throw "http://aka.ms/SPDSCRemoteIssues"
             }
 
             It "throws an exception in the test method to say that this is not supported" {
-                { Test-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+                { Test-TargetResource @testParams } | Should throw "http://aka.ms/SPDSCRemoteIssues"
             }
 
             It "throws an exception in the set method to say that this is not supported" {
-                { Set-TargetResource @testParams } | Should throw "http://aka.ms/xSharePointRemoteIssues"
+                { Set-TargetResource @testParams } | Should throw "http://aka.ms/SPDSCRemoteIssues"
             }
         }
 
@@ -183,7 +183,7 @@ Describe "xSPDesignerSettings" {
                     AllowSavePublishDeclarativeWorkflow = $false
                     AllowSaveDeclarativeWorkflowAsTemplate = $false
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointDesignerUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCDesignerUpdated = $true } -PassThru
                 return $returnVal
             }
             
@@ -231,11 +231,11 @@ Describe "xSPDesignerSettings" {
                         AllowSavePublishDeclarativeWorkflow = $false
                         AllowSaveDeclarativeWorkflowAsTemplate = $false
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointDesignerUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCDesignerUpdated = $true } -PassThru
                 return $returnVal
             }
 
-            Mock Test-xSharePointRunAsCredential { return $true }
+            Mock Test-SPDSCRunAsCredential { return $true }
 
             Mock Get-SPFarm { return @{} }
 

@@ -9,15 +9,15 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPInstallPrereqs"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPInstallPrereqs"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
     
-Describe "xSPInstallPrereqs" {
+Describe "SPInstallPrereqs" {
     InModuleScope $ModuleName {
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
@@ -45,7 +45,7 @@ Describe "xSPInstallPrereqs" {
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
 
-        Mock Get-xSharePointAssemblyVersion { return $majorBuildNumber } 
+        Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber } 
         Mock Get-ChildItem { return $null }
 
         Context "Prerequisites are not installed but should be and are to be installed in online mode" {

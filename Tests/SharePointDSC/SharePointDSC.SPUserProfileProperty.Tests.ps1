@@ -11,11 +11,11 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
-$ModuleName = "MSFT_xSPUserProfileProperty"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPUserProfileProperty"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-Describe "xSPUserProfileProperty" {
+Describe "SPUserProfileProperty" {
     InModuleScope $ModuleName {
         $testParamsNewProperty = @{
            Name = "WorkEmailNew"
@@ -80,7 +80,7 @@ Describe "xSPUserProfileProperty" {
 "@ -ErrorAction SilentlyContinue
         }   
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
         $corePropertyUpdate = @{ 
                             DisplayName = "WorkEmailUpdate" 
@@ -93,22 +93,18 @@ Describe "xSPUserProfileProperty" {
                             Length=25
                             IsSearchable =$true
                         } | Add-Member ScriptMethod Commit {
-                            $Global:xSPUPSPropertyCommitCalled = $true
+                            $Global:SPUPSPropertyCommitCalled = $true
                         } -PassThru | Add-Member ScriptMethod Delete {
-                            $Global:xSPUPSPropertyDeleteCalled = $true
+                            $Global:SPUPSPropertyDeleteCalled = $true
                         } -PassThru
         $corePropertyUpdate.Type = $corePropertyUpdate.Type | Add-Member ScriptMethod GetTypeCode {
-                            $Global:xSPUPSPropertyGetTypeCodeCalled = $true
+                            $Global:SPUPSPropertyGetTypeCodeCalled = $true
                             return $corePropertyUpdate.Type
                         } -PassThru -Force
-<#| Add-Member ScriptMethod GetTypeCode {
-                            $Global:xSPUPCoreGetTypeCodeCalled = $true
-                        } -PassThru 
-                        #>
         $coreProperties = @{WorkEmailUpdate = $corePropertyUpdate}
 
         $coreProperties = $coreProperties | Add-Member ScriptMethod Create {
-                            $Global:xSPUPCoreCreateCalled = $true
+                            $Global:SPUPCoreCreateCalled = $true
                             return @{
                             Name="";
                             DisplayName=""
@@ -117,9 +113,9 @@ Describe "xSPUserProfileProperty" {
                             Length=10
                             }
                         } -PassThru  | Add-Member ScriptMethod RemovePropertyByName {
-                            $Global:xSPUPCoreRemovePropertyByNameCalled = $true
+                            $Global:SPUPCoreRemovePropertyByNameCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPCoreAddCalled = $true
+                            $Global:SPUPCoreAddCalled = $true
                         } -PassThru -Force 
                         
        # $coreProperties.Add($coreProperty)
@@ -128,14 +124,8 @@ Describe "xSPUserProfileProperty" {
                             IsVisibleOnEditor=$true
                             IsEventLog=$true
                         }| Add-Member ScriptMethod Commit {
-                            $Global:xSPUPPropertyCommitCalled = $true
+                            $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
-
-        $typeProperties = @{"WorkEmailUpdate" = $typePropertyUpdate} | Add-Member ScriptMethod Create {
-                            $Global:xSPUPTypeCreateCalled = $true
-                        } -PassThru| Add-Member ScriptMethod Add {
-                            $Global:xSPUPTypeAddCalled = $true
-                        } -PassThru -Force 
         
         #$typeProperties.Add($typeProperty)
        $subTypePropertyUpdate = @{
@@ -151,7 +141,7 @@ Describe "xSPUserProfileProperty" {
                             TypeProperty = $typePropertyUpdate
                             AllowPolicyOverride=$false;
                         }| Add-Member ScriptMethod Commit {
-                            $Global:xSPUPPropertyCommitCalled = $true
+                            $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
 
 
@@ -166,9 +156,9 @@ Describe "xSPUserProfileProperty" {
                             Length=$testParamsNewProperty.Length
                             IsSearchable =$testParamsNewProperty.IsSearchable
                         } | Add-Member ScriptMethod Commit {
-                            $Global:xSPUPSPropertyCommitCalled = $true
+                            $Global:SPUPSPropertyCommitCalled = $true
                         } -PassThru | Add-Member ScriptMethod Delete {
-                            $Global:xSPUPSPropertyDeleteCalled = $true
+                            $Global:SPUPSPropertyDeleteCalled = $true
                         } -PassThru
 
         $typeProperty = @{
@@ -176,7 +166,7 @@ Describe "xSPUserProfileProperty" {
                             IsVisibleOnEditor=$testParamsNewProperty.IsVisibleOnEditor
                             IsEventLog=$testParamsNewProperty.IsEventLog
                         }| Add-Member ScriptMethod Commit {
-                            $Global:xSPUPPropertyCommitCalled = $true
+                            $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
 
         $subTypeProperty = @{
@@ -192,33 +182,33 @@ Describe "xSPUserProfileProperty" {
                             TypeProperty = $typeProperty
                             AllowPolicyOverride=$true;
                         }| Add-Member ScriptMethod Commit {
-                            $Global:xSPUPPropertyCommitCalled = $true
+                            $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
         $userProfileSubTypePropertiesNoProperty = @{} | Add-Member ScriptMethod Create {
-                            $Global:xSPUPSubTypeCreateCalled = $true
+                            $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru  | Add-Member ScriptMethod GetPropertyByName {
                             $result = $null
-                            if($Global:xSPUPGetPropertyByNameCalled -eq $TRUE){
+                            if($Global:SPUPGetPropertyByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
-                            $Global:xSPUPGetPropertyByNameCalled  = $true
+                            $Global:SPUPGetPropertyByNameCalled  = $true
                             return $result
                         } -PassThru| Add-Member ScriptMethod Add {
-                            $Global:xSPUPSubTypeAddCalled = $true
+                            $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force 
 
         $userProfileSubTypePropertiesUpdateProperty = @{"WorkEmailUpdate" = $subTypePropertyUpdate } | Add-Member ScriptMethod Create {
-                            $Global:xSPUPSubTypeCreateCalled = $true
+                            $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPSubTypeAddCalled = $true
+                            $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force | Add-Member ScriptMethod GetPropertyByName {
-                            $Global:xSPUPGetPropertyByNameCalled  = $true
+                            $Global:SPUPGetPropertyByNameCalled  = $true
                             return $subTypePropertyUpdate
                         } -PassThru
          #$userProfileSubTypePropertiesValidProperty.Add($subTypeProperty);
-        mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+        mock Get-SPDSCUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                            $Global:xSPUPGetProfileSubtypeCalled = $true
+                            $Global:SPUPGetProfileSubtypeCalled = $true
                             return @{
                             Properties = $userProfileSubTypePropertiesNoProperty
                             }
@@ -267,12 +257,12 @@ Describe "xSPUserProfileProperty" {
                 return $false; 
             } -PassThru    })
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" } 
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
   
         
-        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
         $propertyMappingItem =  @{
                                     DataSourcePropertyName="mail"
                                     IsImport=$true
@@ -284,7 +274,7 @@ Describe "xSPUserProfileProperty" {
 
         $propertyMapping = @{}| Add-Member ScriptMethod Item {
                             param( [string]$property  )
-                            $Global:xSPUPSMappingItemCalled = $true
+                            $Global:SPUPSMappingItemCalled = $true
                                 if($property="WorkEmailUpdate"){
                                     return $propertyMappingItem}
                                     } -PassThru -force | Add-Member ScriptMethod AddNewExportMapping {
@@ -304,9 +294,9 @@ Describe "xSPUserProfileProperty" {
         }
 
         $connection = $connection   | Add-Member ScriptMethod Update {
-                            $Global:xSPUPSSyncConnectionUpdateCalled = $true
+                            $Global:SPUPSSyncConnectionUpdateCalled = $true
                         } -PassThru  | Add-Member ScriptMethod AddPropertyMapping {
-                            $Global:xSPUPSSyncConnectionAddPropertyMappingCalled = $true
+                            $Global:SPUPSSyncConnectionAddPropertyMappingCalled = $true
                         } -PassThru
 
         
@@ -321,7 +311,7 @@ Describe "xSPUserProfileProperty" {
                                                 $p1, $p2 `
                                             )
         
-        $Global:xSPUPSAddActiveDirectoryConnectionCalled =$true
+        $Global:SPUPSAddActiveDirectoryConnectionCalled =$true
         } -PassThru
         
         
@@ -358,30 +348,30 @@ Describe "xSPUserProfileProperty" {
         Context "When property doesn't exist" {
             
             It "returns null from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "creates a new user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
                 
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 Set-TargetResource @testParamsNewProperty
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
 
             }
 
@@ -407,32 +397,32 @@ Describe "xSPUserProfileProperty" {
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
 
             It "returns null from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "attempts to create a new property but fails as connection isn't available" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 {Set-TargetResource @testParamsNewProperty} | should throw "connection not found"
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
 
             }
 
@@ -446,30 +436,30 @@ Describe "xSPUserProfileProperty" {
             $testParamsNewProperty.TermSet = "Invalid"
 
             It "returns null from the Get method" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "creates a new user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 {Set-TargetResource @testParamsNewProperty} | should throw "Term Set $($testParamsNewProperty.TermSet) not found"
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
 
             }
             $testParamsNewProperty.TermSet = $termSet
@@ -481,30 +471,30 @@ Describe "xSPUserProfileProperty" {
             $testParamsNewProperty.TermGroup = "InvalidGroup"
 
             It "returns null from the Get method" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "creates a new user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 {Set-TargetResource @testParamsNewProperty} | should throw "Term Group $($testParamsNewProperty.TermGroup) not found"
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
 
             }
             $testParamsNewProperty.TermGroup = $termGroup
@@ -516,30 +506,30 @@ Describe "xSPUserProfileProperty" {
             $testParamsNewProperty.TermStore = "InvalidStore"
 
             It "returns null from the Get method" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "creates a new user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 {Set-TargetResource @testParamsNewProperty} | should throw "Term Store $($testParamsNewProperty.TermStore) not found"
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
 
             }
             $testParamsNewProperty.TermStore = $termStore
@@ -549,9 +539,9 @@ Describe "xSPUserProfileProperty" {
 
 
         Context "When property exists and all properties match" {
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
@@ -561,28 +551,28 @@ Describe "xSPUserProfileProperty" {
             }
                     
             It "returns valid value from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "updates an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 Set-TargetResource @testParamsUpdateProperty
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
 
             }
 
@@ -592,9 +582,9 @@ Describe "xSPUserProfileProperty" {
         Context "When property exists and type is different - throws exception" {
             $currentType = $testParamsUpdateProperty.Type
             $testParamsUpdateProperty.Type = "StringMultiValue"
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
@@ -604,32 +594,32 @@ Describe "xSPUserProfileProperty" {
             }
                     
             It "returns valid value from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "attempts to update an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 {Set-TargetResource @testParamsUpdateProperty} | should throw "Can't change property type. Current Type"
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
             }
             $testParamsUpdateProperty.Type = $currentType
 
@@ -639,9 +629,9 @@ Describe "xSPUserProfileProperty" {
             
             $propertyMappingItem.DataSourcePropertyName = "property"
 
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
@@ -651,39 +641,39 @@ Describe "xSPUserProfileProperty" {
             }
                     
             It "returns valid value from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "updates an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 Set-TargetResource @testParamsUpdateProperty
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
             }
         }
         Context "When property exists and mapping does not " {
            $propertyMappingItem=$null
-                       mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+                       mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
@@ -693,39 +683,39 @@ Describe "xSPUserProfileProperty" {
             }
                     
             It "returns valid value from the Get method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetPropertyByNameCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
             It "updates an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
 
                 Set-TargetResource @testParamsUpdateProperty
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $true
             }
         }
 
         Context "When property exists and ensure equals Absent" {
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
@@ -735,17 +725,17 @@ Describe "xSPUserProfileProperty" {
             }
                     $testParamsUpdateProperty.Ensure = "Absent"
             It "deletes an user profile property in the set method" {
-                $Global:xSPUPGetProfileSubtypeCalled = $false
-                $Global:xSPUPGetPropertyByNameCalled = $false
-                $Global:xSPUPSMappingItemCalled = $false
-                $Global:xSPUPCoreRemovePropertyByNameCalled=$false
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
+                $Global:SPUPCoreRemovePropertyByNameCalled=$false
 
                 Set-TargetResource @testParamsUpdateProperty
 
-                $Global:xSPUPGetProfileSubtypeCalled | Should be $true
-                $Global:xSPUPGetPropertyByNameCalled | Should be $true
-                $Global:xSPUPSMappingItemCalled | Should be $false
-                $Global:xSPUPCoreRemovePropertyByNameCalled | Should be $true
+                $Global:SPUPGetProfileSubtypeCalled | Should be $true
+                $Global:SPUPGetPropertyByNameCalled | Should be $true
+                $Global:SPUPSMappingItemCalled | Should be $false
+                $Global:SPUPCoreRemovePropertyByNameCalled | Should be $true
             }           
         }
     }    

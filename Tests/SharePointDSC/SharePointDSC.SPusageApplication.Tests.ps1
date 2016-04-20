@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPUsageApplication"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPUsageApplication"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPUsageApplication" {
+Describe "SPUsageApplication" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Usage Service App"
@@ -25,9 +25,9 @@ Describe "xSPUsageApplication" {
             FailoverDatabaseServer = "anothersql.test.domain"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -225,9 +225,9 @@ Describe "xSPUsageApplication" {
                 })
             }
             Mock Get-SPServiceApplicationProxy {
-                return (New-Object Object | Add-Member ScriptMethod Provision {$Global:xSharePointUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+                return (New-Object Object | Add-Member ScriptMethod Provision {$Global:SPDSCUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
             }    
-            $Global:xSharePointUSageAppProxyStarted = $false
+            $Global:SPDSCUSageAppProxyStarted = $false
             
             It "should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -239,7 +239,7 @@ Describe "xSPUsageApplication" {
             
             It "should start the proxy in the set method" {
                 Set-TargetResource @testParams
-                $Global:xSharePointUSageAppProxyStarted | Should Be $true
+                $Global:SPDSCUSageAppProxyStarted | Should Be $true
             }
         }
     }    

@@ -9,16 +9,16 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPIrmSettings"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPIrmSettings"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-Describe "xSPIrmSettings" {
+Describe "SPIrmSettings" {
     InModuleScope $ModuleName {
         
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
@@ -49,7 +49,7 @@ Describe "xSPIrmSettings" {
 
         Context "IRM settings match desired settings" {
             
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
             $returnVal = @{
                  IrmSettings = @{
                     IrmRMSEnabled = $true 
@@ -57,7 +57,7 @@ Describe "xSPIrmSettings" {
                     IrmRMSCertServer = "https://myRMSserver.local"
                 }
             } 
-            $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointIRMUpdated = $true } -PassThru
+            $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCIRMUpdated = $true } -PassThru
             return $returnVal
             }
             
@@ -80,7 +80,7 @@ Describe "xSPIrmSettings" {
         
          Context "IRM settings do not match desired settings" {
             
-            Mock Get-xSharePointContentService {
+            Mock Get-SPDSCContentService {
             $returnVal = @{
                  IrmSettings = @{
                     IrmRMSEnabled = $false  
@@ -88,7 +88,7 @@ Describe "xSPIrmSettings" {
                     IrmRMSCertServer = $null 
                    }
             } 
-            $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:xSharePointIRMUpdated = $true } -PassThru
+            $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCIRMUpdated = $true } -PassThru
             return $returnVal
             }
             
@@ -107,10 +107,10 @@ Describe "xSPIrmSettings" {
                 Test-TargetResource @testParams | Should Be $false 
             }
             
-            $Global:xSharePointIRMUpdated =
+            $Global:SPDSCIRMUpdated =
             It "Set applies desired settings" {
                 Set-TargetResource @testParams
-                $Global:xSharePointIRMUpdated | Should Be $true
+                $Global:SPDSCIRMUpdated | Should Be $true
             }
             
             It "UseAD and RMSserver both supplied (can only use one), should throw" {

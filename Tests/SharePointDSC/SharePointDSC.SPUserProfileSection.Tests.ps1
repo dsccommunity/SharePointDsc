@@ -11,11 +11,11 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
-$ModuleName = "MSFT_xSPUserProfileSection"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPUserProfileSection"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
 
-Describe "xSPUserProfileSection" {
+Describe "SPUserProfileSection" {
     InModuleScope $ModuleName {
         $testParams= @{
            Name = "PersonalInformation"
@@ -37,15 +37,15 @@ Describe "xSPUserProfileSection" {
 "@ -ErrorAction SilentlyContinue
         }   
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
         $coreProperty = @{ 
                             DisplayName = $testParams.DisplayName
                             Name = $testParams.Name
                         } | Add-Member ScriptMethod Commit {
-                            $Global:xSPUPSPropertyCommitCalled = $true
+                            $Global:SPUPSPropertyCommitCalled = $true
                         } -PassThru | Add-Member ScriptMethod Delete {
-                            $Global:xSPUPSPropertyDeleteCalled = $true
+                            $Global:SPUPSPropertyDeleteCalled = $true
                         } -PassThru
         $subTypeProperty = @{
                             Name= $testParams.Name
@@ -53,30 +53,30 @@ Describe "xSPUserProfileSection" {
                             DisplayOrder =$testParams.DisplayOrder
                             CoreProperty = $coreProperty
                         }| Add-Member ScriptMethod Commit {
-                            $Global:xSPUPSPropertyCommitCalled = $true
+                            $Global:SPUPSPropertyCommitCalled = $true
                         } -PassThru
         $userProfileSubTypePropertiesNoProperty = @{} | Add-Member ScriptMethod Create {
         param($section)
-                            $Global:xSPUPSubTypeCreateCalled = $true
+                            $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru  | Add-Member ScriptMethod GetSectionByName {
                             $result = $null
-                            if($Global:xSPUPGetSectionByNameCalled -eq $TRUE){
+                            if($Global:SPUPGetSectionByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
-                            $Global:xSPUPGetSectionByNameCalled  = $true
+                            $Global:SPUPGetSectionByNameCalled  = $true
                             return $result
                         } -PassThru| Add-Member ScriptMethod Add {
-                            $Global:xSPUPSubTypeAddCalled = $true
+                            $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force 
         $coreProperties = @{ProfileInformation = $coreProperty}
         $userProfileSubTypePropertiesProperty = @{"ProfileInformation" = $subTypeProperty } | Add-Member ScriptMethod Create {
-                            $Global:xSPUPSubTypeCreateCalled = $true
+                            $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
-                            $Global:xSPUPSubTypeAddCalled = $true
+                            $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force
-        mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+        mock Get-SPDSCUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                            $Global:xSPUPGetProfileSubtypeCalled = $true
+                            $Global:SPUPGetProfileSubtypeCalled = $true
                             return @{
                             Properties = $userProfileSubTypePropertiesNoProperty
                             }
@@ -85,7 +85,7 @@ Describe "xSPUserProfileSection" {
         return $result
         }
         
-        Mock Set-xSharePointObjectPropertyIfValueExists -MockWith {return ;}
+        Mock Set-SPDSCObjectPropertyIfValueExists -MockWith {return ;}
         Mock Get-SPWebApplication -MockWith {
             return @(
                     @{
@@ -94,12 +94,12 @@ Describe "xSPUserProfileSection" {
                      })
         }  
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
   
         
-        Mock New-PSSession { return $null } -ModuleName "xSharePoint.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
         
         
         Mock New-Object -MockWith {
@@ -171,13 +171,13 @@ Describe "xSPUserProfileSection" {
             }
 
             It "creates a new user profile section in the set method" {
-                $Global:xSPUPSubTypeCreateCalled = $false
+                $Global:SPUPSubTypeCreateCalled = $false
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
-                $Global:xSPUPSPropertyCommitCalled=$false;
+                $Global:SPUPSPropertyCommitCalled=$false;
 
                 Set-TargetResource @testParams
-                $Global:xSPUPSubTypeCreateCalled | should be $false
-                $Global:xSPUPSPropertyCommitCalled|should be $true                
+                $Global:SPUPSubTypeCreateCalled | should be $false
+                $Global:SPUPSPropertyCommitCalled|should be $true                
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }
 
@@ -203,9 +203,9 @@ Describe "xSPUserProfileSection" {
         }
         
         Context "When section exists and ensure equals Absent" {
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesProperty
                                 }
@@ -216,7 +216,7 @@ Describe "xSPUserProfileSection" {
                     $testParams.Ensure = "Absent"
 
             It "returns true when the Test method is called" {
-                $Global:xSPUPGetSectionByNameCalled = $true
+                $Global:SPUPGetSectionByNameCalled = $true
                 Test-TargetResource @testParams | Should Be $false
 
             }
@@ -232,9 +232,9 @@ Describe "xSPUserProfileSection" {
 
 
         Context "When section exists and display name and display order are different" {
-            mock Get-xSharePointUserProfileSubTypeManager -MockWith {
+            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
-                                $Global:xSPUPGetProfileSubtypeCalled = $true
+                                $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesProperty
                                 }
@@ -246,23 +246,23 @@ Describe "xSPUserProfileSection" {
             $testParams.DisplayName = "ProfileInformationUpdate"
 
             It "returns valid value from the Get method" {
-                $Global:xSPUPGetSectionByNameCalled = $true
+                $Global:SPUPGetSectionByNameCalled = $true
                 $currentValues = Get-TargetResource @testParams 
                 $currentValues.Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
             
             It "returns false when the Test method is called" {
-                $Global:xSPUPGetSectionByNameCalled = $true
+                $Global:SPUPGetSectionByNameCalled = $true
                 Test-TargetResource @testParams | Should Be $false
             }
             It "updates an user profile property in the set method" {
-                $Global:xSPUPSubTypeCreateCalled = $false
+                $Global:SPUPSubTypeCreateCalled = $false
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
-                $Global:xSPUPGetSectionByNameCalled=$true
+                $Global:SPUPGetSectionByNameCalled=$true
                 Set-TargetResource @testParams
-                Assert-MockCalled Set-xSharePointObjectPropertyIfValueExists
-                $Global:xSPUPSubTypeCreateCalled | should be $false
+                Assert-MockCalled Set-SPDSCObjectPropertyIfValueExists
+                $Global:SPUPSubTypeCreateCalled | should be $false
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }
         }

@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
-$ModuleName = "MSFT_xSPAccessServiceApp"
+$ModuleName = "MSFT_SPAccessServiceApp"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPAccessServiceApp" {
+Describe "SPAccessServiceApp" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Test Access Services App"
