@@ -42,20 +42,20 @@ function Set-SPDSCWebApplicationThrottlingSettings {
         ChangeLogExpirationEnabled = "ChangeLogEnabled"
     } 
     $mapping.Keys | ForEach-Object {
-        Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication `
+        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication `
                                                    -PropertyToSet $_ `
                                                    -ParamsValue $settings `
                                                    -ParamKey $mapping[$_]
     }
 
     # Set throttle settings child property seperately
-    Set-xSharePointObjectPropertyIfValueExists -ObjectToSet $WebApplication.HttpThrottleSettings `
+    Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.HttpThrottleSettings `
                                                -PropertyToSet "PerformThrottle" `
                                                -ParamsValue $Settings `
                                                -ParamKey "RequestThrottling"
     
     # Create time span object separately
-    if ((Test-xSharePointObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true) {
+    if ((Test-SPDSCObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true) {
         $WebApplication.ChangeLogRetentionPeriod = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
     }
 }
@@ -68,7 +68,7 @@ function Set-SPDSCWebApplicationHappyHourSettings {
         [parameter(Mandatory = $true)] $Settings
     )
 
-    if ((Test-xSharePointObjectHasProperty $Settings "Hour") -eq $false -or (Test-xSharePointObjectHasProperty $Settings "Minute") -eq $false -or (Test-xSharePointObjectHasProperty $Settings "Duration") -eq $false) {
+    if ((Test-SPDSCObjectHasProperty $Settings "Hour") -eq $false -or (Test-SPDSCObjectHasProperty $Settings "Minute") -eq $false -or (Test-SPDSCObjectHasProperty $Settings "Duration") -eq $false) {
         throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
     } else {
         if ($Settings.Hour -lt 0 -or $Settings.Hour -gt 23) {
@@ -92,8 +92,8 @@ function Test-SPDSCWebApplicationThrottlingSettings {
         [parameter(Mandatory = $true)] $DesiredSettings
     )
 
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.Util\xSharePoint.Util.psm1" -Resolve)
-    $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings `
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDSC.Util\SharePointDSC.Util.psm1" -Resolve)
+    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @(
                                                          "ListViewThreshold",
@@ -108,8 +108,8 @@ function Test-SPDSCWebApplicationThrottlingSettings {
                                                          "EventHandlersEnabled"
                                                      )
     if ($testReturn -eq $true) {
-        if ((Test-xSharePointObjectHasProperty $DesiredSettings "HappyHour") -eq $true) {
-            $testReturn = Test-xSharePointSpecificParameters -CurrentValues $CurrentSettings.HappyHour `
+        if ((Test-SPDSCObjectHasProperty $DesiredSettings "HappyHour") -eq $true) {
+            $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings.HappyHour `
                                                              -DesiredValues $DesiredSettings.HappyHour `
                                                              -ValuesToCheck @("Hour", "Minute", "Duration")
         }

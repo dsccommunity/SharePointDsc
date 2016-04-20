@@ -5,12 +5,12 @@ function Invoke-SPDSCTests() {
         [parameter(Mandatory = $false)] [System.String] $DscTestsPath
     )
 
-    Write-Verbose "Commencing xSharePoint unit tests"
+    Write-Verbose "Commencing SharePointDSC unit tests"
 
     $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 
     $testCoverageFiles = @()
-    Get-ChildItem "$repoDir\modules\xSharePoint\**\*.psm1" -Recurse | ForEach-Object { 
+    Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.psm1" -Recurse | ForEach-Object { 
         if ($_.FullName -notlike "*\DSCResource.Tests\*") {
             $testCoverageFiles += $_.FullName    
         }
@@ -21,7 +21,7 @@ function Invoke-SPDSCTests() {
         $testResultSettings.Add("OutputFormat", "NUnitXml" )
         $testResultSettings.Add("OutputFile", $testResultsFile)
     }
-    Import-Module "$repoDir\modules\xSharePoint\xSharePoint.psd1"
+    Import-Module "$repoDir\modules\SharePointDSC\SharePointDSC.psd1"
     
     
     $versionsToTest = (Get-ChildItem (Join-Path $repoDir "\Tests\Stubs\SharePoint\")).Name
