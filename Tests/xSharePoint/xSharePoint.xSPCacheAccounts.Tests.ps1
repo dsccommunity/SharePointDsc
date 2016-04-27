@@ -41,10 +41,16 @@ namespace Microsoft.SharePoint.Administration {
             $Global:xSharePointClaimsPrincipalUser = $Identity
             return (
                 New-Object Object | Add-Member ScriptMethod ToEncodedString { 
-                    return "i:0#.w|$($Global:xSharePointClaimsPrincipalUser)" 
+                    return "i:0#.w|$($Global:EncodedClaim)" 
                 } -PassThru
             )
-        }
+        } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
+        
+        Mock New-SPClaimsPrincipal { 
+            return @{
+                Value = $Identity -replace "i:0#.w|"
+            }
+        } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
         
         Context "The web application specified does not exist" {
             Mock Get-SPWebApplication { return $null }
@@ -125,7 +131,7 @@ namespace Microsoft.SharePoint.Administration {
                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                 ) -PassThru |
                 Add-Member ScriptMethod Update {} -PassThru|
-                Add-Member NoteProperty UseClaimsAuthentication ($true) -PassThru
+                Add-Member NoteProperty UseClaimsAuthentication ($false) -PassThru
             }
 
             It "returns the values from the get method" {
