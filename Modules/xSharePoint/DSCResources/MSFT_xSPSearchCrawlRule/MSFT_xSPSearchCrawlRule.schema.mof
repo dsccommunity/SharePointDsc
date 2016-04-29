@@ -30,8 +30,8 @@ The database name parameter is used as the prefix for all search databases (so y
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchServiceApp")]
-class MSFT_xSPSearchServiceApp : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchCrawlRule")]
+class MSFT_xSPSearchCrawlRule : OMI_BaseResource
 {
     [Key, Description("The name of the search service application")] string Path;
     [Required, Description("The name of the search service application")] string ServiceAppName;

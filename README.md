@@ -123,6 +123,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
  * Added support for cloud search index to xSPSearchServiceApp
  * Fixed bug in xSPWebAppGeneralSettings that prevented setting a security validation timeout value
+ * Added xSPSearchCrawlRule resource to manage Enterprise Search Crawl Rules
 
 ### 0.12.0.0
 

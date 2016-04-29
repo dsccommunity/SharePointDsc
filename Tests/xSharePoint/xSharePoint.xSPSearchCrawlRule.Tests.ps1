@@ -35,6 +35,164 @@ Describe "xSPSearchCrawlRule" {
         Mock New-SPEnterpriseSearchCrawlRule {}   
         Mock Set-SPEnterpriseSearchCrawlRule {}   
 
+        Context "Absent specified: Can only contain Path and ServiceAppName" {
+            $testParams = @{
+                Path = "http://www.contoso.com"
+                ServiceAppName = "Search Service Application"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "DefaultRuleAccess"
+                Ensure = "Absent"
+            }
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty  
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Invalid parameters specified. Please check verbose messages to check which parameters are invalid."
+            }
+        }
+
+        Context "AuthenticationType=CertificateName and CertificateRuleAccess parameters not specified correctly" {
+            $testParams = @{
+                Path = "http://www.contoso.com"
+                ServiceAppName = "Search Service Application"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "CertificateRuleAccess"
+                Ensure = "Present"
+            }
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty  
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Invalid parameters specified. Please check verbose messages to check which parameters are invalid."
+            }
+        }
+
+        Context "AuthenticationType=NTLMAccountRuleAccess and AuthenticationCredentialsparameters not specified correctly" {
+            $testParams = @{
+                Path = "http://www.contoso.com"
+                ServiceAppName = "Search Service Application"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "NTLMAccountRuleAccess"
+                Ensure = "Present"
+            }
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty  
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Invalid parameters specified. Please check verbose messages to check which parameters are invalid."
+            }
+        }
+
+        Context "AuthenticationType=BasicAccountRuleAccess and AuthenticationCredentialsparameters not specified correctly" {
+            $testParams = @{
+                Path = "http://www.contoso.com"
+                ServiceAppName = "Search Service Application"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "BasicAccountRuleAccess"
+                Ensure = "Present"
+            }
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty  
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Invalid parameters specified. Please check verbose messages to check which parameters are invalid."
+            }
+        }
+
+        Context "ExclusionRule only with CrawlConfigurationRules=CrawlComplexUrls" {
+            $testParams = @{
+                Path = "http://www.contoso.com"
+                ServiceAppName = "Search Service Application"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "DefaultRuleAccess"
+                Type = "ExclusionRule"
+                Ensure = "Present"
+            }
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty  
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Invalid parameters specified. Please check verbose messages to check which parameters are invalid."
+            }
+        }
+
+        Context "ExclusionRule cannot be used with AuthenticationCredentials, CertificateName or AuthenticationType parameters" {
+            $testParams = @{
+                Path = "http://www.contoso.com"
+                ServiceAppName = "Search Service Application"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "DefaultRuleAccess"
+                Type = "ExclusionRule"
+                Ensure = "Present"
+            }
+
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Search Service Application"
+            }) }
+            
+            It "returns null from the Get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty  
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Invalid parameters specified. Please check verbose messages to check which parameters are invalid."
+            }
+        }
+  
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
@@ -127,7 +285,5 @@ Describe "xSPSearchCrawlRule" {
                 Assert-MockCalled Set-SPEnterpriseSearchCrawlRule
             }
         }
-        
-#        $testParams.Add("DefaultContentAccessAccount", (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
     }    
 }
