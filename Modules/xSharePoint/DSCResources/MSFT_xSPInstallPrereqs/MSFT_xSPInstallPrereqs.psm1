@@ -17,13 +17,12 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $MSIPCClient,        
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices,        
         [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
-        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
-        [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
+        [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT11,
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT14,
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
-        [parameter(Mandatory = $false)] [System.String]  $DotNet452,
+        [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
     
@@ -136,12 +135,11 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices,        
         [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
-        [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT11,
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT14,
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
-        [parameter(Mandatory = $false)] [System.String]  $DotNet452,
+        [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
@@ -165,7 +163,7 @@ Write-Verbose -Message "Detecting SharePoint version from binaries"
     }
     if ($majorVersion -eq 16) {
         Write-Verbose -Message "Version: SharePoint 2016"
-        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","KB2898850","MSVCRT11","MSVCRT14","ODBC","DotNet452")
+        $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423","WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
         $osVersion = [System.Environment]::OSVersion.Version.Major
         if ($osVersion -eq 10) {
             # Server 2016
@@ -269,12 +267,11 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices,        
         [parameter(Mandatory = $false)] [System.String]  $KB2671763,        
         [parameter(Mandatory = $false)] [System.String]  $WCFDataServices56,        
-        [parameter(Mandatory = $false)] [System.String]  $KB2898850,        
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT11,
         [parameter(Mandatory = $false)] [System.String]  $MSVCRT14,
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
-        [parameter(Mandatory = $false)] [System.String]  $DotNet452,
+        [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 

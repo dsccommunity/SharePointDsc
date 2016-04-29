@@ -95,7 +95,7 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
             if ($params.ContainsKey("DatabaseCredentials")) {
                 $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
-                $params.Add("DatabasePassword", (ConvertTo-SecureString $params.DatabaseCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+                $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
             if ($params.ContainsKey("DatabaseServer")) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
             if ($params.ContainsKey("FailoverDatabaseServer")) { $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) }

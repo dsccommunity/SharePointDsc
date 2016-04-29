@@ -101,13 +101,12 @@ function Set-TargetResource
             throw "Synchronization is in Progress."
         }
         
-        $securePassword =  ConvertTo-SecureString  $params.ConnectionCredentials.GetNetworkCredential().password -AsPlainText -Force
         $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name} | select -first 1
         if($connection -ne $null -and $params.Forest -ieq  $connection.Server)
         {
             $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
             $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
-            $connection.SetCredentials($domain, $userName, $securePassword);
+            $connection.SetCredentials($domain, $userName, $params.ConnectionCredentials.Password);
 
             $connection.NamingContexts | %{
                 $namingContext = $_
@@ -121,7 +120,7 @@ function Set-TargetResource
                 }
             }
             $connection.Update();
-            $connection.RefreshSchema($securePassword);
+            $connection.RefreshSchema($params.ConnectionCredentials.Password);
             
             return;
         } else {
@@ -180,7 +179,7 @@ function Set-TargetResource
                                             $params.UseSSL, `
                                             $userDomain, `
                                             $userName, `
-                                            $securePassword, `
+                                            $params.ConnectionCredentials.Password, `
                                             $list, `
                                             $null,`
                                             $null)

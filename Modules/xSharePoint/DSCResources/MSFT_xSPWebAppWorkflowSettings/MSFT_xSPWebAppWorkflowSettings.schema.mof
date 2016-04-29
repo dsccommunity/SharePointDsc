@@ -1,4 +1,4 @@
-﻿/*
+/*
 **Description**
 
 This resource is responsible for setting web application settings that are found under the "workflow settings" screen in central admin.
@@ -16,7 +16,7 @@ Any settings not included will be left as the default (or whatever they have bee
     }
 */
 [ClassVersion("1.0.0"), FriendlyName("xSPWebAppWorkflowSettings")]
-Class MSFT_xSPWebAppWorkflowSettings : OMI_BaseResource
+class MSFT_xSPWebAppWorkflowSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string Url;
     [Write, Description("Are external workflow participants enabled in the web app")] boolean ExternalWorkflowParticipantsEnabled;

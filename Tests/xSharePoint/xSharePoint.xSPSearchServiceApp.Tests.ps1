@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -25,6 +25,7 @@ Describe "xSPSearchServiceApp" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
         Mock Start-SPEnterpriseSearchServiceInstance {}
@@ -34,6 +35,10 @@ Describe "xSPSearchServiceApp" {
         Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
         Mock New-SPEnterpriseSearchServiceApplication { return @{} }
         Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+        
+        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
+        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+        Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 0 } }
         
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
@@ -334,6 +339,57 @@ Describe "xSPSearchServiceApp" {
             
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        
+        $testParams = @{
+            Name = "Search Service Application"
+            ApplicationPool = "SharePoint Search Services"
+            Ensure = "Present"
+            CloudIndex = $true
+        }
+        
+        Context "When the service app exists and is cloud enabled" {
+            
+            Mock Get-SPServiceApplication { 
+                return @(@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    CloudIndex = $true
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                })
+            }
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            
+            It "should return false if the version is too low" {
+                (Get-TargetResource @testParams).CloudIndex | Should Be $false
+            }
+            
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            
+            It "should return that the web app is hybrid enabled from the get method" {
+                (Get-TargetResource @testParams).CloudIndex | Should Be $true
+            }
+        }
+        
+        Context "When the service doesn't exist and it should be cloud enabled" {
+            
+            Mock Get-SPServiceApplication { return $null }
+            
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            
+            It "creates the service app in the set method" {
+                Set-TargetResource @testParams
+            }
+            
+            Mock Get-xSharePointInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            
+            It "throws an error in the set method if the version of SharePoint isn't high enough" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    

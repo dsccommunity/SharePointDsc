@@ -1,0 +1,23 @@
+/*
+**Description**
+
+This resource is used to manipulate the IRM settings in SharePoint, integrating it with AD RMS
+
+**Example**
+
+    xSPIrmSettings ContosoRMS
+    {
+      Ensure = "Present"
+      RMSserver = "https://rms.contoso.com"    
+    }
+
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPIrmSettings")]
+class MSFT_xSPIrmSettings : OMI_BaseResource
+{
+    [Key, Description("Enable or Disable IRM on this farm"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, Description("Use the RMS server published in this farm's Active Directory")] Boolean UseADRMS;
+    [Write, Description("Use the specified RMS server, must provide in URL format")] String RMSserver;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
