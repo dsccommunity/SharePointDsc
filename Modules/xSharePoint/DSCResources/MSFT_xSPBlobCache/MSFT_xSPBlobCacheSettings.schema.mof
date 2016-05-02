@@ -1,0 +1,37 @@
+/*
+**Description**
+
+This resource is used to configure the Blob Cache settings for a web application.
+You have to make sure the specified folder is created and has the correct permissions.
+
+Important:
+This resource only configures the local server.
+In order to configure all WFE servers in the farm, you have to apply this resource to all servers./ 
+
+**Example**
+
+    xSPBlobCacheSettings BlobCacheSettings 
+    {
+        WebAppUrl = "http://intranet.contoso.com"
+        Zone = "Default"
+        EnableCache = $true
+        Location = "F:\BlobCache"
+        MaxSize = 10
+        FileTypes = "\.(gif|jpg|png|css|js)$"
+        PsDscRunAsCredential = $InstallAccount
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPBlobCacheSettings")]
+class MSFT_xSPBlobCacheSettings : OMI_BaseResource
+{
+    [Key, Description("The URL of the web application")] string WebAppUrl;
+    [Required, Description("The zone of the web application for which blob cache has to be configured"), ValueMap{"Default", "Intranet", "Internet", "Custom", "Extranet"}, Values{"Default", "Intranet", "Internet", "Custom", "Extranet"}] string Zone;
+    [Write, Description("Specify if the blob cache has to be enabled")] Boolean EnableCache;
+    [Write, Description("The location where the blob cache has to store its files")] string Location;
+    [Write, Description("The maximum size (in GB) of disk space the blob cache is allowed to use")] Uint16 MaxSize;
+    [Write, Description("Specify the file types that must be stored by the blob cache")] string FileTypes;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
+ 

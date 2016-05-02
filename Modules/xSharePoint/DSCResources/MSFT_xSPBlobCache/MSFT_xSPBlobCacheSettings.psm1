@@ -5,38 +5,15 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $Members,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [System.Boolean] $SetCacheAccountsPolicy,
+        [parameter(Mandatory = $true)]  [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] [System.String] $Zone,
+        [parameter(Mandatory = $false)] [System.Boolean] $EnableCache,
+        [parameter(Mandatory = $false)] [System.String] $Location,
+        [parameter(Mandatory = $false)] [System.UInt16] $MaxSize,
+        [parameter(Mandatory = $false)] [System.String] $FileTypes,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
-
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Write-Verbose -Verbose "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
-        return $null
-    }
-
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        Write-Verbose -Verbose "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
-        return $null
-    }
-
-    foreach ($member in $Members) {
-        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) {
-            Write-Verbose -Verbose "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
-            return $null
-        }
-    }
-
-    foreach ($member in $MembersToInclude) {
-        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) {
-            Write-Verbose -Verbose "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"        
-            return $null
-        }
-    }
-    
-    Write-Verbose -Message "Getting web app policy for $UserName at $WebAppUrl"
+        
+    Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -97,14 +74,15 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $Members,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [System.Boolean] $SetCacheAccountsPolicy,
+        [parameter(Mandatory = $true)]  [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] [System.String] $Zone,
+        [parameter(Mandatory = $false)] [System.Boolean] $EnableCache,
+        [parameter(Mandatory = $false)] [System.String] $Location,
+        [parameter(Mandatory = $false)] [System.UInt16] $MaxSize,
+        [parameter(Mandatory = $false)] [System.String] $FileTypes,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web app policy for $UserName at $WebAppUrl"
+    Write-Verbose -Message "Setting blob cache settings for $WebAppUrl"
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
         Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
@@ -359,19 +337,18 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $Members,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [Microsoft.Management.Infrastructure.CimInstance[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [System.Boolean] $SetCacheAccountsPolicy,
+        [parameter(Mandatory = $true)]  [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] [System.String] $Zone,
+        [parameter(Mandatory = $false)] [System.Boolean] $EnableCache,
+        [parameter(Mandatory = $false)] [System.String] $Location,
+        [parameter(Mandatory = $false)] [System.UInt16] $MaxSize,
+        [parameter(Mandatory = $false)] [System.String] $FileTypes,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    Write-Verbose -Message "Testing web app policy for $UserName at $WebAppUrl"
+    Write-Verbose -Message "Testing blob cache settings for $WebAppUrl"
     
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\xSharePoint.WebAppPolicy\xSPWebAppPolicy.psm1" -Resolve)
-
     if ($null -eq $CurrentValues) { return $false }
 
     $cacheAccounts = Get-CacheAccounts $WebAppUrl
@@ -469,36 +446,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-
-function Get-CacheAccounts() {
-    Param (
-        $InputParameters
-    )
-    
-    $cacheAccounts = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $InputParameters -ScriptBlock {
-        Write-Verbose -Verbose "Retrieving CacheAccounts"
-        $params = $args[0]
-
-        $wa = Get-SPWebApplication -Identity $params -ErrorAction SilentlyContinue
-
-        if ($null -eq $wa) {
-            throw "Specified web application could not be found."
-        }
-
-        $returnval = @{
-            SuperUserAccount = ""               
-            SuperReaderAccount = ""
-        }
-
-        if ($wa.Properties.ContainsKey("portalsuperuseraccount")) {
-            $returnval.SuperUserAccount = $wa.Properties["portalsuperuseraccount"]
-        }
-        if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) {
-            $returnval.SuperReaderAccount = $wa.Properties["portalsuperreaderaccount"]
-        }
-        
-        return $returnval
-    }
-
-    return $cacheAccounts
-}
