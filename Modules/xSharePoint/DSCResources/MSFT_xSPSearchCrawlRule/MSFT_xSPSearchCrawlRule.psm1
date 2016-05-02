@@ -172,7 +172,7 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("AuthenticationCredentials") -eq $true) {
                 $newParams.Add("AccountName", $params.AuthenticationCredentials.UserName)
-                $newParams.Add("AccountPassword", (ConvertTo-SecureString -String $params.AuthenticationCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+                $newParams.Add("AccountPassword", $params.AuthenticationCredentials.GetNetworkCredential().Password)
             }
             if ($params.ContainsKey("CertificateName") -eq $true) { $newParams.Add("CertificateName", $params.CertificateName) }
             
@@ -202,7 +202,7 @@ function Set-TargetResource
                 }
                 if ($params.ContainsKey("AuthenticationCredentials") -eq $true) {
                     $setParams.Add("AccountName", $params.AuthenticationCredentials.UserName)
-                    $setParams.Add("AccountPassword", (ConvertTo-SecureString -String $params.AuthenticationCredentials.GetNetworkCredential().Password -AsPlainText -Force))
+                    $setParams.Add("AccountPassword", $params.AuthenticationCredentials.GetNetworkCredential().Password)
                 }
                 if ($params.ContainsKey("CertificateName") -eq $true) { $setParams.Add("AccountName", $params.CertificateName) }
 

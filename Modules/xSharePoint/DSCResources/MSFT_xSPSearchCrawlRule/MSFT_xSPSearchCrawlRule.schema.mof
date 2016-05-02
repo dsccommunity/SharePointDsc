@@ -1,4 +1,4 @@
-﻿/*
+/*
 **Description**
 
 This resource is responsible for provisioning the search service application. 
@@ -35,9 +35,9 @@ class MSFT_xSPSearchCrawlRule : OMI_BaseResource
 {
     [Key, Description("The name of the search service application")] string Path;
     [Required, Description("The name of the search service application")] string ServiceAppName;
-    [Write, Description("Authentication type used by the crawl rule"), ValueMap{"DefaultRuleAccess", "BasicAccountRuleAccess", "CertificateRuleAccess", "NTLMAccountRuleAccess", "FormRuleAccess", "CookieRuleAccess", "AnonymousAccess"}, Values{"DefaultRuleAccess", "BasicAccountRuleAccess", "CertificateRuleAccess", "NTLMAccountRuleAccess", "FormRuleAccess", "CookieRuleAccess", "AnonymousAccess"}] string AuthenticationType;
+    [Write, Description("Authentication type used by the crawl rule"), ValueMap{"DefaultRuleAccess","BasicAccountRuleAccess","CertificateRuleAccess","NTLMAccountRuleAccess","FormRuleAccess","CookieRuleAccess","AnonymousAccess"}, Values{"DefaultRuleAccess","BasicAccountRuleAccess","CertificateRuleAccess","NTLMAccountRuleAccess","FormRuleAccess","CookieRuleAccess","AnonymousAccess"}] string AuthenticationType;
     [Write, Description("The type of the rule"), ValueMap{"InclusionRule","ExclusionRule"}, Values{"InclusionRule","ExclusionRule"}] string Type;
-    [Write, Description("The configuration options for this rule"), ValueMap{"FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"}, Values{"FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"}] string CrawlConfigurationRules[];
+    [Write, Description("The configuration options for this rule"), ValueMap{"FollowLinksNoPageCrawl","CrawlComplexUrls","CrawlAsHTTP"}, Values{"FollowLinksNoPageCrawl","CrawlComplexUrls","CrawlAsHTTP"}] string CrawlConfigurationRules[];
     [Write, Description("The credentials used for this crawl rule (used for types BasicAccountRuleAccess and NTLMAccountRuleAccess)"), EmbeddedInstance("MSFT_Credential")] String AuthenticationCredentials;
     [Write, Description("The certificate used for this crawl rule (used for type CertificateRuleAccess)")] string CertificateName;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
