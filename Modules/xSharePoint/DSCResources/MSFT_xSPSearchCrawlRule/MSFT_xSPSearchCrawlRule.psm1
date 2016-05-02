@@ -33,7 +33,7 @@ function Get-TargetResource
     }
 
     # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess or BasicAccountRuleAccess
-    if ($AuthenticationCredentials -and ($AuthenticationType -ne "NTLMAccountRuleAccess" -or $AuthenticationType -ne "BasicAccountRuleAccess")) {
+    if ($AuthenticationCredentials -and ($AuthenticationType -ne "NTLMAccountRuleAccess" -and $AuthenticationType -ne "BasicAccountRuleAccess")) {
         Throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
     }
     
@@ -167,7 +167,7 @@ function Set-TargetResource
     }
 
     # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess or BasicAccountRuleAccess
-    if ($AuthenticationCredentials -and ($AuthenticationType -ne "NTLMAccountRuleAccess" -or $AuthenticationType -ne "BasicAccountRuleAccess")) {
+    if ($AuthenticationCredentials -and ($AuthenticationType -ne "NTLMAccountRuleAccess" -and $AuthenticationType -ne "BasicAccountRuleAccess")) {
         Throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
     }
     
@@ -201,7 +201,7 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("AuthenticationCredentials") -eq $true) {
                 $newParams.Add("AccountName", $params.AuthenticationCredentials.UserName)
-                $newParams.Add("AccountPassword", $params.AuthenticationCredentials.GetNetworkCredential().Password)
+                $newParams.Add("AccountPassword", $params.AuthenticationCredentials.Password)
             }
             if ($params.ContainsKey("CertificateName") -eq $true) { $newParams.Add("CertificateName", $params.CertificateName) }
             
@@ -229,7 +229,7 @@ function Set-TargetResource
                 }
                 if ($params.ContainsKey("AuthenticationCredentials") -eq $true) {
                     $setParams.Add("AccountName", $params.AuthenticationCredentials.UserName)
-                    $setParams.Add("AccountPassword", $params.AuthenticationCredentials.GetNetworkCredential().Password)
+                    $setParams.Add("AccountPassword", $params.AuthenticationCredentials.Password)
                 }
                 if ($params.ContainsKey("CertificateName") -eq $true) { $setParams.Add("AccountName", $params.CertificateName) }
 
@@ -285,7 +285,7 @@ function Test-TargetResource
     }
 
     # AuthenticationCredentials parameters, but AuthenticationType is not NTLMAccountRuleAccess or BasicAccountRuleAccess
-    if ($AuthenticationCredentials -and ($AuthenticationType -ne "NTLMAccountRuleAccess" -or $AuthenticationType -ne "BasicAccountRuleAccess")) {
+    if ($AuthenticationCredentials -and ($AuthenticationType -ne "NTLMAccountRuleAccess" -and $AuthenticationType -ne "BasicAccountRuleAccess")) {
         Throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
     }
     
