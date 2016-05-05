@@ -99,7 +99,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added ensure properties to multiple resources to standardise schemas
- * Added xSPSearchContentSource, xSPContentDatabase, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp, xSPPerformancePointServiceApp, xSPIrmSettings resources
+ * Added xSPSearchContentSource, xSPContentDatabase, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp, xSPPerformancePointServiceApp, xSPIrmSettings and xSPSearchCrawlRule resources
  * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
  * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
  * Fixed a bug with reboot detection in xSPInstallPrereqs
@@ -123,7 +123,7 @@ Additional detailed documentation is included on the wiki on GitHub.
  * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
  * Added support for cloud search index to xSPSearchServiceApp
  * Fixed bug in xSPWebAppGeneralSettings that prevented setting a security validation timeout value
-
+ 
 ### 0.12.0.0
 
  * Removed Visual Studio project files, added VSCode PowerShell extensions launch file
