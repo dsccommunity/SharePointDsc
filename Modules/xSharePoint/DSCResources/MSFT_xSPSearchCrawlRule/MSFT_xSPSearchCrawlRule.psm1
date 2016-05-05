@@ -182,8 +182,6 @@ function Set-TargetResource
     }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") {
-        # Create the crawl rule as it doesn't exist
-         
         Write-Verbose -Message "Creating Crawl Rule $Path"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -239,7 +237,6 @@ function Set-TargetResource
     }
     
     if ($Ensure -eq "Absent") {
-        # The crawl rule should not exit
         Write-Verbose -Message "Removing Crawl Rule $Path"
         Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
