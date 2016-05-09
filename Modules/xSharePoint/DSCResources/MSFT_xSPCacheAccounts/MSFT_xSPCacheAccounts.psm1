@@ -57,7 +57,7 @@ function Get-TargetResource
             if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperUserAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }    
         } else {
             if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
-            $returnVal.Add("SuperUserAlias", $wa.Properties["portalsuperuseraccount"])
+                $returnVal.Add("SuperUserAlias", $wa.Properties["portalsuperuseraccount"])
             } else {
                 $returnVal.Add("SuperUserAlias", "")
             }
