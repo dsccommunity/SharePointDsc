@@ -476,8 +476,21 @@ Configuration SharePointServer
                 DatabaseServer        = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
                 ApplicationPool       = $serviceAppPoolName
                 PsDscRunAsCredential  = $SPSetupAccount
-                DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
-            } 
+                DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
+            }
+
+            xSPSearchCrawlRule IntranetCrawlAccount
+            {
+                Path                      = "https://intranet.sharepoint.contoso.com"
+                ServiceAppName            = "Search Service Application"
+                Ensure                    = "Present"
+                Type                      = "InclusionRule"
+                CrawlConfigurationRules   = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType        = "DefaultRuleAccess"
+                AuthenticationCredentials = $SPSetupAccount
+                PsDscRunAsCredential      = $SPSetupAccount
+                DependsOn                 = "[xSPSearchServiceApp]SearchServiceApp"
+            }
         }
 
         #**********************************************************
