@@ -6,7 +6,7 @@ You can create new rules, change existing rules and remove existing rules.
 
 **Example**
 
-    xSPSearchCrawlRule IntranetCrawlAccount
+    SPSearchCrawlRule IntranetCrawlAccount
     {
         Path = "https://intranet.sharepoint.contoso.com"
         ServiceAppName = "Search Service Application"
@@ -16,7 +16,7 @@ You can create new rules, change existing rules and remove existing rules.
         AuthenticationType = "DefaultRuleAccess"
     }
 
-    xSPSearchCrawlRule IntranetCrawlAccountCertificate
+    SPSearchCrawlRule IntranetCrawlAccountCertificate
     {
         Path = "https://intranet.sharepoint.contoso.com"
         ServiceAppName = "Search Service Application"
@@ -28,8 +28,8 @@ You can create new rules, change existing rules and remove existing rules.
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPSearchCrawlRule")]
-class MSFT_xSPSearchCrawlRule : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPSearchCrawlRule")]
+class MSFT_SPSearchCrawlRule : OMI_BaseResource
 {
     [Key, Description("The name of the search service application")] string Path;
     [Required, Description("The name of the search service application")] string ServiceAppName;

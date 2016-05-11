@@ -20,7 +20,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting SPWeb '$Url'"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
@@ -75,7 +75,7 @@ function Set-TargetResource
     
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         if ($null -eq $params.InstallAccount) 
@@ -165,7 +165,7 @@ function Test-TargetResource
 
     $valuesToCheck = @("Url", "Name", "Description", "UniquePermissions", "UseParentTopNav", "Ensure")
 
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
 
 

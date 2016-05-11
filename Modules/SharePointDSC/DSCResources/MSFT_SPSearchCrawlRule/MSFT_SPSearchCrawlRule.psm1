@@ -47,7 +47,7 @@ function Get-TargetResource
         Throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
     }
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName -ErrorAction SilentlyContinue
@@ -183,7 +183,7 @@ function Set-TargetResource
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") {
         Write-Verbose -Message "Creating Crawl Rule $Path"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $newParams = @{
@@ -208,7 +208,7 @@ function Set-TargetResource
     }
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") {
         Write-Verbose -Message "Updating Crawl Rule $Path"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $crawlRule = Get-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName | Where-Object { $_.Path -eq $params.Path }
@@ -238,7 +238,7 @@ function Set-TargetResource
     
     if ($Ensure -eq "Absent") {
         Write-Verbose -Message "Removing Crawl Rule $Path"
-        Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             Remove-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName -Identity $params.Path -Confirm:$false
@@ -308,9 +308,9 @@ function Test-TargetResource
             if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials) { return $false }
         }
         
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AuthenticationType", "RuleType", "CertificateName")    
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AuthenticationType", "RuleType", "CertificateName")    
     } else {
-        return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 }

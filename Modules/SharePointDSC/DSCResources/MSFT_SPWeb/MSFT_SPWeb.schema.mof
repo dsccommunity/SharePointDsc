@@ -6,7 +6,7 @@ These settings map to the New-SPWeb cmdlet and accept the same values and types.
 
 **Example**
 
-    xSPWeb TeamSite
+    SPWeb TeamSite
     {
         Url                      = "http://sharepoint.contoso.com/sites/site/subweb"
         Name                     = "Team Sites"
@@ -19,8 +19,8 @@ These settings map to the New-SPWeb cmdlet and accept the same values and types.
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWeb")]
-class MSFT_xSPWeb : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPWeb")]
+class MSFT_SPWeb : OMI_BaseResource
 {
     [Key, Description("The URL of the web")] string Url;
     [Write, Description("Present if the web should exist or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
