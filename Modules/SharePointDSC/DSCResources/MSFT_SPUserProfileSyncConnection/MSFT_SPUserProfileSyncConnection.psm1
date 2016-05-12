@@ -22,7 +22,6 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-
         $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
  
         If ($null -eq $ups)
@@ -81,9 +80,11 @@ function Set-TargetResource
 
     Write-Verbose -Message "Creating user profile service application $Name"
 
-
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
+        $scriptRoot = $args[1]
+        
+        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPUserProfileSyncConnection.psm1")
         
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
         $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
@@ -147,24 +148,24 @@ function Set-TargetResource
             if($params.ContainsKey("ExcludedOus")){
                 $params.ExcludedOus | %{$listExcludedOUs.Add($_) }
             }
-            $list = New-Object System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
-
-            $partition = [ADSI]("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
-            $list.Add((New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
+            $list = New-SPDSCDirectoryServiceNamingContextList
+            
+            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
+            $list.Add((New-SPDSCDirectoryServiceNamingContext -ArgumentList @(
                                             $partition.distinguishedName,
                                             $params.Forest, 
                                             $false, 
-                                            (New-Object Guid($partition.objectGUID)) , 
-                                            $listIncludedOUs , 
-                                            $listExcludedOUs ,
+                                            (New-Object -TypeName "System.Guid" -ArgumentList $partition.objectGUID), 
+                                            $listIncludedOUs, 
+                                            $listExcludedOUs,
                                             $null , 
                                             $false)))
-            $partition = [ADSI]("LDAP://CN=Configuration," +("DC=" + $params.Forest.Replace(".", ",DC=")))
-            $list.Add((New-Object Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext (
+            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," +("DC=" + $params.Forest.Replace(".", ",DC=")))
+            $list.Add((New-SPDSCDirectoryServiceNamingContext -ArgumentList @(
                                             $partition.distinguishedName,
                                             $params.Forest, 
                                             $true, 
-                                            (New-Object Guid($partition.objectGUID)) , 
+                                            (New-Object -TypeName "System.Guid" -ArgumentList $partition.objectGUID), 
                                             $listIncludedOUs , 
                                             $listExcludedOUs ,
                                             $null , 
@@ -173,7 +174,7 @@ function Set-TargetResource
             $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
             $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
             
-            $newUPSADConnection =  $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
+            $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
                                             $params.Name, `
                                             $params.Forest, `
                                             $params.UseSSL, `
@@ -182,7 +183,7 @@ function Set-TargetResource
                                             $params.ConnectionCredentials.Password, `
                                             $list, `
                                             $null,`
-                                            $null)
+                                            $null) | Out-Null
         }
     }
 }
@@ -198,8 +199,8 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $Forest,
         [parameter(Mandatory = $true)]  [System.Management.Automation.PSCredential] $ConnectionCredentials,
-        [parameter(Mandatory = $true)] [System.String] $UserProfileService,
-        [parameter(Mandatory = $true)] [System.String[]] $IncludedOUs,
+        [parameter(Mandatory = $true)]  [System.String] $UserProfileService,
+        [parameter(Mandatory = $true)]  [System.String[]] $IncludedOUs,
         [parameter(Mandatory = $false)] [System.String[]] $ExcludedOUs,
         [parameter(Mandatory = $false)] [System.String] $Server,
         [parameter(Mandatory = $false)] [System.Boolean] $Force,
@@ -218,5 +219,24 @@ function Test-TargetResource
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
 }
 
-Export-ModuleMember -Function *-TargetResource
+function Get-SPDSCADSIObject() {
+    param(
+        [string] $LdapPath
+    )
+    return [ADSI]($LdapPath)
+}
+
+function New-SPDSCDirectoryServiceNamingContext {
+    param(
+        $ArgumentList
+    )
+    return New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" -ArgumentList $ArgumentList
+}
+
+function New-SPDSCDirectoryServiceNamingContextList {
+    param ()
+    return New-Object System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
+}
+            
+Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject, New-SPDSCDirectoryServiceNamingContext, New-SPDSCDirectoryServiceNamingContextList
 

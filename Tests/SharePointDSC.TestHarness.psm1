@@ -1,8 +1,9 @@
 function Invoke-SPDSCTests() {
     param
     (
-        [parameter(Mandatory = $false)] [System.String] $testResultsFile,
-        [parameter(Mandatory = $false)] [System.String] $DscTestsPath
+        [parameter(Mandatory = $false)] [System.String]  $testResultsFile,
+        [parameter(Mandatory = $false)] [System.String]  $DscTestsPath,
+        [parameter(Mandatory = $false)] [System.Boolean] $CalculateTestCoverage = $true
     )
 
     Write-Verbose "Commencing SharePointDSC unit tests"
@@ -10,11 +11,14 @@ function Invoke-SPDSCTests() {
     $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 
     $testCoverageFiles = @()
-    Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.psm1" -Recurse | ForEach-Object { 
-        if ($_.FullName -notlike "*\DSCResource.Tests\*") {
-            $testCoverageFiles += $_.FullName    
-        }
+    if ($CalculateTestCoverage -eq $true) {
+        Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.psm1" -Recurse | ForEach-Object { 
+            if ($_.FullName -notlike "*\DSCResource.Tests\*") {
+                $testCoverageFiles += $_.FullName    
+            }
+        }    
     }
+    
 
     $testResultSettings = @{ }
     if ([string]::IsNullOrEmpty($testResultsFile) -eq $false) {
@@ -46,6 +50,7 @@ function Invoke-SPDSCTests() {
             'Parameters' = @{ }
         }
     }
+    $Global:VerbosePreference = "SilentlyContinue"
     $results = Invoke-Pester -Script $testsToRun -CodeCoverage $testCoverageFiles -PassThru @testResultSettings
 
     return $results

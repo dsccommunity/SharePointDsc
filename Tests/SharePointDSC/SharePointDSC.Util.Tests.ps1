@@ -8,9 +8,10 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\Modules\SharePointDSC.Util\SharePointDSC.Util.psm1") -Force
 
-Describe "SharePointDSC.Util" {
+Describe "SharePointDSC.Util - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     Context "Validate Get-SPDSCAssemblyVersion" {
         It "returns the version number of a given executable" {
             Get-SPDSCAssemblyVersion -PathToAssembly "C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe" | Should Not Be 0
