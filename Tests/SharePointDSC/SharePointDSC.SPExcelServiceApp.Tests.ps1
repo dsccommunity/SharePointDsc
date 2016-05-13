@@ -20,6 +20,9 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
 
+        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
+        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -30,94 +33,115 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
 
         Mock Remove-SPServiceApplication { }
         
-        Context "When no service applications exist in the current farm" {
+        switch ($majorBuildNumber) {
+            15 {
+                Context "When no service applications exist in the current farm" {
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPExcelServiceApplication { }
+                    Mock Get-SPServiceApplication { return $null }
+                    Mock New-SPExcelServiceApplication { }
 
-            It "returns absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    It "returns absent from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
+
+                    It "returns false when the Test method is called" {
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+
+                    It "creates a new service application in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled New-SPExcelServiceApplication 
+                    }
+                }
+
+                Context "When service applications exist in the current farm but the specific Excel Services app does not" {
+
+                    Mock Get-SPServiceApplication { return @(@{
+                        TypeName = "Some other service app type"
+                    }) }
+
+                    It "returns absent from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                    }
+
+                }
+
+                Context "When a service application exists and is configured correctly" {
+                    Mock Get-SPServiceApplication { 
+                        return @(@{
+                            TypeName = "Excel Services Application Web Service Application"
+                            DisplayName = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        })
+                    }
+
+                    It "returns values from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                    }
+
+                    It "returns true when the Test method is called" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+                
+                $testParams = @{
+                    Name = "Test App"
+                    ApplicationPool = "-"
+                    Ensure = "Absent"
+                }
+                Context "When the service application exists but it shouldn't" {
+                    Mock Get-SPServiceApplication { 
+                        return @(@{
+                            TypeName = "Excel Services Application Web Service Application"
+                            DisplayName = $testParams.Name
+                            DatabaseServer = $testParams.DatabaseServer
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        })
+                    }
+                    
+                    It "returns present from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                    }
+                    
+                    It "returns false when the Test method is called" {
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+                    
+                    It "calls the remove service application cmdlet in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled Remove-SPServiceApplication
+                    }
+                }
+                
+                Context "When the serivce application doesn't exist and it shouldn't" {
+                    Mock Get-SPServiceApplication { return $null }
+                    
+                    It "returns absent from the Get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                    }
+                    
+                    It "returns true when the Test method is called" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
             }
+            16 {
+                Context "All methods throw exceptions as Excel Services doesn't exist in 2016" {
+                    It "throws on the get method" {
+                        { Get-TargetResource @testParams } | Should Throw
+                    }
 
-            It "returns false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
+                    It "throws on the test method" {
+                        { Test-TargetResource @testParams } | Should Throw
+                    }
 
-            It "creates a new service application in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPExcelServiceApplication 
-            }
-        }
-
-        Context "When service applications exist in the current farm but the specific Excel Services app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
-
-            It "returns absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
-            }
-
-        }
-
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Excel Services Application Web Service Application"
-                    DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
-            }
-
-            It "returns values from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
-            }
-
-            It "returns true when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $true
+                    It "throws on the set method" {
+                        { Set-TargetResource @testParams } | Should Throw
+                    }
+                }
             }
         }
         
-        $testParams = @{
-            Name = "Test App"
-            ApplicationPool = "-"
-            Ensure = "Absent"
-        }
-        Context "When the service application exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Excel Services Application Web Service Application"
-                    DisplayName = $testParams.Name
-                    DatabaseServer = $testParams.DatabaseServer
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
-            }
-            
-            It "returns present from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
-            }
-            
-            It "returns false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-            
-            It "calls the remove service application cmdlet in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPServiceApplication
-            }
-        }
         
-        Context "When the serivce application doesn't exist and it shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
-            
-            It "returns absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
-            }
-            
-            It "returns true when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
     }
 }
