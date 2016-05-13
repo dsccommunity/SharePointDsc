@@ -44,9 +44,12 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting all Shell Admins"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
-
+        $scriptRoot = $args[1]
+        
+        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPShellAdmins.psm1")
+        
         try {
             $spFarm = Get-SPFarm
         } catch {
@@ -58,7 +61,7 @@ function Get-TargetResource
         $allContentDatabases = $true
 
         $cdbPermissions = @()
-        foreach ($contentDatabase in (Get-SPContentDatabase)) {
+        foreach ($contentDatabase in (Get-SPDSCContentDatabase)) {
             $cdbPermission = @{}
             
             $cdbPermission.Name = $contentDatabase.Name
@@ -122,9 +125,11 @@ function Set-TargetResource
         throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
     }
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
-
+        $scriptRoot = $args[1]
+        
+        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPShellAdmins.psm1")
         try {
             $spFarm = Get-SPFarm
         } catch {
@@ -227,7 +232,7 @@ function Set-TargetResource
                 # Check if configured database exists, throw error if not
                 Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
 
-                $currentCDB = Get-SPContentDatabase | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
+                $currentCDB = Get-SPDSCContentDatabase | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
                 if ($currentCDB -ne $null) {
                     $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
 
@@ -317,7 +322,7 @@ function Set-TargetResource
         if ($params.AllContentDatabases) {
             Write-Verbose "Processing AllContentDatabases parameter"
 
-            foreach ($contentDatabase in (Get-SPContentDatabase)) {
+            foreach ($contentDatabase in (Get-SPDSCContentDatabase)) {
                 $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
                 if ($params.Members) {
                     Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
@@ -580,5 +585,10 @@ function Test-TargetResource
     return $true
 }
 
+# This wrapepr exists as Pester tests seem to have an issue with this being called with no 
+# parameters. This allows us to mock the wrapper and test the logic correctly.
+function Get-SPDSCContentDatabase {
+    return Get-SPContentDatabase
+}
 
 Export-ModuleMember -Function *-TargetResource

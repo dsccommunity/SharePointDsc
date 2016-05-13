@@ -1,9 +1,7 @@
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
-    # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")] 
+    [OutputType([System.Collections.Hashtable])] 
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
@@ -19,8 +17,11 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Search service application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $PSScriptRoot) -ScriptBlock {
         $params = $args[0]
+        $scriptRoot = $args[1]
+        
+        Import-Module -Name (Join-Path $scriptRoot "MSFT_SPSearchServiceApp.psm1")
         
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
         [void][System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Administration")
@@ -41,16 +42,10 @@ function Get-TargetResource
         }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Search Service Application" }
 
-        If ($null -eq $serviceApp) { 
+        if ($null -eq $serviceApp) { 
             return $nullReturn
         } else {
-            $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | where {$_.IsAdministrationWebApplication} 
-            $s = Get-SPSite $caWebApp.Url
-            $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
-            $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
-            
-            $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
-            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+            $defaultAccount = Get-SPDSCContentAccessAccount
             
             $cloudIndex = $false
             $version = Get-SPDSCInstalledProductVersion
@@ -209,11 +204,21 @@ function Test-TargetResource
         return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "ApplicationPool", "SearchCenterUrl")    
     } else {
         return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
-    }
-    
-
-    
-    
+    }    
 }
 
-Export-ModuleMember -Function *-TargetResource
+function Get-SPDSCContentAccessAccount() {
+    # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+    param()
+    $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | where {$_.IsAdministrationWebApplication} 
+    $s = Get-SPSite $caWebApp.Url
+    $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
+    $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
+
+    $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
+    $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+    return $defaultAccount    
+}
+
+Export-ModuleMember -Function *-TargetResource, Get-SPDSCContentAccessAccount

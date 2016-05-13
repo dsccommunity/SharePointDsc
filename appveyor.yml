@@ -2,7 +2,7 @@ version: 1.0.{build}.0
 image: WMF 5
 
 install:
-    - cinst -y pester -version 3.3.14  
+    - cinst -y pester   
     - ps: |
         git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDSC\DscResource.Tests"
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDSC\DscResource.Tests\TestHelper.psm1" -force
