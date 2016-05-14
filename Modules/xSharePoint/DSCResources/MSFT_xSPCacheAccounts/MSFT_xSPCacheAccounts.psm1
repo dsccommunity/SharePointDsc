@@ -26,25 +26,46 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         } }
         
-        $returnVal = @{}
-        $returnVal.Add("WebAppUrl", $params.WebAppUrl)
-        if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
-            $returnVal.Add("SuperUserAlias", $wa.Properties["portalsuperuseraccount"])
-        } else {
-            $returnVal.Add("SuperUserAlias", "")
+        $returnVal = @{
+            InstallAccount = $params.InstallAccount
+            WebAppUrl = $params.WebAppUrl
         }
-        if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) { 
-            $returnVal.Add("SuperReaderAlias", $wa.Properties["portalsuperreaderaccount"])
-        } else {
-            $returnVal.Add("SuperReaderAlias", "")
-        }
-        $returnVal.Add("InstallAccount", $params.InstallAccount)
         
         $policiesSet = $true
         if ($wa.UseClaimsAuthentication -eq $true) {
+            if ($wa.Properties.ContainsKey("portalsuperuseraccount")) {
+                $claim = New-SPClaimsPrincipal -Identity $wa.Properties["portalsuperuseraccount"] -IdentityType EncodedClaim -ErrorAction SilentlyContinue
+                if ($claim -ne $null) {
+                    $returnVal.Add("SuperUserAlias", $claim.Value)
+                } else {
+                    $returnVal.Add("SuperUserAlias", "")
+                }
+            } else {
+                $returnVal.Add("SuperUserAlias", "")
+            }
+            if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) {
+                $claim = New-SPClaimsPrincipal -Identity $wa.Properties["portalsuperreaderaccount"] -IdentityType EncodedClaim -ErrorAction SilentlyContinue
+                if ($claim -ne $null) {
+                    $returnVal.Add("SuperReaderAlias", $claim.Value)
+                } else {
+                    $returnVal.Add("SuperReaderAlias", "")
+                }
+            } else {
+                $returnVal.Add("SuperReaderAlias", "")
+            }
             if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperReaderAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }
             if ($wa.Policies.UserName -notcontains ((New-SPClaimsPrincipal -Identity $params.SuperUserAlias -IdentityType WindowsSamAccountName).ToEncodedString())) { $policiesSet = $false }    
         } else {
+            if ($wa.Properties.ContainsKey("portalsuperuseraccount")) { 
+                $returnVal.Add("SuperUserAlias", $wa.Properties["portalsuperuseraccount"])
+            } else {
+                $returnVal.Add("SuperUserAlias", "")
+            }
+            if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) { 
+                $returnVal.Add("SuperReaderAlias", $wa.Properties["portalsuperreaderaccount"])
+            } else {
+                $returnVal.Add("SuperReaderAlias", "")
+            }
             if ($wa.Policies.UserName -notcontains $params.SuperReaderAlias) { $policiesSet = $false }
             if ($wa.Policies.UserName -notcontains $params.SuperUserAlias) { $policiesSet = $false }
         }

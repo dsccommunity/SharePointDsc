@@ -363,6 +363,19 @@ Configuration SharePointServer
             DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
         }
 
+        xSPSearchCrawlRule IntranetCrawlAccount
+        {
+            Path                      = "https://intranet.sharepoint.contoso.com"
+            ServiceAppName            = "Search Service Application"
+            Ensure                    = "Present"
+            Type                      = "InclusionRule"
+            CrawlConfigurationRules   = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+            AuthenticationType        = "DefaultRuleAccess"
+            AuthenticationCredentials = $SPSetupAccount
+            PsDscRunAsCredential      = $SPSetupAccount
+            DependsOn                 = "[xSPSearchServiceApp]SearchServiceApp"
+        }
+        
         #**********************************************************
         # Local configuration manager settings
         #
