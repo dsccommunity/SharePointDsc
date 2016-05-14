@@ -6,7 +6,8 @@ You have to make sure the specified folder is created and has the correct permis
 
 Important:
 This resource only configures the local server.
-In order to configure all WFE servers in the farm, you have to apply this resource to all servers./ 
+It changes the web.config file directly and is NOT using the SPWebConfigModifications class.
+In order to configure all WFE servers in the farm, you have to apply this resource to all servers.
 
 **Example**
 
