@@ -31,7 +31,7 @@ function Get-TargetResource
         else
         {
             $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup 
-            $upcm = New-Object -TypeName Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
+            $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" -ArgumentList @($context)
 
             $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
             if($connection -eq $null){
@@ -95,7 +95,7 @@ function Set-TargetResource
         $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
 
         Write-Verbose -Message "retrieving UserProfileConfigManager "
-        $upcm = New-Object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager $context
+        $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" -ArgumentList @($context)
 
         if($upcm.IsSynchronizationRunning())
         {
@@ -135,16 +135,16 @@ function Set-TargetResource
                 
             }
 
-            $servers = New-Object System.Collections.Generic.List[[System.String]]
+            $servers = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
             if($params.ContainsKey("Server")){
                 $servers.add($params.Server) 
             }
-            $listIncludedOUs = New-Object System.Collections.Generic.List[[System.String]]
+            $listIncludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
             $params.IncludedOUs | %{ 
                 $listIncludedOUs.Add($_) 
             }
 
-            $listExcludedOUs = New-Object System.Collections.Generic.List[[System.String]]
+            $listExcludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
             if($params.ContainsKey("ExcludedOus")){
                 $params.ExcludedOus | %{$listExcludedOUs.Add($_) }
             }
