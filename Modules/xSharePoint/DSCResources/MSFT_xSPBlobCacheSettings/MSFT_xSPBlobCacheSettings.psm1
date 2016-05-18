@@ -41,13 +41,12 @@ function Get-TargetResource
                 $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Extranet
             }
         }
-        
+
         $sitePath = $wa.IisSettings[$zone].Path
         $webconfiglocation = Join-Path $sitePath "web.config"
 
         $webconfig = New-Object XML
         $webconfig.Load($webconfiglocation)
-
         if ($webconfig.configuration.SharePoint.BlobCache.enabled -eq "true") {
             $cacheEnabled = $true
         } else {
@@ -58,12 +57,10 @@ function Get-TargetResource
             $maxsize = [Convert]::ToUInt16($webconfig.configuration.SharePoint.BlobCache.maxSize)
         }
         catch [FormatException] {
-            Write-Verbose "Conversion failed"
-            return $null
+            throw "Conversion of MaxSize failed"
         }
         catch {
-            Write-Verbose $_.Exception.Message
-            return $null
+            throw "Error: $($_.Exception.Message)"
         }
 
         $returnval = @{
@@ -102,13 +99,13 @@ function Set-TargetResource
     
     $changes = @{}
     
-    if ($CurrentValues.EnabledCache -ne $EnableCache) { $changes.EnabledCache = $EnableCache }
+    if ($CurrentValues.EnableCache -ne $EnableCache) { $changes.EnableCache = $EnableCache }
     if ($CurrentValues.Location -ne $Location) { $changes.Location = $Location }
     if ($CurrentValues.MaxSize -ne $MaxSize) { $changes.MaxSize = $MaxSize }
     if ($CurrentValues.FileTypes -ne $FileTypes) { $changes.FileTypes = $FileTypes }
-    
+
     ## Perform changes
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $changeUsers) -ScriptBlock {
+    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $changes) -ScriptBlock {
         $params  = $args[0]
         $changes = $args[1]
 
@@ -137,7 +134,7 @@ function Set-TargetResource
                 $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Extranet
             }
         }
-        $sitePath = $webapp.IisSettings[$zone].Path
+        $sitePath = $wa.IisSettings[$zone].Path
         $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
         $webconfiglocation = Join-Path $sitePath "web.config"
         $webconfigbackuplocation = Join-Path $sitePath "web_config-$timestamp.backup"
@@ -146,19 +143,19 @@ function Set-TargetResource
         $webconfig = New-Object XML
         $webconfig.Load($webconfiglocation)
 
-        if ($changes.EnableCache) {
+        if ($changes.ContainsKey("EnableCache")) {
             $webconfig.configuration.SharePoint.BlobCache.enabled = $changes.EnableCache.ToString()
         }
 
-        if ($changes.Location) {
+        if ($changes.ContainsKey("Location")) {
             $webconfig.configuration.SharePoint.BlobCache.location = $changes.Location
         }
 
-        if ($changes.MaxSize) {
-            $webconfig.configuration.SharePoint.BlobCache.maxSize = $changes.MaxSize
+        if ($changes.ContainsKey("MaxSize")) {
+            $webconfig.configuration.SharePoint.BlobCache.maxSize = $changes.MaxSize.ToString()
         }
         
-        if ($changes.FileTypes) {
+        if ($changes.ContainsKey("FileTypes")) {
             $webconfig.configuration.SharePoint.BlobCache.path = $changes.FileTypes
         }
 
