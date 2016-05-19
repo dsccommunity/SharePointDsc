@@ -5,9 +5,9 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [ValidateSet("ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages")] [System.String[]] $ListPermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo")] [System.String[]] $SitePermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts")] [System.String[]] $PersonalPermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages")] [System.String[]] $ListPermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts")] [System.String[]] $PersonalPermissions,
         [parameter(Mandatory = $false)] [System.Boolean] $AllPermissions,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -102,9 +102,9 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [ValidateSet("ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages")] [System.String[]] $ListPermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo")] [System.String[]] $SitePermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts")] [System.String[]] $PersonalPermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages")] [System.String[]] $ListPermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts")] [System.String[]] $PersonalPermissions,
         [parameter(Mandatory = $false)] [System.Boolean] $AllPermissions,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -203,9 +203,9 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [ValidateSet("ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages")] [System.String[]] $ListPermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo")] [System.String[]] $SitePermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts")] [System.String[]] $PersonalPermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages")] [System.String[]] $ListPermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts")] [System.String[]] $PersonalPermissions,
         [parameter(Mandatory = $false)] [System.Boolean] $AllPermissions,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -224,7 +224,7 @@ function Test-TargetResource
             Throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
         }
     }
-            
+
     if ($AllPermissions -eq $true) {
         if ($CurrentValues.ContainsKey("AllPermissions")) {
             return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")

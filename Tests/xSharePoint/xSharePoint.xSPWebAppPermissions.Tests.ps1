@@ -9,25 +9,14 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPWebAppPolicy"
+$ModuleName = "MSFT_xSPWebAppPermissions"
 Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPWebAppPolicy" {
+Describe "xSPWebAppPermissions" {
     InModuleScope $ModuleName {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
-                Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
-                        Username           = "contoso\user1"
-                        PermissionLevel    = "Full Control"
-                        ActAsSystemAccount = $true
-                    } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
-                        Username           = "contoso\user2"
-                        PermissionLevel    = "Full Read"
-                        ActAsSystemAccount = $false
-                    } -ClientOnly)
-                )
+                WebAppUrl      = "http:/sharepoint.contoso.com"
+                AllPermissions = $true
             }
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
@@ -53,58 +42,282 @@ namespace Microsoft.SharePoint {
         Context "The web application doesn't exist" {
             Mock Get-SPWebApplication { return $null }
 
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "returns exception from the get method" {
+                { Get-TargetResource @testParams } | Should throw "The specified web application could not be found."
             }
 
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+            It "returns exception from the test method" {
+                { Test-TargetResource @testParams } | Should throw "The specified web application could not be found."
             }
 
-            It "returns null from the set method" {
-                { Set-TargetResource @testParams } | Should throw "Web application does not exist"
+            It "returns exception from the set method" {
+                { Set-TargetResource @testParams } | Should throw "The specified web application could not be found."
             }
         }
 
-#AllPermissions specified together with one of the other parameters
-#Not all three parameters specified
-#AllPermissions specified, but FullMask is not set
-#FullMask is set, but AllPermissions is not specified
-#AllPermissions specified and FullMask is set
-#List/Site/Personal permissions set, but ListPermissions does not match
-#List/Site/Personal permissions set, but SitePermissions does not match
-#List/Site/Personal permissions set, but PersonalPermissions does not match
-#List/Site/Personal permissions set and all permissions match
-
-        Context "Members and MembersToInclude parameters used simultaniously" {
+        Context "AllPermissions specified together with one of the other parameters" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
-                Members = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
-                        Username           = "contoso\user1"
-                        PermissionLevel    = "Full Control"
-                        ActAsSystemAccount = $false
-                    } -ClientOnly)
-                )
-                MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_xSPWebAppPolicy -Property @{
-                        Username           = "contoso\user1"
-                        PermissionLevel    = "Full Control"
-                        ActAsSystemAccount = $false
-                    } -ClientOnly)
-                )
+                WebAppUrl      = "http:/sharepoint.contoso.com"
+                AllPermissions = $true
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns exception from the get method" {
+                { Get-TargetResource @testParams } | Should throw "Do not specify parameters ListPermissions, SitePermissions or PersonalPermissions when specifying parameter AllPermissions"
             }
 
-            It "return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+            It "returns exception from the test method" {
+                { Test-TargetResource @testParams } | Should throw "Do not specify parameters ListPermissions, SitePermissions or PersonalPermissions when specifying parameter AllPermissions"
+            }
+
+            It "returns exception from the set method" {
+                { Set-TargetResource @testParams } | Should throw "Do not specify parameters ListPermissions, SitePermissions or PersonalPermissions when specifying parameter AllPermissions"
+            }
+        }
+
+        Context "Not all three parameters specified" {
+            $testParams = @{
+                WebAppUrl      = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns exception from the get method" {
+                { Get-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+            }
+
+            It "returns exception from the test method" {
+                { Test-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+            }
+
+            It "returns exception from the set method" {
+                { Set-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+            }
+        }
+
+        Context "AllPermissions specified, but FullMask is not set" {
+            $testParams = @{
+                WebAppUrl      = "http:/sharepoint.contoso.com"
+                AllPermissions = $true
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "updates Web App permissions from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+        Context "FullMask is set, but AllPermissions is not specified" {
+            $testParams = @{
+                WebAppUrl           = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "FullMask"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "updates Web App permissions from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+        Context "AllPermissions specified and FullMask is set" {
+            $testParams = @{
+                WebAppUrl       = "http:/sharepoint.contoso.com"
+                AllPermissions  = $true
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "FullMask"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "List/Site/Personal permissions set, but ListPermissions does not match" {
+            $testParams = @{
+                WebAppUrl           = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "updates Web App permissions from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+        Context "List/Site/Personal permissions set, but SitePermissions does not match" {
+            $testParams = @{
+                WebAppUrl           = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "updates Web App permissions from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+        
+        Context "List/Site/Personal permissions set, but PersonalPermissions does not match" {
+            $testParams = @{
+                WebAppUrl           = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            $Global:xSPWebApplicationUpdateCalled = $false
+            It "updates Web App permissions from the set method" {
+                Set-TargetResource @testParams
+                $Global:xSPWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
+        Context "List/Site/Personal permissions set and all permissions match" {
+            $testParams = @{
+                WebAppUrl           = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+
+            Mock Get-SPWebApplication {
+                $returnval = @{
+                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                }
+                
+                $returnval = $returnval | Add-Member ScriptMethod Update {
+                    $Global:xSPWebApplicationUpdateCalled = $true
+                } -PassThru
+                return $returnval
+             }
+
+            It "returns values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
     }    
