@@ -1,0 +1,36 @@
+/*
+**Description**
+
+This resource is responsible for managing the search crawl rules in the search service application.
+You can create new rules, change existing rules and remove existing rules.
+
+**Example**
+
+    xSPWebAppPermissions WebApplicationPermissions
+    {
+        WebAppUrl = "https://intranet.sharepoint.contoso.com"
+        ListPermissions     = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages"
+        SitePermissions     = "ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo"
+        PersonalPermissions = "ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+        PsDscRunAsAccount   = $InstallAccount
+    }
+
+    xSPWebAppPermissions WebApplicationPermissions
+    {
+        Path              = "https://portal.sharepoint.contoso.com"
+        AllPermissions    = $true
+        PsDscRunAsAccount = $InstallAccount
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPermissions")]
+class xSPWebAppPermissions : OMI_BaseResource
+{
+    [Key, Description("The url of the web application")] string WebAppUrl;
+    [Write, Description("List permissions that need to be configured"), ValueMap{"ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages"}, Values{"ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages"}] string[] ListPermissions;
+    [Write, Description("Site permissions that need to be configured"), ValueMap{"ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo"}, Values{"ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo"}] string[] SitePermissions;
+    [Write, Description("Personal permissions that need to be configured"), ValueMap{"ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"}, Values{"ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"}] string[] PersonalPermissions;
+    [Write, Description("Set all permissions")] boolean AllPermissions;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
