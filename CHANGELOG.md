@@ -1,5 +1,9 @@
 # Change log for SharePoint DSC
 
+### Unreleased
+
+ * Added SPWebAppPermissions resource
+
 ### 1.0
 
  * Renamed module from xSharePoint to SharePointDSC

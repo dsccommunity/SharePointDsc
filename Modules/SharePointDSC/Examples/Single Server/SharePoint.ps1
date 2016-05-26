@@ -189,7 +189,17 @@ Configuration SharePointServer
                     DependsOn            = "[SPWebApplication]$webAppInternalName"
                 }
             }
-            
+
+            SPWebAppPermissions WebAppPermissions
+            {
+                WebAppUrl = $webApp.Url
+                ListPermissions      = "Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions      = "View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions  = "Add/Remove Personal Web Parts","Update Personal Web Parts"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = "[xSPWebApplication]$webAppInternalName"
+            }
+                        
             SPCacheAccounts "$($webAppInternalName)CacheAccounts"
             {
                 WebAppUrl              = $webApp.Url
