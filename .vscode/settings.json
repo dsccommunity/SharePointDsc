@@ -1,0 +1,4 @@
+// Place your settings in this file to overwrite the default settings
+{
+    "powershell.scriptAnalysis.settingsPath": ".vscode/ScriptAnalyzerSettings.psd1"
+}
