@@ -60,7 +60,7 @@ namespace Microsoft.SharePoint {
                 WebAppUrl      = "http:/sharepoint.contoso.com"
                 AllPermissions = $true
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
             Mock Get-SPWebApplication { return $null }
@@ -96,6 +96,50 @@ namespace Microsoft.SharePoint {
 
             It "returns exception from the set method" {
                 { Set-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+            }
+        }
+
+        Context "Approve items without Edit Items" {
+            $testParams = @{
+                WebAppUrl      = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns exception from the get method" {
+                { Get-TargetResource @testParams } | Should throw "Edit Items is required when specifying Approve Items"
+            }
+
+            It "returns exception from the test method" {
+                { Test-TargetResource @testParams } | Should throw "Edit Items is required when specifying Approve Items"
+            }
+
+            It "returns exception from the set method" {
+                { Set-TargetResource @testParams } | Should throw "Edit Items is required when specifying Approve Items"
+            }
+        }
+
+        Context "View Items missing for various other parameters" {
+            $testParams = @{
+                WebAppUrl      = "http:/sharepoint.contoso.com"
+                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+            }
+            Mock Get-SPWebApplication { return $null }
+
+            It "returns exception from the get method" {
+                { Get-TargetResource @testParams } | Should throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+            }
+
+            It "returns exception from the test method" {
+                { Test-TargetResource @testParams } | Should throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+            }
+
+            It "returns exception from the set method" {
+                { Set-TargetResource @testParams } | Should throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
             }
         }
 
@@ -135,7 +179,7 @@ namespace Microsoft.SharePoint {
             $testParams = @{
                 WebAppUrl           = "http:/sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
 
@@ -195,7 +239,7 @@ namespace Microsoft.SharePoint {
             $testParams = @{
                 WebAppUrl           = "http:/sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
 
@@ -229,7 +273,7 @@ namespace Microsoft.SharePoint {
             $testParams = @{
                 WebAppUrl           = "http:/sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
 
@@ -263,7 +307,7 @@ namespace Microsoft.SharePoint {
             $testParams = @{
                 WebAppUrl           = "http:/sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
 
@@ -297,7 +341,7 @@ namespace Microsoft.SharePoint {
             $testParams = @{
                 WebAppUrl           = "http:/sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
 

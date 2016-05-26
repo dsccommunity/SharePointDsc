@@ -6,7 +6,7 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $false)] [ValidateSet("Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages")] [System.String[]] $ListPermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
         [parameter(Mandatory = $false)] [ValidateSet("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts")] [System.String[]] $PersonalPermissions,
         [parameter(Mandatory = $false)] [System.Boolean] $AllPermissions,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -25,6 +25,19 @@ function Get-TargetResource
             Throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
         }
     }
+
+#Checks
+    if ($ListPermissions -contains "Approve Items" -and -not ($ListPermissions -contains "Edit Items")) {
+        Throw "Edit Items is required when specifying Approve Items"
+    }
+    
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Client Integration Features" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($ListPermissions -contains "View Items")) {
+        Throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+    }
+    
+    
+    
+    
 
     $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -70,7 +83,7 @@ function Get-TargetResource
                     "BrowseDirectories"    { $SitePermissions += "Browse Directories" }
                     "CreateSSCSite"        { $SitePermissions += "Use Self-Service Site Creation" }
                     "ViewPages"            { $SitePermissions += "View Pages" }
-                    "EnumeratePermissions" { $SitePermissions += "Enumerate Permission" }
+                    "EnumeratePermissions" { $SitePermissions += "Enumerate Permissions" }
                     "BrowseUserInfo"       { $SitePermissions += "Browse User Information" }
                     "ManageAlerts"         { $SitePermissions += "Manage Alerts" }
                     "UseRemoteAPIs"        { $SitePermissions += "Use Remote Interfaces" }
@@ -103,7 +116,7 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $false)] [ValidateSet("Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages")] [System.String[]] $ListPermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
         [parameter(Mandatory = $false)] [ValidateSet("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts")] [System.String[]] $PersonalPermissions,
         [parameter(Mandatory = $false)] [System.Boolean] $AllPermissions,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -122,6 +135,17 @@ function Set-TargetResource
             Throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
         }
     }
+
+#Checks
+    if ($ListPermissions -contains "Approve Items" -and -not ($ListPermissions -contains "Edit Items")) {
+        Throw "Edit Items is required when specifying Approve Items"
+    }
+    
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Client Integration Features" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($ListPermissions -contains "View Items")) {
+        Throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+    }
+
+
 
     if ($AllPermissions) {
         $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -143,7 +167,7 @@ function Set-TargetResource
             if ($null -eq $wa) { throw "The specified web application could not be found." }
 
             $newMask = [Microsoft.SharePoint.SPBasePermissions]::EmptyMask
-            foreach ($lp in $ListPermissions) {
+            foreach ($lp in $params.ListPermissions) {
                 switch ($lp) {
                     "Manage Lists"            { $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageLists}
                     "Override List Behaviors" { $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CancelCheckout}
@@ -160,7 +184,7 @@ function Set-TargetResource
                 }
             }
 
-            foreach ($sp in $SitePermissions) {
+            foreach ($sp in $params.SitePermissions) {
                 switch ($sp) {
                     "Manage Permissions"              { $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManagePermissions}
                     "View Web Analytics Data"         { $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewUsageData}
@@ -183,7 +207,7 @@ function Set-TargetResource
                 }
             }
 
-            foreach ($pp in $PersonalPermissions) {
+            foreach ($pp in $params.PersonalPermissions) {
                 switch ($pp) {
                     "Manage Personal Views"         { $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManagePersonalViews}
                     "Add/Remove Personal Web Parts" { $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddDelPrivateWebParts}
@@ -204,7 +228,7 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
         [parameter(Mandatory = $false)] [ValidateSet("Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages")] [System.String[]] $ListPermissions,
-        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permission","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
+        [parameter(Mandatory = $false)] [ValidateSet("Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information")] [System.String[]] $SitePermissions,
         [parameter(Mandatory = $false)] [ValidateSet("Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts")] [System.String[]] $PersonalPermissions,
         [parameter(Mandatory = $false)] [System.Boolean] $AllPermissions,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
@@ -224,6 +248,17 @@ function Test-TargetResource
             Throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
         }
     }
+
+#Checks
+    if ($ListPermissions -contains "Approve Items" -and -not ($ListPermissions -contains "Edit Items")) {
+        Throw "Edit Items is required when specifying Approve Items"
+    }
+    
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Client Integration Features" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($ListPermissions -contains "View Items")) {
+        Throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+    }
+
+
 
     if ($AllPermissions -eq $true) {
         if ($CurrentValues.ContainsKey("AllPermissions")) {
