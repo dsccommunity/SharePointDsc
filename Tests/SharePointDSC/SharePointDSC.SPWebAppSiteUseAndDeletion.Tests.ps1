@@ -10,9 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPWebAppSiteUseAndDeletion"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Describe "SPWebAppSiteUseAndDeletion" {
+Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
             Url                                      = "http://example.contoso.local"

@@ -10,9 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_SPAppCatalog"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Describe "SPAppCatalog" {
+Describe "SPAppCatalog - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
             SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"

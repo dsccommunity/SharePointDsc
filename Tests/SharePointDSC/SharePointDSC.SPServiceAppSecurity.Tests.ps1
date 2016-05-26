@@ -10,9 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPServiceAppSecurity"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Describe "SPServiceAppSecurity" {
+Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
             ServiceAppName = "Example Service App"

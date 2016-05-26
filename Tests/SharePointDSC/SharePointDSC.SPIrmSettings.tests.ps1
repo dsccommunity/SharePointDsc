@@ -10,10 +10,10 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPIrmSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 
-Describe "SPIrmSettings" {
+Describe "SPIrmSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")

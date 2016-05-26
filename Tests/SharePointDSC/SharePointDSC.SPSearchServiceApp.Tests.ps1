@@ -10,9 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_SPSearchServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Describe "SPSearchServiceApp" {
+Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "Search Service Application"
@@ -56,11 +56,11 @@ Describe "SPSearchServiceApp" {
             }) }
             Mock Get-SPSite { @{} }
             
-            Mock New-Object {
-                return @{
-                    DefaultGatheringAccount = "DOMAIN\username"
-                }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            Mock Get-SPDSCContentAccessAccount {
+                return (New-Object System.Management.Automation.PSCredential ("Domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
+            }
+            
+            Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
 
         Context "When no service applications exist in the current farm" {
 
@@ -174,11 +174,9 @@ Describe "SPSearchServiceApp" {
                 })
             }
             
-            Mock New-Object {
-                return @{
-                    DefaultGatheringAccount = "DOESNOT\match"
-                }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            Mock Get-SPDSCContentAccessAccount {
+                return (New-Object System.Management.Automation.PSCredential ("DOESNOT\match", (ConvertTo-SecureString "password" -AsPlainText -Force)))
+            }
             
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -205,11 +203,9 @@ Describe "SPSearchServiceApp" {
                 })
             }
             
-            Mock New-Object {
-                return @{
-                    DefaultGatheringAccount = "DOMAIN\username"
-                }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            Mock Get-SPDSCContentAccessAccount {
+                return (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
+            }
             
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
@@ -247,11 +243,9 @@ Describe "SPSearchServiceApp" {
             }) }
             Mock Get-SPSite { @{} }
             
-            Mock New-Object {
-                return @{
-                    DefaultGatheringAccount = "DOMAIN\username"
-                }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            Mock Get-SPDSCContentAccessAccount {
+                return (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
+            }
             
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -290,11 +284,9 @@ Describe "SPSearchServiceApp" {
             }) }
             Mock Get-SPSite { @{} }
             
-            Mock New-Object {
-                return @{
-                    DefaultGatheringAccount = "DOMAIN\username"
-                }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            Mock Get-SPDSCContentAccessAccount {
+                return (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
+            }
             
             It "should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true

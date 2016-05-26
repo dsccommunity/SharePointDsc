@@ -1,9 +1,7 @@
-
 [CmdletBinding()]
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
-Add-PSSnapin Microsoft.SharePoint.PowerShell -ea 0 
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
@@ -12,10 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
 $ModuleName = "MSFT_SPUserProfileSection"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-
-Describe "SPUserProfileSection" {
+Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams= @{
            Name = "PersonalInformation"

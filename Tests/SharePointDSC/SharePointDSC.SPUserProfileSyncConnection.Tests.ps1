@@ -10,10 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
 $ModuleName = "MSFT_SPUserProfileSyncConnection"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-
-Describe "SPUserProfileSyncConnection" {
+Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
             UserProfileService = "User Profile Service Application"
@@ -46,6 +45,7 @@ Describe "SPUserProfileSyncConnection" {
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
+        Mock Start-Sleep { }
         Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
         Mock Get-SPWebApplication { 
                 return @{
@@ -105,9 +105,6 @@ Describe "SPUserProfileSyncConnection" {
             } -PassThru   )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
-        Mock New-Object -MockWith {
-            return (New-Object System.Collections.Generic.List[System.Object])
-        }  -ParameterFilter { $TypeName -eq "System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]" } 
         $userProfileServiceValidConnection =  @{
             Name = "User Profile Service Application"
             TypeName = "User Profile Service Application"
@@ -117,6 +114,17 @@ Describe "SPUserProfileSyncConnection" {
             ConnectionManager=  New-Object System.Collections.ArrayList
         }
         $userProfileServiceValidConnection.ConnectionManager.Add($connection);
+        
+        Mock Get-SPDSCADSIObject {
+            return @{
+                distinguishedName = "DC=Contoso,DC=Com"
+                objectGUID = (New-Guid).ToString()
+            }
+        }
+        Mock New-SPDSCDirectoryServiceNamingContextList -MockWith {
+            return New-Object System.Collections.Generic.List[[Object]]
+        } 
+        Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
         
         Context "When connection doesn't exist" {
            $userProfileServiceNoConnections =  @{
@@ -128,10 +136,8 @@ Describe "SPUserProfileSyncConnection" {
             }
 
             Mock Get-SPServiceApplication { return $userProfileServiceNoConnections }
-
-            Mock New-Object -MockWith {return @{}
+            Mock New-SPDSCDirectoryServiceNamingContext -MockWith {return @{} }
             
-            }  -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext"}
             It "returns null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 

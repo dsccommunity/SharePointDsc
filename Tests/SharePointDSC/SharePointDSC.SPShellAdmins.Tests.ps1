@@ -10,9 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPShellAdmins"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Describe "SPShellAdmins" {
+Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
             Name         = "ShellAdmins"
@@ -27,6 +27,8 @@ Describe "SPShellAdmins" {
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        
+        Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
 
         Context "The server is not part of SharePoint farm" {
             Mock Get-SPFarm { throw "Unable to detect local farm" }
@@ -140,7 +142,7 @@ Describe "SPShellAdmins" {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -180,7 +182,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -225,7 +227,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -326,7 +328,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -379,7 +381,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -479,7 +481,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -530,7 +532,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -629,7 +631,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -680,7 +682,7 @@ Describe "SPShellAdmins" {
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPContentDatabase {
+            Mock Get-SPDSCContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"

@@ -2,17 +2,24 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    param
-    (
+    param (
         [parameter(Mandatory = $true)]  [System.String] $Name,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
+    
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
+        throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
+                          "service applicaions via DSC, as SharePoint 2016 deprecated " + `
+                          "this service. See " + `
+                          "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                          "for more info."
+    }
 
-        Write-Verbose -Message "Getting Excel Services service app '$Name'"
+    Write-Verbose -Message "Getting Excel Services service app '$Name'"
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -53,6 +60,13 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
+        throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
+                          "service applicaions via DSC, as SharePoint 2016 deprecated " + `
+                          "this service. See " + `
+                          "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                          "for more info."
+    }
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
@@ -86,6 +100,14 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
+    
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
+        throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
+                          "service applicaions via DSC, as SharePoint 2016 deprecated " + `
+                          "this service. See " + `
+                          "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                          "for more info."
+    }
     
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for Excel Services Application '$Name'"

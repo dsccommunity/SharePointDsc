@@ -10,9 +10,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPInstallPrereqs"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
     
-Describe "SPInstallPrereqs" {
+Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
@@ -23,6 +23,9 @@ Describe "SPInstallPrereqs" {
 
         if ($null -eq (Get-Command Get-WindowsFeature -ErrorAction SilentlyContinue)) {
             function Get-WindowsFeature() { }
+        }
+        if ($null -eq (Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue)) {
+            function Install-WindowsFeature() { }
         }
         
         Mock Get-ChildItem {
