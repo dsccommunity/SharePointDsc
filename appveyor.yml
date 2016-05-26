@@ -37,13 +37,13 @@ after_test:
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName.checksum" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
-        cd "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDSC"
+        cd "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
         if ($env:APPVEYOR_REPO_BRANCH -eq "master" -and $env:APPVEYOR_REPO_NAME -eq "PowerShell/xSharePoint") {
             $nugetVersion = $env:APPVEYOR_BUILD_VERSION
         } else {
             $nugetVersion = "1.0.0-preview.$env:APPVEYOR_BUILD_NUMBER"
         }
-        New-Nuspec -packageName $env:APPVEYOR_PROJECT_NAME -version $nugetVersion -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription $env:APPVEYOR_PROJECT_NAME -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
-        nuget pack ".\$($env:APPVEYOR_PROJECT_NAME).nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
-        $nuGetPackageName = $env:APPVEYOR_PROJECT_NAME + "." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
+        New-Nuspec -packageName "SharePointDsc" -version $nugetVersion -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription "SharePointDsc" -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
+        nuget pack ".\SharePointDsc.nuspec" -outputdirectory $env:APPVEYOR_BUILD_FOLDER
+        $nuGetPackageName = "SharePointDsc." + $env:APPVEYOR_BUILD_VERSION + ".nupkg"
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$nuGetPackageName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
