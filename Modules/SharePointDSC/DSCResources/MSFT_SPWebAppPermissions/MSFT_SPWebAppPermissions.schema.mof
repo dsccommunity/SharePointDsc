@@ -8,7 +8,7 @@ More info about the permission levels: https://technet.microsoft.com/en-us/libra
 
 **Example**
 
-    xSPWebAppPermissions WebApplicationPermissions
+    SPWebAppPermissions WebApplicationPermissions
     {
         WebAppUrl = "https://intranet.sharepoint.contoso.com"
         ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
@@ -17,7 +17,7 @@ More info about the permission levels: https://technet.microsoft.com/en-us/libra
         PsDscRunAsAccount   = $InstallAccount
     }
 
-    xSPWebAppPermissions WebApplicationPermissions
+    SPWebAppPermissions WebApplicationPermissions
     {
         Path              = "https://portal.sharepoint.contoso.com"
         AllPermissions    = $true
@@ -25,8 +25,8 @@ More info about the permission levels: https://technet.microsoft.com/en-us/libra
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPWebAppPermissions")]
-class MSFT_xSPWebAppPermissions : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPWebAppPermissions")]
+class MSFT_SPWebAppPermissions : OMI_BaseResource
 {
     [Key, Description("The url of the web application")] string WebAppUrl;
     [Write, Description("List permissions that need to be configured"), ValueMap{"Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"}, Values{"Manage Lists","Override List Behaviors","Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"}] string ListPermissions[];

@@ -34,12 +34,52 @@ function Get-TargetResource
     if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Client Integration Features" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($ListPermissions -contains "View Items")) {
         Throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
     }
-    
-    
-    
-    
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    if (($ListPermissions -contains "View Versions" -or $SitePermissions -contains "Manage Permissions") -and -not ($ListPermissions -contains "Open Items")) {
+        Throw "Open Items is required when specifying View Versions or Manage Permissions"
+    }    
+    
+    if (($ListPermissions -contains "Delete Versions" -or $SitePermissions -contains "Manage Permissions") -and -not ($ListPermissions -contains "View Versions")) {
+        Throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+    }    
+    
+    if ($SitePermissions -contains "Manage Alerts" -and -not ($ListPermissions -contains "Create Alerts")) {
+        Throw "Create Alerts is required when specifying Manage Alerts"
+    }    
+
+    if ($SitePermissions -contains "Manage Web Site" -and -not ($SitePermissions -contains "Add and Customize Pages")) {
+        Throw "Add and Customize Pages is required when specifying Manage Web Site"
+    }    
+    
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Enumerate Permissions") -and -not ($SitePermissions -contains "Browse Directories")) {
+        Throw "Browse Directories is required when specifying Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions"
+    }    
+
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "View Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "View Web Analytics Data"  -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Apply Themes and Borders" -or $SitePermissions -contains "Apply Style Sheets" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Browse Directories" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Manage Alerts" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($SitePermissions -contains "View Pages")) {
+        Throw "View Pages is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+    }
+
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site") -and -not ($SitePermissions -contains "Enumerate Permissions")) {
+        Throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
+    }    
+
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Edit Personal User Information") -and -not ($SitePermissions -contains "Browse User Information")) {
+        Throw "Browse User Information is required when specifying Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information"
+    }
+
+    if ($SitePermissions -contains "Use Client Integration Features" -and -not ($SitePermissions -contains "Use Remote Interfaces")) {
+        Throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+    }
+
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "View Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $ListPermissions -contains "View Application Pages" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "View Web Analytics Data"  -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Apply Themes and Borders" -or $SitePermissions -contains "Apply Style Sheets" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Browse Directories" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "View Pages" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Browse User Information" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Remote Interfaces" -or $SitePermissions -contains "Use Client Integration Features" -or $SitePermissions -contains "Edit Personal User Information" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($SitePermissions -contains "Open")) {
+        Throw "Open is required when specifying any of the other permissions"
+    }
+
+    if ($PersonalPermissions -contains "Add/Remove Personal Web Parts" -and -not ($PersonalPermissions -contains "Update Personal Web Parts")) {
+        Throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+    }
+
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -145,10 +185,52 @@ function Set-TargetResource
         Throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
     }
 
+    if (($ListPermissions -contains "View Versions" -or $SitePermissions -contains "Manage Permissions") -and -not ($ListPermissions -contains "Open Items")) {
+        Throw "Open Items is required when specifying View Versions or Manage Permissions"
+    }    
+    
+    if (($ListPermissions -contains "Delete Versions" -or $SitePermissions -contains "Manage Permissions") -and -not ($ListPermissions -contains "View Versions")) {
+        Throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+    }    
+    
+    if ($SitePermissions -contains "Manage Alerts" -and -not ($ListPermissions -contains "Create Alerts")) {
+        Throw "Create Alerts is required when specifying Manage Alerts"
+    }    
 
+    if ($SitePermissions -contains "Manage Web Site" -and -not ($SitePermissions -contains "Add and Customize Pages")) {
+        Throw "Add and Customize Pages is required when specifying Manage Web Site"
+    }    
+    
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Enumerate Permissions") -and -not ($SitePermissions -contains "Browse Directories")) {
+        Throw "Browse Directories is required when specifying Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions"
+    }    
 
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "View Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "View Web Analytics Data"  -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Apply Themes and Borders" -or $SitePermissions -contains "Apply Style Sheets" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Browse Directories" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Manage Alerts" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($SitePermissions -contains "View Pages")) {
+        Throw "View Pages is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+    }
+
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site") -and -not ($SitePermissions -contains "Enumerate Permissions")) {
+        Throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
+    }    
+
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Edit Personal User Information") -and -not ($SitePermissions -contains "Browse User Information")) {
+        Throw "Browse User Information is required when specifying Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information"
+    }
+
+    if ($SitePermissions -contains "Use Client Integration Features" -and -not ($SitePermissions -contains "Use Remote Interfaces")) {
+        Throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+    }
+
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "View Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $ListPermissions -contains "View Application Pages" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "View Web Analytics Data"  -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Apply Themes and Borders" -or $SitePermissions -contains "Apply Style Sheets" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Browse Directories" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "View Pages" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Browse User Information" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Remote Interfaces" -or $SitePermissions -contains "Use Client Integration Features" -or $SitePermissions -contains "Edit Personal User Information" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($SitePermissions -contains "Open")) {
+        Throw "Open is required when specifying any of the other permissions"
+    }
+
+    if ($PersonalPermissions -contains "Add/Remove Personal Web Parts" -and -not ($PersonalPermissions -contains "Update Personal Web Parts")) {
+        Throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+    }
+    
     if ($AllPermissions) {
-        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -159,7 +241,7 @@ function Set-TargetResource
             $wa.Update()
         }
     } else {
-        $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -258,11 +340,53 @@ function Test-TargetResource
         Throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
     }
 
+    if (($ListPermissions -contains "View Versions" -or $SitePermissions -contains "Manage Permissions") -and -not ($ListPermissions -contains "Open Items")) {
+        Throw "Open Items is required when specifying View Versions or Manage Permissions"
+    }    
+    
+    if (($ListPermissions -contains "Delete Versions" -or $SitePermissions -contains "Manage Permissions") -and -not ($ListPermissions -contains "View Versions")) {
+        Throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+    }    
+    
+    if ($SitePermissions -contains "Manage Alerts" -and -not ($ListPermissions -contains "Create Alerts")) {
+        Throw "Create Alerts is required when specifying Manage Alerts"
+    }    
 
+    if ($SitePermissions -contains "Manage Web Site" -and -not ($SitePermissions -contains "Add and Customize Pages")) {
+        Throw "Add and Customize Pages is required when specifying Manage Web Site"
+    }    
+    
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Enumerate Permissions") -and -not ($SitePermissions -contains "Browse Directories")) {
+        Throw "Browse Directories is required when specifying Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions"
+    }    
 
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "View Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "View Web Analytics Data"  -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Apply Themes and Borders" -or $SitePermissions -contains "Apply Style Sheets" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Browse Directories" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Manage Alerts" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($SitePermissions -contains "View Pages")) {
+        Throw "View Pages is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+    }
+
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Manage Web Site") -and -not ($SitePermissions -contains "Enumerate Permissions")) {
+        Throw "Enumerate Permissions is required when specifying Manage Permissions or Manage Web Site"
+    }    
+
+    if (($SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Edit Personal User Information") -and -not ($SitePermissions -contains "Browse User Information")) {
+        Throw "Browse User Information is required when specifying Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information"
+    }
+
+    if ($SitePermissions -contains "Use Client Integration Features" -and -not ($SitePermissions -contains "Use Remote Interfaces")) {
+        Throw "Use Remote Interfaces is required when specifying Use Client Integration Features"
+    }
+
+    if (($ListPermissions -contains "Manage Lists" -or $ListPermissions -contains "Override List Behaviors" -or $ListPermissions -contains "Add Items" -or $ListPermissions -contains "Edit Items" -or $ListPermissions -contains "Delete Items" -or $ListPermissions -contains "View Items" -or $ListPermissions -contains "Approve Items" -or $ListPermissions -contains "Open Items" -or $ListPermissions -contains "View Versions" -or $ListPermissions -contains "Delete Versions" -or $ListPermissions -contains "Create Alerts" -or $ListPermissions -contains "View Application Pages" -or $SitePermissions -contains "Manage Permissions" -or $SitePermissions -contains "View Web Analytics Data"  -or $SitePermissions -contains "Create Subsites"  -or $SitePermissions -contains "Manage Web Site" -or $SitePermissions -contains "Add and Customize Pages" -or $SitePermissions -contains "Apply Themes and Borders" -or $SitePermissions -contains "Apply Style Sheets" -or $SitePermissions -contains "Create Groups" -or $SitePermissions -contains "Browse Directories" -or $SitePermissions -contains "Use Self-Service Site Creation" -or $SitePermissions -contains "View Pages" -or $SitePermissions -contains "Enumerate Permissions" -or $SitePermissions -contains "Browse User Information" -or $SitePermissions -contains "Manage Alerts" -or $SitePermissions -contains "Use Remote Interfaces" -or $SitePermissions -contains "Use Client Integration Features" -or $SitePermissions -contains "Edit Personal User Information" -or $PersonalPermissions -contains "Manage Personal Views" -or $PersonalPermissions -contains "Add/Remove Personal Web Parts" -or $PersonalPermissions -contains "Update Personal Web Parts") -and -not ($SitePermissions -contains "Open")) {
+        Throw "Open is required when specifying any of the other permissions"
+    }
+
+    if ($PersonalPermissions -contains "Add/Remove Personal Web Parts" -and -not ($PersonalPermissions -contains "Update Personal Web Parts")) {
+        Throw "Update Personal Web Parts is required when specifying Add/Remove Personal Web Parts"
+    }
+    
     if ($AllPermissions -eq $true) {
         if ($CurrentValues.ContainsKey("AllPermissions")) {
-            return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")
+            return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")
         } else {
             return $false
         }    
