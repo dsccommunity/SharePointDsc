@@ -1,0 +1,43 @@
+﻿.NAME
+    xSPManagedAccount
+
+.SYNOPSIS
+
+This resource will ensure a managed account is provisioned in to the SharePoint farm.
+The Account object specific the credential to store (including username and password) to set as the managed account. 
+The settings for EmailNotification, PreExpireDays and Schedule all relate to enabling automatic password change for the managed account, leaving these option out of the resource will ensure that no automatic password changing from SharePoint occurs.
+
+.EXAMPLE
+
+    xSPManagedAccount WebPoolManagedAccount
+    {
+        AccountName          = $WebPoolManagedAccount.UserName
+        Account              = $WebPoolManagedAccount
+        PsDscRunAsCredential = $InstallAccount
+    }
+
+.PARAMETER AccountName
+    Key - string
+    The username of the account
+
+.PARAMETER Account
+    Required - String
+    The credential with password of the account
+
+.PARAMETER EmailNotification
+    Write - Uint32
+    How many days before a password change should an email be sent
+
+.PARAMETER PreExpireDays
+    Write - Uint32
+    How many days before a password expires should it be changed
+
+.PARAMETER Schedule
+    Write - string
+    What is the schedule for the password reset
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+

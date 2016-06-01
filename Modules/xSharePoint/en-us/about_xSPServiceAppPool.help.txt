@@ -1,0 +1,30 @@
+﻿.NAME
+    xSPServiceAppPool
+
+.SYNOPSIS
+
+This resource is used for provisioning an application pool that can be used for service applications. 
+The account used for the service account must already be registered as a managed account (which can be provisioned through [xSPManagedAccount](xSPManagedAccount)).
+
+.EXAMPLE
+
+    xSPServiceAppPool MainServiceAppPool
+    {
+        Name           = "SharePoint Service Applications"
+        ServiceAccount = "Demo\ServiceAccount"
+        InstallAccount = $InstallAccount
+    }
+
+.PARAMETER Name
+    Key - string
+    The name of application pool
+
+.PARAMETER ServiceAccount
+    Required - string
+    The name of the managed account to run this service account as
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+

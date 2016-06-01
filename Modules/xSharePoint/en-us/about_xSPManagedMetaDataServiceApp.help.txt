@@ -1,0 +1,41 @@
+﻿.NAME
+    xSPManagedMetaDataServiceApp
+
+.SYNOPSIS
+
+Creates a managed metadata service application.
+The application pool property specifies which application pool it should use, and will reset the application back to this pool if it is changed after its initial provisioning.
+The database server and database name properties are only used during provisioning, and will not be altered as part of the ongoing operation of the DSC resource. 
+
+.EXAMPLE
+
+    xSPManagedMetaDataServiceApp ManagedMetadataServiceApp
+    {  
+        Name              = "Managed Metadata Service Application"
+        InstallAccount    = $InstallAccount
+        ApplicationPool   = "SharePoint Service Applications"
+        DatabaseServer    = $DatabaseServer
+        DatabaseName      = "SP_ManagedMetadata"
+    }
+
+.PARAMETER Name
+    Key - string
+    The name of the managed metadata service application
+
+.PARAMETER ApplicationPool
+    Required - string
+    The application pool that the service app will use
+
+.PARAMETER DatabaseServer
+    Write - string
+    The name of the database server which will host the application
+
+.PARAMETER DatabaseName
+    Write - string
+    The name of the database for the service application
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+
