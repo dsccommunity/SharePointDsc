@@ -1,5 +1,9 @@
 # Change log for SharePoint DSC
 
+### Unreleased
+
+ * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
+
 ### 1.0
 
  * Renamed module from xSharePoint to SharePointDSC
