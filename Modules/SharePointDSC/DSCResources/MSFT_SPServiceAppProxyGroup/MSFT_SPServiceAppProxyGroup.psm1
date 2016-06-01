@@ -201,7 +201,7 @@ function Set-TargetResource
 }
 
 
-function Set-TargetResource
+function test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
