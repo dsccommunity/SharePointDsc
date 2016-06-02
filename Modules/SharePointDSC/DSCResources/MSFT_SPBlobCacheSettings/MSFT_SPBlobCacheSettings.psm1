@@ -15,7 +15,7 @@ function Get-TargetResource
         
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
-    $result = Invoke-xSharePointCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPSDCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
@@ -105,7 +105,7 @@ function Set-TargetResource
     if ($CurrentValues.FileTypes -ne $FileTypes) { $changes.FileTypes = $FileTypes }
 
     ## Perform changes
-    Invoke-xSharePointCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $changes) -ScriptBlock {
+    Invoke-SPSDCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $changes) -ScriptBlock {
         $params  = $args[0]
         $changes = $args[1]
 
@@ -185,7 +185,7 @@ function Test-TargetResource
     
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-xSharePointSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @("EnableCache", "Location", "MaxSize", "FileType")
 }

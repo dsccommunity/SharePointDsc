@@ -11,7 +11,7 @@ In order to configure all WFE servers in the farm, you have to apply this resour
 
 **Example**
 
-    xSPBlobCacheSettings BlobCacheSettings 
+    SPBlobCacheSettings BlobCacheSettings 
     {
         WebAppUrl = "http://intranet.contoso.com"
         Zone = "Default"
@@ -23,8 +23,8 @@ In order to configure all WFE servers in the farm, you have to apply this resour
     }
 */
 
-[ClassVersion("1.0.0.0"), FriendlyName("xSPBlobCacheSettings")]
-class MSFT_xSPBlobCacheSettings : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPBlobCacheSettings")]
+class MSFT_SPBlobCacheSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string WebAppUrl;
     [Required, Description("The zone of the web application for which blob cache has to be configured"), ValueMap{"Default","Intranet","Internet","Custom","Extranet"}, Values{"Default","Intranet","Internet","Custom","Extranet"}] string Zone;

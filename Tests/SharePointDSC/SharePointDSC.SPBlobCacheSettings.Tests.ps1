@@ -9,10 +9,10 @@ Set-StrictMode -Version latest
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
-$ModuleName = "MSFT_xSPBlobCacheSettings"
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\DSCResources\$ModuleName\$ModuleName.psm1")
+$ModuleName = "MSFT_SPBlobCacheSettings"
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
-Describe "xSPBlobCacheSettings" {
+Describe "SPBlobCacheSettings" {
     InModuleScope $ModuleName {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
@@ -23,9 +23,9 @@ Describe "xSPBlobCacheSettings" {
                 FileTypes   = "\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
             }
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\xSharePoint")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
         
-        Mock Invoke-xSharePointCommand { 
+        Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
@@ -87,7 +87,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:xSharePointWebConfigUpdated = $true } -PassThru
+                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:SharePointDSCWebConfigUpdated = $true } -PassThru
                 
                 return $returnval
             } -ParameterFilter { $TypeName -eq "XML" }
@@ -136,7 +136,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:xSharePointWebConfigUpdated = $true } -PassThru
+                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:SharePointDSCWebConfigUpdated = $true } -PassThru
                 
                 return $returnval
             } -ParameterFilter { $TypeName -eq "XML" }
@@ -151,10 +151,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            $Global:xSharePointWebConfigUpdated = $false
+            $Global:SharePointDSCWebConfigUpdated = $false
             It "returns true from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSharePointWebConfigUpdated | Should Be $true
+                $Global:SharePointDSCWebConfigUpdated | Should Be $true
             }
         }
         
@@ -187,7 +187,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:xSharePointWebConfigUpdated = $true } -PassThru
+                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:SharePointDSCWebConfigUpdated = $true } -PassThru
                 
                 return $returnval
             } -ParameterFilter { $TypeName -eq "XML" }
@@ -202,10 +202,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            $Global:xSharePointWebConfigUpdated = $false
+            $Global:SharePointDSCWebConfigUpdated = $false
             It "returns true from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSharePointWebConfigUpdated | Should Be $true
+                $Global:SharePointDSCWebConfigUpdated | Should Be $true
             }
         }
 
@@ -287,7 +287,7 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:xSharePointWebConfigUpdated = $true } -PassThru
+                $returnval = $returnval | Add-Member ScriptMethod Load { } -PassThru | Add-Member ScriptMethod Save { $Global:SharePointDSCWebConfigUpdated = $true } -PassThru
                 
                 return $returnval
             } -ParameterFilter { $TypeName -eq "XML" }
@@ -302,10 +302,10 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            $Global:xSharePointWebConfigUpdated = $false
+            $Global:SharePointDSCWebConfigUpdated = $false
             It "returns true from the set method" {
                 Set-TargetResource @testParams
-                $Global:xSharePointWebConfigUpdated | Should Be $true
+                $Global:SharePointDSCWebConfigUpdated | Should Be $true
             }
         }
 
