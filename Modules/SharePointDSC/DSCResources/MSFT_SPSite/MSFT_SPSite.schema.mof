@@ -1,0 +1,39 @@
+/*
+**Description**
+
+This resource will provision a site collection to the current farm, based on the settings that are passed through. 
+These settings map to the New-SPSite cmdlet and accept the same values and types. 
+
+The current version of SharePointDSC is only able to check for the existence of a site collection, the additional parameters are not checked for yet, but will be in a later release
+
+**Example**
+
+    SPSite TeamSite
+    {
+        Url                      = "http://sharepoint.contoso.com"
+        OwnerAlias               = "CONTOSO\ExampleUser"
+        HostHeaderWebApplication = "http://spsites.contoso.com"
+        Name                     = "Team Sites"
+        Template                 = "STS#0"
+        PsDscRunAsCredential     = $InstallAccount
+    }
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("SPSite")]
+class MSFT_SPSite : OMI_BaseResource
+{
+    [Key, Description("The URL of the site collection")] string Url;
+    [Required, Description("The username of the site collection administrator")] string OwnerAlias;
+    [Write, Description("The compatibility level of the site")] uint32 CompatibilityLevel;
+    [Write, Description("The name of the content database to create the site in")] string ContentDatabase;
+    [Write, Description("The description to apply to the site collection")] string Description;
+    [Write, Description("The URL of the host header web application to create this site in")] string HostHeaderWebApplication;
+    [Write, Description("The language code of the site")] uint32 Language;
+    [Write, Description("The display name of the site collection")] string Name;
+    [Write, Description("The email address of the site collection administrator")] string OwnerEmail;
+    [Write, Description("The quota template to apply to the site collection")] string QuotaTemplate;
+    [Write, Description("The secondary site collection admin email address")] string SecondaryEmail;
+    [Write, Description("The secondary site collection admin username")] string SecondaryOwnerAlias;
+    [Write, Description("The template to apply to the site collection")] string Template;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
