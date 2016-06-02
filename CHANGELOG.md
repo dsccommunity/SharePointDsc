@@ -3,6 +3,7 @@
 ### Unreleased
 
  * Added SPBlobCacheSettings resource
+ * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
 
 ### 1.0
 
