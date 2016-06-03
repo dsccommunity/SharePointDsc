@@ -290,6 +290,32 @@ function Test-SPDSCUserIsLocalAdmin() {
         Where-Object { $_ -eq $accountName }
 }
 
+function Test-SPDSCIsADUser() {
+    [OutputType([System.Boolean])]
+    [CmdletBinding()]
+    param (
+        [string] $IdentityName
+    )
+
+    $searcher = New-Object System.DirectoryServices.DirectorySearcher
+    $searcher.filter = "((samAccountName=$IdentityName))"
+    $searcher.SearchScope = "subtree"
+    $searcher.PropertiesToLoad.Add("objectClass") | Out-Null
+    $searcher.PropertiesToLoad.Add("objectCategory") | Out-Null
+    $searcher.PropertiesToLoad.Add("name") | Out-Null
+    $result = $searcher.FindOne()
+
+    if ($null -eq $result) {
+        throw "Unable to locate identity '$IdentityName' in the current domain."
+    }
+
+    if ($result[0].Properties.objectclass -contains "user") {
+        return $true
+    } else {
+        return $false
+    }
+}
+
 function Set-SPDSCObjectPropertyIfValueExists() {
     [CmdletBinding()]
     param
