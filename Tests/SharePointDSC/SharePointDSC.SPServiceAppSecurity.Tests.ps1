@@ -35,7 +35,9 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
         }
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-                
+        
+        Mock Test-SPDSCIsADUser { return $true }
+        
         Mock New-SPClaimsPrincipal { return @{ Value = "CONTOSO\user2" }}
         Mock Grant-SPObjectSecurity {}
         Mock Revoke-SPObjectSecurity {}
