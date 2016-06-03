@@ -139,7 +139,7 @@ function Set-TargetResource
                    }
                    else {
                        Foreach ($ServiceProxyName in $params.ServiceAppProxies) {
-                           $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                          $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
                                 
                            if (!$ServiceProxy) {
                                throw "Invalid Service Application Proxy $ServiceProxyName"
@@ -296,4 +296,6 @@ function test-TargetResource
             return $false
         }   
     }
+    
+    return $true 
 }
