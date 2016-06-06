@@ -70,7 +70,14 @@ function Get-TargetResource
         $members = @()
         foreach ($policy in $wa.Policies) {
             $member = @{}
-            $member.Username = $policy.UserName
+            $memberName = $policy.UserName
+            if ($wa.UseClaimsAuthentication -eq $true) {
+                $convertedClaim = New-SPClaimsPrincipal -Identity $memberName -IdentityType EncodedClaim -ErrorAction SilentlyContinue
+                if($null -ne $convertedClaim) {
+                    $memberName = $convertedClaim.Value
+                }    
+            }
+            $member.Username = $memberName
             $member.PermissionLevel = $policy.PolicyRoleBindings.Name
             $member.ActAsSystemAccount = $policy.IsSystemUser
             $members += $member
@@ -291,7 +298,17 @@ function Set-TargetResource
                 "Add"    {
                     # User does not exist. Add user
                     Write-Verbose -Verbose "Adding $($user.Username)"
-                    $newPolicy = $wa.Policies.Add($user.UserName, $user.UserName)
+                    
+                    $userToAdd = $user.Username
+                    if ($wa.UseClaimsAuthentication -eq $true) {
+                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        if ($isUser -eq $true) {
+                            $userToAdd = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSamAccountName).ToEncodedString()
+                        } else {
+                            $userToAdd = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSecurityGroupName).ToEncodedString()
+                        }    
+                    }
+                    $newPolicy = $wa.Policies.Add($userToAdd, $user.UserName)
                     foreach ($permissionLevel in $user.PermissionLevel) {
                         switch ($permissionLevel) {
                             "Deny All" {
@@ -310,11 +327,20 @@ function Set-TargetResource
                     }
                     if ($user.ActAsSystemAccount) {
                         $newPolicy.IsSystemUser = $user.ActAsSystemAccount
-                    }                    
+                    }
                 }
                 "Change" {
                     # User exists. Check permissions
-                    $policy = $wa.Policies | Where-Object { $_.UserName -eq $user.Username }
+                    $userToChange = $user.Username
+                    if ($wa.UseClaimsAuthentication -eq $true) {
+                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        if ($isUser -eq $true) {
+                            $userToChange = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSamAccountName).ToEncodedString()
+                        } else {
+                            $userToChange = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSecurityGroupName).ToEncodedString()
+                        }    
+                    }
+                    $policy = $wa.Policies | Where-Object { $_.UserName -eq $userToChange }
 
                     Write-Verbose -Verbose "User $($user.Username) exists, checking permissions"
                     if ($user.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $user.ActAsSystemAccount }
@@ -342,7 +368,16 @@ function Set-TargetResource
                 }
                 "Delete" {
                     Write-Verbose -Verbose "Removing $($user.Username)"
-                    Remove-WebAppPolicy $wa.Policies $user.Username
+                    $userToDrop = $user.Username
+                    if ($wa.UseClaimsAuthentication -eq $true) {
+                        $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
+                        if ($isUser -eq $true) {
+                            $userToDrop = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSamAccountName).ToEncodedString()
+                        } else {
+                            $userToDrop = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSecurityGroupName).ToEncodedString()
+                        }    
+                    }
+                    Remove-WebAppPolicy $wa.Policies userToDrop
                 }
             }
         }
@@ -491,10 +526,24 @@ function Get-CacheAccounts() {
         }
 
         if ($wa.Properties.ContainsKey("portalsuperuseraccount")) {
-            $returnval.SuperUserAccount = $wa.Properties["portalsuperuseraccount"]
+            $memberName = $wa.Properties["portalsuperuseraccount"]
+            if ($wa.UseClaimsAuthentication -eq $true) {
+                $convertedClaim = New-SPClaimsPrincipal -Identity $memberName -IdentityType EncodedClaim -ErrorAction SilentlyContinue
+                if($null -ne $convertedClaim) {
+                    $memberName = $convertedClaim.Value
+                }
+            }
+            $returnval.SuperUserAccount = $memberName
         }
         if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) {
-            $returnval.SuperReaderAccount = $wa.Properties["portalsuperreaderaccount"]
+            $memberName = $wa.Properties["portalsuperreaderaccount"]
+            if ($wa.UseClaimsAuthentication -eq $true) {
+                $convertedClaim = New-SPClaimsPrincipal -Identity $memberName -IdentityType EncodedClaim -ErrorAction SilentlyContinue
+                if($null -ne $convertedClaim) {
+                    $memberName = $convertedClaim.Value
+                }
+            }
+            $returnval.SuperReaderAccount = $memberName
         }
         
         return $returnval
@@ -502,5 +551,3 @@ function Get-CacheAccounts() {
 
     return $cacheAccounts
 }
-
-#Verplaatsen methode naar eigen utils module
