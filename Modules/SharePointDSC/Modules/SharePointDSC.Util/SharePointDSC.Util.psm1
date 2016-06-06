@@ -297,6 +297,10 @@ function Test-SPDSCIsADUser() {
         [string] $IdentityName
     )
 
+    if ($IdentityName -like "*\*") {
+        $IdentityName = $IdentityName.Substring($IdentityName.IndexOf('\') + 1)
+    }
+
     $searcher = New-Object System.DirectoryServices.DirectorySearcher
     $searcher.filter = "((samAccountName=$IdentityName))"
     $searcher.SearchScope = "subtree"
