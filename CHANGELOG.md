@@ -3,6 +3,7 @@
 ### Unreleased
 
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
+ * Added SPOfficeOnlineServerBinding resource
 
 ### 1.0
 
