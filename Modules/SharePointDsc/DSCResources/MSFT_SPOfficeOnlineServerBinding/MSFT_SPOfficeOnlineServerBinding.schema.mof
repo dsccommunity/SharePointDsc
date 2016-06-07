@@ -21,7 +21,7 @@ If used on an existing configuration that does not follow this rule, it will mat
 [ClassVersion("1.0.0.0"), FriendlyName("SPOfficeOnlineServerBinding")]
 class MSFT_SPOfficeOnlineServerBinding : OMI_BaseResource
 {
-    [Key, Description("The zone for this binding"), ValueMap{"Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS"}, Values{"Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS"}] boolean Zone;
+    [Key, Description("The zone for this binding"), ValueMap{"Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS"}, Values{"Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS"}] string Zone;
     [Required, Description("The DNS name of the server/s that are running Office Web Apps")] string DnsName;
     [Write, Description("Present ensures the binding for this zone exists, absent ensures it doesn't"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
