@@ -23,8 +23,8 @@ Configuration SharePointServer
         # settings etc.
         #********************************************************** 
 
-        xCredSSP CredSSPServer { Ensure = "Present"; Role = "Server"; DependsOn = "[xComputer]DomainJoin" } 
-        xCredSSP CredSSPClient { Ensure = "Present"; Role = "Client"; DelegateComputers = "*.$($ConfigurationData.NonNodeData.DomainDetails.DomainName)"; DependsOn = "[xComputer]DomainJoin" }
+        xCredSSP CredSSPServer { Ensure = "Present"; Role = "Server"; } 
+        xCredSSP CredSSPClient { Ensure = "Present"; Role = "Client"; DelegateComputers = "*.$($ConfigurationData.NonNodeData.DomainDetails.DomainName)"; }
 
         if ($Node.DisableIISLoopbackCheck -eq $true) {
             Registry DisableLoopBackCheck {
