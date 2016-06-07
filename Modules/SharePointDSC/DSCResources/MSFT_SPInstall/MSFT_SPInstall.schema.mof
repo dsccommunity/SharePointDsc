@@ -1,0 +1,41 @@
+/*
+**Description**
+
+This resource is used to install the SharePoint binaries.
+The BinaryDir parameter should point to the path that setup.exe is located (not to setup.exe itself).
+The ProductKey parameter is used to inject in to the configuration file and validate the license key during the installation process. 
+This module depends on the prerequisites already being installed, which can be done through the use of [SPInstallPreReqs](SPInstallPreReqs).
+
+**Example**
+
+    SPInstall InstallBinaries
+    {
+        BinaryDir  = "C:\SPInstall"
+        ProductKey = $ProductKey
+    }
+
+**Installing SharePoint Foundation 2013**
+
+SharePoint Foundation 2013 is not supported by SPInstall (see [Issue #81](https://github.com/PowerShell/xSharePoint/issues/81) for the details). 
+A workaround for this is to use the package resource as demonstrated below.
+
+    Package InstallSharePointFoundation
+    {
+        Ensure             = "Present"
+        Name               = "Microsoft SharePoint Foundation 2013 Core"
+        Path               = "E:\SharePoint2013\Setup.exe"
+        Arguments          = "/config E:\SharePoint2013\files\setupfarmsilent\config.xml"
+        ProductID          = "90150000-1014-0000-1000-0000000FF1CE"
+        ReturnCode         = 0
+    }
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("SPInstall")]
+class MSFT_SPInstall : OMI_BaseResource
+{
+    [Key, Description("The directory that contains all of the SharePoint binaries")] String BinaryDir;
+    [Required, Description("The product key to use during the installation")] String ProductKey;
+    [Write, Description("The install directory to use in the installation, leave blank to use the setup defaults")] String InstallPath;
+    [Write, Description("The data directory to use in the installation, leave blank to use the setup defaults")] String DataPath;
+    [Write, Description("Present to install SharePoint. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+};
+
