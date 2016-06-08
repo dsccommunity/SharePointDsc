@@ -51,8 +51,6 @@ function Get-TargetResource
             Ensure = $localEnsure
             FarmAccount = $farmAccount
             InstallAccount = $params.InstallAccount
- # Remove Status as 1) not defined in mof file 2) is redundant with Ensure
- #           Status = $syncService.Status
         }
     }
     return $result
