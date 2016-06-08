@@ -2,7 +2,7 @@
 
 ### Unreleased
 
- * Improvement with xSPInstallPrereqs on SPS2013 to accept any SQL native client not only 2008 R2
+ * Improvement with xSPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
 
 ### 1.0
