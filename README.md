@@ -36,7 +36,7 @@ You can also review the "examples" directory in the SharePointDSC module for som
 
 ## Changelog
 
-A full list of changes in each version can be found in the [change log](changelog.md)
+A full list of changes in each version can be found in the [change log](CHANGELOG.md)
 
 ## Project Throughput
 [![Throughput Graph](https://graphs.waffle.io/PowerShell/xSharePoint/throughput.svg)](https://waffle.io/PowerShell/xSharePoint/metrics)

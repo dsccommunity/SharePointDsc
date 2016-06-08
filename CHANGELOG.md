@@ -2,7 +2,9 @@
 
 ### Unreleased
 
- * Added SPWebAppPermissions resource
+ * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
+ * Added SPWebAppPermissions, SPOfficeOnlineServerBinding resource
+ * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity
 
 ### 1.0
 

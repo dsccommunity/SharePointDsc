@@ -33,12 +33,17 @@ function Get-TargetResource
         # Check if timer job if found
         if ($timerjob -eq $null) { return $null }
         
+        $schedule = $null
+        if ($null -ne $timerjob.Schedule) {
+            $schedule = $timerjob.Schedule.ToString()
+        }
+        
         if ($timerjob.WebApplication -eq $null) {
             # Timer job is not associated to web application
             return @{
                 Name = $params.Name
                 Enabled = -not $timerjob.IsDisabled
-                Schedule = $timerjob.Schedule
+                Schedule = $schedule
                 InstallAccount = $params.InstallAccount
             }
         } else {
@@ -47,7 +52,7 @@ function Get-TargetResource
                 Name = $params.Name
                 WebApplication = $timerjob.WebApplication.Url
                 Enabled = -not $timerjob.IsDisabled
-                Schedule = $timerjob.Schedule
+                Schedule = $schedule
                 InstallAccount = $params.InstallAccount
             }
         }
