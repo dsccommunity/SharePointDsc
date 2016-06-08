@@ -15,7 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleNa
 Describe "SPWebAppPermissions" {
     InModuleScope $ModuleName {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 AllPermissions = $true
             }
 
@@ -57,7 +57,7 @@ namespace Microsoft.SharePoint {
 
         Context "AllPermissions specified together with one of the other parameters" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 AllPermissions = $true
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
@@ -80,7 +80,7 @@ namespace Microsoft.SharePoint {
 
         Context "Not all three parameters specified" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
             }
@@ -101,7 +101,7 @@ namespace Microsoft.SharePoint {
 
         Context "Approve items without Edit Items" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -123,7 +123,7 @@ namespace Microsoft.SharePoint {
 
         Context "View Items missing for various other parameters" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -145,7 +145,7 @@ namespace Microsoft.SharePoint {
 
         Context "View Versions or Manage Permissions without Open Items" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -167,7 +167,7 @@ namespace Microsoft.SharePoint {
 
         Context "Delete Versions or Manage Permissions without View Versions" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -189,7 +189,7 @@ namespace Microsoft.SharePoint {
         
         Context "Manage Alerts without Create Alerts" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -211,7 +211,7 @@ namespace Microsoft.SharePoint {
 
         Context "Manage Web Site without Add and Customize Pages" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -233,7 +233,7 @@ namespace Microsoft.SharePoint {
 
         Context "Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions without Browse Directories" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -255,7 +255,7 @@ namespace Microsoft.SharePoint {
     
         Context "View Pages missing for various other parameters" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -277,7 +277,7 @@ namespace Microsoft.SharePoint {
 
         Context "Manage Permissions or Manage Web Site without Enumerate Permissions" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -299,7 +299,7 @@ namespace Microsoft.SharePoint {
 
         Context "Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information without Browse User Information" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -321,7 +321,7 @@ namespace Microsoft.SharePoint {
 
         Context "Use Client Integration Features without Use Remote Interfaces" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -343,7 +343,7 @@ namespace Microsoft.SharePoint {
 
         Context "Open is required when specifying any of the other permissions" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -365,7 +365,7 @@ namespace Microsoft.SharePoint {
 
         Context "Add/Remove Personal Web Parts without Update Personal Web Parts" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts"
@@ -387,7 +387,7 @@ namespace Microsoft.SharePoint {
 
         Context "AllPermissions specified, but FullMask is not set" {
             $testParams = @{
-                WebAppUrl      = "http:/sharepoint.contoso.com"
+                WebAppUrl      = "http://sharepoint.contoso.com"
                 AllPermissions = $true
             }
 
@@ -419,7 +419,7 @@ namespace Microsoft.SharePoint {
 
         Context "FullMask is set, but AllPermissions is not specified" {
             $testParams = @{
-                WebAppUrl           = "http:/sharepoint.contoso.com"
+                WebAppUrl           = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -453,7 +453,7 @@ namespace Microsoft.SharePoint {
 
         Context "AllPermissions specified and FullMask is set" {
             $testParams = @{
-                WebAppUrl       = "http:/sharepoint.contoso.com"
+                WebAppUrl       = "http://sharepoint.contoso.com"
                 AllPermissions  = $true
             }
 
@@ -479,7 +479,7 @@ namespace Microsoft.SharePoint {
 
         Context "List/Site/Personal permissions set, but ListPermissions does not match" {
             $testParams = @{
-                WebAppUrl           = "http:/sharepoint.contoso.com"
+                WebAppUrl           = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -513,7 +513,7 @@ namespace Microsoft.SharePoint {
 
         Context "List/Site/Personal permissions set, but SitePermissions does not match" {
             $testParams = @{
-                WebAppUrl           = "http:/sharepoint.contoso.com"
+                WebAppUrl           = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -547,7 +547,7 @@ namespace Microsoft.SharePoint {
         
         Context "List/Site/Personal permissions set, but PersonalPermissions does not match" {
             $testParams = @{
-                WebAppUrl           = "http:/sharepoint.contoso.com"
+                WebAppUrl           = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
@@ -581,7 +581,7 @@ namespace Microsoft.SharePoint {
 
         Context "List/Site/Personal permissions set and all permissions match" {
             $testParams = @{
-                WebAppUrl           = "http:/sharepoint.contoso.com"
+                WebAppUrl           = "http://sharepoint.contoso.com"
                 ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
                 SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
