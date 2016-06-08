@@ -183,6 +183,15 @@ Configuration SharePointServer
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
             }
+
+            SPOfficeOnlineServerBinding OosBinding
+            {
+                Zone                 = "internal-https"
+                DnsName              = "office.contoso.com"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SPSetupAccount
+                DependsOn            = $FarmWaitTask
+            }
         }
         
 

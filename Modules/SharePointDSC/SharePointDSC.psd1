@@ -79,6 +79,7 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Test-SPDSCRunAsCredential",
                     "Test-SPDSCUserIsLocalAdmin",
                     "Test-SPDSCSpecificParameters",
+                    "Test-SPDSCIsADUser",
                     "Set-SPDSCObjectPropertyIfValueExists",
                     "Get-SPDSCUserProfileSubTypeManager")
 
