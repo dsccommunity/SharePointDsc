@@ -306,6 +306,15 @@ Configuration SharePointServer
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
+
+        SPOfficeOnlineServerBinding OosBinding
+        {
+            Zone                 = "internal-https"
+            DnsName              = "office.contoso.com"
+            Ensure               = "Present"
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+        }
         
         #**********************************************************
         # Service applications

@@ -27,7 +27,7 @@ function Get-TargetResource
 
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         
-        if ($serviceApp -eq $null) {
+        if ($null -eq $serviceApp) {
             return @{
                 ServiceAppName = ""
                 SecurityType = $params.SecurityType
@@ -48,7 +48,7 @@ function Get-TargetResource
         foreach ($securityEntry in $security.AccessRules) {
             
             $user = $securityEntry.Name
-            if ($user.Contains("i:0#.w|") -eq $true) {
+            if ($user -like "i:*|*" -or $user -like "c:*|*") {
                 $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value    
             }
             $members += @{
@@ -116,8 +116,13 @@ function Set-TargetResource
         if ($params.ContainsKey("Members") -eq $true) {
             # Iterate the desired members to make sure they are present with correct settings
             foreach($desiredMember in $params.Members) {
-                $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSamAccountName
-                
+                $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                if ($isUser -eq $true) {
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSamAccountName    
+                } else {
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSecurityGroupName
+                }
+                                
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username) {
                     # The user already has a permission, check that it is correct
                     if (($CurrentValues.Members | Where-Object { $_.Username -eq $desiredMember.Username } | Select -First 1).AccessLevel -ne $desiredMember.AccessLevel) {
@@ -135,7 +140,12 @@ function Set-TargetResource
             foreach($currentMember in $CurrentValues.Members) {
                 if ($params.Members.Username -notcontains $currentMember.Username) {
                     # Current member is not in desired members list, remove it
-                    $claim = New-SPClaimsPrincipal -Identity $currentMember.Username -IdentityType WindowsSamAccountName
+                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    if ($isUser -eq $true) {
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSamAccountName    
+                    } else {
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSecurityGroupName
+                    }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
                 }
             }
@@ -144,7 +154,12 @@ function Set-TargetResource
         if ($params.ContainsKey("MembersToInclude") -eq $true) {
             # Iterate the desired members to make sure they are present with correct settings
             foreach($desiredMember in $params.MembersToInclude) {
-                $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSamAccountName
+                $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                if ($isUser -eq $true) {
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSamAccountName    
+                } else {
+                    $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSecurityGroupName
+                }
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username) {
                     # The user already has a permission, check that it is correct
                     if (($CurrentValues.Members | Where-Object { $_.Username -eq $desiredMember.Username } | Select -First 1).AccessLevel -ne $desiredMember.AccessLevel) {
@@ -164,7 +179,12 @@ function Set-TargetResource
             foreach($excludeMember in $params.MembersToExclude) {
                 if ($CurrentValues.Members.Username -contains $excludeMember) {
                     # Member has permission, removing it
-                    $claim = New-SPClaimsPrincipal -Identity $excludeMember -IdentityType WindowsSamAccountName
+                    $isUser = Test-SPDSCIsADUser -IdentityName $desiredMember.Username
+                    if ($isUser -eq $true) {
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSamAccountName    
+                    } else {
+                        $claim = New-SPClaimsPrincipal -Identity $desiredMember.Username -IdentityType WindowsSecurityGroupName
+                    }
                     Revoke-SPObjectSecurity -Identity $security -Principal $claim
                 }
             }
