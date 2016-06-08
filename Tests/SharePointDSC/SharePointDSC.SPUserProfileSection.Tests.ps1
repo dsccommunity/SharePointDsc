@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
 $ModuleName = "MSFT_SPUserProfileSection"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -34,7 +34,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
 "@ -ErrorAction SilentlyContinue
         }   
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         $coreProperty = @{ 
                             DisplayName = $testParams.DisplayName
@@ -96,7 +96,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
         }
   
         
-        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         
         
         Mock New-Object -MockWith {

@@ -3,11 +3,11 @@ param
     [parameter(Mandatory = $true)] [System.String] $OutPutPath
 )
 
-Import-Module (Join-Path $PSScriptRoot "SharePointDSC\SharePointDSC.TestHelpers.psm1")
+Import-Module (Join-Path $PSScriptRoot "SharePointDsc\SharePointDsc.TestHelpers.psm1")
 
 $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
 
-Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.schema.mof" -Recurse | `
+Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
     ForEach-Object { 
         $mofFileObject = $_
         $result = (Get-MofSchemaObject $_.FullName) | Where-Object { $_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "") -and $_.FriendlyName -ne $null }

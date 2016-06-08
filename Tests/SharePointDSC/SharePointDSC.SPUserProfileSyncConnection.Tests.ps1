@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
 $ModuleName = "MSFT_SPUserProfileSyncConnection"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -34,7 +34,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
                 }        
 "@ -ErrorAction SilentlyContinue 
         }   
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         Mock Get-SPDSCServiceContext {return @{}}
 
@@ -46,7 +46,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
         Mock Start-Sleep { }
-        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         Mock Get-SPWebApplication { 
                 return @{
                         Url="http://ca"

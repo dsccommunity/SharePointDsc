@@ -8,10 +8,10 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC") -Force
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\Modules\SharePointDSC.Util\SharePointDSC.Util.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1") -Force
 
-Describe "SharePointDSC.Util - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
+Describe "SharePointDsc.Util - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     Context "Validate Get-SPDSCAssemblyVersion" {
         It "returns the version number of a given executable" {
             Get-SPDSCAssemblyVersion -PathToAssembly "C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe" | Should Not Be 0
@@ -19,10 +19,10 @@ Describe "SharePointDSC.Util - SharePoint Build $((Get-Item $SharePointCmdletMod
     }
 
     Context "Validate Invoke-SPDSCCommand" {
-        Mock Invoke-Command { return $null } -ModuleName "SharePointDSC.Util"
-        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
-        Mock Get-PSSnapin { return $null } -ModuleName "SharePointDSC.Util"
-        Mock Add-PSSnapin { return $null } -ModuleName "SharePointDSC.Util"
+        Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
+        Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Util"
+        Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Util"
 
         It "executes a command as the local run as user" {
             Invoke-SPDSCCommand -ScriptBlock { return "value" } 
@@ -41,25 +41,25 @@ Describe "SharePointDSC.Util - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         It "throws normal exceptions when triggered in the script block" {
-            Mock Invoke-Command { throw [Exception] "A random exception" } -ModuleName "SharePointDSC.Util"
+            Mock Invoke-Command { throw [Exception] "A random exception" } -ModuleName "SharePointDsc.Util"
 
             { Invoke-SPDSCCommand -ScriptBlock { return "value" } } | Should Throw
         }
 
         It "throws normal exceptions when triggered in the script block using InstallAccount" {
-            Mock Invoke-Command { throw [Exception] "A random exception" } -ModuleName "SharePointDSC.Util"
+            Mock Invoke-Command { throw [Exception] "A random exception" } -ModuleName "SharePointDsc.Util"
 
             { Invoke-SPDSCCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force)))} | Should Throw
         }
 
         It "handles a SharePoint update conflict exception by rebooting the server to retry" {
-            Mock Invoke-Command { throw [Exception] "An update conflict has occurred, and you must re-try this action." } -ModuleName "SharePointDSC.Util"
+            Mock Invoke-Command { throw [Exception] "An update conflict has occurred, and you must re-try this action." } -ModuleName "SharePointDsc.Util"
 
             { Invoke-SPDSCCommand -ScriptBlock { return "value" } } | Should Not Throw
         }
 
         It "handles a SharePoint update conflict exception by rebooting the server to retry using InstallAccount" {
-            Mock Invoke-Command { throw [Exception] "An update conflict has occurred, and you must re-try this action." } -ModuleName "SharePointDSC.Util"
+            Mock Invoke-Command { throw [Exception] "An update conflict has occurred, and you must re-try this action." } -ModuleName "SharePointDsc.Util"
 
             { Invoke-SPDSCCommand -ScriptBlock { return "value" } -Credential (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force)))} | Should Not Throw
         }
