@@ -4,10 +4,11 @@
 
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
  * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
+ * Added SPOfficeOnlineServerBinding resource
 
 ### 1.0
 
- * Renamed module from xSharePoint to SharePointDSC
+ * Renamed module from xSharePoint to SharePointDsc
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added ensure properties to multiple resources to standardise schemas
