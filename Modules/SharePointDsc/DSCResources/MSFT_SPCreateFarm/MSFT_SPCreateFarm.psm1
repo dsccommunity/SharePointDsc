@@ -32,6 +32,7 @@ function Get-TargetResource
         
         if ($null -eq $spFarm) { return $null }
 
+
         $configDb = Get-SPDatabase | Where-Object { $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" }
         $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration | Where-Object { $_.IsAdministrationWebApplication -eq $true }
 
