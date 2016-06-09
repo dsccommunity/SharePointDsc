@@ -139,6 +139,11 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
                 DefaultServiceAccount = @{ Name = "WRONG\account" }
                 Name = $testParams.FarmConfigDatabaseName
             }}
+            Mock Get-SPDatabase { return @(@{ 
+                Name = $testParams.FarmConfigDatabaseName
+                Type = "Configuration Database"
+                Server = @{ Name = $testParams.DatabaseServer }
+            })} 
             Mock Get-SPWebApplication { return @(@{
                 IsAdministrationWebApplication = $true
                 ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
