@@ -8,7 +8,7 @@
 
 ### 1.0
 
- * Renamed module from xSharePoint to SharePointDSC
+ * Renamed module from xSharePoint to SharePointDsc
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added ensure properties to multiple resources to standardise schemas
