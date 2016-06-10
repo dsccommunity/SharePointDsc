@@ -70,7 +70,7 @@ function Get-TargetResource
     #SP2013 prereqs
     if ($majorVersion -eq 15) {
         $returnValue.Add("Active Directory Rights Management Services Client 2.*", (($installedItems | ? {$_.Name -like "Active Directory Rights Management Services Client 2.*"}) -ne $null))
-        $returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.Name -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
+        $returnValue.Add("Microsoft SQL Server Native Client (2008 R2 or 2012)", (($installedItems | ? { $_.Name -match "SQL Server (2008 R2|2012) Native Client" }) -ne $null))
         $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"}) -ne $null))
     }
 
