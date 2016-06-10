@@ -13,7 +13,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting permissions for Web Application '$WebAppUrl'"
-    Test-Input @PSBoundParameters
+    Test-SPDSCInput @PSBoundParameters
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -98,7 +98,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     Write-Verbose -Message "Setting permissions for Web Application '$WebAppUrl'"
-    Test-Input @PSBoundParameters
+    Test-SPDSCInput @PSBoundParameters
 
     $result = Get-TargetResource @PSBoundParameters
     
@@ -190,7 +190,7 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing permissions for Web Application '$WebAppUrl'"
-    Test-Input @PSBoundParameters
+    Test-SPDSCInput @PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
@@ -214,7 +214,7 @@ function Test-TargetResource
 
 Export-ModuleMember -Function *-TargetResource
 
-function Test-Input() {
+function Test-SPDSCInput() {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
