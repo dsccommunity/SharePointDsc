@@ -51,7 +51,6 @@ function Get-TargetResource
             Ensure = $localEnsure
             FarmAccount = $farmAccount
             InstallAccount = $params.InstallAccount
-            Status = $syncService.Status
         }
     }
     return $result
