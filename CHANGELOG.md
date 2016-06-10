@@ -4,10 +4,12 @@
 
  * xSPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
+ * Added SPOfficeOnlineServerBinding resource
+ * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity
 
 ### 1.0
 
- * Renamed module from xSharePoint to SharePointDSC
+ * Renamed module from xSharePoint to SharePointDsc
  * Fixed bug in managed account schedule get method
  * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
  * Added ensure properties to multiple resources to standardise schemas
