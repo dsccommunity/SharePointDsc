@@ -159,6 +159,55 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
+        Context "Prerequisites are installed and should be (with SQL 2012 native client for SP2013)" {
+            $testParams = @{
+                InstallerPath = "C:\SPInstall"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+
+            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
+            if ($majorBuildNumber -eq 15) {
+                Mock Get-CimInstance { return @(
+                    @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
+                    @{ Name = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}
+                    @{ Name = "AppFabric 1.1 for Windows Server"}
+                    @{ Name = "WCF Data Services 5.6.0 Runtime"}
+                    @{ Name = "WCF Data Services 5.0 (for OData v3) Primary Components"}
+                    @{ Name = "Microsoft SQL Server 2012 Native Client"}
+                    @{ Name = "Active Directory Rights Management Services Client 2.0"}
+                )}
+            }
+            if ($majorBuildNumber -eq 16) {
+                Mock Get-CimInstance { return @(
+                    @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
+                    @{ Name = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}
+                    @{ Name = "AppFabric 1.1 for Windows Server"}
+                    @{ Name = "WCF Data Services 5.6.0 Runtime"}
+                    @{ Name = "Microsoft ODBC Driver 11 for SQL Server"}
+                    @{ Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}
+                    @{ Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}
+                    @{ Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}
+                    @{ Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}
+                    @{ Name = "Microsoft SQL Server 2012 Native Client"}
+                    @{ Name = "Active Directory Rights Management Services Client 2.1"}
+                )}
+            }
+            Mock Get-ChildItem { return $null }
+            Mock Get-ChildItem { return @(
+                (New-Object Object | 
+                    Add-Member ScriptMethod GetValue { return "Microsoft Identity Extensions" } -PassThru)
+            ) }
+
+            It "returns present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "returns true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
         Context "Prerequisites are installed but should not be" {
             $testParams = @{
                 InstallerPath = "C:\SPInstall"
