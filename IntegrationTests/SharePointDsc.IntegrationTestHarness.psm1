@@ -43,7 +43,7 @@ function Invoke-SPDscIntegrationTest() {
     }
     
     # Setup test sequence
-    $testSequence = @("Farm", "WebApp", "Site")
+    $testSequence = @("Farm", "ServiceApp", "WebApp", "Site", "PostDeploy")
     $testResults = @{}
     
     # Execute Pre, main and Post tests for each sequence object
