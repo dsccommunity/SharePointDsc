@@ -1,4 +1,4 @@
-Import-Module (Join-Path $PSScriptRoot "..\Tests\SharePointDSC.TestHarness.psm1"  -Resolve) -Force
+Import-Module (Join-Path $PSScriptRoot "..\UnitTests\SharePointDSC.TestHarness.psm1"  -Resolve) -Force
 
 $DscTestsPath = Join-Path $PSScriptRoot "..\Modules\SharePointDSC\DscResource.Tests" -Resolve
 if ((Test-Path $DscTestsPath) -eq $false) {
