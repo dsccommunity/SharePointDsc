@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+ * Improvement with xSPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
  * Added SPOfficeOnlineServerBinding resource
  * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity
