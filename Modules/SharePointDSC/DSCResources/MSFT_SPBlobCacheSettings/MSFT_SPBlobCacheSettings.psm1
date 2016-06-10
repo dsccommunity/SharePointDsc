@@ -25,23 +25,7 @@ function Get-TargetResource
             throw "Specified web application was not found."
         }
 
-        switch ($params.Zone) {
-            "Default"  {
-                $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Default
-            }
-            "Intranet" {
-                $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Intranet
-            }
-            "Internet" {
-                $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Internet
-            }
-            "Custom"   {
-                $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Custom
-            }
-            "Extranet" {
-                $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Extranet
-            }
-        }
+        $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
 
         $sitePath = $wa.IisSettings[$zone].Path
         $webconfiglocation = Join-Path $sitePath "web.config"
@@ -147,23 +131,8 @@ function Set-TargetResource
 
             Write-Verbose -Verbose "Processing changes"
 
-            switch ($params.Zone) {
-                "Default"  {
-                    $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Default
-                }
-                "Intranet" {
-                    $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Intranet
-                }
-                "Internet" {
-                    $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Internet
-                }
-                "Custom"   {
-                    $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Custom
-                }
-                "Extranet" {
-                    $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::Extranet
-                }
-            }
+            $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
+
             $sitePath = $wa.IisSettings[$zone].Path
             $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
             $webconfiglocation = Join-Path $sitePath "web.config"
