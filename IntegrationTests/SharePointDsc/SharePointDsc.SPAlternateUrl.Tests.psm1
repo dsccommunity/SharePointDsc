@@ -38,7 +38,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    SPAlternateUrl CreateAlternateUrl {
+                    SPAlternateUrl UpdateAlternateUrl {
                         WebAppUrl            = "http://$($env:COMPUTERNAME)"
                         Url                  = "http://anotherurl.contoso.com"
                         Zone                 = "Internet"
@@ -59,7 +59,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    SPAlternateUrl CreateAlternateUrl {
+                    SPAlternateUrl RemoveAlternateUrl {
                         WebAppUrl            = "http://$($env:COMPUTERNAME)"
                         Url                  = "http://anotherurl.contoso.com"
                         Zone                 = "Internet"
