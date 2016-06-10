@@ -55,7 +55,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
 
     Context "Delete existing alternate URLs" {
         It "Is able to delete an existing alternate URL" {
-            $configName = "SPAlternateUrl-UpdateUrl"
+            $configName = "SPAlternateUrl-DeleteUrl"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
