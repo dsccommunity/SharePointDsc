@@ -1,4 +1,6 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingComputerNameHardcoded", "")]
 param()
 
 $ErrorActionPreference = 'stop'
@@ -6,67 +8,70 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\xSharePoint.psd1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
-Describe -Tags @("PostFarm") "xSPManagedAccount - Integration Tests" {
+Describe -Tags @("PostFarm") "SPManagedAccount - Integration Tests" {
     Context "Creates new new managed accounts" {
         It "Is able to create a new managed account" {
-            Configuration xSPCreateManagedAccounts {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPManagedAccounts-CreateNewManagedAccounts"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPManagedAccount WebAppPoolAccount {
-                        AccountName = $Global:xSPIntegrationCredPool.WebApp.UserName
-                        Account = $Global:xSPIntegrationCredPool.WebApp
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                    SPManagedAccount WebAppPoolAccount {
+                        AccountName = $Global:SPDscIntegrationCredPool.WebApp.UserName
+                        Account = $Global:SPDscIntegrationCredPool.WebApp
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
-                    xSPManagedAccount ServiceAppPoolAccount {
-                        AccountName = $Global:xSPIntegrationCredPool.ServiceApp.UserName
-                        Account = $Global:xSPIntegrationCredPool.ServiceApp
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                    SPManagedAccount ServiceAppPoolAccount {
+                        AccountName = $Global:SPDscIntegrationCredPool.ServiceApp.UserName
+                        Account = $Global:SPDscIntegrationCredPool.ServiceApp
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPCreateManagedAccounts -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPCreateManagedAccounts"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPCreateManagedAccounts" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPCreateManagedAccounts\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true        
         }
     }
     
     Context "Updates managed accounts" {
         It "is able to set a schedule" {
-            Configuration xSPCreateManagedAccounts {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPManagedAccounts-SetSchedules"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPManagedAccount WebAppPoolAccount {
-                        AccountName = $Global:xSPIntegrationCredPool.WebApp.UserName
-                        Account = $Global:xSPIntegrationCredPool.WebApp
+                    SPManagedAccount WebAppPoolAccount {
+                        AccountName = $Global:SPDscIntegrationCredPool.WebApp.UserName
+                        Account = $Global:SPDscIntegrationCredPool.WebApp
                         Schedule = "monthly between 7 02:00:00 and 7 03:00:00"
                         EmailNotification = 7
                         PreExpireDays = 2
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPCreateManagedAccounts -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPCreateManagedAccounts"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPCreateManagedAccounts" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPCreateManagedAccounts\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true     
         }
         
         It "is able to remove a schedule" {
-            Configuration xSPCreateManagedAccounts {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPManagedAccounts-RemoveSchedules"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPManagedAccount WebAppPoolAccount {
-                        AccountName = $Global:xSPIntegrationCredPool.WebApp.UserName
-                        Account = $Global:xSPIntegrationCredPool.WebApp
+                    SPManagedAccount WebAppPoolAccount {
+                        AccountName = $Global:SPDscIntegrationCredPool.WebApp.UserName
+                        Account = $Global:SPDscIntegrationCredPool.WebApp
                         Schedule = $null
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPCreateManagedAccounts -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPCreateManagedAccounts"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPCreateManagedAccounts" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPCreateManagedAccounts\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true     
         }
     }
     

@@ -1,4 +1,6 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingComputerNameHardcoded", "")]
 param()
 
 $ErrorActionPreference = 'stop'
@@ -6,43 +8,45 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\xSharePoint.psd1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
-Describe -Tags @("Site") "xSPSite - Integration Tests" {
+Describe -Tags @("Site") "SPSite - Integration Tests" {
     Context "Creates new new site collections" {
         It "Is able to create a new path based site collection" {
-            Configuration xSPCreateSite {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPSite-CreateNewPathBasedSite"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPSite PathSite {
+                    SPSite PathSite {
                         Name = "Path based site"
                         Url = "http://$($env:COMPUTERNAME)"
-                        OwnerAlias = $Global:xSPIntegrationCredPool.Setup.UserName
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                        OwnerAlias = $Global:SPDscIntegrationCredPool.Setup.UserName
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPCreateSite -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPCreateSite"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPCreateSite" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPCreateSite\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true   
         }
         
         It "Is able to create a new host name site collection" {
-            Configuration xSPCreateSite {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPSite-CreateNewHostNameSite"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPSite PathSite {
+                    SPSite PathSite {
                         Name = "Path based site"
-                        Url = "http://xsharepoint.test.lab"
+                        Url = "http://sharepointdsc.test.lab"
                         HostHeaderWebApplication = "http://$($env:COMPUTERNAME)"
-                        OwnerAlias = $Global:xSPIntegrationCredPool.Setup.UserName
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                        OwnerAlias = $Global:SPDscIntegrationCredPool.Setup.UserName
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPCreateSite -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPCreateSite"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPCreateSite" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPCreateSite\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true      
         }
     }
     

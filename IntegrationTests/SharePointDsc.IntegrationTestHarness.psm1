@@ -1,22 +1,30 @@
-function Invoke-xSharePointIntegrationTests() { 
+function Invoke-SPDscIntegrationTest() { 
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     param()
 
-    $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
+    $repoDir = Join-Path -Path $PSScriptRoot -ChildPath "..\" -Resolve
 
-    $global:xSPIntegrationGlobals = Import-LocalizedData -FileName GlobalVariables.psd1 -BaseDirectory $PSScriptRoot
+    $global:SPDscIntegrationGlobals = Import-LocalizedData -FileName GlobalVariables.psd1 `
+                                                           -BaseDirectory $PSScriptRoot
 
     # Pre-create and store all the credentials for service accounts
     $CredentialPool = @{}
-    $global:xSPIntegrationGlobals.ActiveDirectory.ServiceAccounts.Keys | ForEach-Object {
-        $credentialData = $global:xSPIntegrationGlobals.ActiveDirectory.ServiceAccounts.$_
-        $SecurePassword = ConvertTo-SecureString $credentialData.Password -AsPlainText -Force 
-        $Credential = New-Object System.Management.Automation.PSCredential ("$($global:xSPIntegrationGlobals.ActiveDirectory.NetbiosName)\$($credentialData.Username)", $SecurePassword)
+    $global:SPDscIntegrationGlobals.ActiveDirectory.ServiceAccounts.Keys | ForEach-Object -Process {
+        $credentialData = $global:SPDscIntegrationGlobals.ActiveDirectory.ServiceAccounts.$_
+        $username = "$($global:SPDscIntegrationGlobals.ActiveDirectory.NetbiosName)\$($credentialData.Username)"
+        $SecurePassword = ConvertTo-SecureString $credentialData.Password -AsPlainText -Force
+        $Credential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                 -ArgumentList ($username, $SecurePassword)
         $CredentialPool.Add($_, $Credential) 
     }
-    $Global:xSPFarmPassphrase = New-Object System.Management.Automation.PSCredential ("passphrase", (ConvertTo-SecureString "SharePoint156!" -AsPlainText -Force))
-    $global:xSPIntegrationCredPool = $CredentialPool
 
-    $global:xSPIntegrationConfigData = @{
+    $passphrase = ConvertTo-SecureString "SharePoint156!" -AsPlainText -Force
+    $Global:SPDscFarmPassphrase = New-Object -TypeName System.Management.Automation.PSCredential `
+                                             -ArgumentList ("passphrase", $passphrase)
+    $global:SPDscIntegrationCredPool = $CredentialPool
+
+    $global:SPDscIntegrationConfigData = @{
         AllNodes = @(
             @{
                 NodeName = 'localhost'
@@ -26,7 +34,6 @@ function Invoke-xSharePointIntegrationTests() {
         )
     }
     
-
     # Run preflight checks
     $preflightTests = Invoke-Pester "$repoDir\IntegrationTests" -Tag "Preflight" -PassThru
 
@@ -54,8 +61,7 @@ function Invoke-xSharePointIntegrationTests() {
     # Output the results
     $testResults.Keys | ForEach-Object {
         $result = $testResults.$_
-        if ($result.FailedCount -gt 0) { $colour = "Red" } else { $colour = "Green" }
-        Write-Host "$_ - Passed: $($result.PassedCount) Failed: $($result.FailedCount)" -ForegroundColor $colour 
+        Write-Output -InputObject "$_ - Passed: $($result.PassedCount) Failed: $($result.FailedCount)"
         $result.TestResult | Where-Object { $_.Passed -ne $true }
     }
 }

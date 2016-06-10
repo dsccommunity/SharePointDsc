@@ -1,4 +1,6 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingComputerNameHardcoded", "")]
 param()
 
 $ErrorActionPreference = 'stop'
@@ -6,27 +8,28 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\xSharePoint.psd1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
-Describe -Tags @("Farm") "xSPCreateFarm - Integration Tests" {
+Describe -Tags @("Farm") "SPCreateFarm - Integration Tests" {
     Context "Creates new farms where no farm exists" {
         It "Is able to create a new farm on the local server" {
-            Configuration xSPFarmCreateFarm {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPCreateFarm-CreateNewFarm"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPCreateFarm CreateLocalFarm {
+                    SPCreateFarm CreateLocalFarm {
                         FarmConfigDatabaseName = "SP_Config"
                         AdminContentDatabaseName = "SP_AdminContent"
                         DatabaseServer = $env:COMPUTERNAME
-                        FarmAccount = $Global:xSPIntegrationCredPool.Farm
-                        Passphrase = $Global:xSPFarmPassphrase
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                        FarmAccount = $Global:SPDscIntegrationCredPool.Farm
+                        Passphrase = $Global:SPDscFarmPassphrase
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPFarmCreateFarm -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPFarmCreateFarm"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPFarmCreateFarm" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPFarmCreateFarm\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true    
         }
     }
     

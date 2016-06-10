@@ -1,4 +1,6 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingComputerNameHardcoded", "")]
 param()
 
 $ErrorActionPreference = 'stop'
@@ -6,31 +8,32 @@ Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\xSharePoint\xSharePoint.psd1")
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
-Describe -Tags @("WebApp") "xSPWebApplication - Integration Tests" {
+Describe -Tags @("WebApp") "SPWebApplication - Integration Tests" {
     Context "Creates new new web applications" {
         It "Is able to create a new web application" {
-            Configuration xSPCreateWebApp {
-                Import-DscResource -ModuleName xSharePoint
+            $configName = "SPWebApplication-CreateWebApp"
+            Configuration $configName {
+                Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
-                    xSPWebApplication MainWebApp {
+                    SPWebApplication MainWebApp {
                         Name = "Test Web App"
                         Url = "http://$($env:COMPUTERNAME)"
                         AllowAnonymous = $false
                         ApplicationPool = "Test Web App Pool"
-                        ApplicationPoolAccount = $Global:xSPIntegrationCredPool.WebApp.UserName
+                        ApplicationPoolAccount = $Global:SPDscIntegrationCredPool.WebApp.UserName
                         AuthenticationMethod = "NTLM"
                         DatabaseName = "SP_Content"
                         DatabaseServer = $env:COMPUTERNAME
                         Port = 80
-                        PsDscRunAsCredential = $Global:xSPIntegrationCredPool.Setup
+                        PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
                 }
             }
-            xSPCreateWebApp -ConfigurationData $global:xSPIntegrationConfigData -OutputPath "TestDrive:\xSPCreateWebApp"
-            Start-DscConfiguration -Wait -Force -Path "TestDrive:\xSPCreateWebApp" -ComputerName "localhost"
-            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\xSPCreateWebApp\localhost.mof").InDesiredState | Should be $true    
+            . $configName -ConfigurationData $global:SPDscIntegrationConfigData -OutputPath "TestDrive:\$configName"
+            Start-DscConfiguration -Wait -Force -Path "TestDrive:\$configName" -ComputerName "localhost"
+            (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\$configName\localhost.mof").InDesiredState | Should be $true      
         }
     }
     
