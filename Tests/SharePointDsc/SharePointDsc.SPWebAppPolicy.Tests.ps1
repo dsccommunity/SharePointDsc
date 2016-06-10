@@ -15,7 +15,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleNa
 Describe "SPWebAppPolicy - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -32,15 +32,34 @@ Describe "SPWebAppPolicy - SharePoint Build $((Get-Item $SharePointCmdletModule)
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
-        Mock Remove-WebAppPolicy { }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Mock Test-SPDSCIsADUser {
+            return $true
+        }
 
+        Mock New-SPClaimsPrincipal { 
+            return @{
+                Value = $Identity -replace "i:0#.w\|"
+            }
+        } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
+
+        Mock New-SPClaimsPrincipal { 
+            $Global:SPDSCClaimsPrincipalUser = $Identity
+            return (
+                New-Object Object | Add-Member ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:SPDSCClaimsPrincipalUser)" 
+                } -PassThru
+            )
+        } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
+
+        Mock Remove-SPDSCGenericObject { }
+        
         try { [Microsoft.SharePoint.Administration.SPPolicyRoleType] }
         catch {
             Add-Type @"
@@ -69,7 +88,7 @@ namespace Microsoft.SharePoint.Administration {
         
         Context "Members and MembersToInclude parameters used simultaniously" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -101,7 +120,7 @@ namespace Microsoft.SharePoint.Administration {
         
         Context "No Member parameters at all" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
             }
 
             It "return null from the get method" {
@@ -119,7 +138,7 @@ namespace Microsoft.SharePoint.Administration {
         
         Context "ActAsSystemAccount parameter specified without Full Control in Members" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -144,7 +163,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "ActAsSystemAccount parameter specified without Full Control in MembersToInclude" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -169,7 +188,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -208,6 +227,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -239,9 +259,9 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
+        Context "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -280,6 +300,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -313,7 +334,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -352,6 +373,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -381,7 +403,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -420,6 +442,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -449,7 +472,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The Members parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -480,17 +503,17 @@ namespace Microsoft.SharePoint.Administration {
 
                 $policies = @(
                     @{
-                        UserName = "contoso\user1"
+                        UserName = "i:0#.w|contoso\user1"
                         PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                     @{
-                        UserName = "contoso\sp_psu"
+                        UserName = "i:0#.w|contoso\sp_psu"
                         PolicyRoleBindings = $roleBindingsFC
                         IsSystemUser = $false
                     }
                     @{
-                        UserName = "contoso\sp_psr"
+                        UserName = "i:0#.w|contoso\sp_psr"
                         PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
@@ -507,12 +530,13 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
-                        portalsuperuseraccount = "contoso\sp_psu"
-                        portalsuperreaderaccount = "contoso\sp_psr"
+                        portalsuperuseraccount = "i:0#.w|contoso\sp_psu"
+                        portalsuperreaderaccount = "i:0#.w|contoso\sp_psr"
                     }
                 }
                 
@@ -527,14 +551,14 @@ namespace Microsoft.SharePoint.Administration {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
         Context "The MembersToInclude parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -565,17 +589,17 @@ namespace Microsoft.SharePoint.Administration {
 
                 $policies = @(
                     @{
-                        UserName = "contoso\user1"
+                        UserName = "i:0#.w|contoso\user1"
                         PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
                     @{
-                        UserName = "contoso\sp_psu"
+                        UserName = "i:0#.w|contoso\sp_psu"
                         PolicyRoleBindings = $roleBindingsFC
                         IsSystemUser = $false
                     }
                     @{
-                        UserName = "contoso\sp_psr"
+                        UserName = "i:0#.w|contoso\sp_psr"
                         PolicyRoleBindings = $roleBindingsFR
                         IsSystemUser = $false
                     }
@@ -592,6 +616,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -619,7 +644,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The MembersToExclude parameter used, but it specifies a Cache User" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\sp_psr"
@@ -676,6 +701,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -707,7 +733,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The Members parameter contains users that aren't configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -750,6 +776,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -778,7 +805,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The Members parameter does not contains users that are configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -799,19 +826,20 @@ namespace Microsoft.SharePoint.Administration {
 
                 $policies = @(
                     @{
-                        UserName = "contoso\user1"
+                        UserName = "i:0#.w|contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
                     }
                     @{
-                        UserName = "contoso\user2"
+                        UserName = "i:0#.w|contoso\user2"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
                     }
-                )
+                ) | Add-Member -MemberType ScriptMethod -Name Add -Value { param($input) return $null } -Force -PassThru
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -840,7 +868,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The MembersToInclude parameter contains users that are not configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -883,6 +911,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -909,9 +938,9 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The MembersToInclude parameter contains users that are not configured in the policy" {
+        Context "The MembersToInclude parameter contains users that are configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -929,12 +958,12 @@ namespace Microsoft.SharePoint.Administration {
 
                 $policies = @(
                     @{
-                        UserName = "contoso\user1"
+                        UserName = "i:0#.w|contoso\user1"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
                     },
                     @{
-                        UserName = "contoso\user2"
+                        UserName = "i:0#.w|contoso\user2"
                         PolicyRoleBindings = $roleBindings
                         IsSystemUser = $false
                     }
@@ -942,6 +971,7 @@ namespace Microsoft.SharePoint.Administration {
 
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -963,7 +993,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The MembersToExclude parameter contains users that are configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -995,6 +1025,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1024,7 +1055,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the Members parameter have different settings than configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -1065,6 +1096,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1093,7 +1125,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the MembersToInclude parameter have different settings than configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -1134,6 +1166,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1162,7 +1195,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the Members parameter have different settings than configured in the policy - ActAsSystemAccount" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -1203,6 +1236,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1231,7 +1265,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the MembersToInclude parameter have different settings than configured in the policy - ActAsSystemAccount" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
@@ -1272,6 +1306,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1300,12 +1335,13 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the Members parameter have the same settings as configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
+                        IdentityType       = "Native"
                     } -ClientOnly)
                 )
             }
@@ -1326,6 +1362,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1345,10 +1382,57 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the Members parameter have the same settings as configured in the policy, in Claims format" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
-                        Username           = "i:0#.w|contoso\user1"
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                        IdentityType       = "Claims"
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "i:0#.w|contoso\user1"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                    Properties = @{}
+                }
+                return @($webApp)
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "The users in the MembersToInclude parameter have the same  settings as configured in the policy" {
+            $testParams = @{
+                WebAppUrl   = "http://sharepoint.contoso.com"
+                MembersToInclude = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
@@ -1371,51 +1455,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
-                    Policies = $policies
-                    Properties = @{}
-                }
-                return @($webApp)
-            }
-
-            It "returns null from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context "The users in the MembersToInclude parameter have the same  settings as configured in the policy" {
-            $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
-                MembersToInclude = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
-                        Username           = "contoso\user1"
-                        PermissionLevel    = "Full Control"
-                        ActAsSystemAccount = $false
-                    } -ClientOnly)
-                )
-            }
-            Mock Get-SPWebApplication { 
-                $roleBindings = @(
-                    @{
-                        Name = "Full Control"
-                    }
-                )
-
-                $policies = @(
-                    @{
-                        UserName = "contoso\user1"
-                        PolicyRoleBindings = $roleBindings
-                        IsSystemUser = $false
-                    }   
-                )
-                 
-                $webApp = @{
-                    Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
@@ -1435,7 +1475,7 @@ namespace Microsoft.SharePoint.Administration {
 
         Context "The users in the MembersToExclude parameter aren't configured in the policy" {
             $testParams = @{
-                WebAppUrl   = "http:/sharepoint.contoso.com"
+                WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
@@ -1459,6 +1499,7 @@ namespace Microsoft.SharePoint.Administration {
                  
                 $webApp = @{
                     Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
                     PolicyRoles = New-Object Object |
                                     Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
