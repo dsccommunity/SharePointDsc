@@ -321,6 +321,18 @@ Configuration SharePointServer
                     DependsOn            = "[xSPWebApplication]$webAppInternalName"
                 }
             
+                SPBlobCacheSettings "ConfigureBlobCache$($webAppInternalName)" 
+                {
+                    WebAppUrl            = $webApp.Url
+                    Zone                 = "Default"
+                    EnableCache          = $webApp.BlobCache.Enabled
+                    Location             = $webApp.BlobCache.Folder
+                    MaxSize              = $webApp.BlobCache.MaxSize
+                    FileTypes            = $webApp.BlobCache.FileTypes
+                    PsDscRunAsCredential = $SPSetupAccount
+                    DependsOn            = "[xSPWebApplication]$webAppInternalName"
+                }
+
                 SPCacheAccounts "$($webAppInternalName)CacheAccounts"
                 {
                     WebAppUrl              = $webApp.Url

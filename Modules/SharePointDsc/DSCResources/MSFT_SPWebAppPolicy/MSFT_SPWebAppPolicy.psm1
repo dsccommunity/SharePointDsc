@@ -502,5 +502,3 @@ function Get-CacheAccounts() {
 
     return $cacheAccounts
 }
-
-#Verplaatsen methode naar eigen utils module
