@@ -192,6 +192,36 @@ function Test-SPDSCRunAsCredential() {
     return $false
 }
 
+function Test-SPDSCRunningAsFarmAccount() {
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param ( 
+        [parameter(Mandatory = $false)] [pscredential] $InstallAccount
+    )
+
+    if ($null -eq $InstallAccount) {
+        if ($Env:USERNAME.Contains("$")) {
+            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
+            return
+        }
+        $Username = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+    } else {
+        $Username = $InstallAccount.UserName
+    }
+
+    try {
+        $spFarm = Get-SPFarm
+    } catch {
+        Write-Verbose -Message "Unable to detect local farm."
+        return $false
+    }
+
+    if ($Username -eq $spFarm.DefaultServiceAccount.Name) {
+        return $true
+    }
+    return $false
+}
+
 function Test-SPDSCSpecificParameters() {
     [CmdletBinding()]
     param
