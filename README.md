@@ -25,7 +25,8 @@ To confirm installation, run the below command and ensure you see the SharePoint
     Get-DscResource -Module SharePointDsc
 
 
-## Requirements 
+## Requirements
+
 The minimum PowerShell version required is 4.0, which ships in Windows 8.1 or Windows Server 2012R2 (or higher versions).
 The preferred version is PowerShell 5.0 or higher, which ships with Windows 10 or Windows Server 2016. 
 This is discussed [on the SharePointDsc wiki](https://github.com/PowerShell/SharePointDsc/wiki/Remote%20sessions%20and%20the%20InstallAccount%20variable), but generally PowerShell 5 will run the SharePoint DSC resources faster and with improved verbose level logging.
@@ -40,4 +41,5 @@ You can also review the "examples" directory in the SharePointDsc module for som
 A full list of changes in each version can be found in the [change log](CHANGELOG.md)
 
 ## Project Throughput
+
 [![Throughput Graph](https://graphs.waffle.io/PowerShell/xSharePoint/throughput.svg)](https://waffle.io/PowerShell/xSharePoint/metrics)

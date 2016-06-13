@@ -718,5 +718,8 @@ function Get-SPDSCCacheAccountConfiguration()
 
     return $cacheAccounts
 }
+<<<<<<< HEAD
 
 Export-ModuleMember -Function *-TargetResource
+=======
+>>>>>>> f82d7bca9610adbeb39a795b8ddb340d9b67216c

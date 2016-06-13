@@ -109,6 +109,13 @@
                             Template = "SPSMSITEHOST#0"
                         }
                     )
+                    BlobCache = @{
+                        Enabled   = $true
+                        Folder    = "F:\BlobCache"
+                        MaxSize   = 30
+                        FileTypes = "\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
+                        
+                    }
                 }
             )
             UserProfileService = @{
