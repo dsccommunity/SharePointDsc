@@ -440,6 +440,7 @@ function Set-TargetResource
                     $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $user.PermissionLevel
                     if ($null -ne $polbinddiff) 
                     {
+                        $policy.PolicyRoleBindings.RemoveAll()
                         foreach ($permissionLevel in $user.PermissionLevel) 
                         {
                             switch ($permissionLevel) 
