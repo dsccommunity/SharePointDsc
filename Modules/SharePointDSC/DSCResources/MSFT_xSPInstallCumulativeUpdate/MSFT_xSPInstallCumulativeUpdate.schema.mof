@@ -1,0 +1,27 @@
+/*
+**Description**
+
+This resource is used to install the SharePoint cumulative update
+Uninstalling CU not managed / not Ensure field
+This module should have a dependsOn the module used to install sharepoint / Install Language Pack
+
+**Example**
+
+    xSPInstallCumulativeUpdate InstallCU201603
+    {
+		Build = '15.0.4805.1000 '
+		BinaryDir = 'E:\SoftwarePackages\SPS\2013_CU-2016-03'
+		CuExeName = 'ubersrv2013-kb3114827-fullfile-x64-glb.exe'
+		CuInstallLogPath = 'F:\LOGS'
+    }
+
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPInstallCumulativeUpdate")]
+class MSFT_xSPInstallCumulativeUpdate : OMI_BaseResource
+{
+    [Key, Description("Build number of the cumulative update used to check if already installed")] String Build;
+    [Required, Description("Path where CU binaries are located")] String BinaryDir;
+	[Required, Description("Name of the CU executable to launch")] String CuExeName;
+	[Write, Description("Path to the folder where CU install log should be written")] String CuInstallLogPath;
+};
+
