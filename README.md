@@ -25,7 +25,7 @@ To confirm installation, run the below command and ensure you see the SharePoint
     Get-DscResource -Module SharePointDsc
 
 
-## Requirements
+## Requirements 
 
 The minimum PowerShell version required is 4.0, which ships in Windows 8.1 or Windows Server 2012R2 (or higher versions).
 The preferred version is PowerShell 5.0 or higher, which ships with Windows 10 or Windows Server 2016. 
