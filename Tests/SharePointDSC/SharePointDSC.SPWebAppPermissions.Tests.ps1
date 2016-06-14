@@ -24,8 +24,6 @@ Describe "SPWebAppPermissions" {
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-
-        Mock Remove-WebAppPolicy { }
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
