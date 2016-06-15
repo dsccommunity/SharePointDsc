@@ -340,15 +340,18 @@ function Set-SPDSCObjectPropertyIfValueExists() {
     }
 }
 
-# Due to issues with unit testing, this function has been created so we are able to mock this function.
-function Remove-WebAppPolicy() {
+function Remove-SPDSCGenericObject() {
     [CmdletBinding()]
     param (
-        [parameter(Mandatory = $true)] [object] $policies,
-        [parameter(Mandatory = $true)] [string] $item
+        [parameter(Mandatory = $true)] 
+        [Object] 
+        $SourceCollection,
+
+        [parameter(Mandatory = $true)] 
+        [Object] 
+        $Target
     )
-    
-    $policies.Remove($item)
+    $SourceCollection.Remove($Target)
 }
 
 Export-ModuleMember -Function *
