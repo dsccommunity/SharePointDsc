@@ -209,14 +209,17 @@ function Test-SPDSCRunningAsFarmAccount() {
         $Username = $InstallAccount.UserName
     }
 
-    try {
-        $spFarm = Get-SPFarm
-    } catch {
-        Write-Verbose -Message "Unable to detect local farm."
-        return $false
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+        try {
+            $spFarm = Get-SPFarm
+        } catch {
+            Write-Verbose -Message "Unable to detect local farm."
+            return $null
+        }
+        return $spFarm.DefaultServiceAccount.Name
     }
-
-    if ($Username -eq $spFarm.DefaultServiceAccount.Name) {
+    
+    if ($Username -eq $result) {
         return $true
     }
     return $false
