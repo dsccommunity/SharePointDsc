@@ -33,7 +33,7 @@ Do not combine the ServiceAppProxies property with the ServiceAppProxiesToInclud
 class MSFT_SPServiceAppProxyGroup : OMI_BaseResource
 {
     [Key, Description("Name of the Proxy Group to create")] String Name;
-    [Write, Description(".."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Required, Description(".."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("..")] String ServiceAppProxies[];
     [Write, Description("..")] String ServiceAppProxiesToInclude[];
     [Write, Description("..")] String ServiceAppProxiesToExclude[];
