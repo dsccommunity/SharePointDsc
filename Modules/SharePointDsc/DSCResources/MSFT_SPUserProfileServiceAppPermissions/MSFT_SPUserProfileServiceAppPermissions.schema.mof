@@ -12,7 +12,7 @@ To specify that there should be no permissions on a type, use "none"
     {
         ProxyName            = "User Profile Service Application Proxy"
         CreatePersonalSite   = @("DEMO\Group", "DEMO\User1")
-        FollowAndEditProfile = "Everyone"
+        FollowAndEditProfile = @("Everyone")
         UseTagsAndNotes      = @("None")
         PsDscRunAsCredential = $InstallAccount
     }

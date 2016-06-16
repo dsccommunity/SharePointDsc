@@ -17,7 +17,7 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
         $testParams = @{
             ProxyName = "User Profile Service App Proxy"
             CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
-            FollowAndEditProfile = "Everyone"
+            FollowAndEditProfile = @("Everyone")
             UseTagsAndNotes      = @("None")
         }
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
@@ -49,7 +49,6 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
         Mock Set-SPProfileServiceApplicationSecurity { }
 
         Mock Start-Sleep { }
-        Mock Test-SPDSCRunningAsFarmAccount { return $true }
         Mock Test-SPDSCIsADUser { return $true }
         Mock Write-Warning { }
 

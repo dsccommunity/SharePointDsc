@@ -477,7 +477,7 @@ Configuration SharePointServer
             {
                 ProxyName            = "User Profile Service Application Proxy"
                 CreatePersonalSite   = @("DEMO\Group", "DEMO\User1")
-                FollowAndEditProfile = "Everyone"
+                FollowAndEditProfile = @("Everyone")
                 UseTagsAndNotes      = @("None")
                 PsDscRunAsCredential = $FarmAccount
                 DependsOn            = "[SPUserProfileServiceApp]UserProfileServiceApp"

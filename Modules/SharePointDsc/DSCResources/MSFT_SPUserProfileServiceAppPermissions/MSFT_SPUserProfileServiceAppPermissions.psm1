@@ -4,19 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String]   $ProxyName,
-        [parameter(Mandatory = $true)]  [System.String[]] $CreatePersonalSite,
-        [parameter(Mandatory = $true)]  [System.String[]] $FollowAndEditProfile,
-        [parameter(Mandatory = $true)]  [System.String[]] $UseTagsAndNotes,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
-    )
-    Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $ProxyName,
 
-    if ((Test-SPDSCRunningAsFarmAccount -InstallAccount $params.InstallAccount) -eq $false) 
-    {   
-        throw ("The UserProfileServiceAppPermissions resource must be run as the farm account." + `
-                "Please ensure either PSDscRunAsCredential or InstallAccount is set to the farm account.")
-    }
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $CreatePersonalSite,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $FollowAndEditProfile,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $UseTagsAndNotes,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
+    )
+
+    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
+
+    Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -104,18 +115,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $ProxyName,
-        [parameter(Mandatory = $true)]  [System.String[]] $CreatePersonalSite,
-        [parameter(Mandatory = $true)]  [System.String[]] $FollowAndEditProfile,
-        [parameter(Mandatory = $true)]  [System.String[]] $UseTagsAndNotes,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $ProxyName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $CreatePersonalSite,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $FollowAndEditProfile,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $UseTagsAndNotes,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
-    
-    if ((Test-SPDSCRunningAsFarmAccount -InstallAccount $params.InstallAccount) -eq $false) 
-    {   
-        throw ("The UserProfileServiceAppPermissions resource must be run as the farm account." + `
-                "Please ensure either PSDscRunAsCredential or InstallAccount is set to the farm account.")
-    }
+
+    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -134,7 +155,7 @@ function Set-TargetResource
             $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
             Revoke-SPObjectSecurity -Identity $security -All
             Set-SPProfileServiceApplicationSecurity -Identity $security -ProfileServiceApplicationProxy $proxy -Confirm:$false
-            Write-Verbose -Message "Sccessfully cleared all permissions on the service app proxy"
+            Write-Verbose -Message "Successfully cleared all permissions on the service app proxy"
         }
 
         Write-Verbose -Message "Waiting 2 minutes for proxy permissions to be applied fully before continuing"
@@ -204,7 +225,7 @@ function Set-TargetResource
             }
             elseif (($null -ne $everyoneDiff) -and ($everyoneDiff.SideIndicator -eq "=>")) 
             {
-                # Need to add averyone, so remove all the permissions that exist currently of this type
+                # Need to add everyone, so remove all the permissions that exist currently of this type
                 # and then add the everyone permissions
                 foreach($user in $CurrentValues.$permission)
                 {
@@ -282,21 +303,58 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $ProxyName,
-        [parameter(Mandatory = $true)]  [System.String[]] $CreatePersonalSite,
-        [parameter(Mandatory = $true)]  [System.String[]] $FollowAndEditProfile,
-        [parameter(Mandatory = $true)]  [System.String[]] $UseTagsAndNotes,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $ProxyName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $CreatePersonalSite,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $FollowAndEditProfile,
+
+        [parameter(Mandatory = $true)]  
+        [System.String[]] 
+        $UseTagsAndNotes,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
+    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($null -eq $CurrentValues) 
-    {
-        return $false
-    }
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("CreatePersonalSite", `
                                                          "FollowAndEditProfile", `
                                                          "UseTagsAndNotes")
 }
+
+function Confirm-SPDscUpaPermissionsConfig()
+{
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSBoundParametersDictionary]
+        $Parameters
+    )
+
+    @(
+        "CreatePersonalSite",
+        "FollowAndEditProfile",
+        "UseTagsAndNotes"
+    ) | ForEach-Object -Process {
+        if (($Parameters.$_ -contains "Everyone") -and ($Parameters.$_ -contains "None")) 
+        {
+            throw ("You can not specify 'Everyone' and 'None' in the same property. " + `
+                   "Check the value for the '$_' property on this resource.")
+        }
+    }
+}
+
+Export-ModuleMember -Function *-TargetResource
