@@ -129,6 +129,11 @@ function Set-TargetResource
         $CurrentValues = $args[1]
 
         $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
+        if ($null -eq $proxy) 
+        {
+            throw "Unable to find service application proxy called '$($params.ProxyName)'"
+            return
+        }
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
 
         $permissionsToUpdate = @{
