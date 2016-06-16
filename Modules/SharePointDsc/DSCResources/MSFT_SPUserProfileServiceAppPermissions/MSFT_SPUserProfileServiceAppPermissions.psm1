@@ -27,7 +27,7 @@ function Get-TargetResource
 
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
-    Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
+    Write-Verbose -Message "Getting permissions for user profile service proxy '$ProxyName"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -136,6 +136,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting permissions for user profile service proxy '$ProxyName"
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -323,6 +324,8 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Testing permissions for user profile service proxy '$ProxyName"
 
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
