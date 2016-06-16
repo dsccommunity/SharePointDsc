@@ -340,7 +340,7 @@ function Confirm-SPDscUpaPermissionsConfig()
     param
     (
         [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSBoundParametersDictionary]
+        [Object]
         $Parameters
     )
 
