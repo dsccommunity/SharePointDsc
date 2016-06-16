@@ -20,7 +20,7 @@ function Get-TargetResource
          if ($WebApp.ServiceApplicationProxyGroup.friendlyname -eq "[default]") {
              $ServiceAppProxyGroup = "Default"
          } else {
-             $ServiceAppProxyGroup = WebApp.ServiceApplicationProxyGroup.name
+             $ServiceAppProxyGroup = $WebApp.ServiceApplicationProxyGroup.name
          }
          
          return @{

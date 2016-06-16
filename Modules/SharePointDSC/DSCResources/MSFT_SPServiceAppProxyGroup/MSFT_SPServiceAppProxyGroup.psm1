@@ -12,12 +12,12 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
  
-    if ($ServiceAppProxies -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude))) {
+    if (($Ensure -eq "Present") -and $ServiceAppProxies -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude))) {
            Write-Verbose  "Cannot use the ServiceAppProxies parameter together with the ServiceAppProxiesToInclude or ServiceAppProxiesToExclude parameters"
            return $null
         }
     
-    if (!$ServiceAppProxies -and !$ServiceAppProxiesToInclude -and !$ServiceAppProxiesToExclude) {
+    if (($Ensure -eq "Present") -and !$ServiceAppProxies -and !$ServiceAppProxiesToInclude -and !$ServiceAppProxiesToExclude) {
             Write-Verbose "At least one of the following parameters must be specified: ServiceAppProxies, ServiceAppProxiesToInclude,ServiceAppProxiesToExclude"
             return $null  
         }
@@ -103,7 +103,7 @@ function Set-TargetResource
                     if ($ProxyGroup.Proxies.name) {
                         $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name -DifferenceObject $params.ServiceAppProxies
                     
-                        if ($Differences -eq $null) { 
+                        if ($null -eq $Differences) { 
                             write-verbose "Service Proxy Group $($params.name) Membership matches desired state"
                         }
                         Else {
@@ -111,19 +111,19 @@ function Set-TargetResource
                                 if ($difference.SideIndicator -eq "=>") {
                                     # Add service proxy 
                                     $ServiceProxyName = $difference.InputObject
-                                    $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                                    $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object {$_.DisplayName -eq $ServiceProxyName}
                                 
                                     if (!$ServiceProxy) {
                                         throw "Invalid Service Application Proxy $ServiceProxyName"
                                     }
                                 
-                                    write-verbose "Adding $ServiceProxyName to $($params.name) Proxy Group"
+                                    write-verbose "1 Adding $ServiceProxyName to $($params.name) Proxy Group"
                                     $ProxyGroup | Add-SPServiceApplicationProxyGroupMember -member $ServiceProxy
                                 
                                 } elseif ($difference.SideIndicator -eq "<=") {
                                     # Remove service proxy
                                     $ServiceProxyName = $difference.InputObject
-                                    $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                                    $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object {$_.DisplayName -eq $ServiceProxyName}
                                 
                                     if (!$ServiceProxy) {
                                         throw "Invalid Service Application Proxy $ServiceProxyName"
@@ -139,13 +139,13 @@ function Set-TargetResource
                    }
                    else {
                        Foreach ($ServiceProxyName in $params.ServiceAppProxies) {
-                          $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                          $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object {$_.DisplayName -eq $ServiceProxyName}
                                 
                            if (!$ServiceProxy) {
                                throw "Invalid Service Application Proxy $ServiceProxyName"
                            }
                                 
-                           write-verbose "Adding $ServiceProxyName to $($params.name) Proxy Group"
+                           write-verbose "2 Adding $ServiceProxyName to $($params.name) Proxy Group"
                            $ProxyGroup | Add-SPServiceApplicationProxyGroupMember -member $ServiceProxy
                        }
                    }
@@ -157,7 +157,7 @@ function Set-TargetResource
                     if ($ProxyGroup.Proxies.name) {
                         $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name -DifferenceObject $params.ServiceAppProxiesToInclude 
                         
-                        if ($Differences -eq $null) { 
+                        if ($null -eq $Differences) { 
                             write-verbose "Service Proxy Group $($params.name) Membership matches desired state"
                         }
                         Else {
@@ -165,48 +165,47 @@ function Set-TargetResource
                                 if ($difference.SideIndicator -eq "=>") {
                                     # Add service proxy 
                                     $ServiceProxyName = $difference.InputObject
-                                    $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                                    $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object {$_.DisplayName -eq $ServiceProxyName}
                                     
                                     if (!$ServiceProxy) {
                                         throw "Invalid Service Application Proxy $ServiceProxyName"
                                     }
                                     
-                                    write-verbose "Adding $ServiceProxyName to $($params.name) Proxy Group"
+                                    write-verbose "3 Adding $ServiceProxyName to $($params.name) Proxy Group"
                                     $ProxyGroup | Add-SPServiceApplicationProxyGroupMember -member $ServiceProxy
                                     
                                 }
                             }
                        }
                     }
-                   
-                }
-                else {
-                    Foreach ($ServiceProxyName in $params.ServiceAppProxies) {
-                           $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                    else {
+                        Foreach ($ServiceProxyName in $params.ServiceAppProxies) {
+                           $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object {$_.DisplayName -eq $ServiceProxyName}
                                 
                            if (!$ServiceProxy) {
                                throw "Invalid Service Application Proxy $ServiceProxyName"
                            }
                                 
-                           write-verbose "Adding $ServiceProxyName to $($params.name) Proxy Group"
+                           write-verbose "4 Adding $ServiceProxyName to $($params.name) Proxy Group"
                            $ProxyGroup | Add-SPServiceApplicationProxyGroupMember -member $ServiceProxy
                        }
+                    }
                 }
                 
                 #Remove Service Applications
                 if ($params.ServiceAppProxiesToExclude) {
                     if ($ProxyGroup.Proxies.name) {
-                        $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name -DifferenceObject $params.ServiceAppProxiesToExclude 
+                        $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name -DifferenceObject $params.ServiceAppProxiesToExclude -IncludeEqual
                         
-                        if ($Differences -eq $null) { 
-                            write-verbose "Service Proxy Group $($params.name) Membership matches desired state"
+                        if ($null -eq $Differences) { 
+                            throw "Error comparing ServiceAppProxiesToExclude for Service Proxy Group $($params.name)"
                         }
                         Else {
                             ForEach ($difference in $differences) {
-                                if ($difference.SideIndicator -eq "<=") {
+                                if ($difference.SideIndicator -eq "==") {
                                     # Remove service proxy 
                                     $ServiceProxyName = $difference.InputObject
-                                    $ServiceProxy = Get-SPServiceApplicationProxy | ? {$_.DisplayName -eq $ServiceProxyName}
+                                    $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object {$_.DisplayName -eq $ServiceProxyName}
                                     
                                     if (!$ServiceProxy) {
                                         throw "Invalid Service Application Proxy $ServiceProxyName"
@@ -252,6 +251,10 @@ function test-TargetResource
 
     if ($null -eq $CurrentValues) { return $false }
     
+    if ($CurrentValues.Ensure -ne $Ensure) {
+        return $false
+    }
+    
     if ($ServiceAppProxies){
         Write-Verbose "Testing ServiceAppProxies property for $Name Proxy Group"
         
@@ -259,7 +262,7 @@ function test-TargetResource
         
         $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxies -DifferenceObject $ServiceAppProxies
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "ServiceAppProxies match"
         } else {
             Write-Verbose "ServiceAppProxies do not match"
@@ -270,13 +273,13 @@ function test-TargetResource
     if ($ServiceAppProxiesToInclude){
         Write-Verbose "Testing ServiceAppProxiesToInclude property for $Name Proxy Group"
         
-        if (-not $CurrentValues.ServiceAppProxiesToInclude) { return $false }
+        if (-not $CurrentValues.ServiceAppProxies) { return $false }
         
-        $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxiesToInclude -DifferenceObject $ServiceAppProxiesToInclude
+        $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxies -DifferenceObject $ServiceAppProxiesToInclude
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "ServiceAppProxiesToInclude matches"
-        } else {
+        } elseif ($differences.sideindicator -contains "=>") {
             Write-Verbose "ServiceAppProxiesToInclude does not match"
             return $false
         }   
@@ -285,13 +288,13 @@ function test-TargetResource
     if ($ServiceAppProxiesToExclude){
         Write-Verbose "Testing ServiceAppProxiesToExclude property for $Name Proxy Group"
         
-        if (-not $CurrentValues.ServiceAppProxiesToExclude) { return $false }
+        if (-not $CurrentValues.ServiceAppProxies) { return $true }
         
-        $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxiesToExclude -DifferenceObject $ServiceAppProxiesToExclude
+        $differences = Compare-Object -ReferenceObject $CurrentValues.ServiceAppProxies -DifferenceObject $ServiceAppProxiesToExclude -IncludeEqual
 
-        if ($differences -eq $null) {
-            Write-Verbose "ServiceAppProxiesToExclude matches"
-        } else {
+        if ($null -eq $differences) {
+           return $false
+        } elseif  ($differences.sideindicator -contains "==") {
             Write-Verbose "ServiceAppProxiesToExclude does not match"
             return $false
         }   

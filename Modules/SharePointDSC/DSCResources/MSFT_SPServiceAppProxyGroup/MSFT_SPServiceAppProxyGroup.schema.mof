@@ -17,12 +17,15 @@ Do not combine the ServiceAppProxies property with the ServiceAppProxiesToInclud
    SPServiceAppProxyGroup TenantGroup1
     {
         Name                = "Tenant Group 1"
-        
+        Ensure              = "Present"
+        ServiceAppProxies   = "Tenant 1 User Profile Service Application","Tenant 1 MMS Service Application","State Service Application"
     }
 
     SPServiceAppProxyGroup TenantGroup2
     {
-        
+        Name                = "Tenant Group 2"
+        Ensure              = "Present"
+        ServiceAppProxiesToInclude = "Tenant 1 User Profile Service Application"
     }
 
 */
