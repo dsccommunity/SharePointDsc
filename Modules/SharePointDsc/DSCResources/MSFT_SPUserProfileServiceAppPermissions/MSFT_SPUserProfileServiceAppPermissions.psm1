@@ -12,7 +12,8 @@ function Get-TargetResource
     )
     Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
 
-    if ((Test-SPDSCRunningAsFarmAccount -InstallAccount $params.InstallAccount) -eq $false) {   
+    if ((Test-SPDSCRunningAsFarmAccount -InstallAccount $params.InstallAccount) -eq $false) 
+    {   
         throw ("The UserProfileServiceAppPermissions resource must be run as the farm account." + `
                 "Please ensure either PSDscRunAsCredential or InstallAccount is set to the farm account.")
     }
@@ -21,7 +22,8 @@ function Get-TargetResource
         $params = $args[0]
 
         $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
-        if ($null -eq $proxy) {
+        if ($null -eq $proxy) 
+        {
             return @{
                 ProxyName = $params.ProxyName
                 CreatePersonalSite = $null
@@ -43,32 +45,48 @@ function Get-TargetResource
             {
                 # Only claims users can be processed by the PowerShell cmdlets, so only
                 # report on and manage the claims identities
-                if ($user -eq "c:0(.s|true") {
+                if ($user -eq "c:0(.s|true") 
+                {
                     $user = "Everyone"
-                } else {
+                } 
+                else 
+                {
                     $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value    
                 }
             }
-            if ($securityEntry.AllowedRights.ToString() -eq "All") {
+            if ($securityEntry.AllowedRights.ToString() -eq "All") 
+            {
                 $createPersonalSite += $user
                 $followAndEditProfile += $user
                 $useTagsAndNotes += $user
             }
-            if ($securityEntry.AllowedRights.ToString() -like "*UsePersonalFeatures*") {
+            if ($securityEntry.AllowedRights.ToString() -like "*UsePersonalFeatures*") 
+            {
                 $followAndEditProfile += $user
             }
-            if ($securityEntry.AllowedRights.ToString() -like "*UseSocialFeatures*") {
+            if ($securityEntry.AllowedRights.ToString() -like "*UseSocialFeatures*") 
+            {
                 $useTagsAndNotes += $user
             }
             if (($securityEntry.AllowedRights.ToString() -like "*CreatePersonalSite*") `
-                -and ($securityEntry.AllowedRights.ToString() -like "*UseMicrobloggingAndFollowing*")) {
+                -and ($securityEntry.AllowedRights.ToString() -like "*UseMicrobloggingAndFollowing*")) 
+            {
                 $createPersonalSite += $user
             }
         }
 
-        if ($createPersonalSite.Length -eq 0) { $createPersonalSite += "None" }
-        if ($followAndEditProfile.Length -eq 0) { $followAndEditProfile += "None" }
-        if ($useTagsAndNotes.Length -eq 0) { $useTagsAndNotes += "None" }
+        if ($createPersonalSite.Length -eq 0) 
+        { 
+            $createPersonalSite += "None" 
+        }
+        if ($followAndEditProfile.Length -eq 0) 
+        { 
+            $followAndEditProfile += "None" 
+        }
+        if ($useTagsAndNotes.Length -eq 0) 
+        { 
+            $useTagsAndNotes += "None" 
+        }
 
         return @{
             ProxyName = $params.ProxyName
@@ -93,7 +111,8 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     
-    if ((Test-SPDSCRunningAsFarmAccount -InstallAccount $params.InstallAccount) -eq $false) {   
+    if ((Test-SPDSCRunningAsFarmAccount -InstallAccount $params.InstallAccount) -eq $false) 
+    {   
         throw ("The UserProfileServiceAppPermissions resource must be run as the farm account." + `
                 "Please ensure either PSDscRunAsCredential or InstallAccount is set to the farm account.")
     }
@@ -142,7 +161,8 @@ function Set-TargetResource
             "UseTagsAndNotes" = "Use Social Features"
         }
 
-        foreach ($permission in $permissionsToUpdate.Keys) {
+        foreach ($permission in $permissionsToUpdate.Keys) 
+        {
             $permissionsDiff = Compare-Object -ReferenceObject $CurrentValues.$permission `
                                               -DifferenceObject  $params.$permission
                                             
@@ -159,19 +179,26 @@ function Set-TargetResource
                         $isUser = Test-SPDSCIsADUser -IdentityName $user
                         if ($isUser -eq $true) 
                         {
-                            $claim = New-SPClaimsPrincipal -Identity $user -IdentityType WindowsSamAccountName  
+                            $claim = New-SPClaimsPrincipal -Identity $user `
+                                                           -IdentityType WindowsSamAccountName  
                         } 
                         else 
                         {
-                            $claim = New-SPClaimsPrincipal -Identity $user -IdentityType WindowsSecurityGroupName
+                            $claim = New-SPClaimsPrincipal -Identity $user `
+                                                           -IdentityType WindowsSecurityGroupName
                         }
-                        Revoke-SPObjectSecurity -Identity $security -Principal $claim -Rights $permissionsToUpdate.$permission
+                        Revoke-SPObjectSecurity -Identity $security `
+                                                -Principal $claim `
+                                                -Rights $permissionsToUpdate.$permission
                     } 
                     elseif ($user -eq "Everyone") 
                     {
                         # Revoke the all user permissions
-                        $allClaimsUsersClaim = New-SPClaimsPrincipal -Identity "c:0(.s|true" -IdentityType EncodedClaim
-                        Revoke-SPObjectSecurity -Identity $security -Principal $allClaimsUsersClaim -Rights $permissionsToUpdate.$permission
+                        $allClaimsUsersClaim = New-SPClaimsPrincipal -Identity "c:0(.s|true" `
+                                                                     -IdentityType EncodedClaim
+                        Revoke-SPObjectSecurity -Identity $security `
+                                                -Principal $allClaimsUsersClaim `
+                                                -Rights $permissionsToUpdate.$permission
                     }
                 }
             }
@@ -185,51 +212,67 @@ function Set-TargetResource
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user
                         if ($isUser -eq $true) {
-                            $claim = New-SPClaimsPrincipal -Identity $user -IdentityType WindowsSamAccountName    
+                            $claim = New-SPClaimsPrincipal -Identity $user `
+                                                           -IdentityType WindowsSamAccountName    
                         } 
                         else 
                         {
-                            $claim = New-SPClaimsPrincipal -Identity $user -IdentityType WindowsSecurityGroupName
+                            $claim = New-SPClaimsPrincipal -Identity $user `
+                                                           -IdentityType WindowsSecurityGroupName
                         }
-                        Revoke-SPObjectSecurity -Identity $security -Principal $claim -Rights $permissionsToUpdate.$permission
+                        Revoke-SPObjectSecurity -Identity $security `
+                                                -Principal $claim `
+                                                -Rights $permissionsToUpdate.$permission
                     }
                 }
 
-                $allClaimsUsersClaim = New-SPClaimsPrincipal -Identity "c:0(.s|true" -IdentityType EncodedClaim
-                Grant-SPObjectSecurity -Identity $security -Principal $allClaimsUsersClaim -Rights $permissionsToUpdate.$permission
+                $allClaimsUsersClaim = New-SPClaimsPrincipal -Identity "c:0(.s|true" `
+                                                             -IdentityType EncodedClaim
+                Grant-SPObjectSecurity -Identity $security `
+                                       -Principal $allClaimsUsersClaim `
+                                       -Rights $permissionsToUpdate.$permission
             } 
             else 
             {
                 # permission changes aren't to everyone or none, process each change
                 foreach ($permissionChange in $permissionsDiff) 
                 {
-                    if ($permissionChange.InputObject -ne "Everyone" -and $permissionChange.InputObject -ne "None") 
+                    if ($permissionChange.InputObject -ne "Everyone" -and `
+                        $permissionChange.InputObject -ne "None") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $permissionChange.InputObject
                         if ($isUser -eq $true) 
                         {
-                            $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject -IdentityType WindowsSamAccountName    
+                            $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject `
+                                                           -IdentityType WindowsSamAccountName    
                         } 
                         else 
                         {
-                            $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject -IdentityType WindowsSecurityGroupName
+                            $claim = New-SPClaimsPrincipal -Identity $permissionChange.InputObject `
+                                                           -IdentityType WindowsSecurityGroupName
                         }
                         if ($permissionChange.SideIndicator -eq "=>")
                         {
                             # Grant permission to the identity
-                            Grant-SPObjectSecurity -Identity $security -Principal $claim -Rights $permissionsToUpdate.$permission
+                            Grant-SPObjectSecurity -Identity $security `
+                                                   -Principal $claim `
+                                                   -Rights $permissionsToUpdate.$permission
                         }
                         if ($permissionChange.SideIndicator -eq "<=")
                         {
                             # Revoke permission for the identity
-                            Revoke-SPObjectSecurity -Identity $security -Principal $claim -Rights $permissionsToUpdate.$permission
+                            Revoke-SPObjectSecurity -Identity $security `
+                                                    -Principal $claim `
+                                                    -Rights $permissionsToUpdate.$permission
                         }
                     }
                 }
             }
         }
 
-        Set-SPProfileServiceApplicationSecurity -Identity $security -ProfileServiceApplicationProxy $proxy -Confirm:$false
+        Set-SPProfileServiceApplicationSecurity -Identity $security `
+                                                -ProfileServiceApplicationProxy $proxy `
+                                                -Confirm:$false
     }
 }
 
