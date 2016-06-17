@@ -26,20 +26,19 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
                
-        Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
-        
+              
         
         
         Context "WebApplication does not exist" {
             $testParams = @{
-                URL              = "https://web.contoso.com"
+                WebAppUrl              = "https://web.contoso.com"
                 ServiceAppProxyGroup      = "Web1ProxyGroup"
             }
 
             Mock get-spwebapplication {}
 
-            It "return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+            It "return null property from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should Be $null
             }
 
             It "returns false from the test method" {
@@ -50,7 +49,7 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
 
         Context "WebApplication Proxy Group connection matches desired config" {
             $testParams = @{
-                URL              = "https://web.contoso.com"
+                WebAppUrl              = "https://web.contoso.com"
                 ServiceAppProxyGroup      = "Web1ProxyGroup"
             }
 
@@ -67,7 +66,7 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
 
         Context "WebApplication Proxy Group connection does not match desired config" {
             $testParams = @{
-                URL              = "https://web.contoso.com"
+                WebAppUrl              = "https://web.contoso.com"
                 ServiceAppProxyGroup      = "Default"
             }
 

@@ -13,19 +13,20 @@ Requirements:
 At least one of the ServiceAppProxies, ServiceAppProxiesToInclude or ServiceAppProxiesToExclude properties needs to be specified.
 Do not combine the ServiceAppProxies property with the ServiceAppProxiesToInclude and ServiceAppProxiesToExclude properties.
 
+**Examples**
 
-   SPServiceAppProxyGroup TenantGroup1
+   SPServiceAppProxyGroup ProxyGroup1
     {
-        Name                = "Tenant Group 1"
+        Name                = "Proxy Group 1"
         Ensure              = "Present"
-        ServiceAppProxies   = "Tenant 1 User Profile Service Application","Tenant 1 MMS Service Application","State Service Application"
+        ServiceAppProxies   = "Web 1 User Profile Service Application","Web 1 MMS Service Application","State Service Application"
     }
 
-    SPServiceAppProxyGroup TenantGroup2
+    SPServiceAppProxyGroup ProxyGroup2
     {
-        Name                = "Tenant Group 2"
+        Name                = "Proxy Group 2"
         Ensure              = "Present"
-        ServiceAppProxiesToInclude = "Tenant 1 User Profile Service Application"
+        ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
     }
 
 */
@@ -33,9 +34,9 @@ Do not combine the ServiceAppProxies property with the ServiceAppProxiesToInclud
 class MSFT_SPServiceAppProxyGroup : OMI_BaseResource
 {
     [Key, Description("Name of the Proxy Group to create")] String Name;
-    [Required, Description(".."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("..")] String ServiceAppProxies[];
-    [Write, Description("..")] String ServiceAppProxiesToInclude[];
-    [Write, Description("..")] String ServiceAppProxiesToExclude[];
+    [Write, Description("Present creates the proxy group if it does not already exist, Absent will delete the proxy group if it exists"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("List of service application proxies that belong in this proxy group, all others will be removed")] String ServiceAppProxies[];
+    [Write, Description("List of service application proxies to add to this proxy group, existing proxies will remain")] String ServiceAppProxiesToInclude[];
+    [Write, Description("List of service application proxies to remove from this proxy grop, all others will remain")] String ServiceAppProxiesToExclude[];
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

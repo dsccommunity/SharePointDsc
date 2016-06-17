@@ -26,14 +26,13 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
         $ListofAllServiceAppProxies = @(
-            "Tenant 1 User Profile Service Application",
-            "Tenant 1 MMS Service Application",
+            "Web 1 User Profile Service Application",
+            "Web 1 MMS Service Application",
             "State Service Application"
-            "Tenant 2 User Profile Service Application"
+            "Web 2 User Profile Service Application"
         )
         
-        Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
-        
+                
         
         Mock Add-SPServiceApplicationProxyGroupMember {}
         Mock Remove-SPServiceApplicationProxyGroupMember {}
@@ -49,8 +48,8 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = "Tenant 1 User Profile Service Application","Tenant 1 MMS Service Application","State Service Application"
-                ServiceAppProxiesToInclude = "Tenant 2 User Profile Service Application"
+                ServiceAppProxies = "Web 1 User Profile Service Application","Web 1 MMS Service Application","State Service Application"
+                ServiceAppProxiesToInclude = "Web 2 User Profile Service Application"
             }
 
             It "return null from the get method" {
@@ -89,7 +88,7 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("State Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
             }
             
             Mock Get-SPServiceApplicationProxyGroup { return $null }
@@ -130,7 +129,7 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("State Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
             }
             
             Mock Get-SPServiceApplicationProxyGroup { 
@@ -157,10 +156,10 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("State Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Tenant 2 User Profile Service Application")
+            $ServiceAppProxiesConfigured = @("State Service Application","Web 2 User Profile Service Application")
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
@@ -195,10 +194,10 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToInclude = @("State Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxiesToInclude = @("State Service Application","Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Tenant 1 User Profile Service Application","Tenant 1 MMS Service Application")
+            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 User Profile Service Application","Web 1 MMS Service Application")
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
@@ -225,10 +224,10 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToInclude = @("State Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxiesToInclude = @("State Service Application","Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Tenant 1 MMS Service Application")
+            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 MMS Service Application")
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
@@ -264,10 +263,10 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToExclude = @("Tenant 1 User Profile Service Application")
+                ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Tenant 1 MMS Service Application")
+            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 MMS Service Application")
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
@@ -294,10 +293,10 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToExclude = @("Tenant 1 User Profile Service Application","Tenant 2 User Profile Service Application")
+                ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application","Web 2 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Tenant 1 MMS Service Application","Tenant 1 User Profile Service Application")
+            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 MMS Service Application","Web 1 User Profile Service Application")
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
@@ -333,12 +332,12 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("No Such Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxies = @("No Such Service Application","Web 1 User Profile Service Application")
             }
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in "Tenant 1 User Profile Service Application" ){ 
+                            foreach ($ServiceAppProxy in "Web 1 User Profile Service Application" ){ 
                                 $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
                             }
                             return @{ 
@@ -364,12 +363,12 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToInclude = @("No Such Service Application","Tenant 1 User Profile Service Application")
+                ServiceAppProxiesToInclude = @("No Such Service Application","Web 1 User Profile Service Application")
             }
             
             Mock Get-SPServiceApplicationProxyGroup { 
                             $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in "Tenant 1 User Profile Service Application" ){ 
+                            foreach ($ServiceAppProxy in "Web 1 User Profile Service Application" ){ 
                                 $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
                             }
                             return @{ 

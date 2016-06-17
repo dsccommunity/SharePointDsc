@@ -11,13 +11,13 @@ This resource is used in conjunction with the SPServiceAppProxyGroup resource, w
 
    SPWebAppProxyGroup ContosoWeb
     {
-        URL                = "https://web.contoso.com"
-        ServiceAppProxyGroup  = "Tenant Group 1"
+        WebAppUrl                = "https://web.contoso.com"
+        ServiceAppProxyGroup  = "Proxy Group 1"
     }
 
     SPWebAppProxyGroup DefaultPortal
     {
-        URL                = "https://portal.contoso.com"
+        WebAppUrl                = "https://portal.contoso.com"
         ServiceAppProxyGroup  = "Default"
     }
 
@@ -25,7 +25,7 @@ This resource is used in conjunction with the SPServiceAppProxyGroup resource, w
 [ClassVersion("1.0.0.0"), FriendlyName("SPWebAppProxyGroup")]
 class MSFT_SPWebAppProxyGroup : OMI_BaseResource
 {
-    [Key, Description("URL of the web application")] String URL;
+    [Key, Description("URL of the web application")] String WebAppUrl;
     [Required, Description("Name of the Service Applicaiton Proxy Group")] string ServiceAppProxyGroup; 
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

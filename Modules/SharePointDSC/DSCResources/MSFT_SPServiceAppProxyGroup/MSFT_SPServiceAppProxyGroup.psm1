@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]   $Name,
-        [parameter(Mandatory = $true)]  [System.String][ValidateSet("Present","Absent")] $Ensure,
+        [parameter(Mandatory = $false)]  [System.String][ValidateSet("Present","Absent")] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxies,
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxiesToInclude,
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxiesToExclude,
@@ -21,6 +21,8 @@ function Get-TargetResource
             Write-Verbose "At least one of the following parameters must be specified: ServiceAppProxies, ServiceAppProxiesToInclude,ServiceAppProxiesToExclude"
             return $null  
         }
+
+        Write-Verbose -Message "Getting Service Application Proxy Group $Name"
         
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -29,7 +31,7 @@ function Get-TargetResource
             if ($params.Name -eq "Default") {
                 $ProxyGroup = Get-SPServiceApplicationProxyGroup -Default
             } else {
-                $ProxyGroup = Get-SPServiceApplicationProxyGroup $params.name -EA 0 
+                $ProxyGroup = Get-SPServiceApplicationProxyGroup $params.name -ErrorAction SilentlyContinue 
             }
             
             if ($ProxyGroup){ 
@@ -64,7 +66,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]   $Name,
-        [parameter(Mandatory = $true)]  [System.String][ValidateSet("Present","Absent")] $Ensure,
+        [parameter(Mandatory = $false)]  [System.String][ValidateSet("Present","Absent")] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxies,
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxiesToInclude,
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxiesToExclude,
@@ -231,14 +233,14 @@ function Set-TargetResource
 }
 
 
-function test-TargetResource
+function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]  [System.String]   $Name,
-        [parameter(Mandatory = $true)]  [System.String][ValidateSet("Present","Absent")] $Ensure,
+        [parameter(Mandatory = $false)]  [System.String][ValidateSet("Present","Absent")] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxies,
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxiesToInclude,
         [parameter(Mandatory = $false)] [System.String[]] $ServiceAppProxiesToExclude,
