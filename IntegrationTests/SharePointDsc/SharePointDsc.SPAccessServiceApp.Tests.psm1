@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("ServiceApp") "SPAccessServiceApp - Integration Tests" {
     Context "Creates a new Access Services service application" {
         It "Is able to create a service app" {
-            $configName = "SPAccessServiceApp-CreateNewApp"
+            $configName = "SPAccessServiceApp_CreateNewApp"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
@@ -34,7 +34,7 @@ Describe -Tags @("ServiceApp") "SPAccessServiceApp - Integration Tests" {
 
     Context "Removes an existing Access Services service application" {
         It "Is able to remove a service app" {
-            $configName = "SPAccessServiceApp-RemoveApp"
+            $configName = "SPAccessServiceApp_RemoveApp"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {

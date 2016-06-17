@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("PostFarm") "SPManagedAccount - Integration Tests" {
     Context "Creates new new managed accounts" {
         It "Is able to create a new managed account" {
-            $configName = "SPManagedAccounts-CreateNewManagedAccounts"
+            $configName = "SPManagedAccounts_CreateNewManagedAccounts"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {

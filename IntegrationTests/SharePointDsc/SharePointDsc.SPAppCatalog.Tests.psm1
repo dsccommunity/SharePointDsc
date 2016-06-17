@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("PostSite") "SPAppCatalog - Integration Tests" {
     Context "Sets the app catalog location" {
         It "Is able to create a app catalog site and set it as the app catalog for the web app" {
-            $configName = "SPAppCatalog-CreateAndSetAppCatalog"
+            $configName = "SPAppCatalog_CreateAndSetAppCatalog"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {

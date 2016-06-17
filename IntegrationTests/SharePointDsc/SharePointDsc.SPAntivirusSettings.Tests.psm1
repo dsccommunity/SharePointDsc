@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("PostFarm") "SPAntivirusSettings - Integration Tests" {
     Context "Applies AV settings" {
         It "Apply settings to the local farm" {
-            $configName = "SPAntivirusSettings-ApplySettings"
+            $configName = "SPAntivirusSettings_ApplySettings"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {

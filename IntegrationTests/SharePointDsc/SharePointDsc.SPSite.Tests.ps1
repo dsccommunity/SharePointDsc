@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("Site") "SPSite - Integration Tests" {
     Context "Creates new new site collections" {
         It "Is able to create a new path based site collection" {
-            $configName = "SPSite-CreateNewPathBasedSite"
+            $configName = "SPSite_CreateNewPathBasedSite"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
@@ -31,7 +31,7 @@ Describe -Tags @("Site") "SPSite - Integration Tests" {
         }
         
         It "Is able to create a new host name site collection" {
-            $configName = "SPSite-CreateNewHostNameSite"
+            $configName = "SPSite_CreateNewHostNameSite"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {

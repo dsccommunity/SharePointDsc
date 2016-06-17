@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
     Context "Creates a new alternate URL" {
         It "Is able to create a service app" {
-            $configName = "SPAlternateUrl-CreateNewUrl"
+            $configName = "SPAlternateUrl_CreateNewUrl"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
@@ -34,7 +34,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
 
     Context "Updates existing alternate URLs" {
         It "Is able to update an existing alternate URL" {
-            $configName = "SPAlternateUrl-UpdateUrl"
+            $configName = "SPAlternateUrl_UpdateUrl"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
@@ -55,7 +55,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
 
     Context "Delete existing alternate URLs" {
         It "Is able to delete an existing alternate URL" {
-            $configName = "SPAlternateUrl-DeleteUrl"
+            $configName = "SPAlternateUrl_DeleteUrl"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {

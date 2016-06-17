@@ -13,7 +13,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 Describe -Tags @("WebApp") "SPWebApplication - Integration Tests" {
     Context "Creates new new web applications" {
         It "Is able to create a new web application" {
-            $configName = "SPWebApplication-CreateWebApp"
+            $configName = "SPWebApplication_CreateWebApp"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
