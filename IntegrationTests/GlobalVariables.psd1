@@ -5,31 +5,31 @@
         ServiceAccounts = @{
             Setup = @{
                 Username = "svcSPSetup"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
             Farm = @{
                 Username = "svcSPFarm"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
             WebApp = @{
                 Username = "svcSPWebApps"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
             ServiceApp = @{
                 Username = "svcSPServiceApps"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
             SuperUser = @{
                 Username = "svcSPSuper"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
             SuperReader = @{
                 Username = "svcSPReader"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
             Crawler = @{
                 Username = "svcSPCrawl"
-                Password = "SharePoint156!"
+                Password = "SharePoint1!"
             }
         }
     }
