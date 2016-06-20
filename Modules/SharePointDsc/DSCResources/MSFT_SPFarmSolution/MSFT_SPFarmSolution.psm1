@@ -11,6 +11,7 @@ function Get-TargetResource
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
         [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
+        [parameter(Mandatory = $false)] [String]   $SolutionLevel,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -42,6 +43,7 @@ function Get-TargetResource
             Ensure          = $currentState
             Version         = $version
             WebApplications = $deployedWebApplications
+            SolutionLevel   = $params.SolutionLevel
             ContainsGlobalAssembly = $ContainsGlobalAssembly
         }
     }
@@ -61,6 +63,7 @@ function Set-TargetResource
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
         [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
+        [parameter(Mandatory = $false)] [String]   $SolutionLevel,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -213,6 +216,10 @@ function Set-TargetResource
                     Local = $false
                     Verbose = $false
                 }
+                if ($params.ContainsKey("SolutionLevel") -eq $true) 
+                {
+                    $runParams.Add("CompatibilityLevel", $params.SolutionLevel)
+                }
 
                 if (!$solution.ContainsWebApplicationResource) 
                 {
@@ -274,6 +281,7 @@ function Test-TargetResource
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
         [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
+        [parameter(Mandatory = $false)] [String]   $SolutionLevel,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
