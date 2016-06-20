@@ -37,7 +37,7 @@ Describe -Tags @("PostFarm") "SPManagedAccount - Integration Tests" {
     
     Context "Updates managed accounts" {
         It "is able to set a schedule" {
-            $configName = "SPManagedAccounts-SetSchedules"
+            $configName = "SPManagedAccounts_SetSchedules"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
@@ -57,7 +57,7 @@ Describe -Tags @("PostFarm") "SPManagedAccount - Integration Tests" {
         }
         
         It "is able to remove a schedule" {
-            $configName = "SPManagedAccounts-RemoveSchedules"
+            $configName = "SPManagedAccounts_RemoveSchedules"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
