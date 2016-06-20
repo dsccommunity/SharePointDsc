@@ -14,13 +14,13 @@ function Get-TargetResource
 
     try
     {
-        $spInstall = Get-xSharePointInstalledProductVersion
+        $spInstall = Get-SPDSCInstalledProductVersion
         $Build = $spInstall.ProductVersion
     }
     catch
     {
         Write-Verbose -Message 'Sharepoint not installed'
-        $Build = $null        
+        [Version]$Build = '0.0.0.0'     
     }
     
     return @{
