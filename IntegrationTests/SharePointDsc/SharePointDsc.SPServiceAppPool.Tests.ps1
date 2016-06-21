@@ -19,14 +19,14 @@ Describe -Tags @("PreServiceApp") "SPServiceAppPool - Integration Tests" {
                 node "localhost" {
                     SPServiceAppPool CreatePool {
                         Name                 = "SharePoint Service Applications"
-                        ServiceAccount       = $Global:SPDscIntegrationCredPool.Setup.ServiceApp.UserName
+                        ServiceAccount       = $Global:SPDscIntegrationCredPool.ServiceApp.UserName
                         Ensure               = "Present"
                         PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
 
                     SPServiceAppPool CreatePool2 {
                         Name                 = "Testing Pool"
-                        ServiceAccount       = $Global:SPDscIntegrationCredPool.Setup.ServiceApp.UserName
+                        ServiceAccount       = $Global:SPDscIntegrationCredPool.ServiceApp.UserName
                         Ensure               = "Present"
                         PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
@@ -40,13 +40,13 @@ Describe -Tags @("PreServiceApp") "SPServiceAppPool - Integration Tests" {
 
     Context "Updates existing pools" {
         It "Updates the service account of a service app pool" {
-            $configName = "SPServiceAppPool-UpdateAppPool"
+            $configName = "SPServiceAppPool_UpdateAppPool"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
                     SPServiceAppPool CreatePool2 {
                         Name                 = "Testing Pool"
-                        ServiceAccount       = $Global:SPDscIntegrationCredPool.Setup.WebApp.UserName
+                        ServiceAccount       = $Global:SPDscIntegrationCredPool.WebApp.UserName
                         Ensure               = "Present"
                         PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
@@ -66,7 +66,7 @@ Describe -Tags @("PreServiceApp") "SPServiceAppPool - Integration Tests" {
                 node "localhost" {
                     SPServiceAppPool CreatePool2 {
                         Name                 = "Testing Pool"
-                        ServiceAccount       = $Global:SPDscIntegrationCredPool.Setup.WebApp.UserName
+                        ServiceAccount       = $Global:SPDscIntegrationCredPool.WebApp.UserName
                         Ensure               = "Absent"
                         PsDscRunAsCredential = $Global:SPDscIntegrationCredPool.Setup
                     }
