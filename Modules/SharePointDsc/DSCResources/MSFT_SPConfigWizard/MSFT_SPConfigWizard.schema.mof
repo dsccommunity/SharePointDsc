@@ -1,0 +1,28 @@
+/*
+**Description**
+
+This resource is used to install the SharePoint binaries.
+The BinaryDir parameter should point to the path that setup.exe is located (not to setup.exe itself).
+The ProductKey parameter is used to inject in to the configuration file and validate the license key during the installation process. 
+This module depends on the prerequisites already being installed, which can be done through the use of [SPInstallPreReqs](SPInstallPreReqs).
+
+**Example**
+
+    SPConfigWizard RunConfigWizard
+    {
+        RunConfigWizard     = $true
+        DatabaseUpgradeDays = "sat", "sun"
+        DatabaseUpgradeTime = "1:00am to 5:00am"
+    }
+
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("SPConfigWizard")]
+class MSFT_SPConfigWizard : OMI_BaseResource
+{
+    [Key, Description("")] Boolean RunConfigWizard;
+    [Required, Description(""), ValueMap{"mon","tue","wed","thu","fri","sat","sun"}, Values{"mon","tue","wed","thu","fri","sat","sun"}] String DatabaseUpgradeDays[];
+    [Required, Description("")] String DatabaseUpgradeTime;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
