@@ -7,7 +7,9 @@
  * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
  * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
- * Added solution level property to SPFarmSOlution
+ * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
+ * Added support for custom database name and server to SPPerformancePointServiceApp
+ * Added solution level property to SPFarmSolution
 
 ### 1.0
 

@@ -65,7 +65,7 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Access Services Application"
+                    TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatebaseName
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -90,7 +90,7 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         Context "When the service application exists but it shouldn't" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Access Services Application"
+                    TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatabaseServer
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
