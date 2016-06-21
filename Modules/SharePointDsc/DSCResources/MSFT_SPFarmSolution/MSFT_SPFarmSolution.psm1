@@ -25,7 +25,7 @@ function Get-TargetResource
             $currentState = "Present" 
             $deployed = $solution.Deployed
             $version = $Solution.Properties["Version"]
-            $deployedWebApplications = @($solution.DeployedWebApplications | select -ExpandProperty Url)
+            $deployedWebApplications = @($solution.DeployedWebApplications | Select-Object -ExpandProperty Url)
             $ContainsGlobalAssembly = $solution.ContainsGlobalAssembly
         } else { 
             $currentState = "Absent" 
@@ -177,7 +177,7 @@ function Set-TargetResource
 
                 if ($solution.ContainsWebApplicationResource) 
                 {
-                    if ($webApps -eq $null -or $webApps.Length -eq 0) 
+                    if ($null -eq $webApps -or $webApps.Length -eq 0) 
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -220,7 +220,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    if ($webApps -eq $null -or $webApps.Length -eq 0) 
+                    if ($null -eq $webApps -or $webApps.Length -eq 0) 
                     {
                         $runParams.Add("AllWebApplications", $true)
 

@@ -24,7 +24,7 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        $caWebapp = Get-SPwebapplication -includecentraladministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
         if ($null -eq $caWebapp) {
             Write-Verbose "Unable to locate central administration website"
             return $null
@@ -79,7 +79,7 @@ function Set-TargetResource
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "Farm Administrators group matches. No further processing required"
         } else {
             Write-Verbose "Farm Administrators group does not match. Perform corrective action"
@@ -191,7 +191,7 @@ function Test-TargetResource
         Write-Verbose "Processing Members parameter"
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "Farm Administrators group matches"
             return $true
         } else {
@@ -234,7 +234,7 @@ function Update-SPDSCFarmAdministrators {
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $changeUsers -ScriptBlock {
         $changeUsers = $args[0]
 
-        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        $caWebapp = Get-SPwebapplication -includecentraladministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
         if ($null -eq $caWebapp) {
             throw "Unable to locate central administration website"
         }
