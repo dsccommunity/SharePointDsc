@@ -31,8 +31,8 @@ function Get-TargetResource
                 }
 
                 # Check if web application exists
-                $webapp = Get-SPWebApplication | Where {($_.Url).StartsWith($params.Url)}
-                if ($webapp -eq $null) {
+                $webapp = Get-SPWebApplication | Where-Object -FilterScript { ($_.Url).StartsWith($params.Url) }
+                if ($null -eq $webapp) {
                     Write-Verbose -Verbose "Web application not found. SharePoint Designer settings will not be applied"
                     return $null
                 } else {
@@ -68,8 +68,8 @@ function Get-TargetResource
                     }
 
                     # Check if site collections exists
-                    $site = Get-SPSite | Where {$_.Url -eq $url}
-                    if ($site -eq $null) {
+                    $site = Get-SPSite | Where-Object -FilterScript { $_.Url -eq $url }
+                    if ($null -eq $site) {
                         Write-Verbose -Verbose "Site collection not found. SharePoint Designer settings will not be applied"
                         return $null
                     } else {
@@ -132,8 +132,8 @@ function Set-TargetResource
                 Write-Verbose -Verbose "Start update SPD web application settings"
 
                 # Check if web application exists
-                $webapp = Get-SPWebApplication | Where {($_.Url).StartsWith($params.Url)}
-                if ($webapp -eq $null) {
+                $webapp = Get-SPWebApplication | Where-Object -FilterScript { ($_.Url).StartsWith($params.Url) }
+                if ($null -eq $webapp) {
                     throw "Web application not found. SharePoint Designer settings will not be applied"
                     return
                 } else {
@@ -164,8 +164,8 @@ function Set-TargetResource
                     Write-Verbose -Verbose "Start update SPD site collection settings"
 
                     # Check if site collection exists
-                    $site = Get-SPSite | Where {$_.Url -eq $url}
-                    if ($site -eq $null) {
+                    $site = Get-SPSite | Where-Object -FilterScript { $_.Url -eq $url }
+                    if ($null -eq $site) {
                         throw "Site collection not found. SharePoint Designer settings will not be applied"
                         return $null
                     } else {
