@@ -88,6 +88,7 @@ function Get-TargetResource
     $results = @{
         InstallerPath = $InstallerPath
         OnlineMode = $OnlineMode
+        SXSpath = $SXSpath
         SQLNCli = $SQLNCli
         PowerShell = $PowerShell
         NETFX = $NETFX
@@ -103,7 +104,7 @@ function Get-TargetResource
         MSVCRT14 = $MSVCRT14
         KB3092423 = $KB3092423
         ODBC = $ODBC
-        DotNet452 = $DotNet452
+        DotNetFx = $DotNetFx
     }
     
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
