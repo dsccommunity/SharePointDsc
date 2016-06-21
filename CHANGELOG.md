@@ -9,6 +9,7 @@
  * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
  * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
  * Added support for custom database name and server to SPPerformancePointServiceApp
+ * Added solution level property to SPFarmSolution
 
 ### 1.0
 

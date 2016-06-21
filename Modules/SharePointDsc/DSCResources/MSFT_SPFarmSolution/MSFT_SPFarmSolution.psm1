@@ -11,6 +11,8 @@ function Get-TargetResource
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
         [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
+        [parameter(Mandatory = $false)] [ValidateSet("14","15","All")]  
+                                        [String]   $SolutionLevel,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -25,7 +27,7 @@ function Get-TargetResource
             $currentState = "Present" 
             $deployed = $solution.Deployed
             $version = $Solution.Properties["Version"]
-            $deployedWebApplications = @($solution.DeployedWebApplications | select -ExpandProperty Url)
+            $deployedWebApplications = @($solution.DeployedWebApplications | Select-Object -ExpandProperty Url)
             $ContainsGlobalAssembly = $solution.ContainsGlobalAssembly
         } else { 
             $currentState = "Absent" 
@@ -42,6 +44,7 @@ function Get-TargetResource
             Ensure          = $currentState
             Version         = $version
             WebApplications = $deployedWebApplications
+            SolutionLevel   = $params.SolutionLevel
             ContainsGlobalAssembly = $ContainsGlobalAssembly
         }
     }
@@ -61,6 +64,8 @@ function Set-TargetResource
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
         [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
+        [parameter(Mandatory = $false)] [ValidateSet("14","15","All")]  
+                                        [String]   $SolutionLevel,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
@@ -177,7 +182,7 @@ function Set-TargetResource
 
                 if ($solution.ContainsWebApplicationResource) 
                 {
-                    if ($webApps -eq $null -or $webApps.Length -eq 0) 
+                    if ($null -eq $webApps -or $webApps.Length -eq 0) 
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -213,6 +218,10 @@ function Set-TargetResource
                     Local = $false
                     Verbose = $false
                 }
+                if ($params.ContainsKey("SolutionLevel") -eq $true) 
+                {
+                    $runParams.Add("CompatibilityLevel", $params.SolutionLevel)
+                }
 
                 if (!$solution.ContainsWebApplicationResource) 
                 {
@@ -220,7 +229,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    if ($webApps -eq $null -or $webApps.Length -eq 0) 
+                    if ($null -eq $webApps -or $webApps.Length -eq 0) 
                     {
                         $runParams.Add("AllWebApplications", $true)
 
@@ -274,6 +283,8 @@ function Test-TargetResource
                                         [String]   $Ensure = "Present",
         [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
         [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
+        [parameter(Mandatory = $false)] [ValidateSet("14","15","All")]  
+                                        [String]   $SolutionLevel,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
