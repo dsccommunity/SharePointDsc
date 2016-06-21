@@ -60,7 +60,7 @@ Describe -Tags @("PreServiceApp") "SPServiceAppPool - Integration Tests" {
 
     Context "Removes existing pools" {
         It "Removes the service app pool" {
-            $configName = "SPServiceAppPool-RemoveAppPool"
+            $configName = "SPServiceAppPool_RemoveAppPool"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
                 node "localhost" {
