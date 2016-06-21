@@ -34,7 +34,7 @@ function Invoke-SPDSCTests() {
     $versionsToTest = (Get-ChildItem (Join-Path $repoDir "\Tests\Stubs\SharePoint\")).Name
     
     # Import the first stub found so that there is a base module loaded before the tests start
-    $firstVersion = $versionsToTest | Select -First 1
+    $firstVersion = $versionsToTest | Select-Object -First 1
     Import-Module (Join-Path $repoDir "\Tests\Stubs\SharePoint\$firstVersion\Microsoft.SharePoint.PowerShell.psm1") -WarningAction SilentlyContinue
 
     $testsToRun = @()

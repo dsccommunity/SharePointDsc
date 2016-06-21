@@ -211,7 +211,7 @@ function Get-SPDSCContentAccessAccount() {
     # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     param()
-    $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | where {$_.IsAdministrationWebApplication} 
+    $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication } 
     $s = Get-SPSite $caWebApp.Url
     $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
     $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
