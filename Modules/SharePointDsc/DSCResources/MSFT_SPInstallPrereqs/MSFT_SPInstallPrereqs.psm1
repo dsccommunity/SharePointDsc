@@ -61,28 +61,28 @@ function Get-TargetResource
     $installedItems = Get-CimInstance -ClassName Win32_Product
     
     #Common prereqs
-    $returnValue.Add("AppFabric 1.1 for Windows Server", (($installedItems | ? {$_.Name -eq "AppFabric 1.1 for Windows Server"}) -ne $null))
-    $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", (($installedItems | ? {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"}) -ne $null))
-    $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | ? {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))    
-    $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", (($installedItems | ? {$_.Name -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}) -ne $null))
-    $returnValue.Add("WCF Data Services 5.6.0 Runtime", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.6.0 Runtime"}) -ne $null))
+    $returnValue.Add("AppFabric 1.1 for Windows Server", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "AppFabric 1.1 for Windows Server"})))
+    $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"})))
+    $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | Where-Object -FilterScript {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))    
+    $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"})))
+    $returnValue.Add("WCF Data Services 5.6.0 Runtime", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "WCF Data Services 5.6.0 Runtime"})))
 
     #SP2013 prereqs
     if ($majorVersion -eq 15) {
-        $returnValue.Add("Active Directory Rights Management Services Client 2.*", (($installedItems | ? {$_.Name -like "Active Directory Rights Management Services Client 2.*"}) -ne $null))
-        $returnValue.Add("Microsoft SQL Server Native Client (2008 R2 or 2012)", (($installedItems | ? { $_.Name -match "SQL Server (2008 R2|2012) Native Client" }) -ne $null))
-        $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", (($installedItems | ? {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"}) -ne $null))
+        $returnValue.Add("Active Directory Rights Management Services Client 2.*", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -like "Active Directory Rights Management Services Client 2.*"})))
+        $returnValue.Add("Microsoft SQL Server Native Client (2008 R2 or 2012)", ($null -ne ($installedItems | Where-Object -FilterScript { $_.Name -match "SQL Server (2008 R2|2012) Native Client" })))
+        $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"})))
     }
 
     #SP2016 prereqs
     if ($majorVersion -eq 16) {
-        $returnValue.Add("Active Directory Rights Management Services Client 2.1", (($installedItems | ? {$_.Name -eq "Active Directory Rights Management Services Client 2.1"}) -ne $null))
-        $returnValue.Add("Microsoft SQL Server 2012 Native Client", (($installedItems | ? {$_.Name -ne $null -and $_.Name.Trim() -eq "Microsoft SQL Server 2012 Native Client"}) -ne $null))    
-        $returnValue.Add("Microsoft ODBC Driver 11 for SQL Server", (($installedItems | ? {$_.Name -eq "Microsoft ODBC Driver 11 for SQL Server"}) -ne $null))    
-        $returnValue.Add("Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}) -ne $null))    
-        $returnValue.Add("Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}) -ne $null))
-        $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}) -ne $null))    
-        $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", (($installedItems | ? {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}) -ne $null))            
+        $returnValue.Add("Active Directory Rights Management Services Client 2.1", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Active Directory Rights Management Services Client 2.1"})))
+        $returnValue.Add("Microsoft SQL Server 2012 Native Client", ($null -ne ($installedItems | Where-Object -FilterScript {$null -ne $_.Name -and $_.Name.Trim() -eq "Microsoft SQL Server 2012 Native Client"})))    
+        $returnValue.Add("Microsoft ODBC Driver 11 for SQL Server", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft ODBC Driver 11 for SQL Server"})))    
+        $returnValue.Add("Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"})))    
+        $returnValue.Add("Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"})))
+        $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"})))    
+        $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"})))            
     }
         
     $results = @{
@@ -151,8 +151,8 @@ function Set-TargetResource
 Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
-        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
-        if ($dotNet46Check -ne $null -and $dotNet46Check.Length -gt 0) {
+        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where-Object -FilterScript { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
+        if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) {
             throw [Exception] "A known issue prevents installation of SharePoint 2013 on servers that have .NET 4.6 already installed. See details at https://support.microsoft.com/en-us/kb/3087184"
             return
         }
@@ -235,9 +235,9 @@ Write-Verbose -Message "Detecting SharePoint version from binaries"
     }
     
     if ( `
-        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
+        ($null -ne (Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue)) `
          -or `
-        ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+        ($null -ne (Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue)) `
         -or `
         ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
         ) {

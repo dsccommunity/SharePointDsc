@@ -141,7 +141,7 @@ function Assert-MofSchemaScriptParameters() {
                     Write-Warning "File $psFile is missing parameter $($mofParameter.Name) from the $($_.Name) method"
                 }
 
-                $parameterAttribute = $paramToCheck.Attributes | ? { $_.TypeName.ToString() -eq "parameter" } -ErrorAction SilentlyContinue
+                $parameterAttribute = $paramToCheck.Attributes | Where-Object -FilterScript { $_.TypeName.ToString() -eq "parameter" } -ErrorAction SilentlyContinue
 
                 if (($mofParameter.State -eq "Key" -or $mofParameter.State -eq "Required")) {
 
@@ -149,7 +149,7 @@ function Assert-MofSchemaScriptParameters() {
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) that is not marked as mandatory (has no parameter attribute) in the $($function.Name) method"
                     } else {
-                        $isMandatoryInScript = [bool]::Parse(($parameterAttribute.NamedArguments | ? { $_.ArgumentName -eq "Mandatory" }).Argument.VariablePath.ToString())
+                        $isMandatoryInScript = [bool]::Parse(($parameterAttribute.NamedArguments | Where-Object -FilterScript { $_.ArgumentName -eq "Mandatory" }).Argument.VariablePath.ToString())
                             
                         if ($isMandatoryInScript -eq $false) {
                             $hasErrors = $true
@@ -160,7 +160,7 @@ function Assert-MofSchemaScriptParameters() {
 
                 if ($mofParameter.State -eq "Write") {
                     if ($null -ne $parameterAttribute) {
-                        $isMandatoryInScript = [bool]::Parse(($parameterAttribute.NamedArguments | ? { $_.ArgumentName -eq "Mandatory" }).Argument.VariablePath.ToString())
+                        $isMandatoryInScript = [bool]::Parse(($parameterAttribute.NamedArguments | Where-Object -FilterScript { $_.ArgumentName -eq "Mandatory" }).Argument.VariablePath.ToString())
                         if ($isMandatoryInScript -eq $true) {
                             $hasErrors = $true
                             Write-Warning "File $psFile has parameter $($mofParameter.Name) that is marked as mandatory in the $($function.Name) method and it should not be"
@@ -169,13 +169,13 @@ function Assert-MofSchemaScriptParameters() {
                 }
 
                 if ($null -ne $mofParameter.ValueMap) {
-                    $validateSetAttribute = ($paramToCheck.Attributes | ? { $_.TypeName.ToString() -eq "ValidateSet" })
+                    $validateSetAttribute = ($paramToCheck.Attributes | Where-Object -FilterScript { $_.TypeName.ToString() -eq "ValidateSet" })
 
                     if (-not $validateSetAttribute) { 
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) that is missing a ValidateSet attribute in the $($function.Name) method"
                     } else {
-                        $psValidateSetParams = $validateSetAttribute.PositionalArguments | % { $_.Value.ToString() }
+                        $psValidateSetParams = $validateSetAttribute.PositionalArguments | ForEach-Object -Process { $_.Value.ToString() }
 
                         $mofParameter.ValueMap | ForEach-Object {
                             if ($psValidateSetParams -notcontains $_) {
@@ -193,14 +193,14 @@ function Assert-MofSchemaScriptParameters() {
                     }
                 }
 
-                if ($mofParameter.EmbeddedInstance -eq $null) {
-                    if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match $mofParameter.DataType }) -eq $null) {
+                if ($null -eq $mofParameter.EmbeddedInstance) {
+                    if ($null -eq ($paramToCheck.Attributes | Where-Object -FilterScript { $_.TypeName.ToString() -match $mofParameter.DataType })) {
                         $hasErrors = $true
                         Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that does not match the data type of the schema"
                     }
 
                     if ($mofParameter.IsArray -eq $true) {
-                        if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match $mofParameter.DataType -and $_.TypeName.IsArray -eq $true }) -eq $null) {
+                        if ($null -eq ($paramToCheck.Attributes | Where-Object -FilterScript { $_.TypeName.ToString() -match $mofParameter.DataType -and $_.TypeName.IsArray -eq $true })) {
                             $hasErrors = $true
                             Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that is marked as an array in the schema but is not an array in the PowerShell module"
                         }
@@ -209,7 +209,7 @@ function Assert-MofSchemaScriptParameters() {
                 } else {
                     switch ($mofParameter.EmbeddedInstance) {
                         "MSFT_Credential" {
-                            if (($paramToCheck.Attributes | ? { $_.TypeName.ToString() -match "PSCredential" }) -eq $null) {
+                            if ($null -eq ($paramToCheck.Attributes | Where-Object -FilterScript { $_.TypeName.ToString() -match "PSCredential" })) {
                                 $hasErrors = $true
                                 Write-Warning "File $psFile has parameter $($mofParameter.Name) in function $($function.Name) that does not match the data type of the schema"
                             }
@@ -221,18 +221,6 @@ function Assert-MofSchemaScriptParameters() {
     }
 
     return (!$hasErrors)
-}
-
-function Get-ParseErrors {
-    param(
-        [Parameter(ValueFromPipeline=$True,Mandatory=$True)]
-        [string]$fileName
-    )    
-
-    $tokens = $null 
-    $errors = $null
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($fileName, [ref] $tokens, [ref] $errors)
-    return $errors
 }
 
 Export-ModuleMember *

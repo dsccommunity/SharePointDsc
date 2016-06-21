@@ -111,13 +111,13 @@ function Set-TargetResource
                         }
                         
                         Write-Verbose "Waiting for cache on $currentServer"
-                        while (($count -lt $maxCount) -and ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null)) {
+                        while (($count -lt $maxCount) -and ($null -eq (Get-SPServiceInstance -Server $currentServer | Where-Object -FilterScript { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }))) {
                             Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for distributed cache to start on $currentServer (waited $count of $maxCount minutes)"
                             Start-Sleep -Seconds 60
                             $count++
                         }
 
-                        if ((Get-SPServiceInstance -Server $currentServer | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" }) -eq $null) {
+                        if ($null -eq (Get-SPServiceInstance -Server $currentServer | Where-Object -FilterScript { $_.TypeName -eq "Distributed Cache" -and $_.Status -eq "Online" })) {
                             Write-Warning "Server $currentServer is not running distributed cache after waiting 30 minutes. No longer waiting for this server, progressing to next action"
                         }
 
@@ -137,7 +137,7 @@ function Set-TargetResource
 
                 $count = 0
                 $maxCount = 30
-                while (($count -lt $maxCount) -and ((Get-SPServiceInstance | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Disabled" }) -ne $null)) {
+                while (($count -lt $maxCount) -and ($null -ne (Get-SPServiceInstance | Where-Object -FilterScript { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Disabled" }))) {
                     Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for distributed cache to stop on all servers (waited $count of $maxCount minutes)"
                     Start-Sleep -Seconds 60
                     $count++
@@ -149,7 +149,7 @@ function Set-TargetResource
 
                 $count = 0
                 $maxCount = 30
-                while (($count -lt $maxCount) -and ((Get-SPServiceInstance | ? { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Online" }) -ne $null)) {
+                while (($count -lt $maxCount) -and ($null -ne (Get-SPServiceInstance | Where-Object -FilterScript { $_.TypeName -eq "Distributed Cache" -and $_.Status -ne "Online" }))) {
                     Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for distributed cache to start on all servers (waited $count of $maxCount minutes)"
                     Start-Sleep -Seconds 60
                     $count++
@@ -176,7 +176,7 @@ function Set-TargetResource
                 $currentServer = "$($env:computername).$domain"
                 $serviceInstance = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "Distributed Cache" }
             }
-            if ($serviceInstance -eq $null) {
+            if ($null -eq $serviceInstance) {
                 throw "Unable to locate a distributed cache service instance on $($env:computername) to remove"
             }               
             $serviceInstance.Delete() 

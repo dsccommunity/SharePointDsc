@@ -327,7 +327,7 @@ Configuration SharePointServer
                     Zone                 = "Default"
                     EnableCache          = $webApp.BlobCache.Enabled
                     Location             = $webApp.BlobCache.Folder
-                    MaxSize              = $webApp.BlobCache.MaxSize
+                    MaxSizeInGB          = $webApp.BlobCache.MaxSize
                     FileTypes            = $webApp.BlobCache.FileTypes
                     PsDscRunAsCredential = $SPSetupAccount
                     DependsOn            = "[xSPWebApplication]$webAppInternalName"
@@ -472,6 +472,17 @@ Configuration SharePointServer
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = @('[SPServiceAppPool]MainServiceAppPool', '[SPManagedMetaDataServiceApp]ManagedMetadataServiceApp', '[SPSearchServiceApp]SearchServiceApp')
             }
+
+            SPUserProfileServiceAppPermissions UserProfilePermissions
+            {
+                ProxyName            = "User Profile Service Application Proxy"
+                CreatePersonalSite   = @("DEMO\Group", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+                PsDscRunAsCredential = $FarmAccount
+                DependsOn            = "[SPUserProfileServiceApp]UserProfileServiceApp"
+            }
+
             SPSecureStoreServiceApp SecureStoreServiceApp
             {
                 Name                  = "Secure Store Service Application"
@@ -510,12 +521,12 @@ Configuration SharePointServer
                 DependsOn             = "[xSPServiceAppPool]MainServiceAppPool"
             }
 
-            xSPSearchCrawlRule IntranetCrawlAccount
+            SPSearchCrawlRule IntranetCrawlAccount
             {
                 Path                      = "https://intranet.sharepoint.contoso.com"
                 ServiceAppName            = "Search Service Application"
                 Ensure                    = "Present"
-                Type                      = "InclusionRule"
+                RuleType                  = "InclusionRule"
                 CrawlConfigurationRules   = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
                 AuthenticationType        = "DefaultRuleAccess"
                 AuthenticationCredentials = $SPSetupAccount
