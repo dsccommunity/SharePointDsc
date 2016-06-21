@@ -28,7 +28,7 @@ function Get-TargetResource
         if ($null -eq $serviceApps) { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Work Management Service Application" }
+        $serviceApp = $serviceApps | Where-Object -FilterScript { $_.TypeName -eq "Work Management Service Application" }
 
         If ($null -eq $serviceApp) { 
             return $nullReturn 
@@ -77,20 +77,20 @@ function Set-TargetResource
         $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
         | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
 
-        if($appService -ne $null -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
+        if($null -ne $appService -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
         {
             #remove existing app
             
             Remove-SPServiceApplication $appService 
-            return;
-        } elseif ( $appService -eq $null){
+            return
+        } elseif ($null -eq $appService){
             $newParams = @{}
             $newParams.Add("Name", $params.Name) 
             $newParams.Add("ApplicationPool", $params.ApplicationPool) 
 
             $appService = New-SPWorkManagementServiceApplication @newParams
             New-SPWorkManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -DefaultProxyGroup -ServiceApplication $appService | Out-Null
-            Sleep -Milliseconds 200
+            Start-Sleep -Milliseconds 200
         }
         $setParams = @{}
         if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) { $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) }

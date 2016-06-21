@@ -8,6 +8,7 @@
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
  * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
  * Fixed a buy with SPAlternateUrl that prevented the test method from returning "true" when a URL was absent if the optional URL property was specified in the config
+ * Added solution level property to SPFarmSolution
 
 ### 1.0
 

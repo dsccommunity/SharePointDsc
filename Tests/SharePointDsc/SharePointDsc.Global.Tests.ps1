@@ -10,7 +10,7 @@ Import-Module "$PSScriptRoot\SharePointDsc.TestHelpers.psm1"
 
 Describe 'SharePointDsc whole of module tests' {
 
-    $mofFiles = @(Get-ChildItem $RepoRoot -Recurse -Filter "*.schema.mof" -File | ? {
+    $mofFiles = @(Get-ChildItem $RepoRoot -Recurse -Filter "*.schema.mof" -File | Where-Object -FilterScript {
         ($_.FullName -like "*\DscResources\*")
     })
     
@@ -49,7 +49,7 @@ Describe 'SharePointDsc whole of module tests' {
         It "uses MOF schemas that match the functions used in the corresponding PowerShell module for each resource" {
             $filesWithErrors = 0
             $WarningPreference = "Continue"
-            $mofFiles | % {
+            $mofFiles | ForEach-Object -Process {
                 if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
             }
             $filesWithErrors | Should Be 0
