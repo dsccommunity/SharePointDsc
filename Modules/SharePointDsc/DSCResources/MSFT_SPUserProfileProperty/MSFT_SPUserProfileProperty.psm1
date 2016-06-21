@@ -247,7 +247,7 @@ function Set-TargetResource
                 $coreProperties.RemovePropertyByName($params.Name)
                 return;
             }
-        } elseif($null -ne $userProfileProperty){
+        } elseif($null -eq $userProfileProperty){
             #region creating property
             $coreProperty = $coreProperties.Create($false)
             $coreProperty.Name = $params.Name
