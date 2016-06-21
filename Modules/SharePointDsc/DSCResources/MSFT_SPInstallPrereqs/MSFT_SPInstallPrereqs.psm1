@@ -23,7 +23,6 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
-        [parameter(Mandatory = $false)] [System.String]  $KB2898850,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
     
@@ -100,12 +99,11 @@ function Get-TargetResource
         WCFDataServices = $WCFDataServices        
         KB2671763 = $KB2671763   
         WCFDataServices56 = $WCFDataServices56        
-        KB2898850 = $KB2898850 
         MSVCRT11 = $MSVCRT11
         MSVCRT14 = $MSVCRT14
         KB3092423 = $KB3092423
         ODBC = $ODBC
-        DotNet452 = $DotNet452
+        DotNetFx = $DotNetFx
     }
     
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
@@ -141,7 +139,6 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
-        [parameter(Mandatory = $false)] [System.String]  $KB2898850,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
@@ -274,7 +271,6 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
-        [parameter(Mandatory = $false)] [System.String]  $KB2898850,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
