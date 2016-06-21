@@ -100,7 +100,7 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
         }
 
-        Context "A URL exists for the specified zone and web app, and it is correct" {
+        Context "A URL exists for the specified zone and web app, and it should not" {
             
             Mock Get-SPAlternateUrl {
                 return @(
@@ -121,6 +121,26 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPAlternateURL
             }
+        }
+
+        Context "A URL does not exist for the current zone, and it should not" {
+
+            Mock Get-SPAlternateUrl {
+                return @()
+            } 
+
+            it "returns the empty values in the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            it "returns true from the test method" {
+                Test-targetResource @testParams | Should Be $true
+            }
+            $testParams.Remove("Url")
+            it "still returns true from the test method with the URL property not providing" {
+                Test-targetResource @testParams | Should Be $true
+            }
+            $testParams.Add("Url", "http://something.contoso.local")
         }
         
         Context "The default zone URL for a web app was changed using this resource" {

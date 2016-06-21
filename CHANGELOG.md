@@ -7,6 +7,7 @@
  * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
  * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
+ * Fixed a buy with SPAlternateUrl that prevented the test method from returning "true" when a URL was absent if the optional URL property was specified in the config
 
 ### 1.0
 
