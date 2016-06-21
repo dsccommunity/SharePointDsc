@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+ * SPInstallPrereqs - KB2898850 is missing in Set/Get/Test params def and in MOF too - Added
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
  * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
  * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2

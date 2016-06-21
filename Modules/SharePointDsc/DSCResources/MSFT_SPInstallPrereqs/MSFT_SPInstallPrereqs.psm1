@@ -23,6 +23,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
+        [parameter(Mandatory = $false)] [System.String]  $KB2898850,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
     
@@ -140,6 +141,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
+        [parameter(Mandatory = $false)] [System.String]  $KB2898850,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
@@ -272,6 +274,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String]  $KB3092423,
         [parameter(Mandatory = $false)] [System.String]  $ODBC,
         [parameter(Mandatory = $false)] [System.String]  $DotNetFx,
+        [parameter(Mandatory = $false)] [System.String]  $KB2898850,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
     )
 
