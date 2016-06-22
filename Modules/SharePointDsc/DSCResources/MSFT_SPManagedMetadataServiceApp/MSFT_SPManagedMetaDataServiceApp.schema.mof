@@ -20,6 +20,7 @@ The database server and database name properties are only used during provisioni
 class MSFT_SPManagedMetaDataServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the managed metadata service application")] string Name;
+	[Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The application pool that the service app will use")] string ApplicationPool;
     [Write, Description("The name of the database server which will host the application")] string DatabaseServer;
     [Write, Description("The name of the database for the service application")] string DatabaseName;

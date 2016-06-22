@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
@@ -55,6 +56,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
@@ -76,11 +78,13 @@ function Set-TargetResource
                 $params.Add("HubUri", $params.ContentTypeHubUrl)
                 $params.Remove("ContentTypeHubUrl")
             }
+            if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
+            if ($pName -eq $Null) {$pName = "$($params.Name) Proxy"}
 
             $app = New-SPMetadataServiceApplication @params 
             if ($null -ne $app)
             {
-                New-SPMetadataServiceApplicationProxy -Name ($params.Name + " Proxy") `
+                New-SPMetadataServiceApplicationProxy -Name $pName `
                                                       -ServiceApplication $app `
                                                       -DefaultProxyGroup `
                                                       -ContentTypePushdownEnabled `
@@ -124,6 +128,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
