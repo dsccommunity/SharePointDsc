@@ -12,6 +12,9 @@ If you would like to modify SharePointDsc module, please feel free.
 As specified in the license, you may copy or modify this resource as long as they are used on the Windows Platform.
 Please refer to the [Contribution Guidelines](https://github.com/PowerShell/SharePointDsc/wiki/Contributing%20to%20SharePointDSC) for information about style guides, testing and patterns for contributing to DSC resources.
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
 ## Installation
 
 To manually install the module, download the source code and unzip the contents of the \Modules\SharePointDsc directory to the $env:ProgramFiles\WindowsPowerShell\Modules folder 
