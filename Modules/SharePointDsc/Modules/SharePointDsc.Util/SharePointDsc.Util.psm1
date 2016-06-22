@@ -166,6 +166,7 @@ function Remove-SPDSCUserToLocalAdmin() {
 
 function Test-SPDSCObjectHasProperty() {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
@@ -181,6 +182,7 @@ function Test-SPDSCObjectHasProperty() {
 
 function Test-SPDSCRunAsCredential() {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential
