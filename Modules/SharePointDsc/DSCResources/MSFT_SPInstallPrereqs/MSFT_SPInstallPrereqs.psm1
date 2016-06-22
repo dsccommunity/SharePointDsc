@@ -60,7 +60,7 @@ function Get-TargetResource
     Write-Verbose -Message "Checking windows packages"
 	$installedItemsX86 = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher
 	$installedItemsX64 = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher
-	$installedItems = $installedProductsX86+$installedProductsX64 | Sort-Object -Property DisplayName -Unique	
+	$installedItems = $installedItemsX86+$installedItemsX64 | Sort-Object -Property DisplayName -Unique	
     
     #Common prereqs
     $returnValue.Add("AppFabric 1.1 for Windows Server", (($installedItems | ? {$_.DisplayName -eq "AppFabric 1.1 for Windows Server"}) -ne $null))
