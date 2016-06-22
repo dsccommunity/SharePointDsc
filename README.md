@@ -42,4 +42,4 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 
 ## Project Throughput
 
-[![Throughput Graph](https://graphs.waffle.io/PowerShell/xSharePoint/throughput.svg)](https://waffle.io/PowerShell/xSharePoint/metrics)
+[![Throughput Graph](https://graphs.waffle.io/PowerShell/SharePointDsc/throughput.svg)](https://waffle.io/PowerShell/SharePointDsc/metrics)
