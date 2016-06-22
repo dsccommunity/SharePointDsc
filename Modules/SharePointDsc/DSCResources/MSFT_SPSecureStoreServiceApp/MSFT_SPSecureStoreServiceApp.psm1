@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
-        [parameter(Mandatory = $false)] [System.String]  $ProxyNameSuffix,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyName,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -61,7 +61,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
-        [parameter(Mandatory = $false)] [System.String]  $ProxyNameSuffix,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyName,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -103,8 +103,8 @@ function Set-TargetResource
                 $params.Remove("DatabaseAuthenticationType")
             }
 
-            if ($ProxyNameSuffix -eq $Null) {$ProxyName = $params.Name} Else {$ProxyName = "$($params.Name) $ProxyNameSuffix"}
-            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $ProxyName
+            if ($params.ProxyName -eq $Null) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
+            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $pName
         }
     } 
     
@@ -141,7 +141,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
-        [parameter(Mandatory = $false)] [System.String]  $ProxyNameSuffix,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyName,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
