@@ -1,4 +1,4 @@
-# Change log for SharePoint DSC
+# Change log for SharePointDsc
 
 ### Unreleased
 

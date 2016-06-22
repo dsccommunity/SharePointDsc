@@ -1,0 +1,34 @@
+﻿.NAME
+    SPVisioServiceApp
+
+.SYNOPSIS
+
+This resource is responsible for creating Visio Graphics Service Application instances within the local SharePoint farm.
+The resource will provision and configure the Visio Graphics Service Application.
+.EXAMPLE
+    SPVisioServiceApp VisioServices
+    {
+        Name = "Visio Graphics Service Application"
+        ApplicationPool = "SharePoint Web Services"
+        Ensure = "Present"
+        InstallAccount  = $InstallAccount
+    }
+
+.PARAMETER Name
+    Key - string
+    The name of the service application
+
+.PARAMETER ApplicationPool
+    Required - string
+    The name of the application pool to run the service app in
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the service app should exist, absent if it should not
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+

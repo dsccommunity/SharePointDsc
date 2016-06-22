@@ -107,7 +107,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource', 'Preview')
+        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/PowerShell/SharePointDsc/blob/master/LICENSE'
@@ -119,7 +119,35 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = '
+ * Renamed module from xSharePoint to SharePointDsc
+ * Fixed bug in managed account schedule get method
+ * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
+ * Added ensure properties to multiple resources to standardise schemas
+ * Added xSPSearchContentSource, xSPContentDatabase, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp, xSPPerformancePointServiceApp, xSPIrmSettings resources
+ * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
+ * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
+ * Fixed a bug with reboot detection in xSPInstallPrereqs
+ * Added SearchCenterUrl property to xSPSearchServiceApp
+ * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
+ * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
+ * Updated xSPWebAppPolicy to allow addition and removal of accounts, including the Cache Accounts, to the web application policy.
+ * Fixed bug with claims accounts not being added to web app policy in xSPCacheAccounts
+ * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
+ * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
+ * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
+ * Fixed nuget package format for development feed from AppVeyor
+ * Fixed bug with get output of xSPUSageApplication
+ * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
+ * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
+ * Added timestamps to verbose logging for resources that pause for responses from SharePoint
+ * Added options to customise the installation directories used when installing SharePoint with xSPInstall
+ * Aligned testing to common DSC resource test module
+ * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
+ * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
+ * Added support for cloud search index to xSPSearchServiceApp
+ * Fixed bug in xSPWebAppGeneralSettings that prevented setting a security validation timeout value
+'
 
     } # End of PSData hashtable
 

@@ -34,7 +34,11 @@ This is discussed [on the SharePointDsc wiki](https://github.com/PowerShell/Shar
 ## Documentation and examples
 
 For a full list of resources in SharePointDsc and examples on their use, check out the [SharePointDsc wiki](https://github.com/PowerShell/SharePointDsc/wiki).
+<<<<<<< HEAD
 You can also review the "examples" directory in the SharePointDsc module for some general use scenarios for all of the resources that are in the module.
+=======
+You can also review the "examples" directory in the SharePointDSC module for some general use scenarios for all of the resources that are in the module.
+>>>>>>> release-1.0
 
 ## Changelog
 
