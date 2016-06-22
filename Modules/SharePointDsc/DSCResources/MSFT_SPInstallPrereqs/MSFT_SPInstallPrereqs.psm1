@@ -58,31 +58,33 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Checking windows packages"
-    $installedItems = Get-CimInstance -ClassName Win32_Product
+	$installedItemsX86 = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher
+	$installedItemsX64 = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher
+	$installedItems = $installedProductsX86+$installedProductsX64 | Sort-Object -Property DisplayName -Unique	
     
     #Common prereqs
-    $returnValue.Add("AppFabric 1.1 for Windows Server", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "AppFabric 1.1 for Windows Server"})))
-    $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft CCR and DSS Runtime 2008 R3"})))
-    $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | Where-Object -FilterScript {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))    
-    $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"})))
-    $returnValue.Add("WCF Data Services 5.6.0 Runtime", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "WCF Data Services 5.6.0 Runtime"})))
+    $returnValue.Add("AppFabric 1.1 for Windows Server", (($installedItems | ? {$_.DisplayName -eq "AppFabric 1.1 for Windows Server"}) -ne $null))
+    $returnValue.Add("Microsoft CCR and DSS Runtime 2008 R3", (($installedItems | ? {$_.DisplayName -eq "Microsoft CCR and DSS Runtime 2008 R3"}) -ne $null))
+    $returnValue.Add("Microsoft Identity Extensions", (@(Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\ -Recurse | ? {$_.GetValue("DisplayName") -eq "Microsoft Identity Extensions" }).Count -gt 0))    
+    $returnValue.Add("Microsoft Sync Framework Runtime v1.0 SP1 (x64)", (($installedItems | ? {$_.DisplayName -eq "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}) -ne $null))
+    $returnValue.Add("WCF Data Services 5.6.0 Runtime", (($installedItems | ? {$_.DisplayName -eq "WCF Data Services 5.6.0 Runtime"}) -ne $null))
 
     #SP2013 prereqs
     if ($majorVersion -eq 15) {
-        $returnValue.Add("Active Directory Rights Management Services Client 2.*", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -like "Active Directory Rights Management Services Client 2.*"})))
-        $returnValue.Add("Microsoft SQL Server Native Client (2008 R2 or 2012)", ($null -ne ($installedItems | Where-Object -FilterScript { $_.Name -match "SQL Server (2008 R2|2012) Native Client" })))
-        $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "WCF Data Services 5.0 (for OData v3) Primary Components"})))
+        $returnValue.Add("Active Directory Rights Management Services Client 2.*", (($installedItems | ? {$_.DisplayName -like "Active Directory Rights Management Services Client 2.*"}) -ne $null))
+        $returnValue.Add("Microsoft SQL Server 2008 R2 Native Client", (($installedItems | ? {$_.DisplayName -eq "Microsoft SQL Server 2008 R2 Native Client"}) -ne $null))
+        $returnValue.Add("WCF Data Services 5.0 (for OData v3) Primary Components", (($installedItems | ? {$_.DisplayName -eq "WCF Data Services 5.0 (for OData v3) Primary Components"}) -ne $null))
     }
 
     #SP2016 prereqs
     if ($majorVersion -eq 16) {
-        $returnValue.Add("Active Directory Rights Management Services Client 2.1", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Active Directory Rights Management Services Client 2.1"})))
-        $returnValue.Add("Microsoft SQL Server 2012 Native Client", ($null -ne ($installedItems | Where-Object -FilterScript {$null -ne $_.Name -and $_.Name.Trim() -eq "Microsoft SQL Server 2012 Native Client"})))    
-        $returnValue.Add("Microsoft ODBC Driver 11 for SQL Server", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft ODBC Driver 11 for SQL Server"})))    
-        $returnValue.Add("Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"})))    
-        $returnValue.Add("Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"})))
-        $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"})))    
-        $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", ($null -ne ($installedItems | Where-Object -FilterScript {$_.Name -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"})))            
+        $returnValue.Add("Active Directory Rights Management Services Client 2.1", (($installedItems | ? {$_.DisplayName -eq "Active Directory Rights Management Services Client 2.1"}) -ne $null))
+        $returnValue.Add("Microsoft SQL Server 2012 Native Client", (($installedItems | ? {$_.DisplayName -ne $null -and $_.DisplayName.Trim() -eq "Microsoft SQL Server 2012 Native Client"}) -ne $null))    
+        $returnValue.Add("Microsoft ODBC Driver 11 for SQL Server", (($installedItems | ? {$_.DisplayName -eq "Microsoft ODBC Driver 11 for SQL Server"}) -ne $null))    
+        $returnValue.Add("Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030", (($installedItems | ? {$_.DisplayName -eq "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}) -ne $null))    
+        $returnValue.Add("Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030", (($installedItems | ? {$_.DisplayName -eq "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}) -ne $null))
+        $returnValue.Add("Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026", (($installedItems | ? {$_.DisplayName -eq "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}) -ne $null))    
+        $returnValue.Add("Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026", (($installedItems | ? {$_.DisplayName -eq "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}) -ne $null))            
     }
         
     $results = @{
