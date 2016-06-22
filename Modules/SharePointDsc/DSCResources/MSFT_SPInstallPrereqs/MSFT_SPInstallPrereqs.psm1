@@ -88,23 +88,23 @@ function Get-TargetResource
     $results = @{
         InstallerPath = $InstallerPath
         OnlineMode = $OnlineMode
-        SQLNCli = $SQLNCli      
-        PowerShell = $PowerShell        
-        NETFX = $NETFX    
-        IDFX = $IDFX        
-        Sync = $Sync        
-        AppFabric = $AppFabric        
-        IDFX11 = $IDFX11      
-        MSIPCClient = $MSIPCClient        
-        WCFDataServices = $WCFDataServices        
-        KB2671763 = $KB2671763   
-        WCFDataServices56 = $WCFDataServices56        
-        KB2898850 = $KB2898850 
+        SXSpath = $SXSpath
+        SQLNCli = $SQLNCli
+        PowerShell = $PowerShell
+        NETFX = $NETFX
+        IDFX = $IDFX
+        Sync = $Sync
+        AppFabric = $AppFabric
+        IDFX11 = $IDFX11
+        MSIPCClient = $MSIPCClient
+        WCFDataServices = $WCFDataServices
+        KB2671763 = $KB2671763
+        WCFDataServices56 = $WCFDataServices56
         MSVCRT11 = $MSVCRT11
         MSVCRT14 = $MSVCRT14
         KB3092423 = $KB3092423
         ODBC = $ODBC
-        DotNet452 = $DotNet452
+        DotNetFx = $DotNetFx
     }
     
     if (($returnValue.Values | Where-Object { $_ -eq $false }).Count -gt 0) {
