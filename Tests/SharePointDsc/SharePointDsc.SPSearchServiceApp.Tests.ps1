@@ -56,9 +56,11 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             }) }
             Mock Get-SPSite { @{} }
             
-            Mock Get-SPDSCContentAccessAccount {
-                return (New-Object System.Management.Automation.PSCredential ("Domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
-            }
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "Domain\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
             
             Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
 
@@ -174,10 +176,12 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                 })
             }
             
-            Mock Get-SPDSCContentAccessAccount {
-                return (New-Object System.Management.Automation.PSCredential ("DOESNOT\match", (ConvertTo-SecureString "password" -AsPlainText -Force)))
-            }
-            
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "WRONG\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+
             It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
@@ -203,9 +207,11 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                 })
             }
             
-            Mock Get-SPDSCContentAccessAccount {
-                return (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
-            }
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "Domain\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
             
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
@@ -243,9 +249,11 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             }) }
             Mock Get-SPSite { @{} }
             
-            Mock Get-SPDSCContentAccessAccount {
-                return (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
-            }
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "Domain\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
             
             It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
@@ -284,9 +292,11 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             }) }
             Mock Get-SPSite { @{} }
             
-            Mock Get-SPDSCContentAccessAccount {
-                return (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force)))
-            }
+            Mock New-Object {
+                return @{
+                    DefaultGatheringAccount = "Domain\username"
+                }
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
             
             It "should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
