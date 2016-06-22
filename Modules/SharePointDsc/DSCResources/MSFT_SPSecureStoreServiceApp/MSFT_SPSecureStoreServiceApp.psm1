@@ -103,7 +103,9 @@ function Set-TargetResource
                 $params.Remove("DatabaseAuthenticationType")
             }
 
-            if ($params.ProxyName -eq $Null) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
+            if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
+            if ($pName -eq $Null) {$pName = "$($params.Name) Proxy"}
+            
             New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $pName
         }
     } 
