@@ -1,5 +1,7 @@
 function Get-TargetResource
 {
+    # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])] 
     param
@@ -45,8 +47,13 @@ function Get-TargetResource
         if ($null -eq $serviceApp) { 
             return $nullReturn
         } else {
-            $defaultAccount = Get-SPDSCContentAccessAccount
-            
+            $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication } 
+            $s = Get-SPSite $caWebApp.Url
+            $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
+            $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;
+            $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
+            $defaultAccount = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @($sc.DefaultGatheringAccount, $dummyPassword)
+
             $cloudIndex = $false
             $version = Get-SPDSCInstalledProductVersion
             if(($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
@@ -211,7 +218,7 @@ function Get-SPDSCContentAccessAccount() {
     # Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     param()
-    $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | where {$_.IsAdministrationWebApplication} 
+    $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication } 
     $s = Get-SPSite $caWebApp.Url
     $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s);
     $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content -ArgumentList $c;

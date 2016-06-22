@@ -54,8 +54,8 @@ function Set-TargetResource
     $InstallerPath = Join-Path $BinaryDir "setup.exe"
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) {
-        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
-        if ($dotNet46Check -ne $null -and $dotNet46Check.Length -gt 0) {
+        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where-Object -FilterScript { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
+        if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) {
             throw [Exception] "A known issue prevents installation of SharePoint 2013 on servers that have .NET 4.6 already installed. See details at https://support.microsoft.com/en-us/kb/3087184"
             return
         }    
@@ -107,8 +107,8 @@ function Set-TargetResource
             $global:DSCMachineStatus = 1
         }
         30066 {
-            if (    ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
-                -or ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
+            if (    ($null -ne (Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue)) `
+                -or ($null -ne (Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue)) `
                 -or ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
                 ) {
                     

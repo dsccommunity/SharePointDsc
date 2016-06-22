@@ -166,6 +166,7 @@ function Remove-SPDSCUserToLocalAdmin() {
 
 function Test-SPDSCObjectHasProperty() {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
@@ -181,6 +182,7 @@ function Test-SPDSCObjectHasProperty() {
 
 function Test-SPDSCRunAsCredential() {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential
@@ -189,6 +191,39 @@ function Test-SPDSCRunAsCredential() {
     # If no specific credential is passed and it's not the machine account, it must be PsDscRunAsCredential
     if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false)) { return $true }
     # return false for all other scenarios
+    return $false
+}
+
+function Test-SPDSCRunningAsFarmAccount() {
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param ( 
+        [parameter(Mandatory = $false)] [pscredential] $InstallAccount
+    )
+
+    if ($null -eq $InstallAccount) {
+        if ($Env:USERNAME.Contains("$")) {
+            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
+            return
+        }
+        $Username = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+    } else {
+        $Username = $InstallAccount.UserName
+    }
+
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+        try {
+            $spFarm = Get-SPFarm
+        } catch {
+            Write-Verbose -Message "Unable to detect local farm."
+            return $null
+        }
+        return $spFarm.DefaultServiceAccount.Name
+    }
+    
+    if ($Username -eq $result) {
+        return $true
+    }
     return $false
 }
 
@@ -340,15 +375,18 @@ function Set-SPDSCObjectPropertyIfValueExists() {
     }
 }
 
-# Due to issues with unit testing, this function has been created so we are able to mock this function.
-function Remove-WebAppPolicy() {
+function Remove-SPDSCGenericObject() {
     [CmdletBinding()]
     param (
-        [parameter(Mandatory = $true)] [object] $policies,
-        [parameter(Mandatory = $true)] [string] $item
+        [parameter(Mandatory = $true)] 
+        [Object] 
+        $SourceCollection,
+
+        [parameter(Mandatory = $true)] 
+        [Object] 
+        $Target
     )
-    
-    $policies.Remove($item)
+    $SourceCollection.Remove($Target)
 }
 
 Export-ModuleMember -Function *

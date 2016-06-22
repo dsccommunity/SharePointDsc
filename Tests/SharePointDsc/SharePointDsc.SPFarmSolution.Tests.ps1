@@ -254,5 +254,33 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 Assert-MockCalled Wait-SPDSCSolutionJob 
             }
         }
+
+        Context "A solution deployment can target a specific compatability level" {
+            $testParams.Version = "1.0.0.0"
+            $testParams.Ensure = "Present"
+            $testParams.Add("SolutionLevel", "All")
+
+            $solution = [pscustomobject]@{
+                    Deployed                = $false
+                    Properties              = @{ Version = "1.0.0.0" }
+                    DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
+                    ContainsGlobalAssembly  = $true
+                } 
+            $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+
+            Mock Get-SPSolution { $solution }    
+            
+            Mock Remove-SPSolution { }
+            Mock Add-SPSolution { $solution } 
+
+            Mock Install-SPSolution { } 
+            Mock Wait-SPDSCSolutionJob { } 
+
+            It "deploys the solution using the correct compatability level" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Install-SPSolution -ParameterFilter { $CompatibilityLevel -eq $testParams.SolutionLevel }
+            }
+        }
     }   
 }

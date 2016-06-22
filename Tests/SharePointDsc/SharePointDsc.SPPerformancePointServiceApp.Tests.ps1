@@ -64,7 +64,7 @@ Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePoin
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Performance Point Service Application"
+                    TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 })
@@ -82,7 +82,7 @@ Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePoin
         Context "When a service application exists and is not configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Performance Point Service Application"
+                    TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 })
@@ -108,7 +108,7 @@ Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePoin
         Context "When the service application exists but it shouldn't" {
             Mock Get-SPServiceApplication { 
                 return @(@{
-                    TypeName = "Performance Point Service Application"
+                    TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 })

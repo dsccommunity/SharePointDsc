@@ -3,6 +3,7 @@ Class MSFT_SPWebPolicyPermissions
 {
     [Key, Description("Name of the account")] String Username;
     [Write, Description("Permission level of the account"), ValueMap{"Deny All","Deny Write","Full Read","Full Control"}, Values{"Deny All","Deny Write","Full Read","Full Control"}] String PermissionLevel[];
+    [Write, Description("Identity type for this entry, either claims or native. If not specified it will default to whatever mode the web application is in."), ValueMap{"Claims","Native"}, Values{"Claims","Native"}] String IdentityType;
     [Write, Description("Specifies if the account is allowed to act as a system account")] Boolean ActAsSystemAccount;
 };
 
@@ -32,8 +33,9 @@ Do not set the ActAsSystemAccount property to $true without setting the permissi
                 ActAsSystemAccount = $true
             })
             @(MSFT_SPWebPolicyPermissions {
-                Username        = "contoso\user2"
+                Username        = "contoso\Group 1"
                 PermissionLevel = "Full Read"
+                IdentityType    = "Claims"
             })
         )
         PsDscRunAsCredential = $InstallAccount

@@ -2,11 +2,17 @@
 
 ### Unreleased
 
- * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions resource
- * xSPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
- * Improvement with xSPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
+ * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
+ * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
+ * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
  * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
- * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity
+ * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
+ * Removed redundant value for KB2898850 from SPInstallPrereqs, also fixed old property name for DotNetFX
+ * Fixed a bug with SPAlternateUrl that prevented the test method from returning "true" when a URL was absent if the optional URL property was specified in the config
+ * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
+ * Added support for custom database name and server to SPPerformancePointServiceApp
+ * Added solution level property to SPFarmSolution
+ * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
 
 ### 1.0
 
