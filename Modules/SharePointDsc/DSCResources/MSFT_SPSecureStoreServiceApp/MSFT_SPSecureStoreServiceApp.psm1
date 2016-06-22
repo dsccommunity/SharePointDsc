@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyNameSuffix,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -60,6 +61,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyNameSuffix,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -101,7 +103,8 @@ function Set-TargetResource
                 $params.Remove("DatabaseAuthenticationType")
             }
 
-            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy"
+            if ($ProxyNameSuffix -eq $Null) {$ProxyName = $params.Name} Else {$ProxyName = "$($params.Name) $ProxyNameSuffix"}
+            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $ProxyName
         }
     } 
     
@@ -138,6 +141,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyNameSuffix,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
