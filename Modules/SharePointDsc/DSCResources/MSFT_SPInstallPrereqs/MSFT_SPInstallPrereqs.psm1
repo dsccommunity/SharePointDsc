@@ -151,24 +151,28 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Getting installed windows features"
-        
+
+    $osVersion = [System.Environment]::OSVersion.Version.Major    
     if ($majorVersion -eq 15) 
     {
         $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2013Features
     }
     if ($majorVersion -eq 16) 
     {
-        $osVersion = [System.Environment]::OSVersion.Version.Major
         if ($osVersion -eq 10) 
         {
             # Server 2016
             $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
-        } 
-        else 
+        }
+        elseif ($osVersion.Major -eq 6 -and $osVersion.Minor -eq 3)
         {
             # Server 2012 R2
-            $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win12r2Features  
+            $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win12r2Features
         }
+        else 
+        {
+            throw "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"        
+        } 
     }
     
     $windowsFeaturesInstalled = $true
@@ -189,7 +193,7 @@ function Get-TargetResource
     $x64Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX64 = Get-ItemProperty -Path $x64Path | Select-Object -Property DisplayName
 
-    $installedItems = $installedItemsX86 + $installedItemsX64
+    $installedItems = $installedItemsX86 + $installedItemsX64 | Select-Object -Property DisplayName -Unique
 
     # Common prereqs
     $prereqsToTest = @(
@@ -416,6 +420,8 @@ function Set-TargetResource
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
+    $osVersion = [System.Environment]::OSVersion.Version
+
     if ($majorVersion -eq 15) 
     {
         $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP"
@@ -442,16 +448,19 @@ function Set-TargetResource
         Write-Verbose -Message "Version: SharePoint 2016"
         $requiredParams = @("SQLNCli","Sync","AppFabric","IDFX11","MSIPCClient","KB3092423",
                             "WCFDataServices56","DotNetFx","MSVCRT11","MSVCRT14","ODBC")
-        $osVersion = [System.Environment]::OSVersion.Version.Major
-        if ($osVersion -eq 10) 
+        if ($osVersion.Major -eq 10) 
         {
             # Server 2016
             $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
         } 
-        else 
+        elseif ($osVersion.Major -eq 6 -and $osVersion.Minor -eq 3)
         {
             # Server 2012 R2
-            $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win12r2Features    
+            $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win12r2Features
+        }
+        else 
+        {
+            throw "SharePoint 2016 only supports Windows Server 2016 or 2012 R2"        
         }
     }
     
