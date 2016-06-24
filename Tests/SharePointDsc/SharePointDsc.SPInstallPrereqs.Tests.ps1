@@ -68,6 +68,12 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
 
         Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber } 
+        Mock Get-SPDscOSVersion {
+            return @{
+                Major = 6
+                Minor = 3
+            }
+        }
 
         Context "Prerequisites are not installed but should be and are to be installed in online mode" {
             $testParams = @{

@@ -152,14 +152,14 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting installed windows features"
 
-    $osVersion = [System.Environment]::OSVersion.Version.Major    
+    $osVersion = Get-SPDscOSVersion 
     if ($majorVersion -eq 15) 
     {
         $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2013Features
     }
     if ($majorVersion -eq 16) 
     {
-        if ($osVersion -eq 10) 
+        if ($osVersion.Major -eq 10) 
         {
             # Server 2016
             $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2016Win16Features
@@ -420,7 +420,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Detecting SharePoint version from binaries"
     $majorVersion = Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath
-    $osVersion = [System.Environment]::OSVersion.Version
+    $osVersion = Get-SPDscOSVersion
 
     if ($majorVersion -eq 15) 
     {

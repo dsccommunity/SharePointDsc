@@ -16,6 +16,12 @@ function Add-SPDSCUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Get-SPDscOSVersion {
+    [CmdletBinding()]
+    param()
+    return [System.Environment]::OSVersion.Version
+}
+
 function Get-SPDSCAssemblyVersion() {
     [CmdletBinding()]
     param
