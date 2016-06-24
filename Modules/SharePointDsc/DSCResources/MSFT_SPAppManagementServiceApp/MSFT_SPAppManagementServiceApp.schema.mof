@@ -8,14 +8,15 @@ Database names or server name will not be changed if the configuration does not 
 
 **Example**
 
-   SPAppManagementServiceApp AppManagementServiceApp
+    SPAppManagementServiceApp AppManagementServiceApp
     {
-        Name           = "App Management Service Application"
-        AppPool        = "SharePoint web services"
-        DatabaseServer = "SQL01.contoso.com"
-        DatabaseName   = "SP_ManagedMetadata"
-        Ensure         = "Present"
-}
+        Name                 = "App Management Service Application"
+        ApplicationPool      = "SharePoint web services"
+        DatabaseServer       = "SQL01.contoso.com"
+        DatabaseName         = "SP_AppManagement"
+        Ensure               = "Present"
+        PsDscRunAsCredential = $InstallAccount        
+    }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("SPAppManagementServiceApp")]
 class MSFT_SPAppManagementServiceApp : OMI_BaseResource
