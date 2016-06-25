@@ -122,33 +122,18 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = '
- * Renamed module from xSharePoint to SharePointDsc
- * Fixed bug in managed account schedule get method
- * Fixed incorrect output of server name in xSPOutgoingEmailSettings 
- * Added ensure properties to multiple resources to standardise schemas
- * Added xSPSearchContentSource, xSPContentDatabase, xSPServiceAppSecurity, xSPAccessServiceApp, xSPExcelServiceApp, xSPPerformancePointServiceApp, xSPIrmSettings resources
- * Fixed a bug in xSPInstallPrereqs that would cause an updated version of AD rights management to fail the test method for SharePoint 2013
- * Fixed bug in xSPFarmAdministrators where testing for users was case sensitive
- * Fixed a bug with reboot detection in xSPInstallPrereqs
- * Added SearchCenterUrl property to xSPSearchServiceApp
- * Fixed a bug in xSPAlternateUrl to account for a default zone URL being changed
- * Added content type hub URL option to xSPManagedMetadataServiceApp for when it provisions a service app
- * Updated xSPWebAppPolicy to allow addition and removal of accounts, including the Cache Accounts, to the web application policy.
- * Fixed bug with claims accounts not being added to web app policy in xSPCacheAccounts
- * Added option to not apply cache accounts policy to the web app in xSPCacheAccounts
- * Farm Passphrase now uses a PSCredential object, in order to pass the value as a securestring on xSPCreateFarm and xSPJoinFarm
- * xSPCreateFarm supports specifying Kerberos authentication for the Central Admin site with the CentralAdministrationAuth property
- * Fixed nuget package format for development feed from AppVeyor
- * Fixed bug with get output of xSPUSageApplication
- * Added SXSpath parameter to xSPInstallPrereqs for installing Windows features in offline environments
- * Added additional parameters to xSPWebAppGeneralSettings for use in hardened environments
- * Added timestamps to verbose logging for resources that pause for responses from SharePoint
- * Added options to customise the installation directories used when installing SharePoint with xSPInstall
- * Aligned testing to common DSC resource test module
- * Fixed bug in the xSPWebApplication which prevented a web application from being created in an existing application pool
- * Updated xSPInstallPrereqs to align with SharePoint 2016 RTM changes
- * Added support for cloud search index to xSPSearchServiceApp
- * Fixed bug in xSPWebAppGeneralSettings that prevented setting a security validation timeout value
+ * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
+ * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
+ * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
+ * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
+ * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
+ * Removed redundant value for KB2898850 from SPInstallPrereqs, also fixed old property name for DotNetFX
+ * Fixed a bug with SPAlternateUrl that prevented the test method from returning "true" when a URL was absent if the optional URL property was specified in the config
+ * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
+ * Added support for custom database name and server to SPPerformancePointServiceApp
+ * Added solution level property to SPFarmSolution
+ * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
+ * Removed dependency on Win32_Prouct from SPInstallPrereqs
 '
 
     } # End of PSData hashtable
