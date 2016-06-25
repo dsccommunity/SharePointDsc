@@ -157,7 +157,7 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $test = $PSBoundParameters
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $test -ScriptBlock {
         $params = $args[0]
         #region Validating parameter combinations
         if( ($params.ContainsKey("TermSet")  -or $params.ContainsKey("TermGroup") -or $params.ContainsKey("TermSet") ) -and
@@ -348,7 +348,6 @@ function Set-TargetResource
         #endregion 
 
     }
-    return  $result
 }
 
 function Test-TargetResource

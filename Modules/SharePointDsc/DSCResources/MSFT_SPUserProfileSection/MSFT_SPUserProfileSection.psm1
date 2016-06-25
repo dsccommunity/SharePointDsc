@@ -65,7 +65,7 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     
     Write-Verbose -Message "Creating user profile property $Name"
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
             $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
@@ -111,7 +111,6 @@ function Set-TargetResource
         }
 
     }
-    return  $result
 }
 
 function Test-TargetResource
