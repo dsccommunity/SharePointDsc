@@ -15,12 +15,13 @@ Remarks
 
 .EXAMPLE
 
-   SPWorkManagementServiceApp WorkManagementServiceApp
+    SPWorkManagementServiceApp WorkManagementServiceApp
     {
-        Name = "App Management Service Application"
-        ApplicationPool = "SharePoint web services"
-        MinimumTimeBetweenEwsSyncSubscriptionSearches = 10 
-}
+        Name                   = "Work Management Service Application"
+        ApplicationPool        = "SharePoint web services"
+        MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
+        PsDscRunAsCredential   = $InstallAccount
+    }
 
 .PARAMETER Name
     Key - string

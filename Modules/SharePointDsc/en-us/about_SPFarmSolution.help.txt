@@ -52,6 +52,11 @@ If the solution does not contain resources scoped for web applications the prope
     Write - Boolean
     Should the solution be deployed to the farm, or just installed to the farm
 
+.PARAMETER SolutionLevel
+    Write - string
+    Allowed values: 14, 15, All
+    What compatability level should the WSP be deployed as?
+
 .PARAMETER InstallAccount
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
