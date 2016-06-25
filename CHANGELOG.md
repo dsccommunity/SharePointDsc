@@ -13,6 +13,7 @@
  * Added support for custom database name and server to SPPerformancePointServiceApp
  * Added solution level property to SPFarmSolution
  * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
+ * Removed dependency on Win32_Prouct from SPInstallPrereqs
 
 ### 1.0
 
