@@ -1,6 +1,6 @@
 # Change log for SharePoint DSC
 
-### Unreleased
+### 1.1
 
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
  * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
