@@ -8,12 +8,13 @@ Database names or server name will not be changed if the configuration does not 
 
 **Example**
 
-   SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
+    SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
     {
-        Name = "Subscription Settings Service Application"
-        AppPool = "SharePoint web services"
-        DatabaseServer = "SQL01.contoso.com"
-        DatabaseName = "SP_ManagedMetadata"
+        Name                 = "Subscription Settings Service Application"
+        ApplicationPool      = "SharePoint web services"
+        DatabaseServer       = "SQL01.contoso.com"
+        DatabaseName         = "SP_SubscriptionSettings"
+        PsDscRunAsCredential = $InstallAccount
     }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("SPSubscriptionSettingsServiceApp")]
