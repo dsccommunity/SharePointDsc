@@ -96,7 +96,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 return @(
                     New-Object Object |            
                         Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                        Add-Member NoteProperty DisplayName $testParamsEnableNeBIOS.Name -PassThru | 
+                        Add-Member NoteProperty DisplayName $testParamsEnableNetBIOS.Name -PassThru | 
                         Add-Member NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
                         Add-Member ScriptMethod Update {$Global:SPUPSAUpdateCalled  = $true} -PassThru |
                         Add-Member NoteProperty ApplicationPool @{ Name = $testParamsEnableNetBIOS.ApplicationPool } -PassThru |             
@@ -153,6 +153,11 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
 
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParamsEnableNetBIOS | Should Be $false
+            }
+
+               It "returns true when the Test method is called" {
+               $testParamsEnableNetBIOS.EnableNetBIOS = $false
+                Test-TargetResource @testParamsEnableNetBIOS | Should Be $true
             }
         }
 
