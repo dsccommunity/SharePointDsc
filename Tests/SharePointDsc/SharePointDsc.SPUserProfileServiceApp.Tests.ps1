@@ -32,7 +32,11 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
         Mock Get-SPFarm { return @{
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}
-        Mock New-SPProfileServiceApplication { return @{} }
+        Mock New-SPProfileServiceApplication { return (@{
+                                        NetBIOSDomainNamesEnabled =  $false}) |
+
+
+         } }
         Mock New-SPProfileServiceApplicationProxy { }
         Mock Add-SPDSCUserToLocalAdmin { } 
         Mock Test-SPDSCUserIsLocalAdmin { return $false }
@@ -77,6 +81,79 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
 
             It "returns false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+       Context "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" {
+             $testParamsEnableNetBios = @{
+            Name = "User Profile Service App"
+            ApplicationPool = "SharePoint Service Applications",
+            NetBIOSDomainNamesEnabled=$false,
+            FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            Ensure = "Present"
+        }
+            Mock Get-SPServiceApplication { 
+                return @(
+                    New-Object Object |            
+                        Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
+                        Add-Member -memberType [System.Boolean] TypeName "NetBIOSDomainNamesEnabled" -value $false -PassThru |
+                        Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                        Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru  |             
+                        Add-Member ScriptMethod Update {
+                             $Global:SPUPSAUpdateCalled=$true
+                        } |             
+                        Add-Member ScriptMethod GetType {
+                            New-Object Object |
+                                Add-Member ScriptMethod GetProperties {
+                                    param($x)
+                                    return @(
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "SocialDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                param($x)
+                                                return @{
+                                                    Name = "SP_SocialDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        ),
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "ProfileDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                return @{
+                                                    Name = "SP_ProfileDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        ),
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "SynchronizationDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                return @{
+                                                    Name = "SP_ProfileSyncDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        )
+                                    )
+                                } -PassThru
+                    } -PassThru -Force 
+                )
+            }
+            
+            It "returns false from the Get method" {
+                (Get-TargetResource @testParamsEnableNetBios).EnableNetBios | Should Be $false  
+            }
+            It "calls Update method on Service Application before finishing set  method" {
+                $Global:SPUPSAUpdateCalled= $false
+            
+                Set-TargetResource @testParamsEnableNetBios
+                $Global:SPUPSAUpdateCalled | Should Be $true  
+
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParamsEnableNetBios | Should Be $false
             }
         }
 
