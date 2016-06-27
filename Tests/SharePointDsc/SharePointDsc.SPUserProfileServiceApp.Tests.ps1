@@ -33,10 +33,10 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}
         Mock New-SPProfileServiceApplication { return (@{
-                                        NetBIOSDomainNamesEnabled =  $false}) |
+                                        NetBIOSDomainNamesEnabled =  $false})
 
 
-         } }
+         } 
         Mock New-SPProfileServiceApplicationProxy { }
         Mock Add-SPDSCUserToLocalAdmin { } 
         Mock Test-SPDSCUserIsLocalAdmin { return $false }
@@ -85,23 +85,21 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
         }
 
        Context "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" {
-             $testParamsEnableNetBios = @{
+        $testParamsEnableNetBIOS = @{
             Name = "User Profile Service App"
-            ApplicationPool = "SharePoint Service Applications",
-            NetBIOSDomainNamesEnabled=$false,
+            ApplicationPool = "SharePoint Service Applications"
+            EnableNetBIOS=$true
             FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
-            Mock Get-SPServiceApplication { 
+                Mock Get-SPServiceApplication { 
                 return @(
                     New-Object Object |            
                         Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                        Add-Member -memberType [System.Boolean] TypeName "NetBIOSDomainNamesEnabled" -value $false -PassThru |
-                        Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
-                        Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru  |             
-                        Add-Member ScriptMethod Update {
-                             $Global:SPUPSAUpdateCalled=$true
-                        } |             
+                        Add-Member NoteProperty DisplayName $testParamsEnableNeBIOS.Name -PassThru | 
+                        Add-Member NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
+                        Add-Member ScriptMethod Update {$Global:SPUPSAUpdateCalled  = $true} -PassThru |
+                        Add-Member NoteProperty ApplicationPool @{ Name = $testParamsEnableNetBIOS.ApplicationPool } -PassThru |             
                         Add-Member ScriptMethod GetType {
                             New-Object Object |
                                 Add-Member ScriptMethod GetProperties {
@@ -140,20 +138,21 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                     } -PassThru -Force 
                 )
             }
+
             
             It "returns false from the Get method" {
-                (Get-TargetResource @testParamsEnableNetBios).EnableNetBios | Should Be $false  
+                (Get-TargetResource @testParamsEnableNetBIOS).EnableNetBIOS | Should Be $false  
             }
             It "calls Update method on Service Application before finishing set  method" {
                 $Global:SPUPSAUpdateCalled= $false
             
-                Set-TargetResource @testParamsEnableNetBios
+                Set-TargetResource @testParamsEnableNetBIOS
                 $Global:SPUPSAUpdateCalled | Should Be $true  
 
             }
 
             It "returns false when the Test method is called" {
-                Test-TargetResource @testParamsEnableNetBios | Should Be $false
+                Test-TargetResource @testParamsEnableNetBIOS | Should Be $false
             }
         }
 
@@ -163,6 +162,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                     New-Object Object |            
                         Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
                         Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                        Add-Member NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
                         Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
                         Add-Member ScriptMethod GetType {
                             New-Object Object |
@@ -232,6 +232,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                     New-Object Object |            
                         Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
                         Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                        Add-Member NoteProperty "NetBIOSDomainNamesEnabled" -value $false -PassThru |
                         Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
                         Add-Member ScriptMethod GetType {
                             New-Object Object |

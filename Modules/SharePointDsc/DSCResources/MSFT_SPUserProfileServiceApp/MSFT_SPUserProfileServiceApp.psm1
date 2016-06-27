@@ -95,6 +95,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
+        [parameter(Mandatory = $false)] [System.Boolean] $EnableNetBIOS = $false,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -128,19 +129,19 @@ function Set-TargetResource
             $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
-            
+            $app =$serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps) { 
                 $app = New-SPProfileServiceApplication @params
                 if ($null -ne $app) {
                     New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
                 }
             }
-            $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
-            $app = $serviceApps | Select-Object -First 1
             if($app.NetBIOSDomainNamesEnabled -ne $EnableNetBIOS){
                 $app.NetBIOSDomainNamesEnabled = $EnableNetBIOS
                 $app.Update()
             }
+
+            
         }
 
         # Remove the FarmAccount from the local Administrators group, if it was added above
