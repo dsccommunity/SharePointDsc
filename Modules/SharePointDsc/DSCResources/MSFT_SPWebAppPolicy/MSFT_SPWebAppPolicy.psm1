@@ -300,7 +300,7 @@ function Set-TargetResource
                         $user = @{
                             Type     = "Delete"
                             Username = $difference.Username
-                            IdentityType = $difference.IdentityType
+                            IdentityMode = $difference.IdentityType
                         }
                     }
                 }
