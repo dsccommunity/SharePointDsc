@@ -1,5 +1,8 @@
 # Change log for SharePointDsc
 
+### unreleased
+ * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp 
+
 ### 1.1
 
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
@@ -14,7 +17,6 @@
  * Added solution level property to SPFarmSolution
  * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
  * Removed dependency on Win32_Prouct from SPInstallPrereqs
- * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp 
 
 ### 1.0
 
