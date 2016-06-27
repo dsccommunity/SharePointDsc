@@ -381,7 +381,7 @@ function Set-TargetResource
                     Write-Verbose -Message "Adding $($user.Username)"
                     
                     $userToAdd = $user.Username
-                    if ($user.IdentityType -eq "Claims") 
+                    if ($user.IdentityMode -eq "Claims") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
@@ -420,7 +420,7 @@ function Set-TargetResource
                 "Change" {
                     # User exists. Check permissions
                     $userToChange = $user.Username
-                    if ($user.IdentityType -eq "Claims") 
+                    if ($user.IdentityMode -eq "Claims") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
@@ -465,7 +465,7 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Removing $($user.Username)"
                     $userToDrop = $user.Username
-                    if ($user.IdentityType -eq "Claims")  
+                    if ($user.IdentityMode -eq "Claims")  
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
