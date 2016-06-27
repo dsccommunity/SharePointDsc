@@ -215,6 +215,7 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
     
     if ($null -eq $CurrentValues) 
     {
