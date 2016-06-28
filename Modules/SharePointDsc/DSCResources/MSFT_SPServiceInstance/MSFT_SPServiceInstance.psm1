@@ -14,8 +14,7 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+		$si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
         
         if ($null -eq $si) { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
@@ -59,7 +58,7 @@ function Set-TargetResource
             $params = $args[0]
             
 
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
             if ($null -eq $si) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
@@ -76,7 +75,7 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.TypeName -eq $params.Name }
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
             if ($null -eq $si) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
