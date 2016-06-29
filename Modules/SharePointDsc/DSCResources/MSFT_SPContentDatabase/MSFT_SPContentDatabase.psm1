@@ -21,7 +21,7 @@ function Get-TargetResource
         
         $cdb = Get-SPDatabase | Where-Object { $_.Type -eq "Content Database" -and $_.Name -eq $params.Name }
 
-        if ($cdb -eq $null) {
+        if ($null -eq $cdb) {
             # Database does not exist
             return @{
                 Name = $params.Name
@@ -81,12 +81,12 @@ function Set-TargetResource
         if ($params.Ensure -eq "Present") {
             # Check if specified web application exists and throw exception when this is not the case
             $webapp = Get-SPWebApplication | Where-Object { $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/") }
-            if ($webapp -eq $null) {
+            if ($null -eq $webapp) {
                 throw "Specified web application does not exist."
             }
 
             # Check if database exists
-            if ($cdb -ne $null) {
+            if ($null -ne $cdb) {
                 if ($cdb.Server -ne $params.DatabaseServer) {
                     throw "Specified database server does not match the actual database server. This resource cannot move the database to a different SQL instance."
                 }
@@ -120,7 +120,7 @@ function Set-TargetResource
             }
             $cdb.Update()
         } else {
-            if ($cdb -ne $null) {
+            if ($null -ne $cdb) {
                 # Database exists, but shouldn't. Dismount database
                 Dismount-SPContentDatabase $params.Name -Confirm:$false
             }

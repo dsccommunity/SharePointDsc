@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+### Unreleased
+
+ * Modified all resources to ensure $null values are on the left of comparisson operations
+
 ### 1.1
 
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
