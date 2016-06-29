@@ -6,5 +6,6 @@ if ((Test-Path $DscTestsPath) -eq $false) {
 }
 Import-Module (Join-Path $PSScriptRoot "..\Modules\SharePointDsc\DscResource.Tests\TestHelper.psm1")
 
-cd (Join-Path $PSScriptRoot "..\Modules\SharePointDsc\DscResource.Tests")
+Set-Location -Path (Join-Path $PSScriptRoot "..\Modules\SharePointDsc\DscResource.Tests")
+
 Invoke-Pester 

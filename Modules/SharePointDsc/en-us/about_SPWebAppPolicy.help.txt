@@ -26,8 +26,9 @@ Do not set the ActAsSystemAccount property to $true without setting the permissi
                 ActAsSystemAccount = $true
             })
             @(MSFT_SPWebPolicyPermissions {
-                Username        = "contoso\user2"
+                Username        = "contoso\Group 1"
                 PermissionLevel = "Full Read"
+                IdentityType    = "Claims"
             })
         )
         PsDscRunAsCredential = $InstallAccount

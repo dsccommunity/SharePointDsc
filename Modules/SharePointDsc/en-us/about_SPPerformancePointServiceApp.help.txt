@@ -21,6 +21,14 @@ The resource will provision and configure the Performance Point Service Applicat
     Required - string
     The name of the application pool to run the service app in
 
+.PARAMETER DatabaseName
+    Write - string
+    The name of the database for the service app
+
+.PARAMETER DatabaseServer
+    Write - string
+    The name of the database server to host the database
+
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent
