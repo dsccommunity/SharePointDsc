@@ -49,7 +49,11 @@ function Get-TargetResource
             
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*") {
-                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value    
+                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value
+                if ($user -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                {
+                    $user = Resolve-SPDscSecurityIdentifier -SID $user
+                }
             }
             $members += @{
                 Username    = $user
