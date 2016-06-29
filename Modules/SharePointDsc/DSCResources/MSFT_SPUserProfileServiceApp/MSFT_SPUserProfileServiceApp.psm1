@@ -18,7 +18,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
-
+     
     Write-Verbose -Message "Getting user profile service application $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
@@ -122,7 +122,6 @@ function Set-TargetResource
             
             $enableNetBIOS = $false
             if ($params.ContainsKey("EnableNetBIOS")) { 
-                    Write-Verbose -Message "Setting EnableNetBIOS variable"
                 $enableNetBIOS =$params.EnableNetBIOS
                 $params.Remove("EnableNetBIOS") | Out-Null 
             }
