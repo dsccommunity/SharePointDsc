@@ -122,7 +122,6 @@ function Set-TargetResource
             
             $enableNetBIOS = $false
             if ($params.ContainsKey("EnableNetBIOS")) { 
-                    Write-Verbose -Message "Setting EnableNetBIOS variable"
                 $enableNetBIOS =$params.EnableNetBIOS
                 $params.Remove("EnableNetBIOS") | Out-Null 
             }
