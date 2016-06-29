@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+### Unreleased
+
+ * Minor tweaks to the PowerShell module manifest
+
 ### 1.1
 
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
