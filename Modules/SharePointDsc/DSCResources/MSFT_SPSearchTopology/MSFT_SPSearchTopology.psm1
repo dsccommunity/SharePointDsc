@@ -241,7 +241,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($CurrentValues -eq $null) { return $false }
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @(
                                                   "Admin", 

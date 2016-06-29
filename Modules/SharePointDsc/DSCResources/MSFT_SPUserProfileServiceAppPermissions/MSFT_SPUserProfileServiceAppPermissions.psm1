@@ -330,7 +330,7 @@ function Test-TargetResource
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("CreatePersonalSite", `
                                                          "FollowAndEditProfile", `

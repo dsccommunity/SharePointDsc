@@ -233,7 +233,7 @@ function Test-SPDSCRunningAsFarmAccount() {
     return $false
 }
 
-function Test-SPDSCSpecificParameters() {
+function Test-SPDscParameterState() {
     [CmdletBinding()]
     param
     (
@@ -256,7 +256,7 @@ function Test-SPDSCSpecificParameters() {
         -and ($DesiredValues.GetType().Name -ne "CimInstance") `
         -and ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary")) 
     {
-        throw ("Property 'DesiredValues' in Test-SPDSCSpecificParameters must be either a " + `
+        throw ("Property 'DesiredValues' in Test-SPDscParameterState must be either a " + `
                "Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)")
     }
 
@@ -336,6 +336,12 @@ function Test-SPDSCSpecificParameters() {
                                 {} 
                                 else 
                                 {
+                                    Write-Verbose -Message ("String value for property " + `
+                                                            "$fieldName does not match. " + `
+                                                            "Current state is " + `
+                                                            "'$($CurrentValues.$fieldName)' " + `
+                                                            "and desired state is " + `
+                                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
@@ -345,6 +351,12 @@ function Test-SPDSCSpecificParameters() {
                                 {} 
                                 else 
                                 {
+                                    Write-Verbose -Message ("Int32 value for property " + `
+                                                            "$fieldName does not match. " + `
+                                                            "Current state is " + `
+                                                            "'$($CurrentValues.$fieldName)' " + `
+                                                            "and desired state is " + `
+                                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
@@ -354,10 +366,20 @@ function Test-SPDSCSpecificParameters() {
                                 {} 
                                 else 
                                 {
+                                    Write-Verbose -Message ("Int16 value for property " + `
+                                                            "$fieldName does not match. " + `
+                                                            "Current state is " + `
+                                                            "'$($CurrentValues.$fieldName)' " + `
+                                                            "and desired state is " + `
+                                                            "'$($DesiredValues.$fieldName)'")
                                     $returnValue = $false
                                 }
                             }
                             default {
+                                Write-Verbose -Message ("Unable to compare property $fieldName " + `
+                                                        "as the type ($($desiredType.Name)) is " + `
+                                                        "not handled by the " + `
+                                                        "Test-SPDscParameterState cmdlet")
                                 $returnValue = $false
                             }
                         }

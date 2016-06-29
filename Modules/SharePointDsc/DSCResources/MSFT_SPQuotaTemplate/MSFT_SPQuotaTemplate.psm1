@@ -178,7 +178,7 @@ function Test-TargetResource
         "Present" {
             $CurrentValues = Get-TargetResource @PSBoundParameters
             if (($CurrentValues.Ensure -eq "Absent") -or ($CurrentValues -eq $null)) { return $false }
-            return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+            return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
         }
         "Absent" {
             if ($StorageMaxInMB -or $StorageWarningInMB -or $MaximumUsagePointsSolutions -or $WarningUsagePointsSolutions) {

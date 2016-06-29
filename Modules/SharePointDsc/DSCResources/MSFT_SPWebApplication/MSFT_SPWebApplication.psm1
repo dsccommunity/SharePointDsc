@@ -177,7 +177,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
     $PSBoundParameters.Ensure = $Ensure
-    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure")
     return $testReturn

@@ -79,7 +79,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing retrieving farm wide automatic password change settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
 }
 
 

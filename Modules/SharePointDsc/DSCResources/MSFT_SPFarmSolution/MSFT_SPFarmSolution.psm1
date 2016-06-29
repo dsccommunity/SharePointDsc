@@ -299,7 +299,7 @@ function Test-TargetResource
         $valuesToCheck = @("Ensure", "Version", "Deployed")
     }
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
 
 function Wait-SPDSCSolutionJob
