@@ -120,6 +120,12 @@ function Set-TargetResource
         $result = Invoke-SPDSCCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
+            $enableNetBIOS = $false
+            if ($params.ContainsKey("EnableNetBIOS")) { 
+                    Write-Verbose -Message "Setting EnableNetBIOS variable"
+                $enableNetBIOS =$params.EnableNetBIOS
+                $params.Remove("EnableNetBIOS") | Out-Null 
+            }
 
             if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
             if ($params.ContainsKey("Ensure")) { $params.Remove("Ensure") | Out-Null }
@@ -136,8 +142,8 @@ function Set-TargetResource
                     New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
                 }
             }
-            if($app.NetBIOSDomainNamesEnabled -ne $EnableNetBIOS){
-                $app.NetBIOSDomainNamesEnabled = $EnableNetBIOS
+            if($app.NetBIOSDomainNamesEnabled -ne $enableNetBIOS){
+                $app.NetBIOSDomainNamesEnabled = $enableNetBIOS
                 $app.Update()
             }
 
@@ -180,7 +186,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.String] $SocialDBServer,
         [parameter(Mandatory = $false)] [System.String] $SyncDBName,
         [parameter(Mandatory = $false)] [System.String] $SyncDBServer,
-        [parameter(Mandatory = $false)] [System.Boolean] $EnableNetBIOS = $false,
+        [parameter(Mandatory = $false)] [System.Boolean] $EnableNetBIOS = $false ,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
@@ -188,9 +194,8 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
     $PSBoundParameters.Ensure = $Ensure
-    $PSBoundParameters.EnableNetBIOS = $EnableNetBIOS
     if($Ensure -eq "Present"){
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "EnableNetBIOS" , "Ensure")
+        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","EnableNetBIOS", "Ensure")
     }else{
         return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name",  "Ensure")
     
