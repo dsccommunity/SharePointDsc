@@ -66,7 +66,7 @@ Description = 'This DSC module is used to deploy and configure SharePoint Server
 NestedModules = @("modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
 # Functions to export from this module
-FunctionsToExport = '*'
+#FunctionsToExport = '*'
 
 # Cmdlets to export from this module
 CmdletsToExport = @("Invoke-SPDSCCommand",
@@ -86,10 +86,10 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Get-SPDscOSVersion")
 
 # Variables to export from this module
-VariablesToExport = '*'
+#VariablesToExport = '*'
 
 # Aliases to export from this module
-AliasesToExport = '*'
+#AliasesToExport = '*'
 
 # List of all modules packaged with this module
 # ModuleList = @()
