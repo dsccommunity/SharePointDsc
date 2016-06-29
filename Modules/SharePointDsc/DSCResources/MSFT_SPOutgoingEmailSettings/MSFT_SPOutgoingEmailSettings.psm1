@@ -24,7 +24,7 @@ function Get-TargetResource
         }
         
         $mailServer = $null
-        if ($webApp.OutboundMailServiceInstance -ne $null) {
+        if ($null -ne $webApp.OutboundMailServiceInstance) {
             $mailServer = $webApp.OutboundMailServiceInstance.Server.Name
         }
         

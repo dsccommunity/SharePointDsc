@@ -239,7 +239,7 @@ function Test-TargetResource
         Write-Verbose "Processing Members parameter"
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username -DifferenceObject $Members.Username
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "Security list matches - checking that permissions match on each object"
             foreach($currentMember in $CurrentValues.Members) {
                 if ($currentMember.AccessLevel -ne ($Members | Where-Object { $_.Username -eq $currentMember.Username } | Select-Object -First 1).AccessLevel) {

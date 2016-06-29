@@ -4,6 +4,7 @@
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
  * Minor tweaks to the PowerShell module manifest
+ * Modified all resources to ensure $null values are on the left of comparisson operations
 
 ### 1.1
 

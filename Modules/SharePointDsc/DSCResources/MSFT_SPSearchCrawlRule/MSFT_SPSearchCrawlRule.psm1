@@ -72,7 +72,7 @@ function Get-TargetResource
         } else {
             $crawlRule = Get-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName | Where-Object { $_.Path -eq $params.Path }
 
-            if ($crawlRule -eq $null) {
+            if ($null -eq $crawlRule) {
                 Write-Verbose -Verbose "Crawl rule $($params.Path) not found"
                 return $nullReturn
             } else {
@@ -213,7 +213,7 @@ function Set-TargetResource
             
             $crawlRule = Get-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName | Where-Object { $_.Path -eq $params.Path }
 
-            if ($crawlRule -ne $null) {
+            if ($null -ne $crawlRule) {
                 $setParams = @{
                     Identity = $params.Path
                     SearchApplication = $params.ServiceAppName
@@ -300,7 +300,7 @@ function Test-TargetResource
     if ($Ensure -eq "Present") {
         if ($CrawlConfigurationRules) {
             if ($CurrentValues.ContainsKey("CrawlConfigurationRules")) {
-                if ((Compare-Object -ReferenceObject $CrawlConfigurationRules -DifferenceObject $CurrentValues.CrawlConfigurationRules) -ne $null) { return $false }
+                if ($null -ne (Compare-Object -ReferenceObject $CrawlConfigurationRules -DifferenceObject $CurrentValues.CrawlConfigurationRules)) { return $false }
             } else { return $false }
         }
 
