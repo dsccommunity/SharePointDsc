@@ -3,6 +3,7 @@
 ### Unreleased
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
+ * Minor tweaks to the PowerShell module manifest
 
 ### 1.1
 
