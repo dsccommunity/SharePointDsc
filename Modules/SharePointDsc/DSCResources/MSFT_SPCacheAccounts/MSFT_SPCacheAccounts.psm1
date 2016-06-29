@@ -35,7 +35,7 @@ function Get-TargetResource
         if ($wa.UseClaimsAuthentication -eq $true) {
             if ($wa.Properties.ContainsKey("portalsuperuseraccount")) {
                 $claim = New-SPClaimsPrincipal -Identity $wa.Properties["portalsuperuseraccount"] -IdentityType EncodedClaim -ErrorAction SilentlyContinue
-                if ($claim -ne $null) {
+                if ($null -ne $claim) {
                     $returnVal.Add("SuperUserAlias", $claim.Value)
                 } else {
                     $returnVal.Add("SuperUserAlias", "")
@@ -45,7 +45,7 @@ function Get-TargetResource
             }
             if ($wa.Properties.ContainsKey("portalsuperreaderaccount")) {
                 $claim = New-SPClaimsPrincipal -Identity $wa.Properties["portalsuperreaderaccount"] -IdentityType EncodedClaim -ErrorAction SilentlyContinue
-                if ($claim -ne $null) {
+                if ($null -ne $claim) {
                     $returnVal.Add("SuperReaderAlias", $claim.Value)
                 } else {
                     $returnVal.Add("SuperReaderAlias", "")

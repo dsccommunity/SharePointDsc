@@ -170,6 +170,19 @@ function Remove-SPDSCUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Resolve-SPDscSecurityIdentifier() {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $SID
+    )
+    $memberName = ([wmi]"Win32_SID.SID='$SID'").AccountName
+    $memberName = "$($env:USERDOMAIN)\$memberName"
+    return $memberName
+}
+
 function Test-SPDSCObjectHasProperty() {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -179,7 +192,7 @@ function Test-SPDSCObjectHasProperty() {
         [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
     )
     if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true) {
-        if ($Object.$PropertyName -ne $null) {
+        if ($null -ne $Object.$PropertyName) {
             return $true
         }
     }

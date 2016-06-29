@@ -144,7 +144,7 @@ function Set-TargetResource
             if ($shellAdmins) {
                 $differences = Compare-Object -ReferenceObject $shellAdmins.UserName -DifferenceObject $params.Members
 
-                if ($differences -eq $null) {
+                if ($null -eq $differences) {
                     Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
                 } else {
                     Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
@@ -233,7 +233,7 @@ function Set-TargetResource
                 Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
 
                 $currentCDB = Get-SPDSCContentDatabase | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
-                if ($currentCDB -ne $null) {
+                if ($null -ne $currentCDB) {
                     $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
 
                     if ($contentDatabase.Members) {
@@ -329,7 +329,7 @@ function Set-TargetResource
                     if ($dbShellAdmins) {
                         $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName -DifferenceObject $params.Members
 
-                        if ($differences -eq $null) {
+                        if ($null -eq $differences) {
                             Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
                         } else {
                             Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
@@ -440,7 +440,7 @@ function Test-TargetResource
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "Shell Admins group matches"
         } else {
             Write-Verbose "Shell Admins group does not match"
@@ -489,7 +489,7 @@ function Test-TargetResource
                 if (-not $contentDatabase.Members) { return $false }
 
                 $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $Members
-                if ($differences -eq $null) {
+                if ($null -eq $differences) {
                     Write-Verbose "Shell Admins group matches"
                 } else {
                     Write-Verbose "Shell Admins group does not match"
@@ -535,13 +535,13 @@ function Test-TargetResource
             Write-Verbose "Processing Content Database: $($contentDatabase.Name)"
 
             $currentCDB = $CurrentValues.ContentDatabases | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
-            if ($currentCDB -ne $null) {
+            if ($null -ne $currentCDB) {
                 if ($contentDatabase.Members) {
                     Write-Verbose "Processing Members parameter"
                     if (-not $currentCDB.Members) { return $false }
 
                     $differences = Compare-Object -ReferenceObject $currentCDB.Members -DifferenceObject $contentDatabase.Members
-                    if ($differences -eq $null) {
+                    if ($null -eq $differences) {
                         Write-Verbose "Shell Admins group matches"
                     } else {
                         Write-Verbose "Shell Admins group does not match"

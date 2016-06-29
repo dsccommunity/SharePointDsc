@@ -20,7 +20,7 @@ function Get-TargetResource
         }
         $wa = $site.WebApplication
         $feature = $wa.Features.Item([Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828"))
-        if($feature -eq $null){
+        if($null -eq $feature) {
             return $null
         }
         if ($site.ID -ne $feature.Properties["__AppCatSiteId"].Value) {
@@ -62,7 +62,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing app domain settings"
-    if($CurrentValues -eq $null){
+    if($null -eq $CurrentValues){
         return $false
     }
     return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 

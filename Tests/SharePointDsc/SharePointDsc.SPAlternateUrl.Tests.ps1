@@ -156,7 +156,7 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
                         PublicUrl = $testParams.Url
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $null }
+            } -ParameterFilter { $null -eq $WebApplication }
             $testParams.Ensure = "Present"
             
             it "should still return true in the test method despite the web app URL being different" {

@@ -177,7 +177,7 @@ function Test-TargetResource
     switch ($Ensure) {
         "Present" {
             $CurrentValues = Get-TargetResource @PSBoundParameters
-            if (($CurrentValues.Ensure -eq "Absent") -or ($CurrentValues -eq $null)) { return $false }
+            if (($CurrentValues.Ensure -eq "Absent") -or ($null -eq $CurrentValues)) { return $false }
             return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
         }
         "Absent" {
@@ -186,7 +186,7 @@ function Test-TargetResource
             }
 
             $CurrentValues = Get-TargetResource @PSBoundParameters
-            if (($CurrentValues.Ensure -eq "Present") -or ($CurrentValues -eq $null)) { 
+            if (($CurrentValues.Ensure -eq "Present") -or ($null -eq $CurrentValues)) { 
                 # Error occured in Get method or template exists, which is not supposed to be. Return false
                 return $false
             } else { 

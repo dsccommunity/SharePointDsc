@@ -33,7 +33,7 @@ function Get-TargetResource
             FarmAccount = $params.FarmAccount
             InstallAccount = $params.InstallAccount
         } }
-        if ($syncService.UserProfileApplicationGuid -ne $null -and $syncService.UserProfileApplicationGuid -ne [Guid]::Empty) {
+        if ($null -ne $syncService.UserProfileApplicationGuid -and $syncService.UserProfileApplicationGuid -ne [Guid]::Empty) {
             $upa = Get-SPServiceInstance -Identity $syncService.UserProfileApplicationGuid -ErrorAction SilentlyContinue
         }
         if ($syncService.Status -eq "Online") { $localEnsure = "Present" } else { $localEnsure = "Absent" }
@@ -96,7 +96,7 @@ function Set-TargetResource
             $currentServer = "$currentServer.$domain"
             $syncService = Get-SPServiceInstance -Server $currentServer | Where-Object { $_.TypeName -eq "User Profile Synchronization Service" }
         }
-        if ($syncService -eq $null) {
+        if ($null -eq $syncService) {
             throw "Unable to locate a user profile service instance on $currentServer to start"
         }
         
