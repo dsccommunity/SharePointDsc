@@ -157,7 +157,7 @@ function Set-TargetResource
             $startAddresses = "$($params.Addresses)"
             
             $source = Get-SPEnterpriseSearchCrawlContentSource -SearchApplication $params.ServiceAppName -Identity $params.Name -ErrorAction SilentlyContinue
-            if ($source -eq $null) {
+            if ($null -eq $source) {
                 switch ($params.ContentSourceType) {
                     "SharePoint" { $newType = "SharePoint" }
                     "Website" { $newType = "Web" }
@@ -208,7 +208,7 @@ function Set-TargetResource
             Set-SPEnterpriseSearchCrawlContentSource @allSetArguments @primarySetArgs            
             
             # Set the incremental search values
-            if ($params.ContainsKey("IncrementalSchedule") -eq $true -and $params.IncrementalSchedule -ne $null) {
+            if ($params.ContainsKey("IncrementalSchedule") -eq $true -and $null -ne $params.IncrementalSchedule) {
                 $incrementalSetArgs = @{
                     ScheduleType = "Incremental"
                 }
@@ -353,10 +353,10 @@ function Test-TargetResource
     
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1" -Resolve)
     
-    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($IncrementalSchedule -ne $null) -and ((Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($null -ne $IncrementalSchedule) -and ((Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule -DesiredSchedule $IncrementalSchedule) -eq $false)) {
         return $false;
     }
-    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($FullSchedule -ne $null) -and ((Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {
+    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($null -ne $FullSchedule) -and ((Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule -DesiredSchedule $FullSchedule) -eq $false)) {
         return $false;
     }
     
@@ -366,7 +366,7 @@ function Test-TargetResource
     $desiredAddresses = @()
     foreach ($address in $Addresses) { $desiredAddresses += New-Object System.Uri -ArgumentList $address }
     
-    if ((Compare-Object -ReferenceObject $currentAddresses -DifferenceObject $desiredAddresses) -ne $null) {
+    if ($null -ne (Compare-Object -ReferenceObject $currentAddresses -DifferenceObject $desiredAddresses)) {
         return $false
     }
     

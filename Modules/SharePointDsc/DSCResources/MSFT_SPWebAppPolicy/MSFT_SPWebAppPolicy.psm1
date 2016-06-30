@@ -128,6 +128,11 @@ function Get-TargetResource
                 }
             }
 
+            if ($memberName -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+            {
+                $memberName = Resolve-SPDscSecurityIdentifier -SID $memberName
+            }
+
             $member.Username = $memberName
             $member.PermissionLevel = $policy.PolicyRoleBindings.Name
             $member.ActAsSystemAccount = $policy.IsSystemUser

@@ -38,10 +38,24 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
         
         Mock Test-SPDSCIsADUser { return $true }
         
-        Mock New-SPClaimsPrincipal { return @{ Value = "CONTOSO\user2" }}
         Mock Grant-SPObjectSecurity {}
         Mock Revoke-SPObjectSecurity {}
         Mock Set-SPServiceApplicationSecurity {}
+
+        Mock New-SPClaimsPrincipal { 
+            return @{
+                Value = $Identity -replace "i:0#.w\|"
+            }
+        } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
+
+        Mock New-SPClaimsPrincipal { 
+            $Global:SPDSCClaimsPrincipalUser = $Identity
+            return (
+                New-Object Object | Add-Member ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:SPDSCClaimsPrincipalUser)" 
+                } -PassThru
+            )
+        } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
         
         Context "The service app that security should be applied to does not exist" {
             
@@ -224,6 +238,30 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
                     }
                 )
             }}
+            
+            It "should return a list of current members from the get method" {
+                (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
+            }
+            
+            It "should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "The service app exists and a specific list of members to add and remove is provided, which does match the desired state and includes a claims based group" {
+            
+            Mock Get-SPServiceApplication { return @{} }
+            Mock Get-SPServiceApplicationSecurity { return @{
+                AccessRules = @(
+                    @{
+                        Name = "i:0#.w|s-1-5-21-2753725054-2932589700-2007370523-2138"
+                        AllowedRights = "FullControl"
+                    }
+                )
+            }}
+            Mock Resolve-SPDscSecurityIdentifier {
+                return "CONTOSO\user1"
+            }
             
             It "should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty

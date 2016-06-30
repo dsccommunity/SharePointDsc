@@ -170,6 +170,19 @@ function Remove-SPDSCUserToLocalAdmin() {
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Resolve-SPDscSecurityIdentifier() {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $SID
+    )
+    $memberName = ([wmi]"Win32_SID.SID='$SID'").AccountName
+    $memberName = "$($env:USERDOMAIN)\$memberName"
+    return $memberName
+}
+
 function Test-SPDSCObjectHasProperty() {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -179,7 +192,7 @@ function Test-SPDSCObjectHasProperty() {
         [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
     )
     if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true) {
-        if ($Object.$PropertyName -ne $null) {
+        if ($null -ne $Object.$PropertyName) {
             return $true
         }
     }
@@ -254,7 +267,7 @@ function Test-SPDSCSpecificParameters() {
         throw "If 'DesiredValues' is a Hashtable then property 'ValuesToCheck' must contain a value"
     }
 
-    if (($ValuesToCheck -eq $null) -or ($ValuesToCheck.Count -lt 1)) {
+    if (($null -eq $ValuesToCheck) -or ($ValuesToCheck.Count -lt 1)) {
         $KeyList = $DesiredValues.Keys
     } else {
         $KeyList = $ValuesToCheck
@@ -275,10 +288,10 @@ function Test-SPDSCSpecificParameters() {
                     $desiredType = $DesiredValues.$_.GetType()
                     $fieldName = $_
                     if ($desiredType.IsArray -eq $true) {
-                        if (($CurrentValues.ContainsKey($fieldName) -eq $false) -or ($CurrentValues.$fieldName -eq $null)) {
+                        if (($CurrentValues.ContainsKey($fieldName) -eq $false) -or ($null -eq $CurrentValues.$fieldName)) {
                             $returnValue = $false
                         } else {
-                            if ((Compare-Object -ReferenceObject $CurrentValues.$fieldName -DifferenceObject $DesiredValues.$fieldName) -ne $null) {
+                            if ($null -ne (Compare-Object -ReferenceObject $CurrentValues.$fieldName -DifferenceObject $DesiredValues.$fieldName)) {
                                 $returnValue = $false
                             }
                         }
@@ -291,12 +304,12 @@ function Test-SPDSCSpecificParameters() {
                                 }
                             }
                             "Int32" {
-                                if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                if (($DesiredValues.$fieldName -eq 0) -and ($null -eq $CurrentValues.$fieldName)) {} else {
                                     $returnValue = $false
                                 }
                             }
                             "Int16" {
-                                if (($DesiredValues.$fieldName -eq 0) -and ($CurrentValues.$fieldName -eq $null)) {} else {
+                                if (($DesiredValues.$fieldName -eq 0) -and ($null -eq $CurrentValues.$fieldName)) {} else {
                                     $returnValue = $false
                                 }
                             }

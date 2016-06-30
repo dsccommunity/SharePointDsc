@@ -48,13 +48,13 @@ function Set-TargetResource
         if ($null -eq $farm ) { return $null }
         
         $farm.PasswordChangeEmailAddress = $params.MailAddress;
-        if($params.PasswordChangeWaitTimeSeconds -ne $null) {
+        if($null -ne $params.PasswordChangeWaitTimeSeconds) {
             $farm.PasswordChangeGuardTime = $params.PasswordChangeWaitTimeSeconds
         }
-        if($params.NumberOfRetries -ne $null) {
+        if($null -ne $params.NumberOfRetries) {
             $farm.PasswordChangeMaximumTries = $params.NumberOfRetries
         }
-        if($params.DaysBeforeExpiry -ne $null) {
+        if($null -ne $params.DaysBeforeExpiry) {
             $farm.DaysBeforePasswordExpirationToSendEmail = $params.DaysBeforeExpiry
         }
         $farm.Update();

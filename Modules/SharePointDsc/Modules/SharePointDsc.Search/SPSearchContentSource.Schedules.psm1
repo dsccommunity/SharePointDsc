@@ -64,11 +64,11 @@ function Test-SPDSCSearchCrawlSchedule {
         }
         "Weekly" { 
             if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleRunEveryInterval") -eq $true -and $CurrentSchedule.CrawlScheduleRunEveryInterval -ne $DesiredSchedule.CrawlScheduleRunEveryInterval) { return $false }
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true -and (Compare-Object -ReferenceObject $CurrentSchedule.CrawlScheduleDaysOfWeek.ToString().Split(', ', [System.StringSplitOptions]::RemoveEmptyEntries) -DifferenceObject $DesiredSchedule.CrawlScheduleDaysOfWeek) -ne $null) { return $false } 
+            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleDaysOfWeek") -eq $true -and $null -ne (Compare-Object -ReferenceObject $CurrentSchedule.CrawlScheduleDaysOfWeek.ToString().Split(', ', [System.StringSplitOptions]::RemoveEmptyEntries) -DifferenceObject $DesiredSchedule.CrawlScheduleDaysOfWeek)) { return $false } 
         }
         "Monthly" { 
             if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleDaysOfMonth") -eq $true -and $CurrentSchedule.CrawlScheduleDaysOfMonth -ne $DesiredSchedule.CrawlScheduleDaysOfMonth) { return $false }
-            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true -and (Compare-Object -ReferenceObject $CurrentSchedule.CrawlScheduleMonthsOfYear.ToString().Split(', ', [System.StringSplitOptions]::RemoveEmptyEntries) -DifferenceObject $DesiredSchedule.CrawlScheduleMonthsOfYear) -eq $null) { return $false }
+            if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule -PropertyName "CrawlScheduleMonthsOfYear") -eq $true -and $null -eq (Compare-Object -ReferenceObject $CurrentSchedule.CrawlScheduleMonthsOfYear.ToString().Split(', ', [System.StringSplitOptions]::RemoveEmptyEntries) -DifferenceObject $DesiredSchedule.CrawlScheduleMonthsOfYear)) { return $false }
         }
     }    
     return $true

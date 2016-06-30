@@ -72,7 +72,7 @@ function Set-TargetResource
         
         $admService = Get-SPDSCContentService
         
-        if ($params.UseADRMS -and ($params.RMSserver -ne $null)) {
+        if ($params.UseADRMS -and ($null -ne $params.RMSserver)) {
             throw "Cannot specify both an RMSserver and set UseADRMS to True"
         }
         

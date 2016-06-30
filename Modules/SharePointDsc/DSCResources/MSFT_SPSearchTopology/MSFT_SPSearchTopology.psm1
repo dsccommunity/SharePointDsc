@@ -86,7 +86,7 @@ function Set-TargetResource
         foreach($searchServer in $AllSearchServers) {
             
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer -ErrorAction SilentlyContinue
-            if ($searchService -eq $null) {
+            if ($null -eq $searchService) {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $searchServer = "$searchServer.$domain"
                 $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer    
@@ -125,12 +125,12 @@ function Set-TargetResource
         foreach ($server in $AllSearchServers) {
             $serverName = $server
             $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server -ErrorAction SilentlyContinue
-            if ($serviceToAdd -eq $null) {
+            if ($null -eq $serviceToAdd) {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $server = "$server.$domain"
                 $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server    
             }
-            if ($serviceToAdd -eq $null) {
+            if ($null -eq $serviceToAdd) {
                 throw "Unable to locate a search service instance on $serverName"
             }
             $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
@@ -240,7 +240,7 @@ function Test-TargetResource
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($CurrentValues -eq $null) { return $false }
+    if ($null -eq $CurrentValues) { return $false }
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @(
