@@ -95,7 +95,7 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for Access Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

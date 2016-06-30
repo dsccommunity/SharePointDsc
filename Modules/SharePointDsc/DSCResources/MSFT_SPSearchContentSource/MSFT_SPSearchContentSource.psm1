@@ -346,7 +346,7 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     
     if ($Ensure -eq "Absent") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                             -DesiredValues $PSBoundParameters `
                                             -ValuesToCheck @("Ensure")
     }
@@ -370,7 +370,7 @@ function Test-TargetResource
         return $false
     }
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("ContentSourceType", "CrawlSetting", "ContinousCrawl", "Priority", "LimitPageDepth", "LimitServerHops", "Ensure")
 }

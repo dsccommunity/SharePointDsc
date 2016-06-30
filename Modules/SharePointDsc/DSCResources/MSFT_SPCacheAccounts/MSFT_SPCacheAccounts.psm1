@@ -164,7 +164,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.SetWebAppPolicy = $SetWebAppPolicy
     Write-Verbose -Message "Testing cache accounts for $WebAppUrl"
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SuperUserAlias", "SuperReaderAlias", "SetWebAppPolicy")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SuperUserAlias", "SuperReaderAlias", "SetWebAppPolicy")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -193,11 +193,18 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
     $PSBoundParameters.Ensure = $Ensure
-    if($Ensure -eq "Present"){
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","EnableNetBIOS", "Ensure")
-    }else{
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name",  "Ensure")
-    
+
+    if($Ensure -eq "Present")
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                            -DesiredValues $PSBoundParameters `
+                                            -ValuesToCheck @("Name","EnableNetBIOS", "Ensure")
+    }
+    else
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                            -DesiredValues $PSBoundParameters `
+                                            -ValuesToCheck @("Name", "Ensure")
     }
 }
 

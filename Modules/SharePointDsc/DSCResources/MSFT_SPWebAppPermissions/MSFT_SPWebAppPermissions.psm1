@@ -196,7 +196,7 @@ function Test-TargetResource
     
     if ($AllPermissions -eq $true) {
         if ($CurrentValues.ContainsKey("AllPermissions")) {
-            return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")
+            return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")
         } else {
             return $false
         }    
