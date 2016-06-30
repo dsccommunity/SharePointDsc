@@ -196,13 +196,13 @@ function Test-TargetResource
 
     if($Ensure -eq "Present")
     {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                             -DesiredValues $PSBoundParameters `
                                             -ValuesToCheck @("Name","EnableNetBIOS", "Ensure")
     }
     else
     {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                             -DesiredValues $PSBoundParameters `
                                             -ValuesToCheck @("Name", "Ensure")
     }
