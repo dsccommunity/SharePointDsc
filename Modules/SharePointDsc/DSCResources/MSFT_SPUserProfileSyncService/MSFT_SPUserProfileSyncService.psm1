@@ -133,6 +133,8 @@ function Set-TargetResource
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
+    #TODO: Check the param for read only and change the ensure value accordingly based on the DB state
+
     Write-Verbose -Message "Setting User Profile Synchronization Service"
 
     # Add the FarmAccount to the local Admins group, if it's not already there
@@ -263,6 +265,9 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    #TODO: Add logic here to determine if the DB is read only (if the param is set) and change ensure accordingly
+
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
     $PSBoundParameters.Ensure = $Ensure
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
