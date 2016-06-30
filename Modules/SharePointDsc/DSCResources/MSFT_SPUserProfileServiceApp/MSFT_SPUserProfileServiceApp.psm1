@@ -18,7 +18,7 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
-     
+      
     Write-Verbose -Message "Getting user profile service application $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
