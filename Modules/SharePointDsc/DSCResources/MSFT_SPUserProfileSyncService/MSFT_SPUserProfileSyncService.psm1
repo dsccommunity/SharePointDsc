@@ -133,7 +133,23 @@ function Set-TargetResource
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
-    #TODO: Check the param for read only and change the ensure value accordingly based on the DB state
+    if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
+    {
+        $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
+                                -UserProfileServiceAppName $UserProfileServiceAppName `
+                                -InstallAccount $InstallAccount
+                                
+        if ($databaseReadOnly)
+        {
+            Write-Verbose -Message ("User profile database is read only, setting user profile " + `
+                                   "sync service to not run on the local server")
+            $PSBoundParameters.Ensure = "Absent"
+        }
+        else 
+        {
+            $PSBoundParameters.Ensure = "Present"
+        }
+    }
 
     Write-Verbose -Message "Setting User Profile Synchronization Service"
 
@@ -265,16 +281,76 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    #TODO: Add logic here to determine if the DB is read only (if the param is set) and change ensure accordingly
-
-    Write-Verbose -Message "Testing for User Profile Synchronization Service"
     $PSBoundParameters.Ensure = $Ensure
+    
+    if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
+    {
+        $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
+                                -UserProfileServiceAppName $UserProfileServiceAppName `
+                                -InstallAccount $InstallAccount
+
+        if ($databaseReadOnly)
+        {
+            Write-Verbose -Message ("User profile database is read only, setting user profile " + `
+                                   "sync service to not run on the local server")
+            $PSBoundParameters.Ensure = "Absent"
+        }
+        else 
+        {
+            $PSBoundParameters.Ensure = "Present"
+        }
+    }
+    
+    Write-Verbose -Message "Testing for User Profile Synchronization Service"
+    
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("Ensure")
 }
 
+function Test-SPDscUserProfileDBReadOnly() 
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]
+        $UserProfileServiceAppName,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
+    )
+
+    $databaseReadOnly = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                            -Arguments $UserProfileServiceAppName `
+                                            -ScriptBlock {
+        $UserProfileServiceAppName = $args[0]
+
+        $serviceApps = Get-SPServiceApplication -Name $UserProfileServiceAppName `
+                                                -ErrorAction SilentlyContinue 
+        if ($null -eq $serviceApps) 
+        { 
+            throw [Exception] ("No user profile service was found " + `
+                               "named $UserProfileServiceAppName")
+        }
+        $ups = $serviceApps | Where-Object -FilterScript { 
+            $_.TypeName -eq "User Profile Service Application" 
+        }
+
+        $propType = $ups.GetType()
+        $propData = $propType.GetProperties([System.Reflection.BindingFlags]::Instance -bor `
+                                            [System.Reflection.BindingFlags]::NonPublic)
+        $profileProp = $propData | Where-Object -FilterScript {
+            $_.Name -eq "ProfileDatabase"
+        }
+        $profileDBName = $profileProp.GetValue($serviceApp).Name
+
+        $database = Get-SPDatabase | Where-Object -FilterScript { 
+            $_.Name -eq $profileDBName
+        }
+        return $database.IsReadyOnly
+    }
+    return $databaseReadOnly
+}
 
 Export-ModuleMember -Function *-TargetResource
 
