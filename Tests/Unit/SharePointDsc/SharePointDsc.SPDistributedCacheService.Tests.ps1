@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPDistributedCacheService"
@@ -29,7 +29,7 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+        $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
         Import-Module "$RepoRoot\Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
         Mock Use-CacheCluster { }
         Mock Get-WmiObject { return @{ StartName = $testParams.ServiceAccount } }

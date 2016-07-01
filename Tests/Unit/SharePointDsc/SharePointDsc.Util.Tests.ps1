@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC") -Force
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\Modules\SharePointDSC.Util\SharePointDSC.Util.psm1") -Force

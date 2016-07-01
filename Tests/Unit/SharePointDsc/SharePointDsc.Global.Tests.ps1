@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module "$PSScriptRoot\SharePointDSC.TestHelpers.psm1"
 
 Describe 'SharePointDSC whole of module tests' {
