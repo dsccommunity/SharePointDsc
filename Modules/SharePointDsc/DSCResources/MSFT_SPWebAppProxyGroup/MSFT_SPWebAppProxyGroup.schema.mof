@@ -1,0 +1,31 @@
+/*
+**Description**
+
+This resource is used to associate a web application to a service application proxy group.
+Use the proxy group name "Default" to associate the web application to the default proxy group.
+A web applicaiton can only connect to a single service application proxy group. This resource will overright the existing service application proxy group association.
+
+This resource is used in conjunction with the SPServiceAppProxyGroup resource, which creates the proxy groups and associates the desired service application proxies with it. Within your configuration, that resource should be a dependancy for the SPWebAppProxyGroup resource.
+
+**Example**
+
+   SPWebAppProxyGroup ContosoWeb
+    {
+        WebAppUrl                = "https://web.contoso.com"
+        ServiceAppProxyGroup  = "Proxy Group 1"
+    }
+
+    SPWebAppProxyGroup DefaultPortal
+    {
+        WebAppUrl                = "https://portal.contoso.com"
+        ServiceAppProxyGroup  = "Default"
+    }
+
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("SPWebAppProxyGroup")]
+class MSFT_SPWebAppProxyGroup : OMI_BaseResource
+{
+    [Key, Description("URL of the web application")] String WebAppUrl;
+    [Required, Description("Name of the Service Applicaiton Proxy Group")] string ServiceAppProxyGroup; 
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};

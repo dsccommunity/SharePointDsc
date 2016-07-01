@@ -104,9 +104,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing Office Online Server details for '$Zone' zone"
     
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Zone","DnsName", "Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Zone","DnsName", "Ensure")
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")   
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")   
     }
 }
 
