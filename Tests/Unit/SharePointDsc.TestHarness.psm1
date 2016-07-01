@@ -40,7 +40,7 @@ function Invoke-SPDSCTests() {
     $testsToRun = @()
     $versionsToTest | ForEach-Object {
         $testsToRun += @(@{
-            'Path' = "$repoDir\Tests\Unit"
+            'Path' = (Join-Path -Path $repoDir -ChildPath "\Tests\Unit")
             'Parameters' = @{ 
                 'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Unit\Stubs\SharePoint\$_\Microsoft.SharePoint.PowerShell.psm1")
             }
