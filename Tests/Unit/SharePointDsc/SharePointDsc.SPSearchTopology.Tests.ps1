@@ -24,7 +24,7 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
             IndexPartition          = @($env:COMPUTERNAME)
             FirstPartitionDirectory = "I:\SearchIndexes\0"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 

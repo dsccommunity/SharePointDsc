@@ -21,7 +21,7 @@ Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointC
             AutomaticallyDeleteUnusedSiteCollections = $true
             UnusedSiteNotificationsBeforeDeletion    = 30
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

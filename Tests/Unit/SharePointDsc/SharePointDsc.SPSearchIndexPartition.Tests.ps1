@@ -20,7 +20,7 @@ Describe "SPSearchIndexPartition - SharePoint Build $((Get-Item $SharePointCmdle
             RootDirectory = "C:\SearchIndex\0"
             ServiceAppName = "Search Service Application"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 

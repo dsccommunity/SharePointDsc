@@ -18,7 +18,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             Name         = "ShellAdmins"
             Members      = "contoso\user1", "contoso\user2"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
 
         
         Mock Invoke-SPDSCCommand { 

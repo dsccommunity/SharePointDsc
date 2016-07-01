@@ -23,7 +23,7 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             CentralAdministrationAuth = "Kerberos"
             CentralAdministrationPort = 1234
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

@@ -21,7 +21,7 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
             ServiceAccount = "DOMAIN\user"
             CreateFirewallRules = $true
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

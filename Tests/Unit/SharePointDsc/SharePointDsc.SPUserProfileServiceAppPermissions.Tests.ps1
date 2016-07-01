@@ -20,7 +20,7 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             FollowAndEditProfile = @("Everyone")
             UseTagsAndNotes      = @("None")
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

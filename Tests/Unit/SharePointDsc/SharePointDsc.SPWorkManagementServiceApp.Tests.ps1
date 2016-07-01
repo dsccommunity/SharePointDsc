@@ -29,7 +29,7 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
             NumberOfUsersPerEwsSyncBatch=10
         }
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
 
         
         Mock Invoke-SPDSCCommand { 

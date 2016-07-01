@@ -19,7 +19,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName

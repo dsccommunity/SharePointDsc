@@ -19,7 +19,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))

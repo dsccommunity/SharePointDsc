@@ -21,7 +21,7 @@ Describe "SPBCSServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule
             DatabaseServer = "TestServer\Instance"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
 
         
         Mock Invoke-SPDSCCommand { 

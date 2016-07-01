@@ -20,7 +20,7 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
             Ensure = "Present"
             Url = "http://something.contoso.local"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
