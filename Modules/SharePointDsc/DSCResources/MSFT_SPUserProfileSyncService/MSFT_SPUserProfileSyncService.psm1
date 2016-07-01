@@ -282,7 +282,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
-    
+
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
@@ -342,7 +342,7 @@ function Test-SPDscUserProfileDBReadOnly()
         $profileProp = $propData | Where-Object -FilterScript {
             $_.Name -eq "ProfileDatabase"
         }
-        $profileDBName = $profileProp.GetValue($serviceApp).Name
+        $profileDBName = $profileProp.GetValue($ups).Name
 
         $database = Get-SPDatabase | Where-Object -FilterScript { 
             $_.Name -eq $profileDBName
