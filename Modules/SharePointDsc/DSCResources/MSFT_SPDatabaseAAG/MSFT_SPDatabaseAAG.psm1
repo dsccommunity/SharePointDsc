@@ -122,6 +122,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Checking AAG configuration for $DatabaseName"
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
 }
 

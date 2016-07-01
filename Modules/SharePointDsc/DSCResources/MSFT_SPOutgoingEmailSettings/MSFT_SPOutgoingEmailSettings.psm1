@@ -85,7 +85,7 @@ function Test-TargetResource
     Write-Verbose -Message "Comparing Current and Target Outgoing email settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
 }
 
 

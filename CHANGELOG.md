@@ -6,6 +6,8 @@
  * Minor tweaks to the PowerShell module manifest
  * Modified all resources to ensure $null values are on the left of comparisson operations
  * Added RunOnlyWhenWriteable property to SPUserProfileSyncService resource
+ * Added better logging to all test method output to make it clear what property is causing a test to fail
+ * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
 
 ### 1.1
 

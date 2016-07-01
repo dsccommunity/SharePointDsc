@@ -115,7 +115,7 @@ function Test-TargetResource
 
     if ($UseADRMS -ne $true) { $PSBoundParameters.UseADRMS = $false }
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
     
 }
 

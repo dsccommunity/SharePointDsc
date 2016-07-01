@@ -672,7 +672,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Checking installation of SharePoint prerequisites"
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 

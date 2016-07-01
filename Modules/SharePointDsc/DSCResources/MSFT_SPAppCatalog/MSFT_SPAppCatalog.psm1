@@ -65,7 +65,7 @@ function Test-TargetResource
     if($null -eq $CurrentValues){
         return $false
     }
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -154,7 +154,7 @@ function Test-TargetResource
     }
 
     $PSBoundParameters.Ensure = $Ensure
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 ### Exception Test-TargetResource with different DBServer to message and false

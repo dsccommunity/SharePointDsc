@@ -282,7 +282,6 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
-
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
@@ -303,9 +302,9 @@ function Test-TargetResource
     
     Write-Verbose -Message "Testing for User Profile Synchronization Service"
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 function Test-SPDscUserProfileDBReadOnly() 

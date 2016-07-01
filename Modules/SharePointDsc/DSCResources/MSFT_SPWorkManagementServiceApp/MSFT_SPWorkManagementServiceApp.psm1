@@ -143,7 +143,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
                                                                                                                              "MinimumTimeBetweenEwsSyncSubscriptionSearches",
                                                                                                                              "MinimumTimeBetweenProviderRefreshes",
                                                                                                                              "MinimumTimeBetweenSearchQueries",
@@ -154,7 +154,7 @@ function Test-TargetResource
                                                                                                                              "Ensure"
                                                                                                                             )
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 }

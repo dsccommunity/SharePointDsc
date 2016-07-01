@@ -127,7 +127,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for BCS Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
