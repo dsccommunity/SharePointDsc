@@ -6,16 +6,16 @@ function Invoke-SPDSCTests() {
         [parameter(Mandatory = $false)] [System.Boolean] $CalculateTestCoverage = $true
     )
 
-    Write-Verbose "Commencing SharePointDSC unit tests"
+    Write-Verbose "Commencing SharePointDsc unit tests"
 
-    $repoDir = Join-Path $PSScriptRoot "..\" -Resolve
+    $repoDir = Join-Path $PSScriptRoot "..\..\" -Resolve
 
     $testCoverageFiles = @()
     if ($CalculateTestCoverage -eq $true) {
         Write-Warning -Message ("Code coverage statistics are being calculated. This will slow the " + `
                                 "start of the tests by several minutes while the code matrix is " + `
                                 "built. Please be patient")
-        Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.psm1" -Recurse | ForEach-Object { 
+        Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.psm1" -Recurse | ForEach-Object { 
             if ($_.FullName -notlike "*\DSCResource.Tests\*") {
                 $testCoverageFiles += $_.FullName    
             }
@@ -28,21 +28,21 @@ function Invoke-SPDSCTests() {
         $testResultSettings.Add("OutputFormat", "NUnitXml" )
         $testResultSettings.Add("OutputFile", $testResultsFile)
     }
-    Import-Module "$repoDir\modules\SharePointDSC\SharePointDSC.psd1"
+    Import-Module "$repoDir\modules\SharePointDsc\SharePointDsc.psd1"
     
     
-    $versionsToTest = (Get-ChildItem (Join-Path $repoDir "\UnitTests\Stubs\SharePoint\")).Name
+    $versionsToTest = (Get-ChildItem (Join-Path $repoDir "\Tests\Unit\Stubs\SharePoint\")).Name
     
     # Import the first stub found so that there is a base module loaded before the tests start
     $firstVersion = $versionsToTest | Select -First 1
-    Import-Module (Join-Path $repoDir "\UnitTests\Stubs\SharePoint\$firstVersion\Microsoft.SharePoint.PowerShell.psm1") -WarningAction SilentlyContinue
+    Import-Module (Join-Path $repoDir "\Tests\Unit\Stubs\SharePoint\$firstVersion\Microsoft.SharePoint.PowerShell.psm1") -WarningAction SilentlyContinue
 
     $testsToRun = @()
     $versionsToTest | ForEach-Object {
         $testsToRun += @(@{
-            'Path' = "$repoDir\UnitTests"
+            'Path' = "$repoDir\Tests\Unit"
             'Parameters' = @{ 
-                'SharePointCmdletModule' = (Join-Path $repoDir "\UnitTests\Stubs\SharePoint\$_\Microsoft.SharePoint.PowerShell.psm1")
+                'SharePointCmdletModule' = (Join-Path $repoDir "\Tests\Unit\Stubs\SharePoint\$_\Microsoft.SharePoint.PowerShell.psm1")
             }
         })
     }
