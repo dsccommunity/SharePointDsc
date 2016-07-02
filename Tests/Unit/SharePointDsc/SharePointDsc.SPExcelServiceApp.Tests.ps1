@@ -18,7 +18,7 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             Name = "Test Excel Services App"
             ApplicationPool = "Test App Pool"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))

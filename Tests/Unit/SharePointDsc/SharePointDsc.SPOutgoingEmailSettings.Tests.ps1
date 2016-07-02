@@ -21,7 +21,7 @@ Describe "SPOutgoingEmailSettings - SharePoint Build $((Get-Item $SharePointCmdl
             ReplyToAddress = "reply@email.com"
             CharacterSet= "65001"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

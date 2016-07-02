@@ -19,7 +19,7 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             ApplicationPool = "Test App Pool"
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         
         Mock Invoke-SPDSCCommand { 

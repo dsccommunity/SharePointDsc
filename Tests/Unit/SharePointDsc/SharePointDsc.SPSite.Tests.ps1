@@ -18,7 +18,7 @@ Describe "SPSite - SharePoint Build $((Get-Item $SharePointCmdletModule).Directo
             Url = "http://site.sharepoint.com"
             OwnerAlias = "DEMO\User"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

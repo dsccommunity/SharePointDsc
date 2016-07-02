@@ -34,7 +34,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             KeepAliveTimeout = 30
             MaximumConversionTime = 300
         } 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc") 
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc") 
 
         Mock Invoke-SPDSCCommand {  
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope 

@@ -18,7 +18,7 @@ Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePoin
             Name = "Test Performance Point App"
             ApplicationPool = "Test App Pool"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         
         Mock Invoke-SPDSCCommand { 

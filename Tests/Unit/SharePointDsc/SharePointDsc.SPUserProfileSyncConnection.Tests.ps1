@@ -34,7 +34,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
                 }        
 "@ -ErrorAction SilentlyContinue 
         }   
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Get-SPDSCServiceContext {return @{}}
 

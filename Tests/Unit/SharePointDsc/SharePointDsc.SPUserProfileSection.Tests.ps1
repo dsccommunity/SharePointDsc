@@ -34,7 +34,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
 "@ -ErrorAction SilentlyContinue
         }   
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         $coreProperty = @{ 
                             DisplayName = $testParams.DisplayName

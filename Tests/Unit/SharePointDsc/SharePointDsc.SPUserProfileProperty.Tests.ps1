@@ -77,7 +77,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 "@ -ErrorAction SilentlyContinue
         }   
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         $corePropertyUpdate = @{ 
                             DisplayName = "WorkEmailUpdate" 

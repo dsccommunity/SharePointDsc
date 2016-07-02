@@ -18,7 +18,7 @@ Describe "SPFarmAdministrators - SharePoint Build $((Get-Item $SharePointCmdletM
             Name = "Farm Administrators"
             Members = @("Demo\User1", "Demo\User2")
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         
         Mock Invoke-SPDSCCommand { 

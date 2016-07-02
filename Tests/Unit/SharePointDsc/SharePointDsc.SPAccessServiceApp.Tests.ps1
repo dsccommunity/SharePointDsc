@@ -19,7 +19,7 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             DatabaseServer = "SQL.contoso.local"
             ApplicationPool = "Test App Pool"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         
         Mock Invoke-SPDSCCommand { 

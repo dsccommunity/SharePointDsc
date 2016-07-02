@@ -22,7 +22,7 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
             SSL = $false
         }
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

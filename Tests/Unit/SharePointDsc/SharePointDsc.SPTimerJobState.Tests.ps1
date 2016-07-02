@@ -19,7 +19,7 @@ Describe "SPTimerJobState - SharePoint Build $((Get-Item $SharePointCmdletModule
             Enabled = $true
             Schedule = "hourly between 0 and 59"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope

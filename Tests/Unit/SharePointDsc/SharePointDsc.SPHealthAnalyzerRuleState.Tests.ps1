@@ -21,7 +21,7 @@ Describe "SPHealthAnalyzerRuleState - SharePoint Build $((Get-Item $SharePointCm
             Schedule = "Daily"
             FixAutomatically = $false
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
