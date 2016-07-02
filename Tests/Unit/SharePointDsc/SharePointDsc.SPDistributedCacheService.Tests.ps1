@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPDistributedCacheService"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -21,7 +21,7 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
             ServiceAccount = "DOMAIN\user"
             CreateFirewallRules = $true
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -30,7 +30,7 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-        Import-Module "$RepoRoot\Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
+        Import-Module "$RepoRoot\Tests\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
         Mock Use-CacheCluster { }
         Mock Get-WmiObject { return @{ StartName = $testParams.ServiceAccount } }
         Mock Get-NetFirewallRule { return @{} }

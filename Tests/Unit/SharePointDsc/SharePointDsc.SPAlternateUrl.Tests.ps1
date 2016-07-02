@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 $ModuleName = "MSFT_SPAlternateUrl"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -20,7 +20,7 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
             Ensure = "Present"
             Url = "http://something.contoso.local"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -100,7 +100,7 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
         }
 
-        Context "A URL exists for the specified zone and web app, and it is correct" {
+        Context "A URL exists for the specified zone and web app, and it should not" {
             
             Mock Get-SPAlternateUrl {
                 return @(
@@ -122,6 +122,26 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 Assert-MockCalled Remove-SPAlternateURL
             }
         }
+
+        Context "A URL does not exist for the current zone, and it should not" {
+
+            Mock Get-SPAlternateUrl {
+                return @()
+            } 
+
+            it "returns the empty values in the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            it "returns true from the test method" {
+                Test-targetResource @testParams | Should Be $true
+            }
+            $testParams.Remove("Url")
+            it "still returns true from the test method with the URL property not providing" {
+                Test-targetResource @testParams | Should Be $true
+            }
+            $testParams.Add("Url", "http://something.contoso.local")
+        }
         
         Context "The default zone URL for a web app was changed using this resource" {
             
@@ -136,7 +156,7 @@ Describe "SPAlternateUrl - SharePoint Build $((Get-Item $SharePointCmdletModule)
                         PublicUrl = $testParams.Url
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $null }
+            } -ParameterFilter { $null -eq $WebApplication }
             $testParams.Ensure = "Present"
             
             it "should still return true in the test method despite the web app URL being different" {

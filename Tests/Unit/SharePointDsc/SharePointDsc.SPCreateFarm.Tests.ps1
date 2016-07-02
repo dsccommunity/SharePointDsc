@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "MSFT_SPCreateFarm"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -23,7 +23,7 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             CentralAdministrationAuth = "Kerberos"
             CentralAdministrationPort = 1234
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -139,6 +139,11 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
                 DefaultServiceAccount = @{ Name = "WRONG\account" }
                 Name = $testParams.FarmConfigDatabaseName
             }}
+            Mock Get-SPDatabase { return @(@{ 
+                Name = $testParams.FarmConfigDatabaseName
+                Type = "Configuration Database"
+                Server = @{ Name = $testParams.DatabaseServer }
+            })} 
             Mock Get-SPWebApplication { return @(@{
                 IsAdministrationWebApplication = $true
                 ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })

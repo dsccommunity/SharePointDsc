@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
     
 $ModuleName = "MSFT_SPUserProfileServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
 Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -20,7 +20,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDSC")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -32,12 +32,16 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
         Mock Get-SPFarm { return @{
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}
-        Mock New-SPProfileServiceApplication { return @{} }
+        Mock New-SPProfileServiceApplication { return (@{
+                                        NetBIOSDomainNamesEnabled =  $false})
+
+
+         } 
         Mock New-SPProfileServiceApplicationProxy { }
         Mock Add-SPDSCUserToLocalAdmin { } 
         Mock Test-SPDSCUserIsLocalAdmin { return $false }
         Mock Remove-SPDSCUserToLocalAdmin { }
-        Mock New-PSSession { return $null } -ModuleName "SharePointDSC.Util"
+        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         Mock Remove-SPServiceApplication { } 
 
         Context "When no service applications exist in the current farm" {
@@ -80,12 +84,90 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
+       Context "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" {
+        $testParamsEnableNetBIOS = @{
+            Name = "User Profile Service App"
+            ApplicationPool = "SharePoint Service Applications"
+            EnableNetBIOS=$true
+            FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+            Ensure = "Present"
+        }
+                Mock Get-SPServiceApplication { 
+                return @(
+                    New-Object Object |            
+                        Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
+                        Add-Member NoteProperty DisplayName $testParamsEnableNetBIOS.Name -PassThru | 
+                        Add-Member NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
+                        Add-Member ScriptMethod Update {$Global:SPUPSAUpdateCalled  = $true} -PassThru |
+                        Add-Member NoteProperty ApplicationPool @{ Name = $testParamsEnableNetBIOS.ApplicationPool } -PassThru |             
+                        Add-Member ScriptMethod GetType {
+                            New-Object Object |
+                                Add-Member ScriptMethod GetProperties {
+                                    param($x)
+                                    return @(
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "SocialDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                param($x)
+                                                return @{
+                                                    Name = "SP_SocialDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        ),
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "ProfileDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                return @{
+                                                    Name = "SP_ProfileDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        ),
+                                        (New-Object Object |
+                                            Add-Member NoteProperty Name "SynchronizationDatabase" -PassThru |
+                                            Add-Member ScriptMethod GetValue {
+                                                return @{
+                                                    Name = "SP_ProfileSyncDB"
+                                                    Server = @{ Name = "SQL.domain.local" }
+                                                }
+                                            } -PassThru
+                                        )
+                                    )
+                                } -PassThru
+                    } -PassThru -Force 
+                )
+            }
+
+            
+            It "returns false from the Get method" {
+                (Get-TargetResource @testParamsEnableNetBIOS).EnableNetBIOS | Should Be $false  
+            }
+            It "calls Update method on Service Application before finishing set  method" {
+                $Global:SPUPSAUpdateCalled= $false
+            
+                Set-TargetResource @testParamsEnableNetBIOS
+                $Global:SPUPSAUpdateCalled | Should Be $true  
+
+            }
+
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParamsEnableNetBIOS | Should Be $false
+            }
+
+               It "returns true when the Test method is called" {
+               $testParamsEnableNetBIOS.EnableNetBIOS = $false
+                Test-TargetResource @testParamsEnableNetBIOS | Should Be $true
+            }
+        }
+
         Context "When a service application exists and is configured correctly" {
             Mock Get-SPServiceApplication { 
                 return @(
                     New-Object Object |            
                         Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
                         Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                        Add-Member NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
                         Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
                         Add-Member ScriptMethod GetType {
                             New-Object Object |
@@ -155,6 +237,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                     New-Object Object |            
                         Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
                         Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                        Add-Member NoteProperty "NetBIOSDomainNamesEnabled" -value $false -PassThru |
                         Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
                         Add-Member ScriptMethod GetType {
                             New-Object Object |

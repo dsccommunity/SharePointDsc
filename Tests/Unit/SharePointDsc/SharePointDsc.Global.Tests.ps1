@@ -6,11 +6,11 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-Import-Module "$PSScriptRoot\SharePointDSC.TestHelpers.psm1"
+Import-Module "$PSScriptRoot\SharePointDsc.TestHelpers.psm1"
 
-Describe 'SharePointDSC whole of module tests' {
+Describe 'SharePointDsc whole of module tests' {
 
-    $mofFiles = @(Get-ChildItem $RepoRoot -Recurse -Filter "*.schema.mof" -File | ? {
+    $mofFiles = @(Get-ChildItem $RepoRoot -Recurse -Filter "*.schema.mof" -File | Where-Object -FilterScript {
         ($_.FullName -like "*\DscResources\*")
     })
     
@@ -24,7 +24,7 @@ Describe 'SharePointDSC whole of module tests' {
                     $installAccount = $mofSchema.Attributes | Where-Object { $_.Name -eq "InstallAccount" }
                     if (($null -ne $installAccount) -and ($installAccount.State -eq "Required")) {
                         $mofFilesWithRequiredInstallAccount += 1
-                        Write-Warning "File $($_.FullName) has InstallAccount listed as a required parameter. After v0.6 of SharePointDSC this should be changed to 'write' instead of 'required'"
+                        Write-Warning "File $($_.FullName) has InstallAccount listed as a required parameter. After v0.6 of SharePointDsc this should be changed to 'write' instead of 'required'"
                     }
                 }
             }
@@ -49,7 +49,7 @@ Describe 'SharePointDSC whole of module tests' {
         It "uses MOF schemas that match the functions used in the corresponding PowerShell module for each resource" {
             $filesWithErrors = 0
             $WarningPreference = "Continue"
-            $mofFiles | % {
+            $mofFiles | ForEach-Object -Process {
                 if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
             }
             $filesWithErrors | Should Be 0
