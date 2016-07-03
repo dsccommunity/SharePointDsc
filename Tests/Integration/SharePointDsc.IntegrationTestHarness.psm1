@@ -3,7 +3,7 @@ function Invoke-SPDscIntegrationTest() {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     param()
 
-    $repoDir = Join-Path -Path $PSScriptRoot -ChildPath "..\" -Resolve
+    $repoDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
 
     $global:SPDscIntegrationGlobals = Import-LocalizedData -FileName GlobalVariables.psd1 `
                                                            -BaseDirectory $PSScriptRoot
