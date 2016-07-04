@@ -14,7 +14,7 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-		$si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
+        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
         
         if ($null -eq $si) { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
