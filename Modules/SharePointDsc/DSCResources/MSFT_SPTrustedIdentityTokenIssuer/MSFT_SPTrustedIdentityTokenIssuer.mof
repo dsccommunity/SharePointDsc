@@ -1,0 +1,45 @@
+/*
+
+**Description**
+
+This resource is used to make sure that a specific SPTrustedIdentityTokenIssuer is either present or absent in a farm.
+The Ensure property will dictate if the SPTrustedIdentityTokenIssuer should be present or absent. 
+The name property is the name of the SPTrustedIdentityTokenIssuer.
+The IdentifierClaim property must match a claim type specified in ClaimsMappings.
+The ClaimsMappings property is list of HashTables that contain parameters for New-SPClaimTypeMapping cmdlet.
+The SigningCertificateThumbPrint must match the thumbprint of a certificate located in store LocalMachine\My.
+The ClaimProviderName property can be set to specify a custom claims provider. This claims provider must be already installed in the SharePoint farm and returned by cmdlet Get-SPClaimProvider.
+
+**Example**
+
+    SPTrustedIdentityTokenIssuer SampleSPTrust
+    {
+        Name                         = "Contoso"
+		Description                  = "Contoso"
+		Realm                        = "https://sharepoint.contoso.com"
+        SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+		IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+		ClaimsMappings               = @( @{Name = "Email"; IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"}, @{Name = "Account name"; IncomingClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"; LocalClaimType = "http://schemas.xmlsoap.org/customSPGroupClaimType"} )
+		SigningCertificateThumbPrint = "F3229E7CCA1DA812E29284B0ED75A9A019A83B08"
+		ClaimProviderName            = "ldapcp"
+		ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+        Ensure                       = "Present"
+        PsDscRunAsCredential         = $InstallAccount
+    }
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("SPTrustedIdentityTokenIssuer")]
+class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
+{
+    [Key, String, Description("The Name of the SPTrustedIdentityTokenIssuer")] Name;
+    [Required, Description("The Description of the SPTrustedIdentityTokenIssuer")] String Description;
+    [Required, Description("The default Realm of the SPTrustedIdentityTokenIssuer")] String Realm;
+    [Required, Description("The SignInUrl of the SPTrustedIdentityTokenIssuer")] String SignInUrl;
+    [Required, Description("The identity claim type to use, it must match a claim type specified in ClaimsMappings")] String IdentifierClaim;
+    [Required, Description("A list of HashTables that contain parameters for New-SPClaimTypeMapping cmdlet"), EmbeddedInstance("MSFT_KeyValuePair")] String ClaimsMappings[];
+    [Required, Description("The thumbprint of the signing certificate to use with this SPTrustedIdentityTokenIssuer. It must match the thumbprint of a certificate located in store LocalMachine\My")] String SigningCertificateThumbPrint;
+    [Write, Description("The name of a claims provider to set to the SPTrustedIdentityTokenIssuer. This claims provider must be already installed in the SharePoint farm and returned by cmdlet Get-SPClaimProvider")] String ClaimProviderName;
+    [Write, Description("The ProviderSignOutUri of the SPTrustedIdentityTokenIssuer")] String ProviderSignOutUri;
+    [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
