@@ -10,7 +10,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
-Describe -Tags @("PreServiceApp") "SPServiceAppPool - Integration Tests" {
+Describe -Tags @("PostFarm") "SPServiceAppPool - Integration Tests" {
     Context "Creates new service app pools" {
         It "Is able to create service app pools" {
             $configName = "SPServiceAppPool_CreateNewAppPool"
