@@ -28,7 +28,7 @@ This is done to ensure that the databases are created with the correct schema ow
 class MSFT_SPUserProfileServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the user profile service")] string Name;
-	[Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
     [Write, Description("The farm account to use when provisioning the app"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
     [Write, Description("The URL of the my site host collection")] string MySiteHostLocation;
