@@ -23,8 +23,8 @@ Configuration SharePointServer
         # settings etc.
         #********************************************************** 
 
-        xCredSSP CredSSPServer { Ensure = "Present"; Role = "Server"; DependsOn = "[xComputer]DomainJoin" } 
-        xCredSSP CredSSPClient { Ensure = "Present"; Role = "Client"; DelegateComputers = "*.$($ConfigurationData.NonNodeData.DomainDetails.DomainName)"; DependsOn = "[xComputer]DomainJoin" }
+        xCredSSP CredSSPServer { Ensure = "Present"; Role = "Server"; } 
+        xCredSSP CredSSPClient { Ensure = "Present"; Role = "Client"; DelegateComputers = "*.$($ConfigurationData.NonNodeData.DomainDetails.DomainName)"; }
 
         if ($Node.DisableIISLoopbackCheck -eq $true) {
             Registry DisableLoopBackCheck {
@@ -379,7 +379,7 @@ Configuration SharePointServer
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
         {  
-            Name                 = "SPWindowsToken"
+            Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = $FarmWaitTask
@@ -389,14 +389,14 @@ Configuration SharePointServer
         if ($Node.ServiceRoles.AppServer -eq $true) {
             SPServiceInstance UserProfileServiceInstance
             {  
-                Name                 = "UserProfile"
+                Name                 = "User Profile Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
             }        
             SPServiceInstance SecureStoreServiceInstance
             {  
-                Name                 = "SecureStore"
+                Name                 = "Secure Store Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
@@ -418,14 +418,14 @@ Configuration SharePointServer
         if ($Node.ServiceRoles.WebFrontEnd -eq $true) {
             SPServiceInstance ManagedMetadataServiceInstance
             {  
-                Name                 = "MetadataWeb"
+                Name                 = "Managed Metadata Web Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
             }
             SPServiceInstance BCSServiceInstance
             {  
-                Name                 = "Bdc"
+                Name                 = "Business Data Connectivity Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
@@ -434,7 +434,7 @@ Configuration SharePointServer
         
         SPServiceInstance SearchServiceInstance
         {  
-            Name                 = "Search"
+            Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = $FarmWaitTask

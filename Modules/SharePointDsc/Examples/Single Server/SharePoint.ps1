@@ -258,7 +258,7 @@ Configuration SharePointServer
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
         {  
-            Name                 = "SPWindowsToken"
+            Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPCreateFarm]CreateSPFarm"
@@ -268,14 +268,14 @@ Configuration SharePointServer
         if ($Node.ServiceRoles.AppServer -eq $true) {
             SPServiceInstance UserProfileServiceInstance
             {  
-                Name                 = "ProfileService"
+                Name                 = "User Profile Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = "[SPCreateFarm]CreateSPFarm"
             }        
             SPServiceInstance SecureStoreServiceInstance
             {  
-                Name                 = "SecureStore"
+                Name                 = "Secure Store Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = "[SPCreateFarm]CreateSPFarm"
@@ -295,14 +295,14 @@ Configuration SharePointServer
         if ($Node.ServiceRoles.WebFrontEnd -eq $true) {
             SPServiceInstance ManagedMetadataServiceInstance
             {  
-                Name                 = "MetadataWeb"
+                Name                 = "Managed Metadata Web Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = "[SPCreateFarm]CreateSPFarm"
             }
             SPServiceInstance BCSServiceInstance
             {  
-                Name                 = "Bdc"
+                Name                 = "Business Data Connectivity Service"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = "[SPCreateFarm]CreateSPFarm"
@@ -311,7 +311,7 @@ Configuration SharePointServer
         
         SPServiceInstance SearchServiceInstance
         {  
-            Name                 = "Search"
+            Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPCreateFarm]CreateSPFarm"
