@@ -1516,5 +1516,55 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
+
+        Context "The users in the Members parameter have the same settings as configured in the policy, in Claims format with a windows group in the results" {
+            $testParams = @{
+                WebAppUrl   = "http://sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
+                        Username           = "contoso\group1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $false
+                        IdentityType       = "Claims"
+                    } -ClientOnly)
+                )
+            }
+            Mock Get-SPWebApplication { 
+                $roleBindings = @(
+                    @{
+                        Name = "Full Control"
+                    }
+                )
+
+                $policies = @(
+                    @{
+                        UserName = "i:0#.w|s-1-5-21-2753725054-2932589700-2007370523-2138"
+                        PolicyRoleBindings = $roleBindings
+                        IsSystemUser = $false
+                    }   
+                )
+                 
+                $webApp = @{
+                    Url = $testParams.WebAppUrl
+                    UseClaimsAuthentication = $true
+                    PolicyRoles = New-Object Object |
+                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    Policies = $policies
+                    Properties = @{}
+                }
+                return @($webApp)
+            }
+            Mock Resolve-SPDscSecurityIdentifier {
+                return "contoso\group1"
+            }
+
+            It "returns null from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
     }    
 }

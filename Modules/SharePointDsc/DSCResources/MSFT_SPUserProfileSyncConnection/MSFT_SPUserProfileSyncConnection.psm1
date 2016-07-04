@@ -216,7 +216,7 @@ function Test-TargetResource
     {
         return $false 
     }    
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
 }
 
 function Get-SPDSCADSIObject() {

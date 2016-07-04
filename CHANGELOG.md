@@ -1,8 +1,18 @@
-# Change log for SharePoint DSC
+# Change log for SharePointDsc
 
 ### Unreleased
 
  * Add ProxyName parameters to Service App
+ * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
+ * Minor tweaks to the PowerShell module manifest
+ * Modified all resources to ensure $null values are on the left of comparisson operations
+ * Added RunOnlyWhenWriteable property to SPUserProfileSyncService resource
+ * Added better logging to all test method output to make it clear what property is causing a test to fail
+ * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
+
+### 1.1
+
+>>>>>>> upstream/dev
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
  * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
  * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
@@ -13,6 +23,8 @@
  * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
  * Added support for custom database name and server to SPPerformancePointServiceApp
  * Added solution level property to SPFarmSolution
+ * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
+ * Removed dependency on Win32_Prouct from SPInstallPrereqs
 
 ### 1.0
 

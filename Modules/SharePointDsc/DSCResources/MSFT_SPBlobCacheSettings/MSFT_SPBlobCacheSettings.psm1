@@ -212,7 +212,7 @@ function Test-TargetResource
         }
     }
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @("EnableCache", "Location", "MaxSizeInGB", "FileType", "MaxAgeInSeconds")
 }

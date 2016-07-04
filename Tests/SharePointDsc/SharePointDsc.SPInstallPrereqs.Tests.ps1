@@ -15,6 +15,19 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleNa
 Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
 
+        function New-SPDscMockPrereq()
+        {
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [String]
+                $Name
+            )
+            $object = New-Object -TypeName System.Object
+            $object = $object | Add-Member -type NoteProperty -Name "DisplayName" -Value $Name -PassThru
+            return $object
+        }
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
@@ -27,6 +40,12 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
         if ($null -eq (Get-Command Install-WindowsFeature -ErrorAction SilentlyContinue)) {
             function Install-WindowsFeature() { }
         }
+
+        Mock Get-ItemProperty -ParameterFilter { 
+                    $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+                } -MockWith {
+                    return @()
+                }
         
         Mock Get-ChildItem {
             return @(
@@ -34,7 +53,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                     Version = "4.5.0.0"
                     Release = "0"
                     PSChildName = "Full"
-                },
+                }, 
                 @{
                     Version = "4.5.0.0"
                     Release = "0"
@@ -49,7 +68,12 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
 
         Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber } 
-        Mock Get-ChildItem { return $null }
+        Mock Get-SPDscOSVersion {
+            return @{
+                Major = 6
+                Minor = 3
+            }
+        }
 
         Context "Prerequisites are not installed but should be and are to be installed in online mode" {
             $testParams = @{
@@ -59,8 +83,9 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
-            Mock Get-CimInstance { return @() }
-            Mock Get-ChildItem { return @() }
+            Mock Get-ItemProperty -MockWith {
+                return @()
+            }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -118,37 +143,43 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
             
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
+            
             if ($majorBuildNumber -eq 15) {
-                Mock Get-CimInstance { return @(
-                    @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
-                    @{ Name = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}
-                    @{ Name = "AppFabric 1.1 for Windows Server"}
-                    @{ Name = "WCF Data Services 5.6.0 Runtime"}
-                    @{ Name = "WCF Data Services 5.0 (for OData v3) Primary Components"}
-                    @{ Name = "Microsoft SQL Server 2008 R2 Native Client"}
-                    @{ Name = "Active Directory Rights Management Services Client 2.0"}
-                )}
+                Mock Get-ItemProperty -ParameterFilter { 
+                    $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+                } -MockWith {
+                    return @(
+                        (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"), 
+                        (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"), 
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"), 
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.0 (for OData v3) Primary Components"), 
+                        (New-SPDscMockPrereq -Name "Microsoft SQL Server 2008 R2 Native Client"), 
+                        (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.0"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Identity Extensions" )
+                    )
+                }
             }
             if ($majorBuildNumber -eq 16) {
-                Mock Get-CimInstance { return @(
-                    @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
-                    @{ Name = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}
-                    @{ Name = "AppFabric 1.1 for Windows Server"}
-                    @{ Name = "WCF Data Services 5.6.0 Runtime"}
-                    @{ Name = "Microsoft ODBC Driver 11 for SQL Server"}
-                    @{ Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}
-                    @{ Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}
-                    @{ Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}
-                    @{ Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}
-                    @{ Name = "Microsoft SQL Server 2012 Native Client"}
-                    @{ Name = "Active Directory Rights Management Services Client 2.1"}
-                )}
+                Mock Get-ItemProperty -ParameterFilter { 
+                    $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+                } -MockWith {
+                    return @(
+                        (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"), 
+                        (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"), 
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"), 
+                        (New-SPDscMockPrereq -Name "Microsoft ODBC Driver 11 for SQL Server"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"), 
+                        (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"), 
+                        (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.1"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
+                    )
+                }
             }
-            Mock Get-ChildItem { return $null }
-            Mock Get-ChildItem { return @(
-                (New-Object Object | 
-                    Add-Member ScriptMethod GetValue { return "Microsoft Identity Extensions" } -PassThru)
-            ) }
             
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -159,54 +190,41 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
-        Context "Prerequisites are installed and should be (with SQL 2012 native client for SP2013)" {
-            $testParams = @{
-                InstallerPath = "C:\SPInstall"
-                OnlineMode = $true
-                Ensure = "Present"
-            }
+        if ($majorBuildNumber -eq 15)
+        {
+            Context "Prerequisites are installed and should be (with SQL 2012 native client for SP2013)" {
+                $testParams = @{
+                    InstallerPath = "C:\SPInstall"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
 
-            Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
-            if ($majorBuildNumber -eq 15) {
-                Mock Get-CimInstance { return @(
-                    @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
-                    @{ Name = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}
-                    @{ Name = "AppFabric 1.1 for Windows Server"}
-                    @{ Name = "WCF Data Services 5.6.0 Runtime"}
-                    @{ Name = "WCF Data Services 5.0 (for OData v3) Primary Components"}
-                    @{ Name = "Microsoft SQL Server 2012 Native Client"}
-                    @{ Name = "Active Directory Rights Management Services Client 2.0"}
-                )}
-            }
-            if ($majorBuildNumber -eq 16) {
-                Mock Get-CimInstance { return @(
-                    @{ Name = "Microsoft CCR and DSS Runtime 2008 R3"}
-                    @{ Name = "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"}
-                    @{ Name = "AppFabric 1.1 for Windows Server"}
-                    @{ Name = "WCF Data Services 5.6.0 Runtime"}
-                    @{ Name = "Microsoft ODBC Driver 11 for SQL Server"}
-                    @{ Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"}
-                    @{ Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"}
-                    @{ Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"}
-                    @{ Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"}
-                    @{ Name = "Microsoft SQL Server 2012 Native Client"}
-                    @{ Name = "Active Directory Rights Management Services Client 2.1"}
-                )}
-            }
-            Mock Get-ChildItem { return $null }
-            Mock Get-ChildItem { return @(
-                (New-Object Object | 
-                    Add-Member ScriptMethod GetValue { return "Microsoft Identity Extensions" } -PassThru)
-            ) }
+                Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $true }) }
+                Mock Get-ItemProperty -ParameterFilter { 
+                    $Path -eq "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+                } -MockWith {
+                    return @(
+                        (New-SPDscMockPrereq -Name "Microsoft CCR and DSS Runtime 2008 R3"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Sync Framework Runtime v1.0 SP1 (x64)"), 
+                        (New-SPDscMockPrereq -Name "AppFabric 1.1 for Windows Server"), 
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.6.0 Runtime"), 
+                        (New-SPDscMockPrereq -Name "WCF Data Services 5.0 (for OData v3) Primary Components"), 
+                        (New-SPDscMockPrereq -Name "Microsoft SQL Server 2012 Native Client"), 
+                        (New-SPDscMockPrereq -Name "Active Directory Rights Management Services Client 2.0"), 
+                        (New-SPDscMockPrereq -Name "Microsoft Identity Extensions")
+                    )
+                }
 
-            It "returns present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }
+                It "returns present from the get method" {
+                    (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                }
 
-            It "returns true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+                It "returns true from the test method" {
+                    Test-TargetResource @testParams | Should Be $true
+                }
             }
         }
+        
 
         Context "Prerequisites are installed but should not be" {
             $testParams = @{
@@ -232,8 +250,9 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
-            Mock Get-CimInstance { return @() }
-            Mock Get-ChildItem { return @() }
+            Mock Get-ItemProperty -MockWith {
+                return @()
+            }
 
             It "throws an exception in the set method if required parameters are not set" {
                 {Set-TargetResource @testParams} | Should Throw
@@ -265,8 +284,9 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false }) }
-            Mock Get-CimInstance { return @() }
-            Mock Get-ChildItem { return @() }
+            Mock Get-ItemProperty -MockWith {
+                return @()
+            }
 
             It "throws an exception in the set method if required parameters are not set" {
                 {Set-TargetResource @testParams} | Should Throw
@@ -297,7 +317,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Full"
-                    },
+                    }, 
                     @{
                         Version = "4.6.0.0"
                         Release = "0"
@@ -320,8 +340,9 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
 
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
-            Mock Get-CimInstance { return @() }
-            Mock Get-ChildItem { return @() }
+            Mock Get-ItemProperty -MockWith {
+                return @()
+            }
 
             if ($majorBuildNumber -eq 15) {
                 $requiredParams = @("SQLNCli","PowerShell","NETFX","IDFX","Sync","AppFabric","IDFX11","MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
