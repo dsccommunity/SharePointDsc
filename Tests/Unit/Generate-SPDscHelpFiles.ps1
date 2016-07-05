@@ -5,7 +5,7 @@ param
 
 Import-Module (Join-Path $PSScriptRoot "SharePointDSC\SharePointDSC.TestHelpers.psm1")
 
-$repoDir = Join-Path $PSScriptRoot "..\" -Resolve
+$repoDir = Join-Path $PSScriptRoot "..\..\" -Resolve
 
 Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.schema.mof" -Recurse | `
     ForEach-Object {
