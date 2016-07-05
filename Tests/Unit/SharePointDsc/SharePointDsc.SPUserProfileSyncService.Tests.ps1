@@ -44,6 +44,50 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
         Mock Remove-SPDSCUserToLocalAdmin { }
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         Mock Start-Sleep { }
+        Mock Get-SPServiceApplication { 
+            return @(
+                New-Object Object |            
+                    Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
+                    Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
+                    Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
+                    Add-Member ScriptMethod GetType {
+                        New-Object Object |
+                            Add-Member ScriptMethod GetProperties {
+                                param($x)
+                                return @(
+                                    (New-Object Object |
+                                        Add-Member NoteProperty Name "SocialDatabase" -PassThru |
+                                        Add-Member ScriptMethod GetValue {
+                                            param($x)
+                                            return @{
+                                                Name = "SP_SocialDB"
+                                                Server = @{ Name = "SQL.domain.local" }
+                                            }
+                                        } -PassThru
+                                    ),
+                                    (New-Object Object |
+                                        Add-Member NoteProperty Name "ProfileDatabase" -PassThru |
+                                        Add-Member ScriptMethod GetValue {
+                                            return @{
+                                                Name = "SP_ProfileDB"
+                                                Server = @{ Name = "SQL.domain.local" }
+                                            }
+                                        } -PassThru
+                                    ),
+                                    (New-Object Object |
+                                        Add-Member NoteProperty Name "SynchronizationDatabase" -PassThru |
+                                        Add-Member ScriptMethod GetValue {
+                                            return @{
+                                                Name = "SP_ProfileSyncDB"
+                                                Server = @{ Name = "SQL.domain.local" }
+                                            }
+                                        } -PassThru
+                                    )
+                                )
+                            } -PassThru
+                } -PassThru -Force 
+            )
+        }
 
         switch ($majorBuildNumber) {
             15 {
@@ -164,7 +208,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                         Test-TargetResource @testParams | Should Be $false
                     }
 
-                    It "calls the start service cmdlet from the set method" {
+                    It "calls the stop service cmdlet from the set method" {
                         $Global:SPDSCUPACheck = $false
                         Set-TargetResource @testParams 
 
@@ -174,11 +218,11 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
 
                 Context "User profile sync service is not running and shouldn't be" {
                     Mock Get-SPServiceInstance { return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            })
+                            Status = "Disabled"
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            UserProfileApplicationGuid = [Guid]::Empty
+                            TypeName = "User Profile Synchronization Service" 
+                        })
                     } 
 
                     It "returns absent from the get method" {
@@ -187,6 +231,71 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
 
                     It "returns true from the test method" {
                         Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+
+
+
+                $testParams.Ensure = "Present"
+                $testParams.Add("RunOnlyWhenWriteable", $true)
+                Context "User profile sync service is not running and shouldn't be because the database is read only" {
+                    Mock Get-SPServiceInstance { return @( @{ 
+                            Status = "Disabled"
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                            UserProfileApplicationGuid = [Guid]::Empty
+                            TypeName = "User Profile Synchronization Service" 
+                        })
+                    }
+
+                    Mock Get-SPDatabase {
+                        return @(
+                            @{
+                                Name = "SP_ProfileDB"
+                                IsReadyOnly = $true
+                            }
+                        )
+                    } 
+
+                    It "returns absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
+
+                    It "returns true from the test method" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+
+                Context "User profile sync service is running and shouldn't be because the database is read only" {
+                    Mock Get-SPServiceInstance { return @( @{ 
+                                Status = "Online"
+                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                                UserProfileApplicationGuid = [Guid]::NewGuid()
+                                TypeName = "User Profile Synchronization Service" 
+                            })
+                    } 
+
+                    Mock Get-SPDatabase {
+                        return @(
+                            @{
+                                Name = "SP_ProfileDB"
+                                IsReadyOnly = $true
+                            }
+                        )
+                    } 
+
+                    It "returns absent from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    }
+
+                    It "returns true from the test method" {
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+
+                    It "calls the stop service cmdlet from the set method" {
+                        $Global:SPDSCUPACheck = $false
+                        Set-TargetResource @testParams 
+
+                        Assert-MockCalled Stop-SPServiceInstance
                     }
                 }
             }
