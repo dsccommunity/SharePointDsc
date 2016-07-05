@@ -111,4 +111,6 @@
 ### 0.2.0
 
 * Initial public release of xSharePoint
- 
+
+### Unreleased
+- Added resource MSFT_SPTrustedIdentityTokenIssuer

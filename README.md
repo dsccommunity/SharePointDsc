@@ -47,5 +47,3 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 
 [![Throughput Graph](https://graphs.waffle.io/PowerShell/SharePointDsc/throughput.svg)](https://waffle.io/PowerShell/SharePointDsc/metrics/throughput)
 
-### Unreleased
-- Added resource MSFT_SPTrustedIdentityTokenIssuer

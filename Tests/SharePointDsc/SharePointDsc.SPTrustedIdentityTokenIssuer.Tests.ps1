@@ -12,8 +12,6 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 $ModuleName = "MSFT_SPTrustedIdentityTokenIssuer"
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 
-Write-Host "ModuleName: $ModuleName"
-
 Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
         $testParams = @{
@@ -47,7 +45,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 }
                 $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
                 return $sptrust
-            } -Verifiable
+            }
 
             Mock New-SPClaimTypeMapping {
                 return [pscustomobject]@{
@@ -70,9 +68,45 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 Assert-MockCalled New-SPTrustedIdentityTokenIssuer
             }
         }
-
-        Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified does not exist" {
+		
+		Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified exists on the farm" {
             Mock Get-SPClaimProvider {
+				return [pscustomobject]@(@{
+                    DisplayName = $testParams.ClaimProviderName
+                })
+            }
+			
+			Mock New-SPTrustedIdentityTokenIssuer {
+                $sptrust = [pscustomobject]@{
+                    Name              = $testParams.Name
+                    ClaimProviderName = ""
+                    ProviderSignOutUri = ""
+                }
+                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                return $sptrust
+            }
+			
+			Mock Get-SPTrustedIdentityTokenIssuer {
+                $sptrust = [pscustomobject]@{
+                    Name              = $testParams.Name
+                    ClaimProviderName = $testParams.ClaimProviderName
+                    ProviderSignOutUri = ""
+                }
+                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                return $sptrust
+            }
+			
+			Mock New-SPClaimTypeMapping {
+                return [pscustomobject]@{
+                    MappedClaimType = $testParams.IdentifierClaim
+                }
+            }
+			
+			Set-TargetResource @testParams
+			$getResults = Get-TargetResource @testParams
+			
+			It "creates the SPTrustedIdentityTokenIssuer and sets claims provider" {
+				$getResults.ClaimProviderName | Should Be $testParams.ClaimProviderName
             }
         }
 
