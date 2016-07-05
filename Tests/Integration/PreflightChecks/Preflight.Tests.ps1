@@ -68,7 +68,7 @@ Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check
         (Test-DscConfiguration -ComputerName "localhost" -ReferenceConfiguration "TestDrive:\PrereqTest\localhost.mof").InDesiredState | Should be $true
     }
 
-    it "Has the SharePoint installed" {
+    it "Has SharePoint installed" {
         Configuration InstallCheck {
             Import-DscResource -ModuleName SharePointDsc
             node "localhost" {
