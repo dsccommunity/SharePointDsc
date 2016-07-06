@@ -1,0 +1,32 @@
+/*
+**Description**
+
+This resource is used to install the SharePoint binaries.
+The BinaryDir parameter should point to the path that setup.exe is located (not to setup.exe itself).
+The ProductKey parameter is used to inject in to the configuration file and validate the license key during the installation process. 
+This module depends on the prerequisites already being installed, which can be done through the use of [SPInstallPreReqs](SPInstallPreReqs).
+
+**Example**
+
+    SPProductUpdate InstallCUMay2016
+    {
+        SetupFile         = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+        ShutdownServices  = $true
+        BinaryInstallDays = "sat", "sun"
+        BinaryInstallTime = "12:00am to 2:00am"
+        Ensure            = "Present"
+    }
+
+*/
+
+[ClassVersion("1.0.0.0"), FriendlyName("SPProductUpdate")]
+class MSFT_SPProductUpdate : OMI_BaseResource
+{
+    [Key, Description("The name of the update setup file")] String SetupFile;
+    [Write, Description("Shutdown SharePoint services to speed up installation")] Boolean ShutdownServices;
+    [Write, Description("Specify on which dates the installation is allowed"), ValueMap{"mon","tue","wed","thu","fri","sat","sun"}, Values{"mon","tue","wed","thu","fri","sat","sun"}] String BinaryInstallDays[];
+    [Write, Description("Specify in which time frame the installation is allowed")] String BinaryInstallTime;
+    [Write, Description("Present to install SharePoint. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+
