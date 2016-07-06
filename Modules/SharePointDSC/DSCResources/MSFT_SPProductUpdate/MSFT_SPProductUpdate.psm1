@@ -108,20 +108,20 @@ function Get-TargetResource
         {
             Write-Verbose "Product found: $productName"
         }
-        $versionInfo = Get-SPFarmVersionInfo $productName
+        $versionInfo = Get-SPDSCFarmVersionInfo $productName
     }
     elseif ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack")
     {
         Write-Verbose "Update is a Service Pack for SharePoint."
         # Check SharePoint version information.
         $servicepack = $true
-        $versionInfo = Get-SPFarmVersionInfo "Microsoft SharePoint Server 2013"
+        $versionInfo = Get-SPDSCFarmVersionInfo "Microsoft SharePoint Server 2013"
     }
     else
     {
         Write-Verbose "Update is a Cumulative Update."
         # Cumulative Update is multi-lingual. Check version information of all products.
-        $versionInfo = Get-SPFarmVersionInfo
+        $versionInfo = Get-SPDSCFarmVersionInfo
     }
 
     Write-Verbose "The lowest version of any SharePoint component is $($versionInfo.Lowest)"
@@ -418,14 +418,14 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing for installation of the SharePoint Update"
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
 
-function Get-SPFarmVersionInfo()
+function Get-SPDSCFarmVersionInfo()
 {
     param
     (
