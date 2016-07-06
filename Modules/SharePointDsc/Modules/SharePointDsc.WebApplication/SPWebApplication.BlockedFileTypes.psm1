@@ -80,17 +80,18 @@ function Test-SPDSCWebApplicationBlockedFileTypeConfig
         [parameter(Mandatory = $true)] 
         $DesiredSettings
     )
-    if (($Settings.ContainsKey("Blocked") -eq $true) `
-            -and (($Settings.ContainsKey("EnsureBlocked") -eq $true) `
-          -or ($Settings.ContainsKey("EnsureAllowed") -eq $true))) 
+
+    if (($DesiredSettings.ContainsKey("Blocked") -eq $true) `
+            -and (($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) `
+          -or ($DesiredSettings.ContainsKey("EnsureAllowed") -eq $true))) 
     {
         throw ("Blocked file types must use either the 'blocked' property or the " + `
                "'EnsureBlocked' and/or 'EnsureAllowed' properties, but not both.")
     }
 
-    if (($Settings.ContainsKey("Blocked") -eq $false) `
-            -and ($Settings.ContainsKey("EnsureBlocked") -eq $false) `
-            -and ($Settings.ContainsKey("EnsureAllowed") -eq $false)) 
+    if (($DesiredSettings.ContainsKey("Blocked") -eq $false) `
+            -and ($DesiredSettings.ContainsKey("EnsureBlocked") -eq $false) `
+            -and ($DesiredSettings.ContainsKey("EnsureAllowed") -eq $false)) 
     {
         throw ("Blocked file types must specify at least one property (either 'Blocked, " + `
                "'EnsureBlocked' or 'EnsureAllowed')")
