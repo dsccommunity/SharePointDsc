@@ -7,11 +7,11 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.Boolean] $RunConfigWizard,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]] $DatabaseUpgradeDays,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String] $DatabaseUpgradeTime,
         
         [parameter(Mandatory = $false)]
@@ -57,11 +57,11 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.Boolean] $RunConfigWizard,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]] $DatabaseUpgradeDays,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String] $DatabaseUpgradeTime,
         
         [parameter(Mandatory = $false)]
@@ -191,11 +191,11 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.Boolean] $RunConfigWizard,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]] $DatabaseUpgradeDays,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String] $DatabaseUpgradeTime,
         
         [parameter(Mandatory = $false)]

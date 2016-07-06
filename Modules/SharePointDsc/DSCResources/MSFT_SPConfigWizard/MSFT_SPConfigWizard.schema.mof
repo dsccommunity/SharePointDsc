@@ -12,7 +12,7 @@ This module depends on the prerequisites already being installed, which can be d
     {
         RunConfigWizard     = $true
         DatabaseUpgradeDays = "sat", "sun"
-        DatabaseUpgradeTime = "1:00am to 5:00am"
+        DatabaseUpgradeTime = "3:00am to 5:00am"
     }
 
 */
@@ -21,8 +21,8 @@ This module depends on the prerequisites already being installed, which can be d
 class MSFT_SPConfigWizard : OMI_BaseResource
 {
     [Key, Description("")] Boolean RunConfigWizard;
-    [Required, Description(""), ValueMap{"mon","tue","wed","thu","fri","sat","sun"}, Values{"mon","tue","wed","thu","fri","sat","sun"}] String DatabaseUpgradeDays[];
-    [Required, Description("")] String DatabaseUpgradeTime;
+    [Write, Description("Specify on which dates running the Configuration Wizard is allowed"), ValueMap{"mon","tue","wed","thu","fri","sat","sun"}, Values{"mon","tue","wed","thu","fri","sat","sun"}] String DatabaseUpgradeDays[];
+    [Write, Description("Specify in which time frame running the Configuration Wizard is allowed")] String DatabaseUpgradeTime;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

@@ -4,31 +4,149 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
-        [parameter(Mandatory = $false)] [System.String] $InstallPath,
-        [parameter(Mandatory = $false)] [System.String] $DataPath,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
+        [parameter(Mandatory = $true)]
+        [System.String] $SetupFile,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean] $ShutdownServices,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [System.String[]] $BinaryInstallDays,
+        
+        [parameter(Mandatory = $false)]
+        [System.String] $BinaryInstallTime,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String] $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     Write-Verbose -Message "Getting install status of SP binaries"
 
-    $spInstall = Get-CimInstance -ClassName Win32_Product -Filter "Name like 'Microsoft SharePoint Server%'"
-    if ($spInstall) {
-        return @{
-            BinaryDir = $BinaryDir
-            ProductKey = $ProductKey
-            InstallPath = $InstallPath
-            DataPath = $DataPath
-            Ensure = "Present"
+#### CHECKEN VOOR INSTALLATIE UPDATE MAAR NOG NIET CONFIG WIZARD, ANDERS BLIJFT HIJ IN EEN LOOP
+
+    $languagepack = $false
+    $servicepack  = $false
+    $language     = ""
+
+    # Get file information from setup file
+    if (-not(Test-Path $SetupFile))
+    {
+        throw "Setup file cannot be found."
+    }
+    $setupFileInfo = Get-ItemProperty $SetupFile
+    $fileVersion = $setupFileInfo.VersionInfo.FileVersion
+    Write-Verbose "Update has version $fileVersion"
+
+    $products = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+        $farm = Get-SPFarm
+        $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+        $server = Get-SPServer $env:COMPUTERNAME
+
+        $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
+        return $serverProductInfo.Products
+    }
+
+    if ($setupFileInfo.VersionInfo.FileDescription -match "Language Pack")
+    {
+        Write-Verbose "Update is a Language Pack Service Pack."
+        # Retrieve language from file and check version for that language pack.
+        $languagepack = $true
+
+        # Extract language from filename
+        if ($setupFileInfo.Name -match "\w*-(\w{2}-\w{2}).exe")
+        {
+            $language = $matches[1]
         }
-    } else {
+        else
+        {
+            throw "Update does not contain the language code in the correct format."
+        }
+
+        try
+        {
+            $cultureInfo = New-Object system.globalization.cultureinfo($language)
+        }
+        catch
+        {
+            throw "Error while converting language information: $language"
+        }
+
+        # Extract English name of the language code
+        if ($cultureInfo.EnglishName -match "(\w*) \(\w*\)")
+        {
+            $languageEnglish = $matches[1]
+        }
+
+        # Extract Native name of the language code
+        if ($cultureInfo.NativeName -match "(\w*) \(\w*\)")
+        {
+            $languageNative = $matches[1]
+        }
+
+        # Build language string used in Language Pack names
+        $languageString = "$languageEnglish/$languageNative"
+        Write-Verbose "Update is for the $languageEnglish language"
+
+        # Find the product name for the specific language pack
+        $productName = ""
+        foreach ($product in $products)
+        {
+            if ($product -match $languageString)
+            {
+                $productName = $product
+            }
+        }
+
+        if ($productName -eq "")
+        {
+            throw "Error: Product for language $language is not found."
+        }
+        else
+        {
+            Write-Verbose "Product found: $productName"
+        }
+        $versionInfo = Get-SPFarmVersionInfo $productName
+    }
+    elseif ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack")
+    {
+        Write-Verbose "Update is a Service Pack for SharePoint."
+        # Check SharePoint version information.
+        $servicepack = $true
+        $versionInfo = Get-SPFarmVersionInfo "Microsoft SharePoint Server 2013"
+    }
+    else
+    {
+        Write-Verbose "Update is a Cumulative Update."
+        # Cumulative Update is multi-lingual. Check version information of all products.
+        $versionInfo = Get-SPFarmVersionInfo
+    }
+
+    Write-Verbose "The lowest version of any SharePoint component is $($versionInfo.Lowest)"
+    if ($versionInfo.Lowest -lt $fileVersion)
+    {
+        # Version of SharePoint is lower than the patch version. Patch is not installed.
         return @{
-            BinaryDir = $BinaryDir
-            ProductKey = $ProductKey
-            InstallPath = $InstallPath
-            DataPath = $DataPath
-            Ensure = "Absent"
+            SetupFile         = $SetupFile
+            ShutdownServices  = $ShutdownServices
+            BinaryInstallDays = $BinaryInstallDays
+            BinaryInstallTime = $BinaryInstallTime
+            Ensure            = "Absent"
+        }
+    }
+    else
+    {
+        # Version of SharePoint is equal or greater than the patch version. Patch is installed.
+        return @{
+            SetupFile         = $SetupFile
+            ShutdownServices  = $ShutdownServices
+            BinaryInstallDays = $BinaryInstallDays
+            BinaryInstallTime = $BinaryInstallTime
+            Ensure            = "Present"
         }
     }
 }
@@ -39,88 +157,137 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
-        [parameter(Mandatory = $false)] [System.String] $InstallPath,
-        [parameter(Mandatory = $false)] [System.String] $DataPath,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
+        [parameter(Mandatory = $true)]
+        [System.String] $SetupFile,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean] $ShutdownServices,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [System.String[]] $BinaryInstallDays,
+        
+        [parameter(Mandatory = $false)]
+        [System.String] $BinaryInstallTime,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String] $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     if ($Ensure -eq "Absent") {
-        throw [Exception] "SharePointDSC does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
+        throw [Exception] "SharePoint does not support uninstalling updates."
         return
     }
     
-    $InstallerPath = Join-Path $BinaryDir "setup.exe"
-    $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
-    if ($majorVersion -eq 15) {
-        $dotNet46Check = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse | Get-ItemProperty -name Version,Release -EA 0 | Where { $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"}
-        if ($dotNet46Check -ne $null -and $dotNet46Check.Length -gt 0) {
-            throw [Exception] "A known issue prevents installation of SharePoint 2013 on servers that have .NET 4.6 already installed. See details at https://support.microsoft.com/en-us/kb/3087184"
-            return
-        }    
-    }
+    if ($ShutdownServices)
+    {
+        Write-Verbose "Stopping services to speed up installation process"
 
-    Write-Verbose -Message "Writing install config file"
+        $searchPaused = $false
+        $osearchStopped = $false
+        $hostControllerStopped = $false
 
-    $configPath = "$env:temp\SPInstallConfig.xml" 
+        $osearchSvc        = Get-Service "OSearch15" 
+        $hostControllerSvc = Get-Service "SPSearchHostController" 
 
-    $configData = "<Configuration>
-    <Package Id=`"sts`">
-        <Setting Id=`"LAUNCHEDFROMSETUPSTS`" Value=`"Yes`"/>
-    </Package>
-
-    <Package Id=`"spswfe`">
-        <Setting Id=`"SETUPCALLED`" Value=`"1`"/>
-    </Package>
-
-    <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint Server Setup(*).log`"/>
-    <PIDKEY Value=`"$ProductKey`" />
-    <Display Level=`"none`" CompletionNotice=`"no`" />
-"
-
-    if ($PSBoundParameters.ContainsKey("InstallPath") -eq $true) {
-        $configData += "    <INSTALLLOCATION Value=`"$InstallPath`" />
-"
-    }
-    if ($PSBoundParameters.ContainsKey("DataPath") -eq $true) {
-        $configData += "    <DATADIR Value=`"$DataPath`"/>
-"
-    }
-    $configData += "    <Setting Id=`"SERVERROLE`" Value=`"APPLICATION`"/>
-    <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
-    <Setting Id=`"SETUP_REBOOT`" Value=`"Never`" />
-    <Setting Id=`"SETUPTYPE`" Value=`"CLEAN_INSTALL`"/>
-</Configuration>"
-
-    $configData | Out-File -FilePath $configPath
-
-    Write-Verbose -Message "Beginning installation of SharePoint"
-    
-    $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
-    
-    $setup = Start-Process -FilePath $setupExe -ArgumentList "/config `"$configPath`"" -Wait -PassThru
-
-    switch ($setup.ExitCode) {
-        0 {  
-            Write-Verbose -Message "SharePoint binary installation complete"
-            $global:DSCMachineStatus = 1
+        $searchPaused = $true
+        $searchSAs = Get-SPEnterpriseSearchServiceApplication
+        foreach ($searchSA in $searchSAs)
+        {
+            $searchSA.Pause()
         }
-        30066 {
-            if (    ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) `
-                -or ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) `
-                -or ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
-                ) {
-                    
-                Write-Verbose -Message "xSPInstall has detected the server has pending a reboot. Flagging to the DSC engine that the server should reboot before continuing."
-                $global:DSCMachineStatus = 1
-            } else {
-                throw "SharePoint installation has failed due to an issue with prerequisites not being installed correctly. Please review the setup logs."
+
+        if($osearchSvc.Status -eq "Running") 
+        { 
+            $osearchStopped = $true
+            Set-Service -Name "OSearch15" -StartupType Disabled
+            $osearchSvc.Stop() 
+        } 
+
+        if($hostControllerSvc.Status -eq "Running") 
+        {
+            $hostControllerStopped = $true
+            Set-Service "SPSearchHostController" -StartupType Disabled 
+            $hostControllerSvc.Stop() 
+        } 
+
+        $hostControllerSvc.WaitForStatus('Stopped','00:01:00')
+
+        Write-Verbose "Search Services are stopped"
+
+        Write-Verbose "Stopping other services"
+
+        Set-Service -Name "IISADMIN" -StartupType Disabled
+        Set-Service -Name "SPTimerV4" -StartupType Disabled
+
+        iisreset -stop -noforce 
+
+        $timerSvc = Get-Service "SPTimerV4"
+        if($timerSvc.Status -eq "Running")
+        {
+            $timerSvc.Stop()
+        }
+    }
+
+    Write-Verbose -Message "Beginning installation of the SharePoint update"
+    
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $$SetupFile -ScriptBlock {
+        $setupFile = $args[0]
+
+        $setup = Start-Process -FilePath $setupFile -ArgumentList "/quiet /passive" -Wait -PassThru
+
+        switch ($setup.ExitCode) {
+            0 {  
+                Write-Verbose -Message "SharePoint update binary installation complete"
+            }
+            Default {
+                throw "SharePoint update install failed, exit code was $($setup.ExitCode)"
             }
         }
-        Default {
-            throw "SharePoint install failed, exit code was $($setup.ExitCode)"
+    }
+
+    if ($ShutdownServices)
+    {
+        Write-Verbose "Restart stopped services"
+        Set-Service -Name "SPTimerV4" -StartupType Automatic 
+        Set-Service -Name "IISADMIN" -StartupType Automatic 
+
+        $timerSvc = Get-Service "SPTimerV4"
+        $timerSvc.Start()
+
+        iisreset -start
+
+        $osearchSvc        = Get-Service "OSearch15" 
+        $hostControllerSvc = Get-Service "SPSearchHostController" 
+
+        ###Ensuring Search Services were stopped by script before Starting" 
+        if($osearchStopped -eq $true) 
+        {
+            Set-Service -Name "OSearch15" -StartupType Automatic
+            $osearchSvc.Start()
         }
+
+        if($hostControllerStopped -eq $true)
+        { 
+            Set-Service "SPSearchHostController" -StartupType Automatic 
+            $hostControllerSvc.Start() 
+        } 
+
+        ###Resuming Search Service Application if paused### 
+        if($searchPaused -eq $true)
+        {
+            $searchSAs = Get-SPEnterpriseSearchServiceApplication
+            foreach ($searchSA in $searchSAs)
+            {
+                $searchSA.Resume()
+            }
+        }
+
+        Write-Verbose "Services restarted."
     }
 }
 
@@ -131,24 +298,119 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $BinaryDir,
-        [parameter(Mandatory = $true)]  [System.String] $ProductKey,
-        [parameter(Mandatory = $false)] [System.String] $InstallPath,
-        [parameter(Mandatory = $false)] [System.String] $DataPath,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present"
+        [parameter(Mandatory = $true)]
+        [System.String] $SetupFile,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean] $ShutdownServices,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
+        [System.String[]] $BinaryInstallDays,
+        
+        [parameter(Mandatory = $false)]
+        [System.String] $BinaryInstallTime,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String] $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] $InstallAccount
     )
 
     if ($Ensure -eq "Absent") {
-        throw [Exception] "SharePointDSC does not support uninstalling SharePoint or its prerequisites. Please remove this manually."
+        throw [Exception] "SharePoint does not support uninstalling updates."
         return
     }
 
     $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Write-Verbose -Message "Testing for installation of SharePoint"
+    Write-Verbose -Message "Testing for installation of the SharePoint Update"
 
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
+
+function Get-SPFarmVersionInfo()
+{
+    param
+    (
+        [parameter(Mandatory = $false)]
+        [System.String] $ProductToCheck
+    )
+
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $ProductToCheck -ScriptBlock {
+        $productToCheck = $args[0]
+
+        $farm = Get-SPFarm
+        $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+        $server = Get-SPServer $env:COMPUTERNAME
+        $versionInfo = @{}
+        $versionInfo.Highest = ""
+        $versionInfo.Lowest = ""
+
+        $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
+        $products = $serverProductInfo.Products
+
+        if ($productToCheck)
+        {
+            $products = $products | Where-Object { $_ -eq $productToCheck }
+            if ($null -eq $products)
+            {
+                throw "Product not found: $productToCheck"
+            }
+        }
+
+        # Loop through all products
+        foreach ($product in $products)
+        {
+            Write-Output "Product: $product"
+            $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
+            $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
+
+            # Loop through all individual components within the product
+            foreach ($patchableUnit in $patchableUnits)
+            {
+                # Check if the displayname is the Proofing tools (always mentioned in first product, generates noise)
+                if (($patchableUnit -notmatch "Microsoft Server Proof") -and
+                    ($patchableUnit -notmatch "SQL Express") -and
+                    ($patchableUnit -notmatch "OMUI") -and
+                    ($patchableUnit -notmatch "XMUI") -and
+                    ($patchableUnit -notmatch "Project Server") -and
+                    ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
+                {
+                    Write-Output "  - $patchableUnit"
+                    $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
+                    $currentVersion = ""
+                    foreach ($patchableUnitInfo in $patchableUnitsInfo)
+                    {
+                        # Loop through version of the patchableUnit
+                        $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
+
+                        # Check if the version of the patchableUnit is the highest for the installed product
+                        if ($currentVersion -gt $versionInfo.Highest)
+                        {
+                            $versionInfo.Highest = $currentVersion
+                        }
+
+                        if ($versionInfo.Lowest -eq "")
+                        {
+                            $versionInfo.Lowest = $version
+                        }
+                        else
+                        {
+                            if ($version -lt $versionInfo.Lowest) {
+                                $versionInfo.Lowest = $version
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $versionInfo
+    }
+    return $result
+}
