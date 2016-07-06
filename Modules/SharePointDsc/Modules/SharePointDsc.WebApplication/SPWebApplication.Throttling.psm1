@@ -93,7 +93,7 @@ function Test-SPDSCWebApplicationThrottlingSettings {
     )
 
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" -Resolve)
-    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings `
+    $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @(
                                                          "ListViewThreshold",
@@ -109,7 +109,7 @@ function Test-SPDSCWebApplicationThrottlingSettings {
                                                      )
     if ($testReturn -eq $true) {
         if ((Test-SPDSCObjectHasProperty $DesiredSettings "HappyHour") -eq $true) {
-            $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings.HappyHour `
+            $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings.HappyHour `
                                                              -DesiredValues $DesiredSettings.HappyHour `
                                                              -ValuesToCheck @("Hour", "Minute", "Duration")
         }

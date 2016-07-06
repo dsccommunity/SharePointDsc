@@ -1,6 +1,16 @@
-# Change log for SharePoint DSC
+# Change log for SharePointDsc
 
 ### Unreleased
+
+ * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
+ * Minor tweaks to the PowerShell module manifest
+ * Modified all resources to ensure $null values are on the left of comparisson operations
+ * Added RunOnlyWhenWriteable property to SPUserProfileSyncService resource
+ * Added better logging to all test method output to make it clear what property is causing a test to fail
+ * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
+ * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+
+### 1.1
 
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
  * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
@@ -12,6 +22,8 @@
  * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
  * Added support for custom database name and server to SPPerformancePointServiceApp
  * Added solution level property to SPFarmSolution
+ * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
+ * Removed dependency on Win32_Prouct from SPInstallPrereqs
 
 ### 1.0
 

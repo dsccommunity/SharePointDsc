@@ -20,9 +20,9 @@ function Get-TargetResource
 
         $Ensure = "Absent"
         $AGName = $params.AGName
-        if ($database -ne $null) {
+        if ($null -ne $database) {
             $ag = $database.AvailabilityGroup
-            if ($ag -ne $null) {
+            if ($null -ne $ag) {
                 $AGName = $ag.Name
                 if ($ag.Name -eq $params.AGName) {
                     $Ensure = "Present"
@@ -122,6 +122,6 @@ function Test-TargetResource
 
     Write-Verbose -Message "Checking AAG configuration for $DatabaseName"
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
 }
 

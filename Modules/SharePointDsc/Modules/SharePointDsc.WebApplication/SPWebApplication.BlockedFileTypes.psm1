@@ -67,17 +67,17 @@ function Test-SPDSCWebApplicationBlockedFileTypes {
 
     if($DesiredSettings.ContainsKey("Blocked") -eq $true) {
         $compareResult = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.Blocked
-        if ($compareResult -eq $null) { return $true } else { return $false }
+        if ($null -eq $compareResult) { return $true } else { return $false }
     }
     
     if($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) {
         $itemsToAdd = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureBlocked | Where-Object { $_.SideIndicator -eq "=>"}
-        if ($itemsToAdd -ne $null) { return $false }
+        if ($null -ne $itemsToAdd) { return $false }
     }
 
     if($DesiredSettings.ContainsKey("EnsureAllowed") -eq $true) {
         $itemsToRemove = Compare-Object -ReferenceObject $CurrentSettings.Blocked -DifferenceObject $DesiredSettings.EnsureAllowed -ExcludeDifferent -IncludeEqual
-        if ($itemsToRemove -ne $null) { return $false } 
+        if ($null -ne $itemsToRemove) { return $false } 
     }
 
     return $true
