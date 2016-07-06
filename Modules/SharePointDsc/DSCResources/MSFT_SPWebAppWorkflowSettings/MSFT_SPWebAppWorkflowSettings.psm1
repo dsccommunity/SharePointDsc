@@ -128,7 +128,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$Url' workflow settings"
     if ($null -eq $CurrentValues) { return $false }
 
-    $relpath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
+    $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
         Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
     return Test-SPDSCWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
                                                   -DesiredSettings $PSBoundParameters
