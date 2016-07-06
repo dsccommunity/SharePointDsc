@@ -12,7 +12,7 @@ Get-ChildItem -Path "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | 
     ForEach-Object {
         $mofFileObject = $_ 
 
-        $descriptionPath = Join-Path -Path $_.DirectoryName -ChildPath "description.md"
+        $descriptionPath = Join-Path -Path $_.DirectoryName -ChildPath "readme.md"
         if (Test-Path -Path $descriptionPath)
         {
             $result = (Get-MofSchemaObject $_.FullName) | Where-Object { 

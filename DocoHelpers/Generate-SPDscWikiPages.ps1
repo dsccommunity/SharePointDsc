@@ -16,7 +16,7 @@ Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
                 -and ($null -ne $_.FriendlyName)  
         }
 
-        $descriptionPath = Join-Path -Path $_.DirectoryName -ChildPath "description.md"
+        $descriptionPath = Join-Path -Path $_.DirectoryName -ChildPath "readme.md"
         if (Test-Path -Path $descriptionPath)
         {
             Write-Output "Generating wiki page for $($result.FriendlyName)"
