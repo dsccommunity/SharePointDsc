@@ -1,18 +1,3 @@
-/*
-**Description**
-
-This resource will ensure that a specific site collection is marked as the app catalog for the web application that the site is in.
-The catalog site needs to have been created using the correct template (APPCATALOG#0).
-
-**Example**
-
-    SPAppCatalog MainAppCatalog
-    {
-        SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-        PsDscRunAsCredential = $SPSetupAccount
-    }
-
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPAppCatalog")]
 class MSFT_SPAppCatalog : OMI_BaseResource
 {
