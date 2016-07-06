@@ -5,7 +5,8 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]
-        [System.Boolean] $RunConfigWizard,
+        [ValidateSet("Present","Absent")]
+        [System.String] $Ensure,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
@@ -55,7 +56,8 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]
-        [System.Boolean] $RunConfigWizard,
+        [ValidateSet("Present","Absent")]
+        [System.String] $Ensure,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
@@ -69,21 +71,6 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Testing status of Configuration Wizard"
-
-    if ($DatabaseUpgradeTime)
-    {
-        #check if current time is in window
-        if ($true)
-        {
-            #check 
-        }
-        else
-        {
-            Write-Verbose "Current time is outside of time window, skipping the Configuration Wizard"
-            return
-        }
-    }
-
 
     $now = Get-Date
     if ($DatabaseUpgradeDays)
@@ -189,7 +176,8 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]
-        [System.Boolean] $RunConfigWizard,
+        [ValidateSet("Present","Absent")]
+        [System.String] $Ensure,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
@@ -216,38 +204,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-
-<#
-    .SYNOPSIS
-        Checks if the specified key of the registry exists and if so returns the specified value. 
-
-    .PARAMETER Key
-        Registry key in which the value exists
-
-    .PARAMETER Value
-        Registry value to return
-
-    .EXAMPLE
-        Get-SPDSCRegistryKey -Key "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS" -Value "LanguagePackInstalled"
-#>
-Function Get-SPDSCRegistryKey() {
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Key,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Value
-    )
-
-    if ((Test-Path $Key) -eq $true)
-    {
-        $regKey = Get-ItemProperty -LiteralPath $Key
-        return $regKey.$Value
-    } else {
-        throw "Specified registry key $Key could not be found."
-    }    
-}

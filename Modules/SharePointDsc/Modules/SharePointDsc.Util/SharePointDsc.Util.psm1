@@ -27,6 +27,28 @@ function Get-SPDSCAssemblyVersion() {
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+function Get-SPDSCRegistryKey() {
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Key,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Value
+    )
+
+    if ((Test-Path $Key) -eq $true)
+    {
+        $regKey = Get-ItemProperty -LiteralPath $Key
+        return $regKey.$Value
+    } else {
+        throw "Specified registry key $Key could not be found."
+    }    
+}
+
 function Get-SPDSCServiceContext {
     [CmdletBinding()]
     param

@@ -27,8 +27,6 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting install status of SP binaries"
 
-#### CHECKEN VOOR INSTALLATIE UPDATE MAAR NOG NIET CONFIG WIZARD, ANDERS BLIJFT HIJ IN EEN LOOP
-
     $languagepack = $false
     $servicepack  = $false
     $language     = ""
@@ -151,7 +149,6 @@ function Get-TargetResource
     }
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -182,7 +179,99 @@ function Set-TargetResource
         throw [Exception] "SharePoint does not support uninstalling updates."
         return
     }
-    
+
+    $now = Get-Date
+    if ($BinaryInstallDays)
+    {
+        # BinaryInstallDays parameter exists, check if current day is specified
+        $currentDayOfWeek = $now.DayOfWeek.ToString().ToLower().Substring(0,3)
+
+        if ($BinaryInstallDays -contains $currentDayOfWeek)
+        {
+            Write-Verbose "Current day is present in the parameter BinaryInstallDays. " + `
+                          "Update can be run today."
+        }
+        else
+        {
+            Write-Verbose "Current day is not present in the parameter BinaryInstallDays, " + `
+                          "skipping the update"
+            return
+        }
+    }
+    else
+    {
+        Write-Verbose "No BinaryInstallDays specified, Update can be ran on any day."
+    }
+
+    # Check if BinaryInstallTime parameter exists
+    if ($BinaryInstallTime)
+    {
+        # Check if current time is inside of time window
+        $upgradeTimes = $BinaryInstallTime.Split(" ")
+        $starttime = 0
+        $endtime = 0
+
+        if ($upgradeTimes.Count -ne 3)
+        {
+            throw "Time window incorrectly formatted."
+        }
+        else
+        {
+            if ([datetime]::TryParse($upgradeTimes[0],[ref]$starttime) -ne $true)
+            {
+                throw "Error converting start time"
+            }
+
+            if ([datetime]::TryParse($upgradeTimes[2],[ref]$endtime) -ne $true)
+            {
+                throw "Error converting end time"
+            }
+
+            if ($starttime -gt $endtime)
+            {
+                throw "Error: Start time cannot be larger than end time"
+            }
+        }
+
+        if (($starttime -lt $now) -and ($endtime -gt $now))
+        {
+            Write-Verbose "Current time is inside of the window specified in " + `
+                          "BinaryInstallTime. Starting update"
+        }
+        else
+        {
+            Write-Verbose "Current time is outside of the window specified in " + `
+                          "BinaryInstallTime, skipping the update"
+            return
+        }
+    }
+    else
+    {
+        Write-Verbose "No BinaryInstallTime specified, Update can be ran at " + `
+                      "any time. Starting update."
+    }
+
+    # To prevent an endless loop: Check if an upgrade is required.
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    {
+        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
+    } else {
+        $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
+    }
+
+    # Read LanguagePackInstalled and SetupType registry keys
+    $languagePackInstalled = Get-SPDSCRegistryKey $wssRegKey "LanguagePackInstalled"
+    $setupType = Get-SPDSCRegistryKey $wssRegKey "SetupType"
+
+    # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
+    # If so, the Config Wizard is required, so the installation will be skipped.
+    if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
+    {
+        Write-Verbose "An upgrade is pending. " + `
+                      "To prevent a possible loop, the install will be skipped"
+        return
+    }
+
     if ($ShutdownServices)
     {
         Write-Verbose "Stopping services to speed up installation process"
@@ -329,7 +418,9 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing for installation of the SharePoint Update"
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
@@ -374,7 +465,8 @@ function Get-SPFarmVersionInfo()
             # Loop through all individual components within the product
             foreach ($patchableUnit in $patchableUnits)
             {
-                # Check if the displayname is the Proofing tools (always mentioned in first product, generates noise)
+                # Check if the displayname is the Proofing tools (always mentioned in first product,
+                # generates noise)
                 if (($patchableUnit -notmatch "Microsoft Server Proof") -and
                     ($patchableUnit -notmatch "SQL Express") -and
                     ($patchableUnit -notmatch "OMUI") -and
