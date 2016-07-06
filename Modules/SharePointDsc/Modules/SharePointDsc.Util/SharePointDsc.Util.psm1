@@ -453,21 +453,38 @@ function Test-SPDSCIsADUser() {
     }
 }
 
-function Set-SPDSCObjectPropertyIfValueExists() {
+function Set-SPDscObjectPropertyIfValuePresent() {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)] [object] $ObjectToSet,
-        [parameter(Mandatory = $true,Position=1)] [string] $PropertyToSet,
-        [parameter(Mandatory = $true,Position=1)] [object] $ParamsValue,
-        [parameter(Mandatory = $true,Position=1)] [string] $ParamKey
+        [parameter(Mandatory = $true)] 
+        [object] 
+        $ObjectToSet,
+
+        [parameter(Mandatory = $true)] 
+        [string] 
+        $PropertyToSet,
+
+        [parameter(Mandatory = $true)] 
+        [object] 
+        $ParamsValue,
+
+        [parameter(Mandatory = $true)] 
+        [string] 
+        $ParamKey
     )
-    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey") {
-        if ($ParamsValue.ContainsKey($ParamKey) -eq $true) {
+    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey") 
+    {
+        if ($ParamsValue.ContainsKey($ParamKey) -eq $true) 
+        {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
-    } else {
-        if (((Test-SPDSCObjectHasProperty $ParamsValue $ParamKey) -eq $true) -and ($null -ne $ParamsValue.$ParamKey)) {
+    } 
+    else 
+    {
+        if (((Test-SPDSCObjectHasProperty $ParamsValue $ParamKey) -eq $true) `
+          -and ($null -ne $ParamsValue.$ParamKey)) 
+        {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
     }
