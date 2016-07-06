@@ -6,7 +6,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-Import-Module "$PSScriptRoot\SharePointDsc.TestHelpers.psm1"
+Import-Module "$RepoRoot\DocoHelpers\MofHelper.psm1"
 
 Describe 'SharePointDsc whole of module tests' {
 
@@ -44,15 +44,6 @@ Describe 'SharePointDsc whole of module tests' {
                 }
             }
             $mofFilesWithRequiredEnsure | Should Be 0
-        }
-
-        It "uses MOF schemas that match the functions used in the corresponding PowerShell module for each resource" {
-            $filesWithErrors = 0
-            $WarningPreference = "Continue"
-            $mofFiles | ForEach-Object -Process {
-                if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
-            }
-            $filesWithErrors | Should Be 0
         }
     }
 }
