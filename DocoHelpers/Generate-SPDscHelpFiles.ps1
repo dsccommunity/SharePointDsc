@@ -1,30 +1,44 @@
 param
 (
-    [parameter(Mandatory = $true)] [System.String] $OutPutPath
+    [parameter(Mandatory = $true)] 
+    [System.String] 
+    $OutPutPath
 )
 
-Import-Module (Join-Path $PSScriptRoot "SharePointDSC\SharePointDSC.TestHelpers.psm1")
+$repoDir = Join-Path $PSScriptRoot "..\" -Resolve
+Import-Module (Join-Path $PSScriptRoot "MofHelper.psm1")
 
-$repoDir = Join-Path $PSScriptRoot "..\..\" -Resolve
-
-Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.schema.mof" -Recurse | `
+Get-ChildItem -Path "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
     ForEach-Object {
         $mofFileObject = $_ 
-        $result = (Get-MofSchemaObject $_.FullName) | Where-Object { $_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "") -and $null -ne $_.FriendlyName  }
-        if ($null -ne $result) {
-            Write-Output "Generating help document for $($result.FriendlyName)"
-        
+
+        $descriptionPath = Join-Path -Path $_.DirectoryName -ChildPath "description.md"
+        if (Test-Path -Path $descriptionPath)
+        {
+            $result = (Get-MofSchemaObject $_.FullName) | Where-Object { 
+                ($_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "")) `
+                    -and ($null -ne $_.FriendlyName)  
+            }
+            Write-Verbose -Message "Generating help document for $($result.FriendlyName)"
+
             $output = ".NAME" + [Environment]::NewLine
-            $output += "    $($result.FriendlyName)" + [Environment]::NewLine + [Environment]::NewLine
+            $output += "    $($result.FriendlyName)"
+            $output += [Environment]::NewLine + [Environment]::NewLine
 
-            $output += $result.Documentation.Replace("**Description**", ".SYNOPSIS").Replace("**Example**",".EXAMPLE") + [Environment]::NewLine
+            $descriptionContent = Get-Content -Path $descriptionPath -Raw
+            $descriptionContent = $descriptionContent.Replace("**Description**", ".DESCRIPTION")
+            $descriptionContent = $descriptionContent -replace "\n", "`n    "
 
-            foreach($property in $result.Attributes) {
-                
+            $output += $descriptionContent
+            $output += [Environment]::NewLine 
+
+            foreach ($property in $result.Attributes) {
                 $output += ".PARAMETER $($property.Name)" + [Environment]::NewLine
-                $output += "    $($property.State) - $($property.DataType)" + [Environment]::NewLine
+                $output += "    $($property.State) - $($property.DataType)"
+                $output += [Environment]::NewLine
                 
-                if ([string]::IsNullOrEmpty($property.ValueMap) -ne $true) {
+                if ([string]::IsNullOrEmpty($property.ValueMap) -ne $true) 
+                {
                     $output += "    Allowed values: "
                     $property.ValueMap | ForEach-Object {
                         $output += $_ + ", "
@@ -33,9 +47,28 @@ Get-ChildItem "$repoDir\modules\SharePointDSC\**\*.schema.mof" -Recurse | `
                     $output = $output.TrimEnd(",")
                     $output +=  [Environment]::NewLine
                 }
-                $output += "    " + $property.Description + [Environment]::NewLine + [Environment]::NewLine
+                $output += "    " + $property.Description 
+                $output += [Environment]::NewLine + [Environment]::NewLine
             }
 
-            $output | Out-File -FilePath (Join-Path $OutPutPath "about_$($result.FriendlyName).help.txt") -Encoding utf8 -Force
+            $examplesPath = ("$repoDir\modules\SharePointDsc\Examples\Resources" + `
+                                "\$($result.FriendlyName)\*.ps1")
+            $exampleFiles = Get-ChildItem -Path $examplesPath
+
+            if ($null -ne $exampleFiles)
+            {
+                foreach ($exampleFile in $exampleFiles)
+                {
+                    $exampleContent = Get-Content -Path $exampleFile.FullName -Raw
+                    $exampleContent = $exampleContent -replace "<#"
+                    $exampleContent = $exampleContent -replace "#>"
+
+                    $output += $exampleContent 
+                    $output += [Environment]::NewLine
+                }
+            }
+
+            $outputPath = Join-Path $OutPutPath "about_$($result.FriendlyName).help.txt"
+            $output | Out-File -FilePath $outputPath -Encoding utf8 -Force
         }
     }
