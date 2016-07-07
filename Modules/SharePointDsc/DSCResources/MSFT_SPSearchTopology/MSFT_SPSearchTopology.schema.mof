@@ -14,7 +14,7 @@ If no disk labeled I: was available on server1, this would fail, even though it 
 
 **Example**
 
-    SPSearchRoles LocalSearchRoles
+    SPSearchTopology LocalSearchTopology
     {
         ServiceAppName          = "Search Service Application"
         Admin                   = @("Server1","Server2")

@@ -128,6 +128,11 @@ function Get-TargetResource
                 }
             }
 
+            if ($memberName -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+            {
+                $memberName = Resolve-SPDscSecurityIdentifier -SID $memberName
+            }
+
             $member.Username = $memberName
             $member.PermissionLevel = $policy.PolicyRoleBindings.Name
             $member.ActAsSystemAccount = $policy.IsSystemUser
@@ -215,6 +220,7 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
     
     if ($null -eq $CurrentValues) 
     {
@@ -299,7 +305,7 @@ function Set-TargetResource
                         $user = @{
                             Type     = "Delete"
                             Username = $difference.Username
-                            IdentityType = $difference.IdentityType
+                            IdentityMode = $difference.IdentityType
                         }
                     }
                 }
@@ -381,7 +387,7 @@ function Set-TargetResource
                     Write-Verbose -Message "Adding $($user.Username)"
                     
                     $userToAdd = $user.Username
-                    if ($user.IdentityType -eq "Claims") 
+                    if ($user.IdentityMode -eq "Claims") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
@@ -420,7 +426,7 @@ function Set-TargetResource
                 "Change" {
                     # User exists. Check permissions
                     $userToChange = $user.Username
-                    if ($user.IdentityType -eq "Claims") 
+                    if ($user.IdentityMode -eq "Claims") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
@@ -465,7 +471,7 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "Removing $($user.Username)"
                     $userToDrop = $user.Username
-                    if ($user.IdentityType -eq "Claims")  
+                    if ($user.IdentityMode -eq "Claims")  
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 

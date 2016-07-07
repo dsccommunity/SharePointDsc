@@ -49,7 +49,11 @@ function Get-TargetResource
             
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*") {
-                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value    
+                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value
+                if ($user -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                {
+                    $user = Resolve-SPDscSecurityIdentifier -SID $user
+                }
             }
             $members += @{
                 Username    = $user
@@ -235,7 +239,7 @@ function Test-TargetResource
         Write-Verbose "Processing Members parameter"
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username -DifferenceObject $Members.Username
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "Security list matches - checking that permissions match on each object"
             foreach($currentMember in $CurrentValues.Members) {
                 if ($currentMember.AccessLevel -ne ($Members | Where-Object { $_.Username -eq $currentMember.Username } | Select-Object -First 1).AccessLevel) {
