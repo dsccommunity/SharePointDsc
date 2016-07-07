@@ -14,12 +14,14 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
+        $getSPServiceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
+        if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
         
         if ($null -eq $si) { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $fqdn = "$($env:COMPUTERNAME).$domain"
-            $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+            $getSPServiceInstance = Get-SPServiceInstance -Server $fqdn
+            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
         }
         
         if ($null -eq $si) { 
@@ -57,15 +59,16 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
+            $getSPServiceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
+            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
             if ($null -eq $si) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+                $getSPServiceInstance = Get-SPServiceInstance -Server $fqdn
+                if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
             }
             if ($null -eq $si) { 
-                throw [Exception] "Unable to locate service application '$($params.Name)'"
+                throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
             Start-SPServiceInstance -Identity $si 
         }
@@ -75,14 +78,16 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }
+            $getSPServiceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
+            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
             if ($null -eq $si) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn | Where-Object { $_.TypeName -eq $params.Name }
+                $getSPServiceInstance = Get-SPServiceInstance -Server $fqdn
+                if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
             }
             if ($null -eq $si) {
-                throw [Exception] "Unable to locate service application '$($params.Name)'"
+                throw [Exception] "Unable to locate service instance '$($params.Name)'"
             }
             Stop-SPServiceInstance -Identity $si
         }

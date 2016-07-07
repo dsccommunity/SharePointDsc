@@ -28,6 +28,18 @@ Describe "SPServiceInstance - SharePoint Build $((Get-Item $SharePointCmdletModu
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         Mock Start-SPServiceInstance { }
         Mock Stop-SPServiceInstance { }
+        
+        Context "The service instance is not running but should be" {
+            Mock Get-SPServiceInstance { return $null }
+
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "returns false from the set method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
 
         Context "The service instance is not running but should be" {
             Mock Get-SPServiceInstance { return @(
