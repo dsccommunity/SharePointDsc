@@ -38,7 +38,7 @@ function Test-SPDSCWebApplicationWorkflowSettings {
     )
     
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" -Resolve)
-    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings `
+    $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @("UserDefinedWorkflowsEnabled","EmailToNoPermissionWorkflowParticipantsEnable","ExternalWorkflowParticipantsEnabled")
     return $testReturn

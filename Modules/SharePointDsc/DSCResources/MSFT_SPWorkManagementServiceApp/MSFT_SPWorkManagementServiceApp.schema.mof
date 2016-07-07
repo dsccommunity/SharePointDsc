@@ -13,12 +13,13 @@ Remarks
 
 **Example**
 
-   SPWorkManagementServiceApp WorkManagementServiceApp
+    SPWorkManagementServiceApp WorkManagementServiceApp
     {
-        Name = "App Management Service Application"
-        ApplicationPool = "SharePoint web services"
-        MinimumTimeBetweenEwsSyncSubscriptionSearches = 10 
-}
+        Name                   = "Work Management Service Application"
+        ApplicationPool        = "SharePoint web services"
+        MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
+        PsDscRunAsCredential   = $InstallAccount
+    }
 */
 [ClassVersion("1.0.0.0"), FriendlyName("SPWorkManagementServiceApp")]
 class MSFT_SPWorkManagementServiceApp : OMI_BaseResource

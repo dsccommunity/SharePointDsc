@@ -161,7 +161,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @("Servers")
 }

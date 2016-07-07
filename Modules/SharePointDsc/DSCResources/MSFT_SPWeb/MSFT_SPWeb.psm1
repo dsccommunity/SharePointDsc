@@ -165,7 +165,7 @@ function Test-TargetResource
 
     $valuesToCheck = @("Url", "Name", "Description", "UniquePermissions", "UseParentTopNav", "Ensure")
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
 
 

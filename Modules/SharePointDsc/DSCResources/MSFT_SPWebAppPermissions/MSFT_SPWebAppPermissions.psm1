@@ -196,7 +196,7 @@ function Test-TargetResource
     
     if ($AllPermissions -eq $true) {
         if ($CurrentValues.ContainsKey("AllPermissions")) {
-            return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")
+            return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AllPermissions")
         } else {
             return $false
         }    
@@ -204,9 +204,9 @@ function Test-TargetResource
         if ($CurrentValues.ContainsKey("AllPermissions")) {
             return $false
         } else {
-            if ((Compare-Object -ReferenceObject $ListPermissions -DifferenceObject $CurrentValues.ListPermissions) -ne $null) { return $false }
-            if ((Compare-Object -ReferenceObject $SitePermissions -DifferenceObject $CurrentValues.SitePermissions) -ne $null) { return $false }
-            if ((Compare-Object -ReferenceObject $PersonalPermissions -DifferenceObject $CurrentValues.PersonalPermissions) -ne $null) { return $false }
+            if ($null -ne (Compare-Object -ReferenceObject $ListPermissions -DifferenceObject $CurrentValues.ListPermissions)) { return $false }
+            if ($null -ne (Compare-Object -ReferenceObject $SitePermissions -DifferenceObject $CurrentValues.SitePermissions)) { return $false }
+            if ($null -ne (Compare-Object -ReferenceObject $PersonalPermissions -DifferenceObject $CurrentValues.PersonalPermissions)) { return $false }
             return $true
         }    
     }
