@@ -23,43 +23,43 @@
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-		$claimsMappings = @()
+        $claimsMappings = @()
         $spTrust = Get-SPTrustedIdentityTokenIssuer $params.Name -ErrorAction SilentlyContinue
         if ($spTrust) { 
-			$description = $spTrust.Description
-			$realm = $spTrust.DefaultProviderRealm
-			$signInUrl = $spTrust.ProviderUri.OriginalString
-			$identifierClaim = $spTrust.IdentityClaimTypeInformation.MappedClaimType
-			$signingCertificateThumbPrint = $spTrust.SigningCertificate.Thumbprint
-			$currentState = "Present"
-			$claimProviderName = $sptrust.ClaimProviderName
-			$providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
-			$spTrust.ClaimTypeInformation| Foreach-Object {
-				$claimsMappings = $claimsMappings + @{Name = $_.DisplayName; IncomingClaimType = $_.InputClaimType; LocalClaimType = $_.MappedClaimType}
-			}
-		} else { 
-			$description = ""
-			$realm = ""
-			$signInUrl = ""
-			$identifierClaim = ""
-			$signingCertificateThumbPrint = ""
-			$currentState = "Absent"
-			$claimProviderName = ""
-			$providerSignOutUri = ""
-		}
+            $description = $spTrust.Description
+            $realm = $spTrust.DefaultProviderRealm
+            $signInUrl = $spTrust.ProviderUri.OriginalString
+            $identifierClaim = $spTrust.IdentityClaimTypeInformation.MappedClaimType
+            $signingCertificateThumbPrint = $spTrust.SigningCertificate.Thumbprint
+            $currentState = "Present"
+            $claimProviderName = $sptrust.ClaimProviderName
+            $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
+            $spTrust.ClaimTypeInformation| Foreach-Object {
+                $claimsMappings = $claimsMappings + @{Name = $_.DisplayName; IncomingClaimType = $_.InputClaimType; LocalClaimType = $_.MappedClaimType}
+            }
+        } else { 
+            $description = ""
+            $realm = ""
+            $signInUrl = ""
+            $identifierClaim = ""
+            $signingCertificateThumbPrint = ""
+            $currentState = "Absent"
+            $claimProviderName = ""
+            $providerSignOutUri = ""
+        }
 
-		return @{
-			Name                         = $params.Name
-			Description                  = $description
-			Realm                        = $realm
-			SignInUrl                    = $signInUrl
-			IdentifierClaim              = $identifierClaim
-			ClaimsMappings               = $claimsMappings
-			SigningCertificateThumbPrint = $signingCertificateThumbPrint
-			Ensure                       = $currentState
-			ClaimProviderName            = $claimProviderName
-			ProviderSignOutUri           = $providerSignOutUri
-		}        
+        return @{
+            Name                         = $params.Name
+            Description                  = $description
+            Realm                        = $realm
+            SignInUrl                    = $signInUrl
+            IdentifierClaim              = $identifierClaim
+            ClaimsMappings               = $claimsMappings
+            SigningCertificateThumbPrint = $signingCertificateThumbPrint
+            Ensure                       = $currentState
+            ClaimProviderName            = $claimProviderName
+            ProviderSignOutUri           = $providerSignOutUri
+        }        
     }
     return $result
 }
@@ -99,13 +99,13 @@ function Set-TargetResource
                     throw "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My."
                     return
                 }
-				
-				$claimsMappingsArray = @()
+                
+                $claimsMappingsArray = @()
                 $params.ClaimsMappings| Foreach-Object{
                     $runParams = @{}
                     $runParams.Add("IncomingClaimTypeDisplayName", $_["Name"])
                     $runParams.Add("IncomingClaimType", $_["IncomingClaimType"])
-					if (!$_["LocalClaimType"]) { $runParams.Add("LocalClaimType", $_["IncomingClaimType"]) }
+                    if (!$_["LocalClaimType"]) { $runParams.Add("LocalClaimType", $_["IncomingClaimType"]) }
                     else { $runParams.Add("LocalClaimType", $_["LocalClaimType"]) }
                     $claimsMappingsArray = $claimsMappingsArray + (New-SPClaimTypeMapping @runParams)
                 }

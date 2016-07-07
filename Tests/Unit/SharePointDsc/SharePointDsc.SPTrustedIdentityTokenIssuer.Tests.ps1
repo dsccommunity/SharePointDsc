@@ -68,15 +68,15 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 Assert-MockCalled New-SPTrustedIdentityTokenIssuer
             }
         }
-		
-		Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified exists on the farm" {
+        
+        Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified exists on the farm" {
             Mock Get-SPClaimProvider {
-				return [pscustomobject]@(@{
+                return [pscustomobject]@(@{
                     DisplayName = $testParams.ClaimProviderName
                 })
             }
-			
-			Mock New-SPTrustedIdentityTokenIssuer {
+            
+            Mock New-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = ""
@@ -85,8 +85,8 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
                 return $sptrust
             }
-			
-			Mock Get-SPTrustedIdentityTokenIssuer {
+            
+            Mock Get-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = $testParams.ClaimProviderName
@@ -95,18 +95,18 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
                 return $sptrust
             }
-			
-			Mock New-SPClaimTypeMapping {
+            
+            Mock New-SPClaimTypeMapping {
                 return [pscustomobject]@{
                     MappedClaimType = $testParams.IdentifierClaim
                 }
             }
-			
-			Set-TargetResource @testParams
-			$getResults = Get-TargetResource @testParams
-			
-			It "creates the SPTrustedIdentityTokenIssuer and sets claims provider" {
-				$getResults.ClaimProviderName | Should Be $testParams.ClaimProviderName
+            
+            Set-TargetResource @testParams
+            $getResults = Get-TargetResource @testParams
+            
+            It "creates the SPTrustedIdentityTokenIssuer and sets claims provider" {
+                $getResults.ClaimProviderName | Should Be $testParams.ClaimProviderName
             }
         }
 
