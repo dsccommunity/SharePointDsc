@@ -39,7 +39,7 @@ function Get-TargetResource
                 Name = $params.Name
                 CacheSizeInMB = $cacheHostConfig.Size
                 ServiceAccount = $windowsService.StartName
-                CreateFirewallRules = ($firewallRule -ne $null)
+                CreateFirewallRules = ($null -ne $firewallRule)
                 Ensure = "Present"
                 ServerProvisionOrder = $params.ServerProvisionOrder
                 InstallAccount = $params.InstallAccount
@@ -214,7 +214,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for distributed cache configuration"
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }
 
 

@@ -48,13 +48,13 @@ function Set-TargetResource
         if ($null -eq $farm ) { return $null }
         
         $farm.PasswordChangeEmailAddress = $params.MailAddress;
-        if($params.PasswordChangeWaitTimeSeconds -ne $null) {
+        if($null -ne $params.PasswordChangeWaitTimeSeconds) {
             $farm.PasswordChangeGuardTime = $params.PasswordChangeWaitTimeSeconds
         }
-        if($params.NumberOfRetries -ne $null) {
+        if($null -ne $params.NumberOfRetries) {
             $farm.PasswordChangeMaximumTries = $params.NumberOfRetries
         }
-        if($params.DaysBeforeExpiry -ne $null) {
+        if($null -ne $params.DaysBeforeExpiry) {
             $farm.DaysBeforePasswordExpirationToSendEmail = $params.DaysBeforeExpiry
         }
         $farm.Update();
@@ -79,7 +79,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing retrieving farm wide automatic password change settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("MailAddress", "DaysBeforeExpiry","PasswordChangeWaitTimeSeconds","NumberOfRetries") 
 }
 
 

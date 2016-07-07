@@ -19,6 +19,7 @@ This is done to ensure that the databases are created with the correct schema ow
         SocialDBServer       = "SQL.contoso.local\SQLINSTANCE"
         SyncDBName           = "SP_ProfileSync"
         SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
+        EnableNetBIOS        = $false
         FarmAccount          = $FarmAccount
         PsDscRunAsCredential = $SetupAccount
     }
@@ -36,6 +37,7 @@ class MSFT_SPUserProfileServiceApp : OMI_BaseResource
     [Write, Description("The name of the database server to host the social database")] string SocialDBServer;
     [Write, Description("The name of the sync database")] string SyncDBName;
     [Write, Description("The name of the database server to host the sync database")] string SyncDBServer;
+    [Write, Description("Whether Farm should resolve NetBIOS domain names")] boolean EnableNetBIOS;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

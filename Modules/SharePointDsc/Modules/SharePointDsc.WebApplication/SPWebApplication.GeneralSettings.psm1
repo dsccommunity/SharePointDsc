@@ -92,7 +92,7 @@ function Test-SPDSCWebApplicationGeneralSettings {
 
 
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" -Resolve)
-    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentSettings `
+    $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @("TimeZone", "Alerts", "AlertsLimit", "RSS", "BlogAPI", "BlogAPIAuthenticated", "BrowserFileHandling", "SecurityValidation", "SecurityValidationExpires","SecurityValidationTimeoutMinutes", "RecycleBinEnabled", "RecycleBinCleanupEnabled", "RecycleBinRetentionPeriod", "SecondStageRecycleBinQuota", "MaximumUploadSize", "CustomerExperienceProgram", "PresenceEnabled","AllowOnlineWebPartCatalog","SelfServiceSiteCreationEnabled"                                )
     return $testReturn

@@ -66,7 +66,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.UInt32] $NumberOfUsersEwsSyncWillProcessAtOnce, 
         [parameter(Mandatory = $false)] [System.UInt32] $NumberOfUsersPerEwsSyncBatch 
     )
-    if($Ensure -ne "Absent" -and $ApplicationPool -eq $null){
+    if($Ensure -ne "Absent" -and $null -eq $ApplicationPool){
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
 
@@ -143,7 +143,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
                                                                                                                              "MinimumTimeBetweenEwsSyncSubscriptionSearches",
                                                                                                                              "MinimumTimeBetweenProviderRefreshes",
                                                                                                                              "MinimumTimeBetweenSearchQueries",
@@ -154,7 +154,7 @@ function Test-TargetResource
                                                                                                                              "Ensure"
                                                                                                                             )
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 }
