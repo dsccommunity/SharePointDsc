@@ -183,7 +183,7 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    #Write-Verbose -Message "xTest if SPTrustedIdentityTokenIssuer '$Name' exists ..."
+    Write-Verbose -Message "Test if SPTrustedIdentityTokenIssuer '$Name' exists ..."
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $valuesToCheck = @("Ensure")
     return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
