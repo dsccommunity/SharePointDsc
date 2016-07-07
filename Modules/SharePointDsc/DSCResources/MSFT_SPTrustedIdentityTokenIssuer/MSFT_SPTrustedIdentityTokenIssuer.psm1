@@ -186,7 +186,7 @@ function Test-TargetResource
     Write-Verbose -Message "Test if SPTrustedIdentityTokenIssuer '$Name' exists ..."
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $valuesToCheck = @("Ensure")
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource
