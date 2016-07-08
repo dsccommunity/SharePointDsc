@@ -2,9 +2,10 @@ version: 1.1.0.{build}
 image: WMF 5
 
 install:
-    - cinst -y pester
     - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe   
     - ps: |
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+        Install-Module Pester -Force
         git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests"
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests\TestHelper.psm1" -force
         
@@ -15,7 +16,7 @@ test_script:
     - ps: |
         $testResultsFile = ".\TestsResults.xml"
         $testCoverageFiles = @()
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Tests\SharePointDsc.TestHarness.psm1"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\Tests\Unit\SharePointDsc.TestHarness.psm1"
         $res = Invoke-SPDSCTests -testResultsFile $testResultsFile -DscTestsPath "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests"
         (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
         if ($res.FailedCount -gt 0) { 
@@ -27,7 +28,7 @@ after_test:
         Move-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests" "$env:APPVEYOR_BUILD_FOLDER\"
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\TestHelper.psm1" -force
         New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ItemType Directory
-        & "$env:APPVEYOR_BUILD_FOLDER\Tests\Generate-SPDSCHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US"
+        & "$env:APPVEYOR_BUILD_FOLDER\Tests\Unit\Generate-SPDSCHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US"
 
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" "SharePointDsc.psd1"
         (Get-Content $manifest -Raw).Replace("1.1.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
