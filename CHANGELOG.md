@@ -10,6 +10,7 @@
  * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
  * Removed dependency on Win32_Product from SPInstall
+ * Added resource MSFT_SPTrustedIdentityTokenIssuer
 
 ### 1.1
 
@@ -122,4 +123,4 @@
 ### 0.2.0
 
 * Initial public release of xSharePoint
- 
+
