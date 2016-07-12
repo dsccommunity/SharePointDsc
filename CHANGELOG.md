@@ -10,7 +10,7 @@
  * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
  * Removed dependency on Win32_Product from SPInstall
- * Added resource MSFT_SPTrustedIdentityTokenIssuer
+ * Added SPTrustedIdentityTokenIssuer and SPRemoteFarmTrust resources
 
 ### 1.1
 
