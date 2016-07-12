@@ -15,13 +15,13 @@ function Get-TargetResource
         $params = $args[0]
         
         $getSPServiceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
-        if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
+        if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" -or $_.TypeName -eq $params.Name }}
         
         if ($null -eq $si) { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $fqdn = "$($env:COMPUTERNAME).$domain"
             $getSPServiceInstance = Get-SPServiceInstance -Server $fqdn
-            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
+            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" -or $_.TypeName -eq $params.Name }}
         }
         
         if ($null -eq $si) { 
@@ -60,12 +60,12 @@ function Set-TargetResource
             $params = $args[0]
             
             $getSPServiceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
-            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
+            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" -or $_.TypeName -eq $params.Name }}
             if ($null -eq $si) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
                 $getSPServiceInstance = Get-SPServiceInstance -Server $fqdn
-                if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
+                if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" -or $_.TypeName -eq $params.Name }}
             }
             if ($null -eq $si) { 
                 throw [Exception] "Unable to locate service instance '$($params.Name)'"
@@ -79,12 +79,12 @@ function Set-TargetResource
             $params = $args[0]
             
             $getSPServiceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME
-            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
+            if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" -or $_.TypeName -eq $params.Name }}
             if ($null -eq $si) { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
                 $getSPServiceInstance = Get-SPServiceInstance -Server $fqdn
-                if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" }}
+                if($getSPServiceInstance){$si = $getSPServiceInstance | Where-Object { $_.GetType().Name -eq $params.Name+"ServiceInstance" -or $_.TypeName -eq $params.Name }}
             }
             if ($null -eq $si) {
                 throw [Exception] "Unable to locate service instance '$($params.Name)'"
