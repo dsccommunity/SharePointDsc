@@ -9,6 +9,7 @@
  * Added better logging to all test method output to make it clear what property is causing a test to fail
  * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+ * Added resource MSFT_SPTrustedIdentityTokenIssuer
 
 ### 1.1
 
@@ -121,4 +122,4 @@
 ### 0.2.0
 
 * Initial public release of xSharePoint
- 
+
