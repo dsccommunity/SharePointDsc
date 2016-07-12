@@ -98,7 +98,7 @@ function Set-TargetResource
             $coreProperty.DisplayName = $params.DisplayName
             $coreProperty.Commit()
         }else{
-            Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+            Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
             $userProfileProperty.Commit()
         }
 

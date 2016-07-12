@@ -1,4 +1,4 @@
-function Invoke-SPDSCTests() {
+function Invoke-SPDscUnitTestSuite() {
     param
     (
         [parameter(Mandatory = $false)] [System.String]  $testResultsFile,
@@ -59,7 +59,7 @@ function Invoke-SPDSCTests() {
     return $results
 }
 
-function Write-SPDSCStubFiles() {
+function Write-SPDSCStubFile() {
     param
     (
         [parameter(Mandatory = $true)] [System.String] $SharePointStubPath
