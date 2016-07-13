@@ -279,8 +279,8 @@ function Test-TargetResource
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
-        Write-Verbose "Specified database server does not match the actual database server. " + `
-                      "This resource cannot move the database to a different SQL instance."
+        Write-Verbose -Message ("Specified database server does not match the actual database server. " + `
+                                "This resource cannot move the database to a different SQL instance.")
         return $false
     }
 
