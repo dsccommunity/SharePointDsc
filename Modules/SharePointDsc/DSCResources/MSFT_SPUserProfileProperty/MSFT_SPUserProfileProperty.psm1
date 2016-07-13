@@ -253,7 +253,7 @@ function Set-TargetResource
             $coreProperty.Name = $params.Name
             $coreProperty.DisplayName = $params.DisplayName
 
-            Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"                                                
+            Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty -PropertyToSet "Length" -ParamsValue $params -ParamKey "Length"                                                
     
             if($params.Type.ToLower() -eq "stringmultivalue")
             {
@@ -280,17 +280,17 @@ function Set-TargetResource
 
         $coreProperty = $userProfileProperty.CoreProperty
         $userProfileTypeProperty = $userProfileProperty.TypeProperty
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $coreProperty -PropertyToSet "Description" -ParamsValue $params -ParamKey "Description"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty -PropertyToSet "Description" -ParamsValue $params -ParamKey "Description"
 
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileTypeProperty -PropertyToSet "IsVisibleOnViewer" -ParamsValue $params -ParamKey "IsVisibleOnViewer"
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileTypeProperty -PropertyToSet "IsVisibleOnEditor" -ParamsValue $params -ParamKey "IsVisibleOnEditor"
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileTypeProperty -PropertyToSet "IsEventLog" -ParamsValue $params -ParamKey "IsEventLog"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty -PropertyToSet "IsVisibleOnViewer" -ParamsValue $params -ParamKey "IsVisibleOnViewer"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty -PropertyToSet "IsVisibleOnEditor" -ParamsValue $params -ParamKey "IsVisibleOnEditor"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileTypeProperty -PropertyToSet "IsEventLog" -ParamsValue $params -ParamKey "IsEventLog"
 
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DefaultPrivacy" -ParamsValue $params -ParamKey "PrivacySetting"
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "PrivacyPolicy" -ParamsValue $params -ParamKey "PolicySetting"
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "IsUserEditable" -ParamsValue $params -ParamKey "IsUserEditable"                                                                
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "UserOverridePrivacy" -ParamsValue $params -ParamKey "UserOverridePrivacy"                                                                
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty -PropertyToSet "DefaultPrivacy" -ParamsValue $params -ParamKey "PrivacySetting"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty -PropertyToSet "PrivacyPolicy" -ParamsValue $params -ParamKey "PolicySetting"
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty -PropertyToSet "IsUserEditable" -ParamsValue $params -ParamKey "IsUserEditable"                                                                
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty -PropertyToSet "UserOverridePrivacy" -ParamsValue $params -ParamKey "UserOverridePrivacy"                                                                
         if($null -ne $termSet){
             $coreProperty.TermSet = $termSet
         }

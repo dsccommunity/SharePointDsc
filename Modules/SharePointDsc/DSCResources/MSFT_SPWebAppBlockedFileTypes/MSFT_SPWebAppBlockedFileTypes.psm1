@@ -23,7 +23,7 @@ function Get-TargetResource
 
         Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1" -Resolve)
 
-        $result = Get-SPDSCWebApplicationBlockedFileTypes -WebApplication $wa
+        $result = Get-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa
         $result.Add("Url", $params.Url)
         $result.Add("InstallAccount", $params.InstallAccount)
         return $result
@@ -56,7 +56,7 @@ function Set-TargetResource
         }
 
         Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1" -Resolve)
-        Set-SPDSCWebApplicationBlockedFileTypes -WebApplication $wa -Settings $params
+        Set-SPDSCWebApplicationBlockedFileTypeConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
 }
@@ -80,7 +80,7 @@ function Test-TargetResource
     if ($null -eq $CurrentValues) { return $false }
 
     Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1" -Resolve)
-    return Test-SPDSCWebApplicationBlockedFileTypes -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
+    return Test-SPDSCWebApplicationBlockedFileTypeConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
 
