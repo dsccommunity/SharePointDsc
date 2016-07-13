@@ -10,9 +10,10 @@ This module depends on the prerequisites already being installed, which can be d
 
     SPConfigWizard RunConfigWizard
     {
-        Ensure              = "Present"
-        DatabaseUpgradeDays = "sat", "sun"
-        DatabaseUpgradeTime = "3:00am to 5:00am"
+        Ensure               = "Present"
+        DatabaseUpgradeDays  = "sat", "sun"
+        DatabaseUpgradeTime  = "3:00am to 5:00am"
+        PsDscRunAsCredential = $SetupAccount
     }
 
 */
