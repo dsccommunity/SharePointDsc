@@ -17,21 +17,18 @@ function Get-TargetResource
         $Query,
 
         [parameter(Mandatory = $true)]  
-        [ValidateSet("Best Bet Provider", 
-                     "Exchange Search Provider", 
-                     "Local People Provider", 
-                     "Local", 
-                     "SharePoint Provider", 
+        [ValidateSet("Exchange Search Provider", 
+                     "Local People Provider",  
+                     "Local SharePoint Provider", 
                      "OpenSearch Provider", 
-                     "Personal Favorites Provider", 
                      "Remote People Provider", 
                      "Remote SharePoint Provider")] 
         [System.String] 
         $ProviderType,
 
-        [parameter(Mandatory = $false)] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
-        $SortOptions,
+        [parameter(Mandatory = $false)]  
+        [System.String] 
+        $ConnectionUrl,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
@@ -45,32 +42,57 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting search result source '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
-
+        [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
+            
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
-        $fedManager = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Query.FederationManager `
-                                 -ArgumentList $serviceApp
+        $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
+        $searchSite = Get-SPWeb -Identity $searchSiteUrl
 
-        try 
+        $adminNamespace = "Microsoft.Office.Server.Search.Administration"
+        $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
+        $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
+        $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
+                                    -ArgumentList $serviceApp
+        $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
+                                    -ArgumentList @(
+                                        $objectLevel::Ssa, 
+                                        $searchSite
+                                    )
+
+        $source = $fedManager.GetSourceByName($params.Name, $searchOwner)
+
+        if ($null -ne $source)
         {
-            $source = $fedManager.GetSourceByName($params.Name)
-
-            #TODO: Get the properties off the $source object and build up a return value
+            $providers = $fedManager.ListProviders()
+            $provider = $providers.Values | Where-Object -FilterScript { 
+                $_.Id -eq $source.ProviderId 
+            }
+            return @{
+                Name = $params.Name
+                SearchServiceAppName = $params.SearchServiceAppName
+                Query = $source.QueryTransform.QueryTemplate
+                ProviderType = $provider.Name
+                ConnectionUrl = $source.ConnectionUrlTemplate
+                Ensure = "Present"
+                InstallAccount = $params.InstallAccount
+            }
         }
-        catch [System.Exception] {
+        else 
+        {
             return @{
                 Name = $params.Name
                 SearchServiceAppName = $params.SearchServiceAppName
                 Query = $null
                 ProviderType = $null
-                SortOptions = $null
+                ConnectionUrl = $null
                 Ensure = "Absent"
                 InstallAccount = $params.InstallAccount
             }
         }
-        
-
     }
     return $result
 }
@@ -94,21 +116,18 @@ function Set-TargetResource
         $Query,
 
         [parameter(Mandatory = $true)]  
-        [ValidateSet("Best Bet Provider", 
-                     "Exchange Search Provider", 
-                     "Local People Provider", 
-                     "Local", 
-                     "SharePoint Provider", 
+        [ValidateSet("Exchange Search Provider", 
+                     "Local People Provider",  
+                     "Local SharePoint Provider", 
                      "OpenSearch Provider", 
-                     "Personal Favorites Provider", 
                      "Remote People Provider", 
                      "Remote SharePoint Provider")] 
         [System.String] 
         $ProviderType,
 
-        [parameter(Mandatory = $false)] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
-        $SortOptions,
+        [parameter(Mandatory = $false)]  
+        [System.String] 
+        $ConnectionUrl,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
@@ -126,39 +145,40 @@ function Set-TargetResource
 
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") {
         Write-Verbose -Message "Creating search result source $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
             
-            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
-            $searchSite = Get-SPWeb -Identity $serviceApp.SearchCenterUrl
+            $serviceApp = Get-SPEnterpriseSearchServiceApplication `
+                            -Identity $params.SearchServiceAppName
 
-            $fedManager = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Query.FederationManager `
+            $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
+            $searchSite = Get-SPWeb -Identity $searchSiteUrl
+
+            $adminNamespace = "Microsoft.Office.Server.Search.Administration"
+            $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
+            $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
+            $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
                                      -ArgumentList $serviceApp
-            $searchOwner = New-Object -TypeName Microsoft.Office.Server.Search.Administration.SearchObjectOwner `
+            $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
                                       -ArgumentList @(
-                                          [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa, 
+                                          $objectLevel::Ssa, 
                                           $searchSite
-                                        )
-            $queryProperties = New-Object -TypeName Microsoft.Office.Server.Search.Query.Rules.QueryTransformProperties
-            $sortCollection = New-Object - TypeName Microsoft.Office.Server.Search.Query.SortCollection
+                                      )
 
-            if ($params.ContainsKey("SortOptions"))
-            {
-                foreach($sortObject in $params.SortOptions)
-                {
-                    $sortDir = [Microsoft.Office.Server.Search.Query.SortDirection]::($sortObject.SortDirection)
-                    $sortCollection.Add($sortObject.PropertyName, $sortDir)
-                }
-            }
-            $queryProperties["SortList"] = [Microsoft.Office.Server.Search.Query.SortCollection]$sortCollection
-
+            $transformType = "Microsoft.Office.Server.Search.Query.Rules.QueryTransformProperties"
+            $queryProperties = New-Object -TypeName $transformType
             $resultSource = $fedManager.CreateSource($searchOwner)
             $resultSource.Name = $params.Name
-
             $providers = $fedManager.ListProviders()
             $resultSource.ProviderId = $providers[$params.ProviderType].Id
             $resultSource.CreateQueryTransform($queryProperties, $params.Query)
+            if ($params.ContainsKey("ConnectionUrl") -eq $true)
+            {
+                $resultSource.ConnectionUrlTemplate = $params.ConnectionUrl
+            }
             $resultSource.Commit()
         }
     }
@@ -166,13 +186,30 @@ function Set-TargetResource
         Write-Verbose -Message "Removing search result source $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            
-            $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
-            $fedManager = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Query.FederationManager `
-                                     -ArgumentList $serviceApp
+            [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
-            $source = $fedManager.GetSourceByName($params.Name)
-            $fedManager.RemoveSource($source)                 
+            $serviceApp = Get-SPEnterpriseSearchServiceApplication `
+                            -Identity $params.SearchServiceAppName
+
+            $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
+            $searchSite = Get-SPWeb -Identity $searchSiteUrl
+
+            $adminNamespace = "Microsoft.Office.Server.Search.Administration"
+            $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
+            $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
+            $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
+                                     -ArgumentList $serviceApp
+            $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
+                                      -ArgumentList @(
+                                          $objectLevel::Ssa, 
+                                          $searchSite
+                                      )
+
+            $source = $fedManager.GetSourceByName($params.Name, $searchOwner)
+            if ($null -ne $source)
+            {
+                $fedManager.RemoveSource($source)
+            }
         }
     } 
 }
@@ -196,21 +233,18 @@ function Test-TargetResource
         $Query,
 
         [parameter(Mandatory = $true)]  
-        [ValidateSet("Best Bet Provider", 
-                     "Exchange Search Provider", 
-                     "Local People Provider", 
-                     "Local", 
-                     "SharePoint Provider", 
+        [ValidateSet("Exchange Search Provider", 
+                     "Local People Provider",  
+                     "Local SharePoint Provider", 
                      "OpenSearch Provider", 
-                     "Personal Favorites Provider", 
                      "Remote People Provider", 
                      "Remote SharePoint Provider")] 
         [System.String] 
         $ProviderType,
 
-        [parameter(Mandatory = $false)] 
-        [Microsoft.Management.Infrastructure.CimInstance[]] 
-        $SortOptions,
+        [parameter(Mandatory = $false)]  
+        [System.String] 
+        $ConnectionUrl,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 

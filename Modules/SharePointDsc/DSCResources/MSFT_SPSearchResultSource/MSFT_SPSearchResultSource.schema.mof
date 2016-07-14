@@ -1,11 +1,3 @@
-[ClassVersion("1.0.0")]
-Class MSFT_SPSearchResultSourceSort
-{
-    [Key, Description("Name of the property to sort on")] String PropertyName;
-    [Write, Description("Permission level of the account"), ValueMap{"Ascending","Descending"}, Values{"Ascending","Descending"}] String SortDirection;
-};
-
-
 /*
 **Description**
 
@@ -16,7 +8,7 @@ This resoruce
     {
         Name = "External SharePoint results"
         SearchServiceAppName = "Search Service Application"
-        Query = "{searchTerms?}"
+        Query = "{searchTerms}"
         ProviderType = "Remote SharePoint Provider"
     }
 */
@@ -26,8 +18,8 @@ class MSFT_SPSearchResultSource : OMI_BaseResource
     [Key, Description("The name of the result source")] String Name;
     [Required, Description("The name of the search service application to associate this result source with")] String SearchServiceAppName;
     [Required, Description("The query to pass to the provider source")] String Query;
-    [Required, Description("The provider type to use for the result source"), ValueMap{"Best Bet Provider", "Exchange Search Provider", "Local People Provider", "Local", "SharePoint Provider", "OpenSearch Provider", "Personal Favorites Provider", "Remote People Provider", "Remote SharePoint Provider"}, Values{"Best Bet Provider", "Exchange Search Provider", "Local People Provider", "Local", "SharePoint Provider", "OpenSearch Provider", "Personal Favorites Provider", "Remote People Provider", "Remote SharePoint Provider"}] String ProviderType;
-    [Write, Description("Specific sorting options that should be applied when the query is issued to the provider"), EmbeddedInstance("MSFT_SPSearchResultSourceSort")] String SortOptions[];
+    [Required, Description("The provider type to use for the result source"), ValueMap{"Exchange Search Provider", "Local People Provider",  "Local SharePoint Provider", "OpenSearch Provider", "Remote People Provider", "Remote SharePoint Provider"}, Values{"Exchange Search Provider", "Local People Provider",  "Local SharePoint Provider", "OpenSearch Provider", "Remote People Provider", "Remote SharePoint Provider"}] String ProviderType;
+    [Write, Description("The URI to connect to the remote location")] String ConnectionUrl;
     [Write, Description("Present if the result source should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
