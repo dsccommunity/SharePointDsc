@@ -11,7 +11,7 @@
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall
- * Added SPTrustedIdentityTokenIssuer and SPRemoteFarmTrust resources
+ * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
 
 ### 1.1
 
