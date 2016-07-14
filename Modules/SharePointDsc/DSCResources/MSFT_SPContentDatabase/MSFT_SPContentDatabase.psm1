@@ -91,7 +91,10 @@ function Set-TargetResource
         {
             param
             (
+                [System.Collections.Hashtable]
                 $params,
+
+                [System.Boolean]
                 $enabled
             )
 
