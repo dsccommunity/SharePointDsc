@@ -19,8 +19,9 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
-        $cdb = Get-SPDatabase | Where-Object -FilterScript `
-                                { $_.Type -eq "Content Database" -and $_.Name -eq $params.Name }
+        $cdb = Get-SPDatabase | Where-Object -FilterScript {
+            $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
+        }
 
         if ($null -eq $cdb)
         {
@@ -86,7 +87,7 @@ function Set-TargetResource
     Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
 
-        function MountContentDatabase()
+        function Mount-SPDscContentDatabase()
         {
             param
             (
@@ -126,7 +127,8 @@ function Set-TargetResource
             }
             catch
             {
-                throw "Error occurred while mounting content database. Content database is not mounted. Error details: $($_.Exception.Message)"
+                throw ("Error occurred while mounting content database. Content database is not mounted. " + `
+                       "Error details: $($_.Exception.Message)")
             }
 
             if ($cdb.Status -eq "Online")
@@ -157,13 +159,15 @@ function Set-TargetResource
         }
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase does not return disabled databases.
-        $cdb = Get-SPDatabase | Where-Object -FilterScript `
-                                    { $_.Type -eq "Content Database" -and $_.Name -eq $params.Name }
+        $cdb = Get-SPDatabase | Where-Object -FilterScript {
+            $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
+        }
 
         if ($params.Ensure -eq "Present") {
             # Check if specified web application exists and throw exception when this is not the case
-            $webapp = Get-SPWebApplication | Where-Object -FilterScript `
-                                    { $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/") }
+            $webapp = Get-SPWebApplication | Where-Object -FilterScript {
+                $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/")
+            }
 
             if ($null -eq $webapp) {
                 throw "Specified web application does not exist."
@@ -172,8 +176,9 @@ function Set-TargetResource
             # Check if database exists
             if ($null -ne $cdb) {
                 if ($cdb.Server -ne $params.DatabaseServer) {
-                    throw "Specified database server does not match the actual database server." + `
-                          " This resource cannot move the database to a different SQL instance."
+                    throw ("Specified database server does not match the actual database " + `
+                           "server. This resource cannot move the database to a different " + `
+                           "SQL instance.")
                 }
 
                 # Check and change attached web application. Dismount and mount to correct web application
@@ -190,7 +195,7 @@ function Set-TargetResource
                     }
                     
                     $parameters = @{} + $params
-                    $cdb = MountContentDatabase $parameters $enabled
+                    $cdb = Mount-SPDscContentDatabase $parameters $enabled
                 }
 
                 # Check and change database status
@@ -242,7 +247,7 @@ function Set-TargetResource
                 }
                 
                 $parameters = @{} + $params
-                $cdb = MountContentDatabase $parameters $enabled
+                $cdb = Mount-SPDscContentDatabase $parameters $enabled
             }
             $cdb.Update()
         }
