@@ -16,7 +16,9 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting content database configuration settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
@@ -84,7 +86,9 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting content database configuration settings"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
         $params = $args[0]
 
         function Mount-SPDscContentDatabase()
@@ -130,7 +134,8 @@ function Set-TargetResource
             }
             catch
             {
-                throw ("Error occurred while mounting content database. Content database is not mounted. " + `
+                throw ("Error occurred while mounting content database. " + `
+                       "Content database is not mounted. " + `
                        "Error details: $($_.Exception.Message)")
             }
 
@@ -161,13 +166,15 @@ function Set-TargetResource
             return $cdb
         }
 
-        # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase does not return disabled databases.
+        # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
+        # does not return disabled databases.
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
             $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
         }
 
         if ($params.Ensure -eq "Present") {
-            # Check if specified web application exists and throw exception when this is not the case
+            # Check if specified web application exists and throw exception when
+            # this is not the case
             $webapp = Get-SPWebApplication | Where-Object -FilterScript {
                 $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/")
             }
@@ -184,7 +191,8 @@ function Set-TargetResource
                            "SQL instance.")
                 }
 
-                # Check and change attached web application. Dismount and mount to correct web application
+                # Check and change attached web application.
+                # Dismount and mount to correct web application
                 if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/")) {
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
@@ -287,8 +295,9 @@ function Test-TargetResource
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
     {
-        Write-Verbose -Message ("Specified database server does not match the actual database server. " + `
-                                "This resource cannot move the database to a different SQL instance.")
+        Write-Verbose -Message ("Specified database server does not match the actual " + `
+                                "database server. This resource cannot move the database " + `
+                                "to a different SQL instance.")
         return $false
     }
 
