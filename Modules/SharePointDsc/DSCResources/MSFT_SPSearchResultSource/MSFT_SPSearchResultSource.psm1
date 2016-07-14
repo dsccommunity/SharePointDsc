@@ -56,12 +56,12 @@ function Get-TargetResource
         $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
         $objectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]
         $fedManager = New-Object -TypeName "$queryNamespace.FederationManager" `
-                                    -ArgumentList $serviceApp
+                                 -ArgumentList $serviceApp
         $searchOwner = New-Object -TypeName "$adminNamespace.SearchObjectOwner" `
-                                    -ArgumentList @(
-                                        $objectLevel::Ssa, 
-                                        $searchSite
-                                    )
+                                  -ArgumentList @(
+                                      $objectLevel::Ssa, 
+                                      $searchSite
+                                  )
 
         $source = $fedManager.GetSourceByName($params.Name, $searchOwner)
 
@@ -173,7 +173,10 @@ function Set-TargetResource
             $resultSource = $fedManager.CreateSource($searchOwner)
             $resultSource.Name = $params.Name
             $providers = $fedManager.ListProviders()
-            $resultSource.ProviderId = $providers[$params.ProviderType].Id
+            $provider = $providers.Values | Where-Object -FilterScript { 
+                $_.Name -eq $params.ProviderType
+            }
+            $resultSource.ProviderId = $provider.Id
             $resultSource.CreateQueryTransform($queryProperties, $params.Query)
             if ($params.ContainsKey("ConnectionUrl") -eq $true)
             {
