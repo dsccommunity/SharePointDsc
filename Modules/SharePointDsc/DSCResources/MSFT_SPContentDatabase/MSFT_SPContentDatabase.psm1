@@ -87,84 +87,12 @@ function Set-TargetResource
     Write-Verbose -Message "Setting content database configuration settings"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
+                        -Arguments @($PSBoundParameters,$PSScriptRoot) `
                         -ScriptBlock {
         $params = $args[0]
+        $scriptRoot  = $args[1]
 
-        function Mount-SPDscContentDatabase()
-        {
-            param
-            (
-                [System.Collections.Hashtable]
-                $params,
-
-                [System.Boolean]
-                $enabled
-            )
-
-            if ($params.ContainsKey("Enabled"))
-            {
-                $params.Remove("Enabled")
-            }
-            
-            if ($params.ContainsKey("Ensure"))
-            {
-                $params.Remove("Ensure")
-            }
-            
-            if ($params.ContainsKey("InstallAccount"))
-            {
-                $params.Remove("InstallAccount")
-            }
-            
-            if ($params.ContainsKey("MaximumSiteCount"))
-            {
-                $params.MaxSiteCount = $params.MaximumSiteCount
-                $params.Remove("MaximumSiteCount")
-            }
-            if ($params.ContainsKey("WebAppUrl"))
-            {
-                $params.WebApplication = $params.WebAppUrl
-                $params.Remove("WebAppUrl")
-            }
-
-            try
-            {
-                $cdb = Mount-SPContentDatabase @params
-            }
-            catch
-            {
-                throw ("Error occurred while mounting content database. " + `
-                       "Content database is not mounted. " + `
-                       "Error details: $($_.Exception.Message)")
-            }
-
-            if ($cdb.Status -eq "Online")
-            {
-                $cdbenabled = $true
-            }
-            else
-            {
-                $cdbenabled = $false
-            }
-
-            if ($enabled -ne $cdbenabled)
-            {
-                switch ($params.Enabled)
-                {
-                    $true
-                    { 
-                        $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
-                    }
-                    $false
-                    {
-                        $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled
-                    }
-                }
-            }
-
-            return $cdb
-        }
+        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDsc.ContentDatabase\SPContentDatabase.psm1" -Resolve)
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
         # does not return disabled databases.
