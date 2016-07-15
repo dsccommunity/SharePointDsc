@@ -34,15 +34,15 @@ function Get-TargetResource
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" -ArgumentList @($context)
 
             $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name}
-            if($connection -eq $null){
+            if($null -eq $connection){
                 return $null
             }
-            $namingContext = $connection.NamingContexts | select -first 1
-            if($namingContext -eq $null){
+            $namingContext = $connection.NamingContexts | Select-Object -First 1
+            if($null -eq $namingContext){
                 return $null
             }
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
-            $domainController = $namingContext.PreferredDomainControllers | select -First 1
+            $domainController = $namingContext.PreferredDomainControllers | Select-Object -First 1
             return @{
                         UserProfileService = $UserProfileService
                         Forest = $connection.Server
@@ -102,22 +102,22 @@ function Set-TargetResource
             throw "Synchronization is in Progress."
         }
         
-        $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name} | select -first 1
-        if($connection -ne $null -and $params.Forest -ieq  $connection.Server)
+        $connection = $upcm.ConnectionManager | Where-Object { $_.DisplayName -eq $params.Name} | Select-Object -first 1
+        if($null -ne $connection -and $params.Forest -ieq  $connection.Server)
         {
             $domain = $params.ConnectionCredentials.UserName.Split("\")[0]
             $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
             $connection.SetCredentials($domain, $userName, $params.ConnectionCredentials.Password);
 
-            $connection.NamingContexts | %{
+            $connection.NamingContexts | ForEach-Object -Process {
                 $namingContext = $_
                 if($params.ContainsKey("IncludedOUs")){
                     $namingContext.ContainersIncluded.Clear()
-                    $params.IncludedOUs| %{$namingContext.ContainersIncluded.Add($_) }
+                    $params.IncludedOUs| ForEach-Object -Process { $namingContext.ContainersIncluded.Add($_) }
                 }
                 $namingContext.ContainersExcluded.Clear()
                 if($params.ContainsKey("ExcludedOUs")){
-                    $params.IncludedOUs| %{$namingContext.ContainersExcluded.Add($_) }
+                    $params.IncludedOUs| ForEach-Object -Process { $namingContext.ContainersExcluded.Add($_) }
                 }
             }
             $connection.Update();
@@ -126,7 +126,7 @@ function Set-TargetResource
             return;
         } else {
             Write-Verbose -Message "creating a new connection "
-            if($connection -ne $null -and $params.Forest -ine  $connection.Server){
+            if($null -ne $connection -and $params.Forest -ine  $connection.Server){
                 if($params.ContainsKey("Force") -and $params.Force -eq $true){
                     $connection.Delete();
                 }else{
@@ -140,13 +140,13 @@ function Set-TargetResource
                 $servers.add($params.Server) 
             }
             $listIncludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
-            $params.IncludedOUs | %{ 
+            $params.IncludedOUs | ForEach-Object -Process { 
                 $listIncludedOUs.Add($_) 
             }
 
             $listExcludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
             if($params.ContainsKey("ExcludedOus")){
-                $params.ExcludedOus | %{$listExcludedOUs.Add($_) }
+                $params.ExcludedOus | ForEach-Object -Process { $listExcludedOUs.Add($_) }
             }
             $list = New-SPDSCDirectoryServiceNamingContextList
             
@@ -216,7 +216,7 @@ function Test-TargetResource
     {
         return $false 
     }    
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name", "Forest", "UserProfileService", "Server", "UseSSL","IncludedOUs", "ExcludedOUs" )
 }
 
 function Get-SPDSCADSIObject() {

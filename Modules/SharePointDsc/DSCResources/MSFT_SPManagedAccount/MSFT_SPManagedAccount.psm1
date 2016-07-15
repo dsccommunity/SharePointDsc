@@ -26,7 +26,7 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         } }
         $schedule = $null
-        if ($ma.ChangeSchedule -ne $null) { $schedule = $ma.ChangeSchedule.ToString() }
+        if ($null -ne $ma.ChangeSchedule) { $schedule = $ma.ChangeSchedule.ToString() }
         return @{
             AccountName       = $ma.Username
             EmailNotification = $ma.DaysBeforeChangeToEmail
@@ -54,7 +54,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [System.String] $AccountName
     )
 
-    if ($Ensure -eq "Present" -and $Account -eq $null) {
+    if ($Ensure -eq "Present" -and $null -eq $Account) {
         throw "You must specify the 'Account' property as a PSCredential to create a managed account"
         return
     }
@@ -112,7 +112,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification", "Ensure") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification", "Ensure") 
 }
 
 

@@ -31,14 +31,14 @@ function Get-TargetResource
         }
 
         # Check if timer job if found
-        if ($timerjob -eq $null) { return $null }
+        if ($null -eq $timerjob) { return $null }
         
         $schedule = $null
         if ($null -ne $timerjob.Schedule) {
             $schedule = $timerjob.Schedule.ToString()
         }
         
-        if ($timerjob.WebApplication -eq $null) {
+        if ($null -eq $timerjob.WebApplication) {
             # Timer job is not associated to web application
             return @{
                 Name = $params.Name
@@ -156,7 +156,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues) { return $false }
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource

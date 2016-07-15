@@ -4,28 +4,53 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String[]] $Members,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $Members,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $MembersToInclude,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $MembersToExclude,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
+    {
+        throw ("Cannot use the Members parameter together with the " + `
+               "MembersToInclude or MembersToExclude parameters")
     }
 
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) 
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+               "Members, MembersToInclude, MembersToExclude")
     }
 
     Write-Verbose -Message "Getting all Farm Administrators"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
-        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
-        if ($null -eq $caWebapp) {
+        $webApps = Get-SPwebapplication -IncludeCentralAdministration
+        $caWebapp = $webApps | Where-Object -FilterScript { 
+            $_.IsAdministrationWebApplication 
+        }
+        
+        if ($null -eq $caWebapp) 
+        {
             Write-Verbose "Unable to locate central administration website"
             return $null
         }
@@ -49,21 +74,39 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String[]] $Members,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $Members,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $MembersToInclude,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $MembersToExclude,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting Farm Administrator config"
     
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
+    {
+        throw ("Cannot use the Members parameter together with the " + `
+               "MembersToInclude or MembersToExclude parameters")
     }
 
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) 
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+               "Members, MembersToInclude, MembersToExclude")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -77,21 +120,29 @@ function Set-TargetResource
     if ($Members) {
         Write-Verbose "Processing Members parameter"
 
-        $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
+        $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
+                                      -DifferenceObject $Members
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) 
+        {
             Write-Verbose "Farm Administrators group matches. No further processing required"
-        } else {
+        } 
+        else 
+        {
             Write-Verbose "Farm Administrators group does not match. Perform corrective action"
             $addUsers = @()
             $removeUsers = @()
-            ForEach ($difference in $differences) {
-                if ($difference.SideIndicator -eq "=>") {
+            foreach ($difference in $differences) 
+            {
+                if ($difference.SideIndicator -eq "=>") 
+                {
                     # Add account
                     $user = $difference.InputObject
                     Write-Verbose "Add $user to Add list"
                     $addUsers += $user
-                } elseif ($difference.SideIndicator -eq "<=") {
+                } 
+                elseif ($difference.SideIndicator -eq "<=") 
+                {
                     # Remove account
                     $user = $difference.InputObject
                     Write-Verbose "Add $user to Remove list"
@@ -99,13 +150,15 @@ function Set-TargetResource
                 }
             }
 
-            if($addUsers.count -gt 0) { 
+            if($addUsers.count -gt 0) 
+            { 
                 Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
                 $changeUsers.Add = $addUsers
                 $runChange = $true
             }
 
-            if($removeUsers.count -gt 0) { 
+            if($removeUsers.count -gt 0) 
+            { 
                 Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
                 $changeUsers.Remove = $removeUsers
                 $runChange = $true
@@ -113,49 +166,62 @@ function Set-TargetResource
         }
     }
 
-    if ($MembersToInclude) {
+    if ($MembersToInclude) 
+    {
         Write-Verbose "Processing MembersToInclude parameter"
         
         $addUsers = @()
-        ForEach ($member in $MembersToInclude) {
-            if (-not($CurrentValues.Members.Contains($member))) {
+        foreach ($member in $MembersToInclude) 
+        {
+            if (-not($CurrentValues.Members.Contains($member))) 
+            {
                 Write-Verbose "$member is not a Farm Administrator. Add user to Add list"
                 $addUsers += $member
-            } else {
+            } 
+            else 
+            {
                 Write-Verbose "$member is already a Farm Administrator. Skipping"
             }
         }
 
-        if($addUsers.count -gt 0) { 
+        if($addUsers.count -gt 0) 
+        { 
             Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
             $changeUsers.Add = $addUsers
             $runChange = $true
         }
     }
 
-    if ($MembersToExclude) {
+    if ($MembersToExclude) 
+    {
         Write-Verbose "Processing MembersToExclude parameter"
         
         $removeUsers = @()
-        ForEach ($member in $MembersToExclude) {
-            if ($CurrentValues.Members.Contains($member)) {
+        foreach ($member in $MembersToExclude) 
+        {
+            if ($CurrentValues.Members.Contains($member)) 
+            {
                 Write-Verbose "$member is a Farm Administrator. Add user to Remove list"
                 $removeUsers += $member
-            } else {
+            } 
+            else 
+            {
                 Write-Verbose "$member is not a Farm Administrator. Skipping"
             }
         }
 
-        if($removeUsers.count -gt 0) { 
+        if($removeUsers.count -gt 0) 
+        { 
             Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
             $changeUsers.Remove = $removeUsers
             $runChange = $true
         }
     }
 
-    if ($runChange) {
+    if ($runChange) 
+    {
         Write-Verbose "Apply changes"
-        Update-SPDSCFarmAdministrators $changeUsers
+        Merge-SPDscFarmAdminList $changeUsers
     }
 }
 
@@ -166,60 +232,96 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String[]] $Members,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToInclude,
-        [parameter(Mandatory = $false)] [System.String[]] $MembersToExclude,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $Members,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $MembersToInclude,
+
+        [parameter(Mandatory = $false)] 
+        [System.String[]] 
+        $MembersToExclude,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing Farm Administrator settings"
     
-    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+    if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
+    {
+        throw ("Cannot use the Members parameter together with the " + `
+               "MembersToInclude or MembersToExclude parameters")
     }
 
-    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-        throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+    if (!$Members -and !$MembersToInclude -and !$MembersToExclude) 
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+               "Members, MembersToInclude, MembersToExclude")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) { return $false }
+    if ($null -eq $CurrentValues) 
+    { 
+        return $false 
+    }
     
-    if ($Members) {
+    if ($Members) 
+    {
         Write-Verbose "Processing Members parameter"
-        $differences = Compare-Object -ReferenceObject $CurrentValues.Members -DifferenceObject $Members
+        $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
+                                      -DifferenceObject $Members
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) 
+        {
             Write-Verbose "Farm Administrators group matches"
             return $true
-        } else {
+        } 
+        else 
+        {
             Write-Verbose "Farm Administrators group does not match"
             return $false
         }
     }
 
     $result = $true
-    if ($MembersToInclude) {
+    if ($MembersToInclude) 
+    {
         Write-Verbose "Processing MembersToInclude parameter"
-        ForEach ($member in $MembersToInclude) {
-            if (-not($CurrentValues.Members -contains $member)) {
+        foreach ($member in $MembersToInclude) 
+        {
+            if (-not($CurrentValues.Members -contains $member)) 
+            {
                 Write-Verbose "$member is not a Farm Administrator. Set result to false"
                 $result = $false
-            } else {
+            } 
+            else 
+            {
                 Write-Verbose "$member is already a Farm Administrator. Skipping"
             }
         }
     }
 
-    if ($MembersToExclude) {
+    if ($MembersToExclude) 
+    {
         Write-Verbose "Processing MembersToExclude parameter"
-        ForEach ($member in $MembersToExclude) {
-            if ($CurrentValues.Members -contains $member) {
+        foreach ($member in $MembersToExclude) 
+        {
+            if ($CurrentValues.Members -contains $member) 
+            {
                 Write-Verbose "$member is a Farm Administrator. Set result to false"
                 $result = $false
-            } else {
+            } 
+            else 
+            {
                 Write-Verbose "$member is not a Farm Administrator. Skipping"
             }
         }
@@ -228,27 +330,38 @@ function Test-TargetResource
     return $result
 }
 
-function Update-SPDSCFarmAdministrators {
-    param ([Hashtable] $changeUsers)
+function Merge-SPDscFarmAdminList 
+{
+    param (
+        [Hashtable] 
+        $changeUsers
+    )
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $changeUsers -ScriptBlock {
         $changeUsers = $args[0]
 
-        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        $webApps = Get-SPwebapplication -IncludeCentralAdministration
+        $caWebapp = $webApps | Where-Object -FilterScript { 
+            $_.IsAdministrationWebApplication 
+        }
         if ($null -eq $caWebapp) {
             throw "Unable to locate central administration website"
         }
         $caWeb = Get-SPweb($caWebapp.Url)
         $farmAdminGroup = $caWeb.AssociatedOwnerGroup
 
-        if ($changeUsers.ContainsKey("Add")) {
-            ForEach ($loginName in $changeUsers.Add) {
+        if ($changeUsers.ContainsKey("Add")) 
+        {
+            foreach ($loginName in $changeUsers.Add) 
+            {
                 $caWeb.SiteGroups.GetByName($farmAdminGroup).AddUser($loginName,"","","")
             }
         }
         
-        if ($changeUsers.ContainsKey("Remove")) {
-            ForEach ($loginName in $changeUsers.Remove) {
+        if ($changeUsers.ContainsKey("Remove")) 
+        {
+            foreach ($loginName in $changeUsers.Remove) 
+            {
                 $removeUser = get-spuser $loginName -web $caWebapp.Url
                 $caWeb.SiteGroups.GetByName($farmAdminGroup).RemoveUser($removeUser)
             }

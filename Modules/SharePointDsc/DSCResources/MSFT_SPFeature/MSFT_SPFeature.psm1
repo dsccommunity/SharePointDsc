@@ -121,7 +121,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure 
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "Version")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "Version")
 }
 
 Export-ModuleMember -Function *-TargetResource

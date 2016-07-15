@@ -49,7 +49,11 @@ function Get-TargetResource
             
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*") {
-                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value    
+                $user = (New-SPClaimsPrincipal -Identity $user -IdentityType EncodedClaim).Value
+                if ($user -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                {
+                    $user = Resolve-SPDscSecurityIdentifier -SID $user
+                }
             }
             $members += @{
                 Username    = $user
@@ -125,7 +129,7 @@ function Set-TargetResource
                                 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username) {
                     # The user already has a permission, check that it is correct
-                    if (($CurrentValues.Members | Where-Object { $_.Username -eq $desiredMember.Username } | Select -First 1).AccessLevel -ne $desiredMember.AccessLevel) {
+                    if (($CurrentValues.Members | Where-Object { $_.Username -eq $desiredMember.Username } | Select-Object -First 1).AccessLevel -ne $desiredMember.AccessLevel) {
                         # Current permission for user doesn't match what it should, remove them and re-add them        
                         Revoke-SPObjectSecurity -Identity $security -Principal $claim
                         Grant-SPObjectSecurity -Identity $security -Principal $claim -Rights $desiredMember.AccessLevel
@@ -162,7 +166,7 @@ function Set-TargetResource
                 }
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username) {
                     # The user already has a permission, check that it is correct
-                    if (($CurrentValues.Members | Where-Object { $_.Username -eq $desiredMember.Username } | Select -First 1).AccessLevel -ne $desiredMember.AccessLevel) {
+                    if (($CurrentValues.Members | Where-Object { $_.Username -eq $desiredMember.Username } | Select-Object -First 1).AccessLevel -ne $desiredMember.AccessLevel) {
                         # Current permission for user doesn't match what it should, remove them and re-add them
                         Revoke-SPObjectSecurity -Identity $security -Principal $claim
                         Grant-SPObjectSecurity -Identity $security -Principal $claim -Rights $desiredMember.AccessLevel
@@ -235,10 +239,10 @@ function Test-TargetResource
         Write-Verbose "Processing Members parameter"
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username -DifferenceObject $Members.Username
 
-        if ($differences -eq $null) {
+        if ($null -eq $differences) {
             Write-Verbose "Security list matches - checking that permissions match on each object"
             foreach($currentMember in $CurrentValues.Members) {
-                if ($currentMember.AccessLevel -ne ($Members | Where-Object { $_.Username -eq $currentMember.Username } | Select -First 1).AccessLevel) {
+                if ($currentMember.AccessLevel -ne ($Members | Where-Object { $_.Username -eq $currentMember.Username } | Select-Object -First 1).AccessLevel) {
                     Write-Verbose "$($currentMember.Username) has incorrect permission level. Test failed."
                     return $false
                 }
@@ -259,7 +263,7 @@ function Test-TargetResource
                 $result = $false
             } else {
                 Write-Verbose "$($member.Username) already has access. Checking permission..."
-                if ($member.AccessLevel -ne ($CurrentValues.Members | Where-Object { $_.Username -eq $member.Username } | Select -First 1).AccessLevel) {
+                if ($member.AccessLevel -ne ($CurrentValues.Members | Where-Object { $_.Username -eq $member.Username } | Select-Object -First 1).AccessLevel) {
                     Write-Verbose "$($member.Username) has incorrect permission level. Test failed."
                     return $false
                 }

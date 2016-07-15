@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.0.0'
+ModuleVersion = '1.1.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -66,7 +66,7 @@ Description = 'This DSC module is used to deploy and configure SharePoint Server
 NestedModules = @("modules\SharePointDsc.Util\SharePointDsc.Util.psm1")
 
 # Functions to export from this module
-FunctionsToExport = '*'
+#FunctionsToExport = '*'
 
 # Cmdlets to export from this module
 CmdletsToExport = @("Invoke-SPDSCCommand",
@@ -78,16 +78,19 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Test-SPDSCObjectHasProperty",
                     "Test-SPDSCRunAsCredential",
                     "Test-SPDSCUserIsLocalAdmin",
-                    "Test-SPDSCSpecificParameters",
+                    "Test-SPDscParameterState",
                     "Test-SPDSCIsADUser",
-                    "Set-SPDSCObjectPropertyIfValueExists",
-                    "Get-SPDSCUserProfileSubTypeManager")
+                    "Test-SPDSCRunningAsFarmAccount",
+                    "Set-SPDscObjectPropertyIfValuePresent",
+                    "Get-SPDSCUserProfileSubTypeManager",
+                    "Get-SPDscOSVersion",
+                    "Resolve-SPDscSecurityIdentifier")
 
 # Variables to export from this module
-VariablesToExport = '*'
+#VariablesToExport = '*'
 
 # Aliases to export from this module
-AliasesToExport = '*'
+#AliasesToExport = '*'
 
 # List of all modules packaged with this module
 # ModuleList = @()
@@ -107,7 +110,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource', 'Preview')
+        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource', 'preview')
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/PowerShell/SharePointDsc/blob/master/LICENSE'
@@ -119,7 +122,20 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = '
+ * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
+ * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
+ * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
+ * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
+ * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
+ * Removed redundant value for KB2898850 from SPInstallPrereqs, also fixed old property name for DotNetFX
+ * Fixed a bug with SPAlternateUrl that prevented the test method from returning "true" when a URL was absent if the optional URL property was specified in the config
+ * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
+ * Added support for custom database name and server to SPPerformancePointServiceApp
+ * Added solution level property to SPFarmSolution
+ * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
+ * Removed dependency on Win32_Prouct from SPInstallPrereqs
+'
 
     } # End of PSData hashtable
 

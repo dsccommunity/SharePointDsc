@@ -28,7 +28,7 @@ function Get-TargetResource
         if ($null -eq $serviceApps) { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Work Management Service Application" }
+        $serviceApp = $serviceApps | Where-Object -FilterScript { $_.TypeName -eq "Work Management Service Application" }
 
         If ($null -eq $serviceApp) { 
             return $nullReturn 
@@ -66,7 +66,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.UInt32] $NumberOfUsersEwsSyncWillProcessAtOnce, 
         [parameter(Mandatory = $false)] [System.UInt32] $NumberOfUsersPerEwsSyncBatch 
     )
-    if($Ensure -ne "Absent" -and $ApplicationPool -eq $null){
+    if($Ensure -ne "Absent" -and $null -eq $ApplicationPool){
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
 
@@ -77,20 +77,20 @@ function Set-TargetResource
         $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
         | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
 
-        if($appService -ne $null -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
+        if($null -ne $appService -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
         {
             #remove existing app
             
             Remove-SPServiceApplication $appService 
-            return;
-        } elseif ( $appService -eq $null){
+            return
+        } elseif ($null -eq $appService){
             $newParams = @{}
             $newParams.Add("Name", $params.Name) 
             $newParams.Add("ApplicationPool", $params.ApplicationPool) 
 
             $appService = New-SPWorkManagementServiceApplication @newParams
             New-SPWorkManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -DefaultProxyGroup -ServiceApplication $appService | Out-Null
-            Sleep -Milliseconds 200
+            Start-Sleep -Milliseconds 200
         }
         $setParams = @{}
         if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) { $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) }
@@ -143,7 +143,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
                                                                                                                              "MinimumTimeBetweenEwsSyncSubscriptionSearches",
                                                                                                                              "MinimumTimeBetweenProviderRefreshes",
                                                                                                                              "MinimumTimeBetweenSearchQueries",
@@ -154,7 +154,7 @@ function Test-TargetResource
                                                                                                                              "Ensure"
                                                                                                                             )
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 }

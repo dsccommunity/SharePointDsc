@@ -26,13 +26,13 @@ function Get-TargetResource
         if ($null -eq $upsa) { 
             return $nullReturn 
         }
-        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext -Site $caURL 
         $userProfileConfigManager  = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
         
         $userProfileProperty = $properties.GetSectionByName($params.Name) 
-        if($userProfileProperty -eq $null){
+        if($null -eq $userProfileProperty){
             return $nullReturn
         }
         return @{
@@ -65,7 +65,7 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     
     Write-Verbose -Message "Creating user profile property $Name"
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
         
             $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
@@ -75,7 +75,7 @@ function Set-TargetResource
                throw "service application $( $params.UserProfileService) not found"
         }
         
-        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | ?{$_.IsAdministrationWebApplication -eq $true }).Url
+        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication -eq $true }).Url
         $context = Get-SPServiceContext  $caURL 
 
         $userProfileConfigManager = new-object Microsoft.Office.Server.UserProfiles.UserProfileConfigManager($context)
@@ -87,18 +87,18 @@ function Set-TargetResource
         $userProfileProperty = $properties.GetSectionByName($params.Name) 
 
         if( $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent"){
-            if($userProfileProperty -ne $null)
+            if($null -ne $userProfileProperty)
             {
                 $properties.RemoveSectionByName($params.Name)
             }
             return;
-        } elseif($userProfileProperty -eq $null){
+        } elseif($null -eq $userProfileProperty){
             $coreProperty = $properties.Create($true)
             $coreProperty.Name = $params.Name
             $coreProperty.DisplayName = $params.DisplayName
             $coreProperty.Commit()
         }else{
-            Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
+            Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty -PropertyToSet "DisplayName" -ParamsValue $params -ParamKey "DisplayName"
             $userProfileProperty.Commit()
         }
 
@@ -111,7 +111,6 @@ function Set-TargetResource
         }
 
     }
-    return  $result
 }
 
 function Test-TargetResource
@@ -134,9 +133,9 @@ function Test-TargetResource
     if ($null -eq $CurrentValues) { return $false  }
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder", "Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Name","DisplayName", "DisplayOrder", "Ensure")
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }  
     
 }

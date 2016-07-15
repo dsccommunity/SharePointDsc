@@ -24,7 +24,7 @@ function Get-TargetResource
             return $null
         }
 
-        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        $caWebapp = Get-SPwebapplication -includecentraladministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
         if ($null -eq $caWebapp) {
             Write-Verbose -Verbose "Unable to locate central administration website"
             return $null
@@ -32,9 +32,9 @@ function Get-TargetResource
 
         # Get CA SPWeb
         $caWeb = Get-SPWeb($caWebapp.Url)
-        $healthRulesList = $caWeb.Lists | ? { $_.BaseTemplate -eq "HealthRules"}
+        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { $_.BaseTemplate -eq "HealthRules" }
 
-        if ($healthRulesList -ne $null) {
+        if ($null -ne $healthRulesList) {
             $spQuery = New-Object Microsoft.SharePoint.SPQuery 
             $querytext =   "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>$($params.Name)</Value></Eq></Where>"
             $spQuery.Query = $querytext
@@ -90,7 +90,7 @@ function Set-TargetResource
             return
         }
 
-        $caWebapp = Get-SPwebapplication -includecentraladministration | where {$_.IsAdministrationWebApplication}
+        $caWebapp = Get-SPwebapplication -includecentraladministration | Where-Object -FilterScript {$_.IsAdministrationWebApplication}
         if ($null -eq $caWebapp) {
             throw "No Central Admin web application was found. Health Analyzer Rule  settings will not be applied"
             return
@@ -98,9 +98,9 @@ function Set-TargetResource
 
         # Get Central Admin SPWeb
         $caWeb = Get-SPWeb($caWebapp.Url)
-        $healthRulesList = $caWeb.Lists | ? { $_.BaseTemplate -eq "HealthRules"}
+        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { $_.BaseTemplate -eq "HealthRules"}
 
-        if ($healthRulesList -ne $null) {
+        if ($null -ne $healthRulesList) {
             $spQuery = New-Object Microsoft.SharePoint.SPQuery 
             $querytext =   "<Where><Eq><FieldRef Name='Title'/><Value Type='Text'>$($params.Name)</Value></Eq></Where>"
             $spQuery.Query = $querytext
@@ -145,7 +145,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues) { return $false }
 
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource
