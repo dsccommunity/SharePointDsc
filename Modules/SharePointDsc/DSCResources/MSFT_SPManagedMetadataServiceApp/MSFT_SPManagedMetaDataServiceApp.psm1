@@ -27,7 +27,7 @@ function Get-TargetResource
         } 
         if ($null -eq $serviceApps) { 
             return $nullReturn 
-        }
+      }
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Managed Metadata Service" }
 
         if ($null -eq $serviceApp)
@@ -36,8 +36,15 @@ function Get-TargetResource
         }
         else
         {
+        $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+        if ($null -ne $serviceAppProxies)
+        {
+            $serviceAppProxy = $serviceAppProxies | Where-Object { $_.GetType().Name -eq 'MetadataWebServiceApplicationProxy' }
+            if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+        }
             return @{
                 Name            = $serviceApp.DisplayName
+                ProxyName       = $proxyName
                 Ensure          = "Present"
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName    = $serviceApp.Database.Name
@@ -79,7 +86,7 @@ function Set-TargetResource
                 $params.Remove("ContentTypeHubUrl")
             }
             if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
-            if ($pName -eq $Null) {$pName = "$($params.Name) Proxy"}
+            if ($null -eq $pName) {$pName = "$($params.Name) Proxy"}
 
             $app = New-SPMetadataServiceApplication @params 
             if ($null -ne $app)

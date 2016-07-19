@@ -2,7 +2,7 @@
 
 ### Unreleased
 
- * Add ProxyName parameters to Service App
+ * Added ProxyName parameter to all service application resources
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
  * Minor tweaks to the PowerShell module manifest
  * Modified all resources to ensure $null values are on the left of comparisson operations
@@ -12,7 +12,6 @@
 
 ### 1.1
 
->>>>>>> upstream/dev
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
  * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
  * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
