@@ -1,8 +1,10 @@
-function Get-SPDSCWebApplicationGeneralSettings {
+function Get-SPDSCWebApplicationGeneralConfig 
+{
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
-        [parameter(Mandatory = $true)] $WebApplication
+        [parameter(Mandatory = $true)] 
+        $WebApplication
     )
     
     return @{
@@ -28,16 +30,23 @@ function Get-SPDSCWebApplicationGeneralSettings {
     }
 }
 
-function Set-SPDSCWebApplicationGeneralSettings {
+function Set-SPDSCWebApplicationGeneralConfig 
+{
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] $Settings
+        [parameter(Mandatory = $true)] 
+        $WebApplication,
+
+        [parameter(Mandatory = $true)] 
+        $Settings
     )
 
     if ($Settings.SecurityValidationTimeoutMinutes)
-      {  write-verbose "timeout minutes: $($Settings.SecurityValidationTimeOutMinutes)"
-          $Settings.SecurityValidationTimeoutMinutes = New-TimeSpan -Minutes $Settings.SecurityValidationTimeoutMinutes }
+    {  
+        Write-Verbose -Message "timeout minutes: $($Settings.SecurityValidationTimeOutMinutes)"
+        $mins = New-TimeSpan -Minutes $Settings.SecurityValidationTimeoutMinutes
+        $Settings.SecurityValidationTimeoutMinutes = $mins  
+    }
 
     # Format here is SPWebApplication property = Custom settings property
     $mapping = @{
@@ -59,42 +68,66 @@ function Set-SPDSCWebApplicationGeneralSettings {
         SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
     } 
     $mapping.Keys | ForEach-Object {
-        Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication `
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
                                                    -PropertyToSet $_ `
                                                    -ParamsValue $settings `
                                                    -ParamKey $mapping[$_]
     }
 
     # Set form digest settings child properties
-    Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
-                                               -PropertyToSet "Enabled" `
-                                               -ParamsValue $settings `
-                                               -ParamKey "SecurityValidation"
+    Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication.FormDigestSettings `
+                                          -PropertyToSet "Enabled" `
+                                          -ParamsValue $settings `
+                                          -ParamKey "SecurityValidation"
    
-   Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
-                                               -PropertyToSet "Expires" `
-                                               -ParamsValue $settings `
-                                               -ParamKey "SecurityValidationExpires"
+   Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication.FormDigestSettings `
+                                         -PropertyToSet "Expires" `
+                                         -ParamsValue $settings `
+                                         -ParamKey "SecurityValidationExpires"
  
-    Set-SPDSCObjectPropertyIfValueExists -ObjectToSet $WebApplication.FormDigestSettings `
-                                               -PropertyToSet "Timeout" `
-                                               -ParamsValue $settings `
-                                               -ParamKey "SecurityValidationTimeOutMinutes"            
+    Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication.FormDigestSettings `
+                                          -PropertyToSet "Timeout" `
+                                          -ParamsValue $settings `
+                                          -ParamKey "SecurityValidationTimeOutMinutes"            
 }
 
-function Test-SPDSCWebApplicationGeneralSettings {
+function Test-SPDSCWebApplicationGeneralConfig 
+{
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
-        [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] $DesiredSettings
+        [parameter(Mandatory = $true)] 
+        $CurrentSettings,
+
+        [parameter(Mandatory = $true)] 
+        $DesiredSettings
     )
 
-
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" -Resolve)
+    $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
+    Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
+    $valuesToCheck = @("TimeZone", 
+                       "Alerts", 
+                       "AlertsLimit", 
+                       "RSS", 
+                       "BlogAPI", 
+                       "BlogAPIAuthenticated", 
+                       "BrowserFileHandling", 
+                       "SecurityValidation", 
+                       "SecurityValidationExpires",
+                       "SecurityValidationTimeoutMinutes", 
+                       "RecycleBinEnabled", 
+                       "RecycleBinCleanupEnabled", 
+                       "RecycleBinRetentionPeriod", 
+                       "SecondStageRecycleBinQuota", 
+                       "MaximumUploadSize", 
+                       "CustomerExperienceProgram", 
+                       "PresenceEnabled",
+                       "AllowOnlineWebPartCatalog",
+                       "SelfServiceSiteCreationEnabled"
+                      )
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
-                                                     -DesiredValues $DesiredSettings `
-                                                     -ValuesToCheck @("TimeZone", "Alerts", "AlertsLimit", "RSS", "BlogAPI", "BlogAPIAuthenticated", "BrowserFileHandling", "SecurityValidation", "SecurityValidationExpires","SecurityValidationTimeoutMinutes", "RecycleBinEnabled", "RecycleBinCleanupEnabled", "RecycleBinRetentionPeriod", "SecondStageRecycleBinQuota", "MaximumUploadSize", "CustomerExperienceProgram", "PresenceEnabled","AllowOnlineWebPartCatalog","SelfServiceSiteCreationEnabled"                                )
+                                           -DesiredValues $DesiredSettings `
+                                           -ValuesToCheck $valuesToCheck
     return $testReturn
 }
 

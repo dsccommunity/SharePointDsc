@@ -81,7 +81,7 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Test-SPDscParameterState",
                     "Test-SPDSCIsADUser",
                     "Test-SPDSCRunningAsFarmAccount",
-                    "Set-SPDSCObjectPropertyIfValueExists",
+                    "Set-SPDscObjectPropertyIfValuePresent",
                     "Get-SPDSCUserProfileSubTypeManager",
                     "Get-SPDscOSVersion",
                     "Resolve-SPDscSecurityIdentifier")
