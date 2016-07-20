@@ -7,6 +7,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
@@ -82,6 +83,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
@@ -121,7 +123,8 @@ function Set-TargetResource
             
             $app = New-SPEnterpriseSearchServiceApplication @newParams 
             if ($app) {
-                New-SPEnterpriseSearchServiceApplicationProxy -Name "$($params.Name) Proxy" -SearchApplication $app
+                if ($params.ProxyName -eq $Null) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
+                New-SPEnterpriseSearchServiceApplicationProxy -Name $pName -SearchApplication $app
                 if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                     $setParams = @{
@@ -187,6 +190,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,

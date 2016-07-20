@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
@@ -86,6 +87,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
@@ -133,12 +135,15 @@ function Set-TargetResource
             $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
             $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
+            if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
+            if ($pName -eq $Null) {$pName = "$($params.Name) Proxy"}
+
             $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
             $app =$serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps) { 
                 $app = New-SPProfileServiceApplication @params
                 if ($null -ne $app) {
-                    New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
+                    New-SPProfileServiceApplicationProxy -Name $pName -ServiceApplication $app -DefaultProxyGroup
                 }
             }
             if($app.NetBIOSDomainNamesEnabled -ne $enableNetBIOS){
@@ -176,6 +181,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
