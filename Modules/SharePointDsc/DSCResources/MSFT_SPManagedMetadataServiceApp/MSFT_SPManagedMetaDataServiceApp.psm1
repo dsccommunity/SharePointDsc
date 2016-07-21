@@ -39,7 +39,7 @@ function Get-TargetResource
         $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
         if ($null -ne $serviceAppProxies)
         {
-            $serviceAppProxy = $serviceAppProxies | Where-Object { $_.GetType().Name -eq 'MetadataWebServiceApplicationProxy' }
+            $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
             if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
         }
             return @{
