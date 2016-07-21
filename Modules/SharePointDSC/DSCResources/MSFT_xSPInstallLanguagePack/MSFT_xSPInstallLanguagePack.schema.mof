@@ -1,0 +1,27 @@
+/*
+**Description**
+
+This resource is used to install the SharePoint language pack
+Only Langauge pack for sharepoint 2013 SP1 based on setup.exe is currently managed and not pre SP1
+The culture parameter indicate the desired language, example fr-fr
+The BinaryDir parameter should point to the folder where setup.exe for the given culture is located
+
+This module should have a dependsOn the module used to install sharepoint
+
+**Example**
+
+    xSPInstallLanguagePack InstallBinaries
+    {
+		BinaryDir  = "Y:\SoftwarePackages\OfficeServers\2013-SP1-LanguagePack\fr-fr\DVD"
+		Culture = "fr-fr"
+    }
+
+*/
+[ClassVersion("1.0.0.0"), FriendlyName("xSPInstallLanguagePack")]
+class MSFT_xSPInstallLanguagePack : OMI_BaseResource
+{
+    [Key, Description("Culture to be installed exemple fr-fr")] String Culture;
+    [Required, Description("Where the setup.exe of this language pack is located")] String BinaryDir;
+    [Write, Description("Present to install SharePoint Language pack. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+};
+
