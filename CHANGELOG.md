@@ -12,7 +12,7 @@
  * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall
- * Added SPTrustedIdentityTokenIssuer and SPRemoteFarmTrust resources
+ * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
  * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out 
 
 ### 1.1
