@@ -33,7 +33,7 @@ Describe "SPPasswordChangeSettings - SharePoint Build $((Get-Item $SharePointCmd
             Mock Get-SPFarm { return $null }
 
             It "returns null from the get method" {
-                Get-TargetResource @testParams | Should Throw 
+                { Get-TargetResource @testParams } | Should Throw 
             }
 
             It "returns false from the test method" {
