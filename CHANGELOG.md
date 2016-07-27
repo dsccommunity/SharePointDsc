@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-### Unreleased
+### 1.2
 
  * Added ProxyName parameter to all service application resources
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
@@ -13,8 +13,9 @@
  * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall
- * Added SPTrustedIdentityTokenIssuer and SPRemoteFarmTrust resources
- * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out 
+ * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
+ * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out
+ * Prevented SPCreateFarm and SPJoinFarm from executing set methods where the local server is already a member of a farm 
 
 ### 1.1
 
