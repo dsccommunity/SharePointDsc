@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-### Unreleased
+### 1.2
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
  * Minor tweaks to the PowerShell module manifest
