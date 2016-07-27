@@ -41,8 +41,15 @@ function Get-TargetResource
         If ($null -eq $serviceApp) { 
             return $nullReturn 
         } else {
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return  @{
                 Name = $serviceApp.DisplayName
+                ProxyName       = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Database.Name
                 DatabaseServer = $serviceApp.Database.Server.Name
@@ -104,7 +111,7 @@ function Set-TargetResource
             }
 
             if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
-            if ($pName -eq $Null) {$pName = "$($params.Name) Proxy"}
+            if ($null -eq $pName) {$pName = "$($params.Name) Proxy"}
             
             New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $pName
         }

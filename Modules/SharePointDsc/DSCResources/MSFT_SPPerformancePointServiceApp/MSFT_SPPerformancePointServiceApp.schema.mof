@@ -15,6 +15,7 @@ The resource will provision and configure the Performance Point Service Applicat
 class MSFT_SPPerformancePointServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the service application")] string Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
     [Write, Description("The name of the database for the service app")] string DatabaseName;
     [Write, Description("The name of the database server to host the database")] string DatabaseServer;
