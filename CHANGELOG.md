@@ -13,7 +13,8 @@
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall
  * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
- * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out 
+ * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out
+ * Prevented SPCreateFarm and SPJoinFarm from executing set methods where the local server is already a member of a farm 
 
 ### 1.1
 
