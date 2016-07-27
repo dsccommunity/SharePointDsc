@@ -1,5 +1,8 @@
 # Change log for SharePointDsc
 
+### Unreleased
+ * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
+
 ### 1.2
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
