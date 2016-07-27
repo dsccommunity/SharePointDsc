@@ -36,12 +36,12 @@ function Get-TargetResource
         }
         else
         {
-        $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
-        if ($null -ne $serviceAppProxies)
-        {
-            $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
-            if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
-        }
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return @{
                 Name            = $serviceApp.DisplayName
                 ProxyName       = $proxyName

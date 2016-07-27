@@ -60,21 +60,27 @@ function Get-TargetResource
             } else {
                 $farmAccount = $spFarm.DefaultServiceAccount.Name
             }
-
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                FarmAccount = $farmAccount
+                Name               = $serviceApp.DisplayName
+                ProxyName          = $proxyName
+                ApplicationPool    = $serviceApp.ApplicationPool.Name
+                FarmAccount        = $farmAccount
                 MySiteHostLocation = $params.MySiteHostLocation
-                ProfileDBName = $databases.ProfileDatabase.Name
-                ProfileDBServer = $databases.ProfileDatabase.Server.Name
-                SocialDBName = $databases.SocialDatabase.Name
-                SocialDBServer = $databases.SocialDatabase.Server.Name
-                SyncDBName = $databases.SynchronizationDatabase.Name
-                SyncDBServer = $databases.SynchronizationDatabase.Server.Name
-                InstallAccount = $params.InstallAccount
-                EnableNetBIOS = $serviceApp.NetBIOSDomainNamesEnabled
-                Ensure = "Present"
+                ProfileDBName      = $databases.ProfileDatabase.Name
+                ProfileDBServer    = $databases.ProfileDatabase.Server.Name
+                SocialDBName       = $databases.SocialDatabase.Name
+                SocialDBServer     = $databases.SocialDatabase.Server.Name
+                SyncDBName         = $databases.SynchronizationDatabase.Name
+                SyncDBServer       = $databases.SynchronizationDatabase.Server.Name
+                InstallAccount     = $params.InstallAccount
+                EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
+                Ensure             = "Present"
             }
         }
     }
@@ -136,7 +142,7 @@ function Set-TargetResource
             $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
             if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
-            if ($pName -eq $Null) {$pName = "$($params.Name) Proxy"}
+            if ($null -eq $pName) {$pName = "$($params.Name) Proxy"}
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
             $app =$serviceApps | Select-Object -First 1
