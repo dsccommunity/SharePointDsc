@@ -1,0 +1,43 @@
+﻿.NAME
+    SPDatabaseAAG
+
+.SYNOPSIS
+
+This resource will allow specifying which SQL Server AlwaysOn Availability group a resource should be in. 
+This resource does not configure the Availability Groups on SQL Server, they must already exist.
+It simply adds the specified database to the group.
+
+
+.EXAMPLE
+
+    SPDatabaseAAG ConfigDBAAG
+    {
+        DatabaseName         = "SP_Config"
+        AGName               = "MyAvailabilityGroup"
+        FileShare            = "\\SQL\Backups"
+        Ensure               = "Present"
+        PsDscRunAsCredential = $InstallAccount
+    }s
+
+.PARAMETER DatabaseName
+    Key - string
+    The name of the database to put in the AlwaysOn group
+
+.PARAMETER AGName
+    Required - string
+    Name of the AlwaysOn group on the SQL server - this must already exist
+
+.PARAMETER FileShare
+    Write - string
+    The fileshare to use for the SQL backup when adding to the group
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the database should be in this AlwaysOn group, or Absent if it should not be in the group
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+
