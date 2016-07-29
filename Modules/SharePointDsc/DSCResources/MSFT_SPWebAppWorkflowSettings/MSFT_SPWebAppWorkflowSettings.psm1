@@ -129,7 +129,7 @@ function Test-TargetResource
     if ($null -eq $CurrentValues) { return $false }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
-        Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
+        Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
     return Test-SPDSCWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
                                                   -DesiredSettings $PSBoundParameters
 }
