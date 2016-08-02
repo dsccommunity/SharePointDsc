@@ -16,11 +16,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPManagedAccount NewManagedAccount
-        {
-            AccountName          = $ManagedAccount.UserName
-            Account              = $ManagedAccount
-            Ensure               = "Present"
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPManagedAccount NewManagedAccount
+            {
+                AccountName          = $ManagedAccount.UserName
+                Account              = $ManagedAccount
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

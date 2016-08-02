@@ -16,11 +16,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPJoinFarm JoinFarm
-        {
-            DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
-            FarmConfigDatabaseName    = "SP_Config"
-            Passphrase                = $FarmPassPhrase
-            PsDscRunAsCredential      = $SetupAccount
+        node localhost {
+            SPJoinFarm JoinFarm
+            {
+                DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
+                FarmConfigDatabaseName    = "SP_Config"
+                Passphrase                = $Passphrase
+                PsDscRunAsCredential      = $SetupAccount
+            }
         }
     }

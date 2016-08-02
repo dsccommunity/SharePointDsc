@@ -12,9 +12,11 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPAppCatalog MainAppCatalog
-        {
-            SiteUrl              = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-            PsDscRunAsCredential = $SPSetupAccount
+        node localhost {
+            SPAppCatalog MainAppCatalog
+            {
+                SiteUrl              = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

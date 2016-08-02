@@ -12,10 +12,12 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPExcelServiceApp ExcelServices
-        {
-            Name            = "Excel Services Service Application"
-            ApplicationPool = "SharePoint Service Applications"
-            InstallAccount  = $SetupAccount
+        node localhost {
+            SPExcelServiceApp ExcelServices
+            {
+                Name            = "Excel Services Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                InstallAccount  = $SetupAccount
+            }
         }
     }

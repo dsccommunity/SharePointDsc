@@ -13,11 +13,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPInstall InstallBinaries
-        {
-            BinaryDir   = "D:\SharePoint\Binaries"
-            InstallPath = "D:\SharePoint\Install"
-            DataPath    = "D:\SharePoint\Data"
-            ProductKey  = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+        node localhost {
+            SPInstall InstallBinaries
+            {
+                BinaryDir   = "D:\SharePoint\Binaries"
+                InstallPath = "D:\SharePoint\Install"
+                DataPath    = "D:\SharePoint\Data"
+                ProductKey  = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            }
         }
     }

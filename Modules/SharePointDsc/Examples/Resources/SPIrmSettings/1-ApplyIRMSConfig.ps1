@@ -13,10 +13,12 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPIrmSettings RMSSettings
-        {
-            Ensure               = "Present"
-            RMSserver            = "https://rms.contoso.com"
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPIrmSettings RMSSettings
+            {
+                Ensure               = "Present"
+                RMSserver            = "https://rms.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

@@ -13,10 +13,12 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPFarmAdministrators LocalFarmAdmins
-        {
-            Name                 = "Farm Administrators"
-            Members              = @("CONTOSO\user1", "CONTOSO\user2")
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPFarmAdministrators LocalFarmAdmins
+            {
+                Name                 = "Farm Administrators"
+                Members              = @("CONTOSO\user1", "CONTOSO\user2")
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

@@ -13,17 +13,19 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPDesignerSettings MainWebAppSPDSettings
-        {
-            Url                                     = "https://intranet.sharepoint.contoso.com"
-            SettingsScope                           = "WebApplication"
-            AllowSharePointDesigner                 = $false
-            AllowDetachPagesFromDefinition          = $false
-            AllowCustomiseMasterPage                = $false
-            AllowManageSiteURLStructure             = $false
-            AllowCreateDeclarativeWorkflow          = $false
-            AllowSavePublishDeclarativeWorkflow     = $false
-            AllowSaveDeclarativeWorkflowAsTemplate  = $false
-            PsDscRunAsCredential                    = $SetupAccount
+        node localhost {
+            SPDesignerSettings MainWebAppSPDSettings
+            {
+                Url                                     = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                           = "WebApplication"
+                AllowSharePointDesigner                 = $false
+                AllowDetachPagesFromDefinition          = $false
+                AllowCustomiseMasterPage                = $false
+                AllowManageSiteURLStructure             = $false
+                AllowCreateDeclarativeWorkflow          = $false
+                AllowSavePublishDeclarativeWorkflow     = $false
+                AllowSaveDeclarativeWorkflowAsTemplate  = $false
+                PsDscRunAsCredential                    = $SetupAccount
+            }
         }
     }

@@ -14,9 +14,11 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPInstall InstallBinaries
-        {
-            BinaryDir  = "C:\SPInstall"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+        node localhost {
+            SPInstall InstallBinaries
+            {
+                BinaryDir  = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            }
         }
     }

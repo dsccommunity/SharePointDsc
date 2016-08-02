@@ -14,26 +14,28 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
-        {
-            PsDscRunAsCredential                        = $InstallAccount
-            LogPath                                     = "L:\ULSLogs"
-            LogSpaceInGB                                = 10
-            AppAnalyticsAutomaticUploadEnabled          = $false
-            CustomerExperienceImprovementProgramEnabled = $true
-            DaysToKeepLogs                              = 7
-            DownloadErrorReportingUpdatesEnabled        = $false
-            ErrorReportingAutomaticUploadEnabled        = $false
-            ErrorReportingEnabled                       = $false
-            EventLogFloodProtectionEnabled              = $true
-            EventLogFloodProtectionNotifyInterval       = 5
-            EventLogFloodProtectionQuietPeriod          = 2
-            EventLogFloodProtectionThreshold            = 5
-            EventLogFloodProtectionTriggerPeriod        = 2
-            LogCutInterval                              = 15
-            LogMaxDiskSpaceUsageEnabled                 = $true
-            ScriptErrorReportingDelay                   = 30
-            ScriptErrorReportingEnabled                 = $true
-            ScriptErrorReportingRequireAuth             = $true
+        node localhost {
+            SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
+            {
+                PsDscRunAsCredential                        = $SetupAccount
+                LogPath                                     = "L:\ULSLogs"
+                LogSpaceInGB                                = 10
+                AppAnalyticsAutomaticUploadEnabled          = $false
+                CustomerExperienceImprovementProgramEnabled = $true
+                DaysToKeepLogs                              = 7
+                DownloadErrorReportingUpdatesEnabled        = $false
+                ErrorReportingAutomaticUploadEnabled        = $false
+                ErrorReportingEnabled                       = $false
+                EventLogFloodProtectionEnabled              = $true
+                EventLogFloodProtectionNotifyInterval       = 5
+                EventLogFloodProtectionQuietPeriod          = 2
+                EventLogFloodProtectionThreshold            = 5
+                EventLogFloodProtectionTriggerPeriod        = 2
+                LogCutInterval                              = 15
+                LogMaxDiskSpaceUsageEnabled                 = $true
+                ScriptErrorReportingDelay                   = 30
+                ScriptErrorReportingEnabled                 = $true
+                ScriptErrorReportingRequireAuth             = $true
+            }
         }
     }

@@ -12,13 +12,15 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPFeature EnableViewFormsLockDown
-        {
-            Name                 = "ViewFormPagesLockDown"
-            Url                  = "http://www.contoso.com"
-            FeatureScope         = "Site"
-            Ensure               = "Absent"
-            PsDscRunAsCredential = $SetupAccuount
-            Version              = "1.0.0.0"     
+        node localhost {
+            SPFeature EnableViewFormsLockDown
+            {
+                Name                 = "ViewFormPagesLockDown"
+                Url                  = "http://www.contoso.com"
+                FeatureScope         = "Site"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+                Version              = "1.0.0.0"     
+            }
         }
     }

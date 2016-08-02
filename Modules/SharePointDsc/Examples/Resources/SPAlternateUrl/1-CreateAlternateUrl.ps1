@@ -12,11 +12,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPAlternateUrl CentralAdminAAM
-        {
-            WebAppUrl            = "http://sharepoint1:9999"
-            Zone                 = "Intranet"
-            Url                  = "https://admin.sharepoint.contoso.com"
-            PsDscRunAsCredential = $SPSetupAccount
+        node localhost {
+            SPAlternateUrl CentralAdminAAM
+            {
+                WebAppUrl            = "http://sharepoint1:9999"
+                Zone                 = "Intranet"
+                Url                  = "https://admin.sharepoint.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

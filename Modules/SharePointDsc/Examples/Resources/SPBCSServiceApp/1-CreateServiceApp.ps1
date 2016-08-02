@@ -13,12 +13,14 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPBCSServiceApp BCSServiceApp
-        {
-            Name            = "BCS Service Application"
-            ApplicationPool = "SharePoint Service Applications"
-            DatabaseName    = "SP_BCS"
-            DatabaseServer  = "SQL.contoso.local\SQLINSTANCE"
-            InstallAccount  = $InstallAccount
+        node localhost {
+            SPBCSServiceApp BCSServiceApp
+            {
+                Name            = "BCS Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseName    = "SP_BCS"
+                DatabaseServer  = "SQL.contoso.local\SQLINSTANCE"
+                InstallAccount  = $SetupAccount
+            }
         }
     }

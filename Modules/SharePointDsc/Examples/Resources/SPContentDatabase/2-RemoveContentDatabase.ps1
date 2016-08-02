@@ -14,12 +14,14 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPContentDatabase ContentDB 
-        {
-            Name                 = "SharePoint_Content_01"
-            DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
-            WebAppUrl            = "http://sharepoint.contoso.com"
-            Ensure               = "Absent"
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPContentDatabase ContentDB 
+            {
+                Name                 = "SharePoint_Content_01"
+                DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

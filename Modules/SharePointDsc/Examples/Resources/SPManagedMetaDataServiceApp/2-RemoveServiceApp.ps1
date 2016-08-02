@@ -16,11 +16,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-        {  
-            Name              = "Managed Metadata Service Application"
-            InstallAccount    = $SetupAccount
-            ApplicationPool   = "none"
-            Ensure            = "Absent"
+        node localhost {
+            SPManagedMetaDataServiceApp ManagedMetadataServiceApp
+            {  
+                Name              = "Managed Metadata Service Application"
+                InstallAccount    = $SetupAccount
+                ApplicationPool   = "none"
+                Ensure            = "Absent"
+            }
         }
     }

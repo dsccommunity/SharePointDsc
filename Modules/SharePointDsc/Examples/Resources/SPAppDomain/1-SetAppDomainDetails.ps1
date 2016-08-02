@@ -12,10 +12,12 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPAppDomain LocalFarmAppUrls
-        {
-            AppDomain            = "contosointranetapps.com"
-            Prefix               = "app"
-            PsDscRunAsCredential = $InstallAccount
+        node localhost {
+            SPAppDomain LocalFarmAppUrls
+            {
+                AppDomain            = "contosointranetapps.com"
+                Prefix               = "app"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

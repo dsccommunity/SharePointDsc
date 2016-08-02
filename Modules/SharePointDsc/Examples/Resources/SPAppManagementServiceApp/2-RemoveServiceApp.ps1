@@ -14,11 +14,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPAppManagementServiceApp AppManagementServiceApp
-        {
-            Name                 = "App Management Service Application"
-            ApplicationPool      = "n/a"
-            Ensure               = "Absent"
-            PsDscRunAsCredential = $SetupAccount        
+        node localhost {
+            SPAppManagementServiceApp AppManagementServiceApp
+            {
+                Name                 = "App Management Service Application"
+                ApplicationPool      = "n/a"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount        
+            }
         }
     }

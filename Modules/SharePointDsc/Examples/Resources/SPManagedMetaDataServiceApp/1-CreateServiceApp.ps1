@@ -12,12 +12,14 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-        {  
-            Name              = "Managed Metadata Service Application"
-            InstallAccount    = $SetupAccount
-            ApplicationPool   = "SharePoint Service Applications"
-            DatabaseServer    = "SQL.contoso.local"
-            DatabaseName      = "SP_ManagedMetadata"
+        node localhost {
+            SPManagedMetaDataServiceApp ManagedMetadataServiceApp
+            {  
+                Name              = "Managed Metadata Service Application"
+                InstallAccount    = $SetupAccount
+                ApplicationPool   = "SharePoint Service Applications"
+                DatabaseServer    = "SQL.contoso.local"
+                DatabaseName      = "SP_ManagedMetadata"
+            }
         }
     }

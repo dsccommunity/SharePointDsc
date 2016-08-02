@@ -14,11 +14,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPBCSServiceApp BCSServiceApp
-        {
-            Name            = "BCS Service Application"
-            ApplicationPool = "n/a"
-            Ensure          = "Absent"
-            InstallAccount  = $InstallAccount
+        node localhost {
+            SPBCSServiceApp BCSServiceApp
+            {
+                Name                 = "BCS Service Application"
+                ApplicationPool      = "n/a"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

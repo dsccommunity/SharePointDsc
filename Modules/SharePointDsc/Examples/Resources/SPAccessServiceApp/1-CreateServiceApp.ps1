@@ -12,11 +12,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPAccessServiceApp AccessServices
-        {
-            Name                 = "Access Services Service Application"
-            ApplicationPool      = "SharePoint Service Applications" 
-            DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPAccessServiceApp AccessServices
+            {
+                Name                 = "Access Services Service Application"
+                ApplicationPool      = "SharePoint Service Applications" 
+                DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

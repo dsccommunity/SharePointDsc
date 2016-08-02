@@ -12,11 +12,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPAntivirusSettings AVSettings
-        {
-            ScanOnDownload        = $true
-            ScanOnUpload          = $true
-            AllowDownloadInfected = $false
-            AttemptToClean        = $false
+        node localhost {
+            SPAntivirusSettings AVSettings
+            {
+                ScanOnDownload        = $true
+                ScanOnUpload          = $true
+                AllowDownloadInfected = $false
+                AttemptToClean        = $false
+            }
         }
     }

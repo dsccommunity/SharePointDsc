@@ -15,12 +15,14 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPDistributedCacheService EnableDistributedCache
-        {
-            Name                 = "AppFabricCachingService"
-            CacheSizeInMB        = 8192
-            ServiceAccount       = "DEMO\ServiceAccount"
-            InstallAccount       = $SetupAccount
-            CreateFirewallRules  = $false
+        node localhost {
+            SPDistributedCacheService EnableDistributedCache
+            {
+                Name                 = "AppFabricCachingService"
+                CacheSizeInMB        = 8192
+                ServiceAccount       = "DEMO\ServiceAccount"
+                InstallAccount       = $SetupAccount
+                CreateFirewallRules  = $false
+            }
         }
     }

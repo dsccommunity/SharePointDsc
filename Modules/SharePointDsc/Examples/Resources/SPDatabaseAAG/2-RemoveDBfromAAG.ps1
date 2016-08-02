@@ -12,11 +12,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPDatabaseAAG ConfigDBAAG
-        {
-            DatabaseName         = "SP_Config"
-            AGName               = "MyAvailabilityGroup"
-            Ensure               = "Absent"
-            PsDscRunAsCredential = $InstallAccount
+        node localhost {
+            SPDatabaseAAG ConfigDBAAG
+            {
+                DatabaseName         = "SP_Config"
+                AGName               = "MyAvailabilityGroup"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

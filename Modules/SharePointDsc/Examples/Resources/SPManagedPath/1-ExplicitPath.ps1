@@ -12,12 +12,14 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPManagedPath TestManagedPath 
-        {
-            WebAppUrl      = "http://sharepoint.contoso.com"
-            InstallAccount = $SetupAccount
-            RelativeUrl    = "example"
-            Explicit       = $true
-            HostHeader     = $false
+        node localhost {
+            SPManagedPath TestManagedPath 
+            {
+                WebAppUrl      = "http://sharepoint.contoso.com"
+                InstallAccount = $SetupAccount
+                RelativeUrl    = "example"
+                Explicit       = $true
+                HostHeader     = $false
+            }
         }
     }

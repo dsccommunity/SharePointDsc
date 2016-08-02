@@ -14,12 +14,14 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPCacheAccounts SetCacheAccounts
-        {
-            WebAppUrl            = "http://sharepoint.contoso.com"
-            SuperUserAlias       = "DEMO\svcSPSuperUser"
-            SuperReaderAlias     = "DEMO\svcSPReader"
-            SetWebAppPolicy      = $false
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPCacheAccounts SetCacheAccounts
+            {
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                SuperUserAlias       = "DEMO\svcSPSuperUser"
+                SuperReaderAlias     = "DEMO\svcSPReader"
+                SetWebAppPolicy      = $false
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

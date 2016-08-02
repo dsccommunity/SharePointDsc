@@ -12,13 +12,15 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPHealthAnalyzerRuleState DisableDiskSpaceRule
-        {
-            Name = "Drives are at risk of running out of free space."
-            Enabled = $false
-            RuleScope   = "All Servers"
-            Schedule = "Daily"
-            FixAutomatically = $false
-            InstallAccount = $InstallAccount
+        node localhost {
+            SPHealthAnalyzerRuleState DisableDiskSpaceRule
+            {
+                Name = "Drives are at risk of running out of free space."
+                Enabled = $false
+                RuleScope   = "All Servers"
+                Schedule = "Daily"
+                FixAutomatically = $false
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

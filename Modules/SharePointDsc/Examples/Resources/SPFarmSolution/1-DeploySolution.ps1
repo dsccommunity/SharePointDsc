@@ -12,13 +12,15 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPFarmSolution SampleWsp
-        {
-            Name                 = "MySolution.wsp"
-            LiteralPath          = "C:\src\MySolution.wsp"
-            Ensure               = "Present"
-            Version              = "1.0.0"
-            WebApplications      = @("http://collaboration", "http://mysites")
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPFarmSolution SampleWsp
+            {
+                Name                 = "MySolution.wsp"
+                LiteralPath          = "C:\src\MySolution.wsp"
+                Ensure               = "Present"
+                Version              = "1.0.0"
+                WebApplications      = @("http://collaboration", "http://mysites")
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

@@ -26,14 +26,16 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPCreateFarm CreateFarm
-        {
-            DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
-            FarmConfigDatabaseName    = "SP_Config"
-            AdminContentDatabaseName  = "SP_AdminContent"
-            ServerRole                = "Application"
-            Passphrase                = $FarmPassPhrase
-            FarmAccount               = $FarmAccount
-            PsDscRunAsCredential      = $SetupAccount
+        node localhost {
+            SPCreateFarm CreateFarm
+            {
+                DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
+                FarmConfigDatabaseName    = "SP_Config"
+                AdminContentDatabaseName  = "SP_AdminContent"
+                ServerRole                = "Application"
+                Passphrase                = $Passphrase
+                FarmAccount               = $FarmAccount
+                PsDscRunAsCredential      = $SetupAccount
+            }
         }
     }

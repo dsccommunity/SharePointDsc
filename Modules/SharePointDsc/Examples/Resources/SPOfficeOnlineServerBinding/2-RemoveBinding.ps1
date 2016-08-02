@@ -13,11 +13,13 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPOfficeOnlineServerBinding OosBinding 
-        {
-            Zone                 = "Internal-HTTP"
-            DnsName              = "webapps.contoso.com"
-            PsDscRunAsCredential = $SetupAccount
-            Ensure               = "Absent"
+        node localhost {
+            SPOfficeOnlineServerBinding OosBinding 
+            {
+                Zone                 = "Internal-HTTP"
+                DnsName              = "webapps.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+                Ensure               = "Absent"
+            }
         }
     }

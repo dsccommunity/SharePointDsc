@@ -13,9 +13,11 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPInstallPrereqs InstallPrerequisites
-        {
-            InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
-            OnlineMode        = $true
+        node localhost {
+            SPInstallPrereqs InstallPrerequisites
+            {
+                InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode        = $true
+            }
         }
     }

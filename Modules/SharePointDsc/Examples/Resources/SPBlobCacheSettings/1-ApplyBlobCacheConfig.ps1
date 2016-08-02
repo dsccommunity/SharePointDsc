@@ -13,14 +13,16 @@
         )
         Import-DscResource -ModuleName SharePointDsc
 
-        SPBlobCacheSettings BlobCacheSettings 
-        {
-            WebAppUrl = "http://intranet.contoso.com"
-            Zone = "Default"
-            EnableCache = $true
-            Location = "F:\BlobCache"
-            MaxSizeInGB = 10
-            FileTypes = "\.(gif|jpg|png|css|js)$"
-            PsDscRunAsCredential = $SetupAccount
+        node localhost {
+            SPBlobCacheSettings BlobCacheSettings 
+            {
+                WebAppUrl = "http://intranet.contoso.com"
+                Zone = "Default"
+                EnableCache = $true
+                Location = "F:\BlobCache"
+                MaxSizeInGB = 10
+                FileTypes = "\.(gif|jpg|png|css|js)$"
+                PsDscRunAsCredential = $SetupAccount
+            }
         }
     }

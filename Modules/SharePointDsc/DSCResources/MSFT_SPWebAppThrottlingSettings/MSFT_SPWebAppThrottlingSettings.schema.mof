@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0")]
+[ClassVersion("1.0.0.0")]
 Class MSFT_SPWebApplicationHappyHour
 {
     [write] uint32 Hour;
@@ -6,32 +6,7 @@ Class MSFT_SPWebApplicationHappyHour
     [write] uint32 Duration;
 
 };
-/*
-**Description**
-
-This resource is responsible for setting web application settings that are found under the "resource throttling" screen in central admin.
-The web application is specified through the URL property, and then any combination of settings can be applied.
-Any settings not included will be left as the default (or whatever they have been manually changed to within SharePoint).
-Happy hour is the setting used to control the window where threshold do not apply throughout the day.
-You can specify the start time of this window as well as how many hours it will last.
-
-**Example**
-
-    SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
-    {
-        Url                      = "Shttp://exmaple.contoso.local"
-        ListViewThreshold        = 5000
-        AllowObjectModelOverride = $false
-        HappyHourEnabled         = $true
-        HappyHour                = MSFT_SPWebApplicationHappyHour {
-            Hour     = 3
-            Minute   = 0
-            Duration = 1
-        }
-        PsDscRunAsCredential     = $InstallAccount
-    }
-*/
-[ClassVersion("1.0.0"), FriendlyName("SPWebAppThrottlingSettings")]
+[ClassVersion("1.0.0.0"), FriendlyName("SPWebAppThrottlingSettings")]
 class MSFT_SPWebAppThrottlingSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string Url;
