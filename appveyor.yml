@@ -38,6 +38,13 @@ after_test:
         New-DscChecksum -Path $env:APPVEYOR_BUILD_FOLDER -Outpath $env:APPVEYOR_BUILD_FOLDER
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName.checksum" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+
+
+        New-Item "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ItemType Directory
+        & "$env:APPVEYOR_BUILD_FOLDER\DocoHelper\Generate-SPDscWikiPages.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent"
+        $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION)_wikicontent.zip"
+        [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\wikicontent", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
+        Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
         
         cd "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
         New-Nuspec -packageName "SharePointDsc" -version $env:APPVEYOR_BUILD_VERSION -author "Microsoft" -owners "Microsoft" -licenseUrl "https://github.com/PowerShell/DscResources/blob/master/LICENSE" -projectUrl "https://github.com/$($env:APPVEYOR_REPO_NAME)" -packageDescription "SharePointDsc" -tags "DesiredStateConfiguration DSC DSCResourceKit" -destinationPath .
