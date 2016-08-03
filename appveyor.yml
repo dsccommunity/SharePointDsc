@@ -8,7 +8,7 @@ install:
         Install-Module Pester -Force
         git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests"
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests\TestHelper.psm1" -force
-        
+        [System.Environment]::SetEnvironmentVariable('PSModulePath', $env:PSModulePath + ";$env:APPVEYOR_BUILD_FOLDER\Modules",[System.EnvironmentVariableTarget]::Machine)
 
 build: off
 

@@ -1,11 +1,11 @@
 function Get-MofSchemaObject() 
 {
     param(
-        [Parameter(Mandatory=$True)]
+        [Parameter(Mandatory=$true)]
         [string]
-        $fileName
+        $FileName
     )
-    $contents = Get-Content $fileName
+    $contents = Get-Content $FileName
 
     $results = @()
 
@@ -133,3 +133,5 @@ function Get-MofSchemaObject()
     }
     return $results
 }
+
+Export-ModuleMember -Function *

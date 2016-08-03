@@ -1,21 +1,27 @@
-param
-(
-    [parameter(Mandatory = $true)] 
-    [System.String] 
-    $OutPutPath
-)
+function Write-DscResourcePowerShellHelp
+{
+    param
+    (
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $OutputPath,
 
-$repoDir = Join-Path $PSScriptRoot "..\" -Resolve
-Import-Module (Join-Path $PSScriptRoot "MofHelper.psm1")
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $ModulePath
+    )
 
-Get-ChildItem -Path "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
-    ForEach-Object {
+    Import-Module ".\MofHelper.psm1"
+
+    $mofSearchPath = (Join-Path -Path $ModulePath -ChildPath "\**\*.schema.mof")
+    $mofSchemas = Get-ChildItem -Path $mofSearchPath -Recurse 
+    $mofSchemas | ForEach-Object {
         $mofFileObject = $_ 
 
         $descriptionPath = Join-Path -Path $_.DirectoryName -ChildPath "readme.md"
         if (Test-Path -Path $descriptionPath)
         {
-            $result = (Get-MofSchemaObject $_.FullName) | Where-Object { 
+            $result = (Get-MofSchemaObject -FileName $_.FullName) | Where-Object { 
                 ($_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "")) `
                     -and ($null -ne $_.FriendlyName)  
             }
@@ -51,7 +57,7 @@ Get-ChildItem -Path "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | 
                 $output += [Environment]::NewLine + [Environment]::NewLine
             }
 
-            $examplesPath = ("$repoDir\modules\SharePointDsc\Examples\Resources" + `
+            $examplesPath = (Join-Path -Path $ModulePath -ChildPath "\Examples\Resources" + `
                                 "\$($result.FriendlyName)\*.ps1")
             $exampleFiles = Get-ChildItem -Path $examplesPath
 
@@ -68,7 +74,10 @@ Get-ChildItem -Path "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | 
                 }
             }
 
-            $outputPath = Join-Path $OutPutPath "about_$($result.FriendlyName).help.txt"
-            $output | Out-File -FilePath $outputPath -Encoding utf8 -Force
+            $OutputPath = Join-Path $OutputPath "about_$($result.FriendlyName).help.txt"
+            $output | Out-File -FilePath $OutputPath -Encoding utf8 -Force
         }
     }
+}
+
+Export-ModuleMember -Function *

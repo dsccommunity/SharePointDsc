@@ -8,7 +8,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-Import-Module "$RepoRoot\DocoHelpers\MofHelper.psm1"
+Import-Module "$RepoRoot\DscResource.DocumentationHelper"
 
 Describe 'SharePointDsc whole of module tests' {
 
@@ -71,27 +71,27 @@ Describe 'SharePointDsc whole of module tests' {
                     }
                 )
             }
-
+            
             Get-ChildItem "$RepoRoot\Modules\SharePointDsc\Examples" -Filter "*.ps1" -Recurse | ForEach-Object -Process {
-                $path = $_.FullName
-                . $path
-
-                $command = Get-Command Example
-                $params = @{}
-                $command.Parameters.Keys | Where-Object { $_ -like "*Account" -or $_ -eq "Passphrase" } | ForEach-Object -Process {
-                    $params.Add($_, $mockCredential)
-                }
-                try
-                {
-                    Example -InstanceName localhost @params -OutputPath "TestDrive:\" -ConfigurationData $configData -ErrorAction Continue | Out-Null
-                }
-                catch
-                {
-                    $examplesWithErrors ++
-                    Write-Warning -Message "Unable to compile MOF for example '$path'"
-                    Write-Error -Message $_
-                }
-            }
+                    $path = $_.FullName
+                    try
+                    {
+                        . $path
+ 
+                        $command = Get-Command Example
+                        $params = @{}
+                        $command.Parameters.Keys | Where-Object { $_ -like "*Account" -or $_ -eq "Passphrase" } | ForEach-Object -Process {
+                            $params.Add($_, $mockCredential)
+                        }
+                        Example -InstanceName localhost @params -OutputPath "TestDrive:\" -ConfigurationData $configData -ErrorAction Continue | Out-Null
+                    }
+                    catch
+                    {
+                        $examplesWithErrors ++
+                        Write-Warning -Message "Unable to compile MOF for example '$path'"
+                        Write-Warning $_.Exception.Message
+                    }
+                } 
             $examplesWithErrors | Should Be 0    
         }
     }

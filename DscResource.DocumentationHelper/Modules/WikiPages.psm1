@@ -1,15 +1,20 @@
-param
-(
-    [parameter(Mandatory = $false)] 
-    [System.String] 
-    $OutPutPath = "C:\temp"
-)
+function Write-DscResourceWikiSite {
+    param
+    (
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $OutPutPath,
 
-$repoDir = Join-Path $PSScriptRoot "..\" -Resolve
-Import-Module (Join-Path $PSScriptRoot "MofHelper.psm1")
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $ModulePath
+    )
 
-Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
-    ForEach-Object { 
+    Import-Module ".\MofHelper.psm1"
+    
+    $mofSearchPath = (Join-Path -Path $ModulePath -ChildPath "\**\*.schema.mof")
+    $mofSchemas = Get-ChildItem -Path $mofSearchPath -Recurse 
+    $mofSchemas | ForEach-Object {
         $mofFileObject = $_
         $result = (Get-MofSchemaObject $_.FullName) | Where-Object { 
             ($_.ClassName -eq $mofFileObject.Name.Replace(".schema.mof", "")) `
@@ -45,8 +50,8 @@ Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
             $output += [Environment]::NewLine + $descriptionContent + [Environment]::NewLine
 
 
-            $examplesPath = ("$repoDir\modules\SharePointDsc\Examples\Resources" + `
-                                    "\$($result.FriendlyName)\*.ps1")
+            $examplesPath = (Join-Path -Path $ModulePath -ChildPath "\Examples\Resources" + `
+                            "\$($result.FriendlyName)\*.ps1")
             $exampleFiles = Get-ChildItem -Path $examplesPath
 
             if ($null -ne $exampleFiles)
@@ -65,7 +70,7 @@ Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
                     $exampleContent = $exampleContent -replace "<#"
                     $exampleContent = $exampleContent -replace "#>"
                     $exampleContent = $exampleContent.Replace(".EXAMPLE", `
-                                                              "***Example $exampleCount***`n")
+                                                            "***Example $exampleCount***`n")
 
                     $output += $exampleContent 
                     $output += [Environment]::NewLine
@@ -74,7 +79,9 @@ Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.schema.mof" -Recurse | `
                 }
             }
             $output | Out-File -FilePath (Join-Path $OutPutPath "$($result.FriendlyName).md") `
-                               -Encoding utf8 -Force
+                            -Encoding utf8 -Force
         }
-        
     }
+}
+
+Export-ModuleMember -Function *
