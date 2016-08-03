@@ -169,7 +169,7 @@ Configuration Example
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }   
 
         SPServiceInstance SecureStoreServiceInstance
@@ -177,7 +177,7 @@ Configuration Example
             Name                 = "Secure Store Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
         
         SPServiceInstance SearchServiceInstance
@@ -185,7 +185,7 @@ Configuration Example
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPCreateFarm]CreateSPFarm"
         }
         
         #**********************************************************
@@ -299,7 +299,7 @@ Configuration Example
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
             CreateFirewallRules  = $true
-            DependsOn            = @('[SPJoinFarm]JoinSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }
 
         #**********************************************************
