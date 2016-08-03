@@ -226,25 +226,25 @@ Configuration Example
             ApplicationPool       = $serviceAppPoolName
             AuditingEnabled       = $true
             AuditlogMaxSize       = 30
-            DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.SecureStoreService.DatabaseName
+            DatabaseName          = "SP_SecureStore"
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
+        
         SPManagedMetaDataServiceApp ManagedMetadataServiceApp
         {  
             Name                 = "Managed Metadata Service Application"
             PsDscRunAsCredential = $SPSetupAccount
             ApplicationPool      = $serviceAppPoolName
-            DatabaseServer       = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
-            DatabaseName         = $ConfigurationData.NonNodeData.SharePoint.ManagedMetadataService.DatabaseName
+            DatabaseName         = "SP_MMS"
             DependsOn            = "[SPServiceAppPool]MainServiceAppPool"
         }
+
         SPBCSServiceApp BCSServiceApp
         {
             Name                  = "BCS Service Application"
             ApplicationPool       = $serviceAppPoolName
-            DatabaseName          = $ConfigurationData.NonNodeData.SharePoint.BCSService.DatabaseName
-            DatabaseServer        = $ConfigurationData.NonNodeData.SQLServer.ServiceAppDatabaseServer
+            DatabaseName          = "SP_BCS"
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = @('[SPServiceAppPool]MainServiceAppPool', '[SPSecureStoreServiceApp]SecureStoreServiceApp')
         }
