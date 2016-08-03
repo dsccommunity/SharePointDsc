@@ -101,12 +101,18 @@ function Set-TargetResource
                 }
                 
                 $claimsMappingsArray = @()
-                $params.ClaimsMappings| Foreach-Object{
+                $params.ClaimsMappings| Foreach-Object {
                     $runParams = @{}
-                    $runParams.Add("IncomingClaimTypeDisplayName", $_["Name"])
-                    $runParams.Add("IncomingClaimType", $_["IncomingClaimType"])
-                    if (!$_["LocalClaimType"]) { $runParams.Add("LocalClaimType", $_["IncomingClaimType"]) }
-                    else { $runParams.Add("LocalClaimType", $_["LocalClaimType"]) }
+                    $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
+                    $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
+                    if ($null -eq $_.LocalClaimType) 
+                    { 
+                        $runParams.Add("LocalClaimType", $_.IncomingClaimType) 
+                    }
+                    else 
+                    { 
+                        $runParams.Add("LocalClaimType", $_.LocalClaimType) 
+                    }
                     $claimsMappingsArray = $claimsMappingsArray + (New-SPClaimTypeMapping @runParams)
                 }
 
