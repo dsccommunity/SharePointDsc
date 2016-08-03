@@ -143,7 +143,7 @@ Configuration Example
             SuperUserAlias         = "CONTOSO\SP_SuperUser"
             SuperReaderAlias       = "CONTOSO\SP_SuperReader"
             PsDscRunAsCredential   = $SPSetupAccount
-            DependsOn              = "[SPWebApplication]$webAppInternalName"
+            DependsOn              = "[SPWebApplication]SharePointSites"
         }
 
         SPSite TeamSite
@@ -153,7 +153,7 @@ Configuration Example
             Name                     = "DSC Demo Site"
             Template                 = "STS#0"
             PsDscRunAsCredential     = $SPSetupAccount
-            DependsOn                = "[SPWebApplication]$webAppInternalName"
+            DependsOn                = "[SPWebApplication]SharePointSites"
         }
 
 
