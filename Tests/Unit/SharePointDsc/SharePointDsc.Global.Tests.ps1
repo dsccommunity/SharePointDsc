@@ -83,7 +83,7 @@ Describe 'SharePointDsc whole of module tests' {
                         $command.Parameters.Keys | Where-Object { $_ -like "*Account" -or $_ -eq "Passphrase" } | ForEach-Object -Process {
                             $params.Add($_, $mockCredential)
                         }
-                        Example -InstanceName localhost @params -OutputPath "TestDrive:\" -ConfigurationData $configData -ErrorAction Continue | Out-Null
+                        Example -InstanceName localhost @params -OutputPath "TestDrive:\" -ConfigurationData $configData -ErrorAction Continue -WarningAction SilentlyContinue | Out-Null
                     }
                     catch
                     {
