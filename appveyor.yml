@@ -35,7 +35,7 @@ after_test:
         Add-Type -assemblyname System.IO.Compression.FileSystem
 
         New-Item "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ItemType Directory
-        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" -Verbose
+        Write-DscResourceWikiSite -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" -Verbose
         $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION)_wikicontent.zip"
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\wikicontent", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
