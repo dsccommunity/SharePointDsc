@@ -29,7 +29,8 @@ after_test:
         Move-Item "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests" "$env:APPVEYOR_BUILD_FOLDER\"
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\TestHelper.psm1" -force
         New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ItemType Directory
-        & "$env:APPVEYOR_BUILD_FOLDER\DocoHelper\Generate-SPDscHelpFiles.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US"
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.DocumentationHelper"
+        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
 
         $manifest = Join-Path "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" "SharePointDsc.psd1"
         (Get-Content $manifest -Raw).Replace("1.2.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
@@ -42,7 +43,7 @@ after_test:
 
 
         New-Item "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ItemType Directory
-        & "$env:APPVEYOR_BUILD_FOLDER\DocoHelper\Generate-SPDscWikiPages.ps1" -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent"
+        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
         $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION)_wikicontent.zip"
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\wikicontent", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
