@@ -6,7 +6,7 @@ install:
     - ps: |
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
         Install-Module Pester -Force
-        #Copy-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" -Destination 'C:\Program Files\WindowsPowerShell\Modules\SharePointDsc' -Recurse
+        Copy-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" -Destination 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' -Recurse
         git clone -q https://github.com/PowerShell/DscResource.Tests "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests"
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc\DscResource.Tests\TestHelper.psm1" -force
         
