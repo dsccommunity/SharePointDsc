@@ -11,7 +11,7 @@ Configuration Example
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName SharePointDsc
 
-    node $AllNodes.NodeName
+    node "localhost"
     {        
         #**********************************************************
         # Install Binaries
