@@ -169,7 +169,7 @@ Configuration Example
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }   
 
         SPServiceInstance SecureStoreServiceInstance
@@ -177,7 +177,7 @@ Configuration Example
             Name                 = "Secure Store Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }
         
         SPServiceInstance SearchServiceInstance
@@ -185,7 +185,7 @@ Configuration Example
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }
         
         #**********************************************************
@@ -299,7 +299,7 @@ Configuration Example
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
             CreateFirewallRules  = $true
-            DependsOn            = @('[SPCreateFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
+            DependsOn            = @('[SPJoinFarm]JoinSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
         }
 
         #**********************************************************
@@ -314,7 +314,7 @@ Configuration Example
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }   
 
         SPServiceInstance ManagedMetadataServiceInstance
@@ -322,7 +322,7 @@ Configuration Example
             Name                 = "Managed Metadata Web Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }
 
         SPServiceInstance BCSServiceInstance
@@ -330,7 +330,7 @@ Configuration Example
             Name                 = "Business Data Connectivity Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPJoinFarm]JoinSPFarm"
         }
         
         #**********************************************************
