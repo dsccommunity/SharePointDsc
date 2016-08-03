@@ -9,7 +9,7 @@
         [parameter(Mandatory = $true)]  [String]   $Realm,
         [parameter(Mandatory = $true)]  [String]   $SignInUrl,
         [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Object[]] $ClaimsMappings,
+        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
         [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",
@@ -74,7 +74,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [String]   $Realm,
         [parameter(Mandatory = $true)]  [String]   $SignInUrl,
         [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Object[]] $ClaimsMappings,
+        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
         [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",
@@ -174,7 +174,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [String]   $Realm,
         [parameter(Mandatory = $true)]  [String]   $SignInUrl,
         [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Object[]] $ClaimsMappings,
+        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
         [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",
