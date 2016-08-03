@@ -30,12 +30,12 @@ after_test:
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\TestHelper.psm1" -force
         New-Item "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ItemType Directory
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.DocumentationHelper"
-        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
+        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc\en-US" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" -Verbose
 
         Add-Type -assemblyname System.IO.Compression.FileSystem
 
         New-Item "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ItemType Directory
-        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc"
+        Write-DscResourcePowerShellHelp -OutputPath "$env:APPVEYOR_BUILD_FOLDER\wikicontent" -ModulePath "$env:APPVEYOR_BUILD_FOLDER\modules\SharePointDsc" -Verbose
         $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION)_wikicontent.zip"
         [System.IO.Compression.ZipFile]::CreateFromDirectory("$env:APPVEYOR_BUILD_FOLDER\wikicontent", "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
         Get-ChildItem "$env:APPVEYOR_BUILD_FOLDER\$zipFileName" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }

@@ -3,14 +3,14 @@ function Write-DscResourceWikiSite {
     (
         [parameter(Mandatory = $true)] 
         [System.String] 
-        $OutPutPath,
+        $OutputPath,
 
         [parameter(Mandatory = $true)] 
         [System.String] 
         $ModulePath
     )
 
-    Import-Module ".\MofHelper.psm1"
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "MofHelper.psm1")
     
     $mofSearchPath = (Join-Path -Path $ModulePath -ChildPath "\**\*.schema.mof")
     $mofSchemas = Get-ChildItem -Path $mofSearchPath -Recurse 
@@ -50,8 +50,8 @@ function Write-DscResourceWikiSite {
             $output += [Environment]::NewLine + $descriptionContent + [Environment]::NewLine
 
 
-            $examplesPath = (Join-Path -Path $ModulePath -ChildPath "\Examples\Resources" + `
-                            "\$($result.FriendlyName)\*.ps1")
+            $exampleSearchPath = "\Examples\Resources\$($result.FriendlyName)\*.ps1"
+            $examplesPath = (Join-Path -Path $ModulePath -ChildPath $exampleSearchPath)
             $exampleFiles = Get-ChildItem -Path $examplesPath
 
             if ($null -ne $exampleFiles)
@@ -78,8 +78,8 @@ function Write-DscResourceWikiSite {
                     $exampleCount ++
                 }
             }
-            $output | Out-File -FilePath (Join-Path $OutPutPath "$($result.FriendlyName).md") `
-                            -Encoding utf8 -Force
+            $output | Out-File -FilePath (Join-Path $OutputPath "$($result.FriendlyName).md") `
+                               -Encoding utf8 -Force
         }
     }
 }

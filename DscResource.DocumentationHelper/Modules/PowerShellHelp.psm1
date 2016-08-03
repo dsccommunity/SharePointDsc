@@ -11,7 +11,7 @@ function Write-DscResourcePowerShellHelp
         $ModulePath
     )
 
-    Import-Module ".\MofHelper.psm1"
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "MofHelper.psm1")
 
     $mofSearchPath = (Join-Path -Path $ModulePath -ChildPath "\**\*.schema.mof")
     $mofSchemas = Get-ChildItem -Path $mofSearchPath -Recurse 
@@ -57,8 +57,8 @@ function Write-DscResourcePowerShellHelp
                 $output += [Environment]::NewLine + [Environment]::NewLine
             }
 
-            $examplesPath = (Join-Path -Path $ModulePath -ChildPath "\Examples\Resources" + `
-                                "\$($result.FriendlyName)\*.ps1")
+            $exampleSearchPath = "\Examples\Resources\$($result.FriendlyName)\*.ps1"
+            $examplesPath = (Join-Path -Path $ModulePath -ChildPath $exampleSearchPath)
             $exampleFiles = Get-ChildItem -Path $examplesPath
 
             if ($null -ne $exampleFiles)
@@ -74,8 +74,8 @@ function Write-DscResourcePowerShellHelp
                 }
             }
 
-            $OutputPath = Join-Path $OutputPath "about_$($result.FriendlyName).help.txt"
-            $output | Out-File -FilePath $OutputPath -Encoding utf8 -Force
+            $savePath = Join-Path -Path $OutputPath -ChildPath "about_$($result.FriendlyName).help.txt"
+            $output | Out-File -FilePath $savePath -Encoding utf8 -Force
         }
     }
 }
