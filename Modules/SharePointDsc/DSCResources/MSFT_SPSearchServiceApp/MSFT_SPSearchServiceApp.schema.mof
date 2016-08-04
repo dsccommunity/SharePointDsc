@@ -20,6 +20,7 @@ The database name parameter is used as the prefix for all search databases (so y
 class MSFT_SPSearchServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the search service application")] string Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The application pool that it should run in")] string ApplicationPool;
     [Write, Description("The URL of the enterprise search center site collection")] string SearchCenterUrl;
     [Write, Description("The name of the database (noting that some search databases will use this as a prefix)")] string DatabaseName;

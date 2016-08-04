@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+### unreleased
+
+ * Added ProxyName parameter to all service application resources
+
 ### 1.2
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
