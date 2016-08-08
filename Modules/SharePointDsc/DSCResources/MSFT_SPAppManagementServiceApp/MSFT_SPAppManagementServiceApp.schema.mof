@@ -22,6 +22,7 @@ Database names or server name will not be changed if the configuration does not 
 class MSFT_SPAppManagementServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the app management service application")] string Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The app pool that should be used to run the service app")] String ApplicationPool;
     [Write, Description("The name of the database for the service application")] string DatabaseName;
     [Write, Description("The name of the server for the database")] String DatabaseServer;
