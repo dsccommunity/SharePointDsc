@@ -264,32 +264,32 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent, $indexComponent)
             }
             Mock Get-SPEnterpriseSearchComponent {
-                $adminComponent = New-Object AdminComponent
+                $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
                 $adminComponent.ServerName = $env:COMPUTERNAME
                 $adminComponent.ServerId = $serverId
                 $adminComponent.ComponentId = [Guid]::NewGuid()
 
-                $crawlComponent = New-Object CrawlComponent
+                $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
                 $crawlComponent.ServerName = $env:COMPUTERNAME
                 $crawlComponent.ServerId = $serverId
                 $crawlComponent.ComponentId = [Guid]::NewGuid()
 
-                $contentProcessingComponent = New-Object ContentProcessingComponent
+                $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
                 $contentProcessingComponent.ServerName = $env:COMPUTERNAME
                 $contentProcessingComponent.ServerId = $serverId
                 $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $analyticsProcessingComponent = New-Object AnalyticsProcessingComponent
+                $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
                 $analyticsProcessingComponent.ServerName = $env:COMPUTERNAME
                 $analyticsProcessingComponent.ServerId = $serverId
                 $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $queryProcessingComponent = New-Object QueryProcessingComponent
+                $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
                 $queryProcessingComponent.ServerName = $env:COMPUTERNAME
                 $queryProcessingComponent.ServerId = $serverId
                 $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $indexComponent = New-Object IndexComponent
+                $indexComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent
                 $indexComponent.ServerName = $env:COMPUTERNAME
                 $indexComponent.ServerId = $serverId
                 $indexComponent.IndexPartitionOrdinal = 0
