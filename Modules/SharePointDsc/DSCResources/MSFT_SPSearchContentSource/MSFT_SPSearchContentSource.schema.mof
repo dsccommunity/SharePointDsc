@@ -1,4 +1,3 @@
-
 [ClassVersion("1.0.0")]
 Class MSFT_SPSearchCrawlSchedule
 {
@@ -12,67 +11,6 @@ Class MSFT_SPSearchCrawlSchedule
     [Write, Description("Specifies the number of minutes between crawl repeats on a day")] Uint32 CrawlScheduleRepeatInterval;
     [Write, Description("For daily crawls, this is the number of days between crawls. For weekly this is the number of weeks between crawls")] Uint32 CrawlScheduleRunEveryInterval;
 };
-/*
-**Description**
-
-This resource will deploy and configure a content source in a specified search service application.
-
-**Example**
-
-This example is for a SharePoint content source
-
-    SPSearchContentSource LocalSharePointSites
-    {
-        Name                 = "Local SharePoint Sites"
-        ServiceAppName       = "Search Service Application"
-        ContentSourceType    = "SharePoint"
-        Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
-        CrawlSetting         = "CrawlEverything"
-        ContinuousCrawl      = $true
-        IncrementalSchedule  = MSFT_SPSearchCrawlSchedule @{
-                                   ScheduleType = "Daily"
-                                   StartHour = "0"
-                                   StartMinute = "0"
-                                   CrawlScheduleRepeatDuration = "1440"
-                                   CrawlScheduleRepeatInterval = "5"
-                               }
-        FullSchedule         = $null
-        Priority             = "Normal"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SPSetupAccount
-        DependsOn            = "[SPSearchRoles]LocalSearchRoles"
-    }
-
-This example is for a website content source
-
-    SPSearchContentSource LocalSharePointSites
-    {
-        Name                 = "Local SharePoint Sites"
-        ServiceAppName       = "Search Service Application"
-        ContentSourceType    = "Website"
-        Addresses            = @("http://www.contoso.com")
-        CrawlSetting         = "Custom"
-        LimitPageDepth       = 5
-        LimitServerHops      = 0
-        IncrementalSchedule  = MSFT_SPSearchCrawlSchedule @{
-                                   ScheduleType = "Daily"
-                                   StartHour = "0"
-                                   StartMinute = "0"
-                                   CrawlScheduleRepeatDuration = "1440"
-                                   CrawlScheduleRepeatInterval = "5"
-                               }
-        FullSchedule         = MSFT_SPSearchCrawlSchedule @{
-                                   ScheduleType = "Weekly"
-                                   CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
-                                   StartHour = "3"
-                                   StartMinute = "0"
-                               }
-        Priority             = "Normal"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SPSetupAccount
-        DependsOn            = "[SPSearchRoles]LocalSearchRoles"
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPSearchContentSource")]
 class MSFT_SPSearchContentSource : OMI_BaseResource
 {

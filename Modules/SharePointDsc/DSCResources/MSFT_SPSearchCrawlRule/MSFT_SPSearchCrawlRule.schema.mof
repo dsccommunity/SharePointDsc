@@ -1,33 +1,3 @@
-/*
-**Description**
-
-This resource is responsible for managing the search crawl rules in the search service application.
-You can create new rules, change existing rules and remove existing rules.
-
-**Example**
-
-    SPSearchCrawlRule IntranetCrawlAccount
-    {
-        Path = "https://intranet.sharepoint.contoso.com"
-        ServiceAppName = "Search Service Application"
-        Ensure = "Present"
-        RuleType = "InclusionRule"
-        CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
-        AuthenticationType = "DefaultRuleAccess"
-    }
-
-    SPSearchCrawlRule IntranetCrawlAccountCertificate
-    {
-        Path = "https://intranet.sharepoint.contoso.com"
-        ServiceAppName = "Search Service Application"
-        Ensure = "Present"
-        RuleType = "InclusionRule"
-        CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
-        AuthenticationType = "CertificateRuleAccess"
-        CertificateName = "Certificate Name"
-    }
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPSearchCrawlRule")]
 class MSFT_SPSearchCrawlRule : OMI_BaseResource
 {

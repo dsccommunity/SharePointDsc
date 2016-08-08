@@ -1,22 +1,3 @@
-/*
-**Description**
-
-This resource is responsible for provisioning and configuring the secure store service application. 
-The parameters passed in (except those related to database specifics) are validated and set when the resource is run, the database values are only used in provisioning of the service application. 
-
-**Example**
-
-    SPSecureStoreServiceApp SecureStoreServiceApp
-    {
-        Name            = "Secure Store Service Application"
-        ApplicationPool = "SharePoint Service Applications"
-        AuditingEnabled = $true
-        AuditlogMaxSize = 30
-        DatabaseName    = "SP_SecureStore"
-        InstallAccount  = $InstallAccount
-        Ensure          = "Present"
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPSecureStoreServiceApp")]
 class MSFT_SPSecureStoreServiceApp : OMI_BaseResource
 {

@@ -1,20 +1,3 @@
-/*
-**Description**
-
-This resource is used to trust a remote SharePoint farm.
-This is used when federating search results between two different SharePoint farms.
-The technique is described at https://technet.microsoft.com/en-us/library/dn133749.aspx
-
-**Example**
-
-    SPRemoteFarmTrust TrustRemoteFarmForSearch
-    {
-        Name = "CentralSearchFarm"
-        RemoteWebAppUrl = "https://search.sharepoint.contoso.com"
-        LocalWebAppUrl = "https://local.sharepoint2.contoso.com"
-    }
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPRemoteFarmTrust")]
 class MSFT_SPRemoteFarmTrust : OMI_BaseResource
 {

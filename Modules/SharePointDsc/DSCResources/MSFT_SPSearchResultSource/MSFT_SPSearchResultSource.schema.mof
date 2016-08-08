@@ -1,17 +1,3 @@
-/*
-**Description**
-
-This resoruce 
-**Example**
-
-    SPSearchResultSource RemoteSharePointFarm
-    {
-        Name = "External SharePoint results"
-        SearchServiceAppName = "Search Service Application"
-        Query = "{searchTerms}"
-        ProviderType = "Remote SharePoint Provider"
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPSearchResultSource")]
 class MSFT_SPSearchResultSource : OMI_BaseResource
 {

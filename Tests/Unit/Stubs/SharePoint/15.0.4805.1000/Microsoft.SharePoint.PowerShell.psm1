@@ -10497,7 +10497,7 @@ param(
     [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet')]
     [Parameter(ParameterSetName='BasicParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [Object]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
