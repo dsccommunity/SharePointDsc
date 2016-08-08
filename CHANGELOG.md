@@ -3,6 +3,7 @@
 ### Unreleased
  * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
  * Added ProxyName parameter to all service application resources
+ * Fixed typos in documentation for InstallAccount parameter on most resources
 
 ### 1.2
 
