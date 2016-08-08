@@ -380,7 +380,7 @@ Configuration SharePointServer
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
         {  
-            Name                 = "Claims to Windows Token Service"
+            Name                 = "SPWindowsToken"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = $FarmWaitTask
@@ -390,14 +390,14 @@ Configuration SharePointServer
         if ($Node.ServiceRoles.AppServer -eq $true) {
             SPServiceInstance UserProfileServiceInstance
             {  
-                Name                 = "User Profile Service"
+                Name                 = "UserProfile"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
             }        
             SPServiceInstance SecureStoreServiceInstance
             {  
-                Name                 = "Secure Store Service"
+                Name                 = "SecureStore"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
@@ -419,14 +419,14 @@ Configuration SharePointServer
         if ($Node.ServiceRoles.WebFrontEnd -eq $true) {
             SPServiceInstance ManagedMetadataServiceInstance
             {  
-                Name                 = "Managed Metadata Web Service"
+                Name                 = "MetadataWeb"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
             }
             SPServiceInstance BCSServiceInstance
             {  
-                Name                 = "Business Data Connectivity Service"
+                Name                 = "Bdc"
                 Ensure               = "Present"
                 PsDscRunAsCredential = $SPSetupAccount
                 DependsOn            = $FarmWaitTask
@@ -435,7 +435,7 @@ Configuration SharePointServer
         
         SPServiceInstance SearchServiceInstance
         {  
-            Name                 = "SharePoint Server Search"
+            Name                 = "Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = $FarmWaitTask

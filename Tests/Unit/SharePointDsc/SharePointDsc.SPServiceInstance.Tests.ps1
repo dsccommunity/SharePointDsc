@@ -28,7 +28,7 @@ Describe "SPServiceInstance - SharePoint Build $((Get-Item $SharePointCmdletModu
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         Mock Start-SPServiceInstance { }
         Mock Stop-SPServiceInstance { }
-
+        
         Context "The service instance is not running but should be" {
             Mock Get-SPServiceInstance { return $null }
 

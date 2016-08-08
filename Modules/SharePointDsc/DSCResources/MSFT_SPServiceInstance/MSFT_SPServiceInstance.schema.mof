@@ -8,17 +8,47 @@ The name is the display name of the service as shown in the Central Admin websit
 
     SPServiceInstance ManagedMetadataServiceInstance
     {  
-        Name           = "Managed Metadata Web Service"
+        Name           = "MetadataWeb"
         Ensure         = "Present"
         InstallAccount = $InstallAccount
     }
 
     SPServiceInstance StopBCSServiceInstance
     {  
-        Name           = "Business Data Connectivity Service"
+        Name           = "Bdc"
         Ensure         = "Absent"
         InstallAccount = $InstallAccount
     }
+    
+**Correspondence between SPServiceInstance.GetType() Method SPServiceInstance.TypeName Property and **
+    SPServiceInstance.GetType() |   TypeName En-Us
+    AccessServerWeb             =>  Access Database Service 2010
+    AccessServicesWeb           =>  Access Services
+    AppManagement               =>  App Management Service
+    Bdc                         =>  Business Data Connectivity Service
+    BIMonitoring                =>  PerformancePoint Service
+    ExcelServerWeb              =>  Excel Calculation Services
+    Launcher                    =>  Document Conversions Launcher Service
+    LoadBalancer                =>  Document Conversions Load Balancer Service
+    MetadataWeb                 =>  Managed Metadata Web Service
+    NotesWeb                    =>  Lotus Notes Connector
+    PowerPointConversion        =>  PowerPoint Conversion Service
+    ProfileSynchronization      =>  User Profile Synchronization Service
+    SearchQueryAndSiteSettings  =>  Search Query and Site Settings Service
+    SearchRuntime               =>  Search Host Controller Service
+    Search                      =>  SharePoint Server Search
+    SecureStore                 =>  Secure Store Service
+    SPIncomingEmail             =>  Microsoft SharePoint Foundation Incoming E-Mail
+    SPRequestManagement         =>  Request Management
+    SPSubscriptionSettings      =>  Microsoft SharePoint Foundation Subscription Settings Service
+    SPUserCode                  =>  Microsoft SharePoint Foundation Sandboxed Code Service
+    SPWindowsToken              =>  Claims to Windows Token Service
+    SPWorkflowTimer             =>  Microsoft SharePoint Foundation Workflow Timer Service
+    Translation                 =>  Machine Translation Service
+    UserProfile                 =>  User Profile Service
+    VisioGraphics               =>  Visio Graphics Service
+    Word                        =>  Word Automation Services
+    WorkManagement              =>  Work Management Service
 */
 [ClassVersion("1.0.0.0"), FriendlyName("SPServiceInstance")]
 class MSFT_SPServiceInstance : OMI_BaseResource
@@ -27,3 +57,4 @@ class MSFT_SPServiceInstance : OMI_BaseResource
     [Write, Description("Present to ensure it runs on this server, or absent to ensure it is stopped"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
+
