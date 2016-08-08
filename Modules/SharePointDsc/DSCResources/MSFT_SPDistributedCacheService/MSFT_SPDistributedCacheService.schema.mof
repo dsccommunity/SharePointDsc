@@ -7,5 +7,5 @@ class MSFT_SPDistributedCacheService : OMI_BaseResource
     [Required, Description("The name of the service account to run the service as. This should already be registered as a managed account in SharePoint")] String ServiceAccount;
     [Write, Description("A list of servers which specifies the order they should provision the cache in to ensure that two servers do not do it at the same time")] String ServerProvisionOrder[];
     [Required, Description("Should the Windows Firewall rules for distributed cache be created?")] Boolean CreateFirewallRules;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

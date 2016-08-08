@@ -10,6 +10,6 @@ class MSFT_SPSearchServiceApp : OMI_BaseResource
     [Write, Description("The default content access account for this search service app"), EmbeddedInstance("MSFT_Credential")] String DefaultContentAccessAccount;
     [Write, Description("Should this search service application be a cloud based service app")] boolean CloudIndex;
     [Write, Description("Present if the service app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
