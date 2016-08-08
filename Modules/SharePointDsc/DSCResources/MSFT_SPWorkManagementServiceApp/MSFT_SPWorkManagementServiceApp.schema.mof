@@ -1,30 +1,8 @@
-/*
-**Description**
-
-This resource is used to provision and manage an instance of the Work Management Services Service Application.
-It will identify an instance of the work management service application through the application display name.
-Currently the resource will provision the app if it does not yet exist, and will change the application pool associated to the app if it does not match the configuration.
-
-
-Remarks
-- Parameters MinimumTimeBetweenEwsSyncSubscriptionSearches, MinimumTimeBetweenProviderRefreshes, MinimumTimeBetweenSearchQueries are in Minutes
-
-
-
-**Example**
-
-    SPWorkManagementServiceApp WorkManagementServiceApp
-    {
-        Name                   = "Work Management Service Application"
-        ApplicationPool        = "SharePoint web services"
-        MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
-        PsDscRunAsCredential   = $InstallAccount
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPWorkManagementServiceApp")]
 class MSFT_SPWorkManagementServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the work management service application")] string Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Write, Description("Present to ensure the app exists, Absent to ensure it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("The name of the application pool this will run in")] String ApplicationPool;
     [Write, Description("The minimum amount of time bween EWS sync subscription searches")] uint32 MinimumTimeBetweenEwsSyncSubscriptionSearches;

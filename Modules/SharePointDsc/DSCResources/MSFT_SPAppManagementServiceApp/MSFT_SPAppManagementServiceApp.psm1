@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
@@ -33,6 +34,12 @@ function Get-TargetResource
         If ($null -eq $serviceApp) { 
             return  $nullReturn
         } else {
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return  @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
@@ -53,6 +60,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
@@ -77,7 +85,8 @@ function Set-TargetResource
             if ($params.ContainsKey("DatabaseServer") -eq $true) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
 
             $appService = New-SPAppManagementServiceApplication @newParams
-            New-SPAppManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -UseDefaultProxyGroup -ServiceApplication $appService -ea Stop | Out-Null
+            if ($null -eq $params.ProxyName) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
+            New-SPAppManagementServiceApplicationProxy -Name $pName -UseDefaultProxyGroup -ServiceApplication $appService -ea Stop | Out-Null
         }
     }
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") {
@@ -114,6 +123,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
@@ -126,7 +136,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for App management Service Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

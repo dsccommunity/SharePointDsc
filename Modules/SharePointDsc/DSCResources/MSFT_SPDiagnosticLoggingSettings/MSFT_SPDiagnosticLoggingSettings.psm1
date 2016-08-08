@@ -131,7 +131,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing diagnostic configuration settings"
     $CurrentValues = Get-TargetResource @PSBoundParameters
     if ($null -eq $CurrentValues) { return $false }
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
 }
 
 

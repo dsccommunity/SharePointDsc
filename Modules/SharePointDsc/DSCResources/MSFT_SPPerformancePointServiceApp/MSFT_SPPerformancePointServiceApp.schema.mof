@@ -1,20 +1,8 @@
-/*
-**Description**
-
-This resource is responsible for creating Performance Point Service Application instances within the local SharePoint farm.
-The resource will provision and configure the Performance Point Service Application.
-**Example**
-    SPPerformancePointServiceApp PerformancePoint
-    {
-        Name = "Performance Point Service Application"
-        ApplicationPool = "SharePoint Web Services"
-        InstallAccount  = $InstallAccount
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPPerformancePointServiceApp")]
 class MSFT_SPPerformancePointServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the service application")] string Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
     [Write, Description("The name of the database for the service app")] string DatabaseName;
     [Write, Description("The name of the database server to host the database")] string DatabaseServer;

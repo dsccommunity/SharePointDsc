@@ -1,25 +1,8 @@
-/*
-**Description**
-
-This resource is responsible for provisioning the search service application. 
-The current version lets you specify the database name and server, as well as the application pool.
-If the application pool is changed the DSC resource will set it back as per what is set in the resource.
-The database name parameter is used as the prefix for all search databases (so you will end up with one for the admin database which matches the name, and then "_analyticsreportingstore", "_crawlstore" and "_linkstore" databases as well).
-
-**Example**
-
-    SPSearchServiceApp SearchServiceApp
-    {  
-        Name                  = "Search Service Application"
-        DatabaseName          = "SP_Search"
-        ApplicationPool       = "SharePoint Service Applications"
-        PsDscRunAsCredential  = $InstallAccount
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPSearchServiceApp")]
 class MSFT_SPSearchServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the search service application")] string Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The application pool that it should run in")] string ApplicationPool;
     [Write, Description("The URL of the enterprise search center site collection")] string SearchCenterUrl;
     [Write, Description("The name of the database (noting that some search databases will use this as a prefix)")] string DatabaseName;

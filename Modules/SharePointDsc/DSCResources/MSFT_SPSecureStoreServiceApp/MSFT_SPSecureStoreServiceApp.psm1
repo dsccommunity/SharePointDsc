@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyName,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -40,8 +41,15 @@ function Get-TargetResource
         If ($null -eq $serviceApp) { 
             return $nullReturn 
         } else {
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return  @{
                 Name = $serviceApp.DisplayName
+                ProxyName       = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Database.Name
                 DatabaseServer = $serviceApp.Database.Server.Name
@@ -60,6 +68,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyName,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -101,7 +110,10 @@ function Set-TargetResource
                 $params.Remove("DatabaseAuthenticationType")
             }
 
-            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name "$($params.Name) Proxy"
+            if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
+            if ($null -eq $pName) {$pName = "$($params.Name) Proxy"}
+            
+            New-SPSecureStoreServiceApplication @params | New-SPSecureStoreServiceApplicationProxy -Name $pName
         }
     } 
     
@@ -138,6 +150,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String]  $Name,
+        [parameter(Mandatory = $false)] [System.String]  $ProxyName,
         [parameter(Mandatory = $true)]  [System.String]  $ApplicationPool,
         [parameter(Mandatory = $true)]  [System.Boolean] $AuditingEnabled,
         [parameter(Mandatory = $false)] [System.UInt32]  $AuditlogMaxSize,
@@ -155,7 +168,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing secure store service application $Name"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 

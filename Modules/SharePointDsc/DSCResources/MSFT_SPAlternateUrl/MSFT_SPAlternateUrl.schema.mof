@@ -1,20 +1,3 @@
-/*
-**Description**
-
-This resource is used to define an alternate access mapping URL for a specified web application.
-
-
-**Example**
-
-    SPAlternateUrl CentralAdminAAM
-    {
-        WebAppUrl            = "http://sharepoint1:9999"
-        Zone                 = "Intranet"
-        Url                  = "https://admin.sharepoint.contoso.com"
-        PsDscRunAsCredential = $SPSetupAccount
-    }
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPAlternateUrl")]
 class MSFT_SPAlternateUrl : OMI_BaseResource
 {

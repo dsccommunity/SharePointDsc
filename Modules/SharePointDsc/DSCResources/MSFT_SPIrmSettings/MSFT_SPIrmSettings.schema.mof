@@ -1,18 +1,3 @@
-/*
-**Description**
-
-This resource is used to manipulate the IRM settings in SharePoint, integrating it with AD RMS
-
-**Example**
-
-    SPIrmSettings ContosoRMS
-    {
-      Ensure = "Present"
-      RMSserver = "https://rms.contoso.com"    
-    }
-
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPIrmSettings")]
 class MSFT_SPIrmSettings : OMI_BaseResource
 {

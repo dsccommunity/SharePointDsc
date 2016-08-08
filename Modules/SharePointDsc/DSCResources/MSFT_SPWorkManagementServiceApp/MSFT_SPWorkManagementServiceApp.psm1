@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $false)] [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
@@ -33,16 +34,22 @@ function Get-TargetResource
         If ($null -eq $serviceApp) { 
             return $nullReturn 
         } else {
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                MinimumTimeBetweenEwsSyncSubscriptionSearches =  $serviceApp.AdminSettings.MinimumTimeBetweenEwsSyncSubscriptionSearches.TotalMinutes 
-                MinimumTimeBetweenProviderRefreshes= $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
-                MinimumTimeBetweenSearchQueries=  $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
-                NumberOfSubscriptionSyncsPerEwsSyncRun=  $serviceApp.AdminSettings.NumberOfSubscriptionSyncsPerEwsSyncRun
-                NumberOfUsersEwsSyncWillProcessAtOnce=  $serviceApp.AdminSettings.NumberOfUsersEwsSyncWillProcessAtOnce
-                NumberOfUsersPerEwsSyncBatch=  $serviceApp.AdminSettings.NumberOfUsersPerEwsSyncBatch
-                Ensure = "Present"
+                Name                                          = $serviceApp.DisplayName
+                ProxyName                                     = $proxyName
+                ApplicationPool                               = $serviceApp.ApplicationPool.Name
+                MinimumTimeBetweenEwsSyncSubscriptionSearches = $serviceApp.AdminSettings.MinimumTimeBetweenEwsSyncSubscriptionSearches.TotalMinutes 
+                MinimumTimeBetweenProviderRefreshes           = $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
+                MinimumTimeBetweenSearchQueries               = $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
+                NumberOfSubscriptionSyncsPerEwsSyncRun        = $serviceApp.AdminSettings.NumberOfSubscriptionSyncsPerEwsSyncRun
+                NumberOfUsersEwsSyncWillProcessAtOnce         = $serviceApp.AdminSettings.NumberOfUsersEwsSyncWillProcessAtOnce
+                NumberOfUsersPerEwsSyncBatch                  = $serviceApp.AdminSettings.NumberOfUsersPerEwsSyncBatch
+                Ensure                                        = "Present"
             }
         }
     }
@@ -56,6 +63,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $false)] [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
@@ -66,7 +74,7 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] [System.UInt32] $NumberOfUsersEwsSyncWillProcessAtOnce, 
         [parameter(Mandatory = $false)] [System.UInt32] $NumberOfUsersPerEwsSyncBatch 
     )
-    if($Ensure -ne "Absent" -and $ApplicationPool -eq $null){
+    if($Ensure -ne "Absent" -and $null -eq $ApplicationPool){
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
 
@@ -89,7 +97,8 @@ function Set-TargetResource
             $newParams.Add("ApplicationPool", $params.ApplicationPool) 
 
             $appService = New-SPWorkManagementServiceApplication @newParams
-            New-SPWorkManagementServiceApplicationProxy -Name "$($params.Name) Proxy" -DefaultProxyGroup -ServiceApplication $appService | Out-Null
+            if ($null -eq $params.ProxyName) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
+            New-SPWorkManagementServiceApplicationProxy -Name $pName -DefaultProxyGroup -ServiceApplication $appService | Out-Null
             Start-Sleep -Milliseconds 200
         }
         $setParams = @{}
@@ -128,6 +137,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $false)] [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
@@ -143,7 +153,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ApplicationPool",
                                                                                                                              "MinimumTimeBetweenEwsSyncSubscriptionSearches",
                                                                                                                              "MinimumTimeBetweenProviderRefreshes",
                                                                                                                              "MinimumTimeBetweenSearchQueries",
@@ -154,7 +164,7 @@ function Test-TargetResource
                                                                                                                              "Ensure"
                                                                                                                             )
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
     }
     
 }
