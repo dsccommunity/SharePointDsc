@@ -47,41 +47,41 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
-        Add-Type -TypeDefinition "public class AdminComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}"
-        Add-Type -TypeDefinition "public class CrawlComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}"
-        Add-Type -TypeDefinition "public class ContentProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}"
-        Add-Type -TypeDefinition "public class AnalyticsProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}"
-        Add-Type -TypeDefinition "public class QueryProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}"
-        Add-Type -TypeDefinition "public class IndexComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Int32 IndexPartitionOrdinal {get; set;} public System.Guid ServerId {get; set;}}"
+        Add-Type -TypeDefinition "namespace Microsoft.Office.Server.Search.Administration.Topology { public class AdminComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}}"
+        Add-Type -TypeDefinition "namespace Microsoft.Office.Server.Search.Administration.Topology { public class CrawlComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}}"
+        Add-Type -TypeDefinition "namespace Microsoft.Office.Server.Search.Administration.Topology { public class ContentProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}}"
+        Add-Type -TypeDefinition "namespace Microsoft.Office.Server.Search.Administration.Topology { public class AnalyticsProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}}"
+        Add-Type -TypeDefinition "namespace Microsoft.Office.Server.Search.Administration.Topology { public class QueryProcessingComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Guid ServerId {get; set;}}}"
+        Add-Type -TypeDefinition "namespace Microsoft.Office.Server.Search.Administration.Topology { public class IndexComponent { public string ServerName { get; set; } public System.Guid ComponentId {get; set;} public System.Int32 IndexPartitionOrdinal {get; set;} public System.Guid ServerId {get; set;}}}"
 
         $serverId = New-Guid
 
-        $adminComponent = New-Object AdminComponent
+        $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
         $adminComponent.ServerName = $env:COMPUTERNAME
         $adminComponent.ServerId = $serverId
         $adminComponent.ComponentId = [Guid]::NewGuid()
 
-        $crawlComponent = New-Object CrawlComponent
+        $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
         $crawlComponent.ServerName = $env:COMPUTERNAME
         $crawlComponent.ServerId = $serverId
         $crawlComponent.ComponentId = [Guid]::NewGuid()
 
-        $contentProcessingComponent = New-Object ContentProcessingComponent
+        $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
         $contentProcessingComponent.ServerName = $env:COMPUTERNAME
         $contentProcessingComponent.ServerId = $serverId
         $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-        $analyticsProcessingComponent = New-Object AnalyticsProcessingComponent
+        $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
         $analyticsProcessingComponent.ServerName = $env:COMPUTERNAME
         $analyticsProcessingComponent.ServerId = $serverId
         $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-        $queryProcessingComponent = New-Object QueryProcessingComponent
+        $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
         $queryProcessingComponent.ServerName = $env:COMPUTERNAME
         $queryProcessingComponent.ServerId = $serverId
         $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-        $indexComponent = New-Object IndexComponent
+        $indexComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.IndexComponent
         $indexComponent.ServerName = $env:COMPUTERNAME
         $indexComponent.ServerId = $serverId
         $indexComponent.IndexPartitionOrdinal = 0
@@ -223,27 +223,27 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
             }
             Mock Get-SPEnterpriseSearchComponent {
-                $adminComponent = New-Object AdminComponent
+                $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
                 $adminComponent.ServerName = $env:COMPUTERNAME
                 $adminComponent.ServerId = $serverId
                 $adminComponent.ComponentId = [Guid]::NewGuid()
 
-                $crawlComponent = New-Object CrawlComponent
+                $crawlComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.CrawlComponent
                 $crawlComponent.ServerName = $env:COMPUTERNAME
                 $crawlComponent.ServerId = $serverId
                 $crawlComponent.ComponentId = [Guid]::NewGuid()
 
-                $contentProcessingComponent = New-Object ContentProcessingComponent
+                $contentProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.ContentProcessingComponent
                 $contentProcessingComponent.ServerName = $env:COMPUTERNAME
                 $contentProcessingComponent.ServerId = $serverId
                 $contentProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $analyticsProcessingComponent = New-Object AnalyticsProcessingComponent
+                $analyticsProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AnalyticsProcessingComponent
                 $analyticsProcessingComponent.ServerName = $env:COMPUTERNAME
                 $analyticsProcessingComponent.ServerId = $serverId
                 $analyticsProcessingComponent.ComponentId = [Guid]::NewGuid()
 
-                $queryProcessingComponent = New-Object QueryProcessingComponent
+                $queryProcessingComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.QueryProcessingComponent
                 $queryProcessingComponent.ServerName = $env:COMPUTERNAME
                 $queryProcessingComponent.ServerId = $serverId
                 $queryProcessingComponent.ComponentId = [Guid]::NewGuid()
