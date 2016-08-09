@@ -1,22 +1,3 @@
-/*
-**Description**
-
-This resource provisions an instance of the usage and health monitoring service application.
-The database settings are only used for initial provisioning, but the usage settings can be changed and will be enforced as the resource is executed. 
-
-**Example**
-
-    SPUsageApplication UsageApplication 
-    {
-        Name                  = "Usage Service Application"
-        DatabaseName          = "SP_Usage"
-        UsageLogCutTime       = 5
-        UsageLogLocation      = "L:\UsageLogs"
-        UsageLogMaxFileSizeKB = 1024
-        Ensure                = "Present"
-        InstallAccount        = $InstallAccount
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPUsageApplication")]
 class MSFT_SPUsageApplication : OMI_BaseResource
 {

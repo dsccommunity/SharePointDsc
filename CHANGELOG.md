@@ -1,8 +1,11 @@
 # Change log for SharePointDsc
 
+### Unreleased
+ * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
+ * Added ProxyName parameter to all service application resources
+
 ### 1.2
 
- * Added ProxyName parameter to all service application resources
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
  * Minor tweaks to the PowerShell module manifest
  * Modified all resources to ensure $null values are on the left of comparisson operations
@@ -10,6 +13,7 @@
  * Added better logging to all test method output to make it clear what property is causing a test to fail
  * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+ * Fixed the use of plural nouns in cmdlet names within the module
  * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall
