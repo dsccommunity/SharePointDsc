@@ -11,5 +11,5 @@ class MSFT_SPWeb : OMI_BaseResource
     [Write, Description("True if the web should use the parent nav bar, otherwise false.")] Boolean UseParentTopNav;
     [Write, Description("True if the web should be in the quick launch of the parent web, otherwise false.")] Boolean AddToQuickLaunch;
     [Write, Description("True if the web should be added to the top nav bar of the parent web, otherwise false.")] Boolean AddToTopNav;    
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

@@ -11,5 +11,5 @@ class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
     [Write, Description("Name of a claims provider to set with this SPTrustedIdentityTokenIssuer.")] String ClaimProviderName;
     [Write, Description("Sign-out URL")] String ProviderSignOutUri;
     [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
