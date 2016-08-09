@@ -7,6 +7,6 @@ class MSFT_SPAntivirusSettings : OMI_BaseResource
     [Write, Description("Should infected documents be handed to the AV engine to attempt cleaning")] Boolean AttemptToClean;
     [Write, Description("What is the timeout for an AV scan in seconds")] Uint16 TimeoutDuration;
     [Write, Description("How many concurrent threads should the AV engine be able to run on a server")] Uint16 NumberOfThreads;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

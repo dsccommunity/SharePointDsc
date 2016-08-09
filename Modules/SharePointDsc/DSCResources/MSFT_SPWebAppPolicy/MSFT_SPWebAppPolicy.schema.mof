@@ -14,5 +14,5 @@ class MSFT_SPWebAppPolicy : OMI_BaseResource
     [Write, Description("List of all accounts that must be in the Web Policy group"), EmbeddedInstance("MSFT_SPWebPolicyPermissions")] String MembersToInclude[];
     [Write, Description("List of all accounts that are not allowed to have any Web Policy permissions"), EmbeddedInstance("MSFT_SPWebPolicyPermissions")] String MembersToExclude[];
     [Write, Description("Include the Cache Accounts in the policy or not")] Boolean SetCacheAccountsPolicy;    
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
