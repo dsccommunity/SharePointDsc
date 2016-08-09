@@ -20,7 +20,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Site Use and Deletion settings will not be applied"
+            Write-Verbose -Message "No local SharePoint farm was detected. Site Use and Deletion settings will not be applied"
             return $null
         }
 
@@ -74,7 +74,7 @@ function Set-TargetResource
             return
         }
 
-        Write-Verbose -Verbose "Start update"
+        Write-Verbose -Message "Start update"
 
         # Set the Site Use and Deletion settings
         if ($params.ContainsKey("SendUnusedSiteCollectionNotifications")) { $wa.SendUnusedSiteCollectionNotifications = $params.SendUnusedSiteCollectionNotifications }

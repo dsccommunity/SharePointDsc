@@ -19,7 +19,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Timer job settings will not be applied"
+            Write-Verbose -Message "No local SharePoint farm was detected. Timer job settings will not be applied"
             return $null
         }
 
@@ -98,7 +98,7 @@ function Set-TargetResource
             if ($params.ContainsKey("Enabled") -eq $true) { 
                 # Enable/Disable timer job
                 if ($params.Enabled) {
-                    Write-Verbose -Verbose "Enable timer job $($params.Name)"
+                    Write-Verbose -Message "Enable timer job $($params.Name)"
                     try {
                         Enable-SPTimerJob $job
                     } catch {
@@ -106,7 +106,7 @@ function Set-TargetResource
                         return
                     }
                 } else {
-                    Write-Verbose -Verbose "Disable timer job $($params.Name)"
+                    Write-Verbose -Message "Disable timer job $($params.Name)"
                     try {
                         Disable-SPTimerJob $job
                     } catch {
@@ -118,7 +118,7 @@ function Set-TargetResource
 
             if ($params.ContainsKey("Schedule") -eq $true) {
                 # Set timer job schedule
-                Write-Verbose -Verbose "Set timer job $($params.Name) schedule"
+                Write-Verbose -Message "Set timer job $($params.Name) schedule"
                 try {
                     Set-SPTimerJob $job -Schedule $params.Schedule -ErrorAction Stop
                 } catch {

@@ -14,31 +14,31 @@ function Get-TargetResource
     )
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) {
-        Write-Verbose -Verbose "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+        Write-Verbose -Message "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
         return $null
     }
 
     if ($ContentDatabases) {
         foreach ($contentDatabase in $ContentDatabases) {
             if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) -or ($contentDatabase.MembersToExclude))) {
-                Write-Verbose -Verbose "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+                Write-Verbose -Message "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
                 return $null
             }
 
             if (!$contentDatabase.Members -and !$contentDatabase.MembersToInclude -and !$contentDatabase.MembersToExclude) {
-                Write-Verbose -Verbose "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+                Write-Verbose -Message "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
                 return $null
             }
         }
     } else {
         if (!$Members -and !$MembersToInclude -and !$MembersToExclude) {
-            Write-Verbose -Verbose "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+            Write-Verbose -Message "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
             return $null
         }
     }
 
     if ($ContentDatabases -and $AllContentDatabases) {
-        Write-Verbose -Verbose "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
+        Write-Verbose -Message "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
         return $null
     }
 
@@ -53,7 +53,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Shell admin settings will not be applied"
+            Write-Verbose -Message "No local SharePoint farm was detected. Shell admin settings will not be applied"
             return $null
         }
 
@@ -140,14 +140,14 @@ function Set-TargetResource
         $shellAdmins = Get-SPShellAdmin
 
         if ($params.Members) {
-            Write-Verbose -Verbose "Processing Members"
+            Write-Verbose -Message "Processing Members"
             if ($shellAdmins) {
                 $differences = Compare-Object -ReferenceObject $shellAdmins.UserName -DifferenceObject $params.Members
 
                 if ($null -eq $differences) {
-                    Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
+                    Write-Verbose -Message "Shell Admins group matches. No further processing required"
                 } else {
-                    Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
+                    Write-Verbose -Message "Shell Admins group does not match. Perform corrective action"
                     ForEach ($difference in $differences) {
                         if ($difference.SideIndicator -eq "=>") {
                             # Add account
@@ -183,7 +183,7 @@ function Set-TargetResource
         }
 
         if ($params.MembersToInclude) {
-            Write-Verbose -Verbose "Processing MembersToInclude"
+            Write-Verbose -Message "Processing MembersToInclude"
             if ($shellAdmins) {
                 foreach ($member in $params.MembersToInclude) {
                     if (-not $shellAdmins.UserName.Contains($member)) {
@@ -208,7 +208,7 @@ function Set-TargetResource
         }
 
         if ($params.MembersToExclude) {
-            Write-Verbose -Verbose "Processing MembersToExclude"
+            Write-Verbose -Message "Processing MembersToExclude"
             if ($shellAdmins) {
                 foreach ($member in $params.MembersToExclude) {
                     if ($shellAdmins.UserName.Contains($member)) {
@@ -230,14 +230,14 @@ function Set-TargetResource
 
             foreach ($contentDatabase in $params.ContentDatabases) {
                 # Check if configured database exists, throw error if not
-                Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
+                Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
 
                 $currentCDB = Get-SPDSCContentDatabase | Where-Object { $_.Name.ToLower() -eq $contentDatabase.Name.ToLower() }
                 if ($null -ne $currentCDB) {
                     $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
 
                     if ($contentDatabase.Members) {
-                        Write-Verbose -Verbose "Processing Members"
+                        Write-Verbose -Message "Processing Members"
                         if ($dbShellAdmins) {
                             $differences = Compare-Object -ReferenceObject $contentDatabase.Members -DifferenceObject $dbShellAdmins.UserName
                             ForEach ($difference in $differences) {
@@ -274,7 +274,7 @@ function Set-TargetResource
                     }
 
                     if ($contentDatabase.MembersToInclude) {
-                        Write-Verbose -Verbose "Processing MembersToInclude"
+                        Write-Verbose -Message "Processing MembersToInclude"
                         if ($dbShellAdmins) {
                             ForEach ($member in $contentDatabase.MembersToInclude) {
                                 if (-not $dbShellAdmins.UserName.Contains($member)) {
@@ -299,7 +299,7 @@ function Set-TargetResource
                     }
 
                     if ($contentDatabase.MembersToExclude) {
-                        Write-Verbose -Verbose "Processing MembersToExclude"
+                        Write-Verbose -Message "Processing MembersToExclude"
                         if ($dbShellAdmins) {
                             ForEach ($member in $contentDatabase.MembersToExclude) {
                                 if ($dbShellAdmins.UserName.Contains($member)) {
@@ -325,14 +325,14 @@ function Set-TargetResource
             foreach ($contentDatabase in (Get-SPDSCContentDatabase)) {
                 $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
                 if ($params.Members) {
-                    Write-Verbose -Verbose "Processing Content Database: $($contentDatabase.Name)"
+                    Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
                     if ($dbShellAdmins) {
                         $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName -DifferenceObject $params.Members
 
                         if ($null -eq $differences) {
-                            Write-Verbose -Verbose "Shell Admins group matches. No further processing required"
+                            Write-Verbose -Message "Shell Admins group matches. No further processing required"
                         } else {
-                            Write-Verbose -Verbose "Shell Admins group does not match. Perform corrective action"
+                            Write-Verbose -Message "Shell Admins group does not match. Perform corrective action"
                             ForEach ($difference in $differences) {
                                 if ($difference.SideIndicator -eq "=>") {
                                     # Add account

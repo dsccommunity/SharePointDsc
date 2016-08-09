@@ -26,14 +26,14 @@ function Get-TargetResource
                 try {
                     $spFarm = Get-SPFarm
                 } catch {
-                    Write-Verbose -Verbose "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
+                    Write-Verbose -Message "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
                     return $null
                 }
 
                 # Check if web application exists
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript { ($_.Url).StartsWith($params.Url) }
                 if ($null -eq $webapp) {
-                    Write-Verbose -Verbose "Web application not found. SharePoint Designer settings will not be applied"
+                    Write-Verbose -Message "Web application not found. SharePoint Designer settings will not be applied"
                     return $null
                 } else {
                     # Get SPD settings for the web application
@@ -63,14 +63,14 @@ function Get-TargetResource
                     try {
                         $spFarm = Get-SPFarm
                     } catch {
-                        Write-Verbose -Verbose "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
+                        Write-Verbose -Message "No local SharePoint farm was detected. SharePoint Designer settings will not be applied"
                         return $null
                     }
 
                     # Check if site collections exists
                     $site = Get-SPSite | Where-Object -FilterScript { $_.Url -eq $url }
                     if ($null -eq $site) {
-                        Write-Verbose -Verbose "Site collection not found. SharePoint Designer settings will not be applied"
+                        Write-Verbose -Message "Site collection not found. SharePoint Designer settings will not be applied"
                         return $null
                     } else {
                         return @{
@@ -129,7 +129,7 @@ function Set-TargetResource
                     return
                 }
         
-                Write-Verbose -Verbose "Start update SPD web application settings"
+                Write-Verbose -Message "Start update SPD web application settings"
 
                 # Check if web application exists
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript { ($_.Url).StartsWith($params.Url) }
@@ -161,7 +161,7 @@ function Set-TargetResource
                         return
                     }
         
-                    Write-Verbose -Verbose "Start update SPD site collection settings"
+                    Write-Verbose -Message "Start update SPD site collection settings"
 
                     # Check if site collection exists
                     $site = Get-SPSite | Where-Object -FilterScript { $_.Url -eq $url }

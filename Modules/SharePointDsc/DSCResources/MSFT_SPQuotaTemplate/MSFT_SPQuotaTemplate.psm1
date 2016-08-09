@@ -28,7 +28,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Quota template settings will not be applied"
+            Write-Verbose -Message "No local SharePoint farm was detected. Quota template settings will not be applied"
             return $null
         }
 
@@ -134,7 +134,7 @@ function Set-TargetResource
                 try {
                     $spFarm = Get-SPFarm
                 } catch {
-                    Write-Verbose -Verbose "No local SharePoint farm was detected. Quota template settings will not be applied"
+                    Write-Verbose -Message "No local SharePoint farm was detected. Quota template settings will not be applied"
                     return
                 }
 

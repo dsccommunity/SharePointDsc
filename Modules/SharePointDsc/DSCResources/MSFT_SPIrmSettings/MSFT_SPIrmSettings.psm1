@@ -18,7 +18,7 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. IRM settings will not be applied"
+            Write-Verbose -Message "No local SharePoint farm was detected. IRM settings will not be applied"
             return @{ 
                     Ensure = "Absent" 
                     UseADRMS =  $UseADRMS

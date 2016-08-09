@@ -20,13 +20,13 @@ function Get-TargetResource
         try {
             $spFarm = Get-SPFarm
         } catch {
-            Write-Verbose -Verbose "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
+            Write-Verbose -Message "No local SharePoint farm was detected. Health Analyzer Rule settings will not be applied"
             return $null
         }
 
         $caWebapp = Get-SPwebapplication -includecentraladministration | Where-Object -FilterScript { $_.IsAdministrationWebApplication }
         if ($null -eq $caWebapp) {
-            Write-Verbose -Verbose "Unable to locate central administration website"
+            Write-Verbose -Message "Unable to locate central administration website"
             return $null
         }
 
@@ -52,11 +52,11 @@ function Get-TargetResource
                     InstallAccount = $params.InstallAccount
                 }
             } else {
-                Write-Verbose -Verbose "Unable to find specified Health Analyzer Rule"
+                Write-Verbose -Message "Unable to find specified Health Analyzer Rule"
                 return $null                
             }
         } else {
-            Write-Verbose -Verbose "Unable to locate Health Analyzer Rules list"
+            Write-Verbose -Message "Unable to locate Health Analyzer Rules list"
             return $null
         }       
     }

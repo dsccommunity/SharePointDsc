@@ -60,20 +60,20 @@ function Get-TargetResource
         }
          
         if ($null -eq $serviceApps) {
-            Write-Verbose -Verbose "Service Application $($params.ServiceAppName) not found"
+            Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
             return $nullReturn 
         }
         
         $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Search Service Application" }
 
         If ($null -eq $serviceApp) { 
-            Write-Verbose -Verbose "Service Application $($params.ServiceAppName) not found"
+            Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
             return $nullReturn
         } else {
             $crawlRule = Get-SPEnterpriseSearchCrawlRule -SearchApplication $params.ServiceAppName | Where-Object { $_.Path -eq $params.Path }
 
             if ($null -eq $crawlRule) {
-                Write-Verbose -Verbose "Crawl rule $($params.Path) not found"
+                Write-Verbose -Message "Crawl rule $($params.Path) not found"
                 return $nullReturn
             } else {
                 $crawlConfigurationRules = @()
