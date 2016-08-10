@@ -1,5 +1,21 @@
 # Change log for SharePointDsc
 
+### 1.2
+
+ * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
+ * Minor tweaks to the PowerShell module manifest
+ * Modified all resources to ensure $null values are on the left of comparisson operations
+ * Added RunOnlyWhenWriteable property to SPUserProfileSyncService resource
+ * Added better logging to all test method output to make it clear what property is causing a test to fail
+ * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
+ * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+ * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
+ * Fixed the use of plural nouns in cmdlet names within the module
+ * Removed dependency on Win32_Product from SPInstall
+ * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
+ * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out
+ * Prevented SPCreateFarm and SPJoinFarm from executing set methods where the local server is already a member of a farm 
+
 ### 1.1
 
  * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
@@ -111,4 +127,4 @@
 ### 0.2.0
 
 * Initial public release of xSharePoint
- 
+

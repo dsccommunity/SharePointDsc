@@ -24,7 +24,7 @@ function Get-TargetResource
         }
         
         $mailServer = $null
-        if ($webApp.OutboundMailServiceInstance -ne $null) {
+        if ($null -ne $webApp.OutboundMailServiceInstance) {
             $mailServer = $webApp.OutboundMailServiceInstance.Server.Name
         }
         
@@ -85,7 +85,7 @@ function Test-TargetResource
     Write-Verbose -Message "Comparing Current and Target Outgoing email settings"
     if ($null -eq $CurrentValues) { return $false }
     
-    return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SMTPServer","FromAddress","ReplyToAddress","CharacterSet") 
 }
 
 

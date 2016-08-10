@@ -173,6 +173,7 @@ Configuration SharePointServer
                 DatabaseName           = $webApp.DatabaseName
                 DatabaseServer         = $ConfigurationData.NonNodeData.SQLServer.ContentDatabaseServer
                 Url                    = $webApp.Url
+                HostHeader             = $webApp.HostHeader
                 Port                   = [Uri]::new($webApp.Url).Port
                 PsDscRunAsCredential   = $SPSetupAccount
                 DependsOn              = "[SPManagedAccount]WebPoolManagedAccount"

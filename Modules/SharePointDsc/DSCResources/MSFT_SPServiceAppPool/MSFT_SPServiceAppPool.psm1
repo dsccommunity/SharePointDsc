@@ -103,9 +103,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing service application pool '$Name'"
     $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount", "Ensure")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("ServiceAccount", "Ensure")
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
     }    
 }
 

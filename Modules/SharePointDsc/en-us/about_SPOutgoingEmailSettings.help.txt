@@ -15,6 +15,7 @@ It is possible to set the outgoing server, from address, reply to address and th
         SMTPServer            = "smtp.contoso.com"
         FromAddress           = "sharepoint@contoso.com"
         ReplyToAddress        = "noreply@contoso.com"
+        CharacterSet          = "65001"
         PsDscRunAsCredential  = $InstallAccount
     }
 

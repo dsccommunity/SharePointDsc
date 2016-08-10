@@ -105,9 +105,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     if ($Ensure -eq "Present") {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure","SessionTimeout")
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure","SessionTimeout")
     } else {
-        return Test-SPDSCSpecificParameters -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
+        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
     }   
     
 }

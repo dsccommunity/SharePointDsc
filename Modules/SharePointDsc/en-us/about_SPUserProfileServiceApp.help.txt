@@ -21,6 +21,7 @@ This is done to ensure that the databases are created with the correct schema ow
         SocialDBServer       = "SQL.contoso.local\SQLINSTANCE"
         SyncDBName           = "SP_ProfileSync"
         SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
+        EnableNetBIOS        = $false
         FarmAccount          = $FarmAccount
         PsDscRunAsCredential = $SetupAccount
     }
@@ -64,6 +65,10 @@ This is done to ensure that the databases are created with the correct schema ow
 .PARAMETER SyncDBServer
     Write - string
     The name of the database server to host the sync database
+
+.PARAMETER EnableNetBIOS
+    Write - boolean
+    Whether Farm should resolve NetBIOS domain names
 
 .PARAMETER Ensure
     Write - string

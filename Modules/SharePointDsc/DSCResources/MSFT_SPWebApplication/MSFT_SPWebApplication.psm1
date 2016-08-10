@@ -98,7 +98,7 @@ function Set-TargetResource
                 # Get a reference to the Administration WebService
                 $admService = Get-SPDSCContentService
                 $appPools = $admService.ApplicationPools | Where-Object { $_.Name -eq $params.ApplicationPool }
-                if ($appPools -eq $null) {
+                if ($null -eq $appPools) {
                     # Application pool does not exist, create a new one.
                     # Test if the specified managed account exists. If so, add ApplicationPoolAccount parameter to create the application pool
                     try {
@@ -177,7 +177,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application '$Name'"
     $PSBoundParameters.Ensure = $Ensure
-    $testReturn = Test-SPDSCSpecificParameters -CurrentValues $CurrentValues `
+    $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure")
     return $testReturn

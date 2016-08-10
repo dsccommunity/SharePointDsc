@@ -15,6 +15,7 @@ Therefore this resource will add the FarmAccount credential to the local adminis
         UserProfileServiceAppName   = "User Profile Service Application"
         Ensure                      = "Present"
         FarmAccount                 = $FarmAccount
+        RunOnlyWhenWriteable        = $true
         InstallAccount              = $InstallAccount
     }
 
@@ -30,6 +31,10 @@ Therefore this resource will add the FarmAccount credential to the local adminis
 .PARAMETER FarmAccount
     Required - String
     The farm account, which is needed to provision the service app
+
+.PARAMETER RunOnlyWhenWriteable
+    Write - Boolean
+    Should the sync service only run when the user profile database is in a writeable state?
 
 .PARAMETER InstallAccount
     Write - String
