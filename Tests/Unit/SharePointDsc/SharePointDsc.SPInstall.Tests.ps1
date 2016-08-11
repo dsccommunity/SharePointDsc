@@ -14,6 +14,21 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleNa
 
 Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
+
+        function New-SPDscMockPrereq()
+        {
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [String]
+                $Name
+            )
+            $object = New-Object -TypeName System.Object
+            $object = $object | Add-Member -type NoteProperty -Name "DisplayName" -Value $Name -PassThru
+            return $object
+        }
+
+
         $testParams = @{
             BinaryDir = "C:\SPInstall"
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
@@ -48,7 +63,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
         Context "SharePoint binaries are not installed but should be" {
-            Mock Get-CimInstance { return $null }
+            Mock Get-ItemProperty { return $null }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -60,7 +75,10 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         }
 
         Context "SharePoint binaries are installed and should be" {
-            Mock Get-CimInstance { return @{} } 
+            Mock Get-ItemProperty { return @(
+                (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
+                (New-SPDscMockPrereq -Name "Something else")
+            ) } 
 
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -91,7 +109,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         $testParams.Ensure = "Absent"
 
         Context "SharePoint binaries are installed and should not be" {
-            Mock Get-CimInstance { return @{} } 
+            Mock Get-ItemProperty { return @{} } 
 
             It "throws in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
@@ -132,7 +150,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
             DataPath = "C:\somewhere\else"
         }
         Context "SharePoint is not installed and should be, using custom install directories" {
-            Mock Get-CimInstance { return $null }
+            Mock Get-ItemProperty { return $null }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"

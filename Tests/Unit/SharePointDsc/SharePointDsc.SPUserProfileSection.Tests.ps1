@@ -82,7 +82,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
         return $result
         }
         
-        Mock Set-SPDSCObjectPropertyIfValueExists -MockWith {return ;}
+        Mock Set-SPDscObjectPropertyIfValuePresent -MockWith {return ;}
         Mock Get-SPWebApplication -MockWith {
             return @(
                     @{
@@ -258,7 +258,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled = $false
                 $Global:SPUPGetSectionByNameCalled=$true
                 Set-TargetResource @testParams
-                Assert-MockCalled Set-SPDSCObjectPropertyIfValueExists
+                Assert-MockCalled Set-SPDscObjectPropertyIfValuePresent
                 $Global:SPUPSubTypeCreateCalled | should be $false
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }

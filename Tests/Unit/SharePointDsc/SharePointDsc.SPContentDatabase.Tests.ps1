@@ -118,7 +118,7 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
-            Mock Mount-SPContentDatabase { 
+            Mock Mount-SPContentDatabase -ModuleName SPContentDatabase { 
                 $returnval = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
@@ -225,7 +225,7 @@ namespace Microsoft.SharePoint.Administration {
             }
             Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
             Mock Dismount-SPContentDatabase { }
-            Mock Mount-SPContentDatabase { 
+            Mock Mount-SPContentDatabase -ModuleName SPContentDatabase { 
                 $returnVal = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
