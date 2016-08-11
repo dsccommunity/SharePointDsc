@@ -40,14 +40,7 @@ function Get-TargetResource
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose "Update has version $fileVersion"
 
-    $products = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
-        $farm = Get-SPFarm
-        $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
-        $server = Get-SPServer $env:COMPUTERNAME
-
-        $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
-        return $serverProductInfo.Products
-    }
+    $products = Get-SPDscFarmProductsInfo
 
     if ($setupFileInfo.VersionInfo.FileDescription -match "Language Pack")
     {
@@ -67,7 +60,7 @@ function Get-TargetResource
 
         try
         {
-            $cultureInfo = New-Object system.globalization.cultureinfo($language)
+            $cultureInfo = New-Object System.Globalization.CultureInfo($language)
         }
         catch
         {
@@ -108,20 +101,20 @@ function Get-TargetResource
         {
             Write-Verbose "Product found: $productName"
         }
-        $versionInfo = Get-SPDSCFarmVersionInfo $productName
+        $versionInfo = Get-SPDscFarmVersionInfo $productName
     }
     elseif ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack")
     {
         Write-Verbose "Update is a Service Pack for SharePoint."
         # Check SharePoint version information.
         $servicepack = $true
-        $versionInfo = Get-SPDSCFarmVersionInfo "Microsoft SharePoint Server 2013"
+        $versionInfo = Get-SPDscFarmVersionInfo "Microsoft SharePoint Server 2013"
     }
     else
     {
         Write-Verbose "Update is a Cumulative Update."
         # Cumulative Update is multi-lingual. Check version information of all products.
-        $versionInfo = Get-SPDSCFarmVersionInfo
+        $versionInfo = Get-SPDscFarmVersionInfo
     }
 
     Write-Verbose "The lowest version of any SharePoint component is $($versionInfo.Lowest)"
@@ -180,6 +173,12 @@ function Set-TargetResource
         return
     }
 
+    # Check if setup file exists
+    if (-not(Test-Path $SetupFile))
+    {
+        throw "Setup file cannot be found."
+    }
+
     $now = Get-Date
     if ($BinaryInstallDays)
     {
@@ -188,13 +187,13 @@ function Set-TargetResource
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
         {
-            Write-Verbose "Current day is present in the parameter BinaryInstallDays. " + `
-                          "Update can be run today."
+            Write-Verbose ("Current day is present in the parameter BinaryInstallDays. " + `
+                           "Update can be run today.")
         }
         else
         {
-            Write-Verbose "Current day is not present in the parameter BinaryInstallDays, " + `
-                          "skipping the update"
+            Write-Verbose ("Current day is not present in the parameter BinaryInstallDays, " + `
+                           "skipping the update")
             return
         }
     }
@@ -235,20 +234,20 @@ function Set-TargetResource
 
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
-            Write-Verbose "Current time is inside of the window specified in " + `
-                          "BinaryInstallTime. Starting update"
+            Write-Verbose ("Current time is inside of the window specified in " + `
+                          "BinaryInstallTime. Starting update")
         }
         else
         {
-            Write-Verbose "Current time is outside of the window specified in " + `
-                          "BinaryInstallTime, skipping the update"
+            Write-Verbose ("Current time is outside of the window specified in " + `
+                          "BinaryInstallTime, skipping the update")
             return
         }
     }
     else
     {
-        Write-Verbose "No BinaryInstallTime specified, Update can be ran at " + `
-                      "any time. Starting update."
+        Write-Verbose ("No BinaryInstallTime specified, Update can be ran at " + `
+                      "any time. Starting update.")
     }
 
     # To prevent an endless loop: Check if an upgrade is required.
@@ -267,8 +266,8 @@ function Set-TargetResource
     # If so, the Config Wizard is required, so the installation will be skipped.
     if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
     {
-        Write-Verbose "An upgrade is pending. " + `
-                      "To prevent a possible loop, the install will be skipped"
+        Write-Verbose ("An upgrade is pending. " + `
+                      "To prevent a possible loop, the install will be skipped")
         return
     }
 
@@ -283,13 +282,16 @@ function Set-TargetResource
         $osearchSvc        = Get-Service "OSearch15" 
         $hostControllerSvc = Get-Service "SPSearchHostController" 
 
-        $searchPaused = $true
-        $searchSAs = Get-SPEnterpriseSearchServiceApplication
-        foreach ($searchSA in $searchSAs)
-        {
-            $searchSA.Pause()
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -ScriptBlock {
+            $searchPaused = $true
+            $searchSAs = Get-SPEnterpriseSearchServiceApplication
+            foreach ($searchSA in $searchSAs)
+            {
+                $searchSA.Pause()
+            }
         }
-
+        
         if($osearchSvc.Status -eq "Running") 
         { 
             $osearchStopped = $true
@@ -324,16 +326,27 @@ function Set-TargetResource
 
     Write-Verbose -Message "Beginning installation of the SharePoint update"
     
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $$SetupFile -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $SetupFile `
+                                  -ScriptBlock {
         $setupFile = $args[0]
 
         $setup = Start-Process -FilePath $setupFile -ArgumentList "/quiet /passive" -Wait -PassThru
 
+        # Error codes: https://technet.microsoft.com/en-us/library/cc179058%28v=office.14%29.aspx?f=255&MSPPError=-2147217396
         switch ($setup.ExitCode) {
-            0 {  
-                Write-Verbose -Message "SharePoint update binary installation complete"
+            0
+            {  
+                Write-Verbose -Message "SharePoint update binary installation complete."
             }
-            Default {
+            17022
+            {
+                Write-Verbose -Message ("SharePoint update binary installation complete, " + `
+                                        "however a reboot is required.")
+                $global:DSCMachineStatus = 1
+            }
+            Default
+            {
                 throw "SharePoint update install failed, exit code was $($setup.ExitCode)"
             }
         }
@@ -353,10 +366,10 @@ function Set-TargetResource
         $osearchSvc        = Get-Service "OSearch15" 
         $hostControllerSvc = Get-Service "SPSearchHostController" 
 
-        ###Ensuring Search Services were stopped by script before Starting" 
+        # Ensuring Search Services were stopped by script before Starting" 
         if($osearchStopped -eq $true) 
         {
-            Set-Service -Name "OSearch15" -StartupType Automatic
+            Set-Service -Name "OSearch15" -StartupType Manual
             $osearchSvc.Start()
         }
 
@@ -366,16 +379,19 @@ function Set-TargetResource
             $hostControllerSvc.Start() 
         } 
 
-        ###Resuming Search Service Application if paused### 
-        if($searchPaused -eq $true)
-        {
-            $searchSAs = Get-SPEnterpriseSearchServiceApplication
-            foreach ($searchSA in $searchSAs)
+        # Resuming Search Service Application if paused### 
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -ScriptBlock {
+            if($searchPaused -eq $true)
             {
-                $searchSA.Resume()
+                $searchSAs = Get-SPEnterpriseSearchServiceApplication
+                foreach ($searchSA in $searchSAs)
+                {
+                    $searchSA.Resume()
+                }
             }
         }
-
+        
         Write-Verbose "Services restarted."
     }
 }
@@ -424,85 +440,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-
-function Get-SPDSCFarmVersionInfo()
-{
-    param
-    (
-        [parameter(Mandatory = $false)]
-        [System.String] $ProductToCheck
-    )
-
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $ProductToCheck -ScriptBlock {
-        $productToCheck = $args[0]
-
-        $farm = Get-SPFarm
-        $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
-        $server = Get-SPServer $env:COMPUTERNAME
-        $versionInfo = @{}
-        $versionInfo.Highest = ""
-        $versionInfo.Lowest = ""
-
-        $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
-        $products = $serverProductInfo.Products
-
-        if ($productToCheck)
-        {
-            $products = $products | Where-Object { $_ -eq $productToCheck }
-            if ($null -eq $products)
-            {
-                throw "Product not found: $productToCheck"
-            }
-        }
-
-        # Loop through all products
-        foreach ($product in $products)
-        {
-            Write-Output "Product: $product"
-            $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
-            $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
-
-            # Loop through all individual components within the product
-            foreach ($patchableUnit in $patchableUnits)
-            {
-                # Check if the displayname is the Proofing tools (always mentioned in first product,
-                # generates noise)
-                if (($patchableUnit -notmatch "Microsoft Server Proof") -and
-                    ($patchableUnit -notmatch "SQL Express") -and
-                    ($patchableUnit -notmatch "OMUI") -and
-                    ($patchableUnit -notmatch "XMUI") -and
-                    ($patchableUnit -notmatch "Project Server") -and
-                    ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
-                {
-                    Write-Output "  - $patchableUnit"
-                    $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
-                    $currentVersion = ""
-                    foreach ($patchableUnitInfo in $patchableUnitsInfo)
-                    {
-                        # Loop through version of the patchableUnit
-                        $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
-
-                        # Check if the version of the patchableUnit is the highest for the installed product
-                        if ($currentVersion -gt $versionInfo.Highest)
-                        {
-                            $versionInfo.Highest = $currentVersion
-                        }
-
-                        if ($versionInfo.Lowest -eq "")
-                        {
-                            $versionInfo.Lowest = $version
-                        }
-                        else
-                        {
-                            if ($version -lt $versionInfo.Lowest) {
-                                $versionInfo.Lowest = $version
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $versionInfo
-    }
-    return $result
-}

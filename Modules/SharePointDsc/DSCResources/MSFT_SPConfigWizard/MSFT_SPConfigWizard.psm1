@@ -37,13 +37,13 @@ function Get-TargetResource
     if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
     {
         return @{
-            RunConfigWizard = $true
+            Ensure = "Absent"
             DatabaseUpgradeDays = $DatabaseUpgradeDays
             DatabaseUpgradeTime = $DatabaseUpgradeTime
         }
     } else {
         return @{
-            RunConfigWizard = $false
+            Ensure = "Present"
             DatabaseUpgradeDays = $DatabaseUpgradeDays
             DatabaseUpgradeTime = $DatabaseUpgradeTime
         }
@@ -138,9 +138,9 @@ function Set-TargetResource
         Write-Verbose "No DatabaseUpgradeTime specified, Configuration Wizard can be ran at any time. Starting wizard."
     }
 
-    if ($RunConfigWizard -eq $false)
+    if ($Ensure -eq $false)
     {
-        Write-Verbose -Message "RunConfigWizard is set to False, so running the Configuration Wizard is not required"
+        Write-Verbose -Message "Ensure is set to Absent, so running the Configuration Wizard is not required"
         return
     }
 
@@ -151,13 +151,20 @@ function Set-TargetResource
     } else {
         $binaryDir = Join-Path $env:CommonProgramFiles "Microsoft Shared\Web Server Extensions\16\BIN"
     }
+    $psconfigExe = Join-Path -Path $binaryDir -ChildPath "psconfig.exe"
 
     # Start wizard
     Write-Verbose -Message "Starting Configuration Wizard"
-    $psconfigExe = Join-Path -Path $binaryDir -ChildPath "setup.exe"
-    $psconfig = Start-Process -FilePath $psconfigExe -ArgumentList "-cmd upgrade -inplace b2b -wait -force" -Wait -PassThru
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $psconfigExe `
+                                  -ScriptBlock {
+        $psconfigExe = $args[0]
+        $psconfig = Start-Process -FilePath $psconfigExe -ArgumentList "-cmd upgrade -inplace b2b -wait -force" -Wait -PassThru
 
-    switch ($psconfig.ExitCode)
+        return $psconfig.ExitCode
+    }
+
+    switch ($result)
     {
         0 {  
             Write-Verbose -Message "SharePoint Post Setup Configuration Wizard ran successfully"
@@ -190,9 +197,9 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] $InstallAccount
     )
 
-    if ($RunConfigWizard -eq $false)
+    if ($Ensure -eq "Absent")
     {
-        Write-Verbose -Message "RunConfigWizard is set to False, so running the Configuration Wizard is not required"
+        Write-Verbose -Message "Ensure is set to Absent, so running the Configuration Wizard is not required"
         return $true
     }
 
@@ -200,7 +207,9 @@ function Test-TargetResource
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
-    return -not($currentValues.RunConfigWizard)
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
