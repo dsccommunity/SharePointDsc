@@ -5,5 +5,5 @@ class MSFT_SPWebAppWorkflowSettings : OMI_BaseResource
     [Write, Description("Are external workflow participants enabled in the web app")] boolean ExternalWorkflowParticipantsEnabled;
     [Write, Description("Are user defined workflows enabled in this web app")] boolean UserDefinedWorkflowsEnabled;
     [Write, Description("Are documents sent via email to external participants of workflow")] boolean EmailToNoPermissionWorkflowParticipantsEnable;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };
