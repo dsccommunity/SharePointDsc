@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Fixed issue with SPSearchTopology that occurs on Get resource with a single server farm returning string instead of array of strings
  * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
  * Added ProxyName parameter to all service application resources
  * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs

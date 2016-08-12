@@ -47,6 +47,18 @@ function Get-TargetResource
         $params = $args[0]
         $ConfirmPreference = 'None'
 
+        $Configuration = @{
+            ServiceAppName = $params.ServiceAppName
+            Admin = $params.Admin
+            Crawler = $params.Crawler
+            ContentProcessing = $params.ContentProcessing
+            AnalyticsProcessing = $params.AnalyticsProcessing
+            QueryProcessing = $params.QueryProcessing
+            IndexPartition = $params.IndexPartition
+            FirstPartitionDirectory = $params.FirstPartitionDirectory
+            InstallAccount = $params.InstallAccount
+        }
+
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName  
         
         if ($null -eq $ssa) 
@@ -130,18 +142,21 @@ function Get-TargetResource
                             }
         
         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-        
-        return @{
-            ServiceAppName = $params.ServiceAppName
-            Admin = $AdminComponents -replace ".$domain"
-            Crawler = $CrawlComponents -replace ".$domain"
-            ContentProcessing = $ContentProcessingComponents -replace ".$domain"
-            AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
-            QueryProcessing = $QueryProcessingComponents -replace ".$domain"
-            InstallAccount = $params.InstallAccount
-            FirstPartitionDirectory = $params.FirstPartitionDirectory
-            IndexPartition = $IndexComponents -replace ".$domain"
-        }
+
+        $Configuration.Admin = $AdminComponents -replace ".$domain"
+        if ('string' -eq $Configuration.Admin.GetType()) {$Configuration.Admin = @($Configuration.Admin)}
+        $Configuration.Crawler = $CrawlComponents -replace ".$domain"
+        if ('string' -eq $Configuration.Crawler.GetType()) {$Configuration.Crawler = @($Configuration.Crawler)}
+        $Configuration.ContentProcessing = $ContentProcessingComponents -replace ".$domain"
+        if ('string' -eq $Configuration.ContentProcessing.GetType()) {$Configuration.ContentProcessing = @($Configuration.ContentProcessing)}
+        $Configuration.AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
+        if ('string' -eq $Configuration.AnalyticsProcessing.GetType()) {$Configuration.AnalyticsProcessing = @($Configuration.AnalyticsProcessing)}
+        $Configuration.QueryProcessing = $QueryProcessingComponents -replace ".$domain"
+        if ('string' -eq $Configuration.QueryProcessing.GetType()) {$Configuration.QueryProcessing = @($Configuration.QueryProcessing)} 
+        $Configuration.IndexPartition = $IndexComponents -replace ".$domain"
+        if ('string' -eq $Configuration.IndexPartition.GetType()) {$Configuration.IndexPartition = @($Configuration.IndexPartition)}
+
+        return $Configuration
     }
     return $result
 }
