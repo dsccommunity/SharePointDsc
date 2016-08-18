@@ -1,25 +1,3 @@
-/*
-**Description**
-
-This resource is used to install the SharePoint binaries.
-The BinaryDir parameter should point to the path that setup.exe is located (not to setup.exe itself).
-The ProductKey parameter is used to inject in to the configuration file and validate the license key during the installation process. 
-This module depends on the prerequisites already being installed, which can be done through the use of [SPInstallPreReqs](SPInstallPreReqs).
-
-**Example**
-
-    SPProductUpdate InstallCUMay2016
-    {
-        SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
-        ShutdownServices     = $true
-        BinaryInstallDays    = "sat", "sun"
-        BinaryInstallTime    = "12:00am to 2:00am"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SetupAccount
-    }
-
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPProductUpdate")]
 class MSFT_SPProductUpdate : OMI_BaseResource
 {
