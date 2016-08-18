@@ -12,7 +12,6 @@ $Global:CurrentSharePointStubModule = $SharePointCmdletModule
 $ModuleName = "MSFT_SPProductUpdate"
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1") -Force
-#Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.ProductUpdate\SPProductUpdate.psm1") -Force
 
 Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     InModuleScope $ModuleName {
@@ -72,18 +71,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = $versionBeingTested
-                        FileDescription = "Cumulative Update"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = $versionBeingTested
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = $versionBeingTested
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -100,7 +121,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -151,18 +179,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Cumulative Update"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -179,7 +229,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -235,18 +292,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Cumulative Update"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -263,7 +342,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -319,18 +405,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Cumulative Update"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Cumulative Update"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -347,7 +455,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -403,18 +518,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = $versionBeingTested
-                        FileDescription = "Service Pack"
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = $versionBeingTested
+                            FileDescription = "Service Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
                     }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = $versionBeingTested
+                            FileDescription = "Service Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    }
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -431,7 +568,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -482,18 +626,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Service Pack"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Service Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Service Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-en-us.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -510,7 +676,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -566,18 +739,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = $versionBeingTested
-                        FileDescription = "Service Pack Language Pack"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = $versionBeingTested
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = $versionBeingTested
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -594,7 +789,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -645,18 +847,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Service Pack Language Pack"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-nl-nl.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-nl-nl.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -673,7 +897,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -729,18 +960,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Service Pack Language Pack"
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64.exe"
                     }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64.exe"
-                } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -757,7 +1010,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -803,18 +1063,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Service Pack Language Pack"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-ab-yz.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-ab-yz.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-ab-yz.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -831,7 +1113,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -877,18 +1166,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Service Pack Language Pack"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
@@ -905,7 +1216,14 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-SPDscFarmProductsInfo {
-                return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                }
             }
             
             Mock Get-SPDscFarmVersionInfo {
@@ -951,18 +1269,40 @@ Describe "SPProductUpdate - SharePoint Build $((Get-Item $SharePointCmdletModule
             }
             
             Mock Get-ItemProperty {
-                return @{
-                    VersionInfo = @{
-                        FileVersion = "15.0.8000"
-                        FileDescription = "Service Pack Language Pack"
-                    }
-                    Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
-                } 
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2013-kb2880554-fullfile-x64-fr-fr.exe"
+                    } 
+                }
+                else 
+                {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "16.0.8000"
+                            FileDescription = "Service Pack Language Pack"
+                        }
+                        Name = "serverlpksp2016-kb2880554-fullfile-x64-fr-fr.exe"
+                    } 
+                }
             }
 
             Mock Get-SPDSCInstalledProductVersion {
-                return @{
-                    FileMajorPart = 15
+                if ($majorBuildNumber -eq  15)
+                {
+                    return @{
+                        FileMajorPart = 15
+                    }
+                }
+                else 
+                {
+                    return @{
+                        FileMajorPart = 16
+                    }
                 }
             }
 
