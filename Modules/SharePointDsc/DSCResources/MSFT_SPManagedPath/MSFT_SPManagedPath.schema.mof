@@ -1,23 +1,3 @@
-/*
-**Description**
-
-This resource is responsible for creating managed paths associated with a specific web application. 
-The WebAppUrl parameter is used to specify the web application to create the path against, and the RelativeUrl parameter lets you set the URL.
-Explicit when set to true will create an explicit inclusion path, if set to false the path is created as wildcard inclusion.
-If you are using host named site collections set HostHeader to true and the path will be created as a host header path to be applied for host named site collections.
-
-**Example**
-
-    SPManagedPath TeamsManagedPath 
-    {
-        WebAppUrl      = "http://sharepoint.contoso.com"
-        InstallAccount = $InstallAccount
-        RelativeUrl    = "teams"
-        Explicit       = $false
-        Ensure         = "Present"
-        HostHeader     = $true
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPManagedPath")]
 class MSFT_SPManagedPath : OMI_BaseResource
 {
@@ -26,5 +6,5 @@ class MSFT_SPManagedPath : OMI_BaseResource
     [Required, Description("Should the host header be explicit? If false then it is a wildcard")] boolean Explicit;
     [Required, Description("Is this a host header web application?")] boolean HostHeader;
     [Write, Description("Present ensures managed path exists, absent ensures it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

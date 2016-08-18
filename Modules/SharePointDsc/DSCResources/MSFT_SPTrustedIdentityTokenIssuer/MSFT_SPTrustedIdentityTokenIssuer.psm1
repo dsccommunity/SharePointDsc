@@ -9,7 +9,7 @@
         [parameter(Mandatory = $true)]  [String]   $Realm,
         [parameter(Mandatory = $true)]  [String]   $SignInUrl,
         [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Object[]] $ClaimsMappings,
+        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
         [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",
@@ -74,7 +74,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  [String]   $Realm,
         [parameter(Mandatory = $true)]  [String]   $SignInUrl,
         [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Object[]] $ClaimsMappings,
+        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
         [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",
@@ -101,12 +101,18 @@ function Set-TargetResource
                 }
                 
                 $claimsMappingsArray = @()
-                $params.ClaimsMappings| Foreach-Object{
+                $params.ClaimsMappings| Foreach-Object {
                     $runParams = @{}
-                    $runParams.Add("IncomingClaimTypeDisplayName", $_["Name"])
-                    $runParams.Add("IncomingClaimType", $_["IncomingClaimType"])
-                    if (!$_["LocalClaimType"]) { $runParams.Add("LocalClaimType", $_["IncomingClaimType"]) }
-                    else { $runParams.Add("LocalClaimType", $_["LocalClaimType"]) }
+                    $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
+                    $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
+                    if ($null -eq $_.LocalClaimType) 
+                    { 
+                        $runParams.Add("LocalClaimType", $_.IncomingClaimType) 
+                    }
+                    else 
+                    { 
+                        $runParams.Add("LocalClaimType", $_.LocalClaimType) 
+                    }
                     $claimsMappingsArray = $claimsMappingsArray + (New-SPClaimTypeMapping @runParams)
                 }
 
@@ -174,7 +180,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  [String]   $Realm,
         [parameter(Mandatory = $true)]  [String]   $SignInUrl,
         [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Object[]] $ClaimsMappings,
+        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
         [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
         [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
                                         [String]   $Ensure = "Present",

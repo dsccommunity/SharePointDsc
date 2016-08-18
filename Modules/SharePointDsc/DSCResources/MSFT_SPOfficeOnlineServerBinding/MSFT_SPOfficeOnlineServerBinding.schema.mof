@@ -1,12 +1,4 @@
 /*
-**Description**
-
-This resource will create a binding to an Office Online Server (formerly known as Office Web Apps). 
-The DnsName property can be a single server name, or a FQDN of a load balanced end point that will direct traffic to a farm.
-
-NOTE: This resource is designed to be used where all WOPI bindings will be targeted to the same Office Online Server farm.
-If used on a clean environment, the new bindings will all point to the one DNS Name.
-If used on an existing configuration that does not follow this rule, it will match only the first DNS name it finds in the list of bindings.
 
 **Example**
 
@@ -24,5 +16,5 @@ class MSFT_SPOfficeOnlineServerBinding : OMI_BaseResource
     [Key, Description("The zone for this binding"), ValueMap{"Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS"}, Values{"Internal-HTTP","Internal-HTTPS","External-HTTP","External-HTTPS"}] string Zone;
     [Required, Description("The DNS name of the server/s that are running Office Web Apps")] string DnsName;
     [Write, Description("Present ensures the binding for this zone exists, absent ensures it doesn't"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

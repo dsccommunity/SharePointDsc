@@ -1,25 +1,3 @@
-/*
-**Description**
-
-This resource will ensure a specifc user profile sync connection is in place and that it is configured accordingly to its definition
-
-This resource currently supports AD only.
-**Example**
-
-  SPUserProfileSyncConnection MainDomain
-    {
-        UserProfileService = "User Profile Service Application"
-        Forest = "contoso.com"
-        Name = "Contoso"
-        ConnectionCredentials = $connectionCredential
-        Server = "server.contoso.com"
-        UseSSL = $false
-        IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
-        ExcludedOUs = @("OU=Notes Usersa,DC=Contoso,DC=com")
-        Force = $false
-        ConnectionType = "ActiveDirectory"
-}
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileSyncConnection")]
 class MSFT_SPUserProfileSyncConnection : OMI_BaseResource
 {   
@@ -33,5 +11,5 @@ class MSFT_SPUserProfileSyncConnection : OMI_BaseResource
     [Write, Description("Should SSL be used for the connection")] boolean UseSSL;
     [Write, Description("Set to true to run the set method on every call to this resource")] boolean Force;
     [Write, Description("The type of the connection - currently only Active Directory is supported"), ValueMap{"ActiveDirectory","BusinessDataCatalog"}, Values{"ActiveDirectory","BusinessDataCatalog"}] string ConnectionType;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

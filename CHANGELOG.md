@@ -1,6 +1,13 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
+ * Added ProxyName parameter to all service application resources
+ * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
+ * Fixed typos in documentation for InstallAccount parameter on most resources
+ * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
+
+### 1.2
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
  * Minor tweaks to the PowerShell module manifest
@@ -9,11 +16,13 @@
  * Added better logging to all test method output to make it clear what property is causing a test to fail
  * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+ * Fixed the use of plural nouns in cmdlet names within the module
  * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall
- * Added SPTrustedIdentityTokenIssuer and SPRemoteFarmTrust resources
- * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out 
+ * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
+ * Added HostHeader parameter in examples for Web Application, so subsequent web applications won't error out
+ * Prevented SPCreateFarm and SPJoinFarm from executing set methods where the local server is already a member of a farm 
 
 ### 1.1
 
