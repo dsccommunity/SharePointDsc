@@ -8,6 +8,6 @@ class MSFT_SPContentDatabase : OMI_BaseResource
     [Write, Description("Specify the site collection warning limit for the content database")] Uint16 WarningSiteCount;
     [Write, Description("Specify the site collection maximum limit for the content database")] Uint16 MaximumSiteCount;
     [Write, Description("Present to create this database, absent to ensure it does not exist"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

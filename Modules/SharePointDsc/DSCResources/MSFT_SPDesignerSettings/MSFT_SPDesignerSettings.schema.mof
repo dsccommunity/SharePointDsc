@@ -10,6 +10,6 @@ class MSFT_SPDesignerSettings : OMI_BaseResource
     [Write, Description("Allow users to create declarative workflows with SharePoint Designer")] Boolean AllowCreateDeclarativeWorkflow;
     [Write, Description("Allow users to save and re-publish declarative workflows with SharePoint Designer")] Boolean AllowSavePublishDeclarativeWorkflow;
     [Write, Description("Allow users to save declarative workflows as a template from SharePoint Designer")] Boolean AllowSaveDeclarativeWorkflowAsTemplate;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
