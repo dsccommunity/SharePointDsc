@@ -59,13 +59,20 @@ function Get-TargetResource
             throw "Update does not contain the language code in the correct format."
         }
 
-        $cultureInfo = New-Object System.Globalization.CultureInfo($language)
+        try
+        {
+            $cultureInfo = New-Object System.Globalization.CultureInfo($language)
+        }
+        catch {
+            throw "Error while converting language information: $language"
+        }
 
+        # try/catch is required for some versions of Windows, other version use the LCID value of 4096
         if ($cultureInfo.LCID -eq 4096)
         {
             throw "Error while converting language information: $language"
         }
-
+        
         # Extract English name of the language code
         if ($cultureInfo.EnglishName -match "(\w*) \(\w*\)")
         {
