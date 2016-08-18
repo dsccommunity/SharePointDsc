@@ -30,7 +30,7 @@ Describe "SPServiceInstance - SharePoint Build $((Get-Item $SharePointCmdletModu
         Mock Stop-SPServiceInstance { }
 
         Context "The service instance is not running but should be" {
-            Mock Get-SPServiceInstance { return $null }
+            Mock Get-SPServiceInstance { return @() }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"

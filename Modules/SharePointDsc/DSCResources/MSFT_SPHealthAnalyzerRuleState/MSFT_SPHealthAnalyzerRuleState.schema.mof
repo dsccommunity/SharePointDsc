@@ -1,8 +1,4 @@
 /*
-**Description**
-
-This resource is used to configure Health Analyzer rules for the local farm.
-The resource is able to enable/disable and configure the specified rule.
 
 **Example**
 
@@ -25,6 +21,6 @@ class MSFT_SPHealthAnalyzerRuleState : OMI_BaseResource
     [Write, Description("What is the scope of this rule"), ValueMap{"All Servers","Any Server"}, Values{"All Servers","Any Server"}] String RuleScope;
     [Write, Description("How often should the rule check"), ValueMap{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}, Values{"Hourly","Daily","Weekly","Monthly","OnDemandOnly"}] String Schedule;
     [Write, Description("Should the rule fix itself automatically")] Boolean FixAutomatically;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

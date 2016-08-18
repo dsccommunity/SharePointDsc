@@ -1,24 +1,3 @@
-/*
-**Description**
-
-This resource will provision a SPWeb based on the settings that are passed through. 
-These settings map to the New-SPWeb cmdlet and accept the same values and types. 
-
-**Example**
-
-    SPWeb TeamSite
-    {
-        Url                      = "http://sharepoint.contoso.com/sites/site/subweb"
-        Name                     = "Team Sites"
-        Ensure                   = "Present"
-        Description              = "A place to share documents with your team."
-        Template                 = "STS#0"
-        Language                 = 1033
-        AddToTopNav              = $true
-        PsDscRunAsCredential     = $InstallAccount
-    }
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPWeb")]
 class MSFT_SPWeb : OMI_BaseResource
 {
@@ -32,5 +11,5 @@ class MSFT_SPWeb : OMI_BaseResource
     [Write, Description("True if the web should use the parent nav bar, otherwise false.")] Boolean UseParentTopNav;
     [Write, Description("True if the web should be in the quick launch of the parent web, otherwise false.")] Boolean AddToQuickLaunch;
     [Write, Description("True if the web should be added to the top nav bar of the parent web, otherwise false.")] Boolean AddToTopNav;    
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

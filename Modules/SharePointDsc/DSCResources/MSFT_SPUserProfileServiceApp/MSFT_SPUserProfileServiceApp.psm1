@@ -5,6 +5,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
@@ -59,21 +60,27 @@ function Get-TargetResource
             } else {
                 $farmAccount = $spFarm.DefaultServiceAccount.Name
             }
-
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }
             return @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                FarmAccount = $farmAccount
+                Name               = $serviceApp.DisplayName
+                ProxyName          = $proxyName
+                ApplicationPool    = $serviceApp.ApplicationPool.Name
+                FarmAccount        = $farmAccount
                 MySiteHostLocation = $params.MySiteHostLocation
-                ProfileDBName = $databases.ProfileDatabase.Name
-                ProfileDBServer = $databases.ProfileDatabase.Server.Name
-                SocialDBName = $databases.SocialDatabase.Name
-                SocialDBServer = $databases.SocialDatabase.Server.Name
-                SyncDBName = $databases.SynchronizationDatabase.Name
-                SyncDBServer = $databases.SynchronizationDatabase.Server.Name
-                InstallAccount = $params.InstallAccount
-                EnableNetBIOS = $serviceApp.NetBIOSDomainNamesEnabled
-                Ensure = "Present"
+                ProfileDBName      = $databases.ProfileDatabase.Name
+                ProfileDBServer    = $databases.ProfileDatabase.Server.Name
+                SocialDBName       = $databases.SocialDatabase.Name
+                SocialDBServer     = $databases.SocialDatabase.Server.Name
+                SyncDBName         = $databases.SynchronizationDatabase.Name
+                SyncDBServer       = $databases.SynchronizationDatabase.Server.Name
+                InstallAccount     = $params.InstallAccount
+                EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
+                Ensure             = "Present"
             }
         }
     }
@@ -86,6 +93,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,
@@ -133,12 +141,15 @@ function Set-TargetResource
             $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBName" -newName "ProfileSyncDBName"
             $params = Rename-SPDSCParamValue -params $params -oldName "SyncDBServer" -newName "ProfileSyncDBServer"
 
+            if ($params.ContainsKey("ProxyName")) { $pName = $params.ProxyName ; $params.Remove("ProxyName") | Out-Null }
+            if ($null -eq $pName) {$pName = "$($params.Name) Proxy"}
+
             $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
             $app =$serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps) { 
                 $app = New-SPProfileServiceApplication @params
                 if ($null -ne $app) {
-                    New-SPProfileServiceApplicationProxy -Name "$($params.Name) Proxy" -ServiceApplication $app -DefaultProxyGroup
+                    New-SPProfileServiceApplicationProxy -Name $pName -ServiceApplication $app -DefaultProxyGroup
                 }
             }
             if($app.NetBIOSDomainNamesEnabled -ne $enableNetBIOS){
@@ -176,6 +187,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $FarmAccount,
         [parameter(Mandatory = $false)] [System.String] $MySiteHostLocation,

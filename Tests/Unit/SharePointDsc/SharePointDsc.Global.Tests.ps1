@@ -1,4 +1,6 @@
 [CmdletBinding()]
+# Ignoring this because we need to generate a stub credential to return up the current crawl account as a PSCredential
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
@@ -6,7 +8,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-Import-Module "$PSScriptRoot\SharePointDsc.TestHelpers.psm1"
+Import-Module "$RepoRoot\DscResource.DocumentationHelper"
 
 Describe 'SharePointDsc whole of module tests' {
 
@@ -45,14 +47,52 @@ Describe 'SharePointDsc whole of module tests' {
             }
             $mofFilesWithRequiredEnsure | Should Be 0
         }
+    }
 
-        It "uses MOF schemas that match the functions used in the corresponding PowerShell module for each resource" {
-            $filesWithErrors = 0
-            $WarningPreference = "Continue"
-            $mofFiles | ForEach-Object -Process {
-                if ((Assert-MofSchemaScriptParameters $_.FullName) -eq $false) { $filesWithErrors++ }
+    Context "Validate example files" {
+        
+        It "should compile MOFs for all examples correctly" {
+            $examplesWithErrors = 0
+            $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
+            $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("username", $dummyPassword)
+            $configData = @{
+                AllNodes = @(
+                    @{
+                        NodeName = "localhost"
+                        PSDscAllowPlainTextPassword = $true
+                    },
+                    @{
+                        NodeName = "Server1"
+                        PSDscAllowPlainTextPassword = $true
+                    },
+                    @{
+                        NodeName = "Server2"
+                        PSDscAllowPlainTextPassword = $true
+                    }
+                )
             }
-            $filesWithErrors | Should Be 0
+            
+            Get-ChildItem "$RepoRoot\Modules\SharePointDsc\Examples" -Filter "*.ps1" -Recurse | ForEach-Object -Process {
+                    $path = $_.FullName
+                    try
+                    {
+                        . $path
+ 
+                        $command = Get-Command Example
+                        $params = @{}
+                        $command.Parameters.Keys | Where-Object { $_ -like "*Account" -or $_ -eq "Passphrase" } | ForEach-Object -Process {
+                            $params.Add($_, $mockCredential)
+                        }
+                        Example @params -OutputPath "TestDrive:\" -ConfigurationData $configData -ErrorAction Continue -WarningAction SilentlyContinue | Out-Null
+                    }
+                    catch
+                    {
+                        $examplesWithErrors ++
+                        Write-Warning -Message "Unable to compile MOF for example '$path'"
+                        Write-Warning $_.Exception.Message
+                    }
+                } 
+            $examplesWithErrors | Should Be 0    
         }
     }
 }
