@@ -38,17 +38,17 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 }
             }
 
-            Mock Start-Process { @{ ExitCode = 0 }}
+            Mock Start-Process { return @{ ExitCode = 0 }}
 
-            It "return Ensure=Absent from the get method" {
+            It "should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "runs Start-Process in the set method" {
+            It "should run Start-Process in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
             }
@@ -64,15 +64,15 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
 
             Mock Start-Process { @{ ExitCode = 0 }}
 
-            It "return Ensure=Absent from the get method" {
+            It "should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "runs Start-Process in the set method" {
+            It "should run Start-Process in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
             }
@@ -97,15 +97,15 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
                  return $testDate
             }
 
-            It "return Ensure=Absent from the get method" {
+            It "should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "runs Start-Process in the set method" {
+            It "should run Start-Process in the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
@@ -113,7 +113,7 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
         Context "Current date outside Upgrade Time" {
             $testParams = @{
                 Ensure              = "Present"
-                DatabaseUpgradeDays = "mon"
+                DatabaseUpgradeDays = "sun"
                 DatabaseUpgradeTime = "3:00am to 5:00am"
             }
             
@@ -130,16 +130,108 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
                  return $testDate
             }
 
-            It "return Ensure=Absent from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-            }
-
-            It "returns false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "runs Start-Process in the set method" {
+            It "should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
+            }
+        }
+
+        Context "Upgrade Time incorrectly formatted" {
+            $testParams = @{
+                Ensure              = "Present"
+                DatabaseUpgradeDays = "sun"
+                DatabaseUpgradeTime = "error 3:00am to 5:00am"
+            }
+            
+            Mock Get-SPDSCRegistryKey {
+                if ($Value -eq "SetupType")
+                {
+                    return "B2B_UPGRADE"
+                }
+            }
+
+            $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+
+            Mock Get-Date {
+                 return $testDate
+            }
+
+            It "should return exception from the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
+            }
+        }
+
+        Context "Start time Upgrade Time incorrectly formatted" {
+            $testParams = @{
+                Ensure              = "Present"
+                DatabaseUpgradeDays = "sun"
+                DatabaseUpgradeTime = "3:00xm to 5:00am"
+            }
+            
+            Mock Get-SPDSCRegistryKey {
+                if ($Value -eq "SetupType")
+                {
+                    return "B2B_UPGRADE"
+                }
+            }
+
+            $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+
+            Mock Get-Date {
+                 return $testDate
+            }
+
+            It "should return exception from the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Error converting start time"
+            }
+        }
+
+        Context "End time Upgrade Time incorrectly formatted" {
+            $testParams = @{
+                Ensure              = "Present"
+                DatabaseUpgradeDays = "sun"
+                DatabaseUpgradeTime = "3:00am to 5:00xm"
+            }
+            
+            Mock Get-SPDSCRegistryKey {
+                if ($Value -eq "SetupType")
+                {
+                    return "B2B_UPGRADE"
+                }
+            }
+
+            $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+
+            Mock Get-Date {
+                 return $testDate
+            }
+
+            It "should return exception from the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Error converting end time"
+            }
+        }
+
+        Context "Start time of Upgrade Time larger than end time" {
+            $testParams = @{
+                Ensure              = "Present"
+                DatabaseUpgradeDays = "sun"
+                DatabaseUpgradeTime = "3:00pm to 5:00am"
+            }
+            
+            Mock Get-SPDSCRegistryKey {
+                if ($Value -eq "SetupType")
+                {
+                    return "B2B_UPGRADE"
+                }
+            }
+
+            $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
+
+            Mock Get-Date {
+                 return $testDate
+            }
+
+            It "should return exception from the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
             }
         }
 
@@ -153,15 +245,15 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
 
             Mock Start-Process { @{ ExitCode = -1 }}
 
-            It "return Ensure=Absent from the get method" {
+            It "should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throw exception in the set method" {
+            It "should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint Post Setup Configuration Wizard failed, exit code was"
             }
         }
@@ -177,15 +269,15 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
 
             Mock Start-Process { @{ ExitCode = 0 }}
 
-            It "return Ensure=Present from the get method" {
+            It "should return Ensure=Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            It "returns null from the set method" {
+            It "should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }

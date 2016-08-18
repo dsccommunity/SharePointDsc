@@ -36,6 +36,7 @@ function Get-TargetResource
     {
         throw "Setup file cannot be found."
     }
+
     $setupFileInfo = Get-ItemProperty $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose "Update has version $fileVersion"
@@ -58,11 +59,9 @@ function Get-TargetResource
             throw "Update does not contain the language code in the correct format."
         }
 
-        try
-        {
-            $cultureInfo = New-Object System.Globalization.CultureInfo($language)
-        }
-        catch
+        $cultureInfo = New-Object System.Globalization.CultureInfo($language)
+
+        if ($cultureInfo.LCID -eq 4096)
         {
             throw "Error while converting language information: $language"
         }
@@ -199,7 +198,7 @@ function Set-TargetResource
     }
     else
     {
-        Write-Verbose "No BinaryInstallDays specified, Update can be ran on any day."
+        Write-Verbose -Message "No BinaryInstallDays specified, Update can be ran on any day."
     }
 
     # Check if BinaryInstallTime parameter exists
@@ -315,7 +314,7 @@ function Set-TargetResource
         Set-Service -Name "IISADMIN" -StartupType Disabled
         Set-Service -Name "SPTimerV4" -StartupType Disabled
 
-        iisreset -stop -noforce 
+        $iisreset = Start-Process -FilePath "iisreset.exe" -ArgumentList "-stop -noforce" -Wait -PassThru
 
         $timerSvc = Get-Service "SPTimerV4"
         if($timerSvc.Status -eq "Running")
@@ -361,7 +360,7 @@ function Set-TargetResource
         $timerSvc = Get-Service "SPTimerV4"
         $timerSvc.Start()
 
-        iisreset -start
+        $iisreset = Start-Process -FilePath "iisreset.exe" -ArgumentList "-start" -Wait -PassThru
 
         $osearchSvc        = Get-Service "OSearch15" 
         $hostControllerSvc = Get-Service "SPSearchHostController" 
