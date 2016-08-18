@@ -5,6 +5,7 @@
  * Added ProxyName parameter to all service application resources
  * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
  * Fixed typos in documentation for InstallAccount parameter on most resources
+ * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
 
 ### 1.2
 
