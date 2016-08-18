@@ -314,7 +314,10 @@ function Set-TargetResource
         Set-Service -Name "IISADMIN" -StartupType Disabled
         Set-Service -Name "SPTimerV4" -StartupType Disabled
 
-        $iisreset = Start-Process -FilePath "iisreset.exe" -ArgumentList "-stop -noforce" -Wait -PassThru
+        $iisreset = Start-Process -FilePath "iisreset.exe" `
+                                  -ArgumentList "-stop -noforce" `
+                                  -Wait `
+                                  -PassThru
 
         $timerSvc = Get-Service "SPTimerV4"
         if($timerSvc.Status -eq "Running")
@@ -330,7 +333,10 @@ function Set-TargetResource
                                   -ScriptBlock {
         $setupFile = $args[0]
 
-        $setup = Start-Process -FilePath $setupFile -ArgumentList "/quiet /passive" -Wait -PassThru
+        $setup = Start-Process -FilePath $setupFile `
+                               -ArgumentList "/quiet /passive" `
+                               -Wait `
+                               -PassThru
 
         # Error codes: https://technet.microsoft.com/en-us/library/cc179058%28v=office.14%29.aspx?f=255&MSPPError=-2147217396
         switch ($setup.ExitCode) {
@@ -360,7 +366,10 @@ function Set-TargetResource
         $timerSvc = Get-Service "SPTimerV4"
         $timerSvc.Start()
 
-        $iisreset = Start-Process -FilePath "iisreset.exe" -ArgumentList "-start" -Wait -PassThru
+        $iisreset = Start-Process -FilePath "iisreset.exe" `
+                                  -ArgumentList "-start" `
+                                  -Wait `
+                                  -PassThru
 
         $osearchSvc        = Get-Service "OSearch15" 
         $hostControllerSvc = Get-Service "SPSearchHostController" 

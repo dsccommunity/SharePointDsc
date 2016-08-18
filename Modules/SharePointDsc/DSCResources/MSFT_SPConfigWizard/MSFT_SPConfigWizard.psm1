@@ -33,7 +33,8 @@ function Get-TargetResource
     $languagePackInstalled = Get-SPDSCRegistryKey $wssRegKey "LanguagePackInstalled"
     $setupType = Get-SPDSCRegistryKey $wssRegKey "SetupType"
 
-    # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade. If so, the Config Wizard is required
+    # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
+    # If so, the Config Wizard is required
     if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
     {
         return @{
@@ -80,17 +81,20 @@ function Set-TargetResource
 
         if ($DatabaseUpgradeDays -contains $currentDayOfWeek)
         {
-            Write-Verbose "Current day is present in the parameter DatabaseUpgradeDays. Configuration wizard can be run today."
+            Write-Verbose ("Current day is present in the parameter DatabaseUpgradeDays. " + `
+                           "Configuration wizard can be run today.")
         }
         else
         {
-            Write-Verbose "Current day is not present in the parameter DatabaseUpgradeDays, skipping the Configuration Wizard"
+            Write-Verbose ("Current day is not present in the parameter DatabaseUpgradeDays, " + `
+                           "skipping the Configuration Wizard")
             return
         }
     }
     else
     {
-        Write-Verbose "No DatabaseUpgradeDays specified, Configuration Wizard can be ran on any day."
+        Write-Verbose ("No DatabaseUpgradeDays specified, Configuration Wizard can be " + `
+                       "ran on any day.")
     }
 
     # Check if DatabaseUpdateTime parameter exists
@@ -125,22 +129,26 @@ function Set-TargetResource
 
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
-            Write-Verbose "Current time is inside of the window specified in DatabaseUpgradeTime. Starting wizard"
+            Write-Verbose ("Current time is inside of the window specified in " + `
+                           "DatabaseUpgradeTime. Starting wizard")
         }
         else
         {
-            Write-Verbose "Current time is outside of the window specified in DatabaseUpgradeTime, skipping the Configuration Wizard"
+            Write-Verbose ("Current time is outside of the window specified in " + `
+                           "DatabaseUpgradeTime, skipping the Configuration Wizard")
             return
         }
     }
     else
     {
-        Write-Verbose "No DatabaseUpgradeTime specified, Configuration Wizard can be ran at any time. Starting wizard."
+        Write-Verbose ("No DatabaseUpgradeTime specified, Configuration Wizard can be " + `
+                       "ran at any time. Starting wizard.")
     }
 
     if ($Ensure -eq $false)
     {
-        Write-Verbose -Message "Ensure is set to Absent, so running the Configuration Wizard is not required"
+        Write-Verbose -Message ("Ensure is set to Absent, so running the Configuration " + `
+                                "Wizard is not required")
         return
     }
 
@@ -159,7 +167,10 @@ function Set-TargetResource
                                   -Arguments $psconfigExe `
                                   -ScriptBlock {
         $psconfigExe = $args[0]
-        $psconfig = Start-Process -FilePath $psconfigExe -ArgumentList "-cmd upgrade -inplace b2b -wait -force" -Wait -PassThru
+        $psconfig = Start-Process -FilePath $psconfigExe `
+                                  -ArgumentList "-cmd upgrade -inplace b2b -wait -force" `
+                                  -Wait `
+                                  -PassThru
 
         return $psconfig.ExitCode
     }
@@ -170,7 +181,8 @@ function Set-TargetResource
             Write-Verbose -Message "SharePoint Post Setup Configuration Wizard ran successfully"
         }
         Default {
-            throw "SharePoint Post Setup Configuration Wizard failed, exit code was $($setup.ExitCode)"
+            throw ("SharePoint Post Setup Configuration Wizard failed, " + `
+                   "exit code was $($setup.ExitCode)")
         }
     }
 }
@@ -199,7 +211,8 @@ function Test-TargetResource
 
     if ($Ensure -eq "Absent")
     {
-        Write-Verbose -Message "Ensure is set to Absent, so running the Configuration Wizard is not required"
+        Write-Verbose -Message ("Ensure is set to Absent, so running the Configuration Wizard " + `
+                                "is not required")
         return $true
     }
 
