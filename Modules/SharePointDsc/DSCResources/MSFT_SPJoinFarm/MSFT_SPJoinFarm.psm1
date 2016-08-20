@@ -172,7 +172,7 @@ function Set-TargetResource
         }
     }
 
-    if ($null -ne $result)
+    if ($null -eq $result)
     {
         Write-Verbose -Message "An error occured joining the farm"
         throw $_

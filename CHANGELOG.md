@@ -1,6 +1,8 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Fixed typo on return value in SPServiceAppProxyGroup
+ * Fixed comparison operator on set method of SPJoinFarm
  * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
  * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
  * Added ProxyName parameter to all service application resources
