@@ -164,7 +164,7 @@ function Set-TargetResource
             Install-SPHelpCollection -All
             Initialize-SPResourceSecurity
             Install-SPService
-            Install-SPFeature -AllExistingFeatures -Force 
+            Install-SPFeature -AllExistingFeatures -Force  | out-null 
             Install-SPApplicationContent    
         }
         catch [System.Exception] {
@@ -172,7 +172,7 @@ function Set-TargetResource
         }
     }
 
-    if ($null -eq $result)
+    if ($null -ne $result)
     {
         Write-Verbose -Message "An error occured joining the farm"
         throw $_
