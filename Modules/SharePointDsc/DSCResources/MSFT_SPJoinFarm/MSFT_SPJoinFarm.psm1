@@ -164,7 +164,7 @@ function Set-TargetResource
             Install-SPHelpCollection -All
             Initialize-SPResourceSecurity
             Install-SPService
-            Install-SPFeature -AllExistingFeatures -Force 
+            Install-SPFeature -AllExistingFeatures -Force  | out-null 
             Install-SPApplicationContent    
         }
         catch [System.Exception] {
