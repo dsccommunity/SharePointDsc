@@ -42,96 +42,87 @@ function Get-SPDscFarmVersionInfo()
     param
     (
         [parameter(Mandatory = $false)]
-        [System.String] $ProductToCheck
+        [System.String]
+        $ProductToCheck
     )
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $ProductToCheck `
-                                  -ScriptBlock {
-        $productToCheck = $args[0]
+    $farm = Get-SPFarm
+    $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+    $server = Get-SPServer $env:COMPUTERNAME
+    $versionInfo = @{}
+    $versionInfo.Highest = ""
+    $versionInfo.Lowest = ""
 
-        $farm = Get-SPFarm
-        $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
-        $server = Get-SPServer $env:COMPUTERNAME
-        $versionInfo = @{}
-        $versionInfo.Highest = ""
-        $versionInfo.Lowest = ""
+    $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
+    $products = $serverProductInfo.Products
 
-        $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
-        $products = $serverProductInfo.Products
-
-        if ($productToCheck)
+    if ($ProductToCheck)
+    {
+        $products = $products | Where-Object { $_ -eq $ProductToCheck }
+        if ($null -eq $products)
         {
-            $products = $products | Where-Object { $_ -eq $productToCheck }
-            if ($null -eq $products)
-            {
-                throw "Product not found: $productToCheck"
-            }
+            throw "Product not found: $ProductToCheck"
         }
+    }
 
-        # Loop through all products
-        foreach ($product in $products)
+    # Loop through all products
+    foreach ($product in $products)
+    {
+        #Write-Verbose -Verbose "Product: $product"
+        $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
+        $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
+
+        # Loop through all individual components within the product
+        foreach ($patchableUnit in $patchableUnits)
         {
-            #Write-Verbose -Verbose "Product: $product"
-            $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
-            $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
-
-            # Loop through all individual components within the product
-            foreach ($patchableUnit in $patchableUnits)
+            # Check if the displayname is the Proofing tools (always mentioned in first product,
+            # generates noise)
+            if (($patchableUnit -notmatch "Microsoft Server Proof") -and
+                ($patchableUnit -notmatch "SQL Express") -and
+                ($patchableUnit -notmatch "OMUI") -and
+                ($patchableUnit -notmatch "XMUI") -and
+                ($patchableUnit -notmatch "Project Server") -and
+                ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
             {
-                # Check if the displayname is the Proofing tools (always mentioned in first product,
-                # generates noise)
-                if (($patchableUnit -notmatch "Microsoft Server Proof") -and
-                    ($patchableUnit -notmatch "SQL Express") -and
-                    ($patchableUnit -notmatch "OMUI") -and
-                    ($patchableUnit -notmatch "XMUI") -and
-                    ($patchableUnit -notmatch "Project Server") -and
-                    ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
+                #Write-Verbose -Verbose "  - $patchableUnit"
+                $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
+                $currentVersion = ""
+                foreach ($patchableUnitInfo in $patchableUnitsInfo)
                 {
-                    #Write-Verbose -Verbose "  - $patchableUnit"
-                    $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
-                    $currentVersion = ""
-                    foreach ($patchableUnitInfo in $patchableUnitsInfo)
+                    # Loop through version of the patchableUnit
+                    $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
+
+                    # Check if the version of the patchableUnit is the highest for the installed product
+                    if ($currentVersion -gt $versionInfo.Highest)
                     {
-                        # Loop through version of the patchableUnit
-                        $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
+                        $versionInfo.Highest = $currentVersion
+                    }
 
-                        # Check if the version of the patchableUnit is the highest for the installed product
-                        if ($currentVersion -gt $versionInfo.Highest)
-                        {
-                            $versionInfo.Highest = $currentVersion
-                        }
-
-                        if ($versionInfo.Lowest -eq "")
-                        {
+                    if ($versionInfo.Lowest -eq "")
+                    {
+                        $versionInfo.Lowest = $currentVersion
+                    }
+                    else
+                    {
+                        if ($currentversion -lt $versionInfo.Lowest) {
                             $versionInfo.Lowest = $currentVersion
-                        }
-                        else
-                        {
-                            if ($currentversion -lt $versionInfo.Lowest) {
-                                $versionInfo.Lowest = $currentVersion
-                            }
                         }
                     }
                 }
             }
         }
-        return $versionInfo
     }
-    return $result
+    return $versionInfo
 }
 
 function Get-SPDscFarmProductsInfo()
 {
-    $products = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
-        $farm = Get-SPFarm
-        $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
-        $server = Get-SPServer $env:COMPUTERNAME
+    $farm = Get-SPFarm
+    $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+    $server = Get-SPServer $env:COMPUTERNAME
 
-        $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
-        return $serverProductInfo.Products
-    }
-    return $products
+    $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
+    return $serverProductInfo.Products
 }
 
 function Get-SPDSCRegistryKey()

@@ -6,17 +6,21 @@ function Get-TargetResource
     (
         [parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure,
+        [System.String]
+        $Ensure,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
-        [System.String[]] $DatabaseUpgradeDays,
+        [System.String[]]
+        $DatabaseUpgradeDays,
         
         [parameter(Mandatory = $false)]
-        [System.String] $DatabaseUpgradeTime,
+        [System.String]
+        $DatabaseUpgradeTime,
         
         [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] $InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting status of Configuration Wizard"
@@ -25,7 +29,9 @@ function Get-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
-    } else {
+    }
+    else
+    {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
@@ -42,7 +48,9 @@ function Get-TargetResource
             DatabaseUpgradeDays = $DatabaseUpgradeDays
             DatabaseUpgradeTime = $DatabaseUpgradeTime
         }
-    } else {
+    } 
+    else
+    {
         return @{
             Ensure = "Present"
             DatabaseUpgradeDays = $DatabaseUpgradeDays
@@ -58,17 +66,21 @@ function Set-TargetResource
     (
         [parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure,
+        [System.String]
+        $Ensure,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
-        [System.String[]] $DatabaseUpgradeDays,
+        [System.String[]]
+        $DatabaseUpgradeDays,
         
         [parameter(Mandatory = $false)]
-        [System.String] $DatabaseUpgradeTime,
+        [System.String]
+        $DatabaseUpgradeTime,
         
         [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] $InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing status of Configuration Wizard"
@@ -81,20 +93,20 @@ function Set-TargetResource
 
         if ($DatabaseUpgradeDays -contains $currentDayOfWeek)
         {
-            Write-Verbose ("Current day is present in the parameter DatabaseUpgradeDays. " + `
-                           "Configuration wizard can be run today.")
+            Write-Verbose -Message ("Current day is present in the parameter DatabaseUpgradeDays. " + `
+                                    "Configuration wizard can be run today.")
         }
         else
         {
-            Write-Verbose ("Current day is not present in the parameter DatabaseUpgradeDays, " + `
-                           "skipping the Configuration Wizard")
+            Write-Verbose -Message ("Current day is not present in the parameter DatabaseUpgradeDays, " + `
+                                    "skipping the Configuration Wizard")
             return
         }
     }
     else
     {
-        Write-Verbose ("No DatabaseUpgradeDays specified, Configuration Wizard can be " + `
-                       "ran on any day.")
+        Write-Verbose -Message ("No DatabaseUpgradeDays specified, Configuration Wizard can be " + `
+                                "ran on any day.")
     }
 
     # Check if DatabaseUpdateTime parameter exists
@@ -129,20 +141,20 @@ function Set-TargetResource
 
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
-            Write-Verbose ("Current time is inside of the window specified in " + `
-                           "DatabaseUpgradeTime. Starting wizard")
+            Write-Verbose -Message ("Current time is inside of the window specified in " + `
+                                    "DatabaseUpgradeTime. Starting wizard")
         }
         else
         {
-            Write-Verbose ("Current time is outside of the window specified in " + `
-                           "DatabaseUpgradeTime, skipping the Configuration Wizard")
+            Write-Verbose -Message ("Current time is outside of the window specified in " + `
+                                    "DatabaseUpgradeTime, skipping the Configuration Wizard")
             return
         }
     }
     else
     {
-        Write-Verbose ("No DatabaseUpgradeTime specified, Configuration Wizard can be " + `
-                       "ran at any time. Starting wizard.")
+        Write-Verbose -Message ("No DatabaseUpgradeTime specified, Configuration Wizard can be " + `
+                                "ran at any time. Starting wizard.")
     }
 
     if ($Ensure -eq $false)
@@ -156,7 +168,9 @@ function Set-TargetResource
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
     {
         $binaryDir = Join-Path $env:CommonProgramFiles "Microsoft Shared\Web Server Extensions\15\BIN"
-    } else {
+    }
+    else
+    {
         $binaryDir = Join-Path $env:CommonProgramFiles "Microsoft Shared\Web Server Extensions\16\BIN"
     }
     $psconfigExe = Join-Path -Path $binaryDir -ChildPath "psconfig.exe"
@@ -175,6 +189,7 @@ function Set-TargetResource
         return $psconfig.ExitCode
     }
 
+    # Error codes: https://aka.ms/installerrorcodes
     switch ($result)
     {
         0 {  
@@ -182,7 +197,8 @@ function Set-TargetResource
         }
         Default {
             throw ("SharePoint Post Setup Configuration Wizard failed, " + `
-                   "exit code was $($setup.ExitCode)")
+                   "exit code was $($setup.ExitCode). Error codes can be found at " + `
+                   "https://aka.ms/installerrorcodes")
         }
     }
 }
@@ -196,17 +212,21 @@ function Test-TargetResource
     (
         [parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure,
+        [System.String]
+        $Ensure,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
-        [System.String[]] $DatabaseUpgradeDays,
+        [System.String[]]
+        $DatabaseUpgradeDays,
         
         [parameter(Mandatory = $false)]
-        [System.String] $DatabaseUpgradeTime,
+        [System.String]
+        $DatabaseUpgradeTime,
         
         [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] $InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     if ($Ensure -eq "Absent")

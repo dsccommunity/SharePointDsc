@@ -5,24 +5,30 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]
-        [System.String] $SetupFile,
+        [System.String]
+        $SetupFile,
         
         [parameter(Mandatory = $false)]
-        [System.Boolean] $ShutdownServices,
+        [System.Boolean]
+        $ShutdownServices,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
-        [System.String[]] $BinaryInstallDays,
+        [System.String[]]
+        $BinaryInstallDays,
         
         [parameter(Mandatory = $false)]
-        [System.String] $BinaryInstallTime,
+        [System.String]
+        $BinaryInstallTime,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure = "Present",
+        [System.String]
+        $Ensure = "Present",
         
         [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] $InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting install status of SP binaries"
@@ -39,13 +45,15 @@ function Get-TargetResource
 
     $setupFileInfo = Get-ItemProperty $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
-    Write-Verbose "Update has version $fileVersion"
+    Write-Verbose -Message "Update has version $fileVersion"
 
-    $products = Get-SPDscFarmProductsInfo
+    $products = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+        return Get-SPDscFarmProductsInfo
+    }
 
     if ($setupFileInfo.VersionInfo.FileDescription -match "Language Pack")
     {
-        Write-Verbose "Update is a Language Pack Service Pack."
+        Write-Verbose -Message "Update is a Language Pack Service Pack."
         # Retrieve language from file and check version for that language pack.
         $languagepack = $true
 
@@ -61,9 +69,10 @@ function Get-TargetResource
 
         try
         {
-            $cultureInfo = New-Object System.Globalization.CultureInfo($language)
+            $cultureInfo = New-Object -TypeName System.Globalization.CultureInfo -ArgumentList $language
         }
-        catch {
+        catch
+        {
             throw "Error while converting language information: $language"
         }
 
@@ -87,7 +96,7 @@ function Get-TargetResource
 
         # Build language string used in Language Pack names
         $languageString = "$languageEnglish/$languageNative"
-        Write-Verbose "Update is for the $languageEnglish language"
+        Write-Verbose -Message "Update is for the $languageEnglish language"
 
         # Find the product name for the specific language pack
         $productName = ""
@@ -105,25 +114,40 @@ function Get-TargetResource
         }
         else
         {
-            Write-Verbose "Product found: $productName"
+            Write-Verbose -Message "Product found: $productName"
         }
-        $versionInfo = Get-SPDscFarmVersionInfo $productName
+        $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -Arguments $productName `
+                                      -ScriptBlock {
+            $productToCheck = $args[0]
+            return Get-SPDscFarmVersionInfo -ProductToCheck $productToCheck
+        }
     }
     elseif ($setupFileInfo.VersionInfo.FileDescription -match "Service Pack")
     {
-        Write-Verbose "Update is a Service Pack for SharePoint."
+        Write-Verbose -Message "Update is a Service Pack for SharePoint."
         # Check SharePoint version information.
         $servicepack = $true
-        $versionInfo = Get-SPDscFarmVersionInfo "Microsoft SharePoint Server 2013"
+        $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -Arguments $productName `
+                                      -ScriptBlock {
+            $productToCheck = $args[0]
+            return Get-SPDscFarmVersionInfo -ProductToCheck "Microsoft SharePoint Server 2013"
+        }
     }
     else
     {
-        Write-Verbose "Update is a Cumulative Update."
+        Write-Verbose -Message "Update is a Cumulative Update."
         # Cumulative Update is multi-lingual. Check version information of all products.
-        $versionInfo = Get-SPDscFarmVersionInfo
+        $versionInfo = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -Arguments $productName `
+                                      -ScriptBlock {
+            $productToCheck = $args[0]
+            return Get-SPDscFarmVersionInfo
+        }
     }
 
-    Write-Verbose "The lowest version of any SharePoint component is $($versionInfo.Lowest)"
+    Write-Verbose -Message "The lowest version of any SharePoint component is $($versionInfo.Lowest)"
     if ($versionInfo.Lowest -lt $fileVersion)
     {
         # Version of SharePoint is lower than the patch version. Patch is not installed.
@@ -154,27 +178,34 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]
-        [System.String] $SetupFile,
+        [System.String]
+        $SetupFile,
         
         [parameter(Mandatory = $false)]
-        [System.Boolean] $ShutdownServices,
+        [System.Boolean]
+        $ShutdownServices,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
-        [System.String[]] $BinaryInstallDays,
+        [System.String[]]
+        $BinaryInstallDays,
         
         [parameter(Mandatory = $false)]
-        [System.String] $BinaryInstallTime,
+        [System.String]
+        $BinaryInstallTime,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure = "Present",
+        [System.String]
+        $Ensure = "Present",
         
         [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] $InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    if ($Ensure -eq "Absent") {
+    if ($Ensure -eq "Absent")
+    {
         throw [Exception] "SharePoint does not support uninstalling updates."
         return
     }
@@ -193,13 +224,13 @@ function Set-TargetResource
 
         if ($BinaryInstallDays -contains $currentDayOfWeek)
         {
-            Write-Verbose ("Current day is present in the parameter BinaryInstallDays. " + `
-                           "Update can be run today.")
+            Write-Verbose -Message ("Current day is present in the parameter BinaryInstallDays. " + `
+                                    "Update can be run today.")
         }
         else
         {
-            Write-Verbose ("Current day is not present in the parameter BinaryInstallDays, " + `
-                           "skipping the update")
+            Write-Verbose -Message ("Current day is not present in the parameter BinaryInstallDays, " + `
+                                    "skipping the update")
             return
         }
     }
@@ -240,53 +271,55 @@ function Set-TargetResource
 
         if (($starttime -lt $now) -and ($endtime -gt $now))
         {
-            Write-Verbose ("Current time is inside of the window specified in " + `
-                          "BinaryInstallTime. Starting update")
+            Write-Verbose -Message ("Current time is inside of the window specified in " + `
+                                    "BinaryInstallTime. Starting update")
         }
         else
         {
-            Write-Verbose ("Current time is outside of the window specified in " + `
-                          "BinaryInstallTime, skipping the update")
+            Write-Verbose -Message ("Current time is outside of the window specified in " + `
+                                    "BinaryInstallTime, skipping the update")
             return
         }
     }
     else
     {
-        Write-Verbose ("No BinaryInstallTime specified, Update can be ran at " + `
-                      "any time. Starting update.")
+        Write-Verbose -Message ("No BinaryInstallTime specified, Update can be ran at " + `
+                                "any time. Starting update.")
     }
 
     # To prevent an endless loop: Check if an upgrade is required.
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0\WSS"
-    } else {
+    }
+    else
+    {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
 
     # Read LanguagePackInstalled and SetupType registry keys
-    $languagePackInstalled = Get-SPDSCRegistryKey $wssRegKey "LanguagePackInstalled"
-    $setupType = Get-SPDSCRegistryKey $wssRegKey "SetupType"
+    $languagePackInstalled = Get-SPDSCRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
+    $setupType = Get-SPDSCRegistryKey -Key $wssRegKey -Value "SetupType"
 
     # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
     # If so, the Config Wizard is required, so the installation will be skipped.
     if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
     {
-        Write-Verbose ("An upgrade is pending. " + `
-                      "To prevent a possible loop, the install will be skipped")
+        Write-Verbose -Message ("An upgrade is pending. " + `
+                                "To prevent a possible loop, the install will be skipped")
         return
     }
 
     if ($ShutdownServices)
     {
-        Write-Verbose "Stopping services to speed up installation process"
+        Write-Verbose -Message "Stopping services to speed up installation process"
 
         $searchPaused = $false
         $osearchStopped = $false
         $hostControllerStopped = $false
 
-        $osearchSvc        = Get-Service "OSearch15" 
-        $hostControllerSvc = Get-Service "SPSearchHostController" 
+        $osearchSvc        = Get-Service -Name "OSearch15" 
+        $hostControllerSvc = Get-Service -Name "SPSearchHostController" 
 
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -ScriptBlock {
@@ -314,9 +347,9 @@ function Set-TargetResource
 
         $hostControllerSvc.WaitForStatus('Stopped','00:01:00')
 
-        Write-Verbose "Search Services are stopped"
+        Write-Verbose -Message "Search Services are stopped"
 
-        Write-Verbose "Stopping other services"
+        Write-Verbose -Message "Stopping other services"
 
         Set-Service -Name "IISADMIN" -StartupType Disabled
         Set-Service -Name "SPTimerV4" -StartupType Disabled
@@ -326,7 +359,7 @@ function Set-TargetResource
                                   -Wait `
                                   -PassThru
 
-        $timerSvc = Get-Service "SPTimerV4"
+        $timerSvc = Get-Service -Name "SPTimerV4"
         if($timerSvc.Status -eq "Running")
         {
             $timerSvc.Stop()
@@ -345,7 +378,7 @@ function Set-TargetResource
                                -Wait `
                                -PassThru
 
-        # Error codes: https://technet.microsoft.com/en-us/library/cc179058%28v=office.14%29.aspx?f=255&MSPPError=-2147217396
+        # Error codes: https://aka.ms/installerrorcodes
         switch ($setup.ExitCode) {
             0
             {  
@@ -359,18 +392,19 @@ function Set-TargetResource
             }
             Default
             {
-                throw "SharePoint update install failed, exit code was $($setup.ExitCode)"
+                throw ("SharePoint update install failed, exit code was $($setup.ExitCode). " + `
+                       "Error codes can be found at https://aka.ms/installerrorcodes")
             }
         }
     }
 
     if ($ShutdownServices)
     {
-        Write-Verbose "Restart stopped services"
+        Write-Verbose -Message "Restart stopped services"
         Set-Service -Name "SPTimerV4" -StartupType Automatic 
         Set-Service -Name "IISADMIN" -StartupType Automatic 
 
-        $timerSvc = Get-Service "SPTimerV4"
+        $timerSvc = Get-Service -Name "SPTimerV4"
         $timerSvc.Start()
 
         $iisreset = Start-Process -FilePath "iisreset.exe" `
@@ -378,8 +412,8 @@ function Set-TargetResource
                                   -Wait `
                                   -PassThru
 
-        $osearchSvc        = Get-Service "OSearch15" 
-        $hostControllerSvc = Get-Service "SPSearchHostController" 
+        $osearchSvc        = Get-Service -Name "OSearch15" 
+        $hostControllerSvc = Get-Service -Name "SPSearchHostController" 
 
         # Ensuring Search Services were stopped by script before Starting" 
         if($osearchStopped -eq $true) 
@@ -407,7 +441,7 @@ function Set-TargetResource
             }
         }
         
-        Write-Verbose "Services restarted."
+        Write-Verbose -Message "Services restarted."
     }
 }
 
@@ -419,27 +453,34 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]
-        [System.String] $SetupFile,
+        [System.String]
+        $SetupFile,
         
         [parameter(Mandatory = $false)]
-        [System.Boolean] $ShutdownServices,
+        [System.Boolean]
+        $ShutdownServices,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
-        [System.String[]] $BinaryInstallDays,
+        [System.String[]]
+        $BinaryInstallDays,
         
         [parameter(Mandatory = $false)]
-        [System.String] $BinaryInstallTime,
+        [System.String]
+        $BinaryInstallTime,
         
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure = "Present",
+        [System.String]
+        $Ensure = "Present",
         
         [parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] $InstallAccount
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    if ($Ensure -eq "Absent") {
+    if ($Ensure -eq "Absent")
+    {
         throw [Exception] "SharePoint does not support uninstalling updates."
         return
     }
