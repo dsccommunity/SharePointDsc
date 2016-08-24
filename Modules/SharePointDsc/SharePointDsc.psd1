@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.1.0.0'
+ModuleVersion = '1.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -81,7 +81,7 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Test-SPDscParameterState",
                     "Test-SPDSCIsADUser",
                     "Test-SPDSCRunningAsFarmAccount",
-                    "Set-SPDSCObjectPropertyIfValueExists",
+                    "Set-SPDscObjectPropertyIfValuePresent",
                     "Get-SPDSCUserProfileSubTypeManager",
                     "Get-SPDscOSVersion",
                     "Resolve-SPDscSecurityIdentifier")
@@ -123,18 +123,19 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = '
- * Added SPBlobCacheSettings, SPOfficeOnlineServerBinding, SPWebAppPermissions, SPServiceAppProxyGroup, SPWebAppProxyGroup and SPUserProfileServiceAppPermissions resources
- * SPUserProfileSyncService Remove Status field from Get-TargResource: not in MOF, redundant with Ensure
- * Improvement with SPInstallPrereqs on SPS2013 to accept 2008 R2 or 2012 SQL native client not only 2008 R2
- * Fixed a bug with SPTimerJobState that prevented a custom schedule being applied to a timer job
- * Fixed a bug with the detection of group principals vs. user principals in SPServiceAppSecurity and SPWebAppPolicy
- * Removed redundant value for KB2898850 from SPInstallPrereqs, also fixed old property name for DotNetFX
- * Fixed a bug with SPAlternateUrl that prevented the test method from returning "true" when a URL was absent if the optional URL property was specified in the config
- * Fixed bugs in SPAccessServiceApp and SPPerformancePointServiceApp with type names not being identified correctly
- * Added support for custom database name and server to SPPerformancePointServiceApp
- * Added solution level property to SPFarmSolution
- * Fixed a bug with SPSearchServiceApp that prevents the default crawl account from being managed after it is initially set
- * Removed dependency on Win32_Prouct from SPInstallPrereqs
+ * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
+ * Minor tweaks to the PowerShell module manifest
+ * Modified all resources to ensure $null values are on the left of comparisson operations
+ * Added RunOnlyWhenWriteable property to SPUserProfileSyncService resource
+ * Added better logging to all test method output to make it clear what property is causing a test to fail
+ * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
+ * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+ * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
+ * Fixed the use of plural nouns in cmdlet names within the module
+ * Removed dependency on Win32_Product from SPInstall
+ * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
+ * Added HostHeader parameter in examples for Web Application, so subsequent web applications won''t error out
+ * Prevented SPCreateFarm and SPJoinFarm from executing set methods where the local server is already a member of a farm 
 '
 
     } # End of PSData hashtable

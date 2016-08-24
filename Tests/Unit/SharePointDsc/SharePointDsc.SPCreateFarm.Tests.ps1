@@ -109,7 +109,7 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             }
         }
 
-        Context "a farm exists locally" {
+        Context "a farm exists locally and is the correct farm" {
             Mock Get-SPFarm { return @{ 
                 DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
                 Name = $testParams.FarmConfigDatabaseName
@@ -131,6 +131,27 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
 
             It "returns true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "a farm exists locally and is not the correct farm" {
+            Mock Get-SPFarm { return @{ 
+                DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
+                Name = "WrongDBName"
+            }}
+            Mock Get-SPDatabase { return @(@{ 
+                Name = "WrongDBName"
+                Type = "Configuration Database"
+                Server = @{ Name = $testParams.DatabaseServer }
+            })} 
+            Mock Get-SPWebApplication { return @(@{
+                IsAdministrationWebApplication = $true
+                ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
+                Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+            })}
+
+            It "throws an error in the set method" {
+                { Set-TargetResource @testParams } | Should throw
             }
         }
 

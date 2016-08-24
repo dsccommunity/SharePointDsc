@@ -1,21 +1,3 @@
-/*
-**Description**
-
-This resource is used to set the outgoing email settings for either a single web application, or the whole farm. 
-To configure the resource for a specific web app, use the URL of the web application for the WebAppUrl property, to change the settings for the whole farm use the URL of the central admin website instead.
-It is possible to set the outgoing server, from address, reply to address and the character set to be used for emails.
-
-**Example**
-
-    SPOutgoingEmailSettings FarmWideEmailSettings
-    {  
-        WebAppUrl             = "http://sharepoint1:2013"
-        SMTPServer            = "smtp.contoso.com"
-        FromAddress           = "sharepoint@contoso.com"
-        ReplyToAddress        = "noreply@contoso.com"
-        PsDscRunAsCredential  = $InstallAccount
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPOutgoingEmailSettings")]
 class MSFT_SPOutgoingEmailSettings : OMI_BaseResource
 {
@@ -24,6 +6,6 @@ class MSFT_SPOutgoingEmailSettings : OMI_BaseResource
     [Required, Description("The from address to put on messages")] string FromAddress;
     [Required, Description("The email address that replies should be directed to")] string ReplyToAddress;
     [Required, Description("The character set to use on messages")] string CharacterSet;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 

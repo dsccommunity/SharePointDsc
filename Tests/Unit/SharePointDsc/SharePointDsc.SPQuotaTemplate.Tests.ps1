@@ -37,7 +37,7 @@ Describe "SPQuotaTemplate - SharePoint Build $((Get-Item $SharePointCmdletModule
             Mock Get-SPFarm { throw "Unable to detect local farm" }
 
             It "return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false from the test method" {
