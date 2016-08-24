@@ -83,15 +83,25 @@ function Get-TargetResource
         }
         
         # Extract English name of the language code
-        if ($cultureInfo.EnglishName -match "(\w*) \(\w*\)")
+        if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \(\w*\)")
         {
             $languageEnglish = $matches[1]
+            if ($languageEnglish.contains(","))
+            {
+                $languages = $languageEnglish.Split(",")
+                $languageEnglish = $languages[0]
+            }
         }
 
         # Extract Native name of the language code
-        if ($cultureInfo.NativeName -match "(\w*) \(\w*\)")
+        if ($cultureInfo.NativeName -match "(\w*,*\s*\w*) \(\w*\)")
         {
             $languageNative = $matches[1]
+            if ($languageNative.contains(","))
+            {
+                $languages = $languageNative.Split(",")
+                $languageNative = $languages[0]
+            }
         }
 
         # Build language string used in Language Pack names
