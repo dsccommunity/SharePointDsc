@@ -269,10 +269,10 @@ function Set-TargetResource
     $configPath = "$env:temp\SPInstallLanguagePackConfig.xml" 
 
     $configData = "<Configuration>
-	<Setting Id=`"OSERVERLPK`" Value=`"1`"/>
-	<Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
-	<Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint 2013  Products Language Pack Setup(*).log`"/>
-	<Display Level=`"none`" CompletionNotice=`"no`" />
+    <Setting Id=`"OSERVERLPK`" Value=`"1`"/>
+    <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
+    <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint 2013  Products Language Pack Setup(*).log`"/>
+    <Display Level=`"none`" CompletionNotice=`"no`" />
 </Configuration>"
 
     $configData | Out-File -FilePath $configPath
