@@ -31,6 +31,14 @@ Configuration Example
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             DependsOn = "[SPInstallPrereqs]InstallPrereqs"
         }
+        
+        SPInstallAppFabricUpdate InstallAppFabricCU {
+            Build                    = '1.0.4657.2'
+            BinaryDir                = "C:\AppFabricInstall\"
+            CuExeName                = 'AppFabric-KB3092423-x64-ENU.exe'
+            PsDscRunAsCredential     = $SPSetupAccount
+            DependsOn                = "[SPInstall]InstallSharePoint"
+        }
 
         #**********************************************************
         # Basic farm configuration
@@ -274,7 +282,15 @@ Configuration Example
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
             DependsOn = "[SPInstallPrereqs]InstallPrereqs"
         }
-
+        
+        SPInstallAppFabricUpdate InstallAppFabricCU {
+            Build                    = '1.0.4657.2'
+            BinaryDir                = "C:\AppFabricInstall\"
+            CuExeName                = 'AppFabric-KB3092423-x64-ENU.exe'
+            PsDscRunAsCredential     = $SPSetupAccount
+            DependsOn                = "[SPInstall]InstallSharePoint"
+        }
+        
         #**********************************************************
         # Basic farm configuration
         #
