@@ -7,11 +7,11 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Build,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $CuExeName
@@ -46,11 +46,11 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Build,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $CuExeName
@@ -74,11 +74,11 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Build,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $BinaryDir,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $CuExeName
@@ -116,3 +116,4 @@ function Set-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
+
