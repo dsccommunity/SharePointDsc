@@ -1,3 +1,4 @@
+
 [ClassVersion("1.0.0.0"), FriendlyName("SPInstallAppFabricUpdate")]
 class MSFT_SPInstallAppFabricUpdate : OMI_BaseResource
 {

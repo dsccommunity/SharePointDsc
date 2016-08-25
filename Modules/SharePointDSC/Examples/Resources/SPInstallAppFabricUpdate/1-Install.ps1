@@ -20,7 +20,6 @@
             {
                 BinaryDir  = "C:\SPAppFabricUpdate"
                 Build = '1.0.4657.2' #CU 07
-                BinaryDir = "C:\SPAppFabricUpdate"
                 CuExeName = 'AppFabric-KB3092423-x64-ENU.exe'
             }
         }
