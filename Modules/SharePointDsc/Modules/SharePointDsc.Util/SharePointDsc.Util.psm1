@@ -58,7 +58,7 @@ function Get-SPDscFarmVersionInfo()
 
     if ($ProductToCheck)
     {
-        $products = $products | Where-Object { $_ -eq $ProductToCheck }
+        $products = $products | Where-Object -FilterScript { $_ -eq $ProductToCheck }
         if ($null -eq $products)
         {
             throw "Product not found: $ProductToCheck"
@@ -104,7 +104,8 @@ function Get-SPDscFarmVersionInfo()
                     }
                     else
                     {
-                        if ($currentversion -lt $versionInfo.Lowest) {
+                        if ($currentversion -lt $versionInfo.Lowest)
+                        {
                             $versionInfo.Lowest = $currentVersion
                         }
                     }
@@ -139,7 +140,7 @@ function Get-SPDSCRegistryKey()
         $Value
     )
 
-    if ((Test-Path $Key) -eq $true)
+    if ((Test-Path -Path $Key) -eq $true)
     {
         $regKey = Get-ItemProperty -LiteralPath $Key
         return $regKey.$Value

@@ -36,8 +36,8 @@ function Get-TargetResource
     }
 
     # Read LanguagePackInstalled and SetupType registry keys
-    $languagePackInstalled = Get-SPDSCRegistryKey $wssRegKey "LanguagePackInstalled"
-    $setupType = Get-SPDSCRegistryKey $wssRegKey "SetupType"
+    $languagePackInstalled = Get-SPDSCRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
+    $setupType = Get-SPDSCRegistryKey -Key $wssRegKey -Value "SetupType"
 
     # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
     # If so, the Config Wizard is required

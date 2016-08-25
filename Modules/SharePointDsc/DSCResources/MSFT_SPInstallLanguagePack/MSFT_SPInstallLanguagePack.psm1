@@ -30,19 +30,21 @@ function Get-TargetResource
     Write-Verbose -Message "Getting install status of SharePoint Language Pack"
 
     # Check if Binary folder exists
-    if (-not(Test-Path $BinaryDir))
+    if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found."
     }
 
-    $osrvFolder = Get-ChildItem (Join-Path $BinaryDir "\osrv*.*")
+    $osrvFolder = Get-ChildItem (Join-Path -Path $BinaryDir `
+                                           -ChildPath "\osrv*.*")
 
     if ($osrvFolder.Count -ne 1)
     {
         throw "Unknown folder structure"
     }
 
-    $products = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
+    $products = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -ScriptBlock {
         return Get-SPDscFarmProductsInfo
     }
 
@@ -165,7 +167,7 @@ function Set-TargetResource
     }
 
     # Check if Binary folder exists
-    if (-not(Test-Path $BinaryDir))
+    if (-not(Test-Path -Path $BinaryDir))
     {
         throw "Specified path cannot be found."
     }
@@ -271,7 +273,18 @@ function Set-TargetResource
     $configData = "<Configuration>
     <Setting Id=`"OSERVERLPK`" Value=`"1`"/>
     <Setting Id=`"USINGUIINSTALLMODE`" Value=`"0`"/>
-    <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint 2013  Products Language Pack Setup(*).log`"/>
+    <Logging Type=`"verbose`" Path=`"%temp%`" Template=`"SharePoint "
+
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+    {
+        $configData += "2013"
+    }
+    else
+    {
+        $configData += "2016"
+    }
+
+    $configData += " Products Language Pack Setup(*).log`"/>
     <Display Level=`"none`" CompletionNotice=`"no`" />
 </Configuration>"
 
