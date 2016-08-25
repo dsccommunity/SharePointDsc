@@ -37,6 +37,75 @@ function Get-TargetResource
         CuInstallLogPath = $CuInstallLogPath
     }
 }
+
+
+function Set-TargetResource
+{
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Build,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $BinaryDir,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $CuExeName
+    )
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    if (($CurrentValues.Build) -eq $null) {
+        throw [Exception] 'AppFabric must be installed before applying Cumulative Updates'
+        return $false
+    }
+
+    Write-Verbose -Message 'Beginning installation of AppFabric Cumulative Update'
+  
+    $setupExe = Join-Path -Path $BinaryDir -ChildPath $CuExeName
+    
+    $setup = Start-Process -FilePath $setupExe `
+                           -ArgumentList "/quiet /passive /norestart" `
+                           -Wait `
+                           -PassThru
+
+    switch ($setup.ExitCode) 
+    {
+        0 {  
+            Write-Verbose -Message "AppFabric Cumulative Update installation complete"
+            $global:DSCMachineStatus = 1
+        }
+        30066 {
+            $pr1 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
+                    "Component Based Servicing\RebootPending")
+            $pr2 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
+                    "WindowsUpdate\Auto Update\RebootRequired")
+            $pr3 = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+            if (    ($null -ne (Get-Item $pr1 -ErrorAction SilentlyContinue)) `
+                -or ($null -ne (Get-Item $pr2 -ErrorAction SilentlyContinue)) `
+                -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
+                ) {
+                    
+                Write-Verbose -Message ("SPInstallAppFabricUpdate has detected the server has pending " + `
+                                        "a reboot. Flagging to the DSC engine that the " + `
+                                        "server should reboot before continuing.")
+                $global:DSCMachineStatus = 1
+            } else {
+                throw ("AppFabric Cumulative Update installation has failed due to an issue with prerequisites " + `
+                       "not being installed correctly. Please review the setup logs.")
+            }
+        }
+        Default {
+            throw "AppFabric Cumulative Update install failed, exit code was $($setup.ExitCode)"
+        }
+    }
+}
+
+
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -63,55 +132,6 @@ function Test-TargetResource
     [Version]$ActualBuild = $CurrentValues.Build
     
     if ($ActualBuild -ge $DesiredBuild) {return $true} else {return $false}
-}
-
-function Set-TargetResource
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Build,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $BinaryDir,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $CuExeName
-    )
-
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    if (($CurrentValues.Build) -eq $null) {
-        throw [Exception] 'AppFabric must be installed before applying Cumulative Updates'
-        return $false
-    }
-
-    Write-Verbose -Message 'Install AppFabric Cumultive update start'
-
-    $InstallerPath = Join-Path $BinaryDir $CuExeName
-    if (!(Test-Path $InstallerPath)) 
-    {
-        throw [Exception] 'AppFabric Cumultive update not found with provided path'
-        return $false
-    }
-    
-    $setup = Start-Process -WorkingDirectory $BinaryDir -FilePath $InstallerPath -ArgumentList "/quiet /passive /norestart" -Wait -PassThru
- 
-    if ($setup.ExitCode -eq 0) {
-        Write-Verbose -Message "AppFabric cumulative update $Build installation complete"
-        #Return true if a reboot is pending to force a reboot from dsc
-        return (((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) -ne $null) -or ((Get-Item 'HKLM:\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) -ne $null) -or ((Get-Item 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' | Get-ItemProperty).PendingFileRenameOperations.count -gt 0))
-    }
-    else
-    {
-        throw "AppFabric cumulative update install failed, exit code was $($setup.ExitCode)"
-        return $false
-    }
 }
 
 
