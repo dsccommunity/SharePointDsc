@@ -1,0 +1,8 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("SPInstallAppFabricUpdate")]
+class MSFT_SPInstallAppFabricUpdate : OMI_BaseResource
+{
+    [Key, Description("Build number of the cumulative update used to check if already installed")] String Build;
+    [Required, Description("Full Path of the CU executable to launch")] String SetupFile;
+};
+
