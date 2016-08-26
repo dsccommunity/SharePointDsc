@@ -10,18 +10,14 @@ function Get-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $BinaryDir,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $CuExeName
+        $SetupFile
     )
 
     Write-Verbose -Message 'Getting AppFabric ProductVersion from Microsoft.ApplicationServer.Caching.Configuration.dll'
     $afConfDLL = "$env:ProgramFiles\AppFabric 1.1 for Windows Server\PowershellModules\DistributedCacheConfiguration\Microsoft.ApplicationServer.Caching.Configuration.dll"
-    if(Test-Path $afConfDLL)
+    if(Test-Path -Path $afConfDLL)
     {
-        $afInstall = (Get-ItemProperty $afConfDLL -Name VersionInfo)
+        $afInstall = (Get-ItemProperty -Path $afConfDLL -Name VersionInfo)
         $Build = $afInstall.VersionInfo.ProductVersion
     }
     else
@@ -32,9 +28,7 @@ function Get-TargetResource
     
     return @{
         Build = $Build
-        BinaryDir = $BinaryDir
-        CuExeName = $CuExeName
-        CuInstallLogPath = $CuInstallLogPath
+        SetupFile = $SetupFile
     }
 }
 
@@ -50,36 +44,26 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $BinaryDir,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $CuExeName
+        $SetupFile
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if (($CurrentValues.Build) -eq $null) {
+    if ($null -eq $CurrentValues.Build)
+    {
         throw [Exception] 'AppFabric must be installed before applying Cumulative Updates'
-        return $false
     }
 
     Write-Verbose -Message 'Beginning installation of AppFabric Cumulative Update'
-  
-    $setupExe = Join-Path -Path $BinaryDir -ChildPath $CuExeName
     
-    $setup = Start-Process -FilePath $setupExe `
+    $setup = Start-Process -FilePath $SetupFile `
                            -ArgumentList "/quiet /passive /norestart" `
                            -Wait `
                            -PassThru
 
-    switch ($setup.ExitCode) 
+    if ($setup.ExitCode -eq 0) 
     {
-        0 {  
-            Write-Verbose -Message "AppFabric Cumulative Update installation complete"
-            $global:DSCMachineStatus = 1
-        }
-        30066 {
+        Write-Verbose -Message "AppFabric Cumulative Update installation complete"
             $pr1 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
                     "Component Based Servicing\RebootPending")
             $pr2 = ("HKLM:\Software\Microsoft\Windows\CurrentVersion\" + `
@@ -88,20 +72,18 @@ function Set-TargetResource
             if (    ($null -ne (Get-Item $pr1 -ErrorAction SilentlyContinue)) `
                 -or ($null -ne (Get-Item $pr2 -ErrorAction SilentlyContinue)) `
                 -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
-                ) {
+                ) 
+            {
                     
                 Write-Verbose -Message ("SPInstallAppFabricUpdate has detected the server has pending " + `
                                         "a reboot. Flagging to the DSC engine that the " + `
                                         "server should reboot before continuing.")
                 $global:DSCMachineStatus = 1
-            } else {
-                throw ("AppFabric Cumulative Update installation has failed due to an issue with prerequisites " + `
-                       "not being installed correctly. Please review the setup logs.")
             }
-        }
-        Default {
-            throw "AppFabric Cumulative Update install failed, exit code was $($setup.ExitCode)"
-        }
+    }
+    else
+    {
+        throw "SharePoint cumulative update install failed, exit code was $($setup.ExitCode)"
     }
 }
 
@@ -118,11 +100,7 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $BinaryDir,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $CuExeName
+        $SetupFile
     )
 
     Write-Verbose -Message "Testing desired minium build number"
@@ -131,7 +109,14 @@ function Test-TargetResource
     [Version]$DesiredBuild = $Build
     [Version]$ActualBuild = $CurrentValues.Build
     
-    if ($ActualBuild -ge $DesiredBuild) {return $true} else {return $false}
+    if ($ActualBuild -ge $DesiredBuild)
+    {
+        return $true
+    }
+    else
+    {
+        return $false
+    }
 }
 
 

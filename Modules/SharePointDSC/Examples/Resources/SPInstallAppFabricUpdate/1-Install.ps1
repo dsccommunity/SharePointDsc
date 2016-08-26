@@ -18,9 +18,8 @@
         node localhost {
             SPInstallAppFabricUpdate InstallAppFabricCU7
             {
-                BinaryDir  = "C:\SPAppFabricUpdate"
+                SetupFile  = "C:\SPAppFabricUpdate\AppFabric-KB3092423-x64-ENU.exe"
                 Build = '1.0.4657.2' #CU 07
-                CuExeName = 'AppFabric-KB3092423-x64-ENU.exe'
             }
         }
 

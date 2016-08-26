@@ -33,9 +33,8 @@ Configuration Example
         }
         
         SPInstallAppFabricUpdate InstallAppFabricCU {
-            Build                    = '1.0.4657.2'
-            BinaryDir                = "C:\AppFabricInstall\"
-            CuExeName                = 'AppFabric-KB3092423-x64-ENU.exe'
+            SetupFile  = "C:\SPAppFabricUpdate\AppFabric-KB3092423-x64-ENU.exe"
+            Build = '1.0.4657.2' #CU 07
             PsDscRunAsCredential     = $SPSetupAccount
             DependsOn                = "[SPInstall]InstallSharePoint"
         }

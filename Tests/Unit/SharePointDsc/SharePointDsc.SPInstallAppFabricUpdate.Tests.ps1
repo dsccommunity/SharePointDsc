@@ -16,8 +16,7 @@ Describe "SPInstallAppFabricUpdate - AppFabric Build $((Get-Item $SharePointCmdl
     InModuleScope $ModuleName {
         $testParams = @{
             Build = '1.0.4657.2'
-            BinaryDir = "C:\SPAppFabricUpdate"
-            CuExeName = 'AppFabric-KB3092423-x64-ENU.exe'
+            SetupFile  = "C:\SPAppFabricUpdate\AppFabric-KB3092423-x64-ENU.exe"
         }
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
