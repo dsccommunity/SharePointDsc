@@ -6,9 +6,9 @@ class MSFT_SPTrustedIdentityTokenIssuer : OMI_BaseResource
     [Required, Description("Default Realm that is passed to identity provider")] String Realm;
     [Required, Description("URL of the identity provider where user is redirected to for authentication")] String SignInUrl;
     [Required, Description("Identity claim type that uniquely identifies the user")] String IdentifierClaim;
-    [Required, Description("List of HashTables that contain parameters for New-SPClaimTypeMapping cmdlet"), EmbeddedInstance("MSFT_KeyValuePair")] String ClaimsMappings[];
+    [Required, Description("JSON array that hosts parameters for cmdlet New-SPClaimTypeMapping")] String ClaimsMappings;
     [Required, Description("Thumbprint of the signing certificate to use with this SPTrustedIdentityTokenIssuer. It must match the thumbprint of a certificate located in store LocalMachine\\My")] String SigningCertificateThumbPrint;
-    [Write, Description("Name of a claims provider to set with this SPTrustedIdentityTokenIssuer.")] String ClaimProviderName;
+    [Write, Description("Name of a claims provider to set with this SPTrustedIdentityTokenIssuer")] String ClaimProviderName;
     [Write, Description("Sign-out URL")] String ProviderSignOutUri;
     [Write, Description("Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;

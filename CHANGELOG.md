@@ -9,6 +9,12 @@
  * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
  * Fixed typos in documentation for InstallAccount parameter on most resources
  * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
+ * Changed SPTrustedIdentityTokenIssuer to use a JSON array for ClaimsMappings to simplify the syntax
+ * Changed SPTrustedIdentityTokenIssuer to throw an exception if certificate specified has a private key, since SharePoint doesn't accept it
+ * Fixed issue with SPTrustedIdentityTokenIssuer to stop if cmdlet New-SPTrustedIdentityTokenIssuer fails to create the SPTrustedIdentityTokenIssuer and returns null
+ * Fixed issue with SPTrustedIdentityTokenIssuer to correctly get parameters ClaimProviderName and ProviderSignOutUri
+ * Fixed issue with SPTrustedIdentityTokenIssuer to effectively remove the SPTrustedAuthenticationProvider from all zones before deleting the SPTrustedIdentityTokenIssuer
+
 
 ### 1.2
 

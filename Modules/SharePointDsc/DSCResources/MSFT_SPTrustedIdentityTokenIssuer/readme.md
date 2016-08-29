@@ -8,9 +8,10 @@ store LocalMachine\My of the server that will run this resource. Once the
 SPTrustedIdentityTokenIssuer is successfully created, the certificate can be safely 
 deleted from this store as it won't be needed by SharePoint.
 
-ClaimsMappings is an array of HashTables that host parameters for New-SPClaimTypeMapping 
-cmdlet. Required properties are Name and IncomingClaimType. It's not necessary to specify 
-property LocalClaimType if it's identical to IncomingClaimType.
+ClaimsMappings is a JSON array that hosts parameters for cmdlet New-SPClaimTypeMapping.
+Array name is Mappings that contains an array of key/value pairs. Each entry requires
+keys Name and IncomingClaimType. Key LocalClaimType is not required if its value is 
+identical to IncomingClaimType.
 
 The IdentifierClaim property must match an IncomingClaimType element in ClaimsMappings array.
 

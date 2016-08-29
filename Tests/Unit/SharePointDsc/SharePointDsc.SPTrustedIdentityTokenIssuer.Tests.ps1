@@ -20,17 +20,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
             Realm                        = "https://sharepoint.contoso.com"
             SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-            ClaimsMappings               = @(
-                (New-CimInstance -ClassName "MSFT_KeyValuePair" -ClientOnly -Property @{
-                    Name = "Email"; 
-                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                }),
-                (New-CimInstance -ClassName "MSFT_KeyValuePair" -ClientOnly -Property @{
-                    Name = "Account name"; 
-                    IncomingClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"; 
-                    LocalClaimType = "http://schemas.xmlsoap.org/customSPGroupClaimType"
-                })
-            )
+            ClaimsMappings               = "{'mappings': [{'Name': 'Email', 'IncomingClaimType': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'}, {'Name': 'Role', 'IncomingClaimType': 'http://schemas.xmlsoap.org/customGroupClaimType', 'LocalClaimType': 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'}]}"
             SigningCertificateThumbPrint = "Mock Thumbrpint"
             ClaimProviderName            = "ldapcp"
             ProviderSignOutUri            = "https://adfs.contoso.com/adfs/ls/"
