@@ -108,10 +108,12 @@ function Set-TargetResource
                     $runParams = @{}
                     $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
-                    if ($_.LocalClaimType -eq $null) {
+                    if ($_.LocalClaimType -eq $null) 
+                    {
                         $runParams.Add("LocalClaimType", $_.IncomingClaimType)
                     }
-                    else {
+                    else 
+                    {
                         $runParams.Add("LocalClaimType", $_.LocalClaimType)
                     }
                     $claimsMappingsArray = $claimsMappingsArray + (New-SPClaimTypeMapping @runParams)
