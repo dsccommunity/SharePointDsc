@@ -35,8 +35,8 @@ function Get-TargetResource
         throw "Specified path cannot be found."
     }
 
-    $osrvFolder = Get-ChildItem (Join-Path -Path $BinaryDir `
-                                           -ChildPath "\osrv*.*")
+    $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
+                                                 -ChildPath "\osrv*.*")
 
     if ($osrvFolder.Count -ne 1)
     {
