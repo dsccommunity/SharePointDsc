@@ -92,7 +92,7 @@ function Set-TargetResource
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            Write-Verbose "Create SPTrustedIdentityTokenIssuer '$Name'..."
+            Write-Verbose "Creating SPTrustedIdentityTokenIssuer '$Name'..."
             $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
                 $params = $args[0]
 
@@ -108,10 +108,10 @@ function Set-TargetResource
                 }
                 
                 $claimsMappingsArray = @()
-                $MappingsList = $params.ClaimsMappings| ConvertFrom-Json
+                $MappingsList = $params.ClaimsMappings| ConvertFrom-Json -ErrorAction SilentlyContinue
                 $MappingsList.Mappings| Foreach-Object {
                     # Even if $MappingsList.Mappings array does not exist, Foreach iterates once with a null object, so test it before any processing
-                    if ($null -eq $_)
+                    if ($null -eq $_ -or $null -eq $_.Name -or $null -eq $_.IncomingClaimType)
                     {
                         return
                     }

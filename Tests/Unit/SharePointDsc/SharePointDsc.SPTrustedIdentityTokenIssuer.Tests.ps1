@@ -172,10 +172,31 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
         }
 
         $testParams.Ensure = "Present"
+        $originalClaimsMappings = $testParams.ClaimsMappings
+        $testParams.ClaimsMappings = "{BADKEYNAME: [{'Name': 'Email', 'IncomingClaimType': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'}]}"
+
+        Context "The JSON array in parameter ClaimsMappings is invalid" {
+            It "throws an exception saying that JSON array in parameter ClaimsMappings is invalid" {
+                { Set-TargetResource @testParams } | Should Throw "No SPClaimTypeMapping was generated from parameter ClaimsMappings. Did you make a mistake with the syntax of its JSON array?"
+            }
+
+            $testParams.ClaimsMappings = "{Mappings: [{'BADKEY': 'Email'}]}"
+            It "throws an exception saying that JSON array in parameter ClaimsMappings is invalid" {
+                { Set-TargetResource @testParams } | Should Throw "No SPClaimTypeMapping was generated from parameter ClaimsMappings. Did you make a mistake with the syntax of its JSON array?"
+            }
+        }
+
+        $testParams.ClaimsMappings = $originalClaimsMappings
         $originalIdentifierClaim = $testParams.IdentifierClaim
         $testParams.IdentifierClaim = "UnknownClaimType"
 
         Context "The IdentifierClaim does not match one of the claim types in ClaimsMappings" {
+             Mock New-SPClaimTypeMapping {
+                return [pscustomobject]@{
+                    MappedClaimType = $originalIdentifierClaim
+                }
+            }
+
             It "validation of IdentifierClaim fails in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
             }
