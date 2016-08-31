@@ -11,8 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
 
-Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-	Mock Get-SPWebApplication{return "null"} -ModuleName "SharePointDSC.Reverse"
+Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {	
 
     Context "Validate Environment Data Extract" {
         Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
@@ -40,6 +39,8 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 	}
 
     Context "Validate SharePoint Components Data Extract" {
+		Mock Get-SPWebApplication{return "null"} -ModuleName "SharePointDSC.Reverse"
+
         It "Read information about the farm's configuration" {
             Read-SPFarm -ScriptBlock { return "value" }
 			Set-ConfigurationSettings -ScriptBlock { return "value" }
