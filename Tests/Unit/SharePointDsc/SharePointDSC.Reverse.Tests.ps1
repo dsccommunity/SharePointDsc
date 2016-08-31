@@ -7,9 +7,11 @@ $ErrorActionPreference = 'continue'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule
 
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
+Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
 Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
     Context "Validate Environment Data Extract" {
