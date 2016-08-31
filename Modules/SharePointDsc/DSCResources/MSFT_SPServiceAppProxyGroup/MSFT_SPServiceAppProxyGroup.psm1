@@ -48,7 +48,7 @@ function Get-TargetResource
                 Ensure = $Ensure
                 ServiceAppProxies = $ServiceAppProxies 
                 ServiceAppProxiesToInclude = $param.ServiceAppProxiesToInclude
-                ServiceAppProxiesToExluce = $param.ServiceAppProxiesToExclude
+                ServiceAppProxiesToExclude = $param.ServiceAppProxiesToExclude
                 InstallAccount = $params.InstallAccount
             }
                 

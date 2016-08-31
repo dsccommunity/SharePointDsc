@@ -7,6 +7,7 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
@@ -59,16 +60,23 @@ function Get-TargetResource
             if(($version.FileMajorPart -gt 15) -or ($version.FileMajorPart -eq 15 -and $version.FileBuildPart -ge 4745)) {
                 $cloudIndex = $serviceApp.CloudIndex
             }
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+            if ($null -ne $serviceAppProxies)
+            {
+                $serviceAppProxy = $serviceAppProxies | Where-Object { $serviceApp.IsConnected($_)}
+                if ($null -ne $serviceAppProxy) { $proxyName = $serviceAppProxy.Name}
+            }          
             $returnVal =  @{
-                Name = $serviceApp.DisplayName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $serviceApp.Database.Name
-                DatabaseServer = $serviceApp.Database.Server.Name
-                Ensure = "Present"
-                SearchCenterUrl = $serviceApp.SearchCenterUrl
+                Name                        = $serviceApp.DisplayName
+                ProxyName                   = $proxyName
+                ApplicationPool             = $serviceApp.ApplicationPool.Name
+                DatabaseName                = $serviceApp.Database.Name
+                DatabaseServer              = $serviceApp.Database.Server.Name
+                Ensure                      = "Present"
+                SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
-                CloudIndex = $cloudIndex
-                InstallAccount = $params.InstallAccount
+                CloudIndex                  = $cloudIndex
+                InstallAccount              = $params.InstallAccount
             }
             return $returnVal
         }
@@ -82,6 +90,7 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,
@@ -121,7 +130,8 @@ function Set-TargetResource
             
             $app = New-SPEnterpriseSearchServiceApplication @newParams 
             if ($app) {
-                New-SPEnterpriseSearchServiceApplicationProxy -Name "$($params.Name) Proxy" -SearchApplication $app
+                if ($null -eq $params.ProxyName) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
+                New-SPEnterpriseSearchServiceApplicationProxy -Name $pName -SearchApplication $app
                 if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) {
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                     $setParams = @{
@@ -187,6 +197,7 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  [System.String] $Name,
+        [parameter(Mandatory = $false)] [System.String] $ProxyName,
         [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
         [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
         [parameter(Mandatory = $false)] [System.String] $DatabaseName,

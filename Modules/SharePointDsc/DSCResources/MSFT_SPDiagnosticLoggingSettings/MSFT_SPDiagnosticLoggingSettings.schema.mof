@@ -1,34 +1,3 @@
-/*
-**Description**
-
-This resource is responsible for configuring settings to do with the diagnostic (ULS) logging on servers in the farm.
-These settings are applied to the diagnostic logging service for the farm and do not need to be applied to each server individually, the settings will be propagated throughout the farm when they are set. 
-
-**Example**
-
-    SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
-    {
-        PsDscRunAsCredential                        = $InstallAccount
-        LogPath                                     = "L:\ULSLogs"
-        LogSpaceInGB                                = 10
-        AppAnalyticsAutomaticUploadEnabled          = $false
-        CustomerExperienceImprovementProgramEnabled = $true
-        DaysToKeepLogs                              = 7
-        DownloadErrorReportingUpdatesEnabled        = $false
-        ErrorReportingAutomaticUploadEnabled        = $false
-        ErrorReportingEnabled                       = $false
-        EventLogFloodProtectionEnabled              = $true
-        EventLogFloodProtectionNotifyInterval       = 5
-        EventLogFloodProtectionQuietPeriod          = 2
-        EventLogFloodProtectionThreshold            = 5
-        EventLogFloodProtectionTriggerPeriod        = 2
-        LogCutInterval                              = 15
-        LogMaxDiskSpaceUsageEnabled                 = $true
-        ScriptErrorReportingDelay                   = 30
-        ScriptErrorReportingEnabled                 = $true
-        ScriptErrorReportingRequireAuth             = $true
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPDiagnosticLoggingSettings")]
 class MSFT_SPDiagnosticLoggingSettings : OMI_BaseResource
 {
@@ -50,6 +19,6 @@ class MSFT_SPDiagnosticLoggingSettings : OMI_BaseResource
     [Write, Description("What delay will be set before script error reporting is triggered")] uint32 ScriptErrorReportingDelay;
     [Write, Description("Is script error reporting enabled in this farm")] boolean ScriptErrorReportingEnabled;
     [Write, Description("Require users to be authenticated to allow script errors to be reported")] boolean ScriptErrorReportingRequireAuth;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
 
