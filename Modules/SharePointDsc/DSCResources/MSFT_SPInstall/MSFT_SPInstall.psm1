@@ -61,7 +61,6 @@ function Get-TargetResource
     }
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -93,7 +92,6 @@ function Set-TargetResource
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
-        return
     }
     
     $InstallerPath = Join-Path $BinaryDir "setup.exe"
@@ -110,7 +108,6 @@ function Set-TargetResource
             throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
                                "servers that have .NET 4.6 already installed. See details " + `
                                "at https://support.microsoft.com/en-us/kb/3087184")
-            return
         }    
     }
 
@@ -174,13 +171,16 @@ function Set-TargetResource
             if (    ($null -ne (Get-Item $pr1 -ErrorAction SilentlyContinue)) `
                 -or ($null -ne (Get-Item $pr2 -ErrorAction SilentlyContinue)) `
                 -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
-                ) {
+                )
+            {
                     
                 Write-Verbose -Message ("xSPInstall has detected the server has pending " + `
                                         "a reboot. Flagging to the DSC engine that the " + `
                                         "server should reboot before continuing.")
                 $global:DSCMachineStatus = 1
-            } else {
+            }
+            else
+            {
                 throw ("SharePoint installation has failed due to an issue with prerequisites " + `
                        "not being installed correctly. Please review the setup logs.")
             }
@@ -190,7 +190,6 @@ function Set-TargetResource
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -220,17 +219,17 @@ function Test-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Testing for installation of SharePoint"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
-        return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Testing for installation of SharePoint"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

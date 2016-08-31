@@ -74,7 +74,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -190,7 +189,6 @@ function Set-TargetResource
     $global:DSCMachineStatus = 1
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -239,6 +237,4 @@ function Test-TargetResource
                                     -ValuesToCheck @("FarmConfigDatabaseName") 
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

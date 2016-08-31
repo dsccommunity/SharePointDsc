@@ -37,12 +37,12 @@ function Get-TargetResource
     Write-Verbose -Message "Getting Quota Template settings"
     if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
-        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+        throw "StorageMaxInMB must be larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
     {
-        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+        throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -139,12 +139,12 @@ function Set-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
-        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+        throw "StorageMaxInMB must be larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
     {
-        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+        throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
     }
 
     switch ($Ensure) 
@@ -221,14 +221,14 @@ function Set-TargetResource
             }
         }
         "Absent" {
-            Write-Verbose "Ensure is set to Absent - Removing template"
+            Write-Verbose -Message "Ensure is set to Absent - Removing template"
 
             if ($StorageMaxInMB `
                 -or $StorageWarningInMB `
                 -or $MaximumUsagePointsSolutions `
                 -or $WarningUsagePointsSolutions) 
             {
-                Throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
+                throw ("Do not use StorageMaxInMB, StorageWarningInMB, " + `
                        "MaximumUsagePointsSolutions or WarningUsagePointsSolutions " + `
                        "when Ensure is specified as Absent")
             }
@@ -260,7 +260,6 @@ function Set-TargetResource
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -301,12 +300,12 @@ function Test-TargetResource
     Write-Verbose -Message "Testing quota template settings"
     if ($StorageMaxInMB -le $StorageWarningInMB) 
     {
-        Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+        throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -le $WarningUsagePointsSolutions) 
     {
-        Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+        throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                "WarningUsagePointsSolutions.")
     }
 
@@ -318,7 +317,8 @@ function Test-TargetResource
             { 
                 return $false 
             }
-            return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
+            return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                            -DesiredValues $PSBoundParameters
         }
         "Absent" {
             if ($StorageMaxInMB `
@@ -334,7 +334,8 @@ function Test-TargetResource
             $CurrentValues = Get-TargetResource @PSBoundParameters
             if ($CurrentValues.Ensure -eq "Present") 
             { 
-                # Error occured in Get method or template exists, which is not supposed to be. Return false
+                # Error occured in Get method or template exists, which is not supposed to be.
+                # Return false
                 return $false
             } 
             else 

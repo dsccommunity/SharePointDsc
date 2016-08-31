@@ -199,6 +199,8 @@ function Test-TargetResource()
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing remote farm trust '$Name'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
