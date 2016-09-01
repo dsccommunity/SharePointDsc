@@ -217,7 +217,7 @@ function Set-TargetResource
         if ($params.ContainsKey("MinimumTimeBetweenSearchQueries"))
         {
             $setParams.Add("MinimumTimeBetweenSearchQueries",
-                	       $params.MinimumTimeBetweenSearchQueries)
+                           $params.MinimumTimeBetweenSearchQueries)
         }
         if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun"))
         {
