@@ -253,8 +253,7 @@ function Set-TargetResource
             }
             $list = New-SPDSCDirectoryServiceNamingContextList
             
-            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" 
-                                                        + $params.Forest.Replace(".", ",DC=")))
+            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC="+ $params.Forest.Replace(".", ",DC=")))
             $list.Add((New-SPDSCDirectoryServiceNamingContext -ArgumentList @(
                                             $partition.distinguishedName,
                                             $params.Forest, 
@@ -265,8 +264,7 @@ function Set-TargetResource
                                             $listExcludedOUs,
                                             $null , 
                                             $false)))
-            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," +("DC=" 
-                                                        + $params.Forest.Replace(".", ",DC=")))
+            $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," +("DC="+ $params.Forest.Replace(".", ",DC=")))
             $list.Add((New-SPDSCDirectoryServiceNamingContext -ArgumentList @(
                                             $partition.distinguishedName,
                                             $params.Forest, 

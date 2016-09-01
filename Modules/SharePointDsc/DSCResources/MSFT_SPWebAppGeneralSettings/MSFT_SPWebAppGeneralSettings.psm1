@@ -104,7 +104,7 @@ function Get-TargetResource
             return $null
         }
 
-        Import-Module (Join-Path -Path $ScriptRoot 
+        Import-Module (Join-Path -Path $ScriptRoot `
                                  -ChildPath ("..\..\Modules\SharePointDsc.WebApplication\" + `
                                              "SPWebApplication.GeneralSettings.psm1") `
                                  -Resolve)
