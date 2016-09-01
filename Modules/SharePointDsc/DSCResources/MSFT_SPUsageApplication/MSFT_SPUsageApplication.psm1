@@ -4,43 +4,89 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
-        [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
-        [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxFileSizeKB,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxSpaceGB
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $FailoverDatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogCutTime,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $UsageLogLocation,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxFileSizeKB,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxSpaceGB,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting usage application '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+
         $nullReturn = @{
             Name = $params.Name
             Ensure = "Absent"
         } 
-        if ($null -eq $serviceApps) { 
+
+        if ($null -eq $serviceApps)
+        { 
             return $nullReturn
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Service Application" }
+        
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.TypeName -eq "Usage and Health Data Collection Service Application"
+        }
 
-        If ($null -eq $serviceApp)
+        if ($null -eq $serviceApp)
         {
             return $nullReturn
         }
         else
         {
-            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Proxy" }
+            $spUsageApplicationProxy = Get-SPServiceApplicationProxy `
+                                       | Where-Object -FilterScript {
+                                           $_.TypeName -eq "Usage and Health Data Collection Proxy"
+                                         }
+            
             $Ensure = "Present"
-            if($spUsageApplicationProxy.Status -eq "Disabled") {
+            if($spUsageApplicationProxy.Status -eq "Disabled")
+            {
                 $Ensure = "Absent"
             }
             
@@ -63,79 +109,155 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
-        [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
-        [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxFileSizeKB,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxSpaceGB
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $FailoverDatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogCutTime,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $UsageLogLocation,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxFileSizeKB,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxSpaceGB,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting usage application $Name"
 
     $CurrentState = Get-TargetResource @PSBoundParameters
 
-    if ($CurrentState.Ensure -eq "Absent" -and $Ensure -eq "Present") {
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    if ($CurrentState.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
-            if ($params.ContainsKey("DatabaseName")) { $newParams.Add("DatabaseName", $params.DatabaseName) }
-            if ($params.ContainsKey("DatabaseCredentials")) {
+
+            if ($params.ContainsKey("DatabaseName"))
+            {
+                $newParams.Add("DatabaseName", $params.DatabaseName)
+            }
+            
+            if ($params.ContainsKey("DatabaseCredentials"))
+            {
                 $params.Add("DatabaseUsername", $params.DatabaseCredentials.Username)
                 $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
-            if ($params.ContainsKey("DatabaseServer")) { $newParams.Add("DatabaseServer", $params.DatabaseServer) }
-            if ($params.ContainsKey("FailoverDatabaseServer")) { $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) }
+            
+            if ($params.ContainsKey("DatabaseServer"))
+            {
+                $newParams.Add("DatabaseServer", $params.DatabaseServer)
+            }
+            
+            if ($params.ContainsKey("FailoverDatabaseServer"))
+            {
+                $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer)
+            }
 
             New-SPUsageApplication @newParams
         }
     }
 
-    if ($Ensure -eq "Present") {
+    if ($Ensure -eq "Present")
+    {
         Write-Verbose -Message "Configuring usage application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
-            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Proxy" }
-            if($spUsageApplicationProxy.Status -eq "Disabled") {
+            $spUsageApplicationProxy = Get-SPServiceApplicationProxy `
+                                       | Where-Object -FilterScript {
+                                           $_.TypeName -eq "Usage and Health Data Collection Proxy"
+                                         }
+
+            if($spUsageApplicationProxy.Status -eq "Disabled")
+            {
                 $spUsageApplicationProxy.Provision()
             }
             
             $setParams = @{}
             $setParams.Add("LoggingEnabled", $true)
-            if ($params.ContainsKey("UsageLogCutTime")) { $setParams.Add("UsageLogCutTime", $params.UsageLogCutTime) }
-            if ($params.ContainsKey("UsageLogLocation")) { $setParams.Add("UsageLogLocation", $params.UsageLogLocation) }
-            if ($params.ContainsKey("UsageLogMaxFileSizeKB")) { $setParams.Add("UsageLogMaxFileSizeKB", $params.UsageLogMaxFileSizeKB) }
-            if ($params.ContainsKey("UsageLogMaxSpaceGB")) { $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) }
+            if ($params.ContainsKey("UsageLogCutTime"))
+            {
+                $setParams.Add("UsageLogCutTime", $params.UsageLogCutTime)
+            }
+            
+            if ($params.ContainsKey("UsageLogLocation"))
+            {
+                $setParams.Add("UsageLogLocation", $params.UsageLogLocation)
+            }
+            
+            if ($params.ContainsKey("UsageLogMaxFileSizeKB"))
+            {
+                $setParams.Add("UsageLogMaxFileSizeKB", $params.UsageLogMaxFileSizeKB)
+            }
+            
+            if ($params.ContainsKey("UsageLogMaxSpaceGB"))
+            {
+                $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB)
+            }
             Set-SPUsageService @setParams
         }    
     }
     
-    if ($Ensure -eq "Absent") {
+    if ($Ensure -eq "Absent")
+    {
         Write-Verbose -Message "Removing usage application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
             $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object { $_.TypeName -eq "Usage and Health Data Collection Service Application" }
-            Remove-SPServiceApplication $service -Confirm:$false
+                       | Where-Object -FilterScript {
+                           $_.TypeName -eq "Usage and Health Data Collection Service Application"
+                        }
+            Remove-SPServiceApplication -Identity $service -Confirm:$false
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -143,29 +265,73 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseName,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $DatabaseCredentials,
-        [parameter(Mandatory = $false)] [System.String] $FailoverDatabaseServer,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogCutTime,
-        [parameter(Mandatory = $false)] [System.String] $UsageLogLocation,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxFileSizeKB,
-        [parameter(Mandatory = $false)] [System.UInt32] $UsageLogMaxSpaceGB
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseName,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $DatabaseCredentials,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $FailoverDatabaseServer,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogCutTime,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $UsageLogLocation,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxFileSizeKB,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $UsageLogMaxSpaceGB,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for usage application '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
-    if ($Ensure -eq "Present") {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("UsageLogCutTime", "UsageLogLocation", "UsageLogMaxFileSizeKB", "UsageLogMaxSpaceGB", "Ensure")
-    } else {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    if ($Ensure -eq "Present")
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("UsageLogCutTime",
+                                                         "UsageLogLocation",
+                                                         "UsageLogMaxFileSizeKB",
+                                                         "UsageLogMaxSpaceGB",
+                                                         "Ensure")
+    }
+    else
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure")
     }
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

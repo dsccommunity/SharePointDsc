@@ -25,14 +25,18 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
-
     Write-Verbose -Message "Getting permissions for user profile service proxy '$ProxyName"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
+
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
-        $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
+        $proxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
+            $_.DisplayName -eq $params.ProxyName
+        }
         if ($null -eq $proxy) 
         {
             return @{
@@ -43,6 +47,7 @@ function Get-TargetResource
                 InstallAccount = $params.InstallAccount
             }
         }
+
         $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
 
         $createPersonalSite = @()
@@ -137,6 +142,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting permissions for user profile service proxy '$ProxyName"
+
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -149,27 +155,38 @@ function Set-TargetResource
                                 "'NT AUTHORITY\Authenticated Users'. This will be removed as " + `
                                 "identies on service app proxy permissions should be claims based.")
 
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
 
-            $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
+            $proxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
+                $_.DisplayName -eq $params.ProxyName
+            }
             $security = Get-SPProfileServiceApplicationSecurity -ProfileServiceApplicationProxy $proxy
             Revoke-SPObjectSecurity -Identity $security -All
-            Set-SPProfileServiceApplicationSecurity -Identity $security -ProfileServiceApplicationProxy $proxy -Confirm:$false
+            Set-SPProfileServiceApplicationSecurity -Identity $security `
+                                                    -ProfileServiceApplicationProxy $proxy `
+                                                    -Confirm:$false
             Write-Verbose -Message "Successfully cleared all permissions on the service app proxy"
         }
 
-        Write-Verbose -Message "Waiting 2 minutes for proxy permissions to be applied fully before continuing"
+        Write-Verbose -Message ("Waiting 2 minutes for proxy permissions to be applied fully " + `
+                                "before continuing")
         Start-Sleep -Seconds 120
         Write-Verbose -Message "Continuing configuration by getting the new current values."
         $CurrentValues = Get-TargetResource @PSBoundParameters
     }
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters, $CurrentValues) -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters, $CurrentValues) `
+                        -ScriptBlock {
         $params = $args[0]
         $CurrentValues = $args[1]
 
-        $proxy = Get-SPServiceApplicationProxy | Where-Object { $_.DisplayName -eq $params.ProxyName }
+        $proxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
+            $_.DisplayName -eq $params.ProxyName
+        }
         if ($null -eq $proxy) 
         {
             throw "Unable to find service application proxy called '$($params.ProxyName)'"
@@ -188,8 +205,12 @@ function Set-TargetResource
             $permissionsDiff = Compare-Object -ReferenceObject $CurrentValues.$permission `
                                               -DifferenceObject  $params.$permission
                                             
-            $everyoneDiff = $permissionsDiff | Where-Object -FilterScript { $_.InputObject -eq "Everyone" }
-            $noneDiff = $permissionsDiff | Where-Object -FilterScript { $_.InputObject -eq "None" }
+            $everyoneDiff = $permissionsDiff | Where-Object -FilterScript {
+                $_.InputObject -eq "Everyone"
+            }
+            $noneDiff = $permissionsDiff | Where-Object -FilterScript {
+                $_.InputObject -eq "None"
+            }
 
             if (($null -ne $noneDiff) -and ($noneDiff.SideIndicator -eq "=>")) 
             {
@@ -226,8 +247,8 @@ function Set-TargetResource
             }
             elseif (($null -ne $everyoneDiff) -and ($everyoneDiff.SideIndicator -eq "=>")) 
             {
-                # Need to add everyone, so remove all the permissions that exist currently of this type
-                # and then add the everyone permissions
+                # Need to add everyone, so remove all the permissions that exist currently of this
+                # type and then add the everyone permissions
                 foreach($user in $CurrentValues.$permission)
                 {
                     if ($user -ne "Everyone" -and $user -ne "None") 

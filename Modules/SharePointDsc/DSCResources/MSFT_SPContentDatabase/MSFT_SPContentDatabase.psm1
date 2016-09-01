@@ -4,14 +4,38 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $Enabled,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $WarningSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $MaximumSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting content database configuration settings"
@@ -68,20 +92,43 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $Enabled,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $WarningSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $MaximumSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting content database configuration settings"
@@ -92,7 +139,9 @@ function Set-TargetResource
         $params = $args[0]
         $scriptRoot  = $args[1]
 
-        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDsc.ContentDatabase\SPContentDatabase.psm1" -Resolve)
+        Import-Module (Join-Path -Path $scriptRoot `
+                                 -ChildPath "..\..\Modules\SharePointDsc.ContentDatabase\SPContentDatabase.psm1" `
+                                 -Resolve)
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
         # does not return disabled databases.
@@ -100,20 +149,24 @@ function Set-TargetResource
             $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
         }
 
-        if ($params.Ensure -eq "Present") {
+        if ($params.Ensure -eq "Present")
+        {
             # Check if specified web application exists and throw exception when
             # this is not the case
             $webapp = Get-SPWebApplication | Where-Object -FilterScript {
                 $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/")
             }
 
-            if ($null -eq $webapp) {
+            if ($null -eq $webapp)
+            {
                 throw "Specified web application does not exist."
             }
 
             # Check if database exists
-            if ($null -ne $cdb) {
-                if ($cdb.Server -ne $params.DatabaseServer) {
+            if ($null -ne $cdb)
+            {
+                if ($cdb.Server -ne $params.DatabaseServer)
+                {
                     throw ("Specified database server does not match the actual database " + `
                            "server. This resource cannot move the database to a different " + `
                            "SQL instance.")
@@ -121,8 +174,9 @@ function Set-TargetResource
 
                 # Check and change attached web application.
                 # Dismount and mount to correct web application
-                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/")) {
-                    Dismount-SPContentDatabase $params.Name -Confirm:$false
+                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/"))
+                {
+                    Dismount-SPContentDatabase -Identity $params.Name -Confirm:$false
 
                     if ($params.ContainsKey("Enabled"))
                     {
@@ -134,7 +188,7 @@ function Set-TargetResource
                     }
                     
                     $parameters = @{} + $params
-                    $cdb = Mount-SPDscContentDatabase $parameters $enabled
+                    $cdb = Mount-SPDscContentDatabase -Params $parameters -Enabled $enabled
                 }
 
                 # Check and change database status
@@ -186,7 +240,7 @@ function Set-TargetResource
                 }
                 
                 $parameters = @{} + $params
-                $cdb = Mount-SPDscContentDatabase $parameters $enabled
+                $cdb = Mount-SPDscContentDatabase -Params $parameters -Enabled $enabled
             }
             $cdb.Update()
         }
@@ -195,12 +249,11 @@ function Set-TargetResource
             if ($null -ne $cdb)
             {
                 # Database exists, but shouldn't. Dismount database
-                Dismount-SPContentDatabase $params.Name -Confirm:$false
+                Dismount-SPContentDatabase -Identity $params.Name -Confirm:$false
             }
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -208,14 +261,38 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $Enabled,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $WarningSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $MaximumSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing content database configuration settings"

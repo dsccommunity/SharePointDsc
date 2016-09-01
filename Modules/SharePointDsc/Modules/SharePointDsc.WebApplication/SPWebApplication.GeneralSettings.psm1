@@ -67,11 +67,11 @@ function Set-SPDSCWebApplicationGeneralConfig
         AllowAccessToWebPartCatalog = "AllowOnlineWebPartCatalog"
         SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
     } 
-    $mapping.Keys | ForEach-Object {
+    $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
-                                                   -PropertyToSet $_ `
-                                                   -ParamsValue $settings `
-                                                   -ParamKey $mapping[$_]
+                                              -PropertyToSet $_ `
+                                              -ParamsValue $settings `
+                                              -ParamKey $mapping[$_]
     }
 
     # Set form digest settings child properties
@@ -130,4 +130,3 @@ function Test-SPDSCWebApplicationGeneralConfig
                                            -ValuesToCheck $valuesToCheck
     return $testReturn
 }
-

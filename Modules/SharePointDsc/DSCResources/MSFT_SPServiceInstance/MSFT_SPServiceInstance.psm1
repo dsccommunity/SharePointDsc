@@ -4,18 +4,18 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
         [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $InstallAccount,
-        
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
         [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
-        $Ensure = "Present"
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting service instance '$Name'"
@@ -73,24 +73,23 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
         [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $InstallAccount,
-        
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
         [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
-        $Ensure = "Present"
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
@@ -151,7 +150,8 @@ function Set-TargetResource
                     $_.GetType().Name -eq $newName
                 }
             }
-            if ($null -eq $si) {
+            if ($null -eq $si)
+            {
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
             Stop-SPServiceInstance -Identity $si
@@ -159,28 +159,28 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
         [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $InstallAccount,
-        
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+
         [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
-        $Ensure = "Present"
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing service instance '$Name'"
+    
     $PSBoundParameters.Ensure = $Ensure
 
     $testArgs = @{

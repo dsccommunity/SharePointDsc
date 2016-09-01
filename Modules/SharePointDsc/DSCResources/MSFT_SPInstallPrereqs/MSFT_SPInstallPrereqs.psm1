@@ -571,7 +571,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -660,6 +659,10 @@ function Test-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Checking installation of SharePoint prerequisites"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
@@ -667,13 +670,11 @@ function Test-TargetResource
         return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Write-Verbose -Message "Checking installation of SharePoint prerequisites"
-    
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 function Test-SPDscPrereqInstallStatus

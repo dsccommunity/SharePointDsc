@@ -46,7 +46,7 @@ function Set-SPDSCWebApplicationThrottlingConfig {
         EventHandlersEnabled                        = "EventHandlersEnabled"
         ChangeLogExpirationEnabled                  = "ChangeLogEnabled"
     } 
-    $mapping.Keys | ForEach-Object {
+    $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
                                               -PropertyToSet $_ `
                                               -ParamsValue $settings `

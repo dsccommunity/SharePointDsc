@@ -97,7 +97,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -139,11 +138,12 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    
     Write-Verbose -Message "Creating search result source '$Name'"
 
-    if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") {
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+    
+    if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    {
         Write-Verbose -Message "Creating search result source $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -185,9 +185,12 @@ function Set-TargetResource
             $resultSource.Commit()
         }
     }
-    if ($Ensure -eq "Absent") {
+    if ($Ensure -eq "Absent")
+    {
         Write-Verbose -Message "Removing search result source $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
 
@@ -263,7 +266,9 @@ function Test-TargetResource
     Write-Verbose -Message "Testing search result source '$Name'"
     $PSBoundParameters.Ensure = $Ensure
     
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure") 
 }
 
 Export-ModuleMember -Function *-TargetResource

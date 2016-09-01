@@ -214,6 +214,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Starting install of SP binaries"
+
     if ($Ensure -eq "Absent")
     {
         throw [Exception] "SharePoint does not support uninstalling updates."
@@ -455,7 +457,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -489,16 +490,17 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing for installation of the SharePoint Update"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent")
     {
         throw [Exception] "SharePoint does not support uninstalling updates."
         return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Testing for installation of the SharePoint Update"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

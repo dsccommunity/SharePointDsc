@@ -4,28 +4,40 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $SiteUrl,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
-
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SiteUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting app catalog status of $SiteUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
-        $site = Get-SPSite $params.SiteUrl -ErrorAction SilentlyContinue
-        if ($null -eq $site) {
+        $site = Get-SPSite -Identity $params.SiteUrl -ErrorAction SilentlyContinue
+        if ($null -eq $site)
+        {
             return $null
         }
+        
         $wa = $site.WebApplication
         $feature = $wa.Features.Item([Guid]::Parse("f8bea737-255e-4758-ab82-e34bb46f5828"))
-        if($null -eq $feature) {
+        if($null -eq $feature)
+        {
             return $null
         }
-        if ($site.ID -ne $feature.Properties["__AppCatSiteId"].Value) {
+        
+        if ($site.ID -ne $feature.Properties["__AppCatSiteId"].Value)
+        {
             return $null
         } 
+
         return @{
             SiteUrl = $site.Url
             InstallAccount = $params.InstallAccount
@@ -39,14 +51,21 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $SiteUrl,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SiteUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Updating app domain settings for $SiteUrl"
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
         $params = $args[0]
-        Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false 
+        Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false
     }
 }
 
@@ -56,8 +75,13 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $SiteUrl,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SiteUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -65,7 +89,9 @@ function Test-TargetResource
     if($null -eq $CurrentValues){
         return $false
     }
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("SiteUrl") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("SiteUrl") 
 }
 
 Export-ModuleMember -Function *-TargetResource

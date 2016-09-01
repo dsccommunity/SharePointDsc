@@ -181,8 +181,8 @@ function Set-TargetResource
     }
     
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
         $params = $args[0]
 
         $newFarmArgs = @{
@@ -283,6 +283,8 @@ function Test-TargetResource
         $ServerRole
     )
 
+    Write-Verbose "Checking for local farm presence"
+
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
     {
@@ -290,8 +292,11 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose "Checking for local farm presence"
-    if ($null -eq $CurrentValues) { return $false }
+    if ($null -eq $CurrentValues)
+    {
+        return $false
+    }
+    
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("FarmConfigDatabaseName")
