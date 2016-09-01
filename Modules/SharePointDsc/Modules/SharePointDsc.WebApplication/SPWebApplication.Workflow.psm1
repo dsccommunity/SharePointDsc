@@ -65,4 +65,3 @@ function Test-SPDSCWebApplicationWorkflowConfig {
                                            -ValuesToCheck $valuesTocheck
     return $testReturn
 }
-

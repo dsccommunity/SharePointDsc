@@ -7,9 +7,10 @@ function Get-SPDSCWebApplicationBlockedFileTypeConfig
         $WebApplication
     )
     $result = @()
-    $WebApplication.BlockedFileExtensions | ForEach-Object { 
+    $WebApplication.BlockedFileExtensions | ForEach-Object -FilterScript { 
         $result += $_ 
     }
+
     return @{
        Blocked = $result
     }
@@ -114,9 +115,10 @@ function Test-SPDSCWebApplicationBlockedFileTypeConfig
     if ($DesiredSettings.ContainsKey("EnsureBlocked") -eq $true) 
     {
         $itemsToAdd = Compare-Object -ReferenceObject $CurrentSettings.Blocked `
-                                     -DifferenceObject $DesiredSettings.EnsureBlocked | Where-Object { 
-                                         $_.SideIndicator -eq "=>"
-                                        }
+                                     -DifferenceObject $DesiredSettings.EnsureBlocked `
+                      | Where-Object -FilterScript { 
+                            $_.SideIndicator -eq "=>"
+                        }
         if ($null -ne $itemsToAdd) 
         { 
             return $false 
@@ -135,4 +137,3 @@ function Test-SPDSCWebApplicationBlockedFileTypeConfig
     }
     return $true
 }
-

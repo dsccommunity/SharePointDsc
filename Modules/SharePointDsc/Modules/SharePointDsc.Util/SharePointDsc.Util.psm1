@@ -3,7 +3,9 @@ function Add-SPDSCUserToLocalAdmin()
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)] [string] $UserName
+        [parameter(Mandatory = $true,Position=1)]
+        [string]
+        $UserName
     )
 
     if ($UserName.Contains("\") -eq $false)
@@ -34,7 +36,7 @@ function Get-SPDSCAssemblyVersion()
         [string]
         $PathToAssembly
     )
-    return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
+    return (Get-Command -Name $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
 function Get-SPDscFarmVersionInfo()
@@ -48,7 +50,7 @@ function Get-SPDscFarmVersionInfo()
 
     $farm = Get-SPFarm
     $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
-    $server = Get-SPServer $env:COMPUTERNAME
+    $server = Get-SPServer -Identity $env:COMPUTERNAME
     $versionInfo = @{}
     $versionInfo.Highest = ""
     $versionInfo.Lowest = ""
@@ -120,7 +122,7 @@ function Get-SPDscFarmProductsInfo()
 {
     $farm = Get-SPFarm
     $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
-    $server = Get-SPServer $env:COMPUTERNAME
+    $server = Get-SPServer -Identity $env:COMPUTERNAME
 
     $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
     return $serverProductInfo.Products
@@ -184,8 +186,11 @@ function Get-SPDSCUserProfileSubTypeManager
 
 function Get-SPDSCInstalledProductVersion()
 {
-    $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions\*\ISAPI\Microsoft.SharePoint.dll"
-    $fullPath = Get-Item $pathToSearch | Sort-Object { $_.Directory } -Descending | Select-Object -First 1
+    $pathToSearch = "C:\Program Files\Common Files\microsoft shared\Web Server Extensions" + `
+                    "\*\ISAPI\Microsoft.SharePoint.dll"
+    $fullPath = Get-Item -Path $pathToSearch `
+                | Sort-Object { $_.Directory } -Descending `
+                | Select-Object -First 1
     return (Get-Command $fullPath).FileVersionInfo
 }
 
@@ -194,15 +199,26 @@ function Invoke-SPDSCCommand()
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential,
-        [parameter(Mandatory = $false)] [Object[]]    $Arguments,
-        [parameter(Mandatory = $true)]  [ScriptBlock] $ScriptBlock
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $Credential,
+        
+        [parameter(Mandatory = $false)]
+        [Object[]]
+        $Arguments,
+        
+        [parameter(Mandatory = $true)]
+        [ScriptBlock]
+        $ScriptBlock
     )
 
     $VerbosePreference = 'Continue'
 
     $invokeArgs = @{
-        ScriptBlock = [ScriptBlock]::Create("if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue)) {Add-PSSnapin Microsoft.SharePoint.PowerShell}; " + $ScriptBlock.ToString())
+        ScriptBlock = [ScriptBlock]::Create("if (`$null -eq (Get-PSSnapin -Name Microsoft." + `
+                                            "SharePoint.PowerShell -ErrorAction SilentlyContinue" + `
+                                            ")) {Add-PSSnapin Microsoft.SharePoint.PowerShell}; " + `
+                                            $ScriptBlock.ToString())
     }
     
     if ($null -ne $Arguments)
@@ -214,10 +230,10 @@ function Invoke-SPDSCCommand()
     {
         if ($Env:USERNAME.Contains("$"))
         {
-            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
-            return
+            throw [Exception] ("You need to specify a value for either InstallAccount or " + `
+                               "PsDscRunAsCredential.")
         }
-        Write-Verbose "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
+        Write-Verbose -Message "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
 
         try 
         {
@@ -227,7 +243,8 @@ function Invoke-SPDSCCommand()
         {
             if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action"))
             {
-                Write-Verbose "Detected an update conflict, restarting server to allow DSC to resume and retry"
+                Write-Verbose -Message ("Detected an update conflict, restarting server to " + `
+                                        "allow DSC to resume and retry")
                 $global:DSCMachineStatus = 1
             }
             else
@@ -235,7 +252,6 @@ function Invoke-SPDSCCommand()
                 throw $_
             }
         }
-        
         return $result
     }
     else
@@ -244,16 +260,23 @@ function Invoke-SPDSCCommand()
         { 
             if (-not $Env:USERNAME.Contains("$"))
             {
-                throw [Exception] "Unable to use both InstallAccount and PsDscRunAsCredential in a single resource. Remove one and try again."
-                return
+                throw [Exception] ("Unable to use both InstallAccount and PsDscRunAsCredential " + `
+                                   "in a single resource. Remove one and try again.")
             }
         }
-        Write-Verbose "Executing using a provided credential and local PSSession as user $($Credential.UserName)"
+        Write-Verbose -Message ("Executing using a provided credential and local PSSession as " + `
+                                "user $($Credential.UserName)")
 
         #Running garbage collection to resolve issues related to Azure DSC extention use
         [GC]::Collect()
 
-        $session = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential -Authentication CredSSP -Name "Microsoft.SharePoint.DSC" -SessionOption (New-PSSessionOption -OperationTimeout 0 -IdleTimeout 60000) -ErrorAction Continue
+        $session = New-PSSession -ComputerName $env:COMPUTERNAME `
+                                 -Credential $Credential `
+                                 -Authentication CredSSP `
+                                 -Name "Microsoft.SharePoint.DSC" `
+                                 -SessionOption (New-PSSessionOption -OperationTimeout 0 `
+                                                                     -IdleTimeout 60000) `
+                                 -ErrorAction Continue
         
         if ($session)
         {
@@ -268,7 +291,8 @@ function Invoke-SPDSCCommand()
         {
             if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action"))
             {
-                Write-Verbose "Detected an update conflict, restarting server to allow DSC to resume and retry"
+                Write-Verbose -Message ("Detected an update conflict, restarting server to " + `
+                                        "allow DSC to resume and retry")
                 $global:DSCMachineStatus = 1
             }
             else
@@ -291,9 +315,14 @@ function Rename-SPDSCParamValue()
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] $Params,
-        [parameter(Mandatory = $true,Position=2)] $OldName,
-        [parameter(Mandatory = $true,Position=3)] $NewName
+        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)]
+        $Params,
+
+        [parameter(Mandatory = $true,Position=2)]
+        $OldName,
+
+        [parameter(Mandatory = $true,Position=3)]
+        $NewName
     )
 
     if ($Params.ContainsKey($OldName))
@@ -344,8 +373,13 @@ function Test-SPDSCObjectHasProperty()
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]  [Object] $Object,
-        [parameter(Mandatory = $true,Position=2)]  [String] $PropertyName
+        [parameter(Mandatory = $true,Position=1)]
+        [Object]
+        $Object,
+
+        [parameter(Mandatory = $true,Position=2)]
+        [String]
+        $PropertyName
     )
     if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true)
     {
@@ -363,10 +397,13 @@ function Test-SPDSCRunAsCredential()
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Credential
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $Credential
     )
 
-    # If no specific credential is passed and it's not the machine account, it must be PsDscRunAsCredential
+    # If no specific credential is passed and it's not the machine account, it must
+    # be PsDscRunAsCredential
     if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false))
     {
         return $true
@@ -381,15 +418,17 @@ function Test-SPDSCRunningAsFarmAccount()
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param ( 
-        [parameter(Mandatory = $false)] [pscredential] $InstallAccount
+        [parameter(Mandatory = $false)]
+        [pscredential]
+        $InstallAccount
     )
 
     if ($null -eq $InstallAccount)
     {
         if ($Env:USERNAME.Contains("$"))
         {
-            throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
-            return
+            throw [Exception] ("You need to specify a value for either InstallAccount " + `
+                               "or PsDscRunAsCredential.")
         }
         $Username = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
     }
@@ -582,7 +621,9 @@ function Test-SPDSCUserIsLocalAdmin()
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)] [string] $UserName
+        [parameter(Mandatory = $true,Position=1)]
+        [string]
+        $UserName
     )
 
     if ($UserName.Contains("\") -eq $false)
@@ -595,7 +636,7 @@ function Test-SPDSCUserIsLocalAdmin()
 
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | 
         ForEach-Object { $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null) } | 
-        Where-Object { $_ -eq $accountName }
+        Where-Object -FilterScript { $_ -eq $accountName }
 }
 
 function Test-SPDSCIsADUser()
@@ -603,7 +644,8 @@ function Test-SPDSCIsADUser()
     [OutputType([System.Boolean])]
     [CmdletBinding()]
     param (
-        [string] $IdentityName
+        [string]
+        $IdentityName
     )
 
     if ($IdentityName -like "*\*")
@@ -664,7 +706,7 @@ function Set-SPDscObjectPropertyIfValuePresent()
     } 
     else 
     {
-        if (((Test-SPDSCObjectHasProperty $ParamsValue $ParamKey) -eq $true) `
+        if (((Test-SPDSCObjectHasProperty -Object $ParamsValue -PropertyName $ParamKey) -eq $true) `
           -and ($null -ne $ParamsValue.$ParamKey)) 
         {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
