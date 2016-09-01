@@ -101,7 +101,7 @@ function Set-TargetResource
         }
         catch
         {
-            throw ()"No local SharePoint farm was detected. IRM settings will not be applied")
+            throw ("No local SharePoint farm was detected. IRM settings will not be applied")
         }
         
         $admService = Get-SPDSCContentService

@@ -26,11 +26,11 @@ function Get-TargetResource
         $InstallAccount
     )
 
-        Write-Verbose -Message "Getting Access Services service app '$Name'"
+    Write-Verbose -Message "Getting Access Services service app '$Name'"
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue

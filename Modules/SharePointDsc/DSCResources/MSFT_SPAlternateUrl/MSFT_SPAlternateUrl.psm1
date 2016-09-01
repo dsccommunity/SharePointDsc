@@ -36,7 +36,7 @@ function Get-TargetResource
 
         $aam = Get-SPAlternateURL -WebApplication $params.WebAppUrl `
                                   -Zone $params.Zone `
-                                  -ErrorAction SilentlyContinue `| Select-Object -First 1
+                                  -ErrorAction SilentlyContinue | Select-Object -First 1
         $url = $null
         $Ensure = "Absent"
         

@@ -193,7 +193,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $appService =  Get-SPServiceApplication -Name $params.Name 
+            $appService =  Get-SPServiceApplication -Name $params.Name `
                            | Where-Object -FilterScript {
                                  $_.TypeName -eq "PerformancePoint Service Application"
                              }

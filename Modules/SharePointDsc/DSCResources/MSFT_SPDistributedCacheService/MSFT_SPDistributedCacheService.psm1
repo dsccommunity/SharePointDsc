@@ -126,8 +126,8 @@ function Set-TargetResource
             Write-Verbose -Message "Create a firewall rule for AppFabric"
             Invoke-SPDSCCommand -Credential $InstallAccount `
                                 -ScriptBlock {
-                $icmpFirewallRule = Get-NetFirewallRule -DisplayName "File and Printer Sharing " + `
-                                                                     "(Echo Request - ICMPv4-In)" `
+                $icmpFirewallRule = Get-NetFirewallRule -DisplayName ("File and Printer Sharing " + `
+                                                                     "(Echo Request - ICMPv4-In)") `
                                                         -ErrorAction SilentlyContinue
 
                 if($null -eq $icmpFirewallRule)

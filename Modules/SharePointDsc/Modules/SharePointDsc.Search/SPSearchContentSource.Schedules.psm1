@@ -119,7 +119,7 @@ function Test-SPDSCSearchCrawlSchedule {
         }
         "Monthly" { 
             if ((Test-SPDSCObjectHasProperty -Object $DesiredSchedule `
-                                             -PropertyName "CrawlScheduleDaysOfMonth") -eq $true 
+                                             -PropertyName "CrawlScheduleDaysOfMonth") -eq $true `
                 -and $CurrentSchedule.CrawlScheduleDaysOfMonth -ne $DesiredSchedule.CrawlScheduleDaysOfMonth)
             {
                 return $false
