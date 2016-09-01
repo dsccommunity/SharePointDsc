@@ -8,10 +8,9 @@ $VerbosePreference = "SilentlyContinue"
 <## Scripts Variables #>
 $Script:dscConfigContent = ""
 
-$Script:spFarmAccount = Get-Credential -Message "Farm Account"
-
 <## This is the main function for this script. It acts as a call dispatcher, calling th various functions required in the proper order to get the full farm picture. #>
 function Orchestrator{    
+	$Script:spFarmAccount = Get-Credential -Message "Farm Account"
 	$Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers
