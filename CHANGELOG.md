@@ -10,6 +10,7 @@
  * Fixed typos in documentation for InstallAccount parameter on most resources
  * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
  * New resources: SPConfigWizard, SPInstallLanguagePack and SPProductUpdate
+ * Updated all resources to match the coding style guidelines
 
 ### 1.2
 
