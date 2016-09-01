@@ -372,8 +372,7 @@ function Confirm-SPDscUpaPermissionsConfig()
         "CreatePersonalSite",
         "FollowAndEditProfile",
         "UseTagsAndNotes"
-    ) | ForEach-Object -Process
-    {
+    ) | ForEach-Object -Process {
         if (($Parameters.$_ -contains "Everyone") -and ($Parameters.$_ -contains "None")) 
         {
             throw ("You can not specify 'Everyone' and 'None' in the same property. " + `

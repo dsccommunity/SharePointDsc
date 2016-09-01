@@ -250,8 +250,8 @@ function Set-TargetResource
                                         $_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] `
                                            -and $_.LoginProviderName -like $params.Name
                                      } | Foreach-Object -Process {
-                                            Write-Verbose -Message ("Removing " $_.LoginProviderName " from " + `
-                                                                    "web app " $wa.Url " in zone " $zone)
+                                            Write-Verbose -Message ("Removing $($_.LoginProviderName) from " + `
+                                                                    "web app $($wa.Url) in zone $zone")
                                             $wa.GetIisSettingsWithFallback($zone).ClaimsAuthenticationProviders.Remove($_) `
                                                 | Out-Null
                                                 

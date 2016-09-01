@@ -67,7 +67,7 @@ function Set-SPDSCWebApplicationGeneralConfig
         AllowAccessToWebPartCatalog = "AllowOnlineWebPartCatalog"
         SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
     } 
-    $mapping.Keys | ForEach-Object {
+    $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
                                               -PropertyToSet $_ `
                                               -ParamsValue $settings `

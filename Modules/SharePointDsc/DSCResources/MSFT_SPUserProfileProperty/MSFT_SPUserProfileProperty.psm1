@@ -559,7 +559,7 @@ function Set-TargetResource
             #$userProfileConfigManager.ConnectionManager[$params.MappingConnectionName]
             $currentMapping  = $syncConnection.PropertyMapping.Item($params.Name)
             if ($null -eq $currentMapping `
-                -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) 
+                -or ($currentMapping.DataSourcePropertyName -ne $params.MappingPropertyName) `
                 -or ($currentMapping.IsImport `
                     -and $params.ContainsKey("MappingDirection") `
                     -and $params.MappingDirection -eq "Export"))

@@ -39,7 +39,7 @@ function Get-TargetResource
             return $null
         }
 
-        Import-Module (Join-Path -Path $ScriptRoot 
+        Import-Module (Join-Path -Path $ScriptRoot `
                                  -ChildPath ("..\..\Modules\SharePointDsc.WebApplication\" + `
                                              "SPWebApplication.BlockedFileTypes.psm1") `
                                  -Resolve)
@@ -136,7 +136,7 @@ function Test-TargetResource
         return $false
     }
 
-    Import-Module (Join-Path -Path $PSScriptRoot 
+    Import-Module (Join-Path -Path $PSScriptRoot `
                              -ChildPath ("..\..\Modules\SharePointDsc.WebApplication\" + `
                                          "SPWebApplication.BlockedFileTypes.psm1") `
                              -Resolve)
