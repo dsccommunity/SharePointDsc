@@ -4,28 +4,64 @@
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [String]   $Name,
-        [parameter(Mandatory = $true)]  [String]   $Description,
-        [parameter(Mandatory = $true)]  [String]   $Realm,
-        [parameter(Mandatory = $true)]  [String]   $SignInUrl,
-        [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
-        [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
-                                        [String]   $Ensure = "Present",
-        [parameter(Mandatory = $false)] [String]   $ClaimProviderName,
-        [parameter(Mandatory = $false)] [String]   $ProviderSignOutUri,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [String]
+        $Name,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $Description,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $Realm,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $SignInUrl,
+
+        [parameter(Mandatory = $true)] 
+        [String]
+        $IdentifierClaim,
+
+        [parameter(Mandatory = $true)]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ClaimsMappings,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $SigningCertificateThumbPrint,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [String]
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $ClaimProviderName,
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $ProviderSignOutUri,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer '$Name'..."
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
         $claimsMappings = @()
-        $spTrust = Get-SPTrustedIdentityTokenIssuer $params.Name -ErrorAction SilentlyContinue
-        if ($spTrust) { 
+        $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.Name `
+                                                    -ErrorAction SilentlyContinue
+        if ($spTrust) 
+        { 
             $description = $spTrust.Description
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
@@ -34,10 +70,15 @@
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
-            $spTrust.ClaimTypeInformation| Foreach-Object {
-                $claimsMappings = $claimsMappings + @{Name = $_.DisplayName; IncomingClaimType = $_.InputClaimType; LocalClaimType = $_.MappedClaimType}
+            $spTrust.ClaimTypeInformation| Foreach-Object -Process {
+                $claimsMappings = $claimsMappings + @{
+                    Name = $_.DisplayName; 
+                    IncomingClaimType = $_.InputClaimType; 
+                    LocalClaimType = $_.MappedClaimType}
             }
-        } else { 
+        } 
+        else 
+        { 
             $description = ""
             $realm = ""
             $signInUrl = ""
@@ -69,18 +110,50 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [String]   $Name,
-        [parameter(Mandatory = $true)]  [String]   $Description,
-        [parameter(Mandatory = $true)]  [String]   $Realm,
-        [parameter(Mandatory = $true)]  [String]   $SignInUrl,
-        [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
-        [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
-                                        [String]   $Ensure = "Present",
-        [parameter(Mandatory = $false)] [String]   $ClaimProviderName,
-        [parameter(Mandatory = $false)] [String]   $ProviderSignOutUri,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [String]
+        $Name,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $Description,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $Realm,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $SignInUrl,
+
+        [parameter(Mandatory = $true)] 
+        [String]
+        $IdentifierClaim,
+
+        [parameter(Mandatory = $true)]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ClaimsMappings,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $SigningCertificateThumbPrint,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [String]
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $ClaimProviderName,
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $ProviderSignOutUri,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -89,19 +162,25 @@ function Set-TargetResource
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            Write-Verbose "Create SPTrustedIdentityTokenIssuer '$Name'..."
+            Write-Verbose -Message "Create SPTrustedIdentityTokenIssuer '$Name'..."
 
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                          -Arguments $PSBoundParameters `
+                                          -ScriptBlock {
                 $params = $args[0]
 
-                $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {$_.Thumbprint -match $params.SigningCertificateThumbPrint}
-                if (!$cert) {
-                    throw "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My."
+                $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
+                    $_.Thumbprint -match $params.SigningCertificateThumbPrint
+                }
+                if (!$cert) 
+                {
+                    throw ("The certificate thumbprint does not match a certificate in " + `
+                           "certificate store LocalMachine\My.")
                     return
                 }
                 
                 $claimsMappingsArray = @()
-                $params.ClaimsMappings| Foreach-Object {
+                $params.ClaimsMappings| Foreach-Object -Process {
                     $runParams = @{}
                     $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
@@ -113,11 +192,17 @@ function Set-TargetResource
                     { 
                         $runParams.Add("LocalClaimType", $_.LocalClaimType) 
                     }
-                    $claimsMappingsArray = $claimsMappingsArray + (New-SPClaimTypeMapping @runParams)
+
+                    $newMapping = New-SPClaimTypeMapping @runParams
+                    $claimsMappingsArray += $newMapping
                 }
 
-                if (!($claimsMappingsArray| Where-Object{$_.MappedClaimType -like $params.IdentifierClaim})) {
-                    throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
+                if (!($claimsMappingsArray| Where-Object -FilterScript {
+                        $_.MappedClaimType -like $params.IdentifierClaim
+                    })) 
+                {
+                    throw ("IdentifierClaim does not match any claim type specified in " + `
+                           "ClaimsMappings.")
                     return
                 }
 
@@ -131,29 +216,51 @@ function Set-TargetResource
                 $runParams.Add("ClaimsMappings", $claimsMappingsArray)
                 $trust = New-SPTrustedIdentityTokenIssuer @runParams
 
-                if ((Get-SPClaimProvider| Where-Object{$_.DisplayName -like $ClaimProviderName})) {
+                if ((Get-SPClaimProvider| Where-Object -FilterScript {
+                        $_.DisplayName -like $ClaimProviderName
+                    })) 
+                {
                     $trust.ClaimProviderName = $params.ClaimProviderName
                 }
-                if ($ProviderSignOutUri) { $trust.ProviderSignOutUri = new-object System.Uri($ProviderSignOutUri) }
+                if ($ProviderSignOutUri) 
+                { 
+                    $trust.ProviderSignOutUri = new-object System.Uri($ProviderSignOutUri) 
+                }
                 $trust.Update()
              }
         }
     }
     else
     {
-        Write-Verbose "Remove SPTrustedIdentityTokenIssuer '$Name'..."
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Write-Verbose -Message "Remove SPTrustedIdentityTokenIssuer '$Name'..."
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -Arguments $PSBoundParameters `
+                                      -ScriptBlock {
             $params = $args[0]
-            # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before it can be deleted
-            Get-SPWebApplication| Foreach-Object{
+            # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before 
+            # it can be deleted
+            Get-SPWebApplication | Foreach-Object -Process {
                 $wa = $_
-                [Enum]::GetNames( [Microsoft.SharePoint.Administration.SPUrlZone] )| Foreach-Object{
+                $urlZones = [Enum]::GetNames([Microsoft.SharePoint.Administration.SPUrlZone]) 
+                $urlZones | Foreach-Object -Process {
                     $zone = $_
-                    $providers = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone $_ -ErrorAction SilentlyContinue
-                    if (!$providers) { return }
-                    $providers| Where-Object{$_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] -and $_.LoginProviderName -like $params.Name}| Foreach-Object{
-                        Write-Verbose "Removing " $_.LoginProviderName " from web app " $wa.Url " in zone " $zone
-                        $wa.GetIisSettingsWithFallback($zone).ClaimsAuthenticationProviders.Remove($_)| Out-Null
+                    $providers = Get-SPAuthenticationProvider -WebApplication $wa.Url `
+                                                              -Zone $_ `
+                                                              -ErrorAction SilentlyContinue
+
+                    if (!$providers) 
+                    { 
+                        return 
+                    }
+                    $providers| Where-Object -FilterScript {
+                        $_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] `
+                        -and $_.LoginProviderName -like $params.Name
+                    } | Foreach-Object -Process {
+                        Write-Verbose -Message ("Removing $($_.LoginProviderName) from web " + `
+                                                "app $($wa.Url) in zone $zone") 
+                        
+                        $iisSettings = $wa.GetIisSettingsWithFallback($zone) 
+                        $iisSettings.ClaimsAuthenticationProviders.Remove($_) | Out-Null
                         $wa.Update()
                         return
                     }
@@ -175,24 +282,57 @@ function Test-TargetResource
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [String]   $Name,
-        [parameter(Mandatory = $true)]  [String]   $Description,
-        [parameter(Mandatory = $true)]  [String]   $Realm,
-        [parameter(Mandatory = $true)]  [String]   $SignInUrl,
-        [parameter(Mandatory = $true)]  [String]   $IdentifierClaim,
-        [parameter(Mandatory = $true)]  [Microsoft.Management.Infrastructure.CimInstance[]] $ClaimsMappings,
-        [parameter(Mandatory = $true)]  [String]   $SigningCertificateThumbPrint,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
-                                        [String]   $Ensure = "Present",
-        [parameter(Mandatory = $false)] [String]   $ClaimProviderName,
-        [parameter(Mandatory = $false)] [String]   $ProviderSignOutUri,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [String]
+        $Name,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $Description,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $Realm,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $SignInUrl,
+
+        [parameter(Mandatory = $true)] 
+        [String]
+        $IdentifierClaim,
+
+        [parameter(Mandatory = $true)]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $ClaimsMappings,
+
+        [parameter(Mandatory = $true)]
+        [String]
+        $SigningCertificateThumbPrint,
+
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [String]
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $ClaimProviderName,
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $ProviderSignOutUri,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Test if SPTrustedIdentityTokenIssuer '$Name' exists ..."
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    $valuesToCheck = @("Ensure")
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
