@@ -7,7 +7,7 @@ function Get-SPDSCWebApplicationBlockedFileTypeConfig
         $WebApplication
     )
     $result = @()
-    $WebApplication.BlockedFileExtensions | ForEach-Object { 
+    $WebApplication.BlockedFileExtensions | ForEach-Object -Process { 
         $result += $_ 
     }
     return @{

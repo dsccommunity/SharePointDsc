@@ -71,7 +71,7 @@ function Get-TargetResource
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
-        Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
 
         $result = Get-SPDSCWebApplicationThrottlingConfig -WebApplication $wa
         $result.Add("Url", $params.Url)
@@ -154,7 +154,7 @@ function Set-TargetResource
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
-        Import-Module (Join-Path $ScriptRoot $relPath -Resolve)
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
         Set-SPDSCWebApplicationThrottlingConfig -WebApplication $wa -Settings $params
         $wa.Update()
 
@@ -236,11 +236,9 @@ function Test-TargetResource
     }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
-    Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
+    Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
     return Test-SPDSCWebApplicationThrottlingConfig -CurrentSettings $CurrentValues `
                                                     -DesiredSettings $PSBoundParameters
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-
