@@ -933,18 +933,21 @@ function Test-CommandExists
     }
 }
 
-<## Call into our main function that is responsible for extracting all the information about our SharePoint farm. #>
-Orchestrator
-
-<## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
-$OutputDSCPath = Read-Host "Output Folder for DSC Configuration"
-
-<## Ensures the path we specify ends with a Slash, in order to make sure the resulting file path is properly structured. #>
-if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
+function Get-SPReverseDSC()
 {
-    $OutputDSCPath += "\"
-}
+	<## Call into our main function that is responsible for extracting all the information about our SharePoint farm. #>
+	Orchestrator
 
-<## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
-$OutputDSCPath += "SP-Farm.DSC.ps1"
-$Script:dscConfigContent | Out-File $OutputDSCPath
+	<## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
+	$OutputDSCPath = Read-Host "Output Folder for DSC Configuration"
+
+	<## Ensures the path we specify ends with a Slash, in order to make sure the resulting file path is properly structured. #>
+	if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
+	{
+		$OutputDSCPath += "\"
+	}
+
+	<## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
+	$OutputDSCPath += "SP-Farm.DSC.ps1"
+	$Script:dscConfigContent | Out-File $OutputDSCPath
+}
