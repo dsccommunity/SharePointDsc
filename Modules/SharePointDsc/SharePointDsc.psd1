@@ -84,7 +84,10 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Set-SPDscObjectPropertyIfValuePresent",
                     "Get-SPDSCUserProfileSubTypeManager",
                     "Get-SPDscOSVersion",
-                    "Resolve-SPDscSecurityIdentifier")
+                    "Get-SPDSCRegistryKey",
+                    "Resolve-SPDscSecurityIdentifier",
+                    "Get-SPDscFarmProductsInfo",
+                    "Get-SPDscFarmVersionInfo")
 
 # Variables to export from this module
 #VariablesToExport = '*'
