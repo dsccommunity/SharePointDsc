@@ -3,7 +3,7 @@ param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
-$ErrorActionPreference = 'continue'
+$ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
@@ -18,6 +18,7 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
+		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"
 
         It "Read information about the Operating System" {
             Read-OperatingSystemVersion -ScriptBlock { return "value" } 
