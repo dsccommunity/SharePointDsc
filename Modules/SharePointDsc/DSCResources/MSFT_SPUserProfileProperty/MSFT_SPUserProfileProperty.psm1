@@ -28,8 +28,8 @@ function Get-TargetResource
                      "Date", 
                      "DateNoYear", 
                      "DateTime", 
-                     "Email", "
-                     Float", 
+                     "Email", 
+                     "Float", 
                      "Guid", 
                      "HTML", 
                      "Integer", 
@@ -252,8 +252,8 @@ function Set-TargetResource
                      "Date", 
                      "DateNoYear", 
                      "DateTime", 
-                     "Email", "
-                     Float", 
+                     "Email", 
+                     "Float", 
                      "Guid", 
                      "HTML", 
                      "Integer", 
@@ -644,8 +644,8 @@ function Test-TargetResource
                      "Date", 
                      "DateNoYear", 
                      "DateTime", 
-                     "Email", "
-                     Float", 
+                     "Email", 
+                     "Float", 
                      "Guid", 
                      "HTML", 
                      "Integer", 
