@@ -53,42 +53,35 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Service Application Proxy Group $Name"
         
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
-        $params = $args[0]
-
-        #Try to get the proxy group
-        if ($params.Name -eq "Default") 
-        {
-            $ProxyGroup = Get-SPServiceApplicationProxyGroup -Default
-        } 
-        else 
-        {
-            $ProxyGroup = Get-SPServiceApplicationProxyGroup -Identity $params.Name `
-                                                             -ErrorAction SilentlyContinue 
-        }
-        
-        if ($ProxyGroup)
-        { 
-            $Ensure = "Present"
-        }
-        else 
-        {
-            $Ensure = "Absent"    
-        }
-        
-        $ServiceAppProxies = $ProxyGroup.Proxies.Name
-        
-        return @{
-            Name = $params.name
-            Ensure = $Ensure
-            ServiceAppProxies = $ServiceAppProxies 
-            ServiceAppProxiesToInclude = $param.ServiceAppProxiesToInclude
-            ServiceAppProxiesToExluce = $param.ServiceAppProxiesToExclude
-            InstallAccount = $params.InstallAccount
-        }       
-    }    
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $params = $args[0]
+    
+            #Try to get the proxy group
+            if ($params.Name -eq "Default") {
+                $ProxyGroup = Get-SPServiceApplicationProxyGroup -Default
+            } else {
+                $ProxyGroup = Get-SPServiceApplicationProxyGroup $params.name -ErrorAction SilentlyContinue 
+            }
+            
+            if ($ProxyGroup){ 
+                $Ensure = "Present"
+            }
+            else {
+                $Ensure = "Absent"    
+            }
+            
+            $ServiceAppProxies = $ProxyGroup.Proxies.Name
+            
+            return @{
+                Name = $params.name
+                Ensure = $Ensure
+                ServiceAppProxies = $ServiceAppProxies 
+                ServiceAppProxiesToInclude = $param.ServiceAppProxiesToInclude
+                ServiceAppProxiesToExclude = $param.ServiceAppProxiesToExclude
+                InstallAccount = $params.InstallAccount
+            }
+                
+    }
     return $result
 }
 

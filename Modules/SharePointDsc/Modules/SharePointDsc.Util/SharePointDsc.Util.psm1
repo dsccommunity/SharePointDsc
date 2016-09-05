@@ -8,7 +8,7 @@ function Add-SPDSCUserToLocalAdmin
         $UserName
     )
 
-    if ($UserName.Contains("\") -eq $false) 
+    if ($UserName.Contains("\") -eq $false)
     {
         throw [Exception] "Usernames should be formatted as domain\username"
     }
@@ -20,7 +20,7 @@ function Add-SPDSCUserToLocalAdmin
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
 }
 
-function Get-SPDscOSVersion 
+function Get-SPDscOSVersion
 {
     [CmdletBinding()]
     param()
@@ -37,6 +37,123 @@ function Get-SPDSCAssemblyVersion
         $PathToAssembly
     )
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
+}
+
+function Get-SPDscFarmVersionInfo
+{
+    param
+    (
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $ProductToCheck
+    )
+
+    $farm = Get-SPFarm
+    $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+    $server = Get-SPServer -Identity $env:COMPUTERNAME
+    $versionInfo = @{}
+    $versionInfo.Highest = ""
+    $versionInfo.Lowest = ""
+
+    $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
+    $products = $serverProductInfo.Products
+
+    if ($ProductToCheck)
+    {
+        $products = $products | Where-Object -FilterScript { 
+            $_ -eq $ProductToCheck 
+        }
+        
+        if ($null -eq $products)
+        {
+            throw "Product not found: $ProductToCheck"
+        }
+    }
+
+    # Loop through all products
+    foreach ($product in $products)
+    {
+        #Write-Verbose -Verbose "Product: $product"
+        $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
+        $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
+
+        # Loop through all individual components within the product
+        foreach ($patchableUnit in $patchableUnits)
+        {
+            # Check if the displayname is the Proofing tools (always mentioned in first product,
+            # generates noise)
+            if (($patchableUnit -notmatch "Microsoft Server Proof") -and
+                ($patchableUnit -notmatch "SQL Express") -and
+                ($patchableUnit -notmatch "OMUI") -and
+                ($patchableUnit -notmatch "XMUI") -and
+                ($patchableUnit -notmatch "Project Server") -and
+                ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
+            {
+                #Write-Verbose -Verbose "  - $patchableUnit"
+                $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
+                $currentVersion = ""
+                foreach ($patchableUnitInfo in $patchableUnitsInfo)
+                {
+                    # Loop through version of the patchableUnit
+                    $currentVersion = $patchableUnitInfo.LatestPatch.Version.ToString()
+
+                    # Check if the version of the patchableUnit is the highest for the installed product
+                    if ($currentVersion -gt $versionInfo.Highest)
+                    {
+                        $versionInfo.Highest = $currentVersion
+                    }
+
+                    if ($versionInfo.Lowest -eq "")
+                    {
+                        $versionInfo.Lowest = $currentVersion
+                    }
+                    else
+                    {
+                        if ($currentversion -lt $versionInfo.Lowest)
+                        {
+                            $versionInfo.Lowest = $currentVersion
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return $versionInfo
+}
+
+function Get-SPDscFarmProductsInfo
+{
+    $farm = Get-SPFarm
+    $productVersions = [Microsoft.SharePoint.Administration.SPProductVersions]::GetProductVersions($farm)
+    $server = Get-SPServer -Identity $env:COMPUTERNAME
+
+    $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
+    return $serverProductInfo.Products
+}
+
+function Get-SPDSCRegistryKey
+{
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Key,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Value
+    )
+
+    if ((Test-Path -Path $Key) -eq $true)
+    {
+        $regKey = Get-ItemProperty -LiteralPath $Key
+        return $regKey.$Value
+    }
+    else
+    {
+        throw "Specified registry key $Key could not be found."
+    }    
 }
 
 function Get-SPDSCServiceContext 
@@ -523,7 +640,7 @@ function Test-SPDSCUserIsLocalAdmin
     $domainName = $UserName.Split('\')[0]
     $accountName = $UserName.Split('\')[1]
 
-    return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | 
+    return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `
         ForEach-Object -Process {
             $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
         } | Where-Object -FilterScript { 

@@ -69,7 +69,8 @@ function Get-TargetResource
         
         $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology
 
-        $AdminComponents = ($allComponents | Where-Object -FilterScript { 
+        $AdminComponents = @()
+        $AdminComponents += ($allComponents | Where-Object -FilterScript { 
                                 ($_.GetType().Name -eq "AdminComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -79,7 +80,8 @@ function Get-TargetResource
                                 return $server.Name
                             }
 
-        $CrawlComponents = ($allComponents | Where-Object -FilterScript { 
+        $CrawlComponents = @()
+        $CrawlComponents += ($allComponents | Where-Object -FilterScript { 
                                 ($_.GetType().Name -eq "CrawlComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -89,7 +91,8 @@ function Get-TargetResource
                                 return $server.Name
                             }
 
-        $ContentProcessingComponents = ($allComponents | Where-Object -FilterScript { 
+        $ContentProcessingComponents = @()
+        $ContentProcessingComponents += ($allComponents | Where-Object -FilterScript { 
                                             ($_.GetType().Name -eq "ContentProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -99,7 +102,8 @@ function Get-TargetResource
                                             return $server.Name
                                         }
 
-        $AnalyticsProcessingComponents = ($allComponents | Where-Object -FilterScript { 
+        $AnalyticsProcessingComponents = @()
+        $AnalyticsProcessingComponents += ($allComponents | Where-Object -FilterScript { 
                                             ($_.GetType().Name -eq "AnalyticsProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -109,7 +113,8 @@ function Get-TargetResource
                                             return $server.Name
                                         }
 
-        $QueryProcessingComponents = ($allComponents | Where-Object -FilterScript { 
+        $QueryProcessingComponents = @()
+        $QueryProcessingComponents += ($allComponents | Where-Object -FilterScript { 
                                             ($_.GetType().Name -eq "QueryProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -119,7 +124,8 @@ function Get-TargetResource
                                             return $server.Name
                                         }
 
-        $IndexComponents = ($allComponents | Where-Object -FilterScript { 
+        $IndexComponents = @()
+        $IndexComponents += ($allComponents | Where-Object -FilterScript { 
                                 ($_.GetType().Name -eq "IndexComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
