@@ -60,7 +60,7 @@ Describe "SPHealthAnalyzerRuleState - SharePoint Build $((Get-Item $SharePointCm
             }
 
             It "should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "No Central Admin web application was found. Health Analyzer Rule  settings will not be applied"
+                { Set-TargetResource @testParams } | Should throw "No Central Admin web application was found. Health Analyzer Rule settings will not be applied"
             }
         }
 

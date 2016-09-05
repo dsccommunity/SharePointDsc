@@ -283,7 +283,7 @@ function Set-TargetResource
             }
             if ($params.ContainsKey("DefaultContentAccessAccount") -eq $true) 
             {
-                $account = $params.DefaultContentAccessAccount.
+                $account = $params.DefaultContentAccessAccount
                 $setParams.Add("DefaultContentAccessAccountName", $account.UserName)
                 $setParams.Add("DefaultContentAccessAccountPassword", $account.Password)
             } 

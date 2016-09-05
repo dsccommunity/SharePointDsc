@@ -131,10 +131,9 @@ function Set-TargetResource
         -and $ServiceAppProxies `
         -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude))) 
     {
-        Write-Verbose -Message ("Cannot use the ServiceAppProxies parameter together " + `
-                                "with the ServiceAppProxiesToInclude or " + `
-                                "ServiceAppProxiesToExclude parameters")
-        return $null
+        throw ("Cannot use the ServiceAppProxies parameter together " + `
+               "with the ServiceAppProxiesToInclude or " + `
+               "ServiceAppProxiesToExclude parameters")
     }
     
     if (($Ensure -eq "Present") `
@@ -142,10 +141,9 @@ function Set-TargetResource
         -and !$ServiceAppProxiesToInclude `
         -and !$ServiceAppProxiesToExclude) 
     {
-        Write-Verbose -Message ("At least one of the following parameters must be specified: " + `
-                                "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
-                                "ServiceAppProxiesToExclude")
-        return $null  
+        throw ("At least one of the following parameters must be specified: " + `
+               "ServiceAppProxies, ServiceAppProxiesToInclude, " + `
+               "ServiceAppProxiesToExclude")  
     }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `

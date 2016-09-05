@@ -236,7 +236,7 @@ function Test-TargetResource
     }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
-    Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
     return Test-SPDSCWebApplicationThrottlingConfig -CurrentSettings $CurrentValues `
                                                     -DesiredSettings $PSBoundParameters
 }

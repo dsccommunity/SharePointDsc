@@ -331,7 +331,7 @@ function Test-TargetResource
     }
 
     $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
-    Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 
     return Test-SPDSCWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }

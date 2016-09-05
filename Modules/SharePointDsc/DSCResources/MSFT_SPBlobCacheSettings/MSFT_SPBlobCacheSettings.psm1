@@ -45,7 +45,8 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
-        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
+                                   -ErrorAction SilentlyContinue
 
         if ($null -eq $wa) 
         {

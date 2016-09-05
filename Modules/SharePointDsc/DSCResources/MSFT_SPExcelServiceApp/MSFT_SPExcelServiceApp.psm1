@@ -124,7 +124,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $appService =  Get-SPServiceApplication -Name $params.Name Where-Object -FilterScript {
+            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                     $_.TypeName -eq "Excel Services Application Web Service Application"  
             }
             Remove-SPServiceApplication $appService -Confirm:$false

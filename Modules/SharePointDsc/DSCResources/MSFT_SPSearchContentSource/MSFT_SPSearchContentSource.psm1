@@ -707,35 +707,38 @@ function Test-TargetResource
     
     $PSBoundParameters.Ensure = $Ensure
     
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent" -or $CurrentValues.Ensure -eq "Absent") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                            -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @("Ensure")
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure")
     }
     
     $relativePath = "..\..\Modules\SharePointDsc.Search\SPSearchContentSource.Schedules.psm1"
-    $modulePath = Join-Path -Path $ScriptRoot `
+    $modulePath = Join-Path -Path $PSScriptRoot `
                             -ChildPath $relativePath `
                             -Resolve
     Import-Module -Name $modulePath
-    
-    $propertyTest = Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule `
-                                                  -DesiredSchedule $IncrementalSchedule
-    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) `
-            -and ($null -ne $IncrementalSchedule) `
-            -and ($propertyTest -eq $false)) 
+                                                  
+    if (($PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) -and ($null -ne $IncrementalSchedule)) 
     {
-        return $false;
+        $propertyTest = Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.IncrementalSchedule `
+                                                      -DesiredSchedule $IncrementalSchedule
+        if ($propertyTest -eq $false)
+        {
+            return $false
+        }
     }
 
-    $propertyTest = Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule `
-                                                  -DesiredSchedule $FullSchedule
-    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) `
-            -and ($null -ne $FullSchedule) `
-            -and ($propertyTest -eq $false)) 
+    
+    if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($null -ne $FullSchedule))
     {
-        return $false;
+        $propertyTest = Test-SPDSCSearchCrawlSchedule -CurrentSchedule $CurrentValues.FullSchedule `
+                                                      -DesiredSchedule $FullSchedule
+        if ($propertyTest -eq $false)
+        {
+            return $false
+        }
     }
     
     # Compare the addresses as Uri objects to handle things like trailing /'s on URLs

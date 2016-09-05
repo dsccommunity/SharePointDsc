@@ -40,7 +40,7 @@ Describe "SPAppCatalog - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             }
 
             It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
             }
 
             It "returns false from the test method" {
@@ -64,7 +64,7 @@ Describe "SPAppCatalog - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             }
 
             It "returns null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
             }
 
             It "returns false from the test method" {
@@ -95,7 +95,7 @@ Describe "SPAppCatalog - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             }
 
             It "returns value from the get method" {
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+                (Get-TargetResource @testParams).SiteUrl | Should Not BeNullOrEmpty
             }
 
             It "returns false from the test method" {

@@ -170,9 +170,8 @@ function Set-TargetResource
     
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
-        Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
-                                "MembersToInclude or MembersToExclude parameters")
-        return $null
+        throw ("Cannot use the Members parameter together with the " + `
+               "MembersToInclude or MembersToExclude parameters")
     }
 
     if ($ContentDatabases) 
@@ -182,20 +181,18 @@ function Set-TargetResource
             if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) `
                 -or ($contentDatabase.MembersToExclude))) 
             {
-                Write-Verbose -Message ("ContentDatabases: Cannot use the Members parameter " + `
-                                        "together with the MembersToInclude or " + `
-                                        "MembersToExclude parameters")
-                return $null
+                throw ("ContentDatabases: Cannot use the Members parameter " + `
+                       "together with the MembersToInclude or " + `
+                       "MembersToExclude parameters")
             }
 
             if (!$contentDatabase.Members `
                 -and !$contentDatabase.MembersToInclude `
                 -and !$contentDatabase.MembersToExclude) 
             {
-                Write-Verbose -Message ("ContentDatabases: At least one of the following " + `
-                                        "parameters must be specified: Members, " + `
-                                        "MembersToInclude, MembersToExclude")
-                return $null
+                throw ("ContentDatabases: At least one of the following " + `
+                       "parameters must be specified: Members, " + `
+                       "MembersToInclude, MembersToExclude")
             }
         }
     } 
@@ -203,17 +200,15 @@ function Set-TargetResource
     {
         if (!$Members -and !$MembersToInclude -and !$MembersToExclude) 
         {
-            Write-Verbose -Message ("At least one of the following parameters must be " + `
-                                    "specified: Members, MembersToInclude, MembersToExclude")
-            return $null
+            throw ("At least one of the following parameters must be " + `
+                   "specified: Members, MembersToInclude, MembersToExclude")
         }
     }
 
     if ($ContentDatabases -and $AllContentDatabases) 
     {
-        Write-Verbose -Message ("Cannot use the ContentDatabases parameter together with the " + `
-                                "AllContentDatabases parameter")
-        return $null
+        throw ("Cannot use the ContentDatabases parameter together with the " + `
+               "AllContentDatabases parameter")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -230,9 +225,8 @@ function Set-TargetResource
         } 
         catch 
         {
-            Write-Verbose -Message ("No local SharePoint farm was detected. Shell admin " + `
-                                    "settings will not be applied")
-            return $null
+            throw ("No local SharePoint farm was detected. Shell admin " + `
+                   "settings will not be applied")
         }
 
         $shellAdmins = Get-SPShellAdmin

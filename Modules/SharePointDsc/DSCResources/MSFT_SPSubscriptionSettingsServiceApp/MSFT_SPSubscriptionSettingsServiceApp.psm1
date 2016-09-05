@@ -109,8 +109,8 @@ function Set-TargetResource
     {
         Write-Verbose -Message "Creating Subscription Settings Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters -`
-                            ScriptBlock {
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
             $newParams = @{
