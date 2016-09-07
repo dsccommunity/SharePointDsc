@@ -20,7 +20,17 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
             Realm                        = "https://sharepoint.contoso.com"
             SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-            ClaimsMappings               = "{'Mappings': [{'Name': 'Email', 'IncomingClaimType': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'}, {'Name': 'Role', 'IncomingClaimType': 'http://schemas.xmlsoap.org/customGroupClaimType', 'LocalClaimType': 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'}]}"
+            ClaimsMappings               = @(
+                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                    Name = "Email"
+                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                    Name = "Role"
+                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                    LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                } -ClientOnly)
+            )
             SigningCertificateThumbPrint = "Mock Thumbrpint"
             ClaimProviderName            = "LDAPCP"
             ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
@@ -172,21 +182,6 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
         }
 
         $testParams.Ensure = "Present"
-        $originalClaimsMappings = $testParams.ClaimsMappings
-        $testParams.ClaimsMappings = "{BADKEYNAME: [{'Name': 'Email', 'IncomingClaimType': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'}]}"
-
-        Context "The JSON array in parameter ClaimsMappings is invalid" {
-            It "throws an exception saying that JSON array in parameter ClaimsMappings is invalid" {
-                { Set-TargetResource @testParams } | Should Throw "No SPClaimTypeMapping was generated from parameter ClaimsMappings. Did you make a mistake with the syntax of its JSON array?"
-            }
-
-            $testParams.ClaimsMappings = "{Mappings: [{'BADKEY': 'Email'}]}"
-            It "throws an exception saying that JSON array in parameter ClaimsMappings is invalid" {
-                { Set-TargetResource @testParams } | Should Throw "No SPClaimTypeMapping was generated from parameter ClaimsMappings. Did you make a mistake with the syntax of its JSON array?"
-            }
-        }
-
-        $testParams.ClaimsMappings = $originalClaimsMappings
         $originalIdentifierClaim = $testParams.IdentifierClaim
         $testParams.IdentifierClaim = "UnknownClaimType"
 

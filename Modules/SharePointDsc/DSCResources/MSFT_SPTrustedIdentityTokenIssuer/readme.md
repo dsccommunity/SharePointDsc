@@ -4,14 +4,15 @@ This resource is used to create or remove SPTrustedIdentityTokenIssuer in a Shar
 farm. 
 
 The SigningCertificateThumbPrint must match the thumbprint of a certificate in the 
-store LocalMachine\My of the server that will run this resource. Once the 
-SPTrustedIdentityTokenIssuer is successfully created, the certificate can be safely 
-deleted from this store as it won't be needed by SharePoint.
+store LocalMachine\My of the server that will run this resource. 
+Note that the private key of the certificate must not be available in the certiificate
+store because SharePoint does not accept it.
+Once the SPTrustedIdentityTokenIssuer is successfully created, the certificate can be 
+safely deleted from the certificate store as it won't be needed by SharePoint.
 
-ClaimsMappings is a JSON array that hosts parameters for cmdlet New-SPClaimTypeMapping.
-Array name is Mappings that contains an array of key/value pairs. Each entry requires
-keys Name and IncomingClaimType. Key LocalClaimType is not required if its value is 
-identical to IncomingClaimType.
+ClaimsMappings is an array of MSFT_SPClaimTypeMapping to use with cmdlet New-SPClaimTypeMapping.
+Each MSFT_SPClaimTypeMapping requires properties Name and IncomingClaimType. 
+Property LocalClaimType is not required if its value is identical to IncomingClaimType.
 
 The IdentifierClaim property must match an IncomingClaimType element in ClaimsMappings array.
 
