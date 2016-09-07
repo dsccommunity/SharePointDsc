@@ -1,40 +1,38 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPAntivirusSettings"
 
-$ModuleName = "MSFT_SPAntivirusSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPAntivirusSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            ScanOnDownload = $true
-            ScanOnUpload = $true
-            AllowDownloadInfected = $true
-            AttemptToClean = $true
-            TimeoutDuration = 60
-            NumberOfThreads = 5
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-                
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        Context -Name "The server is not part of SharePoint farm" -Fixture {
+            $testParams = @{
+                ScanOnDownload = $true
+                ScanOnUpload = $true
+                AllowDownloadInfected = $true
+                AttemptToClean = $true
+                TimeoutDuration = 60
+                NumberOfThreads = 5
+            }
 
-        Context "The server is not part of SharePoint farm" {
-            Mock Get-SPFarm { throw "Unable to detect local farm" }
+            Mock -CommandName Get-SPFarm -MockWith { 
+                throw "Unable to detect local farm" 
+            }
 
-            It "return null from the get method" {
+            It "Should return null from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.AllowDownloadInfected | Should Be $false
                 $result.ScanOnDownload | Should Be $false
@@ -44,17 +42,26 @@ Describe "SPAntivirusSettings - SharePoint Build $((Get-Item $SharePointCmdletMo
                 $result.TimeoutDuration | Should Be 0
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws an exception in the set method to say there is no local farm" {
+            It "Should throw an exception in the set method to say there is no local farm" {
                 { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
             }
         }
 
-        Context "The server is in a farm and the incorrect settings have been applied" {
-            Mock Get-SPDSCContentService {
+        Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
+            $testParams = @{
+                ScanOnDownload = $true
+                ScanOnUpload = $true
+                AllowDownloadInfected = $true
+                AttemptToClean = $true
+                TimeoutDuration = 60
+                NumberOfThreads = 5
+            }
+
+            Mock -CommandName Get-SPDSCContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $false
@@ -67,28 +74,39 @@ Describe "SPAntivirusSettings - SharePoint Build $((Get-Item $SharePointCmdletMo
                         }
                     }
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCAntivirusUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member ScriptMethod Update { 
+                    $Global:SPDscAntivirusUpdated = $true 
+                } -PassThru
                 return $returnVal
             }
-            Mock Get-SPFarm { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPDSCAntivirusUpdated = $false
-            It "updates the antivirus settings" {
+            $Global:SPDscAntivirusUpdated = $false
+            It "Should update the antivirus settings" {
                 Set-TargetResource @testParams
-                $Global:SPDSCAntivirusUpdated | Should Be $true
+                $Global:SPDscAntivirusUpdated | Should Be $true
             }
         }
 
-        Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-SPDSCContentService {
+        Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
+            $testParams = @{
+                ScanOnDownload = $true
+                ScanOnUpload = $true
+                AllowDownloadInfected = $true
+                AttemptToClean = $true
+                TimeoutDuration = 60
+                NumberOfThreads = 5
+            }
+
+            Mock -CommandName Get-SPDSCContentService -MockWith {
                 $returnVal = @{
                     AntivirusSettings = @{
                         AllowDownload = $true
@@ -100,20 +118,20 @@ Describe "SPAntivirusSettings - SharePoint Build $((Get-Item $SharePointCmdletMo
                             TotalSeconds = 60;
                         }
                     }
-                } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCAntivirusUpdated = $true } -PassThru
+                }
                 return $returnVal
             }
-            Mock Get-SPFarm { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
         }
-    }
+    }    
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

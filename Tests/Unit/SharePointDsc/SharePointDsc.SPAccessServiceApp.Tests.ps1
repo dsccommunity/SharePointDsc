@@ -34,15 +34,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null 
             }
             
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPAccessServicesApplication 
             }
@@ -61,7 +61,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }) 
             }
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
         }
@@ -82,11 +82,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })
             }
 
-            It "returns values from the get method" {
+            It "Should return values from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -108,15 +108,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "calls the remove service application cmdlet in the set method" {
+            It "Should call the remove service application cmdlet in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
@@ -134,11 +134,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null 
             }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
