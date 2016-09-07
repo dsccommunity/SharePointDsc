@@ -96,7 +96,7 @@ function New-SPDscUnitTestHelper
 
         [Parameter(Mandatory = $false)]
         [Switch]
-        $MockInvokeHelper = $true
+        $ExcludeInvokeHelper
     )
 
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
@@ -129,7 +129,7 @@ function New-SPDscUnitTestHelper
             
 "@
 
-    if ($MockInvokeHelper) 
+    if ($ExcludeInvokeHelper -eq $false) 
     {
         $initScript += @"
             Mock Invoke-SPDSCCommand { 

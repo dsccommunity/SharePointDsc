@@ -1,108 +1,126 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPAppCatalog"
 
-$ModuleName = "MSFT_SPAppCatalog"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPAppCatalog - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
         $mockSiteId = [Guid]::NewGuid()
         
-        Context "The specified site exists, but cannot be set as an app catalog as it is of the wrong template" {
-            Mock Update-SPAppCatalogConfiguration { throw 'Exception' }
-            Mock Get-SPSite {
+        Context -Name "The specified site exists, but cannot be set as an app catalog as it is of the wrong template" -Fixture {
+            $testParams = @{
+                SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+            }
+
+            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { throw 'Exception' }
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member ScriptMethod Item { return $null } -PassThru -Force
+                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
+                                                         -Name "Item" `
+                                                         -Value { return $null } `
+                                                         -PassThru `
+                                                         -Force
                     }
                     ID = $mockSiteId
                 }
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws exception when executed" {
+            It "Should throw exception when executed" {
                 { Set-TargetResource @testParams } | Should throw
             }
         }
 
-        Context "The specified site exists but is not set as the app catalog for its web application" {
-            Mock Update-SPAppCatalogConfiguration { }
-            Mock Get-SPSite {
+        Context -Name "The specified site exists but is not set as the app catalog for its web application" -Fixture {
+            $testParams = @{
+                SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+            }
+
+            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { }
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member ScriptMethod Item { return $null } -PassThru -Force
+                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
+                                                         -Name "Item" `
+                                                         -Value { return $null } `
+                                                         -PassThru `
+                                                         -Force
                     }
                     ID = $mockSiteId
                 }
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Updates the settings" {
+            It "Should update the settings in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Update-SPAppCatalogConfiguration
             }
 
         }
         
-        Context "The specified site exists and is the current app catalog already" {
-            Mock Get-SPSite {
+        Context -Name "The specified site exists and is the current app catalog already" -Fixture {
+            $testParams = @{
+                SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith {
                 return @{
                     WebApplication = @{
-                        Features = @( @{} ) | Add-Member ScriptMethod Item { return @{ 
-                            ID = [guid]::NewGuid()
-                            Properties = @{
-                                            "__AppCatSiteId" = @{Value = $mockSiteId} 
-                                        }
-                        } } -PassThru -Force
+                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
+                                                         -Name "Item" `
+                                                         -Value { 
+                                                             return @{ 
+                                                                ID = [guid]::NewGuid()
+                                                                Properties = @{
+                                                                    "__AppCatSiteId" = @{Value = $mockSiteId} 
+                                                                }
+                                                            } 
+                                                         } `
+                                                         -PassThru `
+                                                         -Force
                     }
                     ID = $mockSiteId
                     Url = $testParams.SiteUrl
                 }
             }
 
-            It "returns value from the get method" {
+            It "Should return value from the get method" {
                 (Get-TargetResource @testParams).SiteUrl | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
 
-
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

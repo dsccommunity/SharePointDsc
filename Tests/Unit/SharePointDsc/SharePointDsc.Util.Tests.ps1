@@ -15,7 +15,7 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot `
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
                                               -SubModulePath "Modules\SharePointDsc.Util\SharePointDsc.Util.psm1" `
-                                              -MockInvokeHelper:$false
+                                              -ExcludeInvokeHelper
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
