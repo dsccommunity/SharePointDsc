@@ -1,165 +1,179 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPRemoteFarmTrust"
 
-$ModuleName = "MSFT_SPRemoteFarmTrust"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPRemoteFarmTrust - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "SendingFarm"
-            LocalWebAppUrl = "https://sharepoint.adventureworks.com"
-            RemoteWebAppUrl = "https://sharepoint.contoso.com"
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-
-        Mock Get-SPSite {
+        # Mocks for all contexts   
+        Mock -CommandName Get-SPSite {
             return @{
                 Url = $Identity
             }
         }
-        Mock Get-SPServiceContext {
+        Mock -CommandName Get-SPServiceContext {
             return @{
                 Site = $Site
             }
         }
-        Mock Get-SPAuthenticationRealm {
+        Mock -CommandName Get-SPAuthenticationRealm {
             return "14757a87-4d74-4323-83b9-fb1e77e8f22f"
         }
-        Mock Get-SPAppPrincipal {
+        Mock -CommandName Get-SPAppPrincipal {
             return @{
                 Site = $Site
             }
         }
-        Mock Set-SPAuthenticationRealm {}
-        Mock Set-SPAppPrincipalPermission {}
-        Mock Remove-SPAppPrincipalPermission {}
-        Mock Remove-SPTrustedRootAuthority {}
-        Mock Remove-SPTrustedSecurityTokenIssuer {}
-        Mock New-SPTrustedSecurityTokenIssuer {
+        Mock -CommandName Set-SPAuthenticationRealm {}
+        Mock -CommandName Set-SPAppPrincipalPermission {}
+        Mock -CommandName Remove-SPAppPrincipalPermission {}
+        Mock -CommandName Remove-SPTrustedRootAuthority {}
+        Mock -CommandName Remove-SPTrustedSecurityTokenIssuer {}
+        Mock -CommandName New-SPTrustedSecurityTokenIssuer {
             return @{
                 NameId = "f5a433c7-69f9-48ef-916b-dde8b5fa6fdb@14757a87-4d74-4323-83b9-fb1e77e8f22f"
             }
         }
-        Mock New-SPTrustedRootAuthority {
+        Mock -CommandName New-SPTrustedRootAuthority {
             return @{
                 NameId = "f5a433c7-69f9-48ef-916b-dde8b5fa6fdb@14757a87-4d74-4323-83b9-fb1e77e8f22f"
             }
         }
 
+        # Test contexts
+        Context -Name "A remote farm trust doesn't exist, but should" -Fixture {
+            $testParams = @{
+                Name = "SendingFarm"
+                LocalWebAppUrl = "https://sharepoint.adventureworks.com"
+                RemoteWebAppUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
 
-        Context "A remote farm trust doesn't exist, but should" {
-
-            Mock Get-SPTrustedSecurityTokenIssuer {
+            Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
                 return $null
             }
-            Mock Get-SPTrustedRootAuthority {
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
                 return $null
             }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "adds the trust in the set method" {
+            It "Should add the trust in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName New-SPTrustedSecurityTokenIssuer
                 Assert-MockCalled -CommandName New-SPTrustedRootAuthority
             }
         }
 
-        Context "A remote farm trust exists and should" {
+        Context -Name "A remote farm trust exists and should" -Fixture {
+            $testParams = @{
+                Name = "SendingFarm"
+                LocalWebAppUrl = "https://sharepoint.adventureworks.com"
+                RemoteWebAppUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
 
-            Mock Get-SPTrustedSecurityTokenIssuer {
+            Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
                 return @(
                     @{
                         NameId = "f5a433c7-69f9-48ef-916b-dde8b5fa6fdb@14757a87-4d74-4323-83b9-fb1e77e8f22f"
                     }
                 )
             }
-            Mock Get-SPTrustedRootAuthority {
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
                 return @{
                     NameId = "f5a433c7-69f9-48ef-916b-dde8b5fa6fdb@14757a87-4d74-4323-83b9-fb1e77e8f22f"
                 }
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        $testParams.Ensure = "Absent"
+        Context -Name "A remote farm trust exists and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "SendingFarm"
+                LocalWebAppUrl = "https://sharepoint.adventureworks.com"
+                RemoteWebAppUrl = "https://sharepoint.contoso.com"
+                Ensure = "Absent"
+            }
 
-        Context "A remote farm trust exists and shouldn't" {
-
-            Mock Get-SPTrustedSecurityTokenIssuer {
+            Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
                 return @(
                     @{
                         NameId = "f5a433c7-69f9-48ef-916b-dde8b5fa6fdb@14757a87-4d74-4323-83b9-fb1e77e8f22f"
                     }
                 )
             }
-            Mock Get-SPTrustedRootAuthority {
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
                 return @{
                     NameId = "f5a433c7-69f9-48ef-916b-dde8b5fa6fdb@14757a87-4d74-4323-83b9-fb1e77e8f22f"
                 }
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "removes the trust in the set method" {
+            It "Should remove the trust in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName Remove-SPTrustedSecurityTokenIssuer
                 Assert-MockCalled -CommandName Remove-SPTrustedRootAuthority
             }
         }
 
-        Context "A remote farm trust doesn't exist and shouldn't" {
+        Context -Name "A remote farm trust doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "SendingFarm"
+                LocalWebAppUrl = "https://sharepoint.adventureworks.com"
+                RemoteWebAppUrl = "https://sharepoint.contoso.com"
+                Ensure = "Absent"
+            }
 
-            Mock Get-SPTrustedSecurityTokenIssuer {
+            Mock -CommandName Get-SPTrustedSecurityTokenIssuer -MockWith {
                 return $null
             }
-            Mock Get-SPTrustedRootAuthority {
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith {
                 return $null
             }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -30,12 +30,12 @@ Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmd
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
-        Mock New-SPAuthenticationProvider { }
-        Mock New-SPWebApplication { }
-        Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
+        Mock -CommandName New-SPAuthenticationProvider { }
+        Mock -CommandName New-SPWebApplication { }
+        Mock -CommandName Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
 
-        Context "The web appliation exists and has the correct workflow settings" {
-            Mock Get-SPWebApplication { return @(@{
+        Context -Name "The web appliation exists and has the correct workflow settings" {
+            Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 
                     Name = $testParams.ApplicationPool
@@ -56,17 +56,17 @@ Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmd
                 ExternalWorkflowParticipantsEnabled = $true
             })}
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The web appliation exists and uses incorrect workflow settings" {    
-            Mock Get-SPWebApplication { 
+        Context -Name "The web appliation exists and uses incorrect workflow settings" {    
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -87,25 +87,25 @@ Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmd
                     EmailToNoPermissionWorkflowParticipantsEnabled = $false
                     ExternalWorkflowParticipantsEnabled = $false
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
-                } -PassThru | Add-Member ScriptMethod UpdateWorkflowConfigurationSettings {
+                } -PassThru | Add-Member -MemberType ScriptMethod UpdateWorkflowConfigurationSettings {
                     $Global:SPWebApplicationUpdateWorkflowCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
             $Global:SPWebApplicationUpdateCalled = $false
             $Global:SPWebApplicationUpdateWorkflowCalled = $false
-            It "updates the workflow settings" {
+            It "Should update the workflow settings" {
                 Set-TargetResource @testParams
                 $Global:SPWebApplicationUpdateWorkflowCalled | Should Be $true
             }

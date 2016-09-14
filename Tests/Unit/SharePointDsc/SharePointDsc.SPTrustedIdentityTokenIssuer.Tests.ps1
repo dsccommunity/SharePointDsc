@@ -44,7 +44,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }        
         
-        Mock Get-ChildItem {
+        Mock -CommandName Get-ChildItem {
             return @(
                 @{
                     Thumbprint = "Mock Thumbrpint"
@@ -55,8 +55,8 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present" {
-            Mock New-SPTrustedIdentityTokenIssuer {
+        Context -Name "The SPTrustedIdentityTokenIssuer does not exist, but it should be present" {
+            Mock -CommandName New-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = ""
@@ -66,7 +66,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 return $sptrust
             }
 
-            Mock New-SPClaimTypeMapping {
+            Mock -CommandName New-SPClaimTypeMapping {
                 return [pscustomobject]@{
                     MappedClaimType = $testParams.IdentifierClaim
                 }
@@ -74,28 +74,28 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
 
             $getResults = Get-TargetResource @testParams
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 $getResults.Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates the SPTrustedIdentityTokenIssuer" {
+            It "Should create the SPTrustedIdentityTokenIssuer" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPTrustedIdentityTokenIssuer
             }
         }
         
-        Context "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified exists on the farm" {
-            Mock Get-SPClaimProvider {
+        Context -Name "The SPTrustedIdentityTokenIssuer does not exist, but it should be present and claims provider specified exists on the farm" {
+            Mock -CommandName Get-SPClaimProvider {
                 return [pscustomobject]@(@{
                     DisplayName = $testParams.ClaimProviderName
                 })
             }
             
-            Mock New-SPTrustedIdentityTokenIssuer {
+            Mock -CommandName New-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = ""
@@ -105,7 +105,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 return $sptrust
             }
             
-            Mock Get-SPTrustedIdentityTokenIssuer {
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = $testParams.ClaimProviderName
@@ -115,7 +115,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 return $sptrust
             }
             
-            Mock New-SPClaimTypeMapping {
+            Mock -CommandName New-SPClaimTypeMapping {
                 return [pscustomobject]@{
                     MappedClaimType = $testParams.IdentifierClaim
                 }
@@ -124,13 +124,13 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
             Set-TargetResource @testParams
             $getResults = Get-TargetResource @testParams
             
-            It "creates the SPTrustedIdentityTokenIssuer and sets claims provider" {
+            It "Should create the SPTrustedIdentityTokenIssuer and sets claims provider" {
                 $getResults.ClaimProviderName | Should Be $testParams.ClaimProviderName
             }
         }
 
-        Context "The SPTrustedIdentityTokenIssuer already exists, and it should be present" {
-            Mock Get-SPTrustedIdentityTokenIssuer {
+        Context -Name "The SPTrustedIdentityTokenIssuer already exists, and it should be present" {
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                     ClaimProviderName = ""
@@ -141,11 +141,11 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
 
             $getResults = Get-TargetResource @testParams
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 $getResults.Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
 
@@ -156,8 +156,8 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
 
         $testParams.Ensure = "Absent"
 
-        Context "The SPTrustedIdentityTokenIssuer exists, but it should be absent" {
-            Mock Get-SPTrustedIdentityTokenIssuer {
+        Context -Name "The SPTrustedIdentityTokenIssuer exists, but it should be absent" {
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
                 }
@@ -165,17 +165,17 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
                 return $sptrust
             }
 
-            Mock Remove-SPTrustedIdentityTokenIssuer { } -Verifiable
+            Mock -CommandName Remove-SPTrustedIdentityTokenIssuer { } -Verifiable
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "removes the SPTrustedIdentityTokenIssuer" {
+            It "Should remove the SPTrustedIdentityTokenIssuer" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPTrustedIdentityTokenIssuer
             }
@@ -185,7 +185,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
         $originalIdentifierClaim = $testParams.IdentifierClaim
         $testParams.IdentifierClaim = "UnknownClaimType"
 
-        Context "The IdentifierClaim does not match one of the claim types in ClaimsMappings" {
+        Context -Name "The IdentifierClaim does not match one of the claim types in ClaimsMappings" {
             It "validation of IdentifierClaim fails in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
             }
@@ -194,7 +194,7 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
         $testParams.IdentifierClaim = $originalIdentifierClaim
         $testParams.SigningCertificateThumbPrint = "UnknownSigningCertificateThumbPrint"
 
-        Context "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My" {
+        Context -Name "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My" {
             It "validation of SigningCertificateThumbPrint fails in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My."
             }

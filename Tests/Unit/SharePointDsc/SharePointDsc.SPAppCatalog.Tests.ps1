@@ -20,6 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         $mockSiteId = [Guid]::NewGuid()
         
+        # Test contexts 
         Context -Name "The specified site exists, but cannot be set as an app catalog as it is of the wrong template" -Fixture {
             $testParams = @{
                 SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"

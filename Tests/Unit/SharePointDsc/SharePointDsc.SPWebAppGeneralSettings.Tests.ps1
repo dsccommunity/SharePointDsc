@@ -44,12 +44,12 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
-        Mock New-SPAuthenticationProvider { }
-        Mock New-SPWebApplication { }
-        Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
+        Mock -CommandName New-SPAuthenticationProvider { }
+        Mock -CommandName New-SPWebApplication { }
+        Mock -CommandName Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
 
-        Context "The web appliation exists and has the correct general settings" {
-            Mock Get-SPWebApplication { 
+        Context -Name "The web appliation exists and has the correct general settings" {
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -86,23 +86,23 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                     BrowserCEIPEnabled = $testParams.CustomerExperienceProgram
                     PresenceEnabled = $testParams.PresenceEnabled
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The web appliation exists and uses incorrect general settings" {    
-            Mock Get-SPWebApplication { 
+        Context -Name "The web appliation exists and uses incorrect general settings" {    
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -137,22 +137,22 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                     BrowserCEIPEnabled = $false
                     PresenceEnabled = $false
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
             $Global:SPWebApplicationUpdateCalled = $false
-            It "updates the general settings" {
+            It "Should update the general settings" {
                 Set-TargetResource @testParams
                 $Global:SPWebApplicationUpdateCalled | Should Be $true
             }

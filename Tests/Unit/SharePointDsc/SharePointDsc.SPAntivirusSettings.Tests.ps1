@@ -18,6 +18,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Test contexts 
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
                 ScanOnDownload = $true
@@ -74,7 +75,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                     }
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { 
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
                     $Global:SPDscAntivirusUpdated = $true 
                 } -PassThru
                 return $returnVal

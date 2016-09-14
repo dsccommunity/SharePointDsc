@@ -31,9 +31,9 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-        Mock Start-Sleep {}
-        Mock New-Item { return @{} }
-        Mock Get-SPEnterpriseSearchServiceInstance  {
+        Mock -CommandName Start-Sleep {}
+        Mock -CommandName New-Item { return @{} }
+        Mock -CommandName Get-SPEnterpriseSearchServiceInstance  {
             return @{
                 Server = @{
                     Address = $env:COMPUTERNAME
@@ -41,7 +41,7 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Status = "Online"
             }
         }
-        Mock Get-SPEnterpriseSearchServiceApplication {
+        Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
             return @{
                 ActiveTopology = @{}
             }
@@ -86,18 +86,18 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
         $indexComponent.ServerId = $serverId
         $indexComponent.IndexPartitionOrdinal = 0
 
-        Mock Start-SPEnterpriseSearchServiceInstance { return $null }
-        Mock New-SPEnterpriseSearchTopology { return @{} }
-        Mock New-SPEnterpriseSearchAdminComponent { return @{} } 
-        Mock New-SPEnterpriseSearchCrawlComponent { return @{} }
-        Mock New-SPEnterpriseSearchContentProcessingComponent { return @{} }
-        Mock New-SPEnterpriseSearchAnalyticsProcessingComponent { return @{} }
-        Mock New-SPEnterpriseSearchQueryProcessingComponent { return @{} }
-        Mock New-SPEnterpriseSearchIndexComponent { return @{} }
-        Mock Set-SPEnterpriseSearchTopology { return @{} }
-        Mock Remove-SPEnterpriseSearchComponent { return $null }
+        Mock -CommandName Start-SPEnterpriseSearchServiceInstance { return $null }
+        Mock -CommandName New-SPEnterpriseSearchTopology { return @{} }
+        Mock -CommandName New-SPEnterpriseSearchAdminComponent { return @{} } 
+        Mock -CommandName New-SPEnterpriseSearchCrawlComponent { return @{} }
+        Mock -CommandName New-SPEnterpriseSearchContentProcessingComponent { return @{} }
+        Mock -CommandName New-SPEnterpriseSearchAnalyticsProcessingComponent { return @{} }
+        Mock -CommandName New-SPEnterpriseSearchQueryProcessingComponent { return @{} }
+        Mock -CommandName New-SPEnterpriseSearchIndexComponent { return @{} }
+        Mock -CommandName Set-SPEnterpriseSearchTopology { return @{} }
+        Mock -CommandName Remove-SPEnterpriseSearchComponent { return $null }
 
-        Mock Get-SPServer {
+        Mock -CommandName Get-SPServer {
             return @(
                 @{
                     Name = $env:COMPUTERNAME
@@ -106,12 +106,12 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
             )
         }
 
-        Context "No search topology has been applied" {
-            Mock Get-SPEnterpriseSearchComponent {
+        Context -Name "No search topology has been applied" {
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 return @{}
             }
 
-            It "returns empty values from the get method" {
+            It "Should return empty values from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Admin | Should BeNullOrEmpty
                 $result.Crawler | Should BeNullOrEmpty
@@ -120,46 +120,46 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 $result.QueryProcessing | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "sets the desired topology for the current server" {
+            It "Should set the desired topology for the current server" {
                 Set-TargetResource @testParams
             }
         }
 
         
 
-        Context "No search topology exist and the search service instance isnt running" {
-            Mock Get-SPEnterpriseSearchComponent {
+        Context -Name "No search topology exist and the search service instance isnt running" {
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 return @{}
             }
-            $Global:SPDSCSearchRoleInstanceCalLCount = 0
-            Mock Get-SPEnterpriseSearchServiceInstance  {
-                if ($Global:SPDSCSearchRoleInstanceCalLCount -eq 2) {
-                    $Global:SPDSCSearchRoleInstanceCalLCount = 0
+            $Global:SPDscSearchRoleInstanceCalLCount = 0
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance  {
+                if ($Global:SPDscSearchRoleInstanceCalLCount -eq 2) {
+                    $Global:SPDscSearchRoleInstanceCalLCount = 0
                     return @{
                         Status = "Online"
                     }
                 } else {
-                    $Global:SPDSCSearchRoleInstanceCalLCount++
+                    $Global:SPDscSearchRoleInstanceCalLCount++
                     return @{
                         Status = "Offline"
                     }
                 }
             }
 
-            It "sets the desired topology for the current server and starts the search service instance" {
+            It "Should set the desired topology for the current server and starts the search service instance" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-SPEnterpriseSearchServiceInstance
             }
 
         }
 
-        Context "A search topology has been applied but it is not correct" {
+        Context -Name "A search topology has been applied but it is not correct" {
 
-            Mock Get-SPEnterpriseSearchServiceInstance  {
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance  {
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME
@@ -168,40 +168,40 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 }
             }
         
-            It "adds a missing admin component" {
-                Mock Get-SPEnterpriseSearchComponent {
+            It "Should add a missing admin component" {
+                Mock -CommandName Get-SPEnterpriseSearchComponent {
                     return @($crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchAdminComponent
             }
 
-            It "adds a missing crawl component" {
-                Mock Get-SPEnterpriseSearchComponent {
+            It "Should add a missing crawl component" {
+                Mock -CommandName Get-SPEnterpriseSearchComponent {
                     return @($adminComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchCrawlComponent
             }
 
-            It "adds a missing content processing component" {
-                Mock Get-SPEnterpriseSearchComponent {
+            It "Should add a missing content processing component" {
+                Mock -CommandName Get-SPEnterpriseSearchComponent {
                     return @($adminComponent, $crawlComponent, $analyticsProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchContentProcessingComponent
             }
 
-            It "adds a missing analytics processing component" {
-                Mock Get-SPEnterpriseSearchComponent {
+            It "Should add a missing analytics processing component" {
+                Mock -CommandName Get-SPEnterpriseSearchComponent {
                     return @($adminComponent, $crawlComponent, $contentProcessingComponent, $queryProcessingComponent)
                 }
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchAnalyticsProcessingComponent
             }
 
-            It "adds a missing query processing component" {
-                Mock Get-SPEnterpriseSearchComponent {
+            It "Should add a missing query processing component" {
+                Mock -CommandName Get-SPEnterpriseSearchComponent {
                     return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent)
                 }
                 Set-TargetResource @testParams
@@ -219,10 +219,10 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 FirstPartitionDirectory = "I:\SearchIndexes\0"
             }
             
-            Mock Get-SPEnterpriseSearchComponent {
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
             }
-            Mock Get-SPEnterpriseSearchComponent {
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
                 $adminComponent.ServerName = $env:COMPUTERNAME
                 $adminComponent.ServerId = $serverId
@@ -251,7 +251,7 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent)
             }
 
-            It "Removes components that shouldn't be on this server" {
+            It "Should remove components that shouldn't be on this server" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPEnterpriseSearchComponent -Times 5
             }
@@ -259,11 +259,11 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
             
         }
 
-        Context "The correct topology on this server exists" {
-            Mock Get-SPEnterpriseSearchComponent {
+        Context -Name "The correct topology on this server exists" {
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent, $indexComponent)
             }
-            Mock Get-SPEnterpriseSearchComponent {
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 $adminComponent = New-Object Microsoft.Office.Server.Search.Administration.Topology.AdminComponent
                 $adminComponent.ServerName = $env:COMPUTERNAME
                 $adminComponent.ServerId = $serverId
@@ -297,7 +297,7 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 return @($adminComponent, $crawlComponent, $contentProcessingComponent, $analyticsProcessingComponent, $queryProcessingComponent, $indexComponent)
             }
 
-            Mock Get-SPEnterpriseSearchServiceInstance  {
+            Mock -CommandName Get-SPEnterpriseSearchServiceInstance  {
                 return @{
                     Server = @{
                         Address = $env:COMPUTERNAME
@@ -317,26 +317,26 @@ Describe "SPSearchTopology - SharePoint Build $((Get-Item $SharePointCmdletModul
                 FirstPartitionDirectory = "I:\SearchIndexes\0"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "No search service application exists" {
-            Mock Get-SPEnterpriseSearchServiceApplication { return $null }
-            Mock Get-SPEnterpriseSearchComponent {
+        Context -Name "No search service application exists" {
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication { return $null }
+            Mock -CommandName Get-SPEnterpriseSearchComponent {
                 return @{}
             }
 
-            It "returns empty values from the get method" {
+            It "Should return empty values from the get method" {
                 Get-TargetResource @testParams | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "sets the desired topology for the current server" {
+            It "Should set the desired topology for the current server" {
                 { Set-TargetResource @testParams } | Should Throw 
             }
         }

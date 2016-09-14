@@ -21,6 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
+        # Test contexts 
         Context -Name "When no service applications exist in the current farm but it should" -Fixture {
             $testParams = @{
                 Name = "Test App"
@@ -120,7 +121,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 })
                     
-                $service = $service | Add-Member ScriptMethod Update {
+                $service = $service | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscAppServiceUpdateCalled = $true
                 } -PassThru 
                 return $service
@@ -151,7 +152,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName New-SPAppManagementServiceApplication -MockWith {  return  @(@{})}
             Mock -CommandName New-SPAppManagementServiceApplicationProxy -MockWith { return $null }
 
-            It "should not throw an exception in the set method" {
+            It "Should not throw an exception in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPAppManagementServiceApplication
             }

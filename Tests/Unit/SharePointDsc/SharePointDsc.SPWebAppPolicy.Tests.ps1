@@ -39,30 +39,30 @@ Describe "SPWebAppPolicy - SharePoint Build $((Get-Item $SharePointCmdletModule)
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
 
-        Mock Test-SPDSCIsADUser {
+        Mock -CommandName Test-SPDSCIsADUser {
             return $true
         }
 
-        Mock New-SPClaimsPrincipal { 
+        Mock -CommandName New-SPClaimsPrincipal { 
             return @{
                 Value = $Identity -replace "i:0#.w\|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
 
-        Mock New-SPClaimsPrincipal { 
-            $Global:SPDSCClaimsPrincipalUser = $Identity
+        Mock -CommandName New-SPClaimsPrincipal { 
+            $Global:SPDscClaimsPrincipalUser = $Identity
             return (
-                New-Object Object | Add-Member ScriptMethod ToEncodedString { 
-                    return "i:0#.w|$($Global:SPDSCClaimsPrincipalUser)" 
+                New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)" 
                 } -PassThru
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
 
-        Mock Remove-SPDSCGenericObject { }
+        Mock -CommandName Remove-SPDSCGenericObject { }
         
         try { [Microsoft.SharePoint.Administration.SPPolicyRoleType] }
         catch {
-            Add-Type @"
+            Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public enum SPPolicyRoleType { FullRead, FullControl, DenyWrite, DenyAll };
 }        
@@ -70,23 +70,23 @@ namespace Microsoft.SharePoint.Administration {
         }  
 
 
-        Context "The web application doesn't exist" {
-            Mock Get-SPWebApplication { return $null }
+        Context -Name "The web application doesn't exist" {
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "returns null from the set method" {
+            It "Should return null from the set method" {
                 { Set-TargetResource @testParams } | Should throw "Web application does not exist"
             }
         }
         
-        Context "Members and MembersToInclude parameters used simultaniously" {
+        Context -Name "Members and MembersToInclude parameters used simultaniously" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -105,38 +105,38 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
 
-            It "return null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
             }
         }
         
-        Context "No Member parameters at all" {
+        Context -Name "No Member parameters at all" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
             }
 
-            It "return null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
             }
         }
         
-        Context "ActAsSystemAccount parameter specified without Full Control in Members" {
+        Context -Name "ActAsSystemAccount parameter specified without Full Control in Members" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -148,20 +148,20 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
 
-            It "return null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Members Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
             }
         }
 
-        Context "ActAsSystemAccount parameter specified without Full Control in MembersToInclude" {
+        Context -Name "ActAsSystemAccount parameter specified without Full Control in MembersToInclude" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -173,20 +173,20 @@ namespace Microsoft.SharePoint.Administration {
                 )
             }
 
-            It "return null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "MembersToInclude Parameter: You cannot specify ActAsSystemAccount with any other permission than Full Control"
             }
         }
 
-        Context "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
+        Context -Name "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -198,13 +198,13 @@ namespace Microsoft.SharePoint.Administration {
                 )
                 SetCacheAccounts=$true
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -215,12 +215,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -228,8 +228,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -237,18 +237,18 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -259,7 +259,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
+        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -271,13 +271,13 @@ namespace Microsoft.SharePoint.Administration {
                 )
                 SetCacheAccounts=$true
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -288,12 +288,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -301,8 +301,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -310,18 +310,18 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -332,7 +332,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
+        Context -Name "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -344,13 +344,13 @@ namespace Microsoft.SharePoint.Administration {
                 )
                 SetCacheAccounts=$true
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -361,12 +361,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -374,34 +374,34 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "should throw exception in the test method" {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
 
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
         }
 
-        Context "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
+        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -413,13 +413,13 @@ namespace Microsoft.SharePoint.Administration {
                 )
                 SetCacheAccounts=$true
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -430,12 +430,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -443,34 +443,34 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "should throw exception in the test method" {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
 
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Cache accounts not configured properly. PortalSuperUserAccount or PortalSuperReaderAccount property is not configured."
             }
         }
 
-        Context "The Members parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
+        Context -Name "The Members parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -482,13 +482,13 @@ namespace Microsoft.SharePoint.Administration {
                 )
                 SetCacheAccounts=$true
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -497,7 +497,7 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -518,12 +518,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -531,8 +531,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "i:0#.w|contoso\sp_psu"
@@ -540,23 +540,23 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The MembersToInclude parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
+        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -568,13 +568,13 @@ namespace Microsoft.SharePoint.Administration {
                 )
                 SetCacheAccounts=$true
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -583,7 +583,7 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -604,12 +604,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -617,8 +617,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -626,23 +626,23 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The MembersToExclude parameter used, but it specifies a Cache User" {
+        Context -Name "The MembersToExclude parameter used, but it specifies a Cache User" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
@@ -653,13 +653,13 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindingsFR = $roleBindingsFR | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -668,7 +668,7 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindingsFC = $roleBindingsFC | Add-Member ScriptMethod RemoveAll {
+                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -689,12 +689,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -702,8 +702,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -711,27 +711,27 @@ namespace Microsoft.SharePoint.Administration {
                     }
                 }
                 
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "should throw exception in the test method" {
+            It "Should throw exception in the test method" {
                 { Test-TargetResource @testParams } | Should throw "You cannot exclude the Cache accounts from the Web Application Policy"
             }
 
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "You cannot exclude the Cache accounts from the Web Application Policy"
             }
         }
 
-        Context "The Members parameter contains users that aren't configured in the policy" {
+        Context -Name "The Members parameter contains users that aren't configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -747,13 +747,13 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -764,12 +764,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -777,22 +777,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the set method" {
+            It "Should return false from the set method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -803,7 +803,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The Members parameter does not contains users that are configured in the policy" {
+        Context -Name "The Members parameter does not contains users that are configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -814,13 +814,13 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -840,22 +840,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -866,7 +866,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The MembersToInclude parameter contains users that are not configured in the policy" {
+        Context -Name "The MembersToInclude parameter contains users that are not configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -882,13 +882,13 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -899,12 +899,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -912,22 +912,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -938,7 +938,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The MembersToInclude parameter contains users that are configured in the policy" {
+        Context -Name "The MembersToInclude parameter contains users that are configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -949,7 +949,7 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
@@ -972,8 +972,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -982,16 +982,16 @@ namespace Microsoft.SharePoint.Administration {
 
 
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The MembersToExclude parameter contains users that are configured in the policy" {
+        Context -Name "The MembersToExclude parameter contains users that are configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
@@ -1000,13 +1000,13 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
@@ -1026,23 +1026,23 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru | 
-                Add-Member NoteProperty Properties @{} -PassThru
+                Add-Member -MemberType NoteProperty Properties @{} -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -1053,7 +1053,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The users in the Members parameter have different settings than configured in the policy" {
+        Context -Name "The users in the Members parameter have different settings than configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1064,16 +1064,16 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
                     $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
@@ -1084,12 +1084,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1097,22 +1097,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -1123,7 +1123,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The users in the MembersToInclude parameter have different settings than configured in the policy" {
+        Context -Name "The users in the MembersToInclude parameter have different settings than configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -1134,16 +1134,16 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
                     $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
@@ -1154,12 +1154,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1167,22 +1167,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -1193,7 +1193,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The users in the Members parameter have different settings than configured in the policy - ActAsSystemAccount" {
+        Context -Name "The users in the Members parameter have different settings than configured in the policy - ActAsSystemAccount" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1204,16 +1204,16 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
                     $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
@@ -1224,12 +1224,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1237,22 +1237,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -1263,7 +1263,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The users in the MembersToInclude parameter have different settings than configured in the policy - ActAsSystemAccount" {
+        Context -Name "The users in the MembersToInclude parameter have different settings than configured in the policy - ActAsSystemAccount" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -1274,16 +1274,16 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member ScriptMethod RemoveAll {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
                     $Global:SPWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member ScriptMethod Add {
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
                     $Global:SPWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
@@ -1294,12 +1294,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
                     $policy = @{
                         IsSystemUser = $false
                     }
                     $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object Object | Add-Member ScriptMethod Add {} -PassThru
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1307,22 +1307,22 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -1333,7 +1333,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The users in the Members parameter have the same settings as configured in the policy" {
+        Context -Name "The users in the Members parameter have the same settings as configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1345,7 +1345,7 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
@@ -1363,24 +1363,24 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The users in the Members parameter have the same settings as configured in the policy, in Claims format" {
+        Context -Name "The users in the Members parameter have the same settings as configured in the policy, in Claims format" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1392,7 +1392,7 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
@@ -1410,24 +1410,24 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The users in the MembersToInclude parameter have the same  settings as configured in the policy" {
+        Context -Name "The users in the MembersToInclude parameter have the same  settings as configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -1438,7 +1438,7 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
@@ -1456,24 +1456,24 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The users in the MembersToExclude parameter aren't configured in the policy" {
+        Context -Name "The users in the MembersToExclude parameter aren't configured in the policy" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
@@ -1482,7 +1482,7 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
@@ -1500,24 +1500,24 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 return @($webApp)
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The users in the Members parameter have the same settings as configured in the policy, in Claims format with a windows group in the results" {
+        Context -Name "The users in the Members parameter have the same settings as configured in the policy, in Claims format with a windows group in the results" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1529,7 +1529,7 @@ namespace Microsoft.SharePoint.Administration {
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPWebApplication { 
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
@@ -1547,8 +1547,8 @@ namespace Microsoft.SharePoint.Administration {
                 $webApp = @{
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
-                    PolicyRoles = New-Object Object |
-                                    Add-Member ScriptMethod GetSpecialRole { return @{} } -PassThru
+                    PolicyRoles = New-Object -TypeName "Object" |
+                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -1558,11 +1558,11 @@ namespace Microsoft.SharePoint.Administration {
                 return "contoso\group1"
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

@@ -27,7 +27,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
-            Add-Type @"
+            Add-Type -TypeDefinition @"
                 namespace Microsoft.Office.Server.UserProfiles {
                 public enum ConnectionType { ActiveDirectory, BusinessDataCatalog };
                 public enum ProfileType { User};
@@ -36,7 +36,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         }   
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
-        Mock Get-SPDSCServiceContext {return @{}}
+        Mock -CommandName Get-SPDSCServiceContext {return @{}}
 
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -45,9 +45,9 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock Start-Sleep { }
-        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
-        Mock Get-SPWebApplication { 
+        Mock -CommandName Start-Sleep { }
+        Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
+        Mock -CommandName Get-SPWebapplication -MockWith { 
                 return @{
                         Url="http://ca"
                         IsAdministrationWebApplication=$true
@@ -61,14 +61,14 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
             AccountUsername = "TestAccount"
             Type= "ActiveDirectory"
         }
-        $connection = $connection  | Add-Member ScriptMethod RefreshSchema {
+        $connection = $connection  | Add-Member -MemberType ScriptMethod RefreshSchema {
                             $Global:SPUPSSyncConnectionRefreshSchemaCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Update {
+                        } -PassThru | Add-Member -MemberType ScriptMethod -Name Update -Value {
                             $Global:SPUPSSyncConnectionUpdateCalled = $true
-                        } -PassThru | Add-Member ScriptMethod SetCredentials {
+                        } -PassThru | Add-Member -MemberType ScriptMethod SetCredentials {
                                 param($userAccount,$securePassword )
                             $Global:SPUPSSyncConnectionSetCredentialsCalled  = $true
-                        } -PassThru | Add-Member ScriptMethod Delete {
+                        } -PassThru | Add-Member -MemberType ScriptMethod Delete {
                             $Global:SPUPSSyncConnectionDeleteCalled = $true
                         } -PassThru
 
@@ -82,7 +82,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         $namingContext.ContainersExcluded.Add("OU=com, OU=Contoso, OU=Excluded")
         $connection.NamingContexts.Add($namingContext);
         
-        $ConnnectionManager = New-Object System.Collections.ArrayList | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
+        $ConnnectionManager = New-Object System.Collections.ArrayList | Add-Member -MemberType ScriptMethod  AddActiveDirectoryConnection{ `
                                                 param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
                                                 $name, `
                                                 $forest, `
@@ -96,10 +96,10 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         $Global:SPUPSAddActiveDirectoryConnectionCalled =$true
         } -PassThru
             
-        Mock New-Object -MockWith {
+        Mock -CommandName New-Object -MockWith {
             return (@{
             ConnectionManager = $ConnnectionManager  
-            } | Add-Member ScriptMethod IsSynchronizationRunning {
+            } | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
                 $Global:UpsSyncIsSynchronizationRunning=$true;
                 return $false; 
             } -PassThru   )
@@ -115,18 +115,18 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
         }
         $userProfileServiceValidConnection.ConnectionManager.Add($connection);
         
-        Mock Get-SPDSCADSIObject {
+        Mock -CommandName Get-SPDSCADSIObject {
             return @{
                 distinguishedName = "DC=Contoso,DC=Com"
                 objectGUID = (New-Guid).ToString()
             }
         }
-        Mock New-SPDSCDirectoryServiceNamingContextList -MockWith {
+        Mock -CommandName New-SPDSCDirectoryServiceNamingContextList -MockWith {
             return New-Object System.Collections.Generic.List[[Object]]
         } 
         Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
         
-        Context "When connection doesn't exist" {
+        Context -Name "When connection doesn't exist" {
            $userProfileServiceNoConnections =  @{
                 Name = "User Profile Service Application"
                 ApplicationPool = "SharePoint Service Applications"
@@ -135,36 +135,36 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
                 ConnnectionManager = @()
             }
 
-            Mock Get-SPServiceApplication { return $userProfileServiceNoConnections }
-            Mock New-SPDSCDirectoryServiceNamingContext -MockWith {return @{} }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceNoConnections }
+            Mock -CommandName New-SPDSCDirectoryServiceNamingContext -MockWith {return @{} }
             
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 $Global:SPUPSAddActiveDirectoryConnectionCalled =$false
                 Set-TargetResource @testParams
                 $Global:SPUPSAddActiveDirectoryConnectionCalled | Should be $true
             }
         }
 
-        Context "When connection exists and account is different" {
-            Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+        Context -Name "When connection exists and account is different" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceValidConnection }
             
             $ConnnectionManager.Add($connection)
          
-            It "returns service instance from the Get method" {
+            It "Should return service instance from the Get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -177,7 +177,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
             }
         }
         
-        Context "When connection exists and forest is different" {
+        Context -Name "When connection exists and forest is different" {
             $litWareconnection = @{
                 DisplayName = "Contoso" 
                 Server = "litware.net"
@@ -187,7 +187,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
                 Type= "ActiveDirectory"
             }
             $litWareconnection.NamingContexts.Add($namingContext);
-            $litWareconnection = $litWareconnection | Add-Member ScriptMethod Delete {
+            $litWareconnection = $litWareconnection | Add-Member -MemberType ScriptMethod Delete {
                     $Global:SPUPSSyncConnectionDeleteCalled = $true
                 } -PassThru
             $userProfileServiceValidConnection =  @{
@@ -200,8 +200,8 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
             }
 
             $userProfileServiceValidConnection.ConnectionManager.Add($litWareconnection);
-            Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
-            $litwareConnnectionManager = New-Object System.Collections.ArrayList | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceValidConnection }
+            $litwareConnnectionManager = New-Object System.Collections.ArrayList | Add-Member -MemberType ScriptMethod  AddActiveDirectoryConnection{ `
                                                     param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
                                                     $name, `
                                                     $forest, `
@@ -216,26 +216,26 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
             } -PassThru            
             $litwareConnnectionManager.Add($litWareconnection)
 
-            Mock New-Object -MockWith {
-                return (@{} | Add-Member ScriptMethod IsSynchronizationRunning {
+            Mock -CommandName New-Object -MockWith {
+                return (@{} | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
                     $Global:UpsSyncIsSynchronizationRunning=$true;
                     return $false; 
                 } -PassThru   |  Add-Member  ConnectionManager $litwareConnnectionManager  -PassThru )
             } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
-            Mock New-Object -MockWith {return @{}
+            Mock -CommandName New-Object -MockWith {return @{}
             }  -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext"}
 
-            It "returns service instance from the Get method" {
+            It "Should return service instance from the Get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws exception as force isn't specified" {
+            It "Should throw exception as force isn't specified" {
                 $Global:SPUPSSyncConnectionDeleteCalled=$false
                 {Set-TargetResource @testParams} | should throw
                 $Global:SPUPSSyncConnectionDeleteCalled | Should be $false
@@ -262,15 +262,15 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
             }
         }
 
-        Context "When synchronization is running" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When synchronization is running" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
-                    New-Object Object|Add-Member NoteProperty ServiceApplicationProxyGroup "Proxy Group" -PassThru 
+                    New-Object -TypeName "Object"|Add-Member -MemberType NoteProperty ServiceApplicationProxyGroup "Proxy Group" -PassThru 
                 )
             }
             
-            Mock New-Object -MockWith {
-                return (@{} | Add-Member ScriptMethod IsSynchronizationRunning {
+            Mock -CommandName New-Object -MockWith {
+                return (@{} | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
                     $Global:UpsSyncIsSynchronizationRunning=$true;
                     return $true;
                 } -PassThru)
@@ -288,7 +288,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
 
         }
         
-        Context "When connection exists and Excluded and Included OUs are different. force parameter provided" {
+        Context -Name "When connection exists and Excluded and Included OUs are different. force parameter provided" {
             $userProfileServiceValidConnection =  @{
                 Name = "User Profile Service Application"
                 TypeName = "User Profile Service Application"
@@ -298,7 +298,7 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
                 ConnectionManager=  New-Object System.Collections.ArrayList
             }
             $userProfileServiceValidConnection.ConnectionManager.Add($connection);
-            Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceValidConnection }
 
             $difOUsTestParams = @{
                 UserProfileService = "User Profile Service Application"
@@ -313,16 +313,16 @@ Describe "SPUserProfileSyncConnection - SharePoint Build $((Get-Item $SharePoint
                 ConnectionType = "ActiveDirectory"
             }
 
-            It "returns values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @difOUsTestParams | Should Not BeNullOrEmpty
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.UserProfileService } 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @difOUsTestParams | Should Be $false
             }
 
-            It "updates OU lists" {
+            It "Should update OU lists" {
                 $Global:SPUPSSyncConnectionUpdateCalled= $false
                 $Global:SPUPSSyncConnectionSetCredentialsCalled  = $false
                 $Global:SPUPSSyncConnectionRefreshSchemaCalled =$false

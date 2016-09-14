@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("PostFarm") "SPServiceAppPool - Integration Tests" {
-    Context "Creates new service app pools" {
+    Context -Name "Creates new service app pools" {
         It "Is able to create service app pools" {
             $configName = "SPServiceAppPool_CreateNewAppPool"
             Configuration $configName {
@@ -38,8 +38,8 @@ Describe -Tags @("PostFarm") "SPServiceAppPool - Integration Tests" {
         }
     }
 
-    Context "Updates existing pools" {
-        It "Updates the service account of a service app pool" {
+    Context -Name "Updates existing pools" {
+        It "Should update the service account of a service app pool" {
             $configName = "SPServiceAppPool_UpdateAppPool"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc
@@ -58,8 +58,8 @@ Describe -Tags @("PostFarm") "SPServiceAppPool - Integration Tests" {
         }
     }
 
-    Context "Removes existing pools" {
-        It "Removes the service app pool" {
+    Context -Name "Removes existing pools" {
+        It "Should remove the service app pool" {
             $configName = "SPServiceAppPool_RemoveAppPool"
             Configuration $configName {
                 Import-DscResource -ModuleName SharePointDsc

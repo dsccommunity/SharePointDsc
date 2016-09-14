@@ -30,86 +30,86 @@ Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointC
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
-        Context "The server is not part of SharePoint farm" {
-            Mock Get-SPFarm { throw "Unable to detect local farm" }
+        Context -Name "The server is not part of SharePoint farm" {
+            Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
-            It "return null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "throws an exception in the set method to say there is no local farm" {
+            It "Should throw an exception in the set method to say there is no local farm" {
                 { Set-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
             }
         }
 
-        Context "The Web Application isn't available" {
-            Mock Get-SPWebApplication -MockWith  { return $null
+        Context -Name "The Web Application isn't available" {
+            Mock -CommandName Get-SPWebApplication -MockWith  { return $null
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty 
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
 
-            It "throws an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Configured web application could not be found"
             }
         }
 
-        Context "The server is in a farm and the incorrect settings have been applied" {
-            Mock Get-SPWebApplication -MockWith  {
+        Context -Name "The server is in a farm and the incorrect settings have been applied" {
+            Mock -CommandName Get-SPWebApplication -MockWith  {
                 $returnVal = @{
                         SendUnusedSiteCollectionNotifications    = $false
                         UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
                         AutomaticallyDeleteUnusedSiteCollections = $false
                         UnusedSiteNotificationsBeforeDeletion    = 28
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
 
-            Mock Get-SPFarm { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPDSCSiteUseUpdated = $false
-            It "updates the Site Use and Deletion settings" {
+            $Global:SPDscSiteUseUpdated = $false
+            It "Should update the Site Use and Deletion settings" {
                 Set-TargetResource @testParams
-                $Global:SPDSCSiteUseUpdated | Should Be $true
+                $Global:SPDscSiteUseUpdated | Should Be $true
             }
         }
 
-        Context "The server is in a farm and the correct settings have been applied" {
-            Mock Get-SPWebApplication -MockWith  {
+        Context -Name "The server is in a farm and the correct settings have been applied" {
+            Mock -CommandName Get-SPWebApplication -MockWith  {
                 $returnVal = @{
                     SendUnusedSiteCollectionNotifications    = $true
                     UnusedSiteNotificationPeriod             = @{ TotalDays = 90; }
                     AutomaticallyDeleteUnusedSiteCollections = $true
                     UnusedSiteNotificationsBeforeDeletion    = 30
                 } 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
                 return $returnVal
             }
-            Mock Get-SPFarm { return @{} }
+            Mock -CommandName Get-SPFarm -MockWith { return @{} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
 

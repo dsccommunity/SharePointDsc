@@ -25,11 +25,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $Global:SPDscWebConfigFile = Join-Path -Path $Global:SPDscWebConfigPath -ChildPath "web.config"
         New-Item -Path $Global:SPDscWebConfigPath -ItemType Directory
 
-        try { 
+        try 
+        { 
             [Microsoft.SharePoint.Administration.SPUrlZone] 
         }
-        catch {
-            Add-Type @"
+        catch 
+        {
+            Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
 }        
@@ -56,7 +58,8 @@ namespace Microsoft.SharePoint.Administration {
             Set-Content -Path $Global:SPDscWebConfigFile -Value $Content
         }
 
-        Context "The web application doesn't exist" {
+        # Test contexts 
+        Context -Name "The web application doesn't exist" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Zone        = "Default"
@@ -82,7 +85,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "BlobCache is enabled, but the MaxSize parameters cannot be converted to Uint16" {
+        Context -Name "BlobCache is enabled, but the MaxSize parameters cannot be converted to Uint16" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Zone        = "Default"
@@ -118,7 +121,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "BlobCache correctly configured, but the folder does not exist" {
+        Context -Name "BlobCache correctly configured, but the folder does not exist" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Zone        = "Default"
@@ -153,7 +156,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "BlobCache is enabled, but the other parameters do not match" {
+        Context -Name "BlobCache is enabled, but the other parameters do not match" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Zone        = "Default"
@@ -190,7 +193,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
         
-        Context "BlobCache is disabled, but the parameters specify it to be enabled" {
+        Context -Name "BlobCache is disabled, but the parameters specify it to be enabled" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Zone        = "Default"
@@ -240,7 +243,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "The specified configuration is correctly configured" {
+        Context -Name "The specified configuration is correctly configured" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Zone        = "Default"
@@ -268,7 +271,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context "BlobCache is enabled, but the parameters specify it to be disabled" {
+        Context -Name "BlobCache is enabled, but the parameters specify it to be disabled" {
             $testParams = @{
                 WebAppUrl   = "http:/sharepoint.contoso.com"
                 Zone        = "Default"

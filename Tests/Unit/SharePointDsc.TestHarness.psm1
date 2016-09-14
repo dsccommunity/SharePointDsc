@@ -96,7 +96,11 @@ function New-SPDscUnitTestHelper
 
         [Parameter(Mandatory = $false)]
         [Switch]
-        $ExcludeInvokeHelper
+        $ExcludeInvokeHelper,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]
+        $IncludeDistributedCacheStubs
     )
 
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
@@ -118,14 +122,29 @@ function New-SPDscUnitTestHelper
     }
 
     $spBuild = (Get-Item -Path $SharePointStubModule).Directory.BaseName
+    $firstDot = $spBuild.IndexOf(".")
+    $majorBuildNumber = $spBuild.Substring(0, $firstDot)
+
     $describeHeader += " [SP Build: $spBuild]"
 
     Import-Module -Name $moduleToLoad -Global
+
+    
 
     $initScript = @"
             Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
             Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
             Import-Module -Name "$moduleToLoad"
+            
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
+                return @{ 
+                    FileMajorPart = $majorBuildNumber 
+                } 
+            }
+
+            Mock -CommandName Get-SPDSCAssemblyVersion -MockWith {
+                return $majorBuildNumber
+            }
             
 "@
 
@@ -138,12 +157,28 @@ function New-SPDscUnitTestHelper
 "@
     }
 
+    if ($IncludeDistributedCacheStubs -eq $true)
+    {
+        $dcachePath = Join-Path -Path $repoRoot `
+                                -ChildPath "Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1"
+        $initScript += @"
+
+            Import-Module -Name "$dcachePath" -WarningAction SilentlyContinue
+            
+"@
+    }
+
     return @{
         DescribeHeader = $describeHeader
         ModuleName = $moduleName
+        CurrentStubModulePath = $SharePointStubModule
+        CurrentStubBuildNumber = [Version]::Parse($spBuild)
         InitializeScript = [ScriptBlock]::Create($initScript)
         CleanupScript = [ScriptBlock]::Create(@"
+
             Get-Variable -Scope Global -Name "SPDsc*" | Remove-Variable -Force -Scope "Global"
+            `$global:DSCMachineStatus = 0
+            
 "@)
     }
 }

@@ -30,42 +30,42 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        Mock Remove-SPServiceApplication {}
+        Mock -CommandName Remove-SPServiceApplication {}
 
-        Context "When no service applications exist in the current farm" {
+        Context -Name "When no service applications exist in the current farm" {
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSubscriptionSettingsServiceApplication { return @{}}
-            Mock New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
-            It "returns absent from the Get method" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPSubscriptionSettingsServiceApplication { return @{}}
+            Mock -CommandName New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
             }
         }
 
-        Context "When service applications exist in the current farm but the specific subscription settings service app does not" {
+        Context -Name "When service applications exist in the current farm but the specific subscription settings service app does not" {
 
-            Mock Get-SPServiceApplication { return @(@{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
@@ -77,17 +77,17 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
                 })
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"  
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and the app pool is not configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $service = @(@{
                     TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
@@ -98,22 +98,22 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
                     }
                 })
                     
-                $service = $service | Add-Member ScriptMethod Update {
+                $service = $service | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPSubscriptionServiceUpdateCalled = $true
                 } -PassThru 
                 return $service
 
 
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPSubscriptionSettingsServiceApplication { }
+            Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock -CommandName Set-SPSubscriptionSettingsServiceApplication { }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
             $Global:SPSubscriptionServiceUpdateCalled = $false
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
@@ -121,18 +121,18 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
             }
         }
 
-        Context "When a service app needs to be created and no database parameters are provided" {
+        Context -Name "When a service app needs to be created and no database parameters are provided" {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "Test App Pool"
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSubscriptionSettingsServiceApplication {return @{} }
-            Mock New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPSubscriptionSettingsServiceApplication {return @{} }
+            Mock -CommandName New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
 
-            it "should not throw an exception in the set method" {
+            It "should not throw an exception in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplication
                 Assert-MockCalled New-SPSubscriptionSettingsServiceApplicationProxy
@@ -145,8 +145,8 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
             Ensure = "Absent"
         }
         
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When the service app exists but it shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
@@ -158,28 +158,28 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
                 })
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

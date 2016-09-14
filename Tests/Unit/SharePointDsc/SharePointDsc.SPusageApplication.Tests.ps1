@@ -34,60 +34,60 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock New-SPUsageApplication { }
-        Mock Set-SPUsageService { }
-        Mock Get-SPUsageService { return @{
+        Mock -CommandName New-SPUsageApplication { }
+        Mock -CommandName Set-SPUsageService { }
+        Mock -CommandName Get-SPUsageService { return @{
             UsageLogCutTime = $testParams.UsageLogCutTime
             UsageLogDir = $testParams.UsageLogLocation
             UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
             UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
         }}
-        Mock Remove-SPServiceApplication
-        Mock Get-SPServiceApplicationProxy {
-            return (New-Object Object | Add-Member ScriptMethod Provision {} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Online" -PassThru  | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+        Mock -CommandName Remove-SPServiceApplication
+        Mock -CommandName Get-SPServiceApplicationProxy {
+            return (New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Provision {} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Online" -PassThru  | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
         }
 
-        Context "When no service applications exist in the current farm" {
+        Context -Name "When no service applications exist in the current farm" {
 
-            Mock Get-SPServiceApplication { return $null }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPUsageApplication
             }
 
-            It "creates a new service application with custom database credentials" {
+            It "Should create a new service application with custom database credentials" {
                 $testParams.Add("DatabaseCredentials", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPUsageApplication
             }
         }
 
-        Context "When service applications exist in the current farm but not the specific usage service app" {
+        Context -Name "When service applications exist in the current farm but not the specific usage service app" {
 
-            Mock Get-SPServiceApplication { return @(@{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
@@ -98,17 +98,17 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                 })
             }
 
-            It "returns values from the get method" {
+            It "Should return values from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"  
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and log path are not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and log path are not configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
@@ -118,26 +118,26 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                     }
                 })
             }
-            Mock Get-SPUsageService { return @{
+            Mock -CommandName Get-SPUsageService { return @{
                 UsageLogCutTime = $testParams.UsageLogCutTime
                 UsageLogDir = "C:\Wrong\Location"
                 UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
                 UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
             }}
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Set-SPUsageService
             }
         }
 
-        Context "When a service application exists and log size is not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and log size is not configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
@@ -147,18 +147,18 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                     }
                 })
             }
-            Mock Get-SPUsageService { return @{
+            Mock -CommandName Get-SPUsageService { return @{
                 UsageLogCutTime = $testParams.UsageLogCutTime
                 UsageLogDir = $testParams.UsageLogLocation
                 UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
                 UsageLogMaxSpaceGB = 1
             }}
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Set-SPUsageService
@@ -170,8 +170,8 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             Ensure = "Absent"
         }
         
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When the service app exists but it shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
@@ -182,28 +182,28 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                 })
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -213,8 +213,8 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             Ensure = "Present"
         }
         
-        Context "The proxy for the service app is offline when it should be running" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "The proxy for the service app is offline when it should be running" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
@@ -224,22 +224,22 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                     }
                 })
             }
-            Mock Get-SPServiceApplicationProxy {
-                return (New-Object Object | Add-Member ScriptMethod Provision {$Global:SPDSCUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+            Mock -CommandName Get-SPServiceApplicationProxy {
+                return (New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Provision {$Global:SPDscUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
             }    
-            $Global:SPDSCUSageAppProxyStarted = $false
+            $Global:SPDscUSageAppProxyStarted = $false
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should start the proxy in the set method" {
+            It "Should start the proxy in the set method" {
                 Set-TargetResource @testParams
-                $Global:SPDSCUSageAppProxyStarted | Should Be $true
+                $Global:SPDscUSageAppProxyStarted | Should Be $true
             }
         }
     }    

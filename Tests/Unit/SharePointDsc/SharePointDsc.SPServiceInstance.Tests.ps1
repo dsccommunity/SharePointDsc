@@ -26,115 +26,115 @@ Describe "SPServiceInstance - SharePoint Build $((Get-Item $SharePointCmdletModu
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock Start-SPServiceInstance { }
+        Mock -CommandName Start-SPServiceInstance { }
         Mock Stop-SPServiceInstance { }
 
-        Context "The service instance is not running but should be" {
-            Mock Get-SPServiceInstance { return @() }
+        Context -Name "The service instance is not running but should be" {
+            Mock -CommandName Get-SPServiceInstance { return @() }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the set method" {
+            It "Should return false from the set method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "The service instance is not running but should be" {
-            Mock Get-SPServiceInstance { return @(
+        Context -Name "The service instance is not running but should be" {
+            Mock -CommandName Get-SPServiceInstance { return @(
                 @{
                     TypeName = $testParams.Name
                     Status = "Disabled"
                 })
             }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the set method" {
+            It "Should return false from the set method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the start service call from the set method" {
+            It "Should call the start service call from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Start-SPServiceInstance
             }
         }
 
-        Context "The service instance is running and should be" {
-            Mock Get-SPServiceInstance { return @(
+        Context -Name "The service instance is running and should be" {
+            Mock -CommandName Get-SPServiceInstance { return @(
                 @{
                     TypeName = $testParams.Name
                     Status = "Online"
                 })
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "An invalid service application is specified to start" {
-            Mock Get-SPServiceInstance  { return $null }
+        Context -Name "An invalid service application is specified to start" {
+            Mock -CommandName Get-SPServiceInstance  { return $null }
 
-            It "throws when the set method is called" {
+            It "Should throw when the set method is called" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
 
         $testParams.Ensure = "Absent"
 
-        Context "The service instance is not running and should not be" {
-            Mock Get-SPServiceInstance { return @(
+        Context -Name "The service instance is not running and should not be" {
+            Mock -CommandName Get-SPServiceInstance { return @(
                 @{
                     TypeName = $testParams.Name
                     Status = "Disabled"
                 })
             }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The service instance is running and should not be" {
-            Mock Get-SPServiceInstance { return @(
+        Context -Name "The service instance is running and should not be" {
+            Mock -CommandName Get-SPServiceInstance { return @(
                 @{
                     TypeName = $testParams.Name
                     Status = "Online"
                 })
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns false from the set method" {
+            It "Should return false from the set method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the stop service call from the set method" {
+            It "Should call the stop service call from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Stop-SPServiceInstance
             }
         }
 
-        Context "An invalid service application is specified to stop" {
-            Mock Get-SPServiceInstance  { return $null }
+        Context -Name "An invalid service application is specified to stop" {
+            Mock -CommandName Get-SPServiceInstance  { return $null }
 
-            It "throws when the set method is called" {
+            It "Should throw when the set method is called" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }

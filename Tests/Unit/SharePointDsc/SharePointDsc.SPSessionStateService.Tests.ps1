@@ -29,18 +29,18 @@ Describe "SPSessionStateService - SharePoint Build $((Get-Item $SharePointCmdlet
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock Set-SPSessionStateService { return @{} }
-        Mock Enable-SPSessionStateService { return @{} }
-        Mock Disable-SPSessionStateService { return @{} }
+        Mock -CommandName Set-SPSessionStateService { return @{} }
+        Mock -CommandName Enable-SPSessionStateService { return @{} }
+        Mock -CommandName Disable-SPSessionStateService { return @{} }
 
-        Context "the service isn't enabled but should be" {
-            Mock Get-SPSessionStateService  { return @{ SessionStateEnabled = $false; Timeout = @{TotalMinutes = 60}} }
+        Context -Name "the service isn't enabled but should be" {
+            Mock -CommandName Get-SPSessionStateService  { return @{ SessionStateEnabled = $false; Timeout = @{TotalMinutes = 60}} }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -50,46 +50,46 @@ Describe "SPSessionStateService - SharePoint Build $((Get-Item $SharePointCmdlet
                 Assert-MockCalled Enable-SPSessionStateService
             }
         }
-        Context "the service is enabled and should be" {
-            Mock Get-SPSessionStateService  { return @{ SessionStateEnabled = $true; Timeout = @{TotalMinutes = 60}} }
+        Context -Name "the service is enabled and should be" {
+            Mock -CommandName Get-SPSessionStateService  { return @{ SessionStateEnabled = $true; Timeout = @{TotalMinutes = 60}} }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "the timeout should be set to 90 seconds but is 60" {
-            Mock Get-SPSessionStateService  { return @{ SessionStateEnabled = $true; Timeout = @{TotalMinutes = 60}} }
+        Context -Name "the timeout should be set to 90 seconds but is 60" {
+            Mock -CommandName Get-SPSessionStateService  { return @{ SessionStateEnabled = $true; Timeout = @{TotalMinutes = 60}} }
             $testParams.SessionTimeout = 90
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams 
                 $result.Ensure | Should Be "Present"
                 $result.SessionTimeout | Should Be 60
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "updates session timeout to 90 seconds" {
+            It "Should update session timeout to 90 seconds" {
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled Set-SPSessionStateService 
             }
         }
         
-        Context "the service is enabled but shouldn't be" {
-            Mock Get-SPSessionStateService  { return @{ SessionStateEnabled = $true; Timeout = @{TotalMinutes = 60}} }
+        Context -Name "the service is enabled but shouldn't be" {
+            Mock -CommandName Get-SPSessionStateService  { return @{ SessionStateEnabled = $true; Timeout = @{TotalMinutes = 60}} }
             $testParams.Ensure = "Absent"
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -99,14 +99,14 @@ Describe "SPSessionStateService - SharePoint Build $((Get-Item $SharePointCmdlet
             }
         }
         
-        Context "the service is disabled and should be" {
-            Mock Get-SPSessionStateService  { return @{ SessionStateEnabled = $false; Timeout = @{TotalMinutes = 60}} }
+        Context -Name "the service is disabled and should be" {
+            Mock -CommandName Get-SPSessionStateService  { return @{ SessionStateEnabled = $false; Timeout = @{TotalMinutes = 60}} }
             
-            It "returns enabled from the get method" {
+            It "Should return enabled from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

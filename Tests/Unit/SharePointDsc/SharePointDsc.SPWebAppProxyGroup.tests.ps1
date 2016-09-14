@@ -29,7 +29,7 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
               
         
         
-        Context "WebApplication does not exist" {
+        Context -Name "WebApplication does not exist" {
             $testParams = @{
                 WebAppUrl              = "https://web.contoso.com"
                 ServiceAppProxyGroup      = "Web1ProxyGroup"
@@ -37,17 +37,17 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
 
             Mock get-spwebapplication {}
 
-            It "return null property from the get method" {
+            It "Should return null property from the get method" {
                 (Get-TargetResource @testParams).WebAppUrl | Should Be $null
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
         }
 
-        Context "WebApplication Proxy Group connection matches desired config" {
+        Context -Name "WebApplication Proxy Group connection matches desired config" {
             $testParams = @{
                 WebAppUrl              = "https://web.contoso.com"
                 ServiceAppProxyGroup      = "Web1ProxyGroup"
@@ -55,33 +55,33 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
 
             Mock get-spwebapplication { return @{ ServiceApplicationProxyGroup = @{ name = "Web1ProxyGroup"}} }
 
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "WebApplication Proxy Group connection does not match desired config" {
+        Context -Name "WebApplication Proxy Group connection does not match desired config" {
             $testParams = @{
                 WebAppUrl              = "https://web.contoso.com"
                 ServiceAppProxyGroup      = "Default"
             }
 
             Mock get-spwebapplication { return @{ ServiceApplicationProxyGroup = @{ name = "Web1ProxyGroup"}} }
-            Mock set-spwebapplication { }
+            Mock -CommandName Set-spwebapplication { }
             
-            It "return values from the get method" {
+            It "Should return values from the get method" {
                 (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false 
             }
             
-            It "updates the webapplication from the set method" {
+            It "Should update the webapplication from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPWebApplication
             }

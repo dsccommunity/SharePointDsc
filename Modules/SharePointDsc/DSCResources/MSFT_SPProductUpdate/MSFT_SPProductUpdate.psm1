@@ -31,6 +31,12 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    if ($Ensure -eq "Absent")
+    {
+        throw [Exception] "SharePoint does not support uninstalling updates."
+        return
+    }
+
     Write-Verbose -Message "Getting install status of SP binaries"
 
     $languagepack = $false

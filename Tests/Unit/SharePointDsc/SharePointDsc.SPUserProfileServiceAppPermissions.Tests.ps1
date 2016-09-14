@@ -29,34 +29,34 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock New-SPClaimsPrincipal { 
+        Mock -CommandName New-SPClaimsPrincipal { 
             return @{
                 Value = $Identity -replace "i:0#.w\|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
 
-        Mock New-SPClaimsPrincipal { 
-            $Global:SPDSCClaimsPrincipalUser = $Identity
+        Mock -CommandName New-SPClaimsPrincipal { 
+            $Global:SPDscClaimsPrincipalUser = $Identity
             return (
-                New-Object Object | Add-Member ScriptMethod ToEncodedString { 
-                    return "i:0#.w|$($Global:SPDSCClaimsPrincipalUser)" 
+                New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)" 
                 } -PassThru
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
 
         Mock Grant-SPObjectSecurity { }
         Mock Revoke-SPObjectSecurity { }
-        Mock Set-SPProfileServiceApplicationSecurity { }
+        Mock -CommandName Set-SPProfileServiceApplicationSecurity { }
 
-        Mock Start-Sleep { }
-        Mock Test-SPDSCIsADUser { return $true }
+        Mock -CommandName Start-Sleep { }
+        Mock -CommandName Test-SPDSCIsADUser { return $true }
         Mock Write-Warning { }
 
-        Mock Get-SPServiceApplicationProxy {
+        Mock -CommandName Get-SPServiceApplicationProxy {
             return @()
         }
         
-        Context "The proxy does not exist" {
+        Context -Name "The proxy does not exist" {
 
             It "Should return null values from the get method" {
                 $results = Get-TargetResource @testParams
@@ -74,7 +74,7 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Mock Get-SPServiceApplicationProxy {
+        Mock -CommandName Get-SPServiceApplicationProxy {
             return @(
                 @{
                     DisplayName = $testParams.ProxyName
@@ -82,8 +82,8 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             )
         }
 
-        Context "Users who should have access do not have access" {
-            Mock Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should have access do not have access" {
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
                 return @{
                     AccessRules = @()
                 }
@@ -103,8 +103,8 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context "Users who should have access have incorrect permissions" {
-            Mock Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should have access have incorrect permissions" {
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
                 return @{
                     AccessRules = @(
                         @{
@@ -137,8 +137,8 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context "Users who should have permissions have the correct permissions" {
-            Mock Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should have permissions have the correct permissions" {
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
                 return @{
                     AccessRules = @(
                         @{
@@ -166,8 +166,8 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context "Users who should not have access have permissions assigned" {
-            Mock Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should not have access have permissions assigned" {
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
                 return @{
                     AccessRules = @(
                         @{
@@ -204,8 +204,8 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context "The old non-claims 'Authenticated Users' entry exists in the permissions" {
-            Mock Get-SPProfileServiceApplicationSecurity {
+        Context -Name "The old non-claims 'Authenticated Users' entry exists in the permissions" {
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
                 return @{
                     AccessRules = @(
                         @{

@@ -1,62 +1,65 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPCreateFarm"
 
-$ModuleName = "MSFT_SPCreateFarm"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            FarmConfigDatabaseName = "SP_Config"
-            DatabaseServer = "DatabaseServer\Instance"
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            Passphrase =  New-Object System.Management.Automation.PSCredential ("PASSPHRASEUSER", (ConvertTo-SecureString "MyFarmPassphrase" -AsPlainText -Force))
-            AdminContentDatabaseName = "Admin_Content"
-            CentralAdministrationAuth = "Kerberos"
-            CentralAdministrationPort = 1234
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        # Initialize tests
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockFarmAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
+                                      -ArgumentList @("username", $mockPassword)
+        $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
+                                     -ArgumentList @("PASSPHRASEUSER", $mockPassword)                                      
+
+        # Mocks for all contexts   
+        Mock -CommandName New-SPConfigurationDatabase -MockWith {}
+        Mock -CommandName Install-SPHelpCollection -MockWith {}
+        Mock Initialize-SPResourceSecurity -MockWith {}
+        Mock -CommandName Install-SPService -MockWith {}
+        Mock -CommandName Install-SPFeature -MockWith {}
+        Mock -CommandName New-SPCentralAdministration -MockWith {}
+        Mock -CommandName Install-SPApplicationContent -MockWith {}
         
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock New-SPConfigurationDatabase {}
-        Mock Install-SPHelpCollection {}
-        Mock Initialize-SPResourceSecurity {}
-        Mock Install-SPService {}
-        Mock Install-SPFeature {}
-        Mock New-SPCentralAdministration {}
-        Mock Install-SPApplicationContent {}
+        # Test contexts
+        Context -Name "no farm is configured locally and a supported version of SharePoint is installed" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
 
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
-
-        Context "no farm is configured locally and a supported version of SharePoint is installed" {
-            Mock Get-SPFarm { throw "Unable to detect local farm" }
+            Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
             It "the get method returns null when the farm is not configured" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the new configuration database cmdlet in the set method" {
+            It "Should call the new configuration database cmdlet in the set method" {
                 Set-TargetResource @testParams
-                switch ($majorBuildNumber)
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
                     15 {
                         Assert-MockCalled New-SPConfigurationDatabase
@@ -68,12 +71,12 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
-                
             }
 
-            if ($majorBuildNumber -eq 16) {
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16) 
+            {
                 $testParams.Add("ServerRole", "WebFrontEnd")
-                It "creates a farm with a specific server role" {
+                It "Should create a farm with a specific server role" {
                     Set-TargetResource @testParams
                     Assert-MockCalled New-SPConfigurationDatabase -ParameterFilter { $LocalServerRole -eq "WebFrontEnd" }
                 }
@@ -81,108 +84,198 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             }
         }
 
-        if ($majorBuildNumber -eq 15) {
-            $testParams.Add("ServerRole", "WebFrontEnd")
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15) 
+        {
+            Context -Name "only valid parameters for SharePoint 2013 are used" -Fixture {
+                $testParams = @{
+                    FarmConfigDatabaseName = "SP_Config"
+                    DatabaseServer = "DatabaseServer\Instance"
+                    FarmAccount = $mockFarmAccount
+                    Passphrase =  $mockPassphrase
+                    AdminContentDatabaseName = "Admin_Content"
+                    CentralAdministrationAuth = "Kerberos"
+                    CentralAdministrationPort = 1234
+                    ServerRole = "WebFrontEnd"
+                }
 
-            Context "only valid parameters for SharePoint 2013 are used" {
-                It "throws if server role is used in the get method" {
+                It "Should throw if server role is used in the get method" {
                     { Get-TargetResource @testParams } | Should Throw
                 }
 
-                It "throws if server role is used in the test method" {
+                It "Should throw if server role is used in the test method" {
                     { Test-TargetResource @testParams } | Should Throw
                 }
 
-                It "throws if server role is used in the set method" {
+                It "Should throw if server role is used in the set method" {
                     { Set-TargetResource @testParams } | Should Throw
                 }
             }
-
-            $testParams.Remove("ServerRole")
         }
 
-        Context "no farm is configured locally and an unsupported version of SharePoint is installed on the server" {
-            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 14 } }
+        Context -Name "no farm is configured locally and an unsupported version of SharePoint is installed on the server" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+            
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 14 } }
 
-            It "throws when an unsupported version is installed and set is called" {
+            It "Should throw when an unsupported version is installed and set is called" {
                 { Set-TargetResource @testParams } | Should throw
             }
         }
 
-        Context "a farm exists locally and is the correct farm" {
-            Mock Get-SPFarm { return @{ 
-                DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
-                Name = $testParams.FarmConfigDatabaseName
-            }}
-            Mock Get-SPDatabase { return @(@{ 
-                Name = $testParams.FarmConfigDatabaseName
-                Type = "Configuration Database"
-                Server = @{ Name = $testParams.DatabaseServer }
-            })} 
-            Mock Get-SPWebApplication { return @(@{
-                IsAdministrationWebApplication = $true
-                ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
-                Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
-            })}
+        Context -Name "a farm exists locally and is the correct farm" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith { 
+                return @{ 
+                    DefaultServiceAccount = @{ 
+                        Name = $testParams.FarmAccount.UserName 
+                    }
+                    Name = $testParams.FarmConfigDatabaseName
+                }
+            }
+            
+            Mock -CommandName Get-SPDatabase -MockWith { 
+                return @(@{ 
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    Server = @{ 
+                        Name = $testParams.DatabaseServer 
+                    }
+                })
+            } 
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return @(@{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+                })
+            }
 
             It "the get method returns values when the farm is configured" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "a farm exists locally and is not the correct farm" {
-            Mock Get-SPFarm { return @{ 
-                DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
-                Name = "WrongDBName"
-            }}
-            Mock Get-SPDatabase { return @(@{ 
-                Name = "WrongDBName"
-                Type = "Configuration Database"
-                Server = @{ Name = $testParams.DatabaseServer }
-            })} 
-            Mock Get-SPWebApplication { return @(@{
-                IsAdministrationWebApplication = $true
-                ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
-                Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
-            })}
+        Context -Name "a farm exists locally and is not the correct farm" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
 
-            It "throws an error in the set method" {
+            Mock -CommandName Get-SPFarm -MockWith { 
+                return @{ 
+                    DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
+                    Name = "WrongDBName"
+                }
+            }
+            
+            Mock -CommandName Get-SPDatabase -MockWith { 
+                return @(@{ 
+                    Name = "WrongDBName"
+                    Type = "Configuration Database"
+                    Server = @{ 
+                        Name = $testParams.DatabaseServer 
+                    }
+                })
+            } 
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return @(@{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+                })
+            }
+
+            It "Should throw an error in the set method" {
                 { Set-TargetResource @testParams } | Should throw
             }
         }
 
-        Context "a farm exists locally with the wrong farm account" {
-            Mock Get-SPFarm { return @{ 
-                DefaultServiceAccount = @{ Name = "WRONG\account" }
-                Name = $testParams.FarmConfigDatabaseName
-            }}
-            Mock Get-SPDatabase { return @(@{ 
-                Name = $testParams.FarmConfigDatabaseName
-                Type = "Configuration Database"
-                Server = @{ Name = $testParams.DatabaseServer }
-            })} 
-            Mock Get-SPWebApplication { return @(@{
-                IsAdministrationWebApplication = $true
-                ContentDatabases = @(@{ Name = $testParams.AdminContentDatabaseName })
-                Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
-            })}
+        Context -Name "a farm exists locally with the wrong farm account" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+            
+            Mock -CommandName Get-SPFarm -MockWith { 
+                return @{ 
+                    DefaultServiceAccount = @{ Name = "WRONG\account" }
+                    Name = $testParams.FarmConfigDatabaseName
+                }
+            }
+            
+            Mock -CommandName Get-SPDatabase -MockWith { 
+                return @(@{ 
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    Server = @{ Name = $testParams.DatabaseServer }
+                })
+            } 
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return @(@{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+                })
+            }
 
             It "the get method returns current values" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method as changing the farm account isn't supported so set shouldn't be called" {
+            It "Should return true from the test method as changing the farm account isn't supported so set shouldn't be called" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
         }
 
-        Context "no farm is configured locally, a supported version is installed and no central admin port is specified" {
-            $testParams.Remove("CentralAdministrationPort")
+        Context -Name "no farm is configured locally, a supported version is installed and no central admin port is specified" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+            }
 
             It "uses a default value for the central admin port" {
                 Set-TargetResource @testParams
@@ -190,13 +283,22 @@ Describe "SPCreateFarm - SharePoint Build $((Get-Item $SharePointCmdletModule).D
             }
         }
         
-        Context "no farm is configured locally, a supported version is installed and no central admin auth is specified" {
-            $testParams.Remove("CentralAdministrationAuth")
+        Context -Name "no farm is configured locally, a supported version is installed and no central admin auth is specified" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+            }
 
             It "uses NTLM for the Central Admin web application authentication" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPCentralAdministration -ParameterFilter { $WindowsAuthProvider -eq "NTLM" }
             }
         }
-    }    
+
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

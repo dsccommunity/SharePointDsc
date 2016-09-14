@@ -39,57 +39,57 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
-        Context "When a service application exists and Ensure equals 'absent'" {
+        Context -Name "When a service application exists and Ensure equals 'absent'" {
             $testParamsAbsent = @{
                 Name = "Test Work Management App"
                 Ensure = "Absent"
             }
-            Mock Get-SPServiceApplication { 
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Work Management Service Application"
                     DisplayName = $testParamsAbsent.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 })
             }
-            Mock Remove-SPServiceApplication{ }
+            Mock -CommandName Remove-SPServiceApplication{ }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParamsAbsent | Should Be $false
             }
 
-            It "calls the remove service app cmdlet from the set method" {
+            It "Should call the remove service app cmdlet from the set method" {
                 Set-TargetResource @testParamsAbsent
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
 
-        Context "When no service applications exist in the current farm" {
+        Context -Name "When no service applications exist in the current farm" {
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPWorkManagementServiceApplication { }
-            Mock Set-SPWorkManagementServiceApplication { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPWorkManagementServiceApplication { }
+            Mock -CommandName Set-SPWorkManagementServiceApplication { }
 
-            Mock New-SPWorkManagementServiceApplicationProxy { }
-            It "returns null from the Get method" {
+            Mock -CommandName New-SPWorkManagementServiceApplicationProxy { }
+            It "Should return null from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPWorkManagementServiceApplication 
             }
         }
 
-        Context "When service applications exist in the current farm but the specific Work Management app does not" {
-            Mock Set-SPWorkManagementServiceApplication { }
-            Mock New-SPWorkManagementServiceApplication { }
-            Mock New-SPWorkManagementServiceApplicationProxy { }
+        Context -Name "When service applications exist in the current farm but the specific Work Management app does not" {
+            Mock -CommandName Set-SPWorkManagementServiceApplication { }
+            Mock -CommandName New-SPWorkManagementServiceApplication { }
+            Mock -CommandName New-SPWorkManagementServiceApplicationProxy { }
             $Global:GetSpServiceApplicationCalled=$false
-            Mock Get-SPServiceApplication { 
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 if($Global:GetSpServiceApplicationCalled -eq $false){
                     $Global:GetSpServiceApplicationCalled=$true;
                     return @(@{
@@ -102,11 +102,11 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
             
         
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "creates  new app from the Get method" {
+            It "Should create  new app from the Get method" {
                 Set-TargetResource @testParams 
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
                 Assert-MockCalled Set-SPWorkManagementServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
@@ -114,8 +114,8 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
 
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Work Management Service Application"
                     DisplayName = $testParamsComplete.Name
@@ -133,17 +133,17 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                 })
             }
 
-            It "returns values from the get method" {
+            It "Should return values from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParamsComplete | Should Be $true
             }
         }
 
-        Context "When a service application exists and is not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is not configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Work Management Service Application"
                     DisplayName = $testParams.Name
@@ -160,13 +160,13 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
 
                 })
             }
-            Mock Set-SPWorkManagementServiceApplication { }
+            Mock -CommandName Set-SPWorkManagementServiceApplication { }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParamsComplete | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParamsComplete
                 Assert-MockCalled Set-SPWorkManagementServiceApplication
                 Assert-MockCalled Get-SPServiceApplication

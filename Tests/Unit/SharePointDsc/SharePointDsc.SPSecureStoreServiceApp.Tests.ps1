@@ -30,59 +30,59 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
         $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
 
-        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
-        Mock Remove-SPServiceApplication {}   
+        Mock -CommandName Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
+        Mock -CommandName Remove-SPServiceApplication {}   
 
-        Context "When no service application exists in the current farm" {
+        Context -Name "When no service application exists in the current farm" {
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSecureStoreServiceApplication { }
-            Mock New-SPSecureStoreServiceApplicationProxy { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPSecureStoreServiceApplication { }
+            Mock -CommandName New-SPSecureStoreServiceApplicationProxy { }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
 
             $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "creates a new service application in the set method where InstallAccount is used" {
+            It "Should create a new service application in the set method where InstallAccount is used" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
             $testParams.Remove("InstallAccount")
 
             $testParams.Add("DatabaseName", "SP_SecureStore")
-            It "creates a new service application in the set method where parameters beyond the minimum required set" {
+            It "Should create a new service application in the set method where parameters beyond the minimum required set" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
             $testParams.Remove("DatabaseName")
         }
 
-        Context "When service applications exist in the current farm but the specific search app does not" {
-            Mock Get-SPServiceApplication { return @(@{
+        Context -Name "When service applications exist in the current farm but the specific search app does not" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
                 TypeName = "Some other service app type"
             }) }
         
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
@@ -94,17 +94,17 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 })
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and the app pool is not configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
@@ -115,14 +115,14 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                     }
                 })
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPSecureStoreServiceApplication { }
+            Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock -CommandName Set-SPSecureStoreServiceApplication { }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
@@ -130,7 +130,7 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
-        Context "When specific windows credentials are to be used for the database" {
+        Context -Name "When specific windows credentials are to be used for the database" {
             $testParams = @{
                 Name = "Secure Store Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -141,28 +141,28 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSecureStoreServiceApplication { }
-            Mock New-SPSecureStoreServiceApplicationProxy { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPSecureStoreServiceApplication { }
+            Mock -CommandName New-SPSecureStoreServiceApplicationProxy { }
 
             It "allows valid Windows credentials can be passed" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
 
-            It "throws an exception if database authentication type is not specified" {
+            It "Should throw an exception if database authentication type is not specified" {
                 $testParams.Remove("DatabaseAuthenticationType")
                 { Set-TargetResource @testParams } | Should Throw
             }
 
-            It "throws an exception if the credentials aren't provided and the authentication type is set" {
+            It "Should throw an exception if the credentials aren't provided and the authentication type is set" {
                 $testParams.Add("DatabaseAuthenticationType", "Windows")
                 $testParams.Remove("DatabaseCredentials")
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
 
-        Context "When specific SQL credentials are to be used for the database" {
+        Context -Name "When specific SQL credentials are to be used for the database" {
             $testParams = @{
                 Name = "Secure Store Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -173,21 +173,21 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPSecureStoreServiceApplication { }
-            Mock New-SPSecureStoreServiceApplicationProxy { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPSecureStoreServiceApplication { }
+            Mock -CommandName New-SPSecureStoreServiceApplicationProxy { }
 
             It "allows valid SQL credentials can be passed" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
 
-            It "throws an exception if database authentication type is not specified" {
+            It "Should throw an exception if database authentication type is not specified" {
                 $testParams.Remove("DatabaseAuthenticationType")
                 { Set-TargetResource @testParams } | Should Throw
             }
 
-            It "throws an exception if the credentials aren't provided and the authentication type is set" {
+            It "Should throw an exception if the credentials aren't provided and the authentication type is set" {
                 $testParams.Add("DatabaseAuthenticationType", "Windows")
                 $testParams.Remove("DatabaseCredentials")
                 { Set-TargetResource @testParams } | Should Throw
@@ -201,8 +201,8 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             Ensure = "Absent"
         }
         
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When the service app exists but it shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
@@ -214,28 +214,28 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 })
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

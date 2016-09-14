@@ -69,7 +69,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
         
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
-            Add-Type @"
+            Add-Type -TypeDefinition @"
                 namespace Microsoft.Office.Server.UserProfiles {
                 public enum ConnectionType { ActiveDirectory, BusinessDataCatalog };
                 public enum ProfileType { User};
@@ -89,18 +89,18 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                                         TermStore = @{Name =$testParamsUpdateProperty.TermStore} }
                             Length=25
                             IsSearchable =$true
-                        } | Add-Member ScriptMethod Commit {
+                        } | Add-Member -MemberType ScriptMethod Commit {
                             $Global:SPUPSPropertyCommitCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Delete {
+                        } -PassThru | Add-Member -MemberType ScriptMethod Delete {
                             $Global:SPUPSPropertyDeleteCalled = $true
                         } -PassThru
-        $corePropertyUpdate.Type = $corePropertyUpdate.Type | Add-Member ScriptMethod GetTypeCode {
+        $corePropertyUpdate.Type = $corePropertyUpdate.Type | Add-Member -MemberType ScriptMethod GetTypeCode {
                             $Global:SPUPSPropertyGetTypeCodeCalled = $true
                             return $corePropertyUpdate.Type
                         } -PassThru -Force
         $coreProperties = @{WorkEmailUpdate = $corePropertyUpdate}
 
-        $coreProperties = $coreProperties | Add-Member ScriptMethod Create {
+        $coreProperties = $coreProperties | Add-Member -MemberType ScriptMethod Create {
                             $Global:SPUPCoreCreateCalled = $true
                             return @{
                             Name="";
@@ -109,9 +109,9 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                             TermSet=$null
                             Length=10
                             }
-                        } -PassThru  | Add-Member ScriptMethod RemovePropertyByName {
+                        } -PassThru  | Add-Member -MemberType ScriptMethod RemovePropertyByName {
                             $Global:SPUPCoreRemovePropertyByNameCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
+                        } -PassThru | Add-Member -MemberType ScriptMethod Add {
                             $Global:SPUPCoreAddCalled = $true
                         } -PassThru -Force 
                         
@@ -120,7 +120,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                             IsVisibleOnViewer=$true
                             IsVisibleOnEditor=$true
                             IsEventLog=$true
-                        }| Add-Member ScriptMethod Commit {
+                        }| Add-Member -MemberType ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
         
@@ -137,7 +137,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                             CoreProperty = $corePropertyUpdate
                             TypeProperty = $typePropertyUpdate
                             AllowPolicyOverride=$false;
-                        }| Add-Member ScriptMethod Commit {
+                        }| Add-Member -MemberType ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
 
@@ -152,9 +152,9 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                                         TermStore = @{Name =$testParamsNewProperty.TermStore} }
                             Length=$testParamsNewProperty.Length
                             IsSearchable =$testParamsNewProperty.IsSearchable
-                        } | Add-Member ScriptMethod Commit {
+                        } | Add-Member -MemberType ScriptMethod Commit {
                             $Global:SPUPSPropertyCommitCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Delete {
+                        } -PassThru | Add-Member -MemberType ScriptMethod Delete {
                             $Global:SPUPSPropertyDeleteCalled = $true
                         } -PassThru
 
@@ -162,7 +162,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                             IsVisibleOnViewer=$testParamsNewProperty.IsVisibleOnViewer
                             IsVisibleOnEditor=$testParamsNewProperty.IsVisibleOnEditor
                             IsEventLog=$testParamsNewProperty.IsEventLog
-                        }| Add-Member ScriptMethod Commit {
+                        }| Add-Member -MemberType ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
 
@@ -178,33 +178,33 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                             CoreProperty = $coreProperty
                             TypeProperty = $typeProperty
                             AllowPolicyOverride=$true;
-                        }| Add-Member ScriptMethod Commit {
+                        }| Add-Member -MemberType ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 
-        $userProfileSubTypePropertiesNoProperty = @{} | Add-Member ScriptMethod Create {
+        $userProfileSubTypePropertiesNoProperty = @{} | Add-Member -MemberType ScriptMethod Create {
                             $Global:SPUPSubTypeCreateCalled = $true
-                        } -PassThru  | Add-Member ScriptMethod GetPropertyByName {
+                        } -PassThru  | Add-Member -MemberType ScriptMethod GetPropertyByName {
                             $result = $null
                             if($Global:SPUPGetPropertyByNameCalled -eq $TRUE){
                                 $result = $subTypeProperty
                             }
                             $Global:SPUPGetPropertyByNameCalled  = $true
                             return $result
-                        } -PassThru| Add-Member ScriptMethod Add {
+                        } -PassThru| Add-Member -MemberType ScriptMethod Add {
                             $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force 
 
-        $userProfileSubTypePropertiesUpdateProperty = @{"WorkEmailUpdate" = $subTypePropertyUpdate } | Add-Member ScriptMethod Create {
+        $userProfileSubTypePropertiesUpdateProperty = @{"WorkEmailUpdate" = $subTypePropertyUpdate } | Add-Member -MemberType ScriptMethod Create {
                             $Global:SPUPSubTypeCreateCalled = $true
-                        } -PassThru | Add-Member ScriptMethod Add {
+                        } -PassThru | Add-Member -MemberType ScriptMethod Add {
                             $Global:SPUPSubTypeAddCalled = $true
-                        } -PassThru -Force | Add-Member ScriptMethod GetPropertyByName {
+                        } -PassThru -Force | Add-Member -MemberType ScriptMethod GetPropertyByName {
                             $Global:SPUPGetPropertyByNameCalled  = $true
                             return $subTypePropertyUpdate
                         } -PassThru
          #$userProfileSubTypePropertiesValidProperty.Add($subTypeProperty);
         mock Get-SPDSCUserProfileSubTypeManager -MockWith {
-        $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+        $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                             $Global:SPUPGetProfileSubtypeCalled = $true
                             return @{
                             Properties = $userProfileSubTypePropertiesNoProperty
@@ -215,7 +215,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
         }
         
 
-        Mock Get-SPWebApplication -MockWith {
+        Mock -CommandName Get-SPWebApplication -MockWith {
             return @(
                     @{
                         IsAdministrationWebApplication=$true
@@ -238,18 +238,18 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                                 }}    
 
 
-        Mock New-Object -MockWith {
+        Mock -CommandName New-Object -MockWith {
             return (@{
                 TermStores = $TermStoresList
             })
         } -ParameterFilter { $TypeName -eq "Microsoft.SharePoint.Taxonomy.TaxonomySession" } 
 
-        Mock New-Object -MockWith {
+        Mock -CommandName New-Object -MockWith {
             return (@{
-                Properties = @{} | Add-Member ScriptMethod SetDisplayOrderByPropertyName {
+                Properties = @{} | Add-Member -MemberType ScriptMethod SetDisplayOrderByPropertyName {
                 $Global:UpsSetDisplayOrderByPropertyNameCalled=$true;
                 return $false; 
-            } -PassThru | Add-Member ScriptMethod CommitDisplayOrder {
+            } -PassThru | Add-Member -MemberType ScriptMethod CommitDisplayOrder {
                 $Global:UpsSetDisplayOrderByPropertyNameCalled=$true;
                 return $false; 
             } -PassThru    })
@@ -259,25 +259,25 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
         }
   
         
-        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
+        Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         $propertyMappingItem =  @{
                                     DataSourcePropertyName="mail"
                                     IsImport=$true
                                     IsExport=$false
-                                    } | Add-Member ScriptMethod Delete {
+                                    } | Add-Member -MemberType ScriptMethod Delete {
                                         $Global:UpsMappingDeleteCalled=$true;
                                         return $true; 
                                         } -PassThru
 
-        $propertyMapping = @{}| Add-Member ScriptMethod Item {
+        $propertyMapping = @{}| Add-Member -MemberType ScriptMethod Item {
                             param( [string]$property  )
                             $Global:SPUPSMappingItemCalled = $true
                                 if($property="WorkEmailUpdate"){
                                     return $propertyMappingItem}
-                                    } -PassThru -force | Add-Member ScriptMethod AddNewExportMapping {
+                                    } -PassThru -force | Add-Member -MemberType ScriptMethod AddNewExportMapping {
                                         $Global:UpsMappingAddNewExportCalled=$true;
                                         return $true; 
-                                        } -PassThru | Add-Member ScriptMethod AddNewMapping {
+                                        } -PassThru | Add-Member -MemberType ScriptMethod AddNewMapping {
                                         $Global:UpsMappingAddNewMappingCalled=$true;
                                         return $true; 
                                         } -PassThru 
@@ -290,14 +290,14 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             PropertyMapping = $propertyMapping
         }
 
-        $connection = $connection   | Add-Member ScriptMethod Update {
+        $connection = $connection   | Add-Member -MemberType ScriptMethod -Name Update -Value {
                             $Global:SPUPSSyncConnectionUpdateCalled = $true
-                        } -PassThru  | Add-Member ScriptMethod AddPropertyMapping {
+                        } -PassThru  | Add-Member -MemberType ScriptMethod AddPropertyMapping {
                             $Global:SPUPSSyncConnectionAddPropertyMappingCalled = $true
                         } -PassThru
 
         
-        $ConnnectionManager = @($connection) | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
+        $ConnnectionManager = @($connection) | Add-Member -MemberType ScriptMethod  AddActiveDirectoryConnection{ `
                                                 param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
                                                 $name, `
                                                 $forest, `
@@ -312,19 +312,19 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
         } -PassThru
         
         
-        Mock New-Object -MockWith {
-            $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
+        Mock -CommandName New-Object -MockWith {
+            $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member -MemberType ScriptMethod GetCoreProperties {
                 $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
 
                 return ($coreProperties); 
-            } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
+            } -PassThru | Add-Member -MemberType ScriptMethod GetProfileTypeProperties {
                 $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
                 return $userProfileSubTypePropertiesUpdateProperty; 
             } -PassThru     
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager
             ConnectionManager = $ConnnectionManager  
-            } | Add-Member ScriptMethod IsSynchronizationRunning {
+            } | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
                 $Global:UpsSyncIsSynchronizationRunning=$true;
                 return $false; 
             } -PassThru   )
@@ -339,12 +339,12 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             ConnectionManager=  @($connection) #New-Object System.Collections.ArrayList
         }
 
-        Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+        Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceValidConnection }
 
         
-        Context "When property doesn't exist" {
+        Context -Name "When property doesn't exist" {
             
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -355,13 +355,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "creates a new user profile property in the set method" {
+            It "Should create a new user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 
                 $Global:SPUPSMappingItemCalled = $false
@@ -374,26 +374,26 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 
         }
 
-        Context "When property doesn't exist, connection doesn't exist" {
-            Mock New-Object -MockWith {
-                $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
+        Context -Name "When property doesn't exist, connection doesn't exist" {
+            Mock -CommandName New-Object -MockWith {
+                $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member -MemberType ScriptMethod GetCoreProperties {
                 $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
 
                 return ($coreProperties); 
-            } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
+            } -PassThru | Add-Member -MemberType ScriptMethod GetProfileTypeProperties {
                 $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
                 return $userProfileSubTypePropertiesUpdateProperty; 
             } -PassThru     
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager
             ConnectionManager = $()  
-            } | Add-Member ScriptMethod IsSynchronizationRunning {
+            } | Add-Member -MemberType ScriptMethod IsSynchronizationRunning {
                 $Global:UpsSyncIsSynchronizationRunning=$true;
                 return $false; 
             } -PassThru   )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -404,7 +404,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -428,11 +428,11 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 
         }
 
-        Context "When property doesn't exist, term set doesn't exist" {
+        Context -Name "When property doesn't exist, term set doesn't exist" {
             $termSet = $testParamsNewProperty.TermSet 
             $testParamsNewProperty.TermSet = "Invalid"
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -443,13 +443,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "creates a new user profile property in the set method" {
+            It "Should create a new user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
@@ -463,11 +463,11 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 
         }
 
-        Context "When property doesn't exist, term group doesn't exist" {
+        Context -Name "When property doesn't exist, term group doesn't exist" {
             $termGroup = $testParamsNewProperty.TermGroup
             $testParamsNewProperty.TermGroup = "InvalidGroup"
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -478,13 +478,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "creates a new user profile property in the set method" {
+            It "Should create a new user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
@@ -498,11 +498,11 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 
         }
 
-        Context "When property doesn't exist, term store doesn't exist" {
+        Context -Name "When property doesn't exist, term store doesn't exist" {
             $termStore = $testParamsNewProperty.TermStore
             $testParamsNewProperty.TermStore = "InvalidStore"
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -513,13 +513,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "creates a new user profile property in the set method" {
+            It "Should create a new user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
 
@@ -535,9 +535,9 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
         }
 
 
-        Context "When property exists and all properties match" {
+        Context -Name "When property exists and all properties match" {
             mock Get-SPDSCUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -547,7 +547,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -558,13 +558,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "updates an user profile property in the set method" {
+            It "Should update an user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 Set-TargetResource @testParamsUpdateProperty
@@ -576,11 +576,11 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 
         }
 
-        Context "When property exists and type is different - throws exception" {
+        Context -Name "When property exists and type is different - throws exception" {
             $currentType = $testParamsUpdateProperty.Type
             $testParamsUpdateProperty.Type = "StringMultiValue"
             mock Get-SPDSCUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -590,7 +590,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -601,7 +601,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -622,12 +622,12 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
 
         }
 
-        Context "When property exists and mapping exists, mapping config does not match" {
+        Context -Name "When property exists and mapping exists, mapping config does not match" {
             
             $propertyMappingItem.DataSourcePropertyName = "property"
 
             mock Get-SPDSCUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -637,7 +637,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -648,13 +648,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "updates an user profile property in the set method" {
+            It "Should update an user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -666,10 +666,10 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
         }
-        Context "When property exists and mapping does not " {
+        Context -Name "When property exists and mapping does not " {
            $propertyMappingItem=$null
                        mock Get-SPDSCUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
@@ -679,7 +679,7 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -690,13 +690,13 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
             }
 
-            It "updates an user profile property in the set method" {
+            It "Should update an user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -709,9 +709,9 @@ Describe "SPUserProfileProperty - SharePoint Build $((Get-Item $SharePointCmdlet
             }
         }
 
-        Context "When property exists and ensure equals Absent" {
+        Context -Name "When property exists and ensure equals Absent" {
             mock Get-SPDSCUserProfileSubTypeManager -MockWith {
-            $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
+            $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty

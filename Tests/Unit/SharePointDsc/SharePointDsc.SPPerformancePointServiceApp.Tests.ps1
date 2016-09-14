@@ -1,112 +1,132 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPPerformancePointServiceApp"
 
-$ModuleName = "MSFT_SPPerformancePointServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Test Performance Point App"
-            ApplicationPool = "Test App Pool"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        # Mocks for all contexts   
+        Mock -CommandName Remove-SPServiceApplication -MockWith  { }
+        Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+        Mock -CommandName New-SPPerformancePointServiceApplication -MockWith  { }
+        Mock -CommandName New-SPPerformancePointServiceApplicationProxy -MockWith  { }
 
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        Mock Remove-SPServiceApplication { }
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Test Performance Point App"
+                ApplicationPool = "Test App Pool"
+            }
 
-        Context "When no service applications exist in the current farm" {
-
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPPerformancePointServiceApplication { }
-            Mock New-SPPerformancePointServiceApplicationProxy { }
-
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPPerformancePointServiceApplication 
             }
         }
 
-        Context "When service applications exist in the current farm but the specific Performance Point app does not" {
+        Context -Name "When service applications exist in the current farm but the specific Performance Point app does not" -Fixture {
+            $testParams = @{
+                Name = "Test Performance Point App"
+                ApplicationPool = "Test App Pool"
+            }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return @(@{
+                    TypeName = "Some other service app type"
+                }) 
+            }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Test Performance Point App"
+                ApplicationPool = "Test App Pool"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
                 })
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and is not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Test Performance Point App"
+                ApplicationPool = "Test App Pool"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    ApplicationPool = @{ 
+                        Name = "Wrong App Pool Name" 
+                    }
                 })
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Get-SPServiceApplicationPool
             }
         }
         
-        $testParams = @{
-            Name = "Test App"
-            ApplicationPool = "-"
-            Ensure = "Absent"
-        }
-        Context "When the service application exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When the service application exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
@@ -114,30 +134,40 @@ Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePoin
                 })
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "calls the remove service application cmdlet in the set method" {
+            It "Should call the remove service application cmdlet in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the serivce application doesn't exist and it shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the serivce application doesn't exist and it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

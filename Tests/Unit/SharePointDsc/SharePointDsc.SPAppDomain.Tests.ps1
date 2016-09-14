@@ -22,6 +22,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Set-SPAppDomain -MockWith {}
         Mock -CommandName Set-SPAppSiteSubscriptionName -MockWith {}
 
+        # Test contexts 
         Context -Name "No app URLs have been configured locally" -Fixture {
             $testParams = @{
                 AppDomain = "apps.contoso.com"

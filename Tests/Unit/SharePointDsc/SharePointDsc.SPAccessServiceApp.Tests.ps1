@@ -23,6 +23,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Set-SPAccessServicesApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
+        # Test contexts 
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
                 Name = "Test Access Services App"

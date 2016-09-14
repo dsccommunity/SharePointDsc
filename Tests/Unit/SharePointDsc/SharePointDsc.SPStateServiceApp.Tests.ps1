@@ -30,68 +30,68 @@ Describe "SPStateServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         
-        Mock New-SPStateServiceDatabase { return @{} }
-        Mock New-SPStateServiceApplication { return @{} }
-        Mock New-SPStateServiceApplicationProxy { return @{} }
-        Mock Remove-SPServiceApplication { }
+        Mock -CommandName New-SPStateServiceDatabase { return @{} }
+        Mock -CommandName New-SPStateServiceApplication { return @{} }
+        Mock -CommandName New-SPStateServiceApplicationProxy { return @{} }
+        Mock -CommandName Remove-SPServiceApplication { }
 
-        Context "the service app doesn't exist and should" {
-            Mock Get-SPStateServiceApplication { return $null }
+        Context -Name "the service app doesn't exist and should" {
+            Mock -CommandName Get-SPStateServiceApplication { return $null }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false from the get method" {
+            It "Should return false from the get method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a state service app from the set method" {
+            It "Should create a state service app from the set method" {
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled New-SPStateServiceApplication
             }
         }
 
-        Context "the service app exists and should" {
-            Mock Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
+        Context -Name "the service app exists and should" {
+            Mock -CommandName Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
         $testParams.Ensure = "Absent"
         
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
+        Context -Name "When the service app exists but it shouldn't" {
+            Mock -CommandName Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

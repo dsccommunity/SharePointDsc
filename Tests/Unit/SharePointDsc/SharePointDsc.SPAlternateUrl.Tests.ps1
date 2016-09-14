@@ -19,10 +19,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts
-        Mock New-SPAlternateURL {}
-        Mock Set-SPAlternateURL {}
-        Mock Remove-SPAlternateURL {}
+        Mock -CommandName New-SPAlternateURL {}
+        Mock -CommandName Set-SPAlternateURL {}
+        Mock -CommandName Remove-SPAlternateURL {}
         
+        # Test contexts 
         Context -Name "No alternate URL exists for the specified zone and web app, and there should be" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://test.constoso.local"

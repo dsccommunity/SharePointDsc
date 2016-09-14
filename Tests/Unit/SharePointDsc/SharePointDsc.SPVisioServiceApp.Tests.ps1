@@ -29,41 +29,41 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
-        Mock Remove-SPServiceApplication { }
+        Mock -CommandName Remove-SPServiceApplication { }
 
-        Context "When no service applications exist in the current farm" {
+        Context -Name "When no service applications exist in the current farm" {
 
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPVisioServiceApplication { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName New-SPVisioServiceApplication { }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPVisioServiceApplication 
             }
         }
 
-        Context "When service applications exist in the current farm but the specific Visio Graphics app does not" {
+        Context -Name "When service applications exist in the current farm but the specific Visio Graphics app does not" {
 
-            Mock Get-SPServiceApplication { return @(@{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
                 TypeName = "Some other service app type"
             }) }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
@@ -71,30 +71,30 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                 })
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and is not configured correctly" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When a service application exists and is not configured correctly" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 })
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
@@ -107,8 +107,8 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             Ensure = "Absent"
         }
         
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
+        Context -Name "When the service app exists but it shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
@@ -116,28 +116,28 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                 })
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }

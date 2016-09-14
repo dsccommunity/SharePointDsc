@@ -11,9 +11,9 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
 Describe 'SharePointDsc whole of module tests' {
 
-    Context "Validate example files" {
+    Context -Name "Validate example files" {
         
-        It "should compile MOFs for all examples correctly" {
+        It "Should compile MOFs for all examples correctly" {
             $examplesWithErrors = 0
             $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
             $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("username", $dummyPassword)

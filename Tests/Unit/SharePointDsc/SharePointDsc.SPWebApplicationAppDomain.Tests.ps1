@@ -30,29 +30,29 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock New-SPWebApplicationAppDomain { }
-        Mock Remove-SPWebApplicationAppDomain { }
-        Mock Start-Sleep { }
+        Mock -CommandName New-SPWebApplicationAppDomain { }
+        Mock -CommandName Remove-SPWebApplicationAppDomain { }
+        Mock -CommandName Start-Sleep { }
 
-        Context "No app domain settings have been configured for the specified web app and zone" {
-            Mock Get-SPWebApplicationAppDomain { return $null }
+        Context -Name "No app domain settings have been configured for the specified web app and zone" {
+            Mock -CommandName Get-SPWebApplicationAppDomain { return $null }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates the new app domain entry" {
+            It "Should create the new app domain entry" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPWebApplicationAppDomain
             }
         }
 
-        Context "An app domain has been configured for the specified web app and zone but it's not correct" {
-            Mock Get-SPWebApplicationAppDomain { 
+        Context -Name "An app domain has been configured for the specified web app and zone but it's not correct" {
+            Mock -CommandName Get-SPWebApplicationAppDomain { 
                 return @{
                     AppDomain = "wrong.domain"
                     UrlZone = $testParams.Zone
@@ -61,23 +61,23 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
                 }
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates the new app domain entry" {
+            It "Should create the new app domain entry" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPWebApplicationAppDomain
                 Assert-MockCalled New-SPWebApplicationAppDomain
             }
         }
 
-        Context "The correct app domain has been configued for the requested web app and zone" {
-            Mock Get-SPWebApplicationAppDomain { 
+        Context -Name "The correct app domain has been configued for the requested web app and zone" {
+            Mock -CommandName Get-SPWebApplicationAppDomain { 
                 return @{
                     AppDomain = $testParams.AppDomain
                     UrlZone = $testParams.Zone
@@ -86,11 +86,11 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
                 }
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -101,8 +101,8 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
             Zone = "Default"
         }
 
-        Context "The functions operate without optional parameters included" {
-            Mock Get-SPWebApplicationAppDomain { 
+        Context -Name "The functions operate without optional parameters included" {
+            Mock -CommandName Get-SPWebApplicationAppDomain { 
                 return @{
                     AppDomain = "invalid.domain"
                     UrlZone = $testParams.Zone
@@ -111,15 +111,15 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
                 }
             }
 
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates the new app domain entry" {
+            It "Should create the new app domain entry" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPWebApplicationAppDomain
                 Assert-MockCalled New-SPWebApplicationAppDomain

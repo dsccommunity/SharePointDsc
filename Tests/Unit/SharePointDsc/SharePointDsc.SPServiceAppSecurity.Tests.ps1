@@ -36,40 +36,40 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
-        Mock Test-SPDSCIsADUser { return $true }
+        Mock -CommandName Test-SPDSCIsADUser { return $true }
         
         Mock Grant-SPObjectSecurity {}
         Mock Revoke-SPObjectSecurity {}
-        Mock Set-SPServiceApplicationSecurity {}
+        Mock -CommandName Set-SPServiceApplicationSecurity {}
 
-        Mock New-SPClaimsPrincipal { 
+        Mock -CommandName New-SPClaimsPrincipal { 
             return @{
                 Value = $Identity -replace "i:0#.w\|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
 
-        Mock New-SPClaimsPrincipal { 
-            $Global:SPDSCClaimsPrincipalUser = $Identity
+        Mock -CommandName New-SPClaimsPrincipal { 
+            $Global:SPDscClaimsPrincipalUser = $Identity
             return (
-                New-Object Object | Add-Member ScriptMethod ToEncodedString { 
-                    return "i:0#.w|$($Global:SPDSCClaimsPrincipalUser)" 
+                New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)" 
                 } -PassThru
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
         
-        Context "The service app that security should be applied to does not exist" {
+        Context -Name "The service app that security should be applied to does not exist" {
             
-            Mock Get-SPServiceApplication { return $null }
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
             
-            It "should return empty members list from the get method" {
+            It "Should return empty members list from the get method" {
                 (Get-TargetResource @testParams).Members | Should BeNullOrEmpty
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         } 
@@ -79,13 +79,13 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
             SecurityType = "SharingPermissions"
         }
         
-        Context "None of the required members properties are provided" {
+        Context -Name "None of the required members properties are provided" {
             
-            It "should throw an exception from the test method" {
+            It "Should throw an exception from the test method" {
                 { Test-TargetResource @testParams } | Should Throw
             }
             
-            It "should throw an exception from the set method" {
+            It "Should throw an exception from the set method" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
@@ -108,13 +108,13 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
             MembersToExclude = @("CONTOSO\user2")
         }
         
-        Context "All of the members properties are provided" {
+        Context -Name "All of the members properties are provided" {
             
-            It "should throw an exception from the test method" {
+            It "Should throw an exception from the test method" {
                 { Test-TargetResource @testParams } | Should Throw
             }
             
-            It "should throw an exception from the set method" {
+            It "Should throw an exception from the set method" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
@@ -134,10 +134,10 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
             )
         }
         
-        Context "The service app exists and a fixed members list is provided that does not match the current settings" {
+        Context -Name "The service app exists and a fixed members list is provided that does not match the current settings" {
             
-            Mock Get-SPServiceApplication { return @{} }
-            Mock Get-SPServiceApplicationSecurity { return @{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @{} }
+            Mock -CommandName Get-SPServiceApplicationSecurity { return @{
                 AccessRules = @(
                     @{
                         Name = "CONTOSO\user1"
@@ -146,15 +146,15 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
                 )
             }}
             
-            It "should return a list of current members from the get method" {
+            It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should call the update cmdlet from the set method" {
+            It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity
                 Assert-MockCalled Revoke-SPObjectSecurity
@@ -162,10 +162,10 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
             }
         }
         
-        Context "The service app exists and a fixed members list is provided that does match the current settings" {
+        Context -Name "The service app exists and a fixed members list is provided that does match the current settings" {
             
-            Mock Get-SPServiceApplication { return @{} }
-            Mock Get-SPServiceApplicationSecurity { return @{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @{} }
+            Mock -CommandName Get-SPServiceApplicationSecurity { return @{
                 AccessRules = @(
                     @{
                         Name = "CONTOSO\user1"
@@ -178,11 +178,11 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
                 )
             }}
             
-            It "should return a list of current members from the get method" {
+            It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
@@ -199,10 +199,10 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
             MembersToExclude = @("CONTOSO\user2")
         }
         
-        Context "The service app exists and a specific list of members to add and remove is provided, which does not match the desired state" {
+        Context -Name "The service app exists and a specific list of members to add and remove is provided, which does not match the desired state" {
             
-            Mock Get-SPServiceApplication { return @{} }
-            Mock Get-SPServiceApplicationSecurity { return @{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @{} }
+            Mock -CommandName Get-SPServiceApplicationSecurity { return @{
                 AccessRules = @(
                     @{
                         Name = "CONTOSO\user2"
@@ -211,15 +211,15 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
                 )
             }}
             
-            It "should return a list of current members from the get method" {
+            It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should call the update cmdlet from the set method" {
+            It "Should call the update cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Grant-SPObjectSecurity
                 Assert-MockCalled Revoke-SPObjectSecurity
@@ -227,10 +227,10 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
             }
         }
         
-        Context "The service app exists and a specific list of members to add and remove is provided, which does match the desired state" {
+        Context -Name "The service app exists and a specific list of members to add and remove is provided, which does match the desired state" {
             
-            Mock Get-SPServiceApplication { return @{} }
-            Mock Get-SPServiceApplicationSecurity { return @{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @{} }
+            Mock -CommandName Get-SPServiceApplicationSecurity { return @{
                 AccessRules = @(
                     @{
                         Name = "CONTOSO\user1"
@@ -239,19 +239,19 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
                 )
             }}
             
-            It "should return a list of current members from the get method" {
+            It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The service app exists and a specific list of members to add and remove is provided, which does match the desired state and includes a claims based group" {
+        Context -Name "The service app exists and a specific list of members to add and remove is provided, which does match the desired state and includes a claims based group" {
             
-            Mock Get-SPServiceApplication { return @{} }
-            Mock Get-SPServiceApplicationSecurity { return @{
+            Mock -CommandName Get-SPServiceApplication -MockWith { return @{} }
+            Mock -CommandName Get-SPServiceApplicationSecurity { return @{
                 AccessRules = @(
                     @{
                         Name = "i:0#.w|s-1-5-21-2753725054-2932589700-2007370523-2138"
@@ -263,11 +263,11 @@ Describe "SPServiceAppSecurity - SharePoint Build $((Get-Item $SharePointCmdletM
                 return "CONTOSO\user1"
             }
             
-            It "should return a list of current members from the get method" {
+            It "Should return a list of current members from the get method" {
                 (Get-TargetResource @testParams).Members | Should Not BeNullOrEmpty
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
