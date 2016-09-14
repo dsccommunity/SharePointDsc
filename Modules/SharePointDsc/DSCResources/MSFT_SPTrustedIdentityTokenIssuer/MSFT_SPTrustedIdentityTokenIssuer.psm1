@@ -20,7 +20,7 @@
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true)]
         [String]
         $IdentifierClaim,
 
@@ -72,9 +72,10 @@
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
             $spTrust.ClaimTypeInformation| Foreach-Object -Process {
                 $claimsMappings = $claimsMappings + @{
-                    Name = $_.DisplayName; 
-                    IncomingClaimType = $_.InputClaimType; 
-                    LocalClaimType = $_.MappedClaimType}
+                    Name = $_.DisplayName
+                    IncomingClaimType = $_.InputClaimType
+                    LocalClaimType = $_.MappedClaimType
+                }
             }
         } 
         else 
@@ -162,8 +163,7 @@ function Set-TargetResource
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            Write-Verbose -Message "Create SPTrustedIdentityTokenIssuer '$Name'..."
-
+            Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'..."
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
@@ -172,11 +172,18 @@ function Set-TargetResource
                 $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
                     $_.Thumbprint -match $params.SigningCertificateThumbPrint
                 }
+
                 if (!$cert) 
                 {
                     throw ("The certificate thumbprint does not match a certificate in " + `
                            "certificate store LocalMachine\My.")
                     return
+                }
+
+                if ($cert.HasPrivateKey) 
+                {
+                    throw ("SharePoint requires that the private key of the signing " + `
+                           "certificate is not installed in the certificate store.")
                 }
                 
                 $claimsMappingsArray = @()
@@ -185,19 +192,19 @@ function Set-TargetResource
                     $runParams.Add("IncomingClaimTypeDisplayName", $_.Name)
                     $runParams.Add("IncomingClaimType", $_.IncomingClaimType)
                     if ($null -eq $_.LocalClaimType) 
-                    { 
-                        $runParams.Add("LocalClaimType", $_.IncomingClaimType) 
+                    {
+                        $runParams.Add("LocalClaimType", $_.IncomingClaimType)
                     }
                     else 
-                    { 
-                        $runParams.Add("LocalClaimType", $_.LocalClaimType) 
+                    {
+                        $runParams.Add("LocalClaimType", $_.LocalClaimType)
                     }
 
                     $newMapping = New-SPClaimTypeMapping @runParams
                     $claimsMappingsArray += $newMapping
                 }
 
-                if (!($claimsMappingsArray| Where-Object -FilterScript {
+                if (!($claimsMappingsArray | Where-Object -FilterScript {
                         $_.MappedClaimType -like $params.IdentifierClaim
                     })) 
                 {
@@ -216,15 +223,21 @@ function Set-TargetResource
                 $runParams.Add("ClaimsMappings", $claimsMappingsArray)
                 $trust = New-SPTrustedIdentityTokenIssuer @runParams
 
+                if ($null -eq $trust)
+                {
+                    throw "SharePoint failed to create the SPTrustedIdentityTokenIssuer."
+                }
+
                 if ((Get-SPClaimProvider| Where-Object -FilterScript {
-                        $_.DisplayName -like $ClaimProviderName
-                    })) 
+                    $_.DisplayName -eq $params.ClaimProviderName
+                })) 
                 {
                     $trust.ClaimProviderName = $params.ClaimProviderName
                 }
-                if ($ProviderSignOutUri) 
+
+                if ($params.ProviderSignOutUri) 
                 { 
-                    $trust.ProviderSignOutUri = new-object System.Uri($ProviderSignOutUri) 
+                    $trust.ProviderSignOutUri = New-Object System.Uri ($params.ProviderSignOutUri) 
                 }
                 $trust.Update()
              }
@@ -232,38 +245,44 @@ function Set-TargetResource
     }
     else
     {
-        Write-Verbose -Message "Remove SPTrustedIdentityTokenIssuer '$Name'..."
+        Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'..."
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
+            $Name = $params.Name
             # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before 
             # it can be deleted
             Get-SPWebApplication | Foreach-Object -Process {
                 $wa = $_
-                $urlZones = [Enum]::GetNames([Microsoft.SharePoint.Administration.SPUrlZone]) 
+                $webAppUrl = $wa.Url
+                $update = $false
+                $urlZones = [Enum]::GetNames([Microsoft.SharePoint.Administration.SPUrlZone])
                 $urlZones | Foreach-Object -Process {
                     $zone = $_
                     $providers = Get-SPAuthenticationProvider -WebApplication $wa.Url `
-                                                              -Zone $_ `
+                                                              -Zone $zone `
                                                               -ErrorAction SilentlyContinue
-
-                    if (!$providers) 
+                    if (!$providers)
                     { 
-                        return 
-                    }
-                    $providers| Where-Object -FilterScript {
-                        $_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] `
-                        -and $_.LoginProviderName -like $params.Name
-                    } | Foreach-Object -Process {
-                        Write-Verbose -Message ("Removing $($_.LoginProviderName) from web " + `
-                                                "app $($wa.Url) in zone $zone") 
-                        
-                        $iisSettings = $wa.GetIisSettingsWithFallback($zone) 
-                        $iisSettings.ClaimsAuthenticationProviders.Remove($_) | Out-Null
-                        $wa.Update()
                         return
                     }
+                    $trustedProviderToRemove = $providers | Where-Object -FilterScript {
+                        $_ -is [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] `
+                        -and $_.LoginProviderName -like $params.Name
+                    }
+                    if ($trustedProviderToRemove) 
+                    {
+                        Write-Verbose -Message ("Removing SPTrustedAuthenticationProvider " + `
+                                                "'$Name' from web app '$webAppUrl' in zone " + `
+                                                "'$zone'...")
+                        $wa.GetIisSettingsWithFallback($zone).ClaimsAuthenticationProviders.Remove($trustedProviderToRemove) | Out-Null
+                        $update = $true
+                    }
+                }
+                if ($update) 
+                {
+                    $wa.Update()
                 }
             }
         
@@ -328,7 +347,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Test if SPTrustedIdentityTokenIssuer '$Name' exists ..."
+    Write-Verbose -Message "Testing if SPTrustedIdentityTokenIssuer '$Name' exists ..."
     $CurrentValues = Get-TargetResource @PSBoundParameters
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
