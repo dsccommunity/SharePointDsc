@@ -16,6 +16,7 @@
  * Fixed issue with SPTrustedIdentityTokenIssuer to stop if cmdlet New-SPTrustedIdentityTokenIssuer returns null
  * Fixed issue with SPTrustedIdentityTokenIssuer to correctly get parameters ClaimProviderName and ProviderSignOutUri
  * Fixed issue with SPTrustedIdentityTokenIssuer to effectively remove the SPTrustedAuthenticationProvider from all zones before deleting the SPTrustedIdentityTokenIssuer
+ * New resource: SPPublishServiceApplication
 
 ### 1.2
 
