@@ -80,7 +80,7 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             }
 
             It "should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: ServiceAppProxies, ServiceAppProxiesToInclude,ServiceAppProxiesToExclude"
+                { Set-TargetResource @testParams } | Should throw "At least one of the following parameters must be specified: ServiceAppProxies, ServiceAppProxiesToInclude, ServiceAppProxiesToExclude"
             }
         }
 
