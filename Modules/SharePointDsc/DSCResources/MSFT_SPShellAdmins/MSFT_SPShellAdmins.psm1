@@ -33,7 +33,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting all Shell Admins"
+    Write-Verbose -Message "Getting Shell Admins config"
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
@@ -678,7 +678,6 @@ function Set-TargetResource
         }
     }
 }
-
 
 function Test-TargetResource
 {

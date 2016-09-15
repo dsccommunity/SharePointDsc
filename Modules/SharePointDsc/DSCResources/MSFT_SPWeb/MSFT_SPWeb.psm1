@@ -85,7 +85,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -137,7 +136,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Creating SPWeb '$Url'"
+    Write-Verbose -Message "Setting SPWeb '$Url'"
     
     $PSBoundParameters.Ensure = $Ensure
 
@@ -211,7 +210,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -264,11 +262,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing SPWeb '$Url'"
+
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Testing SPWeb '$Url'"
 
     $valuesToCheck = @("Url", 
                        "Name", 

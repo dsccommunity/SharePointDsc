@@ -139,7 +139,8 @@ function Get-TargetResource
         $Ensure = "Present"
     )
     
-    Write-Verbose -Message "Detecting SharePoint version from binaries"
+    Write-Verbose -Message "Getting installation status of SharePoint prerequisites"
+
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) 
     {
@@ -411,6 +412,8 @@ function Set-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Setting installation status of SharePoint prerequisites"
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
@@ -660,6 +663,10 @@ function Test-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Testing installation status of SharePoint prerequisites"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or its " + `
@@ -667,10 +674,7 @@ function Test-TargetResource
         return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Checking installation of SharePoint prerequisites"
     
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
@@ -742,4 +746,3 @@ function Test-SPDscPrereqInstallStatus
 }
 
 Export-ModuleMember -Function *-TargetResource
-

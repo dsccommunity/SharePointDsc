@@ -4,14 +4,38 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $Enabled,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $WarningSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $MaximumSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting content database configuration settings"
@@ -74,14 +98,38 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $Enabled,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $WarningSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $MaximumSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting content database configuration settings"
@@ -208,17 +256,44 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.String] $DatabaseServer,
-        [parameter(Mandatory = $true)]  [System.String] $WebAppUrl,
-        [parameter(Mandatory = $false)] [System.Boolean] $Enabled,
-        [parameter(Mandatory = $false)] [System.UInt16] $WarningSiteCount,
-        [parameter(Mandatory = $false)] [System.UInt16] $MaximumSiteCount,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+        
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $DatabaseServer,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $WebAppUrl,
+        
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $Enabled,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $WarningSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt16]
+        $MaximumSiteCount,
+        
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing content database configuration settings"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
@@ -229,7 +304,6 @@ function Test-TargetResource
         return $false
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters
 }

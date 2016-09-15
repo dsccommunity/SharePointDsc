@@ -26,7 +26,8 @@ function Get-TargetResource
         $Ensure = "Present"
     )
 
-    Write-Verbose -Message "Getting install status of SP binaries"
+    Write-Verbose -Message "Getting install status of SharePoint"
+
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName
     
@@ -88,6 +89,8 @@ function Set-TargetResource
         [System.String] 
         $Ensure = "Present"
     )
+
+    Write-Verbose -Message "Setting install status of SharePoint"
 
     if ($Ensure -eq "Absent") 
     {
@@ -220,6 +223,10 @@ function Test-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Testing install status of SharePoint"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
@@ -227,10 +234,7 @@ function Test-TargetResource
         return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Testing for installation of SharePoint"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

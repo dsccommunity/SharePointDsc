@@ -29,7 +29,6 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
             Ensure          = "Present"
             Version         = "1.0.0.0"
             WebApplications = @("http://app1", "http://app2")
-            Verbose         = $true
         }
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
