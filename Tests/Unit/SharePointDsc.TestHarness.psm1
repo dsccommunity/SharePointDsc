@@ -174,6 +174,7 @@ function New-SPDscUnitTestHelper
         CurrentStubModulePath = $SharePointStubModule
         CurrentStubBuildNumber = [Version]::Parse($spBuild)
         InitializeScript = [ScriptBlock]::Create($initScript)
+        RepoRoot = $repoRoot
         CleanupScript = [ScriptBlock]::Create(@"
 
             Get-Variable -Scope Global -Name "SPDsc*" | Remove-Variable -Force -Scope "Global"
