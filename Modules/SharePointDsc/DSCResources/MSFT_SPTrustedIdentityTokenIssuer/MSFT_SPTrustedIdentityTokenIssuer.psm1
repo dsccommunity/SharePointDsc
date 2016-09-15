@@ -71,7 +71,11 @@
             $claimProviderName = $sptrust.ClaimProviderName
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
             $spTrust.ClaimTypeInformation| Foreach-Object -Process {
-                $claimsMappings = $claimsMappings + @{Name = $_.DisplayName; IncomingClaimType = $_.InputClaimType; LocalClaimType = $_.MappedClaimType}
+                $claimsMappings = $claimsMappings + @{
+                    Name = $_.DisplayName
+                    IncomingClaimType = $_.InputClaimType
+                    LocalClaimType = $_.MappedClaimType
+                }
             }
         } 
         else 
@@ -123,7 +127,7 @@ function Set-TargetResource
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $true)] 
         [String]
         $IdentifierClaim,
 
@@ -168,14 +172,18 @@ function Set-TargetResource
                 $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
                     $_.Thumbprint -match $params.SigningCertificateThumbPrint
                 }
-                if ($null -eq $cert)
+
+                if (!$cert) 
                 {
-                    throw "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My."
+                    throw ("The certificate thumbprint does not match a certificate in " + `
+                           "certificate store LocalMachine\My.")
+                    return
                 }
 
                 if ($cert.HasPrivateKey) 
                 {
-                    throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
+                    throw ("SharePoint requires that the private key of the signing " + `
+                           "certificate is not installed in the certificate store.")
                 }
                 
                 $claimsMappingsArray = @()
@@ -191,15 +199,18 @@ function Set-TargetResource
                     {
                         $runParams.Add("LocalClaimType", $_.LocalClaimType)
                     }
+
                     $newMapping = New-SPClaimTypeMapping @runParams
                     $claimsMappingsArray += $newMapping
                 }
-                
-                if (!($claimsMappingsArray| Where-Object -FilterScript {
-                    $_.MappedClaimType -eq $params.IdentifierClaim
-                })) 
+
+                if (!($claimsMappingsArray | Where-Object -FilterScript {
+                        $_.MappedClaimType -like $params.IdentifierClaim
+                    })) 
                 {
-                    throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
+                    throw ("IdentifierClaim does not match any claim type specified in " + `
+                           "ClaimsMappings.")
+                    return
                 }
 
                 $runParams = @{}
@@ -240,7 +251,8 @@ function Set-TargetResource
                                       -ScriptBlock {
             $params = $args[0]
             $Name = $params.Name
-            # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before it can be deleted
+            # SPTrustedIdentityTokenIssuer must be removed from each zone of each web app before 
+            # it can be deleted
             Get-SPWebApplication | Foreach-Object -Process {
                 $wa = $_
                 $webAppUrl = $wa.Url
@@ -261,7 +273,9 @@ function Set-TargetResource
                     }
                     if ($trustedProviderToRemove) 
                     {
-                        Write-Verbose "Removing SPTrustedAuthenticationProvider '$Name' from web app '$webAppUrl' in zone '$zone'..."
+                        Write-Verbose -Message ("Removing SPTrustedAuthenticationProvider " + `
+                                                "'$Name' from web app '$webAppUrl' in zone " + `
+                                                "'$zone'...")
                         $wa.GetIisSettingsWithFallback($zone).ClaimsAuthenticationProviders.Remove($trustedProviderToRemove) | Out-Null
                         $update = $true
                     }
@@ -303,7 +317,7 @@ function Test-TargetResource
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $true)] 
         [String]
         $IdentifierClaim,
 

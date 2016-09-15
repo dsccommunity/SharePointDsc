@@ -92,15 +92,20 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web application '$url' general settings"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                                  -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
-        
-        
+                
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) { return $null }
+        if ($null -eq $wa) 
+        { 
+            return $null 
+        }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
+        $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
         $result = Get-SPDSCWebApplicationGeneralConfig -WebApplication $wa
         $result.Add("Url", $params.Url)
@@ -204,17 +209,22 @@ function Set-TargetResource
 
     Write-Verbose -Message "Applying general settings '$Url'"
     
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot) -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                                  -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) {
+        if ($null -eq $wa) 
+        {
             throw "Web application $($params.Url) was not found"
             return
         }
 
-        Import-Module (Join-Path $ScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
+        $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
+
         Set-SPDSCWebApplicationGeneralConfig -WebApplication $wa -Settings $params
         $wa.Update()
     }
@@ -315,9 +325,14 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for web application general settings '$Url'"
-    if ($null -eq $CurrentValues) { return $false }
+    if ($null -eq $CurrentValues) 
+    { 
+        return $false 
+    }
 
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1" -Resolve)
+    $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.GeneralSettings.psm1"
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
+
     return Test-SPDSCWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 

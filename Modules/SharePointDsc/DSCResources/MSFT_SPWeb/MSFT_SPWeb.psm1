@@ -4,47 +4,81 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]    [System.String]  $Url,
+        [parameter(Mandatory = $true)]    
+        [System.String]
+        $Url,
+
         [parameter(Mandatory = $false)]
-        [ValidateSet("Present","Absent")] [System.String]  $Ensure = "Present",
-        [parameter(Mandatory = $false)]   [System.String]  $Description,
-        [parameter(Mandatory = $false)]   [System.String]  $Name,
-        [parameter(Mandatory = $false)]   [System.UInt32]  $Language,
-        [parameter(Mandatory = $false)]   [System.String]  $Template,
-        [parameter(Mandatory = $false)]   [System.Boolean] $UniquePermissions,
-        [parameter(Mandatory = $false)]   [System.Boolean] $UseParentTopNav,
-        [parameter(Mandatory = $false)]   [System.Boolean] $AddToQuickLaunch,
-        [parameter(Mandatory = $false)]   [System.Boolean] $AddToTopNav,
-        [parameter(Mandatory = $false)]   [System.Management.Automation.PSCredential] $InstallAccount
+        [ValidateSet("Present","Absent")] 
+        [System.String]
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Description,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32]
+        $Language,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Template,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $UniquePermissions,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $UseParentTopNav,
+
+        [parameter(Mandatory = $false)] 
+        [System.Boolean] 
+        $AddToQuickLaunch,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $AddToTopNav,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting SPWeb '$Url'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($web) { 
-        
+        if ($web) 
+        { 
             $ensureResult   = "Present" 
             $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
             $parentTopNav   = $web.Navigation.UseShared
-
-        } else { 
-        
+        } 
+        else 
+        { 
             $ensureResult = "Absent" 
         }
         
         return @{
-                Url               = $web.Url
-                Ensure            = $ensureResult
-                Description       = $web.Description
-                Name              = $web.Title
-                Language          = $web.Language
-                Template          = $templateResult
-                UniquePermissions = $web.HasUniquePerm
-                UseParentTopNav   = $parentTopNav
+            Url               = $web.Url
+            Ensure            = $ensureResult
+            Description       = $web.Description
+            Name              = $web.Title
+            Language          = $web.Language
+            Template          = $templateResult
+            UniquePermissions = $web.HasUniquePerm
+            UseParentTopNav   = $parentTopNav
         }
     }
 
@@ -57,25 +91,59 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]    [System.String]  $Url,
+        [parameter(Mandatory = $true)]    
+        [System.String]
+        $Url,
+
         [parameter(Mandatory = $false)]
-        [ValidateSet("Present","Absent")] [System.String]  $Ensure = "Present",
-        [parameter(Mandatory = $false)]   [System.String]  $Description,
-        [parameter(Mandatory = $false)]   [System.String]  $Name,
-        [parameter(Mandatory = $false)]   [System.UInt32]  $Language,
-        [parameter(Mandatory = $false)]   [System.String]  $Template,
-        [parameter(Mandatory = $false)]   [System.Boolean] $UniquePermissions,
-        [parameter(Mandatory = $false)]   [System.Boolean] $UseParentTopNav,
-        [parameter(Mandatory = $false)]   [System.Boolean] $AddToQuickLaunch,
-        [parameter(Mandatory = $false)]   [System.Boolean] $AddToTopNav,
-        [parameter(Mandatory = $false)]   [System.Management.Automation.PSCredential] $InstallAccount
+        [ValidateSet("Present","Absent")] 
+        [System.String]
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Description,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32]
+        $Language,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Template,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $UniquePermissions,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $UseParentTopNav,
+
+        [parameter(Mandatory = $false)] 
+        [System.Boolean] 
+        $AddToQuickLaunch,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $AddToTopNav,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Creating SPWeb '$Url'"
     
     $PSBoundParameters.Ensure = $Ensure
 
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
         $params = $args[0]
         
         if ($null -eq $params.InstallAccount) 
@@ -87,8 +155,9 @@ function Set-TargetResource
             $currentUserName = $params.InstallAccount.UserName
         }
         
-        Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."  
-        (New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url).WebApplication.GrantAccessToProcessIdentity($currentUserName)  
+        Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."
+        $site = New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url  
+        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName) 
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
@@ -101,34 +170,40 @@ function Set-TargetResource
         }
         else
         {
-            if ($params.Ensure -eq "Absent") {
+            if ($params.Ensure -eq "Absent") 
+            {
                 Remove-SPweb $params.Url -confirm:$false
-            }else{
-                
+            }
+            else
+            {    
                 $changedWeb = $false
                 
-                if ($web.Title -ne $params.Name) {
+                if ($web.Title -ne $params.Name) 
+                {
                     $web.Title = $params.Name
                     $changedWeb = $true
                 }
 
-                if ($web.Description -ne $params.Description) {
+                if ($web.Description -ne $params.Description) 
+                {
                     $web.Description = $params.Description
                     $changedWeb = $true
                 }
 
-                if ($web.Navigation.UseShared -ne $params.UseParentTopNav) {
+                if ($web.Navigation.UseShared -ne $params.UseParentTopNav) 
+                {
                     $web.Navigation.UseShared = $params.UseParentTopNav
                     $changedWeb = $true
                 }
 
-                if ($web.HasUniquePerm -ne $params.UniquePermissions) {
+                if ($web.HasUniquePerm -ne $params.UniquePermissions) 
+                {
                     $web.HasUniquePerm = $params.UniquePermissions
                     $changedWeb = $true
                 }
                 
-                if ($changedWeb) {
-                    
+                if ($changedWeb) 
+                {
                     $web.Update()
                 }
             }
@@ -143,18 +218,50 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]    [System.String]  $Url,
+        [parameter(Mandatory = $true)]    
+        [System.String]
+        $Url,
+
         [parameter(Mandatory = $false)]
-        [ValidateSet("Present","Absent")] [System.String]  $Ensure = "Present",
-        [parameter(Mandatory = $false)]   [System.String]  $Description,
-        [parameter(Mandatory = $false)]   [System.String]  $Name,
-        [parameter(Mandatory = $false)]   [System.UInt32]  $Language,
-        [parameter(Mandatory = $false)]   [System.String]  $Template,
-        [parameter(Mandatory = $false)]   [System.Boolean] $UniquePermissions,
-        [parameter(Mandatory = $false)]   [System.Boolean] $UseParentTopNav,
-        [parameter(Mandatory = $false)]   [System.Boolean] $AddToQuickLaunch,
-        [parameter(Mandatory = $false)]   [System.Boolean] $AddToTopNav,
-        [parameter(Mandatory = $false)]   [System.Management.Automation.PSCredential] $InstallAccount
+        [ValidateSet("Present","Absent")] 
+        [System.String]
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Description,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32]
+        $Language,
+
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $Template,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $UniquePermissions,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $UseParentTopNav,
+
+        [parameter(Mandatory = $false)] 
+        [System.Boolean] 
+        $AddToQuickLaunch,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean] 
+        $AddToTopNav,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     $PSBoundParameters.Ensure = $Ensure
@@ -163,10 +270,16 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing SPWeb '$Url'"
 
-    $valuesToCheck = @("Url", "Name", "Description", "UniquePermissions", "UseParentTopNav", "Ensure")
+    $valuesToCheck = @("Url", 
+                       "Name", 
+                       "Description", 
+                       "UniquePermissions", 
+                       "UseParentTopNav", 
+                       "Ensure")
 
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck $valuesToCheck
 }
-
 
 Export-ModuleMember -Function *-TargetResource
