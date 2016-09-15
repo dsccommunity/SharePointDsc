@@ -35,7 +35,13 @@ Describe "SPAntivirusSettings - SharePoint Build $((Get-Item $SharePointCmdletMo
             Mock Get-SPFarm { throw "Unable to detect local farm" }
 
             It "return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                $result = Get-TargetResource @testParams
+                $result.AllowDownloadInfected | Should Be $false
+                $result.ScanOnDownload | Should Be $false
+                $result.ScanOnUpload | Should Be $false
+                $result.AttemptToClean | Should Be $false
+                $result.NumberOfThreads | Should Be 0
+                $result.TimeoutDuration | Should Be 0
             }
 
             It "returns false from the test method" {
