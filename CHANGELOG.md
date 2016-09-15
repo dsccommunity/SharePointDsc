@@ -10,6 +10,7 @@
  * Fixed typos in documentation for InstallAccount parameter on most resources
  * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
  * New resources: SPConfigWizard and SPProductUpdate
+ * New resource: SPPublishServiceApplication
 
 ### 1.2
 

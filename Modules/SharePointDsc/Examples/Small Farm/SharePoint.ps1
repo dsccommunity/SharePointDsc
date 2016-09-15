@@ -241,6 +241,13 @@ Configuration Example
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
+
+        SPPublishServiceApplication PublishManagedMetadataServiceApp
+        {  
+            Name           = "Managed Metadata Service Application"
+            Ensure         = "Present"
+            InstallAccount = $SetupAccount
+        }
         
         #**********************************************************
         # Local configuration manager settings
