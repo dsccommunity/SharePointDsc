@@ -33,6 +33,8 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting all Shell Admins"
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with the " + `
@@ -81,8 +83,6 @@ function Get-TargetResource
         return $null
     }
 
-    Write-Verbose -Message "Getting all Shell Admins"
-
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
@@ -106,7 +106,7 @@ function Get-TargetResource
         $allContentDatabases = $true
 
         $cdbPermissions = @()
-        $databases = Get-SPDSCContentDatabase
+        $databases = Get-SPContentDatabase
         foreach ($contentDatabase in $databases) 
         {
             $cdbPermission = @{}
@@ -380,7 +380,7 @@ function Set-TargetResource
                 # Check if configured database exists, throw error if not
                 Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
 
-                $currentCDB = Get-SPDSCContentDatabase | Where-Object -FilterScript { 
+                $currentCDB = Get-SPContentDatabase | Where-Object -FilterScript { 
                     $_.Name -eq $contentDatabase.Name 
                 }
                 if ($null -ne $currentCDB) 
@@ -529,7 +529,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Processing AllContentDatabases parameter"
 
-            foreach ($contentDatabase in (Get-SPDSCContentDatabase)) 
+            foreach ($contentDatabase in (Get-SPContentDatabase)) 
             {
                 $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
                 if ($params.Members) 
@@ -952,12 +952,6 @@ function Test-TargetResource
     }
 
     return $true
-}
-
-# This wrapepr exists as Pester tests seem to have an issue with this being called with no 
-# parameters. This allows us to mock the wrapper and test the logic correctly.
-function Get-SPDSCContentDatabase {
-    return Get-SPContentDatabase
 }
 
 Export-ModuleMember -Function *-TargetResource
