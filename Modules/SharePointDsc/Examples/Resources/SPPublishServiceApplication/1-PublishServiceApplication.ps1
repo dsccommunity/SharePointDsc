@@ -1,7 +1,7 @@
 <#
 .EXAMPLE
-    This example shows how to ensure that the managed metadata service is running
-    on the local server. 
+    This example shows how to ensure that the managed metadata service is published
+    within the farm. 
 #>
 
     Configuration Example 

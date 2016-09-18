@@ -30,20 +30,17 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Mock Unpublish-SPServiceApplication { }
 
         Context "An invalid service application is specified to be published" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
-                    Name = $testParams.Name
-                    Uri = $null
-                }
-                return $spServiceApp
-            }
-
+            Mock Get-SPServiceApplication  { return $null }
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the set method" {
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "throws when the set method is called" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
 
@@ -61,7 +58,7 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the set method" {
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -93,6 +90,14 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
 
         Context "The service application specified does not exist" {
             Mock Get-SPServiceApplication  { return $null }
+                        
+            It "returns absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "returns false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
 
             It "throws when the set method is called" {
                 { Set-TargetResource @testParams } | Should Throw
@@ -134,7 +139,7 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns false from the set method" {
+            It "returns false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -142,14 +147,6 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Unpublish-SPServiceApplication
-            }
-        }
-
-        Context "An invalid service application is specified to be published" {
-            Mock Get-SPServiceApplication  { return $null }
-
-            It "throws when the set method is called" {
-                { Set-TargetResource @testParams } | Should Throw
             }
         }
     }    

@@ -18,9 +18,11 @@ function Get-TargetResource
         $Ensure = "Present"
     )
 
-    Write-Verbose -Message "Getting service application '$Name'"
+    Write-Verbose -Message "Getting service application publish status '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -33,8 +35,8 @@ function Get-TargetResource
 
         if ($null -eq $serviceApp.Uri)
         {
-            Write-Verbose -Message "Only Business Data Connectivity, Machine Translation, Managed Metadata, `
-                                    User Profile, Search, Secure Store are supported to be published via DSC."
+            Write-Verbose -Message ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
+                                    "User Profile, Search, Secure Store are supported to be published via DSC.")
             $sharedEnsure = "Absent"
         }
         else
@@ -45,13 +47,13 @@ function Get-TargetResource
             }
             elseif ($serviceApp.Shared -eq $false)
             {
-                $sharedEnsure = "Absent"    
+                $sharedEnsure = "Absent"
             }
         }  
                
         return @{
             Name = $params.Name
-            Ensure = $sharedEnsure.ToString()
+            Ensure = $sharedEnsure
             InstallAccount = $params.InstallAccount
         }
     }
@@ -78,33 +80,33 @@ function Set-TargetResource
         $Ensure = "Present"
     )
 
-    if ($Ensure -eq "Present") 
-    {        
-        Write-Verbose -Message "Publishing Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            $params = $args[0]
-            
-            $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue    
-            if ($null -eq $serviceApp) 
-            { 
-                throw [Exception] ("The service application $Name does not exist")
-            }
-            
-            Publish-SPServiceApplication $serviceApp            
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                    -Arguments $PSBoundParameters `
+                    -ScriptBlock {
+        $params = $args[0]
+        
+        $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue    
+        if ($null -eq $serviceApp) 
+        { 
+            throw [Exception] ("The service application $Name does not exist")
         }
-    }
-    if ($Ensure -eq "Absent") {
-        Write-Verbose -Message "Unpublishing Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-            $params = $args[0]
-            
-            $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue    
-            if ($null -eq $serviceApp) 
-            { 
-                throw [Exception] ("The service application $Name does not exist")
-            }
-            
-            Unpublish-SPServiceApplication $serviceApp            
+        
+        if ($null -eq $serviceApp.Uri)
+        {
+            throw [Exception] ("Only Business Data Connectivity, Machine Translation, Managed Metadata, " + `
+                               "User Profile, Search, Secure Store are supported to be published via DSC.")
+        }
+
+        if ($Ensure -eq "Present") 
+        {        
+            Write-Verbose -Message "Publishing Service Application $Name"
+            Publish-SPServiceApplication -Identity $serviceApp            
+        }
+
+        if ($Ensure -eq "Absent") 
+        {
+            Write-Verbose -Message "Unpublishing Service Application $Name"            
+            Unpublish-SPServiceApplication  -Identity $serviceApp
         }
     }
 }

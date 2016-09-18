@@ -1,7 +1,7 @@
 <#
 .EXAMPLE
-    This example shows how to ensure that the Business Data Connectivity Service 
-    is not running on the local server. 
+    This example shows how to ensure that the Secure Store Service is not 
+    published within the farm. 
 #>
 
     Configuration Example 
