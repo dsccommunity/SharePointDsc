@@ -81,8 +81,8 @@ function Set-TargetResource
     )
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                    -Arguments $PSBoundParameters `
-                    -ScriptBlock {
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
         $params = $args[0]
         
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue    
@@ -133,14 +133,12 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing service application '$Name'"
-    $PSBoundParameters.Ensure = $Ensure
 
-    $testArgs = @{
-        CurrentValues = (Get-TargetResource @PSBoundParameters)
-        DesiredValues = $PSBoundParameters
-        ValuesToCheck = @("Name", "Ensure")
-    }
-    return Test-SPDscParameterState @testArgs
+    $currentValues = Get-TargetResource @PSBoundParameters
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Name", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -30,7 +30,13 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Mock Unpublish-SPServiceApplication { }
 
         Context "An invalid service application is specified to be published" {
-            Mock Get-SPServiceApplication  { return $null }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    Name = $testParams.Name
+                    Uri = $null
+                }
+                return $spServiceApp
+            }
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
