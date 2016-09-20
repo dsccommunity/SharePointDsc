@@ -9,7 +9,7 @@
  * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
  * Fixed typos in documentation for InstallAccount parameter on most resources
  * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
- * New resources: SPConfigWizard and SPProductUpdate
+ * New resources: SPConfigWizard, SPProductUpdate and SPPublishServiceApplication
  * Updated style of all script in module to align with PowerShell team standards
  * Changed parameter ClaimsMappings in SPTrustedIdentityTokenIssuer to consume an array of custom object MSFT_SPClaimTypeMapping
  * Changed SPTrustedIdentityTokenIssuer to throw an exception if certificate specified has a private key, since SharePoint doesn't accept it
