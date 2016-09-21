@@ -1,25 +1,11 @@
 ﻿.NAME
     SPWeb
 
-.SYNOPSIS
-
-This resource will provision a SPWeb based on the settings that are passed through. 
-These settings map to the New-SPWeb cmdlet and accept the same values and types. 
-
-.EXAMPLE
-
-    SPWeb TeamSite
-    {
-        Url                      = "http://sharepoint.contoso.com/sites/site/subweb"
-        Name                     = "Team Sites"
-        Ensure                   = "Present"
-        Description              = "A place to share documents with your team."
-        Template                 = "STS#0"
-        Language                 = 1033
-        AddToTopNav              = $true
-        PsDscRunAsCredential     = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource will provision a SPWeb based on the settings that are passed through. 
+    These settings map to the New-SPWeb cmdlet and accept the same values and types. 
+    
 .PARAMETER Url
     Key - string
     The URL of the web
@@ -63,6 +49,35 @@ These settings map to the New-SPWeb cmdlet and accept the same values and types.
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example deploys a subsite in a specific location
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWeb TeamSite
+            {
+                Url                      = "http://sharepoint.contoso.com/sites/site/subweb"
+                Name                     = "Team Sites"
+                Ensure                   = "Present"
+                Description              = "A place to share documents with your team."
+                Template                 = "STS#0"
+                Language                 = 1033
+                AddToTopNav              = $true
+                PsDscRunAsCredential     = $SetupAccount
+            }
+        }
+    }
 
 

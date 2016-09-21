@@ -1,23 +1,12 @@
 ﻿.NAME
     SPQuotaTemplate
 
-.SYNOPSIS
-
-This resource is used to configure quota templates in the farm.
-These settings will be used to make sure a certain quota template exists or not. When it exists, it will also make sure the settings are configured as specified.
-
-.EXAMPLE
-
-    SPQuotaTemplate TeamsiteTemplate
-    {
-        Name = "Teamsite"
-        StorageMaxInMB = 1024
-        StorageWarningInMB = 512
-        MaximumUsagePointsSolutions = 1000
-        WarningUsagePointsSolutions = 800
-        Ensure = "Present"
-    }
-
+.DESCRIPTION
+    
+    This resource is used to configure quota templates in the farm. These settings will 
+    be used to make sure a certain quota template exists or not. When it exists, it will 
+    also make sure the settings are configured as specified.
+    
 .PARAMETER Name
     Key - string
     The name of the quota template
@@ -45,6 +34,33 @@ These settings will be used to make sure a certain quota template exists or not.
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a specific quota template in the local farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPQuotaTemplate TeamsiteTemplate
+            {
+                Name = "Teamsite"
+                StorageMaxInMB = 1024
+                StorageWarningInMB = 512
+                MaximumUsagePointsSolutions = 1000
+                WarningUsagePointsSolutions = 800
+                Ensure = "Present"
+            }
+        }
+    }
 
 

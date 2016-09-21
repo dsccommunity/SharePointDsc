@@ -1,25 +1,17 @@
 ﻿.NAME
     SPOfficeOnlineServerBinding
 
-.SYNOPSIS
-
-This resource will create a binding to an Office Online Server (formerly known as Office Web Apps). 
-The DnsName property can be a single server name, or a FQDN of a load balanced end point that will direct traffic to a farm.
-
-NOTE: This resource is designed to be used where all WOPI bindings will be targeted to the same Office Online Server farm.
-If used on a clean environment, the new bindings will all point to the one DNS Name.
-If used on an existing configuration that does not follow this rule, it will match only the first DNS name it finds in the list of bindings.
-
-.EXAMPLE
-
-    SPOfficeOnlineServerBinding OosBinding 
-    {
-        Zone                 = "internal-https"
-        DnsName              = "webapps.contoso.com"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SetupAccount
-    }
-
+.DESCRIPTION
+    
+    This resource will create a binding to an Office Online Server (formerly known as Office 
+    Web Apps). The DnsName property can be a single server name, or a FQDN of a load balanced 
+    end point that will direct traffic to a farm.
+    
+    NOTE: This resource is designed to be used where all WOPI bindings will be targeted to the 
+    same Office Online Server farm. If used on a clean environment, the new bindings will all 
+    point to the one DNS Name. If used on an existing configuration that does not follow this 
+    rule, it will match only the first DNS name it finds in the list of bindings.
+    
 .PARAMETER Zone
     Key - string
     Allowed values: Internal-HTTP, Internal-HTTPS, External-HTTP, External-HTTPS
@@ -36,6 +28,57 @@ If used on an existing configuration that does not follow this rule, it will mat
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to create bindings to the internal-https zone for the 
+    local SharePoint farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPOfficeOnlineServerBinding OosBinding 
+            {
+                Zone                 = "internal-https"
+                DnsName              = "webapps.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to remove bindings from the internal-http zone for the 
+    local SharePoint farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPOfficeOnlineServerBinding OosBinding 
+            {
+                Zone                 = "Internal-HTTP"
+                DnsName              = "webapps.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+                Ensure               = "Absent"
+            }
+        }
+    }
 
 

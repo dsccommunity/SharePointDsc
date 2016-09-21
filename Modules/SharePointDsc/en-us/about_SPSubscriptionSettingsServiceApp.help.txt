@@ -1,24 +1,17 @@
 ﻿.NAME
     SPSubscriptionSettingsServiceApp
 
-.SYNOPSIS
-
-This resource is used to provision and manage an instance of the App Management Services Service Application.
-It will identify an instance of the subscription settings service app through the application display name.
-Currently the resource will provision the app if it does not yet exist, and will change the service account associated to the app if it does not match the configuration.
-Database names or server name will not be changed if the configuration does not match, these parameters are only used for the initial provisioning of the service application.
-
-.EXAMPLE
-
-    SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
-    {
-        Name                 = "Subscription Settings Service Application"
-        ApplicationPool      = "SharePoint web services"
-        DatabaseServer       = "SQL01.contoso.com"
-        DatabaseName         = "SP_SubscriptionSettings"
-        PsDscRunAsCredential = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is used to provision and manage an instance of the App Management 
+    Services Service Application. It will identify an instance of the subscription 
+    settings service app through the application display name. Currently the resource 
+    will provision the app if it does not yet exist, and will change the service 
+    account associated to the app if it does not match the configuration. Database 
+    names or server name will not be changed if the configuration does not match, 
+    these parameters are only used for the initial provisioning of the service 
+    application.
+    
 .PARAMETER Name
     Key - string
     The name of the subscription settings service app
@@ -42,6 +35,59 @@ Database names or server name will not be changed if the configuration does not 
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a new subscription settings service app in the local farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
+            {
+                Name                 = "Subscription Settings Service Application"
+                ApplicationPool      = "SharePoint web services"
+                DatabaseServer       = "SQL01.contoso.com"
+                DatabaseName         = "SP_SubscriptionSettings"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example removes a subscription settings service app in the local farm.
+    The ApplicationPool property is required, but is ignored when removing a 
+    service app.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSubscriptionSettingsServiceApp SubscriptionSettingsServiceApp
+            {
+                Name                 = "Subscription Settings Service Application"
+                ApplicationPool      = "n/a"
+                PsDscRunAsCredential = $SetupAccount
+                Ensure               = "Absent"
+            }
+        }
+    }
 
 

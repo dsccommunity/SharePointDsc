@@ -1,19 +1,10 @@
 ﻿.NAME
     SPIrmSettings
 
-.SYNOPSIS
-
-This resource is used to manipulate the IRM settings in SharePoint, integrating it with AD RMS
-
-.EXAMPLE
-
-    SPIrmSettings ContosoRMS
-    {
-      Ensure = "Present"
-      RMSserver = "https://rms.contoso.com"    
-    }
-
-
+.DESCRIPTION
+    
+    This resource is used to manipulate the IRM settings in SharePoint, integrating it with AD RMS
+    
 .PARAMETER Ensure
     Key - String
     Allowed values: Present, Absent
@@ -29,6 +20,31 @@ This resource is used to manipulate the IRM settings in SharePoint, integrating 
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to apply the RMS settings to a local farm, pointing to
+    a specific RMS server
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPIrmSettings RMSSettings
+            {
+                Ensure               = "Present"
+                RMSserver            = "https://rms.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

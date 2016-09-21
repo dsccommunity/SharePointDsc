@@ -1,22 +1,12 @@
 ﻿.NAME
     SPSessionStateService
 
-.SYNOPSIS
-
-This resource will provision a state service app to the local farm. 
-Specify the name of the database server and database name to provision the app with, and optionally include the session timeout value.
-If session timeout is not provided it will default to 60.
-
-.EXAMPLE
-
-    SPSessionStateService StateServiceApp
-    {
-        DatabaseName         = "SP_StateService"
-        DatabaseServer       = "SQL.test.domain"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource will provision a state service app to the local farm. Specify the name of 
+    the database server and database name to provision the app with, and optionally include 
+    the session timeout value. If session timeout is not provided it will default to 60.
+    
 .PARAMETER DatabaseName
     Key - string
     The name of the database for the service
@@ -36,6 +26,31 @@ If session timeout is not provided it will default to 60.
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a new session state service on the local farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSessionStateService StateServiceApp
+            {
+                DatabaseName         = "SP_StateService"
+                DatabaseServer       = "SQL.test.domain"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

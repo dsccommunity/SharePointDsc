@@ -1,22 +1,12 @@
 ﻿.NAME
     SPAccessServiceApp
 
-.SYNOPSIS
-
-This resource is responsible for creating Access Services Application instances within the local SharePoint farm.
-The resource will provision and configure the Access Services Service Application.
-
-.EXAMPLE
-
-    SPAccessServiceApp AccessServices
-    {
-        Name            = "Access Services Service Application"
-        ApplicationPool = "SharePoint Web Services"
-        DatabaseServer  = "sql.contoso.local"
-        InstallAccount  = $InstallAccount
-    }
-
-
+.DESCRIPTION
+    
+    This resource is responsible for creating Access Services Application instances within the local 
+    SharePoint farm. The resource will provision and configure the Access Services Service 
+    Application.
+    
 .PARAMETER Name
     Key - string
     The name of the service application
@@ -36,6 +26,61 @@ The resource will provision and configure the Access Services Service Applicatio
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to deploy Access Services 2013 to the local SharePoint farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPAccessServiceApp AccessServices
+            {
+                Name                 = "Access Services Service Application"
+                ApplicationPool      = "SharePoint Service Applications" 
+                DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+
+    This example shows how to remove a specific Access Services 2013 from the local 
+    SharePoint farm. Because Application pool and database server are both required
+    parameters, but are not acutally needed to remove the app, any text value can 
+    be supplied for these as they will be ignored. 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPAccessServiceApp AccessServices
+            {
+                Name                 = "Access Services Service Application"
+                ApplicationPool      = "n/a" 
+                DatabaseServer       = "n/a"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

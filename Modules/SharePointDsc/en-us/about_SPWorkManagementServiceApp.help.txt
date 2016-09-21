@@ -1,31 +1,26 @@
 ﻿.NAME
     SPWorkManagementServiceApp
 
-.SYNOPSIS
-
-This resource is used to provision and manage an instance of the Work Management Services Service Application.
-It will identify an instance of the work management service application through the application display name.
-Currently the resource will provision the app if it does not yet exist, and will change the application pool associated to the app if it does not match the configuration.
-
-
-Remarks
-- Parameters MinimumTimeBetweenEwsSyncSubscriptionSearches, MinimumTimeBetweenProviderRefreshes, MinimumTimeBetweenSearchQueries are in Minutes
-
-
-
-.EXAMPLE
-
-    SPWorkManagementServiceApp WorkManagementServiceApp
-    {
-        Name                   = "Work Management Service Application"
-        ApplicationPool        = "SharePoint web services"
-        MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
-        PsDscRunAsCredential   = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is used to provision and manage an instance of the Work Management Services 
+    Service Application. It will identify an instance of the work management service 
+    application through the application display name. Currently the resource will provision the 
+    app if it does not yet exist, and will change the application pool associated to the app if 
+    it does not match the configuration.
+    
+    
+    Remarks
+    - Parameters MinimumTimeBetweenEwsSyncSubscriptionSearches, MinimumTimeBetweenProviderRefreshes, 
+    MinimumTimeBetweenSearchQueries are in Minutes
+    
 .PARAMETER Name
     Key - string
     The name of the work management service application
+
+.PARAMETER ProxyName
+    Write - string
+    The proxy name, if not specified will be /Name of service app/ Proxy
 
 .PARAMETER Ensure
     Write - string
@@ -62,6 +57,31 @@ Remarks
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a new work management service app in the local farm
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWorkManagementServiceApp WorkManagementServiceApp
+            {
+                Name                   = "Work Management Service Application"
+                ApplicationPool        = "SharePoint web services"
+                MinimumTimeBetweenEwsSyncSubscriptionSearches = 10
+                PsDscRunAsCredential   = $SetupAccount
+            }
+        }
+    }
 
 

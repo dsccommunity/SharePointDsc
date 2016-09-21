@@ -1,21 +1,12 @@
 ﻿.NAME
     SPExcelServiceApp
 
-.SYNOPSIS
-
-This resource is responsible for creating Excel Services Application instances within the local SharePoint farm.
-The resource will provision and configure the Excel Services Service Application.
-
-.EXAMPLE
-
-    SPExcelServiceApp ExcelServices
-    {
-        Name = "Excel Services Service Application"
-        ApplicationPool = "SharePoint Web Services"
-        InstallAccount  = $InstallAccount
-    }
-
-
+.DESCRIPTION
+    
+    This resource is responsible for creating Excel Services Application instances 
+    within the local SharePoint farm. The resource will provision and configure the 
+    Excel Services Service Application.
+    
 .PARAMETER Name
     Key - string
     The name of the service application
@@ -31,6 +22,57 @@ The resource will provision and configure the Excel Services Service Application
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to deploy Excel Services to the local SharePoint farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPExcelServiceApp ExcelServices
+            {
+                Name            = "Excel Services Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                InstallAccount  = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to remove Excel Services from the local SharePoint farm.
+    Here application pool is a required parameter, but it is not actually used when
+    removing a service app and as such can be ignored and set to any value. 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPExcelServiceApp ExcelServices
+            {
+                Name            = "Excel Services Service Application"
+                ApplicationPool = "n/a"
+                Ensure          = "Absent"
+                InstallAccount  = $SetupAccount
+            }
+        }
+    }
 
 
