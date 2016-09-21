@@ -3,13 +3,26 @@ function Get-TargetResource
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $ApplicationPool,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
     
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    {
         throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
                           "service applicaions via DSC, as SharePoint 2016 deprecated " + `
                           "this service. See " + `
@@ -19,24 +32,33 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Excel Services service app '$Name'"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
-        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication -Name $params.Name `
+                                                -ErrorAction SilentlyContinue
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         }  
-        if ($null -eq $serviceApps) { 
+        if ($null -eq $serviceApps) 
+        { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object { $_.TypeName -eq "Excel Services Application Web Service Application" }
+        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $_.TypeName -eq "Excel Services Application Web Service Application" 
+        }
 
-        If ($null -eq $serviceApp) { 
+        if ($null -eq $serviceApp) 
+        { 
             return $nullReturn
-        } else {
+        } 
+        else 
+        {
             $returnVal =  @{
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
@@ -54,13 +76,26 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $ApplicationPool,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    {
         throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
                           "service applicaions via DSC, as SharePoint 2016 deprecated " + `
                           "this service. See " + `
@@ -69,23 +104,31 @@ function Set-TargetResource
     }
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") { 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    { 
         Write-Verbose -Message "Creating Excel Services Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
 
             New-SPExcelServiceApplication -Name $params.Name `
-                                          -ApplicationPool $params.ApplicationPool                                                    
+                                          -ApplicationPool $params.ApplicationPool
         }
     }
-    if ($Ensure -eq "Absent") {
+    if ($Ensure -eq "Absent") 
+    {
         Write-Verbose -Message "Removing Excel Service Application $Name"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
-                $params = $args[0]
-                
-                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object { $_.TypeName -eq "Excel Services Application Web Service Application"  }
-                Remove-SPServiceApplication $appService -Confirm:$false
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
+            
+            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                    $_.TypeName -eq "Excel Services Application Web Service Application"  
             }
+            Remove-SPServiceApplication $appService -Confirm:$false
+        }
     }
 }
 
@@ -95,13 +138,26 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $true)]  [System.String] $ApplicationPool,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $ApplicationPool,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
     
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) {
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
+    {
         throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
                           "service applicaions via DSC, as SharePoint 2016 deprecated " + `
                           "this service. See " + `
@@ -112,7 +168,9 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     Write-Verbose -Message "Testing for Excel Services Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

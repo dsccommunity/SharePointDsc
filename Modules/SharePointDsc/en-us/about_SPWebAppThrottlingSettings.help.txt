@@ -1,30 +1,16 @@
 ﻿.NAME
     SPWebAppThrottlingSettings
 
-.SYNOPSIS
-
-This resource is responsible for setting web application settings that are found under the "resource throttling" screen in central admin.
-The web application is specified through the URL property, and then any combination of settings can be applied.
-Any settings not included will be left as the default (or whatever they have been manually changed to within SharePoint).
-Happy hour is the setting used to control the window where threshold do not apply throughout the day.
-You can specify the start time of this window as well as how many hours it will last.
-
-.EXAMPLE
-
-    SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
-    {
-        Url                      = "Shttp://exmaple.contoso.local"
-        ListViewThreshold        = 5000
-        AllowObjectModelOverride = $false
-        HappyHourEnabled         = $true
-        HappyHour                = MSFT_SPWebApplicationHappyHour {
-            Hour     = 3
-            Minute   = 0
-            Duration = 1
-        }
-        PsDscRunAsCredential     = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is responsible for setting web application settings that are found under the 
+    "resource throttling" screen in central admin. The web application is specified through the 
+    URL property, and then any combination of settings can be applied. Any settings not included 
+    will be left as the default (or whatever they have been manually changed to within 
+    SharePoint). Happy hour is the setting used to control the window where threshold do not 
+    apply throughout the day. You can specify the start time of this window as well as how many 
+    hours it will last.
+    
 .PARAMETER Url
     Key - string
     The URL of the web application
@@ -75,6 +61,37 @@ You can specify the start time of this window as well as how many hours it will 
 
 .PARAMETER InstallAccount
     Write - string
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to apply throttling settings to a specific web app
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWebAppThrottlingSettings PrimaryWebAppThrottlingSettings
+            {
+                Url                      = "http://exmaple.contoso.local"
+                ListViewThreshold        = 5000
+                AllowObjectModelOverride = $false
+                HappyHourEnabled         = $true
+                HappyHour                = MSFT_SPWebApplicationHappyHour {
+                    Hour     = 3
+                    Minute   = 0
+                    Duration = 1
+                }
+                PsDscRunAsCredential     = $SetupAccount
+            }
+        }
+    }
 
 

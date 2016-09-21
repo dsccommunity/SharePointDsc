@@ -1,34 +1,12 @@
 ﻿.NAME
     SPSearchCrawlRule
 
-.SYNOPSIS
-
-This resource is responsible for managing the search crawl rules in the search service application.
-You can create new rules, change existing rules and remove existing rules.
-
-.EXAMPLE
-
-    SPSearchCrawlRule IntranetCrawlAccount
-    {
-        Path = "https://intranet.sharepoint.contoso.com"
-        ServiceAppName = "Search Service Application"
-        Ensure = "Present"
-        RuleType = "InclusionRule"
-        CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
-        AuthenticationType = "DefaultRuleAccess"
-    }
-
-    SPSearchCrawlRule IntranetCrawlAccountCertificate
-    {
-        Path = "https://intranet.sharepoint.contoso.com"
-        ServiceAppName = "Search Service Application"
-        Ensure = "Present"
-        RuleType = "InclusionRule"
-        CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
-        AuthenticationType = "CertificateRuleAccess"
-        CertificateName = "Certificate Name"
-    }
-
+.DESCRIPTION
+    
+    This resource is responsible for managing the search crawl rules in the search 
+    service application. You can create new rules, change existing rules and remove 
+    existing rules.
+    
 .PARAMETER Path
     Key - string
     The name of the search service application
@@ -67,6 +45,63 @@ You can create new rules, change existing rules and remove existing rules.
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to apply settings to a sepcific URL in search
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSearchCrawlRule IntranetCrawlAccount
+            {
+                Path = "https://intranet.sharepoint.contoso.com"
+                ServiceAppName = "Search Service Application"
+                Ensure = "Present"
+                RuleType = "InclusionRule"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "DefaultRuleAccess"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to set a certificate for authentication to a content source
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSearchCrawlRule IntranetCrawlAccountCertificate
+            {
+                Path = "https://intranet.sharepoint.contoso.com"
+                ServiceAppName = "Search Service Application"
+                Ensure = "Present"
+                RuleType = "InclusionRule"
+                CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
+                AuthenticationType = "CertificateRuleAccess"
+                CertificateName = "Certificate Name"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

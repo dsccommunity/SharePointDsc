@@ -1,34 +1,23 @@
 ﻿.NAME
     SPUserProfileServiceApp
 
-.SYNOPSIS
-
-This resource will provision an instance of the user profile service to the farm. 
-It creates the required databases using the parameters that are passed in to it (although these are only used during the initial provisioning).
-The farm account is used during the provisioning of the service only (in the set method), and the install account is used in the get and test methods.
-This is done to ensure that the databases are created with the correct schema owners and allow the user profile sync service to operate correctly. 
-
-.EXAMPLE
-
-    SPUserProfileServiceApp UserProfileServiceApp
-    {
-        Name                 = "User Profile Service Application"
-        ApplicationPool      = "SharePoint Service Applications"
-        MySiteHostLocation   = "http://my.sharepoint.contoso.local"
-        ProfileDBName        = "SP_UserProfiles"
-        ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
-        SocialDBName         = "SP_Social"
-        SocialDBServer       = "SQL.contoso.local\SQLINSTANCE"
-        SyncDBName           = "SP_ProfileSync"
-        SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
-        EnableNetBIOS        = $false
-        FarmAccount          = $FarmAccount
-        PsDscRunAsCredential = $SetupAccount
-    }
-
+.DESCRIPTION
+    
+    This resource will provision an instance of the user profile service to the farm. It 
+    creates the required databases using the parameters that are passed in to it (although 
+    these are only used during the initial provisioning). The farm account is used during 
+    the provisioning of the service only (in the set method), and the install account is 
+    used in the get and test methods. This is done to ensure that the databases are created 
+    with the correct schema owners and allow the user profile sync service to operate 
+    correctly. 
+    
 .PARAMETER Name
     Key - string
     The name of the user profile service
+
+.PARAMETER ProxyName
+    Write - string
+    The proxy name, if not specified will be /Name of service app/ Proxy
 
 .PARAMETER ApplicationPool
     Required - string
@@ -77,6 +66,43 @@ This is done to ensure that the databases are created with the correct schema ow
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example adds a new user profile service application to the local farm
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $FarmAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPUserProfileServiceApp UserProfileServiceApp
+            {
+                Name                 = "User Profile Service Application"
+                ApplicationPool      = "SharePoint Service Applications"
+                MySiteHostLocation   = "http://my.sharepoint.contoso.local"
+                ProfileDBName        = "SP_UserProfiles"
+                ProfileDBServer      = "SQL.contoso.local\SQLINSTANCE"
+                SocialDBName         = "SP_Social"
+                SocialDBServer       = "SQL.contoso.local\SQLINSTANCE"
+                SyncDBName           = "SP_ProfileSync"
+                SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
+                EnableNetBIOS        = $false
+                FarmAccount          = $FarmAccount
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

@@ -1,66 +1,10 @@
 ﻿.NAME
     SPSearchContentSource
 
-.SYNOPSIS
-
-This resource will deploy and configure a content source in a specified search service application.
-
-.EXAMPLE
-
-This example is for a SharePoint content source
-
-    SPSearchContentSource LocalSharePointSites
-    {
-        Name                 = "Local SharePoint Sites"
-        ServiceAppName       = "Search Service Application"
-        ContentSourceType    = "SharePoint"
-        Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
-        CrawlSetting         = "CrawlEverything"
-        ContinuousCrawl      = $true
-        IncrementalSchedule  = MSFT_SPSearchCrawlSchedule @{
-                                   ScheduleType = "Daily"
-                                   StartHour = "0"
-                                   StartMinute = "0"
-                                   CrawlScheduleRepeatDuration = "1440"
-                                   CrawlScheduleRepeatInterval = "5"
-                               }
-        FullSchedule         = $null
-        Priority             = "Normal"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SPSetupAccount
-        DependsOn            = "[SPSearchRoles]LocalSearchRoles"
-    }
-
-This example is for a website content source
-
-    SPSearchContentSource LocalSharePointSites
-    {
-        Name                 = "Local SharePoint Sites"
-        ServiceAppName       = "Search Service Application"
-        ContentSourceType    = "Website"
-        Addresses            = @("http://www.contoso.com")
-        CrawlSetting         = "Custom"
-        LimitPageDepth       = 5
-        LimitServerHops      = 0
-        IncrementalSchedule  = MSFT_SPSearchCrawlSchedule @{
-                                   ScheduleType = "Daily"
-                                   StartHour = "0"
-                                   StartMinute = "0"
-                                   CrawlScheduleRepeatDuration = "1440"
-                                   CrawlScheduleRepeatInterval = "5"
-                               }
-        FullSchedule         = MSFT_SPSearchCrawlSchedule @{
-                                   ScheduleType = "Weekly"
-                                   CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
-                                   StartHour = "3"
-                                   StartMinute = "0"
-                               }
-        Priority             = "Normal"
-        Ensure               = "Present"
-        PsDscRunAsCredential = $SPSetupAccount
-        DependsOn            = "[SPSearchRoles]LocalSearchRoles"
-    }
-
+.DESCRIPTION
+    
+    This resource will deploy and configure a content source in a specified search service application.
+    
 .PARAMETER Name
     Key - String
     The name of the content source
@@ -119,6 +63,88 @@ This example is for a website content source
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to create a SharePoint sites content source
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSearchContentSource LocalSharePointSites
+            {
+                Name                 = "Local SharePoint Sites"
+                ServiceAppName       = "Search Service Application"
+                ContentSourceType    = "SharePoint"
+                Addresses            = @("http://sharepointsite1.contoso.com", "http://sharepointsite2.contoso.com")
+                CrawlSetting         = "CrawlEverything"
+                ContinuousCrawl      = $true
+                IncrementalSchedule  = MSFT_SPSearchCrawlSchedule {
+                                        ScheduleType = "Daily"
+                                        StartHour = "0"
+                                        StartMinute = "0"
+                                        CrawlScheduleRepeatDuration = "1440"
+                                        CrawlScheduleRepeatInterval = "5"
+                                       }
+                FullSchedule         = $null
+                Priority             = "Normal"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to create a website content source
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPSearchContentSource WebsiteSource
+            {
+                Name                 = "Contoso website"
+                ServiceAppName       = "Search Service Application"
+                ContentSourceType    = "Website"
+                Addresses            = @("http://www.contoso.com")
+                CrawlSetting         = "Custom"
+                LimitPageDepth       = 5
+                LimitServerHops      = 0
+                IncrementalSchedule  = MSFT_SPSearchCrawlSchedule{
+                                        ScheduleType = "Daily"
+                                        StartHour = "0"
+                                        StartMinute = "0"
+                                        CrawlScheduleRepeatDuration = "1440"
+                                        CrawlScheduleRepeatInterval = "5"
+                                       }
+                FullSchedule         = MSFT_SPSearchCrawlSchedule{
+                                        ScheduleType = "Weekly"
+                                        CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
+                                        StartHour = "3"
+                                        StartMinute = "0"
+                                       }
+                Priority             = "Normal"
+                Ensure               = "Present"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

@@ -25,7 +25,8 @@ function Get-SPDSCWebApplicationThrottlingConfig
     }
 }
 
-function Set-SPDSCWebApplicationThrottlingConfig {
+function Set-SPDSCWebApplicationThrottlingConfig 
+{
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true)] 
@@ -68,11 +69,15 @@ function Set-SPDSCWebApplicationThrottlingConfig {
 }
 
 
-function Set-SPDSCWebApplicationHappyHourConfig {
+function Set-SPDSCWebApplicationHappyHourConfig 
+{
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)] $WebApplication,
-        [parameter(Mandatory = $true)] $Settings
+        [parameter(Mandatory = $true)] 
+        $WebApplication,
+        
+        [parameter(Mandatory = $true)] 
+        $Settings
     )
 
     if ((Test-SPDSCObjectHasProperty $Settings "Hour") -eq $false `
@@ -102,16 +107,20 @@ function Set-SPDSCWebApplicationHappyHourConfig {
     }
 }
 
-function Test-SPDSCWebApplicationThrottlingConfig {
+function Test-SPDSCWebApplicationThrottlingConfig 
+{
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
-        [parameter(Mandatory = $true)] $CurrentSettings,
-        [parameter(Mandatory = $true)] $DesiredSettings
+        [parameter(Mandatory = $true)] 
+        $CurrentSettings,
+        
+        [parameter(Mandatory = $true)] 
+        $DesiredSettings
     )
 
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
-    Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
                                                      -DesiredValues $DesiredSettings `
                                                      -ValuesToCheck @(
@@ -131,8 +140,8 @@ function Test-SPDSCWebApplicationThrottlingConfig {
         if ((Test-SPDSCObjectHasProperty $DesiredSettings "HappyHour") -eq $true) 
         {
             $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings.HappyHour `
-                                                             -DesiredValues $DesiredSettings.HappyHour `
-                                                             -ValuesToCheck @("Hour", "Minute", "Duration")
+                                                   -DesiredValues $DesiredSettings.HappyHour `
+                                                   -ValuesToCheck @("Hour", "Minute", "Duration")
         }
     }
     return $testReturn

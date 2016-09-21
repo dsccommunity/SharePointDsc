@@ -4,32 +4,63 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [String]   $Name,
-        [parameter(Mandatory = $true)]  [String]   $LiteralPath,
-        [parameter(Mandatory = $false)] [String[]] $WebApplications = @(),
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
-                                        [String]   $Ensure = "Present",
-        [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
-        [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
-        [parameter(Mandatory = $false)] [ValidateSet("14","15","All")]  
-                                        [String]   $SolutionLevel,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [String]   
+        $Name,
+
+        [parameter(Mandatory = $true)]  
+        [String]   
+        $LiteralPath,
+
+        [parameter(Mandatory = $false)] 
+        [String[]] 
+        $WebApplications = @(),
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")]
+        [String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [String]
+        $Version = "1.0.0.0",
+
+        [parameter(Mandatory = $false)] 
+        [Boolean]
+        $Deployed = $true,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("14","15","All")]
+        [String]
+        $SolutionLevel,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting farm solution '$Name'..."
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
-        $solution = Get-SPSolution -Identity $params.Name -ErrorAction SilentlyContinue -Verbose:$false
+        $solution = Get-SPSolution -Identity $params.Name `
+                                   -ErrorAction SilentlyContinue `
+                                   -Verbose:$false
 
-        if ($null -ne $solution) { 
+        if ($null -ne $solution) 
+        { 
             $currentState = "Present" 
             $deployed = $solution.Deployed
             $version = $Solution.Properties["Version"]
-            $deployedWebApplications = @($solution.DeployedWebApplications | Select-Object -ExpandProperty Url)
+            $deployedWebApplications = @($solution.DeployedWebApplications `
+                                         | Select-Object -ExpandProperty Url)
             $ContainsGlobalAssembly = $solution.ContainsGlobalAssembly
-        } else { 
+        } 
+        else 
+        { 
             $currentState = "Absent" 
             $deployed = $false
             $version = "0.0.0.0"
@@ -48,7 +79,6 @@ function Get-TargetResource
             ContainsGlobalAssembly = $ContainsGlobalAssembly
         }
     }
-
     return $result
 }
 
@@ -57,16 +87,39 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [String]   $Name,
-        [parameter(Mandatory = $true)]  [String]   $LiteralPath,
-        [parameter(Mandatory = $false)] [String[]] $WebApplications = @(),
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
-                                        [String]   $Ensure = "Present",
-        [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
-        [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
-        [parameter(Mandatory = $false)] [ValidateSet("14","15","All")]  
-                                        [String]   $SolutionLevel,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [String]   
+        $Name,
+
+        [parameter(Mandatory = $true)]  
+        [String]   
+        $LiteralPath,
+
+        [parameter(Mandatory = $false)] 
+        [String[]] 
+        $WebApplications = @(),
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")]
+        [String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [String]
+        $Version = "1.0.0.0",
+
+        [parameter(Mandatory = $false)] 
+        [Boolean]
+        $Deployed = $true,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("14","15","All")]
+        [String]
+        $SolutionLevel,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -80,9 +133,11 @@ function Set-TargetResource
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            Write-Verbose "Upload solution to the farm."
+            Write-Verbose -Message "Upload solution to the farm."
 
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                          -Arguments $PSBoundParameters `
+                                          -ScriptBlock {
                 $params = $args[0]
         
                 $runParams = @{}
@@ -103,12 +158,16 @@ function Set-TargetResource
     
         if ($CurrentValues.Version -ne $Version)
         {
-            # If the solution is not deployed and the versions do not match we have to remove the current solution and add the new one
+            # If the solution is not deployed and the versions do not match we have to 
+            # remove the current solution and add the new one
             if (-not $CurrentValues.Deployed)
             {
-                Write-Verbose "Remove current version ('$($CurrentValues.Version)') of solution..."
+                Write-Verbose -Message ("Remove current version " + `
+                                        "('$($CurrentValues.Version)') of solution...")
 
-                $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                              -Arguments $PSBoundParameters `
+                                              -ScriptBlock {
                     $params = $args[0]
         
                     $runParams = @{}
@@ -134,9 +193,12 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose "Update solution from '$($CurrentValues.Version)' to $Version..."
+                Write-Verbose -Message ("Update solution from " + `
+                                        "'$($CurrentValues.Version)' to $Version...")
 
-                $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+                $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                              -Arguments $PSBoundParameters `
+                                              -ScriptBlock {
                     $params = $args[0]
         
                     $runParams = @{}
@@ -168,11 +230,14 @@ function Set-TargetResource
 
     if ($Deployed -ne $CurrentValues.Deployed) 
     { 
-        Write-Verbose "The deploy state of $Name is '$($CurrentValues.Deployed)' but should be '$Deployed'." 
+        Write-Verbose -Message ("The deploy state of $Name is " + `
+                                "'$($CurrentValues.Deployed)' but should be '$Deployed'.") 
         if ($CurrentValues.Deployed) 
         { 
             # Retract Solution globally 
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                          -Arguments $PSBoundParameters `
+                                          -ScriptBlock {
                 $params = $args[0]
         
                 $runParams = @{}
@@ -207,7 +272,9 @@ function Set-TargetResource
         else 
         { 
             # Deploy solution 
-            $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                          -Arguments $PSBoundParameters `
+                                          -ScriptBlock {
                 $params = $args[0]
        
                 $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
@@ -245,17 +312,17 @@ function Set-TargetResource
                         }
                     }
                 }
-
             }
         }
-       
-     } 
+    } 
 
-     Wait-SPDSCSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
+    Wait-SPDSCSolutionJob -SolutionName $Name -InstallAccount $InstallAccount
 
     if ($Ensure -eq "Absent")
     {
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                      -Arguments $PSBoundParameters `
+                                      -ScriptBlock {
             $params = $args[0]
         
             $runParams = @{ 
@@ -276,16 +343,39 @@ function Test-TargetResource
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [String]   $Name,
-        [parameter(Mandatory = $true)]  [String]   $LiteralPath,
-        [parameter(Mandatory = $false)] [String[]] $WebApplications = @(),
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] 
-                                        [String]   $Ensure = "Present",
-        [parameter(Mandatory = $false)] [String]   $Version = "1.0.0.0",
-        [parameter(Mandatory = $false)] [Boolean]  $Deployed = $true,
-        [parameter(Mandatory = $false)] [ValidateSet("14","15","All")]  
-                                        [String]   $SolutionLevel,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [String]   
+        $Name,
+
+        [parameter(Mandatory = $true)]  
+        [String]   
+        $LiteralPath,
+
+        [parameter(Mandatory = $false)] 
+        [String[]] 
+        $WebApplications = @(),
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")]
+        [String]
+        $Ensure = "Present",
+        
+        [parameter(Mandatory = $false)]
+        [String]
+        $Version = "1.0.0.0",
+
+        [parameter(Mandatory = $false)] 
+        [Boolean]
+        $Deployed = $true,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("14","15","All")]
+        [String]
+        $SolutionLevel,
+        
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -293,13 +383,15 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ($WebApplications.Count -gt 0){
-        $valuesToCheck = @("Ensure", "Version", "Deployed", "WebApplications")
-    }else{
-        $valuesToCheck = @("Ensure", "Version", "Deployed")
+    $valuesToCheck = @("Ensure", "Version", "Deployed")
+    if ($WebApplications.Count -gt 0)
+    {
+        $valuesToCheck += "WebApplications"
     }
-
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck $valuesToCheck
+    
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck $valuesToCheck
 }
 
 function Wait-SPDSCSolutionJob
@@ -307,32 +399,43 @@ function Wait-SPDSCSolutionJob
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [string]$SolutionName,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [string]
+        $SolutionName,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
-    start-sleep -s 5
+    Start-Sleep -Seconds 5
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @{ Name = $SolutionName } -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments @{ Name = $SolutionName } `
+                                  -ScriptBlock {
         $params = $args[0]
 
         $gc = Start-SPAssignment -Verbose:$false
     
         $solution = Get-SPSolution -Identity $params.Name -Verbose:$false -AssignmentCollection $gc
 
-        if ($solution.JobExists){
-            Write-Verbose "Waiting for solution '$($params.Name)'..."
+        if ($solution.JobExists)
+        {
+            Write-Verbose -Message "Waiting for solution '$($params.Name)'..."
 
             while ($solution.JobExists){
-                Write-Verbose "$([DateTime]::Now.ToShortTimeString()) - Waiting for a job for solution '$($params.Name)' to complete"
-                start-sleep -s 5
+                Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for a " + `
+                                        "job for solution '$($params.Name)' to complete")
+                Start-Sleep -Seconds 5
             }
 
-            Write-Verbose "Result: $($solution.LastOperationResult)"
-            Write-Verbose "Details: $($solution.LastOperationDetails)"
+            Write-Verbose -Message "Result: $($solution.LastOperationResult)"
+            Write-Verbose -Message "Details: $($solution.LastOperationDetails)"
 
-        }else{ 
-            Write-Verbose "Solution '$($params.Name)' has no job pending."
+        }
+        else
+        { 
+            Write-Verbose -Message "Solution '$($params.Name)' has no job pending."
             return @{ 
                 LastOperationResult = "DeploymentSucceeded"
                 LastOperationDetails = "Solution '$($params.Name)' has no job pending."

@@ -1,20 +1,3 @@
-/*
-**Description**
-
-This resource is used to trust a remote SharePoint farm.
-This is used when federating search results between two different SharePoint farms.
-The technique is described at https://technet.microsoft.com/en-us/library/dn133749.aspx
-
-**Example**
-
-    SPRemoteFarmTrust TrustRemoteFarmForSearch
-    {
-        Name = "CentralSearchFarm"
-        RemoteWebAppUrl = "https://search.sharepoint.contoso.com"
-        LocalWebAppUrl = "https://local.sharepoint2.contoso.com"
-    }
-*/
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPRemoteFarmTrust")]
 class MSFT_SPRemoteFarmTrust : OMI_BaseResource
 {
@@ -22,5 +5,5 @@ class MSFT_SPRemoteFarmTrust : OMI_BaseResource
     [Required, Description("The URL of a web app in the remote farm, must use HTTPS")] string RemoteWebAppUrl;
     [Required, Description("The URL of a local web app to connect the remote farm to")] string LocalWebAppUrl;
     [Write, Description("Set to present to ensure the trust exists, or absent to ensure it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

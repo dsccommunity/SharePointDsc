@@ -4,27 +4,49 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $DatabaseName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $AGName,
+
+        [parameter(Mandatory = $false)] 
+        [System.String] 
+        $FileShare,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting current AAG config for $DatabaseName"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
-        $database = Get-SPDatabase | Where-Object { $_.Name -eq $params.DatabaseName }
+        $database = Get-SPDatabase | Where-Object -FilterScript { 
+            $_.Name -eq $params.DatabaseName 
+        }
 
         $Ensure = "Absent"
         $AGName = $params.AGName
-        if ($null -ne $database) {
+        if ($null -ne $database) 
+        {
             $ag = $database.AvailabilityGroup
-            if ($null -ne $ag) {
+            if ($null -ne $ag) 
+            {
                 $AGName = $ag.Name
-                if ($ag.Name -eq $params.AGName) {
+                if ($ag.Name -eq $params.AGName) 
+                {
                     $Ensure = "Present"
                 }
             }
@@ -46,11 +68,26 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $DatabaseName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $AGName,
+
+        [parameter(Mandatory = $false)] 
+        [System.String] 
+        $FileShare,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting AAG config for $DatabaseName"
@@ -58,47 +95,65 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     # Move to a new AG
-    if ($CurrentValues.AGName -ne $AGName -and $Ensure -eq "Present") {
+    if ($CurrentValues.AGName -ne $AGName -and $Ensure -eq "Present") 
+    {
         Write-Verbose -Message "Moving $DatabaseName from previous AAG to $AGName"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters, $CurrentValues) -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments ($PSBoundParameters, $CurrentValues) `
+                            -ScriptBlock {
             $params = $args[0]
             $CurrentValues = $args[1]
             
             # Remove it from the current AAG first
-            Remove-DatabaseFromAvailabilityGroup -AGName $CurrentValues.AGName -DatabaseName $params.DatabaseName -Force
+            Remove-DatabaseFromAvailabilityGroup -AGName $CurrentValues.AGName `
+                                                 -DatabaseName $params.DatabaseName `
+                                                 -Force
 
             # Now add it to the AAG it's meant to be in
             $addParams = @{
                 AGName = $params.AGName
                 DatabaseName = $params.DatabaseName
             }
-            if ($params.ContainsKey("FileShare")) {
+            if ($params.ContainsKey("FileShare")) 
+            {
                 $addParams.Add("FileShare", $params.FileShare)
             }
             Add-DatabaseToAvailabilityGroup @addParams
         }
-    } else {
-        if ($Ensure -eq "Present") {
+    } 
+    else 
+    {
+        if ($Ensure -eq "Present") 
+        {
             # Add to AG
             Write-Verbose -Message "Adding $DatabaseName from $AGName"
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
                 $params = $args[0]
 
                 $cmdParams = @{
                     AGName = $params.AGName
                     DatabaseName = $params.DatabaseName
                 }
-                if ($params.ContainsKey("FileShare")) {
+                if ($params.ContainsKey("FileShare")) 
+                {
                     $cmdParams.Add("FileShare", $params.FileShare)
                 }
                 Add-DatabaseToAvailabilityGroup @cmdParams
             }
-        } else {
+        } 
+        else 
+        {
             # Remove from the AG
             Write-Verbose -Message "Removing $DatabaseName from $AGName"
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
                 $params = $args[0]
-                Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName -DatabaseName $params.DatabaseName -Force
+                Remove-DatabaseFromAvailabilityGroup -AGName $params.AGName `
+                                                     -DatabaseName $params.DatabaseName `
+                                                     -Force
             }
         }
     }
@@ -110,11 +165,26 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $AGName,
-        [parameter(Mandatory = $false)] [System.String] $FileShare,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $DatabaseName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $AGName,
+
+        [parameter(Mandatory = $false)] 
+        [System.String] 
+        $FileShare,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     $PSBoundParameters.Ensure = $Ensure
@@ -122,6 +192,8 @@ function Test-TargetResource
 
     Write-Verbose -Message "Checking AAG configuration for $DatabaseName"
     
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure", "AGName")
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure", "AGName")
 }
 

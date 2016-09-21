@@ -1,25 +1,13 @@
 ﻿.NAME
     SPContentDatabase
 
-.SYNOPSIS
-
-This resource is used to add and remove Content Databases to web applications and and configure these databases.
-Note: The resource cannot be used to move the database to a different SQL instance.
-It will throw an error when it detects that the specified SQL instance is a different instance that is currently in use. 
-
-.EXAMPLE
-
-    SPContentDatabase ContentDB {
-        Name = "SharePoint_Content_01"
-        DatabaseServer = "SQL.contoso.local\SQLINSTANCE"
-        WebAppUrl = "http://sharepoint.contoso.com"
-        Enabled = $true
-        WarningSiteCount = 2000
-        MaximumSiteCount = 5000
-        Ensure = "Present"
-        PsDscRunAsCredential = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is used to add and remove Content Databases to web applications and configure 
+    these databases. Note: The resource cannot be used to move the database to a different 
+    SQL instance. It will throw an error when it detects that the specified SQL instance is a 
+    different instance that is currently in use. 
+    
 .PARAMETER Name
     Key - String
     Specifies the name of the content database
@@ -51,6 +39,62 @@ It will throw an error when it detects that the specified SQL instance is a diff
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a new content database for the specified web application.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPContentDatabase ContentDB 
+            {
+                Name                 = "SharePoint_Content_01"
+                DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                Enabled              = $true
+                WarningSiteCount     = 2000
+                MaximumSiteCount     = 5000
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example dismounts a content database from the specified web application. This 
+    will not remove the database from SQL server however, only taking it out of the 
+    web applications configuration.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPContentDatabase ContentDB 
+            {
+                Name                 = "SharePoint_Content_01"
+                DatabaseServer       = "SQL.contoso.local\SQLINSTANCE"
+                WebAppUrl            = "http://sharepoint.contoso.com"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

@@ -1,25 +1,15 @@
 ﻿.NAME
     SPBCSServiceApp
 
-.SYNOPSIS
-
-This resource is used to provision and manage an instance of the Business Connectivity Services Service Application.
-It will identify an instance of the BCS app through the application display name.
-Currently the resource will provision the app if it does not yet exist, and will change the service account associated to the app if it does not match the configuration.
-Database names or server name will not be changed if the configuration does not match, these parameters are only used for the initial provisioning of the service application.
-
-.EXAMPLE
-
-    SPBCSServiceApp BCSServiceApp
-    {
-        Name            = "BCS Service Application"
-        ApplicationPool = "SharePoint Service Applications"
-        DatabaseName    = "SP_BCS"
-        DatabaseServer  = $DatabaseServer
-        InstallAccount  = $InstallAccount
-        Ensure          = "Present"
-    }
-
+.DESCRIPTION
+    
+    This resource is used to provision and manage an instance of the Business Connectivity Services 
+    Service Application. It will identify an instance of the BCS app through the application 
+    display name. Currently the resource will provision the app if it does not yet exist, and will 
+    change the service account associated to the app if it does not match the configuration. Database 
+    names or server name will not be changed if the configuration does not match, these parameters 
+    are only used for the initial provisioning of the service application.
+    
 .PARAMETER Name
     Key - string
     The name of the BCS service app
@@ -43,6 +33,60 @@ Database names or server name will not be changed if the configuration does not 
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to deploy a Business Connectivity Services application to the
+    local SharePoint farm. 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPBCSServiceApp BCSServiceApp
+            {
+                Name            = "BCS Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseName    = "SP_BCS"
+                DatabaseServer  = "SQL.contoso.local\SQLINSTANCE"
+                InstallAccount  = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to deploy a Business Connectivity Services application to the
+    local SharePoint farm. The application pool account is mandatory but the value is 
+    ignored when removing a service app, so the value entered here does not matter. 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPBCSServiceApp BCSServiceApp
+            {
+                Name                 = "BCS Service Application"
+                ApplicationPool      = "n/a"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

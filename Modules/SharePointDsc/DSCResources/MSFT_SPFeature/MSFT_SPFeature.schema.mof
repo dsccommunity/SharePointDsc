@@ -1,22 +1,3 @@
-/*
-**Description**
-
-This resource is used to make sure that a specific feature is either enabled or disabled at a given URL/scope.
-The Ensure property will dictate if the feature should be on or off. 
-The name property is the name of the feature based on its folder name in the FEATURES folder in the SharePoint hive directory. 
-
-**Example**
-
-    SPFeature EnableViewFormsLockDown
-    {
-        Name                 = "ViewFormPagesLockDown"
-        Url                  = "http://www.contoso.com"
-        Ensure               = "Present"
-        Scope                = "Site"
-        PsDscRunAsCredential = $SetupAccuount
-        Version              = "1.0.0.0"     
-    }
-*/
 [ClassVersion("1.0.0.0"), FriendlyName("SPFeature")]
 class MSFT_SPFeature : OMI_BaseResource
 {
@@ -25,7 +6,5 @@ class MSFT_SPFeature : OMI_BaseResource
     [Key, Description("The URL to change the feature at")] string Url;
     [Write, Description("Present if the feature is to be enabled, Absent if it is to be disabled"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("The version of the feature to check against")] string Version;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
-
-

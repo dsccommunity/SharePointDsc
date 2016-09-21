@@ -1,27 +1,12 @@
 ﻿.NAME
     SPUserProfileSyncConnection
 
-.SYNOPSIS
-
-This resource will ensure a specifc user profile sync connection is in place and that it is configured accordingly to its definition
-
-This resource currently supports AD only.
-.EXAMPLE
-
-  SPUserProfileSyncConnection MainDomain
-    {
-        UserProfileService = "User Profile Service Application"
-        Forest = "contoso.com"
-        Name = "Contoso"
-        ConnectionCredentials = $connectionCredential
-        Server = "server.contoso.com"
-        UseSSL = $false
-        IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
-        ExcludedOUs = @("OU=Notes Usersa,DC=Contoso,DC=com")
-        Force = $false
-        ConnectionType = "ActiveDirectory"
-}
-
+.DESCRIPTION
+    
+    This resource will ensure a specifc user profile sync connection is in place and 
+    that it is configured accordingly to its definition
+    
+    This resource currently supports AD only.
 .PARAMETER Name
     Key - string
     The name of the connection
@@ -65,6 +50,43 @@ This resource currently supports AD only.
 
 .PARAMETER InstallAccount
     Write - string
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example adds a new user profile sync connection to the specified user 
+    profile service app
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $ConnectionAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPUserProfileSyncConnection MainDomain
+            {
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = $ConnectionAccount
+                Server = "server.contoso.com"
+                UseSSL = $false
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ExcludedOUs = @("OU=Notes Usersa,DC=Contoso,DC=com")
+                Force = $false
+                ConnectionType = "ActiveDirectory"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
 
 

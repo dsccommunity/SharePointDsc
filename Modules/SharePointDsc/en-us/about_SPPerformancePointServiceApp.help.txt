@@ -1,21 +1,19 @@
 ﻿.NAME
     SPPerformancePointServiceApp
 
-.SYNOPSIS
-
-This resource is responsible for creating Performance Point Service Application instances within the local SharePoint farm.
-The resource will provision and configure the Performance Point Service Application.
-.EXAMPLE
-    SPPerformancePointServiceApp PerformancePoint
-    {
-        Name = "Performance Point Service Application"
-        ApplicationPool = "SharePoint Web Services"
-        InstallAccount  = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is responsible for creating Performance Point Service Application 
+    instances within the local SharePoint farm. The resource will provision and 
+    configure the Performance Point Service Application.
+    
 .PARAMETER Name
     Key - string
     The name of the service application
+
+.PARAMETER ProxyName
+    Write - string
+    The proxy name, if not specified will be /Name of service app/ Proxy
 
 .PARAMETER ApplicationPool
     Required - string
@@ -36,6 +34,57 @@ The resource will provision and configure the Performance Point Service Applicat
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a new performance point service app in the local farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPPerformancePointServiceApp PerformancePoint
+            {
+                Name = "Performance Point Service Application"
+                ApplicationPool = "SharePoint Web Services"
+                InstallAccount  = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example removes the specific performance point service app from the local
+    farm. The ApplicationPool parameter is still mandatory but it is not used, so
+    the value can be anything. 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPPerformancePointServiceApp PerformancePoint
+            {
+                Name = "Performance Point Service Application"
+                ApplicationPool = "n/a"
+                Ensure = "Absent"
+                InstallAccount  = $SetupAccount
+            }
+        }
+    }
 
 

@@ -1,24 +1,12 @@
 ﻿.NAME
     SPUsageApplication
 
-.SYNOPSIS
-
-This resource provisions an instance of the usage and health monitoring service application.
-The database settings are only used for initial provisioning, but the usage settings can be changed and will be enforced as the resource is executed. 
-
-.EXAMPLE
-
-    SPUsageApplication UsageApplication 
-    {
-        Name                  = "Usage Service Application"
-        DatabaseName          = "SP_Usage"
-        UsageLogCutTime       = 5
-        UsageLogLocation      = "L:\UsageLogs"
-        UsageLogMaxFileSizeKB = 1024
-        Ensure                = "Present"
-        InstallAccount        = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource provisions an instance of the usage and health monitoring service 
+    application. The database settings are only used for initial provisioning, but 
+    the usage settings can be changed and will be enforced as the resource is executed. 
+    
 .PARAMETER Name
     Key - string
     The name of the service application
@@ -62,6 +50,34 @@ The database settings are only used for initial provisioning, but the usage sett
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example deploys a usage application to the local farm
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPUsageApplication UsageApplication 
+            {
+                Name                  = "Usage Service Application"
+                DatabaseName          = "SP_Usage"
+                UsageLogCutTime       = 5
+                UsageLogLocation      = "L:\UsageLogs"
+                UsageLogMaxFileSizeKB = 1024
+                Ensure                = "Present"
+                InstallAccount        = $SetupAccount
+            }
+        }
+    }
 
 

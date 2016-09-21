@@ -1,36 +1,24 @@
 ﻿.NAME
     SPDesignerSettings
 
-.SYNOPSIS
-
-This resource is used to set the SharePoint Designer settings for the local farm or site collections.
-These settings will be used to control if users are allowed to make changes using SharePoint Designer.
-Note that this will not prevent users from installing SharePoint Designer, just from using SharePoint Designer to connect to the farm.
-
-Settings can be applied against an entire web application, or a specific site collection. 
-Use the "SettingsScope" property to set it to either "WebApplication" or "SiteCollection" to define which you are targetting.
-
-Known issue:
-When using PowerShell v4 or PowerShell v5 with the InstallAccount switch (instead of PsDscRunAsCredential), you cannot use the SettingsScope "SiteCollection".
-Due to an issue with Remote PowerShell and SharePoint, changing the Site Collection settings results in an Access Denied error.
-Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential configuration.
-
-.EXAMPLE
-
-    SPDesignerSettings MainWebAppSPDSettings
-    {
-        Url                                     = "https://intranet.sharepoint.contoso.com"
-        SettingsScope                           = "WebApplication"
-        AllowSharePointDesigner                 = $false
-        AllowDetachPagesFromDefinition          = $false
-        AllowCustomiseMasterPage                = $false
-        AllowManageSiteURLStructure             = $false
-        AllowCreateDeclarativeWorkflow          = $false
-        AllowSavePublishDeclarativeWorkflow     = $false
-        AllowSaveDeclarativeWorkflowAsTemplate  = $false
-        PsDscRunAsCredential                    = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is used to set the SharePoint Designer settings for the local farm or site 
+    collections. These settings will be used to control if users are allowed to make changes 
+    using SharePoint Designer. Note that this will not prevent users from installing 
+    SharePoint Designer, just from using SharePoint Designer to connect to the farm.
+    
+    Settings can be applied against an entire web application, or a specific site collection. 
+    Use the "SettingsScope" property to set it to either "WebApplication" or "SiteCollection" 
+    to define which you are targetting.
+    
+    Known issue:
+    When using PowerShell v4 or PowerShell v5 with the InstallAccount switch (instead of 
+    PsDscRunAsCredential), you cannot use the SettingsScope "SiteCollection". Due to an issue 
+    with Remote PowerShell and SharePoint, changing the Site Collection settings results in 
+    an Access Denied error. Consider implementing PowerShell v5 and switching to the 
+    PsDscRunAsCredential configuration.
+    
 .PARAMETER Url
     Key - string
     The URL of the web application or site collection to configure
@@ -70,6 +58,38 @@ Consider implementing PowerShell v5 and switching to the PsDscRunAsCredential co
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example applies settings to disable SharePoint Designer access to the 
+    specified web application.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPDesignerSettings MainWebAppSPDSettings
+            {
+                Url                                     = "https://intranet.sharepoint.contoso.com"
+                SettingsScope                           = "WebApplication"
+                AllowSharePointDesigner                 = $false
+                AllowDetachPagesFromDefinition          = $false
+                AllowCustomiseMasterPage                = $false
+                AllowManageSiteURLStructure             = $false
+                AllowCreateDeclarativeWorkflow          = $false
+                AllowSavePublishDeclarativeWorkflow     = $false
+                AllowSaveDeclarativeWorkflowAsTemplate  = $false
+                PsDscRunAsCredential                    = $SetupAccount
+            }
+        }
+    }
 
 

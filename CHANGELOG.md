@@ -1,5 +1,22 @@
 # Change log for SharePointDsc
 
+### 1.3
+ * Fixed typo on return value in SPServiceAppProxyGroup
+ * Fixed SPJoinFarm to not write output during successful farm join
+ * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
+ * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
+ * Added ProxyName parameter to all service application resources
+ * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
+ * Fixed typos in documentation for InstallAccount parameter on most resources
+ * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
+ * New resources: SPConfigWizard, SPProductUpdate and SPPublishServiceApplication
+ * Updated style of all script in module to align with PowerShell team standards
+ * Changed parameter ClaimsMappings in SPTrustedIdentityTokenIssuer to consume an array of custom object MSFT_SPClaimTypeMapping
+ * Changed SPTrustedIdentityTokenIssuer to throw an exception if certificate specified has a private key, since SharePoint doesn't accept it
+ * Fixed issue with SPTrustedIdentityTokenIssuer to stop if cmdlet New-SPTrustedIdentityTokenIssuer returns null
+ * Fixed issue with SPTrustedIdentityTokenIssuer to correctly get parameters ClaimProviderName and ProviderSignOutUri
+ * Fixed issue with SPTrustedIdentityTokenIssuer to effectively remove the SPTrustedAuthenticationProvider from all zones before deleting the SPTrustedIdentityTokenIssuer
+
 ### 1.2
 
  * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
@@ -9,6 +26,7 @@
  * Added better logging to all test method output to make it clear what property is causing a test to fail
  * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
  * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
+ * Fixed the use of plural nouns in cmdlet names within the module
  * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
  * Fixed the use of plural nouns in cmdlet names within the module
  * Removed dependency on Win32_Product from SPInstall

@@ -1,21 +1,12 @@
 ﻿.NAME
     SPServiceAppPool
 
-.SYNOPSIS
-
-This resource is used for provisioning an application pool that can be used for service applications. 
-The account used for the service account must already be registered as a managed account (which can be provisioned through [SPManagedAccount](SPManagedAccount)).
-
-.EXAMPLE
-
-    SPServiceAppPool MainServiceAppPool
-    {
-        Name           = "SharePoint Service Applications"
-        ServiceAccount = "Demo\ServiceAccount"
-        InstallAccount = $InstallAccount
-        Ensure         = "Present"
-    }
-
+.DESCRIPTION
+    
+    This resource is used for provisioning an application pool that can be used for 
+    service applications. The account used for the service account must already be 
+    registered as a managed account (which can be provisioned through SPManagedAccount.
+    
 .PARAMETER Name
     Key - string
     The name of application pool
@@ -31,6 +22,31 @@ The account used for the service account must already be registered as a managed
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example creates a service application pool for service apps to run in.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPServiceAppPool MainServiceAppPool
+            {
+                Name                 = "SharePoint Service Applications"
+                ServiceAccount       = "Demo\ServiceAccount"
+                PsDscRunAsCredential = $SetupAccount
+                Ensure               = "Present"
+            }
+        }
+    }
 
 

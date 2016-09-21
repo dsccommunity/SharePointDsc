@@ -1,24 +1,13 @@
 ﻿.NAME
     SPFeature
 
-.SYNOPSIS
-
-This resource is used to make sure that a specific feature is either enabled or disabled at a given URL/scope.
-The Ensure property will dictate if the feature should be on or off. 
-The name property is the name of the feature based on its folder name in the FEATURES folder in the SharePoint hive directory. 
-
-.EXAMPLE
-
-    SPFeature EnableViewFormsLockDown
-    {
-        Name                 = "ViewFormPagesLockDown"
-        Url                  = "http://www.contoso.com"
-        Ensure               = "Present"
-        Scope                = "Site"
-        PsDscRunAsCredential = $SetupAccuount
-        Version              = "1.0.0.0"     
-    }
-
+.DESCRIPTION
+    
+    This resource is used to make sure that a specific feature is either enabled or disabled 
+    at a given URL/scope. The Ensure property will dictate if the feature should be on or 
+    off. The name property is the name of the feature based on its folder name in the 
+    FEATURES folder in the SharePoint hive directory. 
+    
 .PARAMETER Name
     Key - string
     The name of the feature
@@ -43,6 +32,59 @@ The name property is the name of the feature based on its folder name in the FEA
 
 .PARAMETER InstallAccount
     Write - String
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to enable a site collection scoped feature 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPFeature EnableViewFormsLockDown
+            {
+                Name                 = "ViewFormPagesLockDown"
+                Url                  = "http://www.contoso.com"
+                FeatureScope         = "Site"
+                PsDscRunAsCredential = $SetupAccount
+                Version              = "1.0.0.0"     
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to disable a site collection scoped feature 
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPFeature EnableViewFormsLockDown
+            {
+                Name                 = "ViewFormPagesLockDown"
+                Url                  = "http://www.contoso.com"
+                FeatureScope         = "Site"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+                Version              = "1.0.0.0"     
+            }
+        }
+    }
 
 

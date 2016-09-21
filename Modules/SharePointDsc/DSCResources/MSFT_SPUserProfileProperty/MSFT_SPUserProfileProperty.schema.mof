@@ -1,48 +1,3 @@
-
-/*
-**Description**
-
-This resource will create a property in a user profile service application. 
-It creates, update or delete a property using the parameters that are passed in to it .
-
-The parameter DisplayOrder is absolute. ie.: If you want it to be placed as the 5th field of section Bla, which has propertyName value of 5000 then your DisplayOrder needs to be 5005
-If no DisplayOrder is added then SharePoint adds it as the last property of section X.
-
-Length is only relevant if Field type is "String".
-
-This Resource  doesn't currently support removing existing user profile properties
-
-**Example**
-SPUserProfileProperty WorkEmailProperty
-{
-    Name = "WorkEmail2"
-    Ensure = "Present"
-    UserProfileService = "User Profile Service Application"
-    DisplayName = "Work Email"
-    Type = "Email"
-    Description = "" #implementation isn't using it yet
-    PolicySetting = "Mandatory"
-    PrivacySetting = "Public"
-    MappingConnectionName = "contoso.com"
-    MappingPropertyName = "mail"
-    MappingDirection = "Import"
-    Length = 10
-    DisplayOrder =25 
-    IsEventLog =$false
-    IsVisibleOnEditor=$true
-    IsVisibleOnViewer = $true
-    IsUserEditable = $true
-    IsAlias = $false 
-    IsSearchable = $false 
-    TermStore = ""
-    TermGroup = ""
-    TermSet = "" 
-    UserOverridePrivacy = $false
-}
-
-*/
-
-
 [ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileProperty")]
 class MSFT_SPUserProfileProperty : OMI_BaseResource
 {
@@ -69,5 +24,5 @@ class MSFT_SPUserProfileProperty : OMI_BaseResource
     [Write, Description("The name of the term store to look up managed terms from")] string TermStore;
     [Write, Description("The name of the term store group that terms are in for this field")] string TermGroup;
     [Write, Description("The name of the term set to allow values to be selected from")] string TermSet;
-    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

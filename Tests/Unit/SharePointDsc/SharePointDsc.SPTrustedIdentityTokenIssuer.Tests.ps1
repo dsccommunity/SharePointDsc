@@ -20,19 +20,38 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
             Realm                        = "https://sharepoint.contoso.com"
             SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
             IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-            ClaimsMappings               = @( @{Name = "Email"; IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"}, @{Name = "Account name"; IncomingClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"; LocalClaimType = "http://schemas.xmlsoap.org/customSPGroupClaimType"} )
-            SigningCertificateThumbPrint = (Get-ChildItem -Path Cert:\LocalMachine\My| Select -First 1).Thumbprint
-            ClaimProviderName            = "ldapcp"
-            ProviderSignOutUri            = "https://adfs.contoso.com/adfs/ls/"
+            ClaimsMappings               = @(
+                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                    Name = "Email"
+                    IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                } -ClientOnly)
+                (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                    Name = "Role"
+                    IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                    LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                } -ClientOnly)
+            )
+            SigningCertificateThumbPrint = "Mock Thumbrpint"
+            ClaimProviderName            = "LDAPCP"
+            ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
             Ensure                       = "Present"
             Verbose                      = $true
         }
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }        
         
+        Mock Get-ChildItem {
+            return @(
+                @{
+                    Thumbprint = "Mock Thumbrpint"
+                }
+            )
+        }
+
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
@@ -167,6 +186,12 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
         $testParams.IdentifierClaim = "UnknownClaimType"
 
         Context "The IdentifierClaim does not match one of the claim types in ClaimsMappings" {
+             Mock New-SPClaimTypeMapping {
+                return [pscustomobject]@{
+                    MappedClaimType = $originalIdentifierClaim
+                }
+            }
+
             It "validation of IdentifierClaim fails in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
             }

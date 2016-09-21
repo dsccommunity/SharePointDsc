@@ -1,23 +1,13 @@
 ﻿.NAME
     SPWebAppSiteUseAndDeletion
 
-.SYNOPSIS
-
-This resource is responsible for controlling the Site Use and Deletion settings on a specific web application.
-You can enable or disable the Site Use and Deletion feature, specify the amount of days after which the alerts are being send, if sites have to be deleted automatically and if so after how many days this has to be done.
-
-.EXAMPLE
-
-    SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
-    {
-        Url                                      = "http://example.contoso.local"
-        SendUnusedSiteCollectionNotifications    = $true
-        UnusedSiteNotificationPeriod             = 90
-        AutomaticallyDeleteUnusedSiteCollections = $true
-        UnusedSiteNotificationsBeforeDeletion    = 24
-        PsDscRunAsCredential                     = $InstallAccount
-    }
-
+.DESCRIPTION
+    
+    This resource is responsible for controlling the Site Use and Deletion settings on a 
+    specific web application. You can enable or disable the Site Use and Deletion feature, 
+    specify the amount of days after which the alerts are being send, if sites have to be 
+    deleted automatically and if so after how many days this has to be done.
+    
 .PARAMETER Url
     Key - string
     The URL of the web application
@@ -40,6 +30,33 @@ You can enable or disable the Site Use and Deletion feature, specify the amount 
 
 .PARAMETER InstallAccount
     Write - string
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to apply site use and deletion settings to the specified web applicaiton
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWebAppSiteUseAndDeletion ConfigureSiteUseAndDeletion
+            {
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 24
+                PsDscRunAsCredential                     = $SetupAccount
+            }
+        }
+    }
 
 

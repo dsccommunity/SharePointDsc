@@ -45,7 +45,8 @@ function Get-TargetResource
 
     foreach ($member in $Members) 
     {
-        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) 
+        if (($member.ActAsSystemAccount -eq $true) `
+            -and ($member.PermissionLevel -ne "Full Control")) 
         {
             Write-Verbose -Message ("Members Parameter: You cannot specify ActAsSystemAccount " + `
                                    "with any other permission than Full Control")      
@@ -55,20 +56,25 @@ function Get-TargetResource
 
     foreach ($member in $MembersToInclude) 
     {
-        if (($member.ActAsSystemAccount -eq $true) -and ($member.PermissionLevel -ne "Full Control")) 
+        if (($member.ActAsSystemAccount -eq $true) `
+            -and ($member.PermissionLevel -ne "Full Control")) 
         {
-            Write-Verbose -Message ("MembersToInclude Parameter: You cannot specify ActAsSystemAccount " + `
-                                   "with any other permission than Full Control")        
+            Write-Verbose -Message ("MembersToInclude Parameter: You cannot specify " + `
+                                    "ActAsSystemAccount with any other permission than Full " + `
+                                    "Control")     
             return $null
         }
     }
     
     Write-Verbose -Message "Getting web app policy for $UserName at $WebAppUrl"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
 
-        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
+                                   -ErrorAction SilentlyContinue
 
         if ($null -eq $wa) 
         { 
@@ -220,7 +226,10 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
+
+
+    $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
     
     if ($null -eq $CurrentValues) 
     {
@@ -239,13 +248,18 @@ function Set-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                               -Arguments $PSBoundParameters `
+                                               -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl
-        if ($wa.UseClaimsAuthentication -eq $true) {
+        if ($wa.UseClaimsAuthentication -eq $true) 
+        {
             return "Claims"
-        } else {
+        } 
+        else 
+        {
             return "Native"
         }
     }
@@ -262,7 +276,8 @@ function Set-TargetResource
         }
         if ($MembersToInclude)
         {
-            Write-Verbose -Message "MembersToInclude property is set - setting membership list to ensure specified members are included"
+            Write-Verbose -Message ("MembersToInclude property is set - setting membership " + `
+                                    "list to ensure specified members are included")
             $membersToCheck = $MembersToInclude
         }
         foreach ($member in $membersToCheck) 
@@ -299,7 +314,8 @@ function Set-TargetResource
             switch ($difference.Status) 
             {
                 Additional {
-                    # Only remove users if the "Members" property was set instead of "MembersToInclude"
+                    # Only remove users if the "Members" property was set 
+                    # instead of "MembersToInclude"
                     if ($Members) 
                     {
                         $user = @{
@@ -334,11 +350,14 @@ function Set-TargetResource
 
     if ($MembersToExclude) 
     {
-        Write-Verbose -Message "MembersToExclude property is set - setting membership list to ensure specified members are not included"
+        Write-Verbose -Message ("MembersToExclude property is set - setting membership list " + `
+                                "to ensure specified members are not included")
 
         foreach ($member in $MembersToExclude) 
         {
-            $policy = $CurrentValues.Members | Where-Object { $_.UserName -eq $member.UserName -and $_.IdentityType -eq $identityType}
+            $policy = $CurrentValues.Members | Where-Object -FilterScript { 
+                $_.UserName -eq $member.UserName -and $_.IdentityType -eq $identityType
+            }
 
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
                 ($cacheAccounts.SuperReaderAccount -eq $member.Username)) 
@@ -346,7 +365,8 @@ function Set-TargetResource
                 throw "You cannot exclude the Cache accounts from the Web Application Policy"
             }
 
-            if ($null -ne $policy) {
+            if ($null -ne $policy) 
+            {
                 $user = @{
                     Type     = "Delete"
                     Username = $member.UserName
@@ -357,12 +377,15 @@ function Set-TargetResource
     }
     
     ## Perform changes
-    Invoke-SPDSCCommand -Credential $InstallAccount -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments @($PSBoundParameters,$PSScriptRoot,$changeUsers) `
+                        -ScriptBlock {
         $params      = $args[0]
         $scriptRoot  = $args[1]
         $changeUsers = $args[2]
 
-        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
+        $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
@@ -392,11 +415,15 @@ function Set-TargetResource
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
                         {
-                            $userToAdd = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSamAccountName).ToEncodedString()
+                            $principal = New-SPClaimsPrincipal -Identity $user.Username `
+                                                               -IdentityType WindowsSamAccountName
+                            $userToAdd = $principal.ToEncodedString()
                         } 
                         else 
                         {
-                            $userToAdd = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSecurityGroupName).ToEncodedString()
+                            $principal = New-SPClaimsPrincipal -Identity $user.Username `
+                                                               -IdentityType WindowsSecurityGroupName
+                            $userToAdd = $principal.ToEncodedString()
                         }    
                     }
                     $newPolicy = $wa.Policies.Add($userToAdd, $user.UserName)
@@ -431,19 +458,29 @@ function Set-TargetResource
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
                         {
-                            $userToChange = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSamAccountName).ToEncodedString()
+                            $principal = New-SPClaimsPrincipal -Identity $user.Username `
+                                                               -IdentityType WindowsSamAccountName
+                            $userToChange = $principal.ToEncodedString()
                         } 
                         else 
                         {
-                            $userToChange = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSecurityGroupName).ToEncodedString()
-                        }    
+                            $principal = New-SPClaimsPrincipal -Identity $user.Username `
+                                                               -IdentityType WindowsSecurityGroupName
+                            $userToChange = $principal.ToEncodedString()
+                        }
                     }
-                    $policy = $wa.Policies | Where-Object { $_.UserName -eq $userToChange }
+                    $policy = $wa.Policies | Where-Object -FilterScript { 
+                        $_.UserName -eq $userToChange 
+                    }
 
                     Write-Verbose -Message "User $($user.Username) exists, checking permissions"
-                    if ($user.ActAsSystemAccount -ne $policy.IsSystemUser) { $policy.IsSystemUser = $user.ActAsSystemAccount }
+                    if ($user.ActAsSystemAccount -ne $policy.IsSystemUser) 
+                    { 
+                        $policy.IsSystemUser = $user.ActAsSystemAccount 
+                    }
 
-                    $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name -DifferenceObject $user.PermissionLevel
+                    $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name `
+                                                  -DifferenceObject $user.PermissionLevel
                     if ($null -ne $polbinddiff) 
                     {
                         $policy.PolicyRoleBindings.RemoveAll()
@@ -476,18 +513,23 @@ function Set-TargetResource
                         $isUser = Test-SPDSCIsADUser -IdentityName $user.Username
                         if ($isUser -eq $true) 
                         {
-                            $userToDrop = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSamAccountName).ToEncodedString()
+                            $principal = New-SPClaimsPrincipal -Identity $user.Username `
+                                                               -IdentityType WindowsSamAccountName
+                            $userToDrop = $principal.ToEncodedString()
                         } 
                         else 
                         {
-                            $userToDrop = (New-SPClaimsPrincipal -Identity $user.Username -IdentityType WindowsSecurityGroupName).ToEncodedString()
+                            $principal = New-SPClaimsPrincipal -Identity $user.Username `
+                                                               -IdentityType WindowsSecurityGroupName
+                            $userToDrop = $principal.ToEncodedString()
                         }    
                     }
-                    Remove-SPDSCGenericObject -SourceCollection $wa.Policies -Target $userToDrop -ErrorAction SilentlyContinue
+                    Remove-SPDSCGenericObject -SourceCollection $wa.Policies `
+                                              -Target $userToDrop `
+                                              -ErrorAction SilentlyContinue
                 }
             }
         }
- 
         $wa.Update()
     }
 }
@@ -526,7 +568,10 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
     Write-Verbose -Message "Testing web app policy for '$WebAppUrl'"
-    Import-Module (Join-Path $PSScriptRoot "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1" -Resolve)
+
+    $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
+
     if ($null -eq $CurrentValues) 
     { 
         return $false 
@@ -544,13 +589,18 @@ function Test-TargetResource
     }
 
     # Determine the default identity type to use for entries that do not have it specified
-    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $defaultIdentityType = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                               -Arguments $PSBoundParameters `
+                                               -ScriptBlock {
         $params = $args[0]
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl
-        if ($wa.UseClaimsAuthentication -eq $true) {
+        if ($wa.UseClaimsAuthentication -eq $true) 
+        {
             return "Claims"
-        } else {
+        } 
+        else 
+        {
             return "Native"
         }
     }
@@ -567,7 +617,8 @@ function Test-TargetResource
         }
         if ($MembersToInclude)
         {
-            Write-Verbose -Message "MembersToInclude property is set - testing membership list to ensure specified members are included"
+            Write-Verbose -Message ("MembersToInclude property is set - testing membership " + `
+                                    "list to ensure specified members are included")
             $membersToCheck = $MembersToInclude
         }
         foreach ($member in $membersToCheck) 
@@ -616,7 +667,9 @@ function Test-TargetResource
         # If only checking members to include only differences or missing records count as a fail
         if ($MembersToInclude)
         {
-            if (($differences | Where-Object -FilterScript { $_.Status -eq "Different" -or $_.Status -eq "Missing" }).Count -eq 0) 
+            if (($differences | Where-Object -FilterScript { 
+                    $_.Status -eq "Different" -or $_.Status -eq "Missing" 
+                }).Count -eq 0) 
             { 
                 return $true 
             } 
@@ -632,7 +685,8 @@ function Test-TargetResource
     # membership list
     if ($MembersToExclude) 
     {
-        Write-Verbose "MembersToExclude property is set - checking for permissions that need to be removed"
+        Write-Verbose -Message ("MembersToExclude property is set - checking for permissions " + `
+                                "that need to be removed")
         foreach ($member in $MembersToExclude) 
         {
             if (($cacheAccounts.SuperUserAccount -eq $member.Username) -or `
@@ -663,7 +717,9 @@ function Get-SPDSCCacheAccountConfiguration()
         $InputParameters
     )
     
-    $cacheAccounts = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $InputParameters -ScriptBlock {
+    $cacheAccounts = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                         -Arguments $InputParameters `
+                                         -ScriptBlock {
         Write-Verbose -Message "Retrieving CacheAccounts"
         $params = $args[0]
 

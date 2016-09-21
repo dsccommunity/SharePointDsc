@@ -1,51 +1,17 @@
 ﻿.NAME
     SPWordAutomationServiceApp
 
-.SYNOPSIS 
-
-The resource is able to provision, unprovision and configure the Word Automation Service Application.
-All settings that you can configure on the Service Application administration page are configurable using this resource.
-
-Important:
-When you specify Ensure=Present, the Application Pool and DatabaseName parameters are required.
-When you specify Ensure=Absent, no other parameters are allowed (with the exception of Name, InstallAccount or PsDscRunAsCredential).
-
-.EXAMPLE
-
-Make sure the service application exists and has a specific configuration
-
-    SPWordAutomationServiceApp Word Automation 
-    { 
-        Name = "Word Automation Service Application" 
-        Ensure = "Present"
-        ApplicationPool = "SharePoint Web Services"
-        DatabaseName = "WordAutomation_DB"
-        DatabaseServer = "SQLServer"
-        SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
-        DisableEmbeddedFonts = $false
-        MaximumMemoryUsage = 100
-        RecycleThreshold = 100
-        DisableBinaryFileScan = $false
-        ConversionProcesses = 8
-        JobConversionFrequency = 15                         (in minutes)
-        NumberOfConversionsPerProcess = 12
-        TimeBeforeConversionIsMonitored = 5                 (in minutes)
-        MaximumConversionAttempts = 2
-        MaximumSyncConversionRequests = 25 
-        KeepAliveTimeout = 30                               (in seconds)
-        MaximumConversionTime = 300                         (in seconds)
-        PsDscRunAsCredential = $InstallAccount 
-    } 
-
-Make sure the service application does not exist and remove when it does
-
-    SPWordAutomationServiceApp Word Automation 
-    { 
-        Name = "Word Automation Service Application" 
-        Ensure = "Absent"
-        PsDscRunAsCredential = $InstallAccount 
-    } 
-
+.DESCRIPTION 
+    
+    The resource is able to provision, unprovision and configure the Word Automation Service 
+    Application. All settings that you can configure on the Service Application administration 
+    page are configurable using this resource.
+    
+    Important:
+    When you specify Ensure=Present, the Application Pool and DatabaseName parameters are 
+    required. When you specify Ensure=Absent, no other parameters are allowed (with the exception 
+    of Name, InstallAccount or PsDscRunAsCredential).
+    
 .PARAMETER Name
     Key - string
     THe name of the service application
@@ -122,6 +88,70 @@ Make sure the service application does not exist and remove when it does
 
 .PARAMETER InstallAccount
     Write - string
-    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example makes sure the service application exists and has a specific configuration
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWordAutomationServiceApp WordAutomation 
+            { 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+                PsDscRunAsCredential = $SetupAccount 
+            } 
+        }
+    }
+
+
+.EXAMPLE
+    This example removes a word automation service app
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWordAutomationServiceApp WordAutomation 
+            { 
+                Name = "Word Automation Service Application" 
+                Ensure = "Absent"
+                PsDscRunAsCredential = $SetupAccount 
+            }
+        }
+    }
 
 
