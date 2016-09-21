@@ -1,0 +1,44 @@
+﻿.NAME
+    SPStateServiceApp
+
+.SYNOPSIS
+
+This resource provisions an instance of the state service in to the local farm.
+The database specific parameters are only used during initial provisioning of the app, and will not change database settings beyond the initial deployment.
+
+.EXAMPLE
+
+    SPStateServiceApp StateServiceApp
+    {
+        Name                 = "State Service Application"
+        DatabaseName         = "SP_State"
+        Ensure               = "Present"
+        PsDscRunAsCredential = $InstallAccount
+    }
+
+.PARAMETER Name
+    Key - string
+    The name of the state service app
+
+.PARAMETER DatabaseCredentials
+    Write - String
+    The database credentials for accessing the database
+
+.PARAMETER DatabaseName
+    Required - string
+    The name of the database for the service app
+
+.PARAMETER DatabaseServer
+    Write - string
+    The name of the database server
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the service app should exist, absent if it should not
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5
+
+
