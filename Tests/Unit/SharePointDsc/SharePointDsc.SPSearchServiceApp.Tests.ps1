@@ -73,7 +73,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock Import-Module -MockWith {} -ParameterFilter { $_.Name -eq $ModuleName }
 
         # Test contexts
-        Context -Name "When no service applications exist in the current farm" {
+        Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -98,7 +98,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "When service applications exist in the current farm but the specific search app does not" {
+        Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -125,7 +125,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "When a service application exists and is configured correctly" {
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -154,7 +154,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "When a service application exists and the app pool is not configured correctly" {
+        Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -190,7 +190,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the default content access account does not match" {    
+        Context -Name "When the default content access account does not match" -Fixture {    
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -230,7 +230,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the default content access account does match" {    
+        Context -Name "When the default content access account does match" -Fixture {    
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -267,7 +267,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the search center URL does not match" {
+        Context -Name "When the search center URL does not match" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -324,7 +324,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the search center URL does match" {
+        Context -Name "When the search center URL does match" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -374,7 +374,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the service app exists but it shouldn't" {
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -411,7 +411,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the service app doesn't exist and shouldn't" {
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -431,7 +431,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the service app exists and is cloud enabled" {
+        Context -Name "When the service app exists and is cloud enabled" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
@@ -474,7 +474,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the service doesn't exist and it should be cloud enabled" {
+        Context -Name "When the service doesn't exist and it should be cloud enabled" -Fixture {
             $testParams = @{
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"

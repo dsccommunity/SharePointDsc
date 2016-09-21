@@ -62,7 +62,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "enables the feature in the set method" {
+            It "Should enable the feature in the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Enable-SPFeature
@@ -89,7 +89,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "enables the feature in the set method" {
+            It "Should enable the feature in the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Enable-SPFeature
@@ -116,7 +116,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "enables the feature in the set method" {
+            It "Should enable the feature in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Disable-SPFeature
             }
@@ -142,7 +142,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "enables the feature in the set method" {
+            It "Should enable the feature in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Disable-SPFeature
             }

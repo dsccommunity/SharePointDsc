@@ -1,43 +1,47 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPSecureStoreServiceApp"
 
-$ModuleName = "MSFT_SPSecureStoreServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Secure Store Service Application"
-            ApplicationPool = "SharePoint Search Services"
-            AuditingEnabled = $false
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
+        # Initialize tests
+        $mockPassword = ConvertTo-SecureString -String "passwprd" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                      -ArgumentList @("SqlUser", $mockPassword)
 
-        Mock -CommandName Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
-        Mock -CommandName Remove-SPServiceApplication {}   
+        # Mocks for all contexts   
+        Mock -CommandName Remove-SPServiceApplication -MockWith {}   
+        Mock -CommandName New-SPSecureStoreServiceApplication -MockWith { }
+        Mock -CommandName New-SPSecureStoreServiceApplicationProxy -MockWith { }
+        Mock -CommandName Set-SPSecureStoreServiceApplication -MockWith { }
 
-        Context -Name "When no service application exists in the current farm" {
+        # Test contexts
+        Context -Name "When no service application exists in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                AuditingEnabled = $false
+                Ensure = "Present"
+            }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPSecureStoreServiceApplication { }
-            Mock -CommandName New-SPSecureStoreServiceApplicationProxy { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
 
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -52,25 +56,26 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
 
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "Should create a new service application in the set method where InstallAccount is used" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPSecureStoreServiceApplication 
-            }
-            $testParams.Remove("InstallAccount")
-
             $testParams.Add("DatabaseName", "SP_SecureStore")
             It "Should create a new service application in the set method where parameters beyond the minimum required set" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPSecureStoreServiceApplication 
             }
-            $testParams.Remove("DatabaseName")
         }
 
-        Context -Name "When service applications exist in the current farm but the specific search app does not" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+        Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                AuditingEnabled = $false
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return @(@{
+                    TypeName = "Some other service app type"
+                }) 
+            }
         
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -81,15 +86,26 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
-        Context -Name "When a service application exists and is configured correctly" {
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                AuditingEnabled = $false
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 })
             }
@@ -103,20 +119,34 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
-        Context -Name "When a service application exists and the app pool is not configured correctly" {
+        Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                AuditingEnabled = $false
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    ApplicationPool = @{ 
+                        Name = "Wrong App Pool Name" 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 })
             }
-            Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock -CommandName Set-SPSecureStoreServiceApplication { }
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -130,20 +160,20 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
-        Context -Name "When specific windows credentials are to be used for the database" {
+        Context -Name "When specific windows credentials are to be used for the database" -Fixture {
             $testParams = @{
                 Name = "Secure Store Service Application"
                 ApplicationPool = "SharePoint Search Services"
                 AuditingEnabled = $false
                 DatabaseName = "SP_ManagedMetadata"
-                DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                DatabaseCredentials = $mockCredential
                 DatabaseAuthenticationType = "Windows"
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPSecureStoreServiceApplication { }
-            Mock -CommandName New-SPSecureStoreServiceApplicationProxy { }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
 
             It "allows valid Windows credentials can be passed" {
                 Set-TargetResource @testParams
@@ -162,20 +192,18 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
-        Context -Name "When specific SQL credentials are to be used for the database" {
+        Context -Name "When specific SQL credentials are to be used for the database" -Fixture {
             $testParams = @{
                 Name = "Secure Store Service Application"
                 ApplicationPool = "SharePoint Search Services"
                 AuditingEnabled = $false
                 DatabaseName = "SP_ManagedMetadata"
-                DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                DatabaseCredentials = $mockCredential
                 DatabaseAuthenticationType = "SQL"
                 Ensure = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPSecureStoreServiceApplication { }
-            Mock -CommandName New-SPSecureStoreServiceApplicationProxy { }
 
             It "allows valid SQL credentials can be passed" {
                 Set-TargetResource @testParams
@@ -194,22 +222,26 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
         
-        $testParams = @{
-            Name = "Secure Store Service Application"
-            ApplicationPool = "-"
-            AuditingEnabled = $false
-            Ensure = "Absent"
-        }
-        
-        Context -Name "When the service app exists but it shouldn't" {
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "-"
+                AuditingEnabled = $false
+                Ensure = "Absent"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 })
             }
@@ -228,8 +260,17 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
         
-        Context -Name "When the service app doesn't exist and shouldn't" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "-"
+                AuditingEnabled = $false
+                Ensure = "Absent"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -239,5 +280,7 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

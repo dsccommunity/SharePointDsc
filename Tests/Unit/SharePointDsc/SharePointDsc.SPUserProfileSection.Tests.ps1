@@ -1,28 +1,29 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
-    
-$ModuleName = "MSFT_SPUserProfileSection"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPUserProfileSection"
 
-Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
         $testParams= @{
            Name = "PersonalInformation"
            UserProfileService = "User Profile Service Application"
            DisplayName = "Personal Information"
            DisplayOrder = 5000 
         }
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue  
-        
         
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
@@ -34,7 +35,6 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
 "@ -ErrorAction SilentlyContinue
         }   
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         $coreProperty = @{ 
                             DisplayName = $testParams.DisplayName
@@ -71,7 +71,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
                         } -PassThru | Add-Member -MemberType ScriptMethod Add {
                             $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force
-        mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                             $Global:SPUPGetProfileSubtypeCalled = $true
                             return @{
@@ -90,11 +90,6 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
                         Url ="caURL"
                      })
         }  
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-  
         
         Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         
@@ -200,7 +195,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
         }
         
         Context -Name "When section exists and ensure equals Absent" {
-            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -229,7 +224,7 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
 
 
         Context -Name "When section exists and display name and display order are different" {
-            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member -MemberType ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -263,6 +258,8 @@ Describe "SPUserProfileSection - SharePoint Build $((Get-Item $SharePointCmdletM
                 $Global:UpsConfigManagerSetDisplayOrderBySectionNameCalled | Should be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope
 

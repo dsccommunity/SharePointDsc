@@ -19,7 +19,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Mocks for all contexts   
-        Mock -CommandName Get-SPSite {
+        Mock -CommandName Get-SPSite -MockWith {
             return @{
                 Url = $Identity
             }

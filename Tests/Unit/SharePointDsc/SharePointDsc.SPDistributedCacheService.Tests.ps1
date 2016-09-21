@@ -69,7 +69,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                    -PassThru  
                 }) 
         } }
-        Mock Stop-SPServiceInstance -MockWith { 
+        Mock -CommandName Stop-SPServiceInstance -MockWith { 
             $Global:SPDscDCacheOnline = $false 
         }
         Mock -CommandName Start-SPServiceInstance -MockWith { 

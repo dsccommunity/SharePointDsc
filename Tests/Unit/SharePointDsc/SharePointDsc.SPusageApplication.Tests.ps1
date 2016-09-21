@@ -1,53 +1,68 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPUsageApplication"
 
-$ModuleName = "MSFT_SPUsageApplication"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Usage Service App"
-            UsageLogCutTime = 60
-            UsageLogLocation = "L:\UsageLogs"
-            UsageLogMaxFileSizeKB = 1024
-            UsageLogMaxSpaceGB = 10
-            DatabaseName = "SP_Usage"
-            DatabaseServer = "sql.test.domain"
-            FailoverDatabaseServer = "anothersql.test.domain"
-            Ensure = "Present"
+        # Initialize tests
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("DOMAIN\username", $mockPassword)
+
+        # Mocks for all contexts  
+        Mock -CommandName New-SPUsageApplication -MockWith { }
+        Mock -CommandName Set-SPUsageService -MockWith { }
+        Mock -CommandName Get-SPUsageService -MockWith { 
+            return @{
+                UsageLogCutTime = $testParams.UsageLogCutTime
+                UsageLogDir = $testParams.UsageLogLocation
+                UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
+                UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
+            }
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-        Mock -CommandName New-SPUsageApplication { }
-        Mock -CommandName Set-SPUsageService { }
-        Mock -CommandName Get-SPUsageService { return @{
-            UsageLogCutTime = $testParams.UsageLogCutTime
-            UsageLogDir = $testParams.UsageLogLocation
-            UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
-            UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
-        }}
-        Mock -CommandName Remove-SPServiceApplication
-        Mock -CommandName Get-SPServiceApplicationProxy {
-            return (New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Provision {} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Online" -PassThru  | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
-        }
+        Mock -CommandName Remove-SPServiceApplication -MockWith {}
+        Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+            return (New-Object -TypeName "Object" | 
+                                    Add-Member -MemberType ScriptMethod `
+                                               -Name Provision `
+                                               -Value {} `
+                                               -PassThru | 
+                                    Add-Member -NotePropertyName Status `
+                                               -NotePropertyValue "Online" `
+                                               -PassThru  | 
+                                    Add-Member -NotePropertyName TypeName `
+                                               -NotePropertyValue "Usage and Health Data Collection Proxy" `
+                                               -PassThru)
+        } 
 
-        Context -Name "When no service applications exist in the current farm" {
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Usage Service App"
+                UsageLogCutTime = 60
+                UsageLogLocation = "L:\UsageLogs"
+                UsageLogMaxFileSizeKB = 1024
+                UsageLogMaxSpaceGB = 10
+                DatabaseName = "SP_Usage"
+                DatabaseServer = "sql.test.domain"
+                FailoverDatabaseServer = "anothersql.test.domain"
+                Ensure = "Present"
+            }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
 
@@ -65,13 +80,24 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
 
             It "Should create a new service application with custom database credentials" {
-                $testParams.Add("DatabaseCredentials", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+                $testParams.Add("DatabaseCredentials", $mockCredential)
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPUsageApplication
             }
         }
 
-        Context -Name "When service applications exist in the current farm but not the specific usage service app" {
+        Context -Name "When service applications exist in the current farm but not the specific usage service app" -Fixture {
+            $testParams = @{
+                Name = "Usage Service App"
+                UsageLogCutTime = 60
+                UsageLogLocation = "L:\UsageLogs"
+                UsageLogMaxFileSizeKB = 1024
+                UsageLogMaxSpaceGB = 10
+                DatabaseName = "SP_Usage"
+                DatabaseServer = "sql.test.domain"
+                FailoverDatabaseServer = "anothersql.test.domain"
+                Ensure = "Present"
+            }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
                 TypeName = "Some other service app type"
@@ -86,7 +112,19 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
 
-        Context -Name "When a service application exists and is configured correctly" {
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Usage Service App"
+                UsageLogCutTime = 60
+                UsageLogLocation = "L:\UsageLogs"
+                UsageLogMaxFileSizeKB = 1024
+                UsageLogMaxSpaceGB = 10
+                DatabaseName = "SP_Usage"
+                DatabaseServer = "sql.test.domain"
+                FailoverDatabaseServer = "anothersql.test.domain"
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
@@ -107,7 +145,19 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
 
-        Context -Name "When a service application exists and log path are not configured correctly" {
+        Context -Name "When a service application exists and log path are not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Usage Service App"
+                UsageLogCutTime = 60
+                UsageLogLocation = "L:\UsageLogs"
+                UsageLogMaxFileSizeKB = 1024
+                UsageLogMaxSpaceGB = 10
+                DatabaseName = "SP_Usage"
+                DatabaseServer = "sql.test.domain"
+                FailoverDatabaseServer = "anothersql.test.domain"
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
@@ -118,12 +168,15 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                     }
                 })
             }
-            Mock -CommandName Get-SPUsageService { return @{
-                UsageLogCutTime = $testParams.UsageLogCutTime
-                UsageLogDir = "C:\Wrong\Location"
-                UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
-                UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
-            }}
+
+            Mock -CommandName Get-SPUsageService -MockWith { 
+                return @{
+                    UsageLogCutTime = $testParams.UsageLogCutTime
+                    UsageLogDir = "C:\Wrong\Location"
+                    UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
+                    UsageLogMaxSpaceGB = $testParams.UsageLogMaxSpaceGB
+                }
+            }
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -131,12 +184,23 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
 
             It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Set-SPUsageService
             }
         }
 
-        Context -Name "When a service application exists and log size is not configured correctly" {
+        Context -Name "When a service application exists and log size is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Usage Service App"
+                UsageLogCutTime = 60
+                UsageLogLocation = "L:\UsageLogs"
+                UsageLogMaxFileSizeKB = 1024
+                UsageLogMaxSpaceGB = 10
+                DatabaseName = "SP_Usage"
+                DatabaseServer = "sql.test.domain"
+                FailoverDatabaseServer = "anothersql.test.domain"
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
@@ -147,12 +211,15 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
                     }
                 })
             }
-            Mock -CommandName Get-SPUsageService { return @{
-                UsageLogCutTime = $testParams.UsageLogCutTime
-                UsageLogDir = $testParams.UsageLogLocation
-                UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
-                UsageLogMaxSpaceGB = 1
-            }}
+
+            Mock -CommandName Get-SPUsageService -MockWith { 
+                return @{
+                    UsageLogCutTime = $testParams.UsageLogCutTime
+                    UsageLogDir = $testParams.UsageLogLocation
+                    UsageLogMaxFileSize = ($testParams.UsageLogMaxFileSizeKB * 1024)
+                    UsageLogMaxSpaceGB = 1
+                }
+            }
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -160,24 +227,25 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
 
             It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Set-SPUsageService
             }
         }
         
-        $testParams = @{
-            Name = "Test App"
-            Ensure = "Absent"
-        }
-        
-        Context -Name "When the service app exists but it shouldn't" {
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                Ensure = "Absent"
+            }
+            
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = "db"
-                        Server = @{ Name = "server" }
+                        Server = @{ 
+                            Name = "server" 
+                        }
                     }
                 })
             }
@@ -196,8 +264,15 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
         
-        Context -Name "When the service app doesn't exist and shouldn't" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                Ensure = "Absent"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -208,26 +283,39 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
         
-        $testParams = @{
-            Name = "Test App"
-            Ensure = "Present"
-        }
-        
-        Context -Name "The proxy for the service app is offline when it should be running" {
+        Context -Name "The proxy for the service app is offline when it should be running" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Usage and Health Data Collection Service Application"
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = "db"
-                        Server = @{ Name = "server" }
+                        Server = @{ 
+                            Name = "server" 
+                        }
                     }
                 })
             }
-            Mock -CommandName Get-SPServiceApplicationProxy {
-                return (New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Provision {$Global:SPDscUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return (New-Object -TypeName "Object" | 
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name Provision `
+                                       -Value { 
+                                           $Global:SPDscUSageAppProxyStarted = $true 
+                                        } -PassThru | 
+                            Add-Member -NotePropertyName Status `
+                                       -NotePropertyValue "Disabled" `
+                                       -PassThru | 
+                            Add-Member -NotePropertyName TypeName `
+                                       -NotePropertyValue "Usage and Health Data Collection Proxy" `
+                                       -PassThru)
             }    
-            $Global:SPDscUSageAppProxyStarted = $false
             
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -238,9 +326,12 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
             
             It "Should start the proxy in the set method" {
+                $Global:SPDscUSageAppProxyStarted = $false
                 Set-TargetResource @testParams
                 $Global:SPDscUSageAppProxyStarted | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

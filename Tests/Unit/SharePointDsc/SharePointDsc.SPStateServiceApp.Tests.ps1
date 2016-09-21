@@ -1,42 +1,48 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPStateServiceApp"
 
-$ModuleName = "MSFT_SPStateServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPStateServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "State Service App"
-            DatabaseName = "SP_StateService"
-            DatabaseServer = "SQL.test.domain"
-            DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-        Mock -CommandName New-SPStateServiceDatabase { return @{} }
-        Mock -CommandName New-SPStateServiceApplication { return @{} }
-        Mock -CommandName New-SPStateServiceApplicationProxy { return @{} }
-        Mock -CommandName Remove-SPServiceApplication { }
+        # Initialize tests
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("username", $mockPassword)
 
-        Context -Name "the service app doesn't exist and should" {
-            Mock -CommandName Get-SPStateServiceApplication { return $null }
+        # Mocks for all contexts   
+        Mock -CommandName New-SPStateServiceDatabase -MockWith { return @{} }
+        Mock -CommandName New-SPStateServiceApplication -MockWith { return @{} }
+        Mock -CommandName New-SPStateServiceApplicationProxy -MockWith { return @{} }
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+
+        # Test contexts
+        Context -Name "the service app doesn't exist and should" -Fixture {
+            $testParams = @{
+                Name = "State Service App"
+                DatabaseName = "SP_StateService"
+                DatabaseServer = "SQL.test.domain"
+                DatabaseCredentials = $mockCredential
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPStateServiceApplication -MockWith { 
+                return $null 
+            }
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -53,8 +59,20 @@ Describe "SPStateServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
 
-        Context -Name "the service app exists and should" {
-            Mock -CommandName Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
+        Context -Name "the service app exists and should" -Fixture {
+            $testParams = @{
+                Name = "State Service App"
+                DatabaseName = "SP_StateService"
+                DatabaseServer = "SQL.test.domain"
+                DatabaseCredentials = $mockCredential
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPStateServiceApplication -MockWith { 
+                return @{ 
+                    DisplayName = $testParams.Name 
+                } 
+            }
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
@@ -65,10 +83,18 @@ Describe "SPStateServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
         
-        $testParams.Ensure = "Absent"
-        
-        Context -Name "When the service app exists but it shouldn't" {
-            Mock -CommandName Get-SPStateServiceApplication { return @{ DisplayName = $testParams.Name } }
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "State Service App"
+                DatabaseName = "-"
+                Ensure = "Absent"
+            }
+            
+            Mock -CommandName Get-SPStateServiceApplication -MockWith { 
+                return @{ 
+                    DisplayName = $testParams.Name 
+                } 
+            }
             
             It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
@@ -84,8 +110,16 @@ Describe "SPStateServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
         
-        Context -Name "When the service app doesn't exist and shouldn't" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "State Service App"
+                DatabaseName = "-"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -95,5 +129,7 @@ Describe "SPStateServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

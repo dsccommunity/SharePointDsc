@@ -1,50 +1,52 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPServiceAppProxyGroup"
 
-$ModuleName = "MSFT_SPServiceAppProxyGroup"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-               
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        $ListofAllServiceAppProxies = @(
+        # Initialize tests
+        $listofAllServiceAppProxies = @(
             "Web 1 User Profile Service Application",
             "Web 1 MMS Service Application",
-            "State Service Application"
+            "State Service Application",
             "Web 2 User Profile Service Application"
         )
-        
-                
-        
-        Mock -CommandName Add-SPServiceApplicationProxyGroupMember {}
-        Mock -CommandName Remove-SPServiceApplicationProxyGroupMember {}
-        Mock -CommandName Get-SPServiceApplicationProxy { $ProxiesToReturn = @()
-                               foreach ($ServiceAppProxy in $ListofAllServiceAppProxies ){ 
-                                    $ProxiesToReturn +=  @{ DisplayName = $ServiceAppProxy }}
-                                    return $ProxiesToReturn  
-                               }
-            
-        Mock -CommandName New-SPServiceApplicationProxyGroup { return @{ Name = $TestParams.Name} }
 
-        Context -Name "ServiceAppProxies and ServiceAppProxiesToInclude parameters used simultaniously" {
+        # Mocks for all contexts   
+        Mock -CommandName Add-SPServiceApplicationProxyGroupMember -MockWith {}
+        Mock -CommandName Remove-SPServiceApplicationProxyGroupMember -MockWith {}
+        Mock -CommandName Get-SPServiceApplicationProxy -MockWith { 
+            $proxiesToReturn = @()
+            foreach ($ServiceAppProxy in $listofAllServiceAppProxies)
+            { 
+                $proxiesToReturn +=  @{ 
+                    DisplayName = $ServiceAppProxy 
+                }
+            }
+            return $proxiesToReturn  
+        }
+        Mock -CommandName New-SPServiceApplicationProxyGroup { 
+            return @{ 
+                Name = $TestParams.Name
+            } 
+        }
+
+        # Test contexts
+        Context -Name "ServiceAppProxies and ServiceAppProxiesToInclude parameters used simultaniously" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
@@ -65,7 +67,7 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             }
         }
 
-        Context -Name "None of the ServiceAppProxies, ServiceAppProxiesToInclude and ServiceAppProxiesToExclude parameters are used" {
+        Context -Name "None of the ServiceAppProxies, ServiceAppProxiesToInclude and ServiceAppProxiesToExclude parameters are used" -Fixture {
             $testParams = @{
                 Name              = "My Proxy Group"
                 Ensure            = "Present"
@@ -84,14 +86,16 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             }
         }
 
-        Context -Name "The Service Application Proxy Group does not exist and should" {
+        Context -Name "The Service Application Proxy Group does not exist and should" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
                 ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
             }
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { return $null }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                return $null 
+            }
             
             It "Should return ensure = absent  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Absent' 
@@ -107,13 +111,15 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             }
         }
         
-        Context -Name "The ServiceApplication Proxy Group does not exist, and should not" {
+        Context -Name "The ServiceApplication Proxy Group does not exist, and should not" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Absent"
             }
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { return $null }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                return $null 
+            }
             
             It "Should return ensure = absent  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Absent' 
@@ -122,26 +128,28 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true 
             }
-        
         }
         
-        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxies match" {
+        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxies match" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
                 ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
             }
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in $TestParams.ServiceAppProxies ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in $TestParams.ServiceAppProxies)
+                { 
+                    $proxiesToReturn += @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -152,25 +160,32 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             }
         }
  
-        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxies do not match" {
+        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxies do not match" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("State Service Application","Web 1 User Profile Service Application")
+                ServiceAppProxies = @(
+                    "State Service Application",
+                    "Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Web 2 User Profile Service Application")
+            $serviceAppProxiesConfigured = @(
+                "State Service Application",
+                "Web 2 User Profile Service Application")
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in $ServiceAppProxiesConfigured ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                { 
+                    $proxiesToReturn += @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -180,35 +195,40 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
                 Test-TargetResource @testParams | Should Be $false 
             }
             
-            It "Set method Adds the missing Service Proxy" {
+            It "Should add the missing and remove the extra service proxy in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Add-SPServiceApplicationProxyGroupMember -Exactly 1
-            }
-            
-            It "Set method Removes the extra Service Proxy" {
                 Assert-MockCalled Remove-SPServiceApplicationProxyGroupMember -Exactly 1
             }
         }
         
-        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude matches" {
+        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude matches" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToInclude = @("State Service Application","Web 1 User Profile Service Application")
+                ServiceAppProxiesToInclude = @(
+                    "State Service Application",
+                    "Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 User Profile Service Application","Web 1 MMS Service Application")
+            $serviceAppProxiesConfigured = @(
+                "State Service Application",
+                "Web 1 User Profile Service Application",
+                "Web 1 MMS Service Application")
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in $ServiceAppProxiesConfigured ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                { 
+                    $proxiesToReturn += @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -217,28 +237,34 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true 
             }
-            
         }
         
-        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude does not match" {
+        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToInclude does not match" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxiesToInclude = @("State Service Application","Web 1 User Profile Service Application")
+                ServiceAppProxiesToInclude = @(
+                    "State Service Application",
+                    "Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 MMS Service Application")
+            $serviceAppProxiesConfigured = @(
+                "State Service Application",
+                "Web 1 MMS Service Application")
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in $ServiceAppProxiesConfigured ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                { 
+                    $proxiesToReturn +=  @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -248,36 +274,37 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
                 Test-TargetResource @testParams | Should Be $false 
             }
             
-            It "Set method Adds the missing Service Proxy" {
+            It "Should add the missing and then not remove the extra service proxy in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Add-SPServiceApplicationProxyGroupMember -Exactly 1
-            }
-            
-            It "Set method does not remove extra Service Proxies" {
                 Assert-MockCalled Remove-SPServiceApplicationProxyGroupMember -Exactly 0
             }
-            
         }
         
-        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude matches" {
+        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude matches" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
                 ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 MMS Service Application")
+            $serviceAppProxiesConfigured = @(
+                "State Service Application",
+                "Web 1 MMS Service Application")
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in $ServiceAppProxiesConfigured ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                { 
+                    $proxiesToReturn += @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -286,28 +313,33 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
-            
         }
         
-        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude does not match" {
+        Context -Name "The Service Application Proxy Group exists and should, ServiceAppProxiesToExclude does not match" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
                 ServiceAppProxiesToExclude = @("Web 1 User Profile Service Application","Web 2 User Profile Service Application")
             }
             
-            $ServiceAppProxiesConfigured = @("State Service Application","Web 1 MMS Service Application","Web 1 User Profile Service Application")
+            $serviceAppProxiesConfigured = @(
+                "State Service Application",
+                "Web 1 MMS Service Application",
+                "Web 1 User Profile Service Application")
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in $ServiceAppProxiesConfigured ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
+                { 
+                    $proxiesToReturn +=  @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -317,34 +349,71 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "Set method removes the Service Proxy" {
+            It "Should remove the extra but not add a new service proxy in the set mthod" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplicationProxyGroupMember -Exactly 1
-            }
-            
-            It "Set method does not Add extra Service Proxies" {
                 Assert-MockCalled Add-SPServiceApplicationProxyGroupMember -Exactly 0
             }
-            
         }
         
-        Context -Name "Specified service application does not exist, ServiceAppProxies specified" {
+        Context -Name "Specified service application does not exist, ServiceAppProxies specified" -Fixture {
             $testParams = @{
                 Name              = "Shared Services"
                 Ensure            = "Present"
-                ServiceAppProxies = @("No Such Service Application","Web 1 User Profile Service Application")
+                ServiceAppProxies = @(
+                    "No Such Service Application",
+                    "Web 1 User Profile Service Application")
             }
             
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in "Web 1 User Profile Service Application" ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
+                { 
+                    $proxiesToReturn +=  @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
+            
+            It "Should return ensure = present  from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should be 'Present' 
+            }
+            
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false 
+            }
+            
+            It "Should throw an error from the set method" {
+               { Set-TargetResource @testParams } | Should throw "Invalid Service Application Proxy No Such Service Application"
+            }       
+        }
+        
+        Context -Name "Specified service application does not exist, ServiceAppProxiesToInclude specified" -Fixture {
+            $testParams = @{
+                Name              = "Shared Services"
+                Ensure            = "Present"
+                ServiceAppProxiesToInclude = @(
+                    "No Such Service Application",
+                    "Web 1 User Profile Service Application")
+            }
+            
+            Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
+                $proxiesToReturn = @()
+                foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
+                { 
+                    $proxiesToReturn += @{ 
+                        Name = $ServiceAppProxy 
+                    }
+                }
+                return @{ 
+                    Name = $testParams.Name
+                    Proxies = $proxiesToReturn
+                } 
+            }
             
             It "Should return ensure = present  from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be 'Present' 
@@ -358,39 +427,7 @@ Describe "SPServiceAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdle
                { Set-TargetResource @testParams }| Should throw "Invalid Service Application Proxy No Such Service Application"
             }       
         }
-        
-        Context -Name "Specified service application does not exist, ServiceAppProxiesToInclude specified" {
-            $testParams = @{
-                Name              = "Shared Services"
-                Ensure            = "Present"
-                ServiceAppProxiesToInclude = @("No Such Service Application","Web 1 User Profile Service Application")
-            }
-            
-            Mock -CommandName Get-SPServiceApplicationProxyGroup { 
-                            $ProxiesToReturn = @()
-                            foreach ($ServiceAppProxy in "Web 1 User Profile Service Application" ){ 
-                                $ProxiesToReturn +=  @{ Name = $ServiceAppProxy }
-                            }
-                            return @{ 
-                                Name = $testParams.Name
-                                Proxies = $ProxiesToReturn
-                            } 
-                        }
-            
-            It "Should return ensure = present  from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should be 'Present' 
-            }
-            
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false 
-            }
-            
-            It "Should throw an error from the set method" {
-               { Set-TargetResource @testParams }| Should throw "Invalid Service Application Proxy No Such Service Application"
-            }       
-        }
-        
-
-
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

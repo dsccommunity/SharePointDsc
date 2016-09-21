@@ -1,37 +1,37 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPShellAdmins"
 
-$ModuleName = "MSFT_SPShellAdmins"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name         = "ShellAdmins"
-            Members      = "contoso\user1", "contoso\user2"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        # Mocks for all contexts   
+        Mock -CommandName Add-SPShellAdmin -MockWith {}
+        Mock -CommandName Remove-SPShellAdmin -MockWith {}
 
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
+        # Test contexts
+        Context -Name "The server is not part of SharePoint farm" -Fixture {
+            $testParams = @{
+                Name         = "ShellAdmins"
+                Members      = "contoso\user1", "contoso\user2"
+            }
 
-        Context -Name "The server is not part of SharePoint farm" {
-            Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
+            Mock -CommandName Get-SPFarm -MockWith { 
+                throw "Unable to detect local farm" 
+            }
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Be $null
@@ -46,7 +46,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Members and MembersToInclude parameters used simultaniously - General permissions" {
+        Context -Name "Members and MembersToInclude parameters used simultaniously - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 Members          = "contoso\user1", "contoso\user2"
@@ -66,7 +66,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - General permissions" {
+        Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
             }
@@ -84,7 +84,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Members and MembersToInclude parameters used simultaniously - ContentDatabase permissions" {
+        Context -Name "Members and MembersToInclude parameters used simultaniously - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 ContentDatabases = @(
@@ -109,7 +109,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - ContentDatabase permissions" {
+        Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 ContentDatabases = @(
@@ -132,7 +132,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Specified content database does not exist - ContentDatabase permissions" {
+        Context -Name "Specified content database does not exist - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 ContentDatabases = @(
@@ -142,7 +142,8 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -154,6 +155,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     }
                 )
             }
+
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
@@ -167,22 +169,31 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "AllContentDatabases parameter is used and permissions do not match" {
+        Context -Name "AllContentDatabases parameter is used and permissions do not match" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 Members          = "contoso\user1", "contoso\user2"
                 AllContentDatabases = $true
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user3","contoso\user4" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user3","contoso\user4" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -194,8 +205,6 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     }
                 )
             }
-            Mock -CommandName Add-SPShellAdmin {}
-            Mock -CommandName Remove-SPShellAdmin {}
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -212,22 +221,31 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "AllContentDatabases parameter is used and permissions do not match" {
+        Context -Name "AllContentDatabases parameter is used and permissions do not match" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 Members          = "contoso\user1", "contoso\user2"
                 AllContentDatabases = $true
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -249,22 +267,24 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured Members do not match the actual members - General permissions" {
+        Context -Name "Configured Members do not match the actual members - General permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 Members      = "contoso\user1", "contoso\user2"
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
                     return @{}
-                } else {
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
                     return @{ UserName = "contoso\user3","contoso\user4" }
                 }
             }
-            Mock -CommandName Add-SPShellAdmin {}
-            Mock -CommandName Remove-SPShellAdmin {}
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -281,18 +301,24 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured Members match the actual members - General permissions" {
+        Context -Name "Configured Members match the actual members - General permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 Members      = "contoso\user1", "contoso\user2"
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
                     return @{}
-                } else {
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1", "contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1", "contoso\user2" 
+                    }
                 }
             }
 
@@ -305,7 +331,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured Members do not match the actual members - ContentDatabase permissions" {
+        Context -Name "Configured Members do not match the actual members - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
@@ -319,16 +345,25 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+            
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user3","contoso\user4" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user3","contoso\user4" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -340,8 +375,6 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     }
                 )
             }
-            Mock -CommandName Add-SPShellAdmin {}
-            Mock -CommandName Remove-SPShellAdmin {}
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -358,7 +391,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured Members match the actual members - ContentDatabase permissions" {
+        Context -Name "Configured Members match the actual members - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
@@ -372,16 +405,25 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -403,22 +445,26 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToInclude do not match the actual members - General permissions" {
+        Context -Name "Configured MembersToInclude do not match the actual members - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 MembersToInclude = "contoso\user1", "contoso\user2"
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
                     return @{}
-                } else {
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user3","contoso\user4" }
+                    return @{ 
+                        UserName = "contoso\user3","contoso\user4" 
+                    }
                 }
             }
-
-            Mock -CommandName Add-SPShellAdmin {}
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -434,18 +480,24 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToInclude match the actual members - General permissions" {
+        Context -Name "Configured MembersToInclude match the actual members - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 MembersToInclude = "contoso\user1", "contoso\user2"
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
                     return @{}
-                } else {
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1", "contoso\user2", "contoso\user3" }
+                    return @{ 
+                        UserName = "contoso\user1", "contoso\user2", "contoso\user3" 
+                    }
                 }
             }
 
@@ -458,7 +510,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToInclude do not match the actual members - ContentDatabase permissions" {
+        Context -Name "Configured MembersToInclude do not match the actual members - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
@@ -472,16 +524,25 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user3","contoso\user4" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user3","contoso\user4" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -493,8 +554,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     }
                 )
             }
-            Mock -CommandName Add-SPShellAdmin {}
-
+            
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
@@ -509,7 +569,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToInclude match the actual members - ContentDatabase permissions" {
+        Context -Name "Configured MembersToInclude match the actual members - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
@@ -523,16 +583,25 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user1","contoso\user2", "contoso\user3" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2", "contoso\user3" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -554,21 +623,26 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToExclude do not match the actual members - General permissions" {
+        Context -Name "Configured MembersToExclude do not match the actual members - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 MembersToExclude = "contoso\user1", "contoso\user2"
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
                     return @{}
-                } else {
+                }
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Remove-SPShellAdmin {}
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -584,18 +658,24 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToExclude match the actual members - General permissions" {
+        Context -Name "Configured MembersToExclude match the actual members - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 MembersToExclude = "contoso\user1", "contoso\user2"
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
                     return @{}
-                } else {
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user3", "contoso\user4" }
+                    return @{ 
+                        UserName = "contoso\user3", "contoso\user4" 
+                    }
                 }
             }
 
@@ -608,7 +688,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToExclude do not match the actual members - ContentDatabase permissions" {
+        Context -Name "Configured MembersToExclude do not match the actual members - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
@@ -622,16 +702,25 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -643,7 +732,6 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     }
                 )
             }
-            Mock -CommandName Remove-SPShellAdmin {}
 
             It "Should return null from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
@@ -659,7 +747,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
             }
         }
 
-        Context -Name "Configured MembersToExclude match the actual members - ContentDatabase permissions" {
+        Context -Name "Configured MembersToExclude match the actual members - ContentDatabase permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
                 ContentDatabases = @(
@@ -673,16 +761,24 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock -CommandName Get-SPShellAdmin {
-                if ($database) {
+
+            Mock -CommandName Get-SPShellAdmin -MockWith {
+                if ($database) 
+                {
                     # Database parameter used, return database permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
-                } else {
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
+                } 
+                else 
+                {
                     # Database parameter not used, return general permissions
-                    return @{ UserName = "contoso\user1","contoso\user2" }
+                    return @{ 
+                        UserName = "contoso\user1","contoso\user2" 
+                    }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase {
+            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -705,3 +801,5 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

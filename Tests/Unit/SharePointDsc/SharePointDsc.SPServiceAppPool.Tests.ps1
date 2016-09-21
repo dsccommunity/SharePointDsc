@@ -1,38 +1,41 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPServiceAppPool"
 
-$ModuleName = "MSFT_SPServiceAppPool"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPServiceAppPool - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Service pool"
-            ServiceAccount = "DEMO\svcSPServiceApps"
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        Mock -CommandName New-SPServiceApplicationPool { }
-        Mock -CommandName Set-SPServiceApplicationPool { }
-        Mock -CommandName Remove-SPServiceApplicationPool { }
+        # Initialize tests
 
-        Context -Name "A service account pool does not exist but should" {
-            Mock -CommandName Get-SPServiceApplicationPool { return $null }
+        # Mocks for all contexts   
+        Mock -CommandName New-SPServiceApplicationPool -MockWith { }
+        Mock -CommandName Set-SPServiceApplicationPool -MockWith { }
+        Mock -CommandName Remove-SPServiceApplicationPool -MockWith { }
+
+        # Test contexts
+        Context -Name "A service account pool does not exist but should" -Fixture {
+            $testParams = @{
+                Name = "Service pool"
+                ServiceAccount = "DEMO\svcSPServiceApps"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return $null 
+            }
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -44,16 +47,23 @@ Describe "SPServiceAppPool - SharePoint Build $((Get-Item $SharePointCmdletModul
 
             It "Should call the set method to create a new service account pool" {
                 Set-TargetResource @testParams
-                
                 Assert-MockCalled New-SPServiceApplicationPool 
             }
         }
 
-        Context -Name "A service account pool exists but has the wrong service account" {
-            Mock -CommandName Get-SPServiceApplicationPool { return @{
-                Name = $testParams.Name
-                ProcessAccountName = "WRONG\account"
-            }}
+        Context -Name "A service account pool exists but has the wrong service account" -Fixture {
+            $testParams = @{
+                Name = "Service pool"
+                ServiceAccount = "DEMO\svcSPServiceApps"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{
+                    Name = $testParams.Name
+                    ProcessAccountName = "WRONG\account"
+                }
+            }
 
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false                
@@ -66,11 +76,19 @@ Describe "SPServiceAppPool - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
-        Context -Name "A service account pool exists and uses the correct account" {
-            Mock -CommandName Get-SPServiceApplicationPool { return @{
-                Name = $testParams.Name
-                ProcessAccountName = $testParams.ServiceAccount
-            }}
+        Context -Name "A service account pool exists and uses the correct account" -Fixture {
+            $testParams = @{
+                Name = "Service pool"
+                ServiceAccount = "DEMO\svcSPServiceApps"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{
+                    Name = $testParams.Name
+                    ProcessAccountName = $testParams.ServiceAccount
+                }
+            }
 
             It "retrieves present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -81,17 +99,19 @@ Describe "SPServiceAppPool - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
         
-        $testParams = @{
-            Name = "Service pool"
-            ServiceAccount = "DEMO\svcSPServiceApps"
-            Ensure = "Absent"
-        }
-        
-        Context -Name "When the service app pool exists but it shouldn't" {
-            Mock -CommandName Get-SPServiceApplicationPool { return @{
-                Name = $testParams.Name
-                ProcessAccountName = $testParams.ServiceAccount
-            }}
+        Context -Name "When the service app pool exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Service pool"
+                ServiceAccount = "DEMO\svcSPServiceApps"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{
+                    Name = $testParams.Name
+                    ProcessAccountName = $testParams.ServiceAccount
+                }
+            }
             
             It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
@@ -107,8 +127,16 @@ Describe "SPServiceAppPool - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
         
-        Context -Name "When the service app pool doesn't exist and shouldn't" {
-            Mock -CommandName Get-SPServiceApplicationPool { return $null }
+        Context -Name "When the service app pool doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Service pool"
+                ServiceAccount = "DEMO\svcSPServiceApps"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return $null 
+            }
             
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -118,5 +146,7 @@ Describe "SPServiceAppPool - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

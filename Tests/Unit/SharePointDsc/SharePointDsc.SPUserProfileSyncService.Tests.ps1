@@ -37,7 +37,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
             DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
         }}
         Mock -CommandName Start-SPServiceInstance { }
-        Mock Stop-SPServiceInstance { }
+        Mock -CommandName Stop-SPServiceInstance { }
         Mock Restart-Service { }
         Mock -CommandName Add-SPDSCUserToLocalAdmin { } 
         Mock -CommandName Test-SPDSCUserIsLocalAdmin { return $false }
@@ -92,7 +92,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
         switch ($majorBuildNumber) {
             15 {
                 Context -Name "User profile sync service is not found locally" {
-                    Mock -CommandName Get-SPServiceInstance { return $null }
+                    Mock -CommandName Get-SPServiceInstance -MockWith { return $null }
 
                     It "Should return absent from the get method" {
                         $Global:SPDscUPACheck = $false
@@ -101,7 +101,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context -Name "User profile sync service is not running and should be" {
-                    Mock -CommandName Get-SPServiceInstance { if ($Global:SPDscUPACheck -eq $false) {
+                    Mock -CommandName Get-SPServiceInstance -MockWith { if ($Global:SPDscUPACheck -eq $false) {
                             $Global:SPDscUPACheck = $true
                             return @( @{ 
                                 Status = "Disabled"
@@ -160,7 +160,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context -Name "User profile sync service is running and should be" {
-                    Mock -CommandName Get-SPServiceInstance { return @( @{ 
+                    Mock -CommandName Get-SPServiceInstance -MockWith { return @( @{ 
                                 Status = "Online"
                                 ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                                 UserProfileApplicationGuid = [Guid]::NewGuid()
@@ -180,7 +180,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 $testParams.Ensure = "Absent"
 
                 Context -Name "User profile sync service is running and shouldn't be" {
-                    Mock -CommandName Get-SPServiceInstance { if ($Global:SPDscUPACheck -eq $false) {
+                    Mock -CommandName Get-SPServiceInstance -MockWith { if ($Global:SPDscUPACheck -eq $false) {
                             $Global:SPDscUPACheck = $true
                             return @( @{ 
                                 Status = "Online"
@@ -217,7 +217,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context -Name "User profile sync service is not running and shouldn't be" {
-                    Mock -CommandName Get-SPServiceInstance { return @( @{ 
+                    Mock -CommandName Get-SPServiceInstance -MockWith { return @( @{ 
                             Status = "Disabled"
                             ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                             UserProfileApplicationGuid = [Guid]::Empty
@@ -239,7 +239,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 $testParams.Ensure = "Present"
                 $testParams.Add("RunOnlyWhenWriteable", $true)
                 Context -Name "User profile sync service is not running and shouldn't be because the database is read only" {
-                    Mock -CommandName Get-SPServiceInstance { return @( @{ 
+                    Mock -CommandName Get-SPServiceInstance -MockWith { return @( @{ 
                             Status = "Disabled"
                             ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                             UserProfileApplicationGuid = [Guid]::Empty
@@ -266,7 +266,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context -Name "User profile sync service is running and shouldn't be because the database is read only" {
-                    Mock -CommandName Get-SPServiceInstance { return @( @{ 
+                    Mock -CommandName Get-SPServiceInstance -MockWith { return @( @{ 
                                 Status = "Online"
                                 ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                                 UserProfileApplicationGuid = [Guid]::NewGuid()

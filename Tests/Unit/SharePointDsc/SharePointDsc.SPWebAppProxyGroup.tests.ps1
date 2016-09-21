@@ -35,7 +35,7 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
                 ServiceAppProxyGroup      = "Web1ProxyGroup"
             }
 
-            Mock get-spwebapplication {}
+            Mock -CommandName Get-spwebapplication {}
 
             It "Should return null property from the get method" {
                 (Get-TargetResource @testParams).WebAppUrl | Should Be $null
@@ -53,7 +53,7 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
                 ServiceAppProxyGroup      = "Web1ProxyGroup"
             }
 
-            Mock get-spwebapplication { return @{ ServiceApplicationProxyGroup = @{ name = "Web1ProxyGroup"}} }
+            Mock -CommandName Get-spwebapplication { return @{ ServiceApplicationProxyGroup = @{ name = "Web1ProxyGroup"}} }
 
             It "Should return values from the get method" {
                 (Get-TargetResource @testParams).ServiceAppProxyGroup | Should Be "Web1ProxyGroup"
@@ -70,7 +70,7 @@ Describe "SPWebAppProxyGroup - SharePoint Build $((Get-Item $SharePointCmdletMod
                 ServiceAppProxyGroup      = "Default"
             }
 
-            Mock get-spwebapplication { return @{ ServiceApplicationProxyGroup = @{ name = "Web1ProxyGroup"}} }
+            Mock -CommandName Get-spwebapplication { return @{ ServiceApplicationProxyGroup = @{ name = "Web1ProxyGroup"}} }
             Mock -CommandName Set-spwebapplication { }
             
             It "Should return values from the get method" {
