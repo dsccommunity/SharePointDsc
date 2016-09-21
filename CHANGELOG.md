@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-### Unreleased
+### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
  * Fixed SPJoinFarm to not write output during successful farm join
  * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
