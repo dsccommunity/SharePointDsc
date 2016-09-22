@@ -19,7 +19,27 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
 		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"
-		Mock Get-SP-Server {return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPServer cmdlet
+		$wfe1 = New-Object -TypeName PSObject
+		Add-Member -InputObject $wfe1 -MemberType NoteProperty -Name Name -Value "SPWFE1"
+
+		$wfe2 = New-Object -TypeName PSObject
+		Add-Member -InputObject $wfe2 -MemberType NoteProperty -Name Name -Value "SPWFE2"
+
+		$servers = @($wfe1, $wfe2)
+
+		Mock Get-SPServer {return $servers} -ModuleName "SharePointDsc.Reverse"
+
+		#Mocking the Get-WmiObject cmdlet
+		$osInfo = New-Object -TypeName PSObject
+		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSName -Value "Windows Server 2012 R2"
+		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSArchitecture -Value "x64"
+		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name Version -Value "15.0.0.0"
+		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPDatabase cmdlet
+		Mock Get-SPDatabase { return $null } -ModuleName "SharePointDsc.Reverse"
 
         It "Read information about the Operating System" {
             Read-OperatingSystemVersion -ScriptBlock { return "value" } 
