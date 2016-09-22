@@ -79,7 +79,7 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		Mock Get-SPManagedAccount { return $managedAccount } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPSite cmdlet
-		$rootWeb = Noew-Object -TypeName PSObject
+		$rootWeb = New-Object -TypeName PSObject
 		Add-Member -InputObject $rootWeb -MemberType NoteProperty -Name Title -Value "Root Web"
 
 		$spSite = New-Object -TypeName PSObject		
