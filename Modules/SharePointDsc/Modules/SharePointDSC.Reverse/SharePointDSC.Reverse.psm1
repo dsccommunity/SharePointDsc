@@ -471,6 +471,8 @@ function Get-DSCFakeParameters{
 
 <## This function declares the xSPCreateFarm object required to create the config and admin database for the resulting SharePoint Farm. #>
 function Read-SPFarm{
+    $path = Get-Location
+    Write-Host $Path.Path -BackgroundColor DarkMagenta
     $module = Resolve-Path "..\..\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1"
     Import-Module $module
     $Script:dscConfigContent += "        SPCreateFarm CreateSPFarm{`r`n"
