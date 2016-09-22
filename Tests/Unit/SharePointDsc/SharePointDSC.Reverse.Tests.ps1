@@ -2,7 +2,7 @@
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
-
+Write-Host $SharePointCmdletModule -BackgroundColor DarkMagenta
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
