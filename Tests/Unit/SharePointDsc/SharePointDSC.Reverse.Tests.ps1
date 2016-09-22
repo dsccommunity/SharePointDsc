@@ -31,12 +31,12 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 
 		Mock Get-SPServer {return $servers} -ModuleName "SharePointDsc.Reverse"
 
-		#Mocking the Get-WmiObject cmdlet
+		# Mocking the Get-WmiObject cmdlet
 		$osInfo = New-Object -TypeName PSObject
 		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSName -Value "Windows Server 2012 R2"
 		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSArchitecture -Value "x64"
 		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name Version -Value "15.0.0.0"
-		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"
+		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"		
 
 		# Mocking the Get-SPDatabase cmdlet
 		Mock Get-SPDatabase { return $null } -ModuleName "SharePointDsc.Reverse"
@@ -61,7 +61,43 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 	}
 
     Context "Validate SharePoint Components Data Extract" {
+
+		# Mocking the Get-SPDSCInstalledProductVersion cmdlet
+		$productVersionInfo = New-Object -TypeName PSObject
+		Add-Member -InputObject $productVersionInfo -MemberType NoteProperty -Name FileMajorPart -Value "16"
+		Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPManagedPath cmdlet
+		Mock Get-SPManagedPath { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPManagedAccount cmdlet
+		Mock Get-SPManagedAccount { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPSite cmdlet
+		Mock Get-SPSite { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPServiceApplicationPool cmdlet
+		Mock Get-SPServiceApplicationPool { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPServiceInstance cmdlet
+		Mock Get-SPServiceInstance { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPDiagnosticConfig cmdlet
+		Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mocking the Get-SPUsageApplication
+		Mock Get-SPUsageApplication { return $null } -ModuleName "SharePointDsc.Reverse"
+
+		# Mokcing the Get-SPWebApplication cmdlet
 		Mock Get-SPWebApplication{return "null"} -ModuleName "SharePointDSC.Reverse"
+
+		# Mocking the Get-SPStateServiceApplication cmdlet
+		Mock Get-SPStateServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
+
+		# Mocking the Get-SPServiceApplication cmdlet
+		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
+
+		
 
         It "Read information about the farm's configuration" {
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")			
@@ -71,7 +107,7 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 
 		It "Read information about the Web Applications' configuration" {
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")	
-			Read-SPWebApplications -ScriptBlock { return "value" }
+			Read-SPWebApplications -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Paths' configuration" {
