@@ -19,6 +19,7 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
 		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"
+		Mock Get-SP-Server {return $null } -ModuleName "SharePointDsc.Reverse"
 
         It "Read information about the Operating System" {
             Read-OperatingSystemVersion -ScriptBlock { return "value" } 
