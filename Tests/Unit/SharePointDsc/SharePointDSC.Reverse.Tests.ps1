@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
-
+$Script:spFarmAccount = $null
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
@@ -68,13 +68,25 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPManagedPath cmdlet
-		Mock Get-SPManagedPath { return $null } -ModuleName "SharePointDsc.Reverse"
+		$managedPath = New-Object -TypeName PSObject
+		Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Name -Value "sites"
+		Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Type -Value "ExplicitInclusion"
+		Mock Get-SPManagedPath { return $managedPath } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPManagedAccount cmdlet
-		Mock Get-SPManagedAccount { return $null } -ModuleName "SharePointDsc.Reverse"
+		$managedAccount = New-Object -TypeName PSObject
+		Add-Member -InputObject $managedAccount -MemberType NoteProperty -Name UserName -Value "contoso\sp_farm"
+		Mock Get-SPManagedAccount { return $managedAccount } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPSite cmdlet
-		Mock Get-SPSite { return $null } -ModuleName "SharePointDsc.Reverse"
+		$rootWeb = Noew-Object -TypeName PSObject
+		Add-Member -InputObject $rootWeb -MemberType NoteProperty -Name Title -Value "Root Web"
+
+		$spSite = New-Object -TypeName PSObject		
+		Add-Member -InputObject $spSite -MemberType NoteProperty -Name RootWeb -Value $rootWeb
+		Add-Member -InputObject $spSite -MemberType NoteProperty -Name Url -Value "http://contoso.com"
+
+		Mock Get-SPSite { return $spSite } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPServiceApplicationPool cmdlet
 		Mock Get-SPServiceApplicationPool { return $null } -ModuleName "SharePointDsc.Reverse"
@@ -83,21 +95,24 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		Mock Get-SPServiceInstance { return $null } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPDiagnosticConfig cmdlet
+
 		Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
 
 		# Mocking the Get-SPUsageApplication
 		Mock Get-SPUsageApplication { return $null } -ModuleName "SharePointDsc.Reverse"
 
 		# Mokcing the Get-SPWebApplication cmdlet
-		Mock Get-SPWebApplication{return "null"} -ModuleName "SharePointDSC.Reverse"
+		$spWebApp = New-Object -TypeName PSObject		
+		Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
+		Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
+		$webApps = @($spwebApp)
+		Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDSC.Reverse"
 
 		# Mocking the Get-SPStateServiceApplication cmdlet
 		Mock Get-SPStateServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
 
 		# Mocking the Get-SPServiceApplication cmdlet
 		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
-
-		
 
         It "Read information about the farm's configuration" {
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")			
