@@ -487,7 +487,10 @@ function Read-SPFarm ($modulePath){
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
         $params.Remove("ServerRole")
     }
-
+    foreach($param in $params)
+    {
+        Write-Host $param -BackgroundColor DarkMagenta
+    }
     $results = Get-TargetResource @params
     $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module
     $Script:dscConfigContent += "        }`r`n"
