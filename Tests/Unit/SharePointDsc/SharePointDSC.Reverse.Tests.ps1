@@ -64,70 +64,84 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		Mock Get-SPWebApplication{return "null"} -ModuleName "SharePointDSC.Reverse"
 
         It "Read information about the farm's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
-			Write-Host $modulePath -BackgroundColor DarkMagenta
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")			
             Read-SPFarm -modulePath $modulePath -ScriptBlock { return "value" }
 			Set-ConfigurationSettings -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Web Applications' configuration" {
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")	
 			Read-SPWebApplications -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Paths' configuration" {
-			Read-SPManagedPaths -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1")	
+			Read-SPManagedPaths -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Accounts' configuration" {
-			Read-SPManagedAccounts -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1")
+			Read-SPManagedAccounts -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Service Application Pools' configuration" {
-			Read-SPServiceApplicationPools -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1")
+			Read-SPServiceApplicationPools -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Site Collections' configuration" {
-			Read-SPSites -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1")
+			Read-SPSites -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Service Instances' configuration" {
-			Read-SPServiceInstance -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceInstance\MSFT_SPServiceInstance.psm1")
+			Read-SPServiceInstance -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Diagnostic Logging's configuration" {
-			Read-DiagnosticLoggingSettings -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1")
+			Read-DiagnosticLoggingSettings -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Usage Service Application's configuration" {
-			Read-UsageServiceApplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1")
+			Read-UsageServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the State Service Application's configuration" {
-			Read-StateServiceApplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1")
+			Read-StateServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the User Profile Service Application's configuration" {
-			Read-UserProfileServiceapplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1")
+			Read-UserProfileServiceapplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Cache Accounts' configuration" {
-			Read-CacheAccounts -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1")
+			Read-CacheAccounts -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Secure Store Service Application's configuration" {
-			Read-SecureStoreServiceApplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1")
+			Read-SecureStoreServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the BCS Service Application's configuration" {
-			Read-BCSServiceApplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1")
+			Read-BCSServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Search Service Application's configuration" {
-			Read-SearchServiceApplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1")
+			Read-SearchServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Metadata Service Application's configuration" {
-			Read-ManagedMetadataServiceApplication -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
+			Read-ManagedMetadataServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
     }
 }
