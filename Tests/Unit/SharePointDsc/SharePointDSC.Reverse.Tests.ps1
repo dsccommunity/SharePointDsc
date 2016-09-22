@@ -2,7 +2,7 @@
 param(
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
-Write-Host $SharePointCmdletModule -BackgroundColor DarkMagenta
+
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
@@ -64,7 +64,9 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		Mock Get-SPWebApplication{return "null"} -ModuleName "SharePointDSC.Reverse"
 
         It "Read information about the farm's configuration" {
-            Read-SPFarm -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
+			Write-Host $modulePath -BackgroundColor DarkMagenta
+            Read-SPFarm -modulePath $modulePath -ScriptBlock { return "value" }
 			Set-ConfigurationSettings -ScriptBlock { return "value" }
         }
 
