@@ -489,7 +489,7 @@ function Read-SPFarm ($modulePath){
     }
     foreach($param in $params)
     {
-        Write-Host $param -BackgroundColor DarkMagenta
+        Write-Host ($param.Key + "=" + $param.Value) -BackgroundColor DarkMagenta
     }
     $results = Get-TargetResource @params
     $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module
