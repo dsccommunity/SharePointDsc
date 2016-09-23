@@ -432,7 +432,7 @@ function Get-DSCFakeParameters{
 
                 <# Loop once to figure out if there is a validate Set to use. #>
                 $attributes | ForEach-Object{
-                    if($_.TypeName.FullName -eq"ValidateSet")
+                    if($_.TypeName.FullName -eq "ValidateSet")
                     {
                         $params.Add($paramName.Replace("`$", ""), $_.PositionalArguments[0].ToString().Replace("`"", ""))
                         $found = $true
@@ -453,7 +453,14 @@ function Get-DSCFakeParameters{
                         }
                         elseif($_.TypeName.FullName -eq "System.Management.Automation.PSCredential")
                         {
-                            $params.Add($paramName.Replace("`$", ""), $Script:spFarmAccount)
+                            if($Script:spFarmAccount -ne $null)
+                            {
+                                $params.Add($paramName.Replace("`$", ""), $Script:spFarmAccount)
+                            }
+                            else {
+                                # This is to handle the Automated Tests.
+                                $params.Add($paramName.Replace("`$", ""), "contoso\sp_farm")
+                            }
                             $found = $true
                         }
                         elseif($_.TypeName.FullName -eq "System.Management.Automation.Boolean" -or $_.TypeName.FullName -eq "System.Boolean")
@@ -487,7 +494,7 @@ function Read-SPFarm ($modulePath){
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
         $params.Remove("ServerRole")
     }
-    $params.Keys | % { Write-Host "key = $_ , value = " + $params.Item($_) }
+    $params.Keys | % { Write-Host "key = $_ , value ="$params.Item($_) }
     $results = Get-TargetResource @params
     $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module
     $Script:dscConfigContent += "        }`r`n"
