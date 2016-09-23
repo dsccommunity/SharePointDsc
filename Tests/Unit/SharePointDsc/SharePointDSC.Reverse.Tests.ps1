@@ -118,8 +118,18 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		Mock Get-TargetResource { return $null } -ModuleName "SharePointDSC.Reverse"
 
         It "Read information about the farm's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")			
-            Read-SPFarm -modulePath $modulePath -ScriptBlock { return "value" }
+			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
+			$testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                Passphrase =  New-Object System.Management.Automation.PSCredential ("PASSPHRASEUSER", (ConvertTo-SecureString "MyFarmPassphrase" -AsPlainText -Force))
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+
+            Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
 			Set-ConfigurationSettings -ScriptBlock { return "value" }
         }
 

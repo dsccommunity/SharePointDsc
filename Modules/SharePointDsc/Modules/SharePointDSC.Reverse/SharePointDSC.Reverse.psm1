@@ -453,14 +453,7 @@ function Get-DSCFakeParameters{
                         }
                         elseif($_.TypeName.FullName -eq "System.Management.Automation.PSCredential")
                         {
-                            if($Script:spFarmAccount -ne $null)
-                            {
-                                $params.Add($paramName.Replace("`$", ""), $Script:spFarmAccount)
-                            }
-                            else {
-                                # This is to handle the Automated Tests.
-                                $params.Add($paramName.Replace("`$", ""), "contoso\sp_farm")
-                            }
+                            $params.Add($paramName.Replace("`$", ""), $Script:spFarmAccount)                            
                             $found = $true
                         }
                         elseif($_.TypeName.FullName -eq "System.Management.Automation.Boolean" -or $_.TypeName.FullName -eq "System.Boolean")
@@ -477,7 +470,7 @@ function Get-DSCFakeParameters{
 }
 
 <## This function declares the xSPCreateFarm object required to create the config and admin database for the resulting SharePoint Farm. #>
-function Read-SPFarm ($modulePath){
+function Read-SPFarm ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
@@ -488,7 +481,11 @@ function Read-SPFarm ($modulePath){
 
     Import-Module $module
     $Script:dscConfigContent += "        SPCreateFarm CreateSPFarm{`r`n"
-    $params = Get-DSCFakeParameters -FilePath $module
+
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }    
 
     <# If not SP2016, remove the server role param. #>
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
