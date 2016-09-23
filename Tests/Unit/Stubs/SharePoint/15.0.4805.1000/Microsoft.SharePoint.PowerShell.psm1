@@ -5909,15 +5909,6 @@ param(
  
  } 
 
- # Need to define mock structure for Get-TargetResource since the AppVeyor server is not a SharePoint box;
-function Get-TargetResource { 
-  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-param(
-    [Parameter(Mandatory=$true)]
-    [hashtable]
-    ${Params})
- } 
-
 
 function Grant-SPBusinessDataCatalogMetadataObject { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]

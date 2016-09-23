@@ -127,6 +127,7 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
                 AdminContentDatabaseName = "Admin_Content"
                 CentralAdministrationAuth = "Kerberos"
                 CentralAdministrationPort = 1234
+				InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             }
 
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
