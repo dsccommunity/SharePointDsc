@@ -114,9 +114,6 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 		# Mocking the Get-SPServiceApplication cmdlet
 		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
 
-		# Mocking the DSC Get-TargetResource cmdlet
-		Mock Get-TargetResource { return $null } -ModuleName "SharePointDSC.Reverse"
-
         It "Read information about the farm's configuration" {
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
 			$testParams = @{
