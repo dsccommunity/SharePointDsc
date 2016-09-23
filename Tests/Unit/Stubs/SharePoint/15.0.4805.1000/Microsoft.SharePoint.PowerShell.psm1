@@ -5913,8 +5913,8 @@ param(
 function Get-TargetResource { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
-    [Parameter(ParameterSetName='Params', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [object]
+    [Parameter(Mandatory=$true)]
+    [hashtable]
     ${Params})
  } 
 
