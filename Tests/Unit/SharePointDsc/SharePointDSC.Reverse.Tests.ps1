@@ -13,7 +13,9 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
 
 Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {	
-
+    Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
+    Mock Invoke-SPDSCCommand { return $null }
+	Mock New-PSSession { return $null }
     Context "Validate Environment Data Extract" {
         Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Reverse"
@@ -114,10 +116,6 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 
 		# Mocking the Get-SPServiceApplication cmdlet
 		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
-
-		Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
-        Mock Invoke-SPDSCCommand { return $null }
-		Mock New-PSSession { return $null }
 
         It "Read information about the farm's configuration" {
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
