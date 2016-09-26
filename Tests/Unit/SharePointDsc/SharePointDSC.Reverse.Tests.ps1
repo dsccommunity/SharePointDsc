@@ -31,7 +31,8 @@ Describe "SharePointDsc.Reverse" {
     Context "Validate Environment Data Extract" {       
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
-		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"
+		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"		
+		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"		
 
 		# Mocking the Get-SPServer cmdlet
 		$wfe1 = New-Object -TypeName PSObject
@@ -139,7 +140,7 @@ Describe "SharePointDsc.Reverse" {
 				InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             }
 
-			Import-Module $env:PSModulePath
+			Import-Module $env:modulePath
 			Mock Invoke-SPDSCCommand { 
             	return $null
         	}
