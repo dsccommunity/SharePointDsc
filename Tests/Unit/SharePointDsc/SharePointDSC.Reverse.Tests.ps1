@@ -6,15 +6,12 @@ param(
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
+$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
-$Script:spFarmAccount = $null
-$Global:RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-
-Import-Module (Join-Path $Global:RepoRoot "Modules\SharePointDsc") -Force
-Import-Module (Join-Path $Global:RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
 
 $ModuleName = "SharePointDSC.Reverse"
-
+Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\$ModuleName\$ModuleName.psm1") -Force
+$Script:spFarmAccount = $null
 Describe "SharePointDsc.Reverse" {	
     InModuleScope $ModuleName {
         $testParams = @{
@@ -31,13 +28,13 @@ Describe "SharePointDsc.Reverse" {
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-        
+        Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 	
 
     Context "Validate Environment Data Extract" {
-        Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
+        
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
