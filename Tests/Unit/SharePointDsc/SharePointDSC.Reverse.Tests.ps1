@@ -14,7 +14,7 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.
 
 $ModuleName = "SharePointDSC.Reverse"
 
-Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {	
+Describe "SharePointDsc.Reverse" {	
     InModuleScope $ModuleName {
         $testParams = @{
             Name = "SharePoint_Content_01"
