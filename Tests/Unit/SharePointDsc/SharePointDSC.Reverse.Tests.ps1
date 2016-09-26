@@ -117,6 +117,7 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 
 		Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Invoke-SPDSCCommand { return $null }
+		Mock New-PSSession { return $null }
 
         It "Read information about the farm's configuration" {
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
