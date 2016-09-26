@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 $Script:spFarmAccount = $null
 $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
