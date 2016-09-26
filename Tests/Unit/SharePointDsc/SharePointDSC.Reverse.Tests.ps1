@@ -32,10 +32,8 @@ Describe "SharePointDsc.Reverse" {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
-
-    Context "Validate Environment Data Extract" {
-        
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Reverse"
+    Context "Validate Environment Data Extract" {       
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
 		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"
