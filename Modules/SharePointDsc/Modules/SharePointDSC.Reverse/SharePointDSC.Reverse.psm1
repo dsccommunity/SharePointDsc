@@ -477,9 +477,9 @@ function Read-SPFarm ($modulePath, $params){
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
+        
     $Script:dscConfigContent += "        SPCreateFarm CreateSPFarm{`r`n"
 
     if($params -eq $null)
