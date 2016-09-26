@@ -12,10 +12,29 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
 
+$ModuleName = "SharePointDSC.Reverse"
+
 Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {	
-    Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
-    Mock Invoke-SPDSCCommand { return $null }
-	Mock New-PSSession { return $null }
+    InModuleScope $ModuleName {
+        $testParams = @{
+            Name = "SharePoint_Content_01"
+            DatabaseServer = "SQLSrv"
+            WebAppUrl = "http://sharepoint.contoso.com"
+            Enabled = $true
+            WarningSiteCount = 2000
+            MaximumSiteCount = 5000
+            Ensure = "Present"
+        }
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        
+        Mock Invoke-SPDSCCommand { 
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        }
+        
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+	
+
     Context "Validate Environment Data Extract" {
         Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Reverse"
@@ -208,5 +227,6 @@ Describe "SharePointDsc.Reverse - SharePoint Build $((Get-Item $SharePointCmdlet
 			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
 			Read-ManagedMetadataServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
+	}
     }
 }
