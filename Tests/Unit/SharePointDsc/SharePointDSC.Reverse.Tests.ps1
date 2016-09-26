@@ -28,7 +28,7 @@ Describe "SharePointDsc.Reverse" {
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue		
 
-    Context "Validate Environment Data Extract" {       
+    <#Context "Validate Environment Data Extract" {       
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
 		Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"		
@@ -71,7 +71,7 @@ Describe "SharePointDsc.Reverse" {
 		It "Read information about the required dependencies"{
 			Set-Imports -ScriptBlock { return "value" }
 		}
-	}
+	}#>
 
     Context "Validate SharePoint Components Data Extract" {
 
@@ -126,8 +126,9 @@ Describe "SharePointDsc.Reverse" {
 
 		# Mocking the Get-SPServiceApplication cmdlet
 		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
-
+		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"	
         It "Read information about the farm's configuration" {
+			Write-Host "Reading info about the Farm" -Backgroundcolor DarkMagenta
 			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
 			$testParams = @{
                 FarmConfigDatabaseName = "SP_Config"
@@ -139,17 +140,19 @@ Describe "SharePointDsc.Reverse" {
                 CentralAdministrationPort = 1234
 				InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             }
-
+			Write-Host ("Importing Module " + $ModuleName) -Backgroundcolor DarkMagenta
 			Import-Module $modulePath
 			Mock Invoke-SPDSCCommand { 
             	return $null
         	}
-
+			Mock New-PSSession{ return $null }
+			Write-Host "Calling Read-SPFarm" -Backgroundcolor DarkMagenta
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+			Write-Host "Calling Set-ConfigurationSettings" -Backgroundcolor DarkMagenta
 			Set-ConfigurationSettings -ScriptBlock { return "value" }
         }
 
-		It "Read information about the Web Applications' configuration" {
+		<#It "Read information about the Web Applications' configuration" {
 			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")	
 			Read-SPWebApplications -modulePath $modulePath -ScriptBlock { return "value" }
         }
@@ -222,7 +225,7 @@ Describe "SharePointDsc.Reverse" {
 		It "Read information about the Managed Metadata Service Application's configuration" {
 			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
 			Read-ManagedMetadataServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+        }#>
 	}
     }
 }
