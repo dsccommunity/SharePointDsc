@@ -147,7 +147,7 @@ Describe "SharePointDsc.Reverse" {
             	return $null
         	}
 			Mock New-PSSession{ return $null }
-			Mock Get-TargetResource{$return $null}
+			Mock Get-TargetResource{return $null}
 			Write-Host "Calling Read-SPFarm" -Backgroundcolor DarkMagenta
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
 			Write-Host "Calling Set-ConfigurationSettings" -Backgroundcolor DarkMagenta
