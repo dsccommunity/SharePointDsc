@@ -8,10 +8,10 @@ Set-StrictMode -Version latest
 
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 $Script:spFarmAccount = $null
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
+$Global:RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc") -Force
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
+Import-Module (Join-Path $Global:RepoRoot "Modules\SharePointDsc") -Force
+Import-Module (Join-Path $Global:RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Reverse\SharePointDsc.Reverse.psm1") -Force
 
 $ModuleName = "SharePointDSC.Reverse"
 
@@ -138,7 +138,7 @@ Describe "SharePointDsc.Reverse" {
 		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
 
         It "Read information about the farm's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
 			$testParams = @{
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "DatabaseServer\Instance"
@@ -155,77 +155,77 @@ Describe "SharePointDsc.Reverse" {
         }
 
 		It "Read information about the Web Applications' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")	
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")	
 			Read-SPWebApplications -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Paths' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1")	
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1")	
 			Read-SPManagedPaths -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Accounts' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1")
 			Read-SPManagedAccounts -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Service Application Pools' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1")
 			Read-SPServiceApplicationPools -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Site Collections' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1")
 			Read-SPSites -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Service Instances' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceInstance\MSFT_SPServiceInstance.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceInstance\MSFT_SPServiceInstance.psm1")
 			Read-SPServiceInstance -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Diagnostic Logging's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1")
 			Read-DiagnosticLoggingSettings -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Usage Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1")
 			Read-UsageServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the State Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1")
 			Read-StateServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the User Profile Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1")
 			Read-UserProfileServiceapplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Cache Accounts' configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1")
 			Read-CacheAccounts -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Secure Store Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1")
 			Read-SecureStoreServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the BCS Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1")
 			Read-BCSServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Search Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1")
 			Read-SearchServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
 		It "Read information about the Managed Metadata Service Application's configuration" {
-			$modulePath = (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
+			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
 			Read-ManagedMetadataServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
         }
 	}
