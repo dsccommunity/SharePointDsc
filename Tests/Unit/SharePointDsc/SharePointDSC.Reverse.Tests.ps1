@@ -127,6 +127,7 @@ Describe "SharePointDsc.Reverse" {
 		# Mocking the Get-SPServiceApplication cmdlet
 		Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
 		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"	
+
         It "Read information about the farm's configuration" {
 			Write-Host "Reading info about the Farm" -Backgroundcolor DarkMagenta
 			$modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
@@ -146,6 +147,7 @@ Describe "SharePointDsc.Reverse" {
             	return $null
         	}
 			Mock New-PSSession{ return $null }
+			Mock Get-TargetResource{$return $null}
 			Write-Host "Calling Read-SPFarm" -Backgroundcolor DarkMagenta
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
 			Write-Host "Calling Set-ConfigurationSettings" -Backgroundcolor DarkMagenta
