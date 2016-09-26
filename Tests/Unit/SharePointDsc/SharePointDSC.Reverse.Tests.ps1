@@ -23,15 +23,15 @@ Describe "SharePointDsc.Reverse" {
             MaximumSiteCount = 5000
             Ensure = "Present"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")        
         
-        Mock Invoke-SPDSCCommand { 
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+		
+	    Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
         Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-	
 
     Context "Validate Environment Data Extract" {
         
