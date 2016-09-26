@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
+$Global:RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 $Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "SharePointDSC.Reverse"
