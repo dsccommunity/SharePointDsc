@@ -26,29 +26,7 @@ Describe "SharePointDsc.Reverse" {
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")        
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-		
-	    Mock Invoke-SPDSCCommand { 
-            return $null
-        }
-        Mock New-PSSession {
-            [pscustomobject]@{
-            ComputerName      = $ComputerName[0]
-            Availability      = 'Available'
-            ComputerType      = 'RemoteMachine'
-            Id                = 1
-            Name              = 'Session1'
-            ConfigurationName = 'Microsoft.PowerShell'
-            PSTypeName        = 'System.Management.Automation.Runspaces.PSSession'
-            }
-        }
-        Mock Invoke-Command { & $Scriptblock }
-        Mock Get-CimInstance {
-            [pscustomobject]@{
-                CSName     = 'server'
-                PSTypeName = 'Microsoft.Management.Infrastructure.CimInstance#root/cimv2/Win32_OperatingSystem'
-            }
-        } -ParameterFilter {$ClassName -And $ClassName -ieq 'Win32_OperatingSystem'}
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue		
 
     Context "Validate Environment Data Extract" {       
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
@@ -160,6 +138,11 @@ Describe "SharePointDsc.Reverse" {
                 CentralAdministrationPort = 1234
 				InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             }
+
+			Import-Module $env:PSModulePath
+			Mock Invoke-SPDSCCommand { 
+            	return $null
+        	}
 
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
 			Set-ConfigurationSettings -ScriptBlock { return "value" }
