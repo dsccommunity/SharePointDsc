@@ -140,7 +140,7 @@ Describe "SharePointDsc.Reverse" {
 				InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             }
 
-			Import-Module $env:modulePath
+			Import-Module $modulePath
 			Mock Invoke-SPDSCCommand { 
             	return $null
         	}
