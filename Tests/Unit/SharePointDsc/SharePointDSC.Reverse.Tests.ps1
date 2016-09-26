@@ -71,7 +71,6 @@ Describe "SharePointDsc.Reverse" {
 		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSName -Value "Windows Server 2012 R2"
 		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSArchitecture -Value "x64"
 		Add-Member -InputObject $osInfo -MemberType NoteProperty -Name Version -Value "15.0.0.0"
-		Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"		
 
 		# Mocking the Get-SPDatabase cmdlet
 		Mock Get-SPDatabase { return $null } -ModuleName "SharePointDsc.Reverse"
