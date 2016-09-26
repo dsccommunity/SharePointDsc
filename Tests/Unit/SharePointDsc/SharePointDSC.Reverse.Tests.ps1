@@ -29,7 +29,7 @@ Describe "SharePointDsc.Reverse" {
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 		
 	    Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+            return $null
         }
         Mock New-PSSession {
             [pscustomobject]@{
