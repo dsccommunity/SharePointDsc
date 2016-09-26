@@ -31,9 +31,25 @@ Describe "SharePointDsc.Reverse" {
 	    Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-        Mock Invoke-Command { return $null } -ModuleName "SharePointDsc.Reverse"
-		$mockSession = Microsoft.PowerShell.Core\New-PSSession -ComputerName localhost -ErrorAction Stop
-        Mock New-PSSession { return $mockSession } -ModuleName "SharePointDsc.Reverse"
+        Mock New-PSSession {
+            [pscustomobject]@{
+            ComputerName      = $ComputerName[0]
+            Availability      = 'Available'
+            ComputerType      = 'RemoteMachine'
+            Id                = 1
+            Name              = 'Session1'
+            ConfigurationName = 'Microsoft.PowerShell'
+            PSTypeName        = 'System.Management.Automation.Runspaces.PSSession'
+            }
+        }
+        Mock Invoke-Command { & $Scriptblock }
+        Mock Get-CimInstance {
+            [pscustomobject]@{
+                CSName     = 'server'
+                PSTypeName = 'Microsoft.Management.Infrastructure.CimInstance#root/cimv2/Win32_OperatingSystem'
+            }
+        } -ParameterFilter {$ClassName -And $ClassName -ieq 'Win32_OperatingSystem'}
+
     Context "Validate Environment Data Extract" {       
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
