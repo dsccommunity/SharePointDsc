@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [string] $SharePointCmdletModule = "\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1"
 )
 
 $ErrorActionPreference = 'stop'
@@ -14,19 +14,13 @@ Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\$ModuleName\$M
 $Script:spFarmAccount = $null
 Describe "SharePointDsc.Reverse" {    
     InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "SharePoint_Content_01"
-            DatabaseServer = "SQLSrv"
-            WebAppUrl = "http://sharepoint.contoso.com"
-            Enabled = $true
-            WarningSiteCount = 2000
-            MaximumSiteCount = 5000
-            Ensure = "Present"
-        }
+        
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")        
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue        
+		$stubsPath = (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) ("Tests\Unit" + $Global:CurrentSharePointStubModule))
+		Write-Host $stubsPath -BackgroundColor DarkMagenta
+        Import-Module $stubsPath -WarningAction SilentlyContinue        
 
         Context "Validate Environment Data Extract" {       
             Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
