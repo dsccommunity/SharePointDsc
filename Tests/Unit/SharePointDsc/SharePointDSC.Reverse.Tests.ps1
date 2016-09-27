@@ -87,7 +87,7 @@ Describe "SharePointDsc.Reverse" {
             Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
             Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
             $webApps = @($spwebApp)
-            Mock Get-SPWebApplication{return $webApps}
+            Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDsc.Reverse"
 
             It "Read information about the farm's configuration" {
                 $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
@@ -120,7 +120,8 @@ Describe "SharePointDsc.Reverse" {
                     Ensure = "Present"
                 }
 
-                Import-Module $modulePath                    
+                Import-Module $modulePath        
+				Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDsc.Reverse"            
                 Mock Get-TargetResource{return $testParams}
 
                 Read-SPWebApplications -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
