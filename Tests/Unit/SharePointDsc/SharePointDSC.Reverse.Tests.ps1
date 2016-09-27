@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = "Tests\Unit\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1"
+    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
 )
 
 $ErrorActionPreference = 'stop'
@@ -17,15 +17,13 @@ Describe "SharePointDsc.Reverse" {
         
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")        
         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-		Write-Host $CurrentSharePointStubModule -BackgroundColor DarkMagenta
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue     
         Import-Module $CurrentSharePointStubModule -WarningAction SilentlyContinue        
 
         Context "Validate Environment Data Extract" {       
             Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
             Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
-            Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"        
-            Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"        
+            Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"       
 
             # Mocking the Get-SPServer cmdlet
             $wfe1 = New-Object -TypeName PSObject
@@ -74,13 +72,7 @@ Describe "SharePointDsc.Reverse" {
             Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
 
             Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
-
-            # Mokcing the Get-SPWebApplication cmdlet
-            $spWebApp = New-Object -TypeName PSObject        
-            Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
-            Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
-            $webApps = @($spwebApp)
-            Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDsc.Reverse"
+            Mock Get-SPWebApplication{return $null}
 
             It "Read information about the farm's configuration" {
                 $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
@@ -113,8 +105,7 @@ Describe "SharePointDsc.Reverse" {
                     Ensure = "Present"
                 }
 
-                Import-Module $modulePath        
-				Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDsc.Reverse"            
+                Import-Module $modulePath             
                 Mock Get-TargetResource{return $testParams}
 
                 Read-SPWebApplications -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
