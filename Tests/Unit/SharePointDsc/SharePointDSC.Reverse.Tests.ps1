@@ -23,8 +23,9 @@ Describe "SharePointDsc.Reverse" {
         Context "Validate Environment Data Extract" {       
             Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
             Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
-            Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"       
-
+            Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"
+            Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"  
+     
             # Mocking the Get-SPServer cmdlet
             $wfe1 = New-Object -TypeName PSObject
             Add-Member -InputObject $wfe1 -MemberType NoteProperty -Name Name -Value "SPWFE1"
