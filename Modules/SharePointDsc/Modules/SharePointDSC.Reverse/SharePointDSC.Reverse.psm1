@@ -10,8 +10,8 @@ $Script:dscConfigContent = ""
 
 <## This is the main function for this script. It acts as a call dispatcher, calling th various functions required in the proper order to get the full farm picture. #>
 function Orchestrator{    
-	$Script:spFarmAccount = Get-Credential -Message "Farm Account"
-	$Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
+    $Script:spFarmAccount = Get-Credential -Message "Farm Account"
+    $Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers
 
@@ -1035,19 +1035,19 @@ function Test-CommandExists
 
 function Get-SPReverseDSC()
 {
-	<## Call into our main function that is responsible for extracting all the information about our SharePoint farm. #>
-	Orchestrator
+    <## Call into our main function that is responsible for extracting all the information about our SharePoint farm. #>
+    Orchestrator
 
-	<## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
-	$OutputDSCPath = Read-Host "Output Folder for DSC Configuration"
+    <## Prompts the user to specify the FOLDER path where the resulting PowerShell DSC Configuration Script will be saved. #>
+    $OutputDSCPath = Read-Host "Output Folder for DSC Configuration"
 
-	<## Ensures the path we specify ends with a Slash, in order to make sure the resulting file path is properly structured. #>
-	if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
-	{
-		$OutputDSCPath += "\"
-	}
+    <## Ensures the path we specify ends with a Slash, in order to make sure the resulting file path is properly structured. #>
+    if(!$OutputDSCPath.EndsWith("\") -and !$OutputDSCPath.EndsWith("/"))
+    {
+        $OutputDSCPath += "\"
+    }
 
-	<## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
-	$OutputDSCPath += "SP-Farm.DSC.ps1"
-	$Script:dscConfigContent | Out-File $OutputDSCPath
+    <## Save the content of the resulting DSC Configuration file into a file at the specified path. #>
+    $OutputDSCPath += "SP-Farm.DSC.ps1"
+    $Script:dscConfigContent | Out-File $OutputDSCPath
 }
