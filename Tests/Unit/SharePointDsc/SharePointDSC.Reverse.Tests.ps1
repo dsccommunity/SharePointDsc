@@ -1,13 +1,13 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = "\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1"
+    [string] $SharePointCmdletModule = "Tests\Unit\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1"
 )
 
 $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $Global:RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:CurrentSharePointStubModule = $repoRoot + $SharePointCmdletModule 
 
 $ModuleName = "SharePointDSC.Reverse"
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\$ModuleName\$ModuleName.psm1") -Force
@@ -18,9 +18,8 @@ Describe "SharePointDsc.Reverse" {
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")        
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-		$stubsPath = (Join-Path ("Tests\Unit" + $Global:CurrentSharePointStubModule))
-		Write-Host $stubsPath -BackgroundColor DarkMagenta
-        Import-Module $stubsPath -WarningAction SilentlyContinue        
+		Write-Host $CurrentSharePointStubModule -BackgroundColor DarkMagenta
+        Import-Module $CurrentSharePointStubModule -WarningAction SilentlyContinue        
 
         Context "Validate Environment Data Extract" {       
             Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
