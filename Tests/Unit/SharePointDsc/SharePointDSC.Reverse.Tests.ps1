@@ -28,7 +28,7 @@ Describe "SharePointDsc.Reverse" {
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue        
 
-    <#Context "Validate Environment Data Extract" {       
+    Context "Validate Environment Data Extract" {       
         Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
         Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"        
@@ -71,7 +71,7 @@ Describe "SharePointDsc.Reverse" {
         It "Read information about the required dependencies"{
             Set-Imports -ScriptBlock { return "value" }
         }
-    }#>
+    }
 
     Context "Validate SharePoint Components Data Extract" {
 
@@ -143,10 +143,10 @@ Describe "SharePointDsc.Reverse" {
             }
             Write-Host ("Importing Module " + $ModuleName) -Backgroundcolor DarkMagenta
             Import-Module $modulePath
-            Mock Invoke-SPDSCCommand { 
-                return $null
-            }
-            Mock New-PSSession{ return $null }
+            #Mock Invoke-SPDSCCommand { 
+            #    return $null
+            #}
+            #Mock New-PSSession{ return $null }
             Mock Get-TargetResource{return $testParams}
             Write-Host "Calling Read-SPFarm" -Backgroundcolor DarkMagenta
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
