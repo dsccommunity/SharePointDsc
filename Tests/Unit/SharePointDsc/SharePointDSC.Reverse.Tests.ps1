@@ -129,7 +129,6 @@ Describe "SharePointDsc.Reverse" {
         Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
 
         It "Read information about the farm's configuration" {
-            Write-Host "Reading info about the Farm" -Backgroundcolor DarkMagenta
             $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
             $testParams = @{
                 FarmConfigDatabaseName = "SP_Config"
@@ -141,25 +140,32 @@ Describe "SharePointDsc.Reverse" {
                 CentralAdministrationPort = 1234
                 InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             }
-            Write-Host ("Importing Module " + $ModuleName) -Backgroundcolor DarkMagenta
             Import-Module $modulePath
-            #Mock Invoke-SPDSCCommand { 
-            #    return $null
-            #}
-            #Mock New-PSSession{ return $null }
             Mock Get-TargetResource{return $testParams}
-            Write-Host "Calling Read-SPFarm" -Backgroundcolor DarkMagenta
+            
             Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
-            Write-Host "Calling Set-ConfigurationSettings" -Backgroundcolor DarkMagenta
+            
             Set-ConfigurationSettings -ScriptBlock { return "value" }
         }
         
-        <#It "Read information about the Web Applications' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")    
+        It "Read information about the Web Applications' configuration" {
+            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")
+            $testParams = @{
+            	Name = "SharePoint Sites"
+            	ApplicationPool = "SharePoint Web Apps"
+            	ApplicationPoolAccount = "DEMO\ServiceAccount"
+            	Url = "http://sites.sharepoint.com"
+            	AuthenticationMethod = "NTLM"
+            	Ensure = "Present"
+            }
+
+			Import-Module $modulePath
+            Mock Get-TargetResource{return $testParams}
+
             Read-SPWebApplications -modulePath $modulePath -ScriptBlock { return "value" }
         }
 
-        It "Read information about the Managed Paths' configuration" {
+        <#It "Read information about the Managed Paths' configuration" {
             $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1")    
             Read-SPManagedPaths -modulePath $modulePath -ScriptBlock { return "value" }
         }
