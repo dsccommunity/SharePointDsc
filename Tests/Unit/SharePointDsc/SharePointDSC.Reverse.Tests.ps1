@@ -74,6 +74,12 @@ Describe "SharePointDsc.Reverse" {
         }
 
         Context "Validate SharePoint Components Data Extract" {       
+
+			# Mocking the Get-SPDSCInstalledProductVersion cmdlet
+            $productVersionInfo = New-Object -TypeName PSObject
+            Add-Member -InputObject $productVersionInfo -MemberType NoteProperty -Name FileMajorPart -Value "16"
+            Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
+
             Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
 
             It "Read information about the farm's configuration" {
@@ -114,7 +120,7 @@ Describe "SharePointDsc.Reverse" {
                 Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
                 Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
                 $webApps = @($spwebApp)
-                Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDSC.Reverse"
+                Mock Get-SPWebApplication{return $webApps}
                 Mock Get-TargetResource{return $testParams}
 
                 Read-SPWebApplications -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
