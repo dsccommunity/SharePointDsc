@@ -491,26 +491,28 @@ function Read-SPFarm ($modulePath, $params){
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) {
         $params.Remove("ServerRole")
     }
-    $params.Keys | % { Write-Host "key = $_ , value ="$params.Item($_) }
     $results = Get-TargetResource @params
     $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module
     $Script:dscConfigContent += "        }`r`n"
 }
 
 <## This function obtains a reference to every Web Application in the farm and declares their properties (i.e. Port, Associated IIS Application Pool, etc.). #>
-function Read-SPWebApplications ($modulePath){
+function Read-SPWebApplications ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1"
-    }
-
-    Import-Module $module
+        Import-Module $module
+    }    
 
     $spWebApplications = Get-SPWebApplication | Sort-Object -Property Name
-    $params = Get-DSCFakeParameters -FilePath $module
+
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
     
     foreach($spWebApp in $spWebApplications)
     {
@@ -526,17 +528,22 @@ function Read-SPWebApplications ($modulePath){
 }
 
 <## This function loops through every IIS Application Pool that are associated with the various existing Service Applications in the SharePoint farm. ##>
-function Read-SPServiceApplicationPools ($modulePath){
+function Read-SPServiceApplicationPools ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1"
+        Import-Module $module
     }
-    Import-Module $module
+    
     $spServiceAppPools = Get-SPServiceApplicationPool | Sort-Object -Property Name
-    $params = Get-DSCFakeParameters -FilePath $module
+
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     foreach($spServiceAppPool in $spServiceAppPools)
     {
@@ -550,19 +557,22 @@ function Read-SPServiceApplicationPools ($modulePath){
 }
 
 <## This function retrieves a list of all site collections, no matter what Web Application they belong to. The Url attribute helps the xSharePoint DSC Resource determine what Web Application they belong to. #>
-function Read-SPSites ($modulePath){
+function Read-SPSites ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1"
-    }
-
-    Import-Module $module
+        Import-Module $module
+    }    
     $spSites = Get-SPSite -Limit All
 
-    $params = Get-DSCFakeParameters -FilePath $module
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
+
     $siteGuid = $null
     $siteTitle = $null
     foreach($spsite in $spSites)
@@ -583,20 +593,22 @@ function Read-SPSites ($modulePath){
 }
 
 <## This function generates a list of all Managed Paths, no matter what their associated Web Application is. The xSharePoint DSC Resource uses the WebAppUrl attribute to identify what Web Applicaton they belong to. #>
-function Read-SPManagedPaths ($modulePath){
+function Read-SPManagedPaths ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1"
-    }
-
-    Import-Module $module
+        Import-Module $module
+    }   
 
     $spWebApps = Get-SPWebApplication
 
-    $params = Get-DSCFakeParameters -FilePath $module
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
     foreach($spWebApp in $spWebApps)
     {
         $spManagedPaths = Get-SPManagedPath -WebApplication $spWebApp.Url | Sort-Object -Property Name
@@ -650,19 +662,23 @@ function Read-SPManagedPaths ($modulePath){
 }
 
 <## This function retrieves all Managed Accounts in the SharePoint Farm. The Account attribute sets the associated credential variable (each managed account is declared as a variable and the user is prompted to Manually enter the credentials when first executing the script. See function "Set-ObtainRequiredCredentials" for more details on how these variales are set. #>
-function Read-SPManagedAccounts ($modulePath){
+function Read-SPManagedAccounts ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1"
-    }
-
-    Import-Module $module
+        Import-Module $module
+    }    
 
     $managedAccounts = Get-SPManagedAccount
-    $params = Get-DSCFakeParameters -FilePath $module
+
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
+
     foreach($managedAccount in $managedAccounts)
     {
         $Script:dscConfigContent += "        SPManagedAccount " + (Check-Credentials $managedAccount.Username).Replace("$","") + "`r`n"
@@ -674,19 +690,22 @@ function Read-SPManagedAccounts ($modulePath){
 }
 
 <## This function retrieves all Services in the SharePoint farm. It does not care if the service is enabled or not. It lists them all, and simply sets the "Ensure" attribute of those that are disabled to "Absent". #>
-function Read-SPServiceInstance ($modulePath){
+function Read-SPServiceInstance ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPServiceInstance\MSFT_SPServiceInstance.psm1"
-    }
-
-    Import-Module $module
+        Import-Module $module
+    }    
 
     $serviceInstances = Get-SPServiceInstance | Where{$_.Server.Name -eq $Server} | Sort-Object -Property TypeName
-    $params = Get-DSCFakeParameters -FilePath $module
+
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     foreach($serviceInstance in $serviceInstances)
     {
@@ -719,17 +738,20 @@ function Read-SPServiceInstance ($modulePath){
 }
 
 <## This function retrieves all settings related to Diagnostic Logging (ULS logs) on the SharePoint farm. #>
-function Read-DiagnosticLoggingSettings ($modulePath){
+function Read-DiagnosticLoggingSettings ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+   
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
     $diagConfig = Get-SPDiagnosticConfig    
 
     $Script:dscConfigContent += "        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings`r`n"
@@ -740,17 +762,19 @@ function Read-DiagnosticLoggingSettings ($modulePath){
 }
 
 <## This function retrieves all settings related to the SharePoint Usage Service Application, assuming it exists. #>
-function Read-UsageServiceApplication ($modulePath){
+function Read-UsageServiceApplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $usageApplication = Get-SPUsageApplication
     if($usageApplication.Length -gt 0)
@@ -764,17 +788,20 @@ function Read-UsageServiceApplication ($modulePath){
 }
 
 <## This function retrieves settings associated with the State Service Application, assuming it exists. #>
-function Read-StateServiceApplication ($modulePath){
+function Read-StateServiceApplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $stateApplications = Get-SPStateServiceApplication
     foreach($stateApp in $stateApplications)
@@ -792,17 +819,20 @@ function Read-StateServiceApplication ($modulePath){
 }
 
 <## This function retrieves information about all the "Super" accounts (Super Reader & Super User) used for caching. #>
-function Read-CacheAccounts ($modulePath){
+function Read-CacheAccounts ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $webApps = Get-SPWebApplication
 
@@ -823,17 +853,20 @@ function Read-CacheAccounts ($modulePath){
 }
 
 <## This function retrieves settings related to the User Profile Service Application. #>
-function Read-UserProfileServiceapplication ($modulePath){
+function Read-UserProfileServiceapplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $ups = Get-SPServiceApplication | Where{$_.TypeName -eq "User Profile Service Application"}
 
@@ -864,17 +897,20 @@ function Read-UserProfileServiceapplication ($modulePath){
 
 <## This function retrieves all settings related to the Secure Store Service Application. Currently this function makes a direct call to the Secure Store database on the farm's SQL server to retrieve information about the logging details. There are currently no publicly available hooks in the SharePoint/Office Server Object Model that allow us to do it. This forces the user executing this reverse DSC script to have to install the SQL Server Client components on the server on which they execute the script, which is not a "best practice". #>
 <# TODO: Change the logic to extract information about the logging from being a direct SQL call to something that uses the Object Model. #>
-function Read-SecureStoreServiceApplication ($modulePath){
+function Read-SecureStoreServiceApplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $ssa = Get-SPServiceApplication | Where{$_.TypeName -eq "Secure Store Service Application"}
     for($i = 0; $i -lt $ssa.Length; $i++)
@@ -893,17 +929,20 @@ function Read-SecureStoreServiceApplication ($modulePath){
 }
 
 <## This function retrieves settings related to the Managed Metadata Service Application. #>
-function Read-ManagedMetadataServiceApplication ($modulePath){
+function Read-ManagedMetadataServiceApplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $mms = Get-SPServiceApplication | Where{$_.TypeName -eq "Managed Metadata Service"}
     if (Get-Command "Get-SPMetadataServiceApplication" -errorAction SilentlyContinue)
@@ -924,17 +963,20 @@ function Read-ManagedMetadataServiceApplication ($modulePath){
 }
 
 <## This function retrieves settings related to the Business Connectivity Service Application. #>
-function Read-BCSServiceApplication ($modulePath){
+function Read-BCSServiceApplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1"
+        Import-Module $module
     }
-
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $bcsa = Get-SPServiceApplication | Where{$_.TypeName -eq "Business Data Connectivity Service Application"}
     
@@ -953,17 +995,20 @@ function Read-BCSServiceApplication ($modulePath){
 }
 
 <## This function retrieves settings related to the Search Service Application. #>
-function Read-SearchServiceApplication ($modulePath){
+function Read-SearchServiceApplication ($modulePath, $params){
     if($modulePath -ne $null)
     {
         $module = Resolve-Path $modulePath
     }
     else {
         $module = Resolve-Path "..\..\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1"
-    }
+        Import-Module $module
+    }    
     
-    Import-Module $module
-    $params = Get-DSCFakeParameters -FilePath $module
+    if($params -eq $null)
+    {
+        $params = Get-DSCFakeParameters -FilePath $module
+    }
 
     $searchSA = Get-SPServiceApplication | Where{$_.TypeName -eq "Search Service Application"}
     

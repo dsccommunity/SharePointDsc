@@ -28,212 +28,356 @@ Describe "SharePointDsc.Reverse" {
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue        
 
-    Context "Validate Environment Data Extract" {       
-        Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
-        Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
-        Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"        
-        Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"        
+        Context "Validate Environment Data Extract" {       
+            Mock Get-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
+            Mock Add-PSSnapin { return $null } -ModuleName "SharePointDsc.Reverse"
+            Mock Get-Credential { return $null } -ModuleName "SharePointDsc.Reverse"        
+            Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"        
 
-        # Mocking the Get-SPServer cmdlet
-        $wfe1 = New-Object -TypeName PSObject
-        Add-Member -InputObject $wfe1 -MemberType NoteProperty -Name Name -Value "SPWFE1"
+            # Mocking the Get-SPServer cmdlet
+            $wfe1 = New-Object -TypeName PSObject
+            Add-Member -InputObject $wfe1 -MemberType NoteProperty -Name Name -Value "SPWFE1"
 
-        $wfe2 = New-Object -TypeName PSObject
-        Add-Member -InputObject $wfe2 -MemberType NoteProperty -Name Name -Value "SPWFE2"
+            $wfe2 = New-Object -TypeName PSObject
+            Add-Member -InputObject $wfe2 -MemberType NoteProperty -Name Name -Value "SPWFE2"
 
-        $servers = @($wfe1, $wfe2)
+            $servers = @($wfe1, $wfe2)
 
-        Mock Get-SPServer {return $servers} -ModuleName "SharePointDsc.Reverse"
+            Mock Get-SPServer {return $servers} -ModuleName "SharePointDsc.Reverse"
 
-        # Mocking the Get-WmiObject cmdlet
-        $osInfo = New-Object -TypeName PSObject
-        Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSName -Value "Windows Server 2012 R2"
-        Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSArchitecture -Value "x64"
-        Add-Member -InputObject $osInfo -MemberType NoteProperty -Name Version -Value "15.0.0.0"
+            # Mocking the Get-WmiObject cmdlet
+            $osInfo = New-Object -TypeName PSObject
+            Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSName -Value "Windows Server 2012 R2"
+            Add-Member -InputObject $osInfo -MemberType NoteProperty -Name OSArchitecture -Value "x64"
+            Add-Member -InputObject $osInfo -MemberType NoteProperty -Name Version -Value "15.0.0.0"
 
-        # Mocking the Get-SPDatabase cmdlet
-        Mock Get-SPDatabase { return $null } -ModuleName "SharePointDsc.Reverse"
+            # Mocking the Get-SPDatabase cmdlet
+            Mock Get-SPDatabase { return $null } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Operating System" {
-            Read-OperatingSystemVersion -ScriptBlock { return "value" } 
-        }
-
-        It "Read information about SQL Server" {
-            Read-SQLVersion -ScriptBlock { return "value" }
-        }
-
-        It "Read information about the SharePoint version" {
-            Read-SPProductVersions -ScriptBlock { return "value" }
-        }        
-    }
-
-    Context "Validate Prerequisites for Reverse DSC script"{
-        It "Read information about the required dependencies"{
-            Set-Imports -ScriptBlock { return "value" }
-        }
-    }
-
-    Context "Validate SharePoint Components Data Extract" {
-
-        # Mocking the Get-SPDSCInstalledProductVersion cmdlet
-        $productVersionInfo = New-Object -TypeName PSObject
-        Add-Member -InputObject $productVersionInfo -MemberType NoteProperty -Name FileMajorPart -Value "16"
-        Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPManagedPath cmdlet
-        $managedPath = New-Object -TypeName PSObject
-        Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Name -Value "sites"
-        Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Type -Value "ExplicitInclusion"
-        Mock Get-SPManagedPath { return $managedPath } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPManagedAccount cmdlet
-        $managedAccount = New-Object -TypeName PSObject
-        Add-Member -InputObject $managedAccount -MemberType NoteProperty -Name UserName -Value "contoso\sp_farm"
-        Mock Get-SPManagedAccount { return $managedAccount } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPSite cmdlet
-        $rootWeb = New-Object -TypeName PSObject
-        Add-Member -InputObject $rootWeb -MemberType NoteProperty -Name Title -Value "Root Web"
-
-        $spSite = New-Object -TypeName PSObject        
-        Add-Member -InputObject $spSite -MemberType NoteProperty -Name RootWeb -Value $rootWeb
-        Add-Member -InputObject $spSite -MemberType NoteProperty -Name Url -Value "http://contoso.com"
-
-        Mock Get-SPSite { return $spSite } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPServiceApplicationPool cmdlet
-        Mock Get-SPServiceApplicationPool { return $null } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPServiceInstance cmdlet
-        Mock Get-SPServiceInstance { return $null } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPDiagnosticConfig cmdlet
-
-        Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
-
-        # Mocking the Get-SPUsageApplication
-        Mock Get-SPUsageApplication { return $null } -ModuleName "SharePointDsc.Reverse"
-
-        # Mokcing the Get-SPWebApplication cmdlet
-        $spWebApp = New-Object -TypeName PSObject        
-        Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
-        Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
-        $webApps = @($spwebApp)
-        Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDSC.Reverse"
-
-        # Mocking the Get-SPStateServiceApplication cmdlet
-        Mock Get-SPStateServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
-
-        # Mocking the Get-SPServiceApplication cmdlet
-        Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
-        Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
-
-        It "Read information about the farm's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
-            $testParams = @{
-                FarmConfigDatabaseName = "SP_Config"
-                DatabaseServer = "DatabaseServer\Instance"
-                FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-                Passphrase =  New-Object System.Management.Automation.PSCredential ("PASSPHRASEUSER", (ConvertTo-SecureString "MyFarmPassphrase" -AsPlainText -Force))
-                AdminContentDatabaseName = "Admin_Content"
-                CentralAdministrationAuth = "Kerberos"
-                CentralAdministrationPort = 1234
-                InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            }
-            Import-Module $modulePath
-            Mock Get-TargetResource{return $testParams}
-            
-            Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
-            
-            Set-ConfigurationSettings -ScriptBlock { return "value" }
-        }
-        
-        It "Read information about the Web Applications' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")
-            $testParams = @{
-            	Name = "SharePoint Sites"
-            	ApplicationPool = "SharePoint Web Apps"
-            	ApplicationPoolAccount = "DEMO\ServiceAccount"
-            	Url = "http://sites.sharepoint.com"
-            	AuthenticationMethod = "NTLM"
-            	Ensure = "Present"
+            It "Read information about the Operating System" {
+                Read-OperatingSystemVersion -ScriptBlock { return "value" } 
             }
 
-			Import-Module $modulePath
-            Mock Get-TargetResource{return $testParams}
+            It "Read information about SQL Server" {
+                Read-SQLVersion -ScriptBlock { return "value" }
+            }
 
-            Read-SPWebApplications -modulePath $modulePath -ScriptBlock { return "value" }
+            It "Read information about the SharePoint version" {
+                Read-SPProductVersions -ScriptBlock { return "value" }
+            }        
         }
 
-        <#It "Read information about the Managed Paths' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1")    
-            Read-SPManagedPaths -modulePath $modulePath -ScriptBlock { return "value" }
+        Context "Validate Prerequisites for Reverse DSC script"{
+            It "Read information about the required dependencies"{
+                Set-Imports -ScriptBlock { return "value" }
+            }
         }
 
-        It "Read information about the Managed Accounts' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1")
-            Read-SPManagedAccounts -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+        Context "Validate SharePoint Components Data Extract" {
 
-        It "Read information about the Service Application Pools' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1")
-            Read-SPServiceApplicationPools -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPDSCInstalledProductVersion cmdlet
+            $productVersionInfo = New-Object -TypeName PSObject
+            Add-Member -InputObject $productVersionInfo -MemberType NoteProperty -Name FileMajorPart -Value "16"
+            Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Site Collections' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1")
-            Read-SPSites -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPManagedPath cmdlet
+            $managedPath = New-Object -TypeName PSObject
+            Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Name -Value "sites"
+            Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Type -Value "ExplicitInclusion"
+            Mock Get-SPManagedPath { return $managedPath } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Service Instances' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceInstance\MSFT_SPServiceInstance.psm1")
-            Read-SPServiceInstance -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPManagedAccount cmdlet
+            $managedAccount = New-Object -TypeName PSObject
+            Add-Member -InputObject $managedAccount -MemberType NoteProperty -Name UserName -Value "contoso\sp_farm"
+            Mock Get-SPManagedAccount { return $managedAccount } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Diagnostic Logging's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1")
-            Read-DiagnosticLoggingSettings -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPSite cmdlet
+            $rootWeb = New-Object -TypeName PSObject
+            Add-Member -InputObject $rootWeb -MemberType NoteProperty -Name Title -Value "Root Web"
 
-        It "Read information about the Usage Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1")
-            Read-UsageServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            $spSite = New-Object -TypeName PSObject        
+            Add-Member -InputObject $spSite -MemberType NoteProperty -Name RootWeb -Value $rootWeb
+            Add-Member -InputObject $spSite -MemberType NoteProperty -Name Url -Value "http://contoso.com"
 
-        It "Read information about the State Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1")
-            Read-StateServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            Mock Get-SPSite { return $spSite } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the User Profile Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1")
-            Read-UserProfileServiceapplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPServiceApplicationPool cmdlet
+            Mock Get-SPServiceApplicationPool { return $null } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Cache Accounts' configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1")
-            Read-CacheAccounts -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPServiceInstance cmdlet
+            Mock Get-SPServiceInstance { return $null } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Secure Store Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1")
-            Read-SecureStoreServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPDiagnosticConfig cmdlet
 
-        It "Read information about the BCS Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1")
-            Read-BCSServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Search Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1")
-            Read-SearchServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }
+            # Mocking the Get-SPUsageApplication
+            Mock Get-SPUsageApplication { return $null } -ModuleName "SharePointDsc.Reverse"
 
-        It "Read information about the Managed Metadata Service Application's configuration" {
-            $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
-            Read-ManagedMetadataServiceApplication -modulePath $modulePath -ScriptBlock { return "value" }
-        }#>
-    }
+            # Mokcing the Get-SPWebApplication cmdlet
+            $spWebApp = New-Object -TypeName PSObject        
+            Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
+            Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
+            $webApps = @($spwebApp)
+            Mock Get-SPWebApplication{return $webApps} -ModuleName "SharePointDSC.Reverse"
+
+            # Mocking the Get-SPStateServiceApplication cmdlet
+            Mock Get-SPStateServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
+
+            # Mocking the Get-SPServiceApplication cmdlet
+            Mock Get-SPServiceApplication { return $null } -ModuleName "SharePointDSC.Reverse"
+            Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
+
+            It "Read information about the farm's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
+                $testParams = @{
+                    FarmConfigDatabaseName = "SP_Config"
+                    DatabaseServer = "DatabaseServer\Instance"
+                    FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                    Passphrase =  New-Object System.Management.Automation.PSCredential ("PASSPHRASEUSER", (ConvertTo-SecureString "MyFarmPassphrase" -AsPlainText -Force))
+                    AdminContentDatabaseName = "Admin_Content"
+                    CentralAdministrationAuth = "Kerberos"
+                    CentralAdministrationPort = 1234
+                    InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                }
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                
+                Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+                
+                Set-ConfigurationSettings -ScriptBlock { return "value" }
+            }
+            
+            It "Read information about the Web Applications' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPWebApplication\MSFT_SPWebApplication.psm1")
+                $testParams = @{
+                    Name = "SharePoint Sites"
+                    ApplicationPool = "SharePoint Web Apps"
+                    ApplicationPoolAccount = "DEMO\ServiceAccount"
+                    Url = "http://sites.sharepoint.com"
+                    AuthenticationMethod = "NTLM"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+
+                Read-SPWebApplications -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Managed Paths' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedPath\MSFT_SPManagedPath.psm1")   
+                $testParams = @{
+                    WebAppUrl   = "http://sites.sharepoint.com"
+                    RelativeUrl = "teams"
+                    Explicit    = $false
+                    HostHeader  = $false
+                    Ensure      = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams} 
+                Read-SPManagedPaths -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Managed Accounts' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedAccount\MSFT_SPManagedAccount.psm1")
+                $testParams = @{
+                    Account = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                    EmailNotification = 7
+                    PreExpireDays = 7
+                    Schedule = ""
+                    Ensure = "Present"
+                    AccountName = "username"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-SPManagedAccounts -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Service Application Pools' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceAppPool\MSFT_SPServiceAppPool.psm1")
+                $testParams = @{
+                    Name = "Service pool"
+                    ServiceAccount = "DEMO\svcSPServiceApps"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-SPServiceApplicationPools -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Site Collections' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSite\MSFT_SPSite.psm1")
+                $testParams = @{
+                    Url = "http://site.sharepoint.com"
+                    OwnerAlias = "DEMO\User"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-SPSites -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Service Instances' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPServiceInstance\MSFT_SPServiceInstance.psm1")
+                $testParams = @{
+                    Name = "Service pool"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-SPServiceInstance -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Diagnostic Logging's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1")
+                $testParams = @{
+                    LogPath = "L:\ULSLogs"
+                    LogSpaceInGB = 10
+                    AppAnalyticsAutomaticUploadEnabled = $true
+                    CustomerExperienceImprovementProgramEnabled = $true
+                    ErrorReportingEnabled = $true
+                    ErrorReportingAutomaticUploadEnabled = $true
+                    DownloadErrorReportingUpdatesEnabled = $true
+                    DaysToKeepLogs = 7
+                    LogMaxDiskSpaceUsageEnabled = $true
+                    LogCutInterval = 30
+                    ScriptErrorReportingEnabled = $true
+                    ScriptErrorReportingRequireAuth = $true
+                    ScriptErrorReportingDelay = 5
+                    EventLogFloodProtectionEnabled = $true
+                    EventLogFloodProtectionThreshold = 10
+                    EventLogFloodProtectionTriggerPeriod = 5
+                    EventLogFloodProtectionQuietPeriod = 5
+                    EventLogFloodProtectionNotifyInterval = 5
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-DiagnosticLoggingSettings -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Usage Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1")
+                $testParams = @{
+                    Name = "Usage Service App"
+                    UsageLogCutTime = 60
+                    UsageLogLocation = "L:\UsageLogs"
+                    UsageLogMaxFileSizeKB = 1024
+                    UsageLogMaxSpaceGB = 10
+                    DatabaseName = "SP_Usage"
+                    DatabaseServer = "sql.test.domain"
+                    FailoverDatabaseServer = "anothersql.test.domain"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-UsageServiceApplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the State Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPStateServiceApp\MSFT_SPStateServiceApp.psm1")
+                $testParams = @{
+                    Name = "State Service App"
+                    DatabaseName = "SP_StateService"
+                    DatabaseServer = "SQL.test.domain"
+                    DatabaseCredentials = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-StateServiceApplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the User Profile Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUserProfileServiceApp\MSFT_SPUserProfileServiceApp.psm1")
+                $testParams = @{
+                    Name = "User Profile Service App"
+                    ApplicationPool = "SharePoint Service Applications"
+                    FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-UserProfileServiceapplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Cache Accounts' configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCacheAccounts\MSFT_SPCacheAccounts.psm1")
+                $testParams = @{
+                    WebAppUrl = "http://test.sharepoint.com"
+                    SuperUserAlias = "DEMO\SuperUser"
+                    SuperReaderAlias = "DEMO\SuperReader"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-CacheAccounts -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Secure Store Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSecureStoreServiceApp\MSFT_SPSecureStoreServiceApp.psm1")
+                $testParams = @{
+                    Name = "Secure Store Service Application"
+                    ApplicationPool = "SharePoint Search Services"
+                    AuditingEnabled = $false
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-SecureStoreServiceApplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the BCS Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPBCSServiceApp\MSFT_SPBCSServiceApp.psm1")
+                $testParams = @{
+                    Name = "Test App"
+                    ApplicationPool = "Test App Pool"
+                    DatabaseName = "Test_DB"
+                    DatabaseServer = "TestServer\Instance"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-BCSServiceApplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Search Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPSearchServiceApp\MSFT_SPSearchServiceApp.psm1")
+                $testParams = @{
+                    Name = "Search Service Application"
+                    ApplicationPool = "SharePoint Search Services"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-SearchServiceApplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+
+            It "Read information about the Managed Metadata Service Application's configuration" {
+                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPManagedMetadataServiceApp\MSFT_SPManagedMetadataServiceApp.psm1")
+                $testParams = @{
+                    Name = "Managed Metadata Service App"
+                    ApplicationPool = "SharePoint Service Applications"
+                    DatabaseServer = "databaseserver\instance"
+                    DatabaseName = "SP_MMS"
+                    Ensure = "Present"
+                }
+
+                Import-Module $modulePath
+                Mock Get-TargetResource{return $testParams}
+                Read-ManagedMetadataServiceApplication -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
+            }
+        }
     }
 }
