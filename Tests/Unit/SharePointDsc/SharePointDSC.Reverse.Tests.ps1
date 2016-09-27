@@ -75,12 +75,19 @@ Describe "SharePointDsc.Reverse" {
 
         Context "Validate SharePoint Components Data Extract" {       
 
-			# Mocking the Get-SPDSCInstalledProductVersion cmdlet
+            # Mocking the Get-SPDSCInstalledProductVersion cmdlet
             $productVersionInfo = New-Object -TypeName PSObject
             Add-Member -InputObject $productVersionInfo -MemberType NoteProperty -Name FileMajorPart -Value "16"
             Mock Get-SPDSCInstalledProductVersion { return $productVersionInfo } -ModuleName "SharePointDsc.Reverse"
 
             Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
+
+            # Mokcing the Get-SPWebApplication cmdlet
+            $spWebApp = New-Object -TypeName PSObject        
+            Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
+            Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
+            $webApps = @($spwebApp)
+            Mock Get-SPWebApplication{return $webApps}
 
             It "Read information about the farm's configuration" {
                 $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
@@ -113,14 +120,7 @@ Describe "SharePointDsc.Reverse" {
                     Ensure = "Present"
                 }
 
-                Import-Module $modulePath
-                
-                # Mokcing the Get-SPWebApplication cmdlet
-                $spWebApp = New-Object -TypeName PSObject        
-                Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Name -Value "Test Web Application"
-                Add-Member -InputObject $spWebApp -MemberType NoteProperty -Name Url -Value "http://contoso.com"
-                $webApps = @($spwebApp)
-                Mock Get-SPWebApplication{return $webApps}
+                Import-Module $modulePath                    
                 Mock Get-TargetResource{return $testParams}
 
                 Read-SPWebApplications -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
