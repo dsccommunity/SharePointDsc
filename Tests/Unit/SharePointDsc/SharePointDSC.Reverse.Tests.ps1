@@ -79,7 +79,7 @@ Describe "SharePointDsc.Reverse" {
             Mock Get-SPSite { return $null }
             Mock Get-SPServiceApplicationPool { return $null }
             Mock Get-SPDiagnosticConfig { return $null }
-
+                 
             It "Read information about the farm's configuration" {
                 $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
                 $testParams = @{
@@ -93,10 +93,8 @@ Describe "SharePointDsc.Reverse" {
                     InstallAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
                 }
                 Import-Module $modulePath
-                Mock Get-TargetResource{return $testParams}
-                
-                Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
-                
+                Mock Get-TargetResource{return $testParams}                
+                Read-SPFarm -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }                
                 Set-ConfigurationSettings -ScriptBlock { return "value" }
             }
             
@@ -113,7 +111,6 @@ Describe "SharePointDsc.Reverse" {
 
                 Import-Module $modulePath             
                 Mock Get-TargetResource{return $testParams}
-
                 Read-SPWebApplications -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
 
@@ -181,7 +178,6 @@ Describe "SharePointDsc.Reverse" {
                 }
 
                 Import-Module $modulePath
-
                 Mock Get-SPServiceInstance { return $null } -ModuleName "SharePointDsc.Reverse"
                 Mock Get-TargetResource{return $testParams}
                 Read-SPServiceInstance -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
@@ -212,6 +208,7 @@ Describe "SharePointDsc.Reverse" {
 
                 Import-Module $modulePath                
                 Mock Get-TargetResource{return $testParams}
+				Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
                 Read-DiagnosticLoggingSettings -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
 
