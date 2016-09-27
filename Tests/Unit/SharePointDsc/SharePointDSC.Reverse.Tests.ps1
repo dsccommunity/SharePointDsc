@@ -183,35 +183,6 @@ Describe "SharePointDsc.Reverse" {
                 Read-SPServiceInstance -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
 
-            It "Read information about the Diagnostic Logging's configuration" {
-                $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPDiagnosticLoggingSettings\MSFT_SPDiagnosticLoggingSettings.psm1")
-                $testParams = @{
-                    LogPath = "L:\ULSLogs"
-                    LogSpaceInGB = 10
-                    AppAnalyticsAutomaticUploadEnabled = $true
-                    CustomerExperienceImprovementProgramEnabled = $true
-                    ErrorReportingEnabled = $true
-                    ErrorReportingAutomaticUploadEnabled = $true
-                    DownloadErrorReportingUpdatesEnabled = $true
-                    DaysToKeepLogs = 7
-                    LogMaxDiskSpaceUsageEnabled = $true
-                    LogCutInterval = 30
-                    ScriptErrorReportingEnabled = $true
-                    ScriptErrorReportingRequireAuth = $true
-                    ScriptErrorReportingDelay = 5
-                    EventLogFloodProtectionEnabled = $true
-                    EventLogFloodProtectionThreshold = 10
-                    EventLogFloodProtectionTriggerPeriod = 5
-                    EventLogFloodProtectionQuietPeriod = 5
-                    EventLogFloodProtectionNotifyInterval = 5
-                }
-
-                Import-Module $modulePath                
-                Mock Get-TargetResource{return $testParams}
-				Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
-                Read-DiagnosticLoggingSettings -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
-            }
-
             It "Read information about the Usage Service Application's configuration" {
                 $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPUsageApplication\MSFT_SPUsageApplication.psm1")
                 $testParams = @{
