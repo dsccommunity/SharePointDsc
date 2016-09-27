@@ -7,7 +7,7 @@ $ErrorActionPreference = 'stop'
 Set-StrictMode -Version latest
 
 $Global:RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $repoRoot + $SharePointCmdletModule 
+$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
 
 $ModuleName = "SharePointDSC.Reverse"
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\$ModuleName\$ModuleName.psm1") -Force
