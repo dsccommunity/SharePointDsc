@@ -74,6 +74,11 @@ Describe "SharePointDsc.Reverse" {
 
             Mock Get-WmiObject {return $osInfo} -ModuleName "SharePointDsc.Reverse"    
             Mock Get-SPWebApplication{return $null}
+            Mock Get-SPManagedPath { return $null }
+            Mock Get-SPManagedAccount { return $null }
+            Mock Get-SPSite { return $null }
+            Mock Get-SPServiceApplicationPool { return $null }
+            Mock Get-SPDiagnosticConfig { return $null }
 
             It "Read information about the farm's configuration" {
                 $modulePath = (Join-Path $Global:RepoRoot "Modules\SharePointDsc\DSCResources\MSFT_SPCreateFarm\MSFT_SPCreateFarm.psm1")
@@ -123,12 +128,6 @@ Describe "SharePointDsc.Reverse" {
                 }
 
                 Import-Module $modulePath
-
-                # Mocking the Get-SPManagedPath cmdlet
-                $managedPath = New-Object -TypeName PSObject
-                Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Name -Value "sites"
-                Add-Member -InputObject $managedPath -MemberType NoteProperty -Name Type -Value "ExplicitInclusion"
-                Mock Get-SPManagedPath { return $managedPath } -ModuleName "SharePointDsc.Reverse"
                 Mock Get-TargetResource{return $testParams} 
                 Read-SPManagedPaths -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
@@ -145,10 +144,6 @@ Describe "SharePointDsc.Reverse" {
                 }
 
                 Import-Module $modulePath
-                # Mocking the Get-SPManagedAccount cmdlet
-                $managedAccount = New-Object -TypeName PSObject
-                Add-Member -InputObject $managedAccount -MemberType NoteProperty -Name UserName -Value "contoso\sp_farm"
-                Mock Get-SPManagedAccount { return $managedAccount } -ModuleName "SharePointDsc.Reverse"
                 Mock Get-TargetResource{return $testParams}
                 Read-SPManagedAccounts -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
@@ -161,9 +156,7 @@ Describe "SharePointDsc.Reverse" {
                     Ensure = "Present"
                 }
 
-                Import-Module $modulePath
-
-                Mock Get-SPServiceApplicationPool { return $null } -ModuleName "SharePointDsc.Reverse"
+                Import-Module $modulePath                
                 Mock Get-TargetResource{return $testParams}
                 Read-SPServiceApplicationPools -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
@@ -176,14 +169,6 @@ Describe "SharePointDsc.Reverse" {
                 }
 
                 Import-Module $modulePath
-
-                # Mocking the Get-SPSite cmdlet
-                $rootWeb = New-Object -TypeName PSObject
-                Add-Member -InputObject $rootWeb -MemberType NoteProperty -Name Title -Value "Root Web"
-                $spSite = New-Object -TypeName PSObject        
-                Add-Member -InputObject $spSite -MemberType NoteProperty -Name RootWeb -Value $rootWeb
-                Add-Member -InputObject $spSite -MemberType NoteProperty -Name Url -Value "http://contoso.com"
-                Mock Get-SPSite { return $spSite } -ModuleName "SharePointDsc.Reverse"
                 Mock Get-TargetResource{return $testParams}
                 Read-SPSites -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
@@ -225,8 +210,7 @@ Describe "SharePointDsc.Reverse" {
                     EventLogFloodProtectionNotifyInterval = 5
                 }
 
-                Import-Module $modulePath
-                Mock Get-SPDiagnosticConfig { return $null } -ModuleName "SharePointDsc.Reverse"
+                Import-Module $modulePath                
                 Mock Get-TargetResource{return $testParams}
                 Read-DiagnosticLoggingSettings -params $testParams -modulePath $modulePath -ScriptBlock { return "value" }
             }
