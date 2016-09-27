@@ -18,7 +18,7 @@ Describe "SharePointDsc.Reverse" {
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")        
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-		$stubsPath = (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) ("Tests\Unit" + $Global:CurrentSharePointStubModule))
+		$stubsPath = (Join-Path ("Tests\Unit" + $Global:CurrentSharePointStubModule))
 		Write-Host $stubsPath -BackgroundColor DarkMagenta
         Import-Module $stubsPath -WarningAction SilentlyContinue        
 
