@@ -174,16 +174,16 @@ function Read-SQLVersion
 <# TODO: Replace this by a logic that reads the feature from te actual server and writes them down instead of simply assuming they are required. #>
 function Set-ConfigurationSettings
 {
-    $Script:dscConfigContent += "        xCredSSP CredSSPServer { Ensure = `"Present`"; Role = `"Server`"; } `r`n"
-    $Script:dscConfigContent += "        xCredSSP CredSSPClient { Ensure = `"Present`"; Role = `"Client`"; DelegateComputers = `"*." + (Get-WmiObject Win32_ComputerSystem).Domain + "`" }`r`n`r`n"
+    $Script:dscConfigContent += "        xCredSSP CredSSPServer `r`n        {`r`n            Ensure = `"Present`";`r`n            Role = `"Server`";`r`n        } `r`n"
+    $Script:dscConfigContent += "        xCredSSP CredSSPClient `r`n        { `r`n           Ensure = `"Present`";`r`n            Role = `"Client`"; `r`n            DelegateComputers = `"*." + (Get-WmiObject Win32_ComputerSystem).Domain + "`";`r`n        }`r`n`r`n"
 
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2Pool         { Name = `".NET v2.0`";            Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2ClassicPool  { Name = `".NET v2.0 Classic`";    Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45Pool        { Name = `".NET v4.5`";            Ensure = `"Absent`"; }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45ClassicPool { Name = `".NET v4.5 Classic`";    Ensure = `"Absent`"; }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveClassicDotNetPool   { Name = `"Classic .NET AppPool`"; Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDefaultAppPool      { Name = `"DefaultAppPool`";       Ensure = `"Absent`" }`r`n"
-    $Script:dscConfigContent += "        xWebSite    RemoveDefaultWebSite      { Name = `"Default Web Site`";     Ensure = `"Absent`"; PhysicalPath = `"C:\inetpub\wwwroot`" }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2Pool         `r`n        { `r`n            Name = `".NET v2.0`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2ClassicPool  `r`n        { `r`n            Name = `".NET v2.0 Classic`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45Pool        `r`n        { `r`n            Name = `".NET v4.5`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45ClassicPool `r`n        { `r`n            Name = `".NET v4.5 Classic`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveClassicDotNetPool   `r`n        { `r`n            Name = `"Classic .NET AppPool`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDefaultAppPool      `r`n        { `r`n            Name = `"DefaultAppPool`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebSite    RemoveDefaultWebSite      `r`n        { `r`n            Name = `"Default Web Site`";;`r`n            Ensure = `"Absent`";`r`n            PhysicalPath = `"C:\inetpub\wwwroot`";`r`n        }`r`n"
 }
 
 function Set-ConfigurationData
@@ -198,8 +198,8 @@ function Set-ConfigurationData
     foreach($spServer in $spServers)
     {
         $tempConfigDataContent += "    @{`r`n"
-        $tempConfigDataContent += "        NodeName = `"" + $spServer.Name + "`"`r`n"
-        $tempConfigDataContent += "        PSDscAllowPlainTextPassword = `$true`r`n"
+        $tempConfigDataContent += "        NodeName = `"" + $spServer.Name + "`";`r`n"
+        $tempConfigDataContent += "        PSDscAllowPlainTextPassword = `$true;`r`n"
         $tempConfigDataContent += "    },`r`n"
     }
 
@@ -392,12 +392,12 @@ function Get-DSCBlock
                 $value = $Params.Item($_)
             }
         }
-        $dscBlock += "            " + $_  + " = " + $value + " `r`n"
+        $dscBlock += "            " + $_  + " = " + $value + ";`r`n"
     }
 
     if(!$foundInstallAccount)
     {
-        $dscBlock += "            PsDscRunAsCredential=`$CredsFarmAccount`r`n"
+        $dscBlock += "            PsDscRunAsCredential=`$CredsFarmAccount;`r`n"
     }
     
     return $dscBlock
