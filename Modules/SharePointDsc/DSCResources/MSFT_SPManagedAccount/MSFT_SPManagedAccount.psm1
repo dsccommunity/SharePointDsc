@@ -4,29 +4,59 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Account,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
-        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
-        [parameter(Mandatory = $false)] [System.String] $Schedule,
-        [parameter(Mandatory = $true)]  [System.String] $AccountName
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $Account,
+        
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $EmailNotification,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $PreExpireDays,
+
+        [parameter(Mandatory = $false)] 
+        [System.String] 
+        $Schedule,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $AccountName
     )
 
     Write-Verbose -Message "Checking for managed account $AccountName"
 
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
-        $ma = Get-SPManagedAccount -Identity $params.Account.UserName -ErrorAction SilentlyContinue
-        if ($null -eq $ma) { return @{
-            AccountName    = $params.AccountName
-            Account        = $params.Account
-            Ensure         = "Absent"
-            InstallAccount = $params.InstallAccount
-        } }
+        $ma = Get-SPManagedAccount -Identity $params.Account.UserName `
+                                   -ErrorAction SilentlyContinue
+        if ($null -eq $ma) 
+        { 
+            return @{
+                AccountName    = $params.AccountName
+                Account        = $params.Account
+                Ensure         = "Absent"
+                InstallAccount = $params.InstallAccount
+            } 
+        }
         $schedule = $null
-        if ($null -ne $ma.ChangeSchedule) { $schedule = $ma.ChangeSchedule.ToString() }
+        if ($null -ne $ma.ChangeSchedule) 
+        { 
+            $schedule = $ma.ChangeSchedule.ToString() 
+        }
         return @{
             AccountName       = $ma.Username
             EmailNotification = $ma.DaysBeforeChangeToEmail
@@ -45,52 +75,92 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Account,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
-        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
-        [parameter(Mandatory = $false)] [System.String] $Schedule,
-        [parameter(Mandatory = $true)]  [System.String] $AccountName
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $Account,
+        
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $EmailNotification,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $PreExpireDays,
+
+        [parameter(Mandatory = $false)] 
+        [System.String] 
+        $Schedule,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $AccountName
     )
 
-    if ($Ensure -eq "Present" -and $null -eq $Account) {
-        throw "You must specify the 'Account' property as a PSCredential to create a managed account"
+    if ($Ensure -eq "Present" -and $null -eq $Account) 
+    {
+        throw ("You must specify the 'Account' property as a PSCredential to create a " + `
+               "managed account")
         return
     }
     
     $currentValues = Get-TargetResource @PSBoundParameters
-    if ($currentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") {
-        Write-Verbose "Managed account does not exist but should, creating the managed account"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    if ($currentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    {
+        Write-Verbose -Message ("Managed account does not exist but should, creating " + `
+                                "the managed account")
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             New-SPManagedAccount -Credential $params.Account
         }
     }
     
-    if ($Ensure -eq "Present") {
+    if ($Ensure -eq "Present") 
+    {
         Write-Verbose -Message "Updating settings for managed account"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
             $updateParams = @{ 
                 Identity = $params.Account.UserName 
             }
-            if ($params.ContainsKey("EmailNotification")) { $updateParams.Add("EmailNotification", $params.EmailNotification) }
-            if ($params.ContainsKey("PreExpireDays")) { $updateParams.Add("PreExpireDays", $params.PreExpireDays) }
-            if ($params.ContainsKey("Schedule")) { $updateParams.Add("Schedule", $params.Schedule) }
-
+            if ($params.ContainsKey("EmailNotification")) 
+            { 
+                $updateParams.Add("EmailNotification", $params.EmailNotification) 
+            }
+            if ($params.ContainsKey("PreExpireDays")) 
+            { 
+                $updateParams.Add("PreExpireDays", $params.PreExpireDays) 
+            }
+            if ($params.ContainsKey("Schedule")) 
+            { 
+                $updateParams.Add("Schedule", $params.Schedule) 
+            }
             Set-SPManagedAccount @updateParams
         }    
-    } else {
+    } 
+    else 
+    {
         Write-Verbose -Message "Removing managed account"
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             Remove-SPManagedAccount -Identity $params.AccountName -Confirm:$false
         }
-    }
-
-    
+    }   
 }
 
 
@@ -100,21 +170,46 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $Account,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.UInt32] $EmailNotification,
-        [parameter(Mandatory = $false)] [System.UInt32] $PreExpireDays,
-        [parameter(Mandatory = $false)] [System.String] $Schedule,
-        [parameter(Mandatory = $true)]  [System.String] $AccountName
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $Account,
+        
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $EmailNotification,
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $PreExpireDays,
+
+        [parameter(Mandatory = $false)] 
+        [System.String] 
+        $Schedule,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $AccountName
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
     $PSBoundParameters.Ensure = $Ensure
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("AccountName", "Schedule","PreExpireDays","EmailNotification", "Ensure") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("AccountName", 
+                                                     "Schedule",
+                                                     "PreExpireDays",
+                                                     "EmailNotification", 
+                                                     "Ensure") 
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

@@ -67,7 +67,7 @@ function Set-SPDSCWebApplicationGeneralConfig
         AllowAccessToWebPartCatalog = "AllowOnlineWebPartCatalog"
         SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
     } 
-    $mapping.Keys | ForEach-Object {
+    $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
                                                    -PropertyToSet $_ `
                                                    -ParamsValue $settings `
@@ -104,7 +104,7 @@ function Test-SPDSCWebApplicationGeneralConfig
     )
 
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
-    Import-Module (Join-Path $PSScriptRoot $relPath -Resolve)
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
     $valuesToCheck = @("TimeZone", 
                        "Alerts", 
                        "AlertsLimit", 

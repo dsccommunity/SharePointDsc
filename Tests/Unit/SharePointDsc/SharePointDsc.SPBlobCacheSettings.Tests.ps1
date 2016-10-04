@@ -13,6 +13,10 @@ $ModuleName = "MSFT_SPBlobCacheSettings"
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1")
 
 Describe "SPBlobCacheSettings" {
+    
+    $webConfigPath = "TestDrive:\inetpub\wwwroot\Virtual Directories\8080"
+    New-Item $webConfigPath -ItemType Directory
+    
     InModuleScope $ModuleName {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -22,6 +26,8 @@ Describe "SPBlobCacheSettings" {
                 MaxSizeInGB     = 30
                 FileTypes   = "\.(gif|jpg|jpeg|jpe|jfif|bmp|dib|tif|tiff|themedbmp|themedcss|themedgif|themedjpg|themedpng|ico|png|wdp|hdp|css|js|asf|avi|flv|m4v|mov|mp3|mp4|mpeg|mpg|rm|rmvb|wma|wmv|ogg|ogv|oga|webm|xap)$"
             }
+
+        $webConfigPath = "TestDrive:\inetpub\wwwroot\Virtual Directories\8080"
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
@@ -41,22 +47,22 @@ namespace Microsoft.SharePoint.Administration {
 "@
         }
 
-        $webConfigPath = "TestDrive:\inetpub\wwwroot\Virtual Directories\8080"
-        New-Item $webConfigPath -ItemType Directory
+        
 
         Context "The web application doesn't exist" {
             Mock Get-SPWebApplication { return $null }
+            Mock Test-Path { return $false }
 
             It "throws exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "Specified web application was not found."
+                (Get-TargetResource @testParams).WebAppUrl | Should Be $null
             }
 
             It "throws exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified web application was not found."
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "throws exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "Specified web application was not found."
+                { Set-TargetResource @testParams } | Should throw "Specified web application could not be found."
             }
         }
 
@@ -138,7 +144,6 @@ namespace Microsoft.SharePoint.Administration {
             
             It "check if function is called in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-Item
             }
         }
 

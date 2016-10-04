@@ -35,7 +35,9 @@ function Compare-SPDSCWebAppPolicy()
         [String] 
         $DefaultIdentityType
     )
-    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath "..\SharePointDsc.Util\SharePointDsc.Util.psm1" -Resolve)
+    Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                   -ChildPath "..\SharePointDsc.Util\SharePointDsc.Util.psm1" `
+                                   -Resolve)
     $diff = @()
 
     foreach ($policy in $WAPolicies) 
@@ -44,7 +46,8 @@ function Compare-SPDSCWebAppPolicy()
         foreach($setting in $DSCSettings) 
         {
             $identityType = $DefaultIdentityType
-            if ((Test-SPDSCObjectHasProperty -Object $setting -PropertyName "IdentityType") -eq $true) 
+            if ((Test-SPDSCObjectHasProperty -Object $setting `
+                                             -PropertyName "IdentityType") -eq $true) 
             {
                 $identityType = $setting.IdentityType
             }
@@ -118,7 +121,8 @@ function Compare-SPDSCWebAppPolicy()
     {
         $memberexists = $false
         $identityType = $DefaultIdentityType
-        if ((Test-SPDSCObjectHasProperty -Object $setting -PropertyName "IdentityType") -eq $true) {
+        if ((Test-SPDSCObjectHasProperty -Object $setting -PropertyName "IdentityType") -eq $true) 
+        {
             $identityType = $setting.IdentityType
         }
         foreach($policy in $WAPolicies) 

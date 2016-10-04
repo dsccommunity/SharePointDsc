@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-### Unreleased
+### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
  * Fixed SPJoinFarm to not write output during successful farm join
  * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
@@ -9,6 +9,13 @@
  * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
  * Fixed typos in documentation for InstallAccount parameter on most resources
  * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
+ * New resources: SPConfigWizard, SPProductUpdate and SPPublishServiceApplication
+ * Updated style of all script in module to align with PowerShell team standards
+ * Changed parameter ClaimsMappings in SPTrustedIdentityTokenIssuer to consume an array of custom object MSFT_SPClaimTypeMapping
+ * Changed SPTrustedIdentityTokenIssuer to throw an exception if certificate specified has a private key, since SharePoint doesn't accept it
+ * Fixed issue with SPTrustedIdentityTokenIssuer to stop if cmdlet New-SPTrustedIdentityTokenIssuer returns null
+ * Fixed issue with SPTrustedIdentityTokenIssuer to correctly get parameters ClaimProviderName and ProviderSignOutUri
+ * Fixed issue with SPTrustedIdentityTokenIssuer to effectively remove the SPTrustedAuthenticationProvider from all zones before deleting the SPTrustedIdentityTokenIssuer
 
 ### 1.2
 

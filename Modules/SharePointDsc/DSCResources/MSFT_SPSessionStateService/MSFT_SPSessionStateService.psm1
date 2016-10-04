@@ -4,21 +4,39 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.UInt32] $SessionTimeout,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String] 
+        $DatabaseName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $DatabaseServer,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $SessionTimeout,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Getting SPSessionStateService info"
     
-    $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         $svc = Get-SPSessionStateService
         $Ensure = "Absent"
-        if ($svc.SessionStateEnabled -eq $true) {
+        if ($svc.SessionStateEnabled -eq $true) 
+        {
             $Ensure = "Present"
         }
         return @{
@@ -37,11 +55,26 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.UInt32] $SessionTimeout,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String] 
+        $DatabaseName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $DatabaseServer,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $SessionTimeout,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     if($SessionTimeout -eq 0) 
@@ -49,8 +82,11 @@ function Set-TargetResource
         $SessionTimeout = 60    
     }
     
-    if ($Ensure -eq "Present") {
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    if ($Ensure -eq "Present") 
+    {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
             $svc = Get-SPSessionStateService
@@ -70,8 +106,11 @@ function Set-TargetResource
             }
         }
     }
-    if ($Ensure -eq "Absent") {
-        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
+    if ($Ensure -eq "Absent") 
+    {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
             $params = $args[0]
             
             $svc = Get-SPSessionStateService
@@ -94,22 +133,43 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseName,
-        [parameter(Mandatory = $true)]  [System.String] $DatabaseServer,
-        [parameter(Mandatory = $false)] [ValidateSet("Present","Absent")] [System.String] $Ensure = "Present",
-        [parameter(Mandatory = $false)] [System.UInt32] $SessionTimeout,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount
+        [parameter(Mandatory = $true)]
+        [System.String] 
+        $DatabaseName,
+
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $DatabaseServer,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
+        [parameter(Mandatory = $false)] 
+        [System.UInt32] 
+        $SessionTimeout,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Ensure = $Ensure
 
-    if ($Ensure -eq "Present") {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure","SessionTimeout")
-    } else {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure")    
+    if ($Ensure -eq "Present") 
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure","SessionTimeout")
+    } 
+    else 
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure")    
     }   
-    
 }
 
 Export-ModuleMember -Function *-TargetResource
