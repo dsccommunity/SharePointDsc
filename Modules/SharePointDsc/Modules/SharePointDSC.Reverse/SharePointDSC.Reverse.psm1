@@ -20,7 +20,7 @@ function Orchestrator{
             
             do
             {
-                $continue = Read-Host "Do you wish to continue? (y/n)"
+                $continue = Read-Host "Do you wish to continue?  (y/n)"
                 if($continue.ToLower() -eq "n")
                 {
                     exit
