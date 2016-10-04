@@ -1,6 +1,6 @@
 ﻿<##############################################################
- # This script is used to analyze an existing SharePoint (2010, 2013, 2016 or greater), and to produce the resulting PowerShell DSC Configuration Script representing it. Its purpose is to help SharePoint Admins and Devs replicate an existing SharePoint farm in an isolated area in order to troubleshoot an issue. This script needs to be executed directly on one of the SharePoint server in the far we wish to replicate. Upon finishing its execution, this Powershell script will prompt the user to specify a path to a FOLDER where the resulting PowerShell DSC Configuraton (.ps1) script will be generated. The resulting script will be named "SP-Farm.DSC.ps1" and will contain an exact description, in DSC notation, of the various components and configuration settings of the current SharePoint Farm. This script can then be used in an isolated environment to replicate the SharePoint server farm. The script could also be used as a simple textual (while in a DSC notation format) description of what the configuraton of the SharePoint farm looks like. This script is meant to be community driven, and everyone is encourage to participate and help improve and mature it. It is not officially endorsed by Microsoft, and support is 'offered' on a best effort basis by its contributors. Bugs suggestions should be reported through the issue system on GitHub. They will be looked at as time permits.
- # v0.1 - Nik Charlebois
+ # This script is used to analyze an existing SharePoint (2013, 2016 or greater), and to produce the resulting PowerShell DSC Configuration Script representing it. Its purpose is to help SharePoint Admins and Devs replicate an existing SharePoint farm in an isolated area in order to troubleshoot an issue. This script needs to be executed directly on one of the SharePoint server in the far we wish to replicate. Upon finishing its execution, this Powershell script will prompt the user to specify a path to a FOLDER where the resulting PowerShell DSC Configuraton (.ps1) script will be generated. The resulting script will be named "SP-Farm.DSC.ps1" and will contain an exact description, in DSC notation, of the various components and configuration settings of the current SharePoint Farm. This script can then be used in an isolated environment to replicate the SharePoint server farm. The script could also be used as a simple textual (while in a DSC notation format) description of what the configuraton of the SharePoint farm looks like. This script is meant to be community driven, and everyone is encourage to participate and help improve and mature it. It is not officially endorsed by Microsoft, and support is 'offered' on a best effort basis by its contributors. Bugs suggestions should be reported through the issue system on GitHub. They will be looked at as time permits.
+ # v1.4.0.0 - Nik Charlebois
  ##############################################################>
 <## Script Settings #>
 $VerbosePreference = "SilentlyContinue"
@@ -10,7 +10,27 @@ $Script:dscConfigContent = ""
 
 <## This is the main function for this script. It acts as a call dispatcher, calling th various functions required in the proper order to get the full farm picture. #>
 function Orchestrator{    
-    $Script:spFarmAccount = Get-Credential -Message "Farm Account"
+
+    <# Ensure the user executing the script is not the same as the farm admin account provided #>
+    $loopCount = 0
+    do{
+        if($loopCount -gt 0)
+        {
+            Write-Host "Please ensure the Farm Account provided is not the same as the current user. You may need to execute the script as a different user." -BackgroundColor Yellow -ForegroundColor Black
+            
+            do
+            {
+                $continue = Read-Host "Do you wish to continue? (y/n)"
+                if($continue.ToLower() -eq "n")
+                {
+                    exit
+                }
+            }while($continue.ToLower() -ne "y" -and $continue.ToLower() -ne "n")
+        }
+        $Script:spFarmAccount = Get-Credential -Message "Farm Account"
+        $loopCount++
+    }while($Script:spFarmAccount.Username.ToLower() -eq $env:USERNAME.ToLower() -or $Script:spFarmAccount.UserName.ToLower() -eq ($env:USERDOMAIN + "\" + $env:USERNAME).ToLower())
+
     $Script:spCentralAdmin = Get-SPWebApplication -IncludeCentralAdministration | Where{$_.DisplayName -like '*Central Administration*'}
     $spFarm = Get-SPFarm
     $spServers = $spFarm.Servers
@@ -46,7 +66,7 @@ function Orchestrator{
         <## SQL servers are returned by Get-SPServer but they have a Role of 'Invalid'. Therefore we need to ignore these. The resulting PowerShell DSC Configuration script does not take into account the configuration of the SQL server for the SharePoint Farm at this point in time. We are activaly working on giving our users an experience that is as painless as possible, and are planning on integrating the SQL DSC Configuration as part of our feature set. #>
         if($spServer.Role -ne "Invalid")
         {
-            $Script:dscConfigContent += "`r`n    node " + $spServer.Name + "{`r`n"
+            $Script:dscConfigContent += "`r`n    node " + $spServer.Name + "`r`n    {`r`n"
 
             Write-Progress -Activity ("[" + $spServer.Name + "] Setting Up Configuration Settings...") -PercentComplete ($currentStep/$totalSteps*100)
             Set-ConfigurationSettings
@@ -120,10 +140,10 @@ function Orchestrator{
             Set-LCM
             $currentStep++
 
-            $Script:dscConfigContent += "    }`r`n"
+            $Script:dscConfigContent += "`r`n    }`r`n"
         }
     }    
-    $Script:dscConfigContent += "}`r`n"
+    $Script:dscConfigContent += "`r`n}`r`n"
     Write-Progress -Activity "[$spServer.Name] Setting Configuration Data..." -PercentComplete ($currentStep/$totalSteps*100)
     Set-ConfigurationData
     $currentStep++
@@ -174,16 +194,16 @@ function Read-SQLVersion
 <# TODO: Replace this by a logic that reads the feature from te actual server and writes them down instead of simply assuming they are required. #>
 function Set-ConfigurationSettings
 {
-    $Script:dscConfigContent += "        xCredSSP CredSSPServer `r`n        {`r`n            Ensure = `"Present`";`r`n            Role = `"Server`";`r`n        } `r`n"
-    $Script:dscConfigContent += "        xCredSSP CredSSPClient `r`n        { `r`n           Ensure = `"Present`";`r`n            Role = `"Client`"; `r`n            DelegateComputers = `"*." + (Get-WmiObject Win32_ComputerSystem).Domain + "`";`r`n        }`r`n`r`n"
+    $Script:dscConfigContent += "        xCredSSP CredSSPServer `r`n        {`r`n            Ensure = `"Present`";`r`n            Role = `"Server`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xCredSSP CredSSPClient `r`n        {`r`n            Ensure = `"Present`";`r`n            Role = `"Client`";`r`n            DelegateComputers = `"*." + (Get-WmiObject Win32_ComputerSystem).Domain + "`";`r`n        }`r`n`r`n"
 
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2Pool         `r`n        { `r`n            Name = `".NET v2.0`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2ClassicPool  `r`n        { `r`n            Name = `".NET v2.0 Classic`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45Pool        `r`n        { `r`n            Name = `".NET v4.5`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45ClassicPool `r`n        { `r`n            Name = `".NET v4.5 Classic`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveClassicDotNetPool   `r`n        { `r`n            Name = `"Classic .NET AppPool`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
-    $Script:dscConfigContent += "        xWebAppPool RemoveDefaultAppPool      `r`n        { `r`n            Name = `"DefaultAppPool`";;`r`n            Ensure = `"Absent`";`r`n        }`r`n"
-    $Script:dscConfigContent += "        xWebSite    RemoveDefaultWebSite      `r`n        { `r`n            Name = `"Default Web Site`";;`r`n            Ensure = `"Absent`";`r`n            PhysicalPath = `"C:\inetpub\wwwroot`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2Pool         `r`n        {`r`n            Name = `".NET v2.0`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet2ClassicPool  `r`n        {`r`n            Name = `".NET v2.0 Classic`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45Pool        `r`n        {`r`n            Name = `".NET v4.5`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDotNet45ClassicPool `r`n        {`r`n            Name = `".NET v4.5 Classic`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveClassicDotNetPool   `r`n        {`r`n            Name = `"Classic .NET AppPool`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebAppPool RemoveDefaultAppPool      `r`n        {`r`n            Name = `"DefaultAppPool`";`r`n            Ensure = `"Absent`";`r`n        }`r`n"
+    $Script:dscConfigContent += "        xWebSite    RemoveDefaultWebSite      `r`n        {`r`n            Name = `"Default Web Site`";`r`n            Ensure = `"Absent`";`r`n            PhysicalPath = `"C:\inetpub\wwwroot`";`r`n        }`r`n"
 }
 
 function Set-ConfigurationData
@@ -480,7 +500,7 @@ function Read-SPFarm ($modulePath, $params){
         Import-Module $module
     }
         
-    $Script:dscConfigContent += "        SPCreateFarm CreateSPFarm{`r`n"
+    $Script:dscConfigContent += "        SPCreateFarm CreateSPFarm`r`n        {`r`n"
 
     if($params -eq $null)
     {
@@ -493,7 +513,7 @@ function Read-SPFarm ($modulePath, $params){
     }
     $results = Get-TargetResource @params
     $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module
-    $Script:dscConfigContent += "        }`r`n"
+    $Script:dscConfigContent += "`r`n        }`r`n"
 }
 
 <## This function obtains a reference to every Web Application in the farm and declares their properties (i.e. Port, Associated IIS Application Pool, etc.). #>
@@ -516,14 +536,14 @@ function Read-SPWebApplications ($modulePath, $params){
     
     foreach($spWebApp in $spWebApplications)
     {
-        $Script:dscConfigContent += "        SPWebApplication " + $spWebApp.Name.Replace(" ", "") + "{`r`n"      
+        $Script:dscConfigContent += "        SPWebApplication " + $spWebApp.Name.Replace(" ", "") + "`r`n        {`r`n"      
 
         $params.Name = $spWebApp.Name
         $results = Get-TargetResource @params
 
     
         $Script:dscConfigContent += Get-DSCBlock -Params $results -ModulePath $module
-        $Script:dscConfigContent += "        }`r`n"
+        $Script:dscConfigContent += "`r`n        }`r`n"
     }
 }
 
