@@ -36,6 +36,7 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPVisioServiceApplication { return $null }
             Mock New-SPVisioServiceApplicationProxy { return $null }
+            Mock Set-TargetResource { return $null }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -47,7 +48,6 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPVisioServiceApplication 
             }
         }
 
