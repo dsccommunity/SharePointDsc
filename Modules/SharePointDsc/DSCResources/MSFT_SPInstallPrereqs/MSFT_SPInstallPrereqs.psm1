@@ -447,7 +447,7 @@ function Set-TargetResource
                              | Where-Object -FilterScript { 
                                    $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
                                }
-$dotNet46Check | Out-file c:\temp\test.txt -Append
+
             if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
             {
                 throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
