@@ -1,6 +1,10 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Fixed issue with mounting SPContentDatabase
+ * Fixed issue with SPShellAdmin and Content Database method
+ * Added .Net 4.6 support check
+ * Improved code styling
  * Fixed typo on return value in SPServiceAppProxyGroup
  * Fixed SPJoinFarm to not write output during successful farm join
  * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
