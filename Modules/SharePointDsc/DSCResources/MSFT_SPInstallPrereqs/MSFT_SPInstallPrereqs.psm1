@@ -427,18 +427,34 @@ function Set-TargetResource
 
     if ($majorVersion -eq 15) 
     {
-        $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP"
-        $dotNet46Check = Get-ChildItem -Path $ndpKey -Recurse `
-                         | Get-ItemProperty -name Version,Release -ErrorAction SilentlyContinue `
-                         | Where-Object -FilterScript { 
-                             $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
-                           }
-        if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
+        $BinaryDir = Split-Path -Path $InstallerPath
+        $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
+        $checkDotNet = $true
+        if (Test-Path -Path $svrsetupDll) {
+            $svrsetupDllFileInfo = Get-ItemProperty -Path $svrsetupDll
+            $fileVersion = $svrsetupDllFileInfo.VersionInfo.FileVersion
+            if ($fileVersion -ge "15.0.4709.1000")
+            {
+                $checkDotNet = $false
+            }
+        }
+
+        if ($checkDotNet -eq $true)
         {
-            throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
-                               "servers that have .NET 4.6 already installed. See details at " + `
-                               "https://support.microsoft.com/en-us/kb/3087184")
-            return
+            $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP"
+            $dotNet46Check = Get-ChildItem -Path $ndpKey -Recurse `
+                             | Get-ItemProperty -name Version,Release -ErrorAction SilentlyContinue `
+                             | Where-Object -FilterScript { 
+                                   $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
+                               }
+$dotNet46Check | Out-file c:\temp\test.txt -Append
+            if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
+            {
+                throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
+                                "servers that have .NET 4.6 already installed. See details " + `
+                                "at https://support.microsoft.com/en-us/kb/3087184")
+                return
+            }    
         }
         
         Write-Verbose -Message "Version: SharePoint 2013"

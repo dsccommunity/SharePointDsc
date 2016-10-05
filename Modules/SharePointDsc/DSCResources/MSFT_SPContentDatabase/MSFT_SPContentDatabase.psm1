@@ -135,12 +135,9 @@ function Set-TargetResource
     Write-Verbose -Message "Setting content database configuration settings"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                        -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
-        $scriptRoot  = $args[1]
-
-        Import-Module (Join-Path $scriptRoot "..\..\Modules\SharePointDsc.ContentDatabase\SPContentDatabase.psm1" -Resolve)
 
         # Use Get-SPDatabase instead of Get-SPContentDatabase because the Get-SPContentDatabase
         # does not return disabled databases.
@@ -172,17 +169,61 @@ function Set-TargetResource
                 if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/")) {
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
-                    if ($params.ContainsKey("Enabled"))
+                    $newParams= @{}
+                    foreach ($param in $params.GetEnumerator())
                     {
-                        $enabled = $params.Enabled
+                        $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
+
+                        if ($skipParams -notcontains $param.Key)
+                        {
+                        	$newParams.$($param.Key) = $param.Value
+                        }
+                    
+                        if ($param.Key -eq "MaximumSiteCount")
+                        {
+                            $newParams.MaxSiteCount = $param.Value
+                        }
+
+                        if ($param.Key -eq "WebAppUrl")
+                        {
+                            $newParams.WebApplication = $param.Value
+                        }
+                    }
+
+                    try
+                    {
+                        $cdb = Mount-SPContentDatabase @newParams
+                    }
+                    catch
+                    {
+                        throw ("Error occurred while mounting content database. " + `
+                                "Content database is not mounted. " + `
+                                "Error details: $($_.Exception.Message)")
+                    }
+
+                    if ($cdb.Status -eq "Online")
+                    {
+                        $cdbenabled = $true
                     }
                     else
                     {
-                        $enabled = $true
+                        $cdbenabled = $false
                     }
                     
-                    $parameters = @{} + $params
-                    $cdb = Mount-SPDscContentDatabase $parameters $enabled
+                    if ($params.Enabled -ne $cdbenabled)
+                    {
+                        switch ($params.Enabled)
+                        {
+                            $true
+                            { 
+                                $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
+                            }
+                            $false
+                            {
+                                $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled
+                            }
+                        }
+                    }
                 }
 
                 # Check and change database status
@@ -224,17 +265,61 @@ function Set-TargetResource
             else
             {
                 # Database does not exist, but should. Create/mount database
-                if ($params.ContainsKey("Enabled"))
+                $newParams= @{}
+                foreach ($param in $params.GetEnumerator())
                 {
-                    $enabled = $params.Enabled
+                    $skipParams = @("Enabled", "Ensure", "InstallAccount", "MaximumSiteCount", "WebAppUrl")
+
+                    if ($skipParams -notcontains $param.Key)
+                    {
+                        $newParams.$($param.Key) = $param.Value
+                    }
+                
+                    if ($param.Key -eq "MaximumSiteCount")
+                    {
+                        $newParams.MaxSiteCount = $param.Value
+                    }
+                    
+                    if ($param.Key -eq "WebAppUrl")
+                    {
+                        $newParams.WebApplication = $param.Value
+                    }
+                }
+
+                try
+                {
+                    $cdb = Mount-SPContentDatabase @newParams
+                }
+                catch
+                {
+                    throw ("Error occurred while mounting content database. " + `
+                            "Content database is not mounted. " + `
+                            "Error details: $($_.Exception.Message)")
+                }
+
+                if ($cdb.Status -eq "Online")
+                {
+                    $cdbenabled = $true
                 }
                 else
                 {
-                    $enabled = $true
+                    $cdbenabled = $false
                 }
                 
-                $parameters = @{} + $params
-                $cdb = Mount-SPDscContentDatabase $parameters $enabled
+                if ($params.Enabled -ne $cdbenabled)
+                {
+                    switch ($params.Enabled)
+                    {
+                        $true
+                        { 
+                            $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
+                        }
+                        $false
+                        {
+                            $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Disabled
+                        }
+                    }
+                }
             }
             $cdb.Update()
         }

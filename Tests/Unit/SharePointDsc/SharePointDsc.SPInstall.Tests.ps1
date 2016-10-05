@@ -75,10 +75,24 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         }
 
         Context "SharePoint binaries are installed and should be" {
-            Mock Get-ItemProperty { return @(
-                (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
-                (New-SPDscMockPrereq -Name "Something else")
-            ) } 
+            Mock Get-ItemProperty { 
+                return @(
+                    (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
+                    (New-SPDscMockPrereq -Name "Something else")
+                )
+            } -ParameterFilter { $Path }
+
+            Mock Get-ItemProperty {
+                return @{
+                    VersionInfo = @{
+                        FileVersion = "15.0.4709.1000"
+                    }
+                } 
+            }
+
+            Mock Test-Path {
+                return $true
+            }
 
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -109,7 +123,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         $testParams.Ensure = "Absent"
 
         Context "SharePoint binaries are installed and should not be" {
-            Mock Get-ItemProperty { return @{} } 
+            Mock Get-ItemProperty { return @{} } -ParameterFilter { $Path }
 
             It "throws in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
@@ -150,7 +164,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
             DataPath = "C:\somewhere\else"
         }
         Context "SharePoint is not installed and should be, using custom install directories" {
-            Mock Get-ItemProperty { return $null }
+            Mock Get-ItemProperty { return $null } -ParameterFilter { $Path }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
