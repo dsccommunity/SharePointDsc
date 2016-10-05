@@ -30,6 +30,7 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         
         Mock Start-SPEnterpriseSearchServiceInstance {}
         Mock Remove-SPServiceApplication {}   
+        Mock Get-SPServiceApplicationProxy { return $null }
         Mock New-SPEnterpriseSearchServiceApplicationProxy {}
         Mock Set-SPEnterpriseSearchServiceApplication {} 
         Mock Get-SPEnterpriseSearchServiceInstance { return @{} }

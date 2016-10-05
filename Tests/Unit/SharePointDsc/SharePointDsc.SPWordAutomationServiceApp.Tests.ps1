@@ -82,6 +82,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 return ,$returnval
             }
             Mock Set-SPTimerJob {}
+            Mock Get-SPServiceApplicationProxy { return $null }
 
             It "returns null from the Get method" { 
                 Get-TargetResource @testParams | Should BeNullOrEmpty 

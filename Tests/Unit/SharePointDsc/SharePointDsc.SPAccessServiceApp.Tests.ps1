@@ -31,6 +31,7 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         Mock New-SPAccessServicesApplication { }
         Mock Set-SPAccessServicesApplication { }
         Mock Remove-SPServiceApplication { }
+        Mock Get-SPServiceApplicationProxy { return $null }
 
         Context "When no service applications exist in the current farm" {
 
