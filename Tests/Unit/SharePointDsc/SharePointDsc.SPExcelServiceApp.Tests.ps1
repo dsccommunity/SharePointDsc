@@ -32,7 +32,7 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Mock Remove-SPServiceApplication { }
-        Mock Get-SPServiceApplicationProxy { return $null }
+        Mock Get-SPServiceApplicationProxy { }
 
         switch ($majorBuildNumber) {
             15 {

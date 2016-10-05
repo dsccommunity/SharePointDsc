@@ -82,7 +82,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 return ,$returnval
             }
             Mock Set-SPTimerJob {}
-            Mock Get-SPServiceApplicationProxy { return $null }
+            Mock Get-SPServiceApplicationProxy { }
 
             It "returns null from the Get method" { 
                 Get-TargetResource @testParams | Should BeNullOrEmpty 
@@ -297,7 +297,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     DisplayName = $testParams.Name 
                 }) 
             } 
-            Mock Remove-SPServiceApplication { return $null } 
+            Mock Remove-SPServiceApplication { } 
 
             It "should return null from the get method" { 
                 Get-TargetResource @testParams | Should BeNullOrEmpty 

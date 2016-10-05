@@ -31,7 +31,7 @@ Describe "SPAppManagementServiceApp - SharePoint Build $((Get-Item $SharePointCm
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         Mock Remove-SPServiceApplication { }
-        Mock Get-SPServiceApplicationProxy { return $null }
+        Mock Get-SPServiceApplicationProxy { }
 
         Context "When no service applications exist in the current farm but it should" {
 

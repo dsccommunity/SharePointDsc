@@ -52,7 +52,7 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                 })
             }
             Mock Remove-SPServiceApplication{ }
-            Mock Get-SPServiceApplicationProxy { return $null }
+            Mock Get-SPServiceApplicationProxy { }
 
             It "returns true when the Test method is called" {
                 Test-TargetResource @testParamsAbsent | Should Be $false

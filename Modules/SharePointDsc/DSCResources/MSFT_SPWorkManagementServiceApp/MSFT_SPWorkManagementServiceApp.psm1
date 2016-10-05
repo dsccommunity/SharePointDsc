@@ -87,9 +87,6 @@ function Set-TargetResource
 
         if($null -ne $app -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
         {
-            #remove existing app
-
-            # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
             foreach($proxyInstance in $proxies)
             {
@@ -99,7 +96,7 @@ function Set-TargetResource
                 }
             }
 
-            Remove-SPServiceApplication $app 
+            Remove-SPServiceApplication -Identity $app -RemoveData -Confirm:$false
             return
         } elseif ($null -eq $app){
             $newParams = @{}

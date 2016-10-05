@@ -31,7 +31,7 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         
         Mock Remove-SPServiceApplication { } 
-        Mock Get-SPServiceApplicationProxy { return $null }
+        Mock Get-SPServiceApplicationProxy { }
 
         Context "When no service applications exist in the current farm" {
 

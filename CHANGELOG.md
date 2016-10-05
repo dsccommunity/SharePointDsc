@@ -1,5 +1,8 @@
 # Change log for SharePointDsc
 
+### Unreleased
+ * Set-TargetResource of Service Application now also removes all associated proxies
+
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
  * Fixed SPJoinFarm to not write output during successful farm join

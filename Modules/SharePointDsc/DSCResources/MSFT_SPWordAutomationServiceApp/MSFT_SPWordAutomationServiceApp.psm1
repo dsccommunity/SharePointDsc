@@ -536,8 +536,6 @@ function Set-TargetResource
                                     }
                 if ($null -ne $app) 
                 {
-
-                    # Remove the connected proxy(ies)
                     $proxies = Get-SPServiceApplicationProxy
                     foreach($proxyInstance in $proxies)
                     {
@@ -547,8 +545,7 @@ function Set-TargetResource
                         }
                     }
 
-                    # Service app existed, deleting
-                    Remove-SPServiceApplication $app -RemoveData -Confirm:$false
+                    Remove-SPServiceApplication -Identity $app -RemoveData -Confirm:$false
                 } 
             }
         }

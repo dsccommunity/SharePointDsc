@@ -189,7 +189,6 @@ function Set-TargetResource
                 $_.TypeName -eq "PerformancePoint Service Application"  
             }
 
-            # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
             foreach($proxyInstance in $proxies)
             {
@@ -199,7 +198,7 @@ function Set-TargetResource
                 }
             }
 
-            Remove-SPServiceApplication $app -Confirm:$false
+            Remove-SPServiceApplication -Identity $app -Confirm:$false
         }
     }
 }
