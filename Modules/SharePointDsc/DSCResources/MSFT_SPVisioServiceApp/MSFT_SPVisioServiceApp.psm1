@@ -74,6 +74,10 @@ function Set-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $ProxyName = "Visio Service Application Proxy",
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -91,14 +95,13 @@ function Set-TargetResource
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
-                            -ScriptBlock 
-        {
+                            -ScriptBlock {
             $params = $args[0]
         
             $visioApp = New-SPVisioServiceApplication -Name $params.Name `
                                       -ApplicationPool $params.ApplicationPool
 
-            $visioProxy = New-SPVisioServiceApplicationProxy -Name ($params.Name + "Proxy") -ServiceApplication $params.Name
+            $visioProxy = New-SPVisioServiceApplicationProxy -Name ($params.ProxyName + "Proxy") -ServiceApplication $params.Name
         }
     }
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
