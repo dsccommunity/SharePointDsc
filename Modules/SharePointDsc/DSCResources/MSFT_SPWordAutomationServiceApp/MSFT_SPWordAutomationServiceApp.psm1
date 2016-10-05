@@ -548,7 +548,7 @@ function Set-TargetResource
                     }
 
                     # Service app existed, deleting
-                    Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
+                    Remove-SPServiceApplication $app -RemoveData -Confirm:$false
                 } 
             }
         }
