@@ -1,4 +1,6 @@
 # Change log for SharePointDsc
+### Unreleased
+ * SPVisioServiceapplication now creates proxy and let's you specify a name for it
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
