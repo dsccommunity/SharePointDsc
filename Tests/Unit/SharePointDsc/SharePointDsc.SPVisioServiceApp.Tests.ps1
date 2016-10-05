@@ -29,13 +29,12 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
-        Mock Remove-SPServiceApplication { return $null }
+        Mock Remove-SPServiceApplication { }
 
         Context "When no service applications exist in the current farm" {
 
             Mock Get-SPServiceApplication { return $null }
-            Mock New-SPVisioServiceApplication { return $null }
-            Mock New-SPVisioServiceApplicationProxy { return $null }
+            Mock New-SPVisioServiceApplication { }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
