@@ -131,6 +131,14 @@ function Get-SPDscFarmProductsInfo
     return $serverProductInfo.Products
 }
 
+function Get-SPDscRegProductsInfo
+{
+	$registryLocation = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall
+	$sharePointPrograms = $registryLocation | where-object { $_.PsPath -like "*\Office*" } | foreach {Get-ItemProperty $_.PsPath}
+	
+	return $sharePointPrograms.DisplayName 
+}
+
 function Get-SPDSCRegistryKey
 {
     [CmdletBinding()]

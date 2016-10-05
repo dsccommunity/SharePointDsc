@@ -45,7 +45,7 @@ function Get-TargetResource
 
     $products = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -ScriptBlock {
-        return Get-SPDscFarmProductsInfo
+		return Get-SPDscRegProductsInfo 
     }
 
     # Extract language from filename
