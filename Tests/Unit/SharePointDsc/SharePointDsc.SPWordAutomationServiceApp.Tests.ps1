@@ -220,7 +220,6 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             Mock Get-SPServiceApplication {  
                 $returnval = @(@{
                     TypeName = "Word Automation Services" 
-                    Identity = "00000000-0000-0000-0000-000000000000"
                     DisplayName = $testParams.Name 
                     ApplicationPool = @{ Name = $testParams.ApplicationPool } 
                     WordServiceFormats = @{
@@ -298,8 +297,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     DisplayName = $testParams.Name 
                 }) 
             } 
-            Mock Remove-SPServiceApplication { } 
-            Mock Get-SPServiceApplicationProxy { return $null }
+            Mock Remove-SPServiceApplication { return $null } 
 
             It "should return null from the get method" { 
                 Get-TargetResource @testParams | Should BeNullOrEmpty 
