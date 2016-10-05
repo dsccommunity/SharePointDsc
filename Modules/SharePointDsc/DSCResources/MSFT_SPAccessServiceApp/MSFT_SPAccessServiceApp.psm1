@@ -122,6 +122,17 @@ function Set-TargetResource
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
                 $_.TypeName -eq "Access Services Web Service Application"  
             }
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
             Remove-SPServiceApplication $app -Confirm:$false
         }
     }

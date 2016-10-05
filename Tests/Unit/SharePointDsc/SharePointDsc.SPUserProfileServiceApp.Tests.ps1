@@ -43,6 +43,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
         Mock Remove-SPDSCUserToLocalAdmin { }
         Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         Mock Remove-SPServiceApplication { } 
+        Mock Get-SPServiceApplicationProxy { return $null }
 
         Context "When no service applications exist in the current farm" {
 

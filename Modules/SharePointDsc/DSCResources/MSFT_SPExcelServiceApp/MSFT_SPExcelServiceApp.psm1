@@ -124,10 +124,21 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $app =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                     $_.TypeName -eq "Excel Services Application Web Service Application"  
             }
-            Remove-SPServiceApplication $appService -Confirm:$false
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication $app -Confirm:$false
         }
     }
 }
