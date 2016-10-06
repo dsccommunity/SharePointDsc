@@ -56,8 +56,9 @@ function Get-TargetResource
         { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Managed Metadata Service" 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.TypeName -eq "Managed Metadata Service" -or `
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
         }
 
         if ($null -eq $serviceApp)
@@ -188,8 +189,9 @@ function Set-TargetResource
                 $params = $args[0]
                 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Managed Metadata Service" 
+                    | Where-Object -FilterScript {
+                        $_.TypeName -eq "Managed Metadata Service" -or `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 Set-SPMetadataServiceApplication -Identity $serviceApp -ApplicationPool $appPool
@@ -207,7 +209,8 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Managed Metadata Service"  
+                $_.TypeName -eq "Managed Metadata Service" -or `
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"  
             }
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
