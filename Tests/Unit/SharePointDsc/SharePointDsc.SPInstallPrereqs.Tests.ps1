@@ -52,18 +52,21 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
         }
         
         Mock Get-ChildItem {
-            return @(
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Full"
-                }, 
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Client"
-                }
-            )
+           $full = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Full"
+            } 
+
+           $client = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Client"
+            } 
+
+            $returnval = @($full, $client)
+            $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+            return $returnval
         }
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
@@ -229,7 +232,6 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
         
-
         Context "Prerequisites are installed but should not be" {
             $testParams = @{
                 InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
@@ -324,18 +326,21 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                 }
 
                 Mock Get-ChildItem {
-                    return @(
-                        @{
-                            Version = "4.6.0.0"
-                            Release = "0"
-                            PSChildName = "Full"
-                        }, 
-                        @{
-                            Version = "4.6.0.0"
-                            Release = "0"
-                            PSChildName = "Client"
-                        }
-                    )
+                $full = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    } 
+
+                $client = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    } 
+
+                    $returnval = @($full, $client)
+                    $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                    return $returnval
                 }
 
                 Mock Get-ItemProperty {
@@ -349,7 +354,52 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                 }
                 
                 It "throws an error in the set method" {
-                    { Set-TargetResource @testParams } | Should Throw "Set"
+                    { Set-TargetResource @testParams } | Should Throw ("A known issue prevents installation of SharePoint 2013 on " + `
+                                                                       "servers that have .NET 4.6 already installed")
+                }
+            }
+
+            Context "SharePoint 2013 is installing on a server with .NET 4.6 with compatibility update" {
+                $testParams = @{
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock Get-ChildItem {
+                $full = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    } 
+
+                $client = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    } 
+
+                    $returnval = @($full, $client)
+                    $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                    return $returnval
+                }
+
+                Mock Get-ItemProperty {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.4709.1000"
+                        }
+                    }
+                } -ParameterFilter { 
+                    $Path -eq "C:\SPInstall\updates\svrsetup.dll"
+                }
+                
+                It "should install prereqs" {
+                    Mock Start-Process { return @{ ExitCode = 0 } }
+                    Mock Test-Path { return $true }
+
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Start-Process -Scope It 
                 }
             }
         }

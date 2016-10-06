@@ -441,18 +441,26 @@ function Set-TargetResource
 
         if ($checkDotNet -eq $true)
         {
-            $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP"
-            $dotNet46Check = Get-ChildItem -Path $ndpKey -Recurse `
-                             | Get-ItemProperty -name Version,Release -ErrorAction SilentlyContinue `
-                             | Where-Object -FilterScript { 
-                                   $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
-                               }
+            $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4"
+            $dotNet46Installed = $false
+            if (Test-Path -Path $ndpKey)
+            {
+                $dotNetv4Keys = Get-ChildItem -Path $ndpKey
+                foreach ($dotnetInstance in $dotNetv4Keys)
+                {
+                    if ($dotnetInstance.GetValue("Release") -ge 390000)
+                    {
+                        $dotNet46Installed = $true
+                        break
+                    }
+                }
+            }
 
-            if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
+            if ($dotNet46Installed -eq $true) 
             {
                 throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
-                                "servers that have .NET 4.6 already installed. See details " + `
-                                "at https://support.microsoft.com/en-us/kb/3087184")
+                                   "servers that have .NET 4.6 already installed. See details " + `
+                                   "at https://support.microsoft.com/en-us/kb/3087184")
                 return
             }    
         }
@@ -462,6 +470,7 @@ function Set-TargetResource
                             "MSIPCClient","WCFDataServices","KB2671763","WCFDataServices56")
         $WindowsFeatures = Get-WindowsFeature -Name $Script:SP2013Features
     }
+    
     if ($majorVersion -eq 16) 
     {
         Write-Verbose -Message "Version: SharePoint 2016"

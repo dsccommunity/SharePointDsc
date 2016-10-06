@@ -176,7 +176,7 @@ function Set-TargetResource
 
                         if ($skipParams -notcontains $param.Key)
                         {
-                        	$newParams.$($param.Key) = $param.Value
+                            $newParams.$($param.Key) = $param.Value
                         }
                     
                         if ($param.Key -eq "MaximumSiteCount")
