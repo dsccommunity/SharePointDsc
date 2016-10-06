@@ -80,7 +80,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
                     (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
                     (New-SPDscMockPrereq -Name "Something else")
                 )
-            } -ParameterFilter { $Path }
+            } -ParameterFilter { $null -ne $Path }
 
             Mock Get-ItemProperty {
                 return @{
@@ -123,7 +123,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         $testParams.Ensure = "Absent"
 
         Context "SharePoint binaries are installed and should not be" {
-            Mock Get-ItemProperty { return @{} } -ParameterFilter { $Path }
+            Mock Get-ItemProperty { return @{} } -ParameterFilter { $null -ne $Path }
 
             It "throws in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
@@ -164,7 +164,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
             DataPath = "C:\somewhere\else"
         }
         Context "SharePoint is not installed and should be, using custom install directories" {
-            Mock Get-ItemProperty { return $null } -ParameterFilter { $Path }
+            Mock Get-ItemProperty { return $null } -ParameterFilter { $null -ne $Path }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"

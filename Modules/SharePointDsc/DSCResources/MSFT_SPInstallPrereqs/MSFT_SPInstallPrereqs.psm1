@@ -430,7 +430,8 @@ function Set-TargetResource
         $BinaryDir = Split-Path -Path $InstallerPath
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
         $checkDotNet = $true
-        if (Test-Path -Path $svrsetupDll) {
+        if (Test-Path -Path $svrsetupDll)
+        {
             $svrsetupDllFileInfo = Get-ItemProperty -Path $svrsetupDll
             $fileVersion = $svrsetupDllFileInfo.VersionInfo.FileVersion
             if ($fileVersion -ge "15.0.4709.1000")

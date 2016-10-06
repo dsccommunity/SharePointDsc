@@ -92,7 +92,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-ItemProperty -MockWith {
                 return @()
-            } -ParameterFilter { $Path }
+            } -ParameterFilter { $null -ne $Path }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -258,7 +258,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-ItemProperty -MockWith {
                 return @()
-            } -ParameterFilter { $Path }
+            } -ParameterFilter { $null -ne $Path }
 
             It "throws an exception in the set method if required parameters are not set" {
                 {Set-TargetResource @testParams} | Should Throw

@@ -105,8 +105,9 @@ function Set-TargetResource
     {
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
         $checkDotNet = $true
-        if (Test-Path -Path $svrsetupDll) {
-            $svrsetupDllFileInfo = Get-ItemProperty $svrsetupDll
+        if (Test-Path -Path $svrsetupDll)
+        {
+            $svrsetupDllFileInfo = Get-ItemProperty -Path $svrsetupDll
             $fileVersion = $svrsetupDllFileInfo.VersionInfo.FileVersion
             if ($fileVersion -ge "15.0.4709.1000")
             {
@@ -116,18 +117,28 @@ function Set-TargetResource
 
         if ($checkDotNet -eq $true)
         {
-            $ndp = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP'
-            $dotNet46Check = $ndp | Get-ItemProperty -name Version,Release -ErrorAction SilentlyContinue `
-                                  | Where-Object -FilterScript { 
-                                        $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
-                                    }
-            if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
+            $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4"
+            $dotNet46Installed = $false
+            if (Test-Path -Path $ndpKey)
+            {
+                $dotNetv4Keys = Get-ChildItem -Path $ndpKey
+                foreach ($dotnetInstance in $dotNetv4Keys)
+                {
+                    if ($dotnetInstance.GetValue("Release") -ge 390000)
+                    {
+                        $dotNet46Installed = $true
+                        break
+                    }
+                }
+            }
+
+            if ($dotNet46Installed -eq $true) 
             {
                 throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
-                                "servers that have .NET 4.6 already installed. See details " + `
-                                "at https://support.microsoft.com/en-us/kb/3087184")
+                                   "servers that have .NET 4.6 already installed. See details " + `
+                                   "at https://support.microsoft.com/en-us/kb/3087184")
                 return
-            }    
+            }
         }
     }
 
