@@ -41,18 +41,21 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber }
         
         Mock Get-ChildItem {
-            return @(
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Full"
-                },
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Client"
-                }
-            )
+           $full = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Full"
+            } 
+
+           $client = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Client"
+            } 
+
+            $returnval = @($full, $client)
+            $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+            return $returnval
         }
         
         Mock Invoke-SPDSCCommand { 
@@ -136,18 +139,21 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         
         Context "SharePoint 2013 is installing on a server with .NET 4.6" {
             Mock Get-ChildItem {
-                return @(
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Full"
-                    },
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Client"
-                    }
-                )
+            $full = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                } 
+
+            $client = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                } 
+
+                $returnval = @($full, $client)
+                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                return $returnval
             }
             
             It "throws an error in the set method" {
