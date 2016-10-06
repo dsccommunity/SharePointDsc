@@ -1,5 +1,8 @@
 # Change log for SharePointDsc
 
+### Unreleased
+ * Fixed issue with SPSecureStoreServiceApp for OS not in En-Us language
+
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
  * Fixed SPJoinFarm to not write output during successful farm join
