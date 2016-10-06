@@ -133,8 +133,10 @@ function Get-SPDscFarmProductsInfo
 
 function Get-SPDscRegProductsInfo
 {
-    $registryLocation = Get-ChildItem HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall
-    $sharePointPrograms = $registryLocation | where-object { $_.PsPath -like "*\Office*" } | foreach {Get-ItemProperty $_.PsPath}
+    $registryLocation = Get-ChildItem -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
+    $sharePointPrograms = $registryLocation | Where-Object -FilterScript {
+         $_.PsPath -like "*\Office*" 
+    } | foreach-object -Process { Get-ItemProperty -Path $_.PsPath }
     
     return $sharePointPrograms.DisplayName 
 }
