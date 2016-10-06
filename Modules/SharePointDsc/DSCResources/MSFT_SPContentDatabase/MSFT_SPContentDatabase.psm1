@@ -321,7 +321,14 @@ function Set-TargetResource
                     }
                 }
             }
-            $cdb.Update()
+            if ($null -ne $cdb)
+            {
+                $cdb.Update()
+            }
+            else
+            {
+                Write-Verbose -Message "Could not update Content Database because the reference is null"
+            }
         }
         else
         {
