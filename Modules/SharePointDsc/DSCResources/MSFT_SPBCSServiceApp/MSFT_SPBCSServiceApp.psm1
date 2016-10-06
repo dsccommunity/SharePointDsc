@@ -50,7 +50,8 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Business Data Connectivity Service Application" 
+            $_.TypeName -eq "Business Data Connectivity Service Application" -or `
+            $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"    
         }
 
         if ($null -eq $serviceApp) 
@@ -139,7 +140,8 @@ function Set-TargetResource
 
                 Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Business Data Connectivity Service Application" 
+                        $_.TypeName -eq "Business Data Connectivity Service Application" -or `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"  
                     } `
                     | Set-SPBusinessDataCatalogServiceApplication -ApplicationPool $appPool
             }
@@ -156,7 +158,8 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "Business Data Connectivity Service Application"
+                $_.TypeName -eq "Business Data Connectivity Service Application" -or `
+                $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"  
             }
             Remove-SPServiceApplication $app -Confirm:$false
         }

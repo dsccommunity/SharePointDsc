@@ -1,7 +1,20 @@
 # Change log for SharePointDsc
 
 ### Unreleased
- * Fixed issue with SPManagedMetaDataServiceApp for OS not in En-Us language
+ * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
+  - SPAccessServiceApp
+  - SPAppManagementServiceApp
+  - SPBCSServiceApp
+  - SPExcelServiceApp
+  - SPManagedMetaDataServiceApp
+  - SPPerformancePointServiceApp
+  - SPSearchServiceApp
+  - SPSecureStoreServiceApp
+  - SPUsageApplication
+  - SPUserProfileServiceApp
+  - SPVisioServiceApp
+  - SPWordAutomationServiceApp
+  - SPWorkManagementServiceApp
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup

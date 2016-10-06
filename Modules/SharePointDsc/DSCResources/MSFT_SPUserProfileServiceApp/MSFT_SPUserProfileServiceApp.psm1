@@ -79,7 +79,8 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Service Application" 
+            $_.TypeName -eq "User Profile Service Application" -or `
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"            
         }
 
         if ($null -eq $serviceApp)
@@ -314,7 +315,8 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "User Profile Service Application" 
+                        $_.TypeName -eq "User Profile Service Application" -or `
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"  
                     }
             Remove-SPServiceApplication $service -Confirm:$false
         }

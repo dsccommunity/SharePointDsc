@@ -29,7 +29,10 @@ function Get-TargetResource
         if ($null -eq $serviceApps) { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { $_.TypeName -eq "Work Management Service Application" }
+        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $_.TypeName -eq "Work Management Service Application" -or `
+            $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+        }
 
         If ($null -eq $serviceApp) { 
             return $nullReturn 
@@ -82,8 +85,10 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
-        | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
+        $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue | Where-Object -FilterScript {
+            $_.TypeName -eq "Work Management Service Application" -or `
+            $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+        }
 
         if($null -ne $appService -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
         {
@@ -122,9 +127,11 @@ function Set-TargetResource
             $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
         }
         $setParams.Add("Confirm", $false)
-        $appService =  Get-SPServiceApplication -Name $params.Name `
-            | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
-          
+        $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $_.TypeName -eq "Work Management Service Application" -or `
+            $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication" 
+        }
+
         $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
     }
 }

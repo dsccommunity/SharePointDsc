@@ -69,7 +69,8 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Usage and Health Data Collection Service Application" 
+            $_.TypeName -eq "Usage and Health Data Collection Service Application" -or `
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
         }
 
         if ($null -eq $serviceApp)
@@ -79,7 +80,8 @@ function Get-TargetResource
         else
         {
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
-                $_.TypeName -eq "Usage and Health Data Collection Proxy" 
+                $_.TypeName -eq "Usage and Health Data Collection Proxy" -or `
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
             $ensure = "Present"
@@ -203,7 +205,8 @@ function Set-TargetResource
             $params = $args[0]
             
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
-                $_.TypeName -eq "Usage and Health Data Collection Proxy" 
+                $_.TypeName -eq "Usage and Health Data Collection Proxy" -or `
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
             if($spUsageApplicationProxy.Status -eq "Disabled") 
@@ -243,7 +246,8 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Usage and Health Data Collection Service Application" 
+                        $_.TypeName -eq "Usage and Health Data Collection Service Application" -or `
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
                     }
             Remove-SPServiceApplication $service -Confirm:$false
         }
