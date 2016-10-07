@@ -32,6 +32,7 @@ Describe "SPSecureStoreServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
 
         Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
         Mock Remove-SPServiceApplication {}   
+        Mock Get-SPServiceApplicationProxy { return $null }
 
         Context "When no service application exists in the current farm" {
 

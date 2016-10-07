@@ -312,11 +312,22 @@ function Set-TargetResource
 
             $params = $args[0]
             
-            $service = Get-SPServiceApplication -Name $params.Name `
+            $app = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
                         $_.TypeName -eq "User Profile Service Application" 
                     }
-            Remove-SPServiceApplication $service -Confirm:$false
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication $app -Confirm:$false
         }
     }        
 }

@@ -529,13 +529,24 @@ function Set-TargetResource
             Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
                 $params = $args[0] 
 
-                $serviceApp = Get-SPServiceApplication `
+                $app = Get-SPServiceApplication `
                                     -Name $params.Name `
                                     -ErrorAction SilentlyContinue | Where-Object -FilterScript { 
                                         $_.TypeName -eq "Word Automation Services" 
                                     }
-                if ($null -ne $serviceApp) 
+                if ($null -ne $app) 
                 {
+
+                    # Remove the connected proxy(ies)
+                    $proxies = Get-SPServiceApplicationProxy
+                    foreach($proxyInstance in $proxies)
+                    {
+                        if($app.IsConnected($proxyInstance))
+                        {
+                            $proxyInstance.Delete()
+                        }
+                    }
+
                     # Service app existed, deleting
                     Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
                 } 

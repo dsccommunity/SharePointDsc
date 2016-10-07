@@ -28,6 +28,7 @@ Describe "SPPerformancePointServiceApp - SharePoint Build $((Get-Item $SharePoin
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
         Mock Remove-SPServiceApplication { }
+        Mock Get-SPServiceApplicationProxy { return $null }
 
         Context "When no service applications exist in the current farm" {
 

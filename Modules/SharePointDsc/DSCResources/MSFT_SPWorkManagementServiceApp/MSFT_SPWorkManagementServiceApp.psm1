@@ -82,23 +82,33 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        $appService =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
+        $app =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
         | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
 
-        if($null -ne $appService -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
+        if($null -ne $app -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
         {
             #remove existing app
-            
-            Remove-SPServiceApplication $appService 
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication $app 
             return
-        } elseif ($null -eq $appService){
+        } elseif ($null -eq $app){
             $newParams = @{}
             $newParams.Add("Name", $params.Name) 
             $newParams.Add("ApplicationPool", $params.ApplicationPool) 
 
-            $appService = New-SPWorkManagementServiceApplication @newParams
+            $app = New-SPWorkManagementServiceApplication @newParams
             if ($null -eq $params.ProxyName) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
-            New-SPWorkManagementServiceApplicationProxy -Name $pName -DefaultProxyGroup -ServiceApplication $appService | Out-Null
+            New-SPWorkManagementServiceApplicationProxy -Name $pName -DefaultProxyGroup -ServiceApplication $app | Out-Null
             Start-Sleep -Milliseconds 200
         }
         $setParams = @{}
@@ -122,10 +132,10 @@ function Set-TargetResource
             $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
         }
         $setParams.Add("Confirm", $false)
-        $appService =  Get-SPServiceApplication -Name $params.Name `
+        $app =  Get-SPServiceApplication -Name $params.Name `
             | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
           
-        $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
+        $app | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
     }
 }
 
