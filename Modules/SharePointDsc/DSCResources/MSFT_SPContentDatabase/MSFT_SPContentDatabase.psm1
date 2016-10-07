@@ -145,20 +145,24 @@ function Set-TargetResource
             $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
         }
 
-        if ($params.Ensure -eq "Present") {
+        if ($params.Ensure -eq "Present")
+        {
             # Check if specified web application exists and throw exception when
             # this is not the case
             $webapp = Get-SPWebApplication | Where-Object -FilterScript {
                 $_.Url.Trim("/") -eq $params.WebAppUrl.Trim("/")
             }
 
-            if ($null -eq $webapp) {
+            if ($null -eq $webapp)
+            {
                 throw "Specified web application does not exist."
             }
 
             # Check if database exists
-            if ($null -ne $cdb) {
-                if ($cdb.Server -ne $params.DatabaseServer) {
+            if ($null -ne $cdb)
+            {
+                if ($cdb.Server -ne $params.DatabaseServer)
+                {
                     throw ("Specified database server does not match the actual database " + `
                            "server. This resource cannot move the database to a different " + `
                            "SQL instance.")
@@ -166,7 +170,8 @@ function Set-TargetResource
 
                 # Check and change attached web application.
                 # Dismount and mount to correct web application
-                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/")) {
+                if ($params.WebAppUrl.Trim("/") -ne $cdb.WebApplication.Url.Trim("/"))
+                {
                     Dismount-SPContentDatabase $params.Name -Confirm:$false
 
                     $newParams= @{}
@@ -327,7 +332,8 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose -Message "Could not update Content Database because the reference is null"
+                Write-Verbose -Message "Could not update Content Database due to an issue " + `
+                                       "which occurred during mounting the database."
             }
         }
         else
