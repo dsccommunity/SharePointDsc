@@ -1,7 +1,7 @@
 [CmdletBinding()] 
 param( 
     [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve) 
-) 
+)
 
 $ErrorActionPreference = 'stop' 
 Set-StrictMode -Version latest 
@@ -41,11 +41,18 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         } 
          
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue 
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
+        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+
+        Mock Remove-SPServiceApplication { }
 
         Context "When no service applications exist in the current farm and Ensure is set to Present" { 
 
-            Mock Get-SPServiceApplication { return $null } 
+            Mock Get-SPServiceApplication { return $null }
+            Mock Get-SPServiceApplicationPool {
+                return @(@{ 
+                    Name = $testParams.ApplicationPool
+                }) 
+            }
             Mock New-SPWordConversionServiceApplication {
                 $returnval = @(@{
                     WordServiceFormats = @{
@@ -68,39 +75,24 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     KeepAliveTimeout = 30
                     MaximumConversionTime = 300
                 })
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnval
-            } 
-            Mock Get-SPServiceApplicationPool {
-                return @(@{ 
-                    Name = $testParams.ApplicationPool
-                }) 
             }
 
-            Mock Get-SPTimerJob {
-                $returnval = @(@{ Name = "Just a name" })
-                return ,$returnval
-            }
-            Mock Set-SPTimerJob {}
-
-            It "returns null from the Get method" { 
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }  
+            It "returns absent from the Get method" { 
+                (Get-TargetResource @testParams).Ensure | Should Be "absent" 
             } 
 
             It "returns false when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-            $Global:SPDSCSiteUseUpdated = $false
-            It "creates a new service application in the set method" { 
+             It "creates a new service application in the set method" { 
                 Set-TargetResource @testParams 
                 Assert-MockCalled New-SPWordConversionServiceApplication  
-                $Global:SPDSCSiteUseUpdated | Should Be $true
-            } 
-        } 
+            }
+        }
 
-        Context "When no service applications exist in the current farm and Ensure is set to Present, but the Application Pool does not exist" { 
+        Context "When no service applications exist in the current farm and Ensure is set to Present, but the Application Pool does not exist" {
             Mock Get-SPServiceApplication { return $null } 
             Mock Get-SPServiceApplicationPool { return $null }
 
@@ -110,16 +102,18 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         }
 
         Context "When service applications exist in the current farm but the specific word automation app does not" { 
+            Mock Get-SPServiceApplication { return @(@{
+                TypeName = "Some other service app type"
+            }) }
+            
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
+            }
 
-            Mock Get-SPServiceApplication { return @(@{ 
-                TypeName = "Some other service app type" 
-            }) } 
-
-            It "returns null from the Get method" { 
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }  
-            } 
-        } 
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
 
         Context "When a service application exists and is configured correctly" { 
             Mock Get-SPServiceApplication {  
@@ -168,6 +162,10 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     TypeName = "Word Automation Services" 
                     DisplayName = $testParams.Name 
                     ApplicationPool = @{ Name = "Wrong App Pool Name" } 
+                    Database = @{
+                            Name = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                    }
                     WordServiceFormats = @{
                         OpenXmlDocument = $false
                         Word972003Document = $true
@@ -206,7 +204,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             } 
 
             $Global:SPDSCSiteUseUpdated = $false
-            It "calls the update service app cmdlet from the set method" { 
+            It "calls Set-SPWordConversionServiceApplication and update service app cmdlet from the set method" { 
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled Get-SPServiceApplicationPool 
@@ -219,7 +217,11 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             Mock Get-SPServiceApplication {  
                 $returnval = @(@{
                     TypeName = "Word Automation Services" 
-                    DisplayName = $testParams.Name 
+                    DisplayName = $testParams.Name
+                    Database = @{
+                            Name = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                    }
                     ApplicationPool = @{ Name = $testParams.ApplicationPool } 
                     WordServiceFormats = @{
                         OpenXmlDocument = $false
@@ -243,11 +245,8 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 })
                 $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
                 return $returnval
-            } 
-
+            }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } } 
-            Mock Set-SPWordConversionServiceApplication {}
-
             Mock Get-SPTimerJob {
                 $returnval = @(@{ Name = "Just a name" })
                 return ,$returnval
@@ -261,7 +260,8 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             $Global:SPDSCSiteUseUpdated = $false
             It "calls the update service app cmdlet from the set method" { 
                 Set-TargetResource @testParams 
-                Assert-MockCalled Get-SPServiceApplication
+
+                Assert-MockCalled Get-SPServiceApplication 
                 $Global:SPDSCSiteUseUpdated | Should Be $true
             } 
         }
@@ -274,42 +274,63 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
 
             Mock Get-SPServiceApplication { return $null } 
 
-            It "returns values from the get method" { 
-                Get-TargetResource @testParams | Should Not BeNullOrEmpty 
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }  
-            } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
 
             It "returns true when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $true 
             } 
-        } 
+        }
 
         Context "When a service application exists and Ensure is set to Absent" {
+            Mock Get-SPServiceApplication {  
+                return @(@{ 
+                    TypeName = "Word Automation Services" 
+                    DisplayName = $testParams.Name 
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool } 
+                    Database = @{
+                            Name = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                    WordServiceFormats = @{
+                        OpenXmlDocument = $true
+                        Word972003Document = $true
+                        RichTextFormat = $true
+                        WebPage = $true
+                        Word2003Xml = $true
+                    }
+                    DisableEmbeddedFonts = $false
+                    MaximumMemoryUsage = 100
+                    RecycleProcessThreshold = 100
+                    DisableBinaryFileScan = $false
+                    TotalActiveProcesses = 8
+                    TimerJobFrequency = @{ TotalMinutes = 15 }
+                    ConversionsPerInstance = 12
+                    ConversionTimeout = @{ TotalMinutes = 5 }
+                    MaximumConversionAttempts = 2
+                    MaximumSyncConversionRequests = 25
+                    KeepAliveTimeout = @{ TotalSeconds = 30 }
+                    MaximumConversionTime = @{ TotalSeconds = 300 }
+                }) 
+            }
+
+            It "returns present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+            
+            It "returns true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+
             $testParams = @{ 
                 Name = "Word Automation Service Application" 
                 Ensure = "Absent"
             }
 
-            Mock Get-SPServiceApplication { 
-                return @(@{ 
-                    TypeName = "Word Automation Services" 
-                    DisplayName = $testParams.Name 
-                }) 
-            } 
-            Mock Remove-SPServiceApplication { } 
-
-            It "should return null from the get method" { 
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }  
-            } 
-
-            It "should return false when the Test method is called" { 
-                Test-TargetResource @testParams | Should Be $false 
-            }
-
-            It "should call the update service app cmdlet from the set method" { 
-                Set-TargetResource @testParams 
-                Assert-MockCalled Remove-SPServiceApplication 
+            It "calls the remove service application cmdlet in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication
             }
         }
 
@@ -352,6 +373,5 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 { Set-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
             }
         } 
-
     } 
 } 
