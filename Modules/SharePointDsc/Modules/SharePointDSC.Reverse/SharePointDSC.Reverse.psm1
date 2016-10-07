@@ -159,7 +159,7 @@ function Read-OperatingSystemVersion
     foreach($spServer in $servers)
     {
         $serverName = $spServer.Name
-        $osInfo = Get-WmiObject Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture -ErrorAction SilentlyContinue
+        $osInfo = Get-CimInstance Win32_OperatingSystem  -ComputerName $serverName| Select-Object @{Label="OSName"; Expression={$_.Name.Substring($_.Name.indexof("W"),$_.Name.indexof("|")-$_.Name.indexof("W"))}} , Version ,OSArchitecture -ErrorAction SilentlyContinue
         $Script:dscConfigContent += "    [" + $serverName + "]: " + $osInfo.OSName + "(" + $osInfo.OSArchitecture + ")    ----    " + $osInfo.Version + "`r`n"
     }    
     $Script:dscConfigContent += "#>`r`n`r`n"
@@ -219,7 +219,6 @@ function Set-ConfigurationData
     {
         $tempConfigDataContent += "    @{`r`n"
         $tempConfigDataContent += "        NodeName = `"" + $spServer.Name + "`";`r`n"
-        $tempConfigDataContent += "        PSDscAllowPlainTextPassword = `$true;`r`n"
         $tempConfigDataContent += "    },`r`n"
     }
 
@@ -233,9 +232,9 @@ function Set-ConfigurationData
 function Set-Imports
 {
     $Script:dscConfigContent += "    Import-DscResource -ModuleName PSDesiredStateConfiguration`r`n"
-    $Script:dscConfigContent += "    Import-DscResource -ModuleName SharePointDSC`r`n"
-    $Script:dscConfigContent += "    Import-DscResource -ModuleName xWebAdministration`r`n"
-    $Script:dscConfigContent += "    Import-DscResource -ModuleName xCredSSP`r`n"
+    $Script:dscConfigContent += "    Import-DscResource -ModuleName SharePointDSC -ModuleVersion '1.3.0.0'`r`n"
+    $Script:dscConfigContent += "    Import-DscResource -ModuleName xWebAdministration -ModuleVersion '1.14.0.0'`r`n"
+    $Script:dscConfigContent += "    Import-DscResource -ModuleName xCredSSP -ModuleVersion '1.1.0.0'`r`n"
 }
 
 <## This function receives a user name and returns the "Display Name" for that user. This function is primarly used to identify the Farm (System) account. #>
