@@ -12,6 +12,10 @@ function Get-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $ProxyName,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -76,7 +80,7 @@ function Set-TargetResource
 
         [parameter(Mandatory = $false)]
         [System.String] 
-        $ProxyName = "Visio Service Application Proxy",
+        $ProxyName,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
@@ -156,6 +160,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String] 
         $ApplicationPool,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $ProxyName,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 

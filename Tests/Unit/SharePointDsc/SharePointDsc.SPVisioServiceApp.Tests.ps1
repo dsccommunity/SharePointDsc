@@ -30,7 +30,6 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Mock Remove-SPServiceApplication { }
-        Mock Get-SPVisioServiceApplicationProxy { return $null }
 
         Context "When no service applications exist in the current farm" {
 

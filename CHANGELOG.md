@@ -1,12 +1,11 @@
 # Change log for SharePointDsc
-### Unreleased
- * SPVisioServiceapplication now creates proxy and let's you specify a name for it
 
 ### Unreleased
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
  * Improved code styling
+ * SPVisioServiceapplication now creates proxy and lets you specify a name for it
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
