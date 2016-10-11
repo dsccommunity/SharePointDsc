@@ -41,18 +41,21 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber }
         
         Mock Get-ChildItem {
-            return @(
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Full"
-                },
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Client"
-                }
-            )
+           $full = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Full"
+            } 
+
+           $client = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Client"
+            } 
+
+            $returnval = @($full, $client)
+            $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+            return $returnval
         }
         
         Mock Invoke-SPDSCCommand { 
@@ -75,10 +78,24 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         }
 
         Context "SharePoint binaries are installed and should be" {
-            Mock Get-ItemProperty { return @(
-                (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
-                (New-SPDscMockPrereq -Name "Something else")
-            ) } 
+            Mock Get-ItemProperty { 
+                return @(
+                    (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
+                    (New-SPDscMockPrereq -Name "Something else")
+                )
+            } -ParameterFilter { $null -ne $Path }
+
+            Mock Get-ItemProperty {
+                return @{
+                    VersionInfo = @{
+                        FileVersion = "15.0.4709.1000"
+                    }
+                } 
+            }
+
+            Mock Test-Path {
+                return $true
+            }
 
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -109,7 +126,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         $testParams.Ensure = "Absent"
 
         Context "SharePoint binaries are installed and should not be" {
-            Mock Get-ItemProperty { return @{} } 
+            Mock Get-ItemProperty { return @{} } -ParameterFilter { $null -ne $Path }
 
             It "throws in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
@@ -122,18 +139,21 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
         
         Context "SharePoint 2013 is installing on a server with .NET 4.6" {
             Mock Get-ChildItem {
-                return @(
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Full"
-                    },
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Client"
-                    }
-                )
+            $full = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                } 
+
+            $client = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                } 
+
+                $returnval = @($full, $client)
+                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                return $returnval
             }
             
             It "throws an error in the set method" {
@@ -150,7 +170,7 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
             DataPath = "C:\somewhere\else"
         }
         Context "SharePoint is not installed and should be, using custom install directories" {
-            Mock Get-ItemProperty { return $null }
+            Mock Get-ItemProperty { return $null } -ParameterFilter { $null -ne $Path }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"

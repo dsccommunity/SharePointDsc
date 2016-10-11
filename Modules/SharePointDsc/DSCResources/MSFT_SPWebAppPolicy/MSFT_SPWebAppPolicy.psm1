@@ -29,6 +29,8 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting web app policy for $WebAppUrl"
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
         Write-Verbose -Message ("Cannot use the Members parameter together with " + `
@@ -66,8 +68,6 @@ function Get-TargetResource
         }
     }
     
-    Write-Verbose -Message "Getting web app policy for $UserName at $WebAppUrl"
-
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -160,7 +160,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -191,7 +190,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting web app policy for $UserName at $WebAppUrl"
+    Write-Verbose -Message "Setting web app policy for $WebAppUrl"
 
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
@@ -565,10 +564,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing web app policy for $WebAppUrl"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    Write-Verbose -Message "Testing web app policy for '$WebAppUrl'"
-
     $modulePath = "..\..\Modules\SharePointDsc.WebAppPolicy\SPWebAppPolicy.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $modulePath -Resolve)
 

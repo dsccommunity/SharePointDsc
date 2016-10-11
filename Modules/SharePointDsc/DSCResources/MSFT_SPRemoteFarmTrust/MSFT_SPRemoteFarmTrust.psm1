@@ -24,7 +24,7 @@ function Get-TargetResource()
         $InstallAccount
     )
 
-    Write-Verbose -Message "Looking for remote farm trust '$Name'"
+    Write-Verbose -Message "Getting remote farm trust '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -90,6 +90,8 @@ function Set-TargetResource()
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting remote farm trust '$Name'"
 
     if ($Ensure -eq "Present")
     {
@@ -198,6 +200,8 @@ function Test-TargetResource()
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Testing remote farm trust '$Name'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

@@ -39,7 +39,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting farm solution '$Name'..."
+    Write-Verbose -Message "Getting farm solution '$Name' settings"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -121,6 +121,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting farm solution '$Name' settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -378,10 +380,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing solution $Name"
+    Write-Verbose -Message "Testing farm solution '$Name' settings"
 
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $valuesToCheck = @("Ensure", "Version", "Deployed")
     if ($WebApplications.Count -gt 0)

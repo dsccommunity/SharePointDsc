@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to apply specific anti-virus configuration to the farm
+    This example shows how to configure the AppCatalog in the farm
 #>
 
     Configuration Example 

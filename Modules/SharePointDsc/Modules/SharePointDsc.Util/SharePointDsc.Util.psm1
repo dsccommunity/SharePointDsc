@@ -73,7 +73,6 @@ function Get-SPDscFarmVersionInfo
     # Loop through all products
     foreach ($product in $products)
     {
-        #Write-Verbose -Verbose "Product: $product"
         $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
         $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
 
@@ -89,7 +88,6 @@ function Get-SPDscFarmVersionInfo
                 ($patchableUnit -notmatch "Project Server") -and
                 ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
             {
-                #Write-Verbose -Verbose "  - $patchableUnit"
                 $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
                 $currentVersion = ""
                 foreach ($patchableUnitInfo in $patchableUnitsInfo)

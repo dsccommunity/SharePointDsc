@@ -214,6 +214,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting user profile service application $Name"
+
     if ($Ensure -eq "Present") 
     {    
         if ($PSBoundParameters.ContainsKey("FarmAccount") -eq $false) 
@@ -321,7 +323,6 @@ function Set-TargetResource
     }        
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -386,9 +387,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if($Ensure -eq "Present")
     {
@@ -405,4 +408,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-
