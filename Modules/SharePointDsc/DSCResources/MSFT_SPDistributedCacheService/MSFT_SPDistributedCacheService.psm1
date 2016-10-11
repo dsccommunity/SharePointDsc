@@ -121,6 +121,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting the cache host information"
+
     $CurrentState = Get-TargetResource @PSBoundParameters
 
     if ($Ensure -eq "Present") 
@@ -383,14 +385,15 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing the cache host information"
+
     $PSBoundParameters.Ensure = $Ensure
-    Write-Verbose -Message "Testing for distributed cache configuration"
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure", "CreateFirewallRules")
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

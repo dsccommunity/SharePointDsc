@@ -30,7 +30,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Checking app urls settings"
+    Write-Verbose -Message "Getting app domain settings for '$AppDomain'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -89,8 +89,9 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting app domain settings for '$AppDomain'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Updating app domain settings "
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $CurrentValues) `
@@ -155,12 +156,15 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing app domain settings for '$AppDomain'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing app domain settings"
+
     if ($null -eq $CurrentValues) 
     { 
         return $false 
     }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("AppDomain", "Port", "SSL") 

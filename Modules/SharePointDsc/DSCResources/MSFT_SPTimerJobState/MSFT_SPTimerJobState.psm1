@@ -25,7 +25,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting timer job settings"
+    Write-Verbose -Message "Getting timer job settings for job '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -117,7 +117,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting timer job settings"
+    Write-Verbose -Message "Setting timer job settings for job '$Name'"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -242,7 +242,8 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing timer job settings"
+    Write-Verbose -Message "Testing timer job settings for job '$Name'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 

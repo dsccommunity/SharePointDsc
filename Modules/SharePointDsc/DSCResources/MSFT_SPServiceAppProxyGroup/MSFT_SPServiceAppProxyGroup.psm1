@@ -30,6 +30,8 @@ function Get-TargetResource
         $InstallAccount
     )
  
+    Write-Verbose -Message "Getting Service Application Proxy Group $Name"
+
     if (($Ensure -eq "Present") `
         -and $ServiceAppProxies `
         -and (($ServiceAppProxiesToInclude) -or ($ServiceAppProxiesToExclude))) 
@@ -50,9 +52,7 @@ function Get-TargetResource
                                 "ServiceAppProxiesToExclude")
         return $null  
     }
-
-    Write-Verbose -Message "Getting Service Application Proxy Group $Name"
-        
+       
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
     
@@ -84,8 +84,6 @@ function Get-TargetResource
     }
     return $result
 }
-
-
 
 function Set-TargetResource
 {
@@ -333,7 +331,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -366,7 +363,7 @@ function Test-TargetResource
         $InstallAccount
     )
  
-    write-verbose "Testing Service Application Proxy Group $Name"
+    Write-Verbose -Message "Testing Service Application Proxy Group $Name"
     
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

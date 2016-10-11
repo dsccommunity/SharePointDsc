@@ -30,7 +30,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting user profile service application $Name"
+    Write-Verbose -Message "Getting user profile section $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -109,9 +109,10 @@ function Set-TargetResource
 
     # note for integration test: CA can take a couple of minutes to notice the change. 
     # don't try refreshing properties page. go through from a fresh "flow" from Service apps page
+    Write-Verbose -Message "Setting user profile section $Name"
+
     $PSBoundParameters.Ensure = $Ensure
     
-    Write-Verbose -Message "Creating user profile property $Name"
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
@@ -208,13 +209,17 @@ function Test-TargetResource
 
     )
 
+    Write-Verbose -Message "Testing user profile section $Name"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for user profile property $Name"
+
     if ($null -eq $CurrentValues) 
     { 
         return $false  
     }
-    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

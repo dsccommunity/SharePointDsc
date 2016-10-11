@@ -137,7 +137,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -200,7 +199,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Creating site collection $Url"
+    Write-Verbose -Message "Setting site collection $Url"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -217,7 +216,6 @@ function Set-TargetResource
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -282,8 +280,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing site collection $Url"
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($null -eq $CurrentValues) 
     { 
         return $false 
@@ -294,4 +294,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-
