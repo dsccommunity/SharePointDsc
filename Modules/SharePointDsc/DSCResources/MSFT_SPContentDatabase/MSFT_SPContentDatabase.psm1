@@ -197,7 +197,7 @@ function Set-TargetResource
 
                     try
                     {
-                        $cdb = Mount-SPContentDatabase @newParams
+                        $cdb = Mount-SPContentDatabase @newParams -ErrorAction Stop
                     }
                     catch
                     {
@@ -293,7 +293,7 @@ function Set-TargetResource
 
                 try
                 {
-                    $cdb = Mount-SPContentDatabase @newParams
+                    $cdb = Mount-SPContentDatabase @newParams -ErrorAction Stop
                 }
                 catch
                 {
@@ -326,15 +326,7 @@ function Set-TargetResource
                     }
                 }
             }
-            if ($null -ne $cdb)
-            {
-                $cdb.Update()
-            }
-            else
-            {
-                Write-Verbose -Message "Could not update Content Database due to an issue " + `
-                                       "which occurred during mounting the database."
-            }
+            $cdb.Update()
         }
         else
         {
