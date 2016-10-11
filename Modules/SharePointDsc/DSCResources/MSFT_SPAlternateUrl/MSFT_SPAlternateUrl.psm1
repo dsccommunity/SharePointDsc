@@ -96,9 +96,9 @@ function Set-TargetResource
 
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Setting Alternate URL for $Zone in $WebAppUrl"
 
-    Write-Verbose -Message "Updating app domain settings for $SiteUrl"
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     
     if ($Ensure -eq "Present") 
     {
@@ -168,9 +168,10 @@ function Test-TargetResource
 
     )
 
-    Write-Verbose -Message "Testing alternate URL configuration"
+    Write-Verbose -Message "Testing Alternate URL for $Zone in $WebAppUrl"
     
     $PSBoundParameters.Ensure = $Ensure
+    
     if ([string]::IsNullOrEmpty($Url) -and $Ensure -eq "Present") 
     {
         throw "URL must be specified when ensure is set to present"

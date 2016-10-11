@@ -34,11 +34,11 @@ function Get-TargetResource
         $InstallAccount
     )
 
-        Write-Verbose -Message "Getting Performance Point service app '$Name'"
+    Write-Verbose -Message "Getting for PerformancePoint Service Application '$Name'"
 
-        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                      -Arguments $PSBoundParameters `
-                                      -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
@@ -120,6 +120,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting PerformancePoint Service Application '$Name'"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -239,9 +241,12 @@ function Test-TargetResource
         $InstallAccount
     )
     
-    Write-Verbose -Message "Testing for PerformancePoint Service Application '$Name'"
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing PerformancePoint Service Application '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")

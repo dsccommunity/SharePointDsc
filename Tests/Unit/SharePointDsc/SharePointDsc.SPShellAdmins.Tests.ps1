@@ -142,7 +142,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     } -ClientOnly)
                 )
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -182,7 +182,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -227,7 +227,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -328,7 +328,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -381,7 +381,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -481,7 +481,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -532,7 +532,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -631,7 +631,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -682,7 +682,7 @@ Describe "SPShellAdmins - SharePoint Build $((Get-Item $SharePointCmdletModule).
                     return @{ UserName = "contoso\user1","contoso\user2" }
                 }
             }
-            Mock Get-SPDSCContentDatabase {
+            Mock Get-SPContentDatabase {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"

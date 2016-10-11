@@ -93,7 +93,9 @@ function Get-TargetResource
     ) 
 
     Write-Verbose -Message "Getting Word Automation service app '$Name'" 
+
     $PSBoundParameters.Ensure = $Ensure
+    
     if (($ApplicationPool `
             -or $DatabaseName `
             -or $DatabaseServer `
@@ -301,6 +303,10 @@ function Set-TargetResource
         $InstallAccount 
     ) 
 
+    Write-Verbose -Message "Setting Word Automation service app '$Name'" 
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if (($ApplicationPool `
             -or $DatabaseName `
             -or $DatabaseServer `
@@ -321,7 +327,7 @@ function Set-TargetResource
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
-    $PSBoundParameters.Ensure = $Ensure
+
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) 
     {
         throw ("An Application Pool and Database Name are required to configure the Word " + `
@@ -646,6 +652,10 @@ function Test-TargetResource
         $InstallAccount 
     ) 
 
+    Write-Verbose -Message "Testing Word Automation service app '$Name'" 
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if (($ApplicationPool `
             -or $DatabaseName `
             -or $DatabaseServer `
@@ -667,15 +677,12 @@ function Test-TargetResource
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
     
-    $PSBoundParameters.Ensure = $Ensure
-
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) 
     {
         throw ("An Application Pool and Database Name are required to configure the Word " + ` 
                "Automation Service Application")
     }
 
-    Write-Verbose -Message "Testing for Word Automation Service Application '$Name'" 
     $CurrentValues = Get-TargetResource @PSBoundParameters 
      
     if ($null -eq $CurrentValues) 

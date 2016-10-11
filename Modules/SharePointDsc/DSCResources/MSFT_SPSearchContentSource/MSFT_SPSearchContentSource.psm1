@@ -65,6 +65,8 @@ function Get-TargetResource
         $InstallAccount
     )
    
+    Write-Verbose -Message "Getting Content Source Setting for '$Name'"
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                   -ScriptBlock {
@@ -251,7 +253,10 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    switch ($ContentSourceType) {
+    Write-Verbose -Message "Setting Content Source Setting for '$Name'"
+
+    switch ($ContentSourceType)
+    {
         "SharePoint" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
             { 
@@ -656,7 +661,12 @@ function Test-TargetResource
         $InstallAccount
     )
  
-    switch ($ContentSourceType) {
+    Write-Verbose -Message "Testing Content Source Setting for '$Name'"
+
+    $PSBoundParameters.Ensure = $Ensure
+    
+    switch ($ContentSourceType)
+    {
         "SharePoint" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
             { 
@@ -705,8 +715,6 @@ function Test-TargetResource
     } 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    $PSBoundParameters.Ensure = $Ensure
-    
     if ($Ensure -eq "Absent" -or $CurrentValues.Ensure -eq "Absent") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
@@ -729,7 +737,6 @@ function Test-TargetResource
             return $false
         }
     }
-
     
     if (($PSBoundParameters.ContainsKey("FullSchedule") -eq $true) -and ($null -ne $FullSchedule))
     {
