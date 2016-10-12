@@ -169,7 +169,7 @@ function Set-TargetResource
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
-<<<<<<< HEAD
+
         $app =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
         | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
 
@@ -187,13 +187,13 @@ function Set-TargetResource
             Remove-SPServiceApplication -Identity $app -RemoveData -Confirm:$false
             return
         } elseif ($null -eq $app){
-=======
-        $appService =  Get-SPServiceApplication -Name $params.Name `
+
+            $appService =  Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue `
                        | Where-Object -FilterScript {
                            $_.TypeName -eq "Work Management Service Application"
-                         }
-
+                        }
+        }
         if ($null -ne $appService `
             -and $params.ContainsKey("Ensure") `
             -and $params.Ensure -eq "Absent")
@@ -204,16 +204,15 @@ function Set-TargetResource
         }
         elseif ($null -eq $appService)
         {
->>>>>>> refs/remotes/PowerShell/dev
+
             $newParams = @{}
             $newParams.Add("Name", $params.Name) 
             $newParams.Add("ApplicationPool", $params.ApplicationPool) 
 
-<<<<<<< HEAD
             $app = New-SPWorkManagementServiceApplication @newParams
             if ($null -eq $params.ProxyName) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
             New-SPWorkManagementServiceApplicationProxy -Name $pName -DefaultProxyGroup -ServiceApplication $app | Out-Null
-=======
+
             $appService = New-SPWorkManagementServiceApplication @newParams
             if ($null -eq $params.ProxyName)
             {
@@ -226,7 +225,7 @@ function Set-TargetResource
             New-SPWorkManagementServiceApplicationProxy -Name $pName `
                                                         -DefaultProxyGroup `
                                                         -ServiceApplication $appService | Out-Null
->>>>>>> refs/remotes/PowerShell/dev
+
             Start-Sleep -Milliseconds 200
         }
         $setParams = @{}
@@ -276,16 +275,15 @@ function Set-TargetResource
             $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
         }
         $setParams.Add("Confirm", $false)
-<<<<<<< HEAD
+
         $app =  Get-SPServiceApplication -Name $params.Name `
             | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
-=======
+
         $appService =  Get-SPServiceApplication -Name $params.Name `
                         | Where-Object -FilterScript {
                             $_.TypeName -eq "Work Management Service Application"
                           }
->>>>>>> refs/remotes/PowerShell/dev
-          
+
         $app | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
     }
 }
