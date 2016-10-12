@@ -42,24 +42,31 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
         }
 
         Mock Get-ItemProperty -ParameterFilter { 
-                    $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
-                } -MockWith {
-                    return @()
-                }
+            $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+        } -MockWith {
+            return @()
+        }
+
+        Mock Test-Path {
+            return $true
+        }
         
         Mock Get-ChildItem {
-            return @(
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Full"
-                }, 
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Client"
-                }
-            )
+           $full = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Full"
+            } 
+
+           $client = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Client"
+            } 
+
+            $returnval = @($full, $client)
+            $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+            return $returnval
         }
         
         Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
@@ -77,7 +84,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
 
         Context "Prerequisites are not installed but should be and are to be installed in online mode" {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Present"
             }
@@ -85,7 +92,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-ItemProperty -MockWith {
                 return @()
-            }
+            } -ParameterFilter { $null -ne $Path }
 
             It "returns absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -137,7 +144,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
 
         Context "Prerequisites are installed and should be" {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Present"
             }
@@ -194,7 +201,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
         {
             Context "Prerequisites are installed and should be (with SQL 2012 native client for SP2013)" {
                 $testParams = @{
-                    InstallerPath = "C:\SPInstall"
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                     OnlineMode = $true
                     Ensure = "Present"
                 }
@@ -225,10 +232,9 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
         
-
         Context "Prerequisites are installed but should not be" {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Absent"
             }
@@ -244,7 +250,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
 
         Context "Prerequisites are not installed but should be and are to be installed in offline mode" {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 Ensure = "Present"
             }
@@ -252,7 +258,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             Mock Get-WindowsFeature { @( @{ Name = "ExampleFeature"; Installed = $false}) }
             Mock Get-ItemProperty -MockWith {
                 return @()
-            }
+            } -ParameterFilter { $null -ne $Path }
 
             It "throws an exception in the set method if required parameters are not set" {
                 {Set-TargetResource @testParams} | Should Throw
@@ -278,7 +284,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
 
         Context "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 Ensure = "Present"
             }
@@ -310,30 +316,97 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
         
-        Context "SharePoint 2013 is installing on a server with .NET 4.6" {
-            Mock Get-ChildItem {
-                return @(
-                    @{
+        if ($majorBuildNumber -eq 15)
+        {
+            Context "SharePoint 2013 is installing on a server with .NET 4.6" {
+                $testParams = @{
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock Get-ChildItem {
+                $full = @{
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Full"
-                    }, 
-                    @{
+                    } 
+
+                $client = @{
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Client"
+                    } 
+
+                    $returnval = @($full, $client)
+                    $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                    return $returnval
+                }
+
+                Mock Get-ItemProperty {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.4600.1000"
+                        }
                     }
-                )
+                } -ParameterFilter { 
+                    $Path -eq "C:\SPInstall\updates\svrsetup.dll"
+                }
+                
+                It "throws an error in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw ("A known issue prevents installation of SharePoint 2013 on " + `
+                                                                       "servers that have .NET 4.6 already installed")
+                }
             }
-            
-            It "throws an error in the set method" {
-                { Set-TargetResource @testParams } | Should Throw
+
+            Context "SharePoint 2013 is installing on a server with .NET 4.6 with compatibility update" {
+                $testParams = @{
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock Get-ChildItem {
+                $full = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    } 
+
+                $client = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    } 
+
+                    $returnval = @($full, $client)
+                    $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                    return $returnval
+                }
+
+                Mock Get-ItemProperty {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.4709.1000"
+                        }
+                    }
+                } -ParameterFilter { 
+                    $Path -eq "C:\SPInstall\updates\svrsetup.dll"
+                }
+                
+                It "should install prereqs" {
+                    Mock Start-Process { return @{ ExitCode = 0 } }
+                    Mock Test-Path { return $true }
+
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Start-Process -Scope It 
+                }
             }
         }
-        
-      Context "Prerequisites are not installed but should be and are to be installed in offline mode, with SXSstore specified" {
+
+        Context "Prerequisites are not installed but should be and are to be installed in offline mode, with SXSstore specified" {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 SXSpath = "C:\SPInstall\SXS"
                 Ensure = "Present"
@@ -363,7 +436,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Assert-MockCalled Install-WindowsFeature -Scope It 
             }
             
-             It "feature install requires a reboot" {
+            It "feature install requires a reboot" {
                 Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $true ; restartneeded = "yes"})  }
                 Mock Start-Process { return @{ ExitCode = 0 } }
                 Mock Test-Path { return $true }
@@ -378,10 +451,8 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Mock Start-Process { return @{ ExitCode = 0 } }
                 Mock Test-Path { return $true }
 
-                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"
-                
+                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"                
             }
-            
-        } 
+        }
     }    
 }

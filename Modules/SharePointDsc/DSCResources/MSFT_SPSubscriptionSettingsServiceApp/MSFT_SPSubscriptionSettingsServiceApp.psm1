@@ -29,6 +29,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
     Write-Verbose -Message "Getting Subscription Settings Service '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -71,7 +72,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -102,6 +102,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Subscription Settings Service '$Name'"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -198,10 +200,12 @@ function Test-TargetResource
         $InstallAccount
     )
     
-    Write-Verbose -Message "Testing for Subscription Settings Service Application '$Name'"
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing Subscription Settings Service '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
     
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

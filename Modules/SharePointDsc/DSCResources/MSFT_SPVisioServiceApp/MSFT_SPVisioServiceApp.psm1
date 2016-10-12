@@ -85,6 +85,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting Visio Graphics service app '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -162,9 +164,12 @@ function Test-TargetResource
         $InstallAccount
     )
     
-    Write-Verbose -Message "Testing for Visio Graphics Service Application '$Name'"
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing Visio Graphics service app '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")

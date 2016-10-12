@@ -25,6 +25,8 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting Farm Administrators configuration"
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
         throw ("Cannot use the Members parameter together with the " + `
@@ -36,8 +38,6 @@ function Get-TargetResource
         throw ("At least one of the following parameters must be specified: " + `
                "Members, MembersToInclude, MembersToExclude")
     }
-
-    Write-Verbose -Message "Getting all Farm Administrators"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -95,7 +95,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting Farm Administrator config"
+    Write-Verbose -Message "Setting Farm Administrators configuration"
     
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
@@ -253,7 +253,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing Farm Administrator settings"
+    Write-Verbose -Message "Testing Farm Administrators configuration"
     
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
@@ -370,4 +370,3 @@ function Merge-SPDscFarmAdminList
 }
 
 Export-ModuleMember -Function *-TargetResource
-

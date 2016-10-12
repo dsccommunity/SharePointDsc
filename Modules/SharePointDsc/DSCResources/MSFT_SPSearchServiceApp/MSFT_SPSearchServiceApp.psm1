@@ -184,6 +184,9 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Search service application '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -371,8 +374,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing Search service application '$Name'"
+
+    $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($PSBoundParameters.ContainsKey("DefaultContentAccessAccount") `
         -and $Ensure -eq "Present") 
@@ -384,7 +390,6 @@ function Test-TargetResource
         }
     }
     
-    $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

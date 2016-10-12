@@ -92,6 +92,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting Access Services service app '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -158,7 +160,9 @@ function Test-TargetResource
     )
     
     Write-Verbose -Message "Testing for Access Service Application '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")

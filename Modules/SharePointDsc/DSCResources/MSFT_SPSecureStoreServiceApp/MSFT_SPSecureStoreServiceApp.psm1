@@ -118,7 +118,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -182,6 +181,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting secure store service application '$Name'"
 
     $result = Get-TargetResource @PSBoundParameters
     $params = $PSBoundParameters
@@ -275,7 +276,6 @@ function Set-TargetResource
     }    
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -341,13 +341,15 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing secure store service application $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")
 }
-
 
 Export-ModuleMember -Function *-TargetResource

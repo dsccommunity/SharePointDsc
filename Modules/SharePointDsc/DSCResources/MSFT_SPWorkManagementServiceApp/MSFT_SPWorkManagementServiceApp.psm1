@@ -7,47 +7,49 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
+        
         [parameter(Mandatory = $false)]
         [System.String]
         $ProxyName,
-
+        
         [parameter(Mandatory = $false)]
         [System.String]
         $ApplicationPool,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenProviderRefreshes, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenSearchQueries, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfSubscriptionSyncsPerEwsSyncRun, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfUsersEwsSyncWillProcessAtOnce, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfUsersPerEwsSyncBatch,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure = "Present",
-
+        [System.String]
+        $Ensure = "Present",
+        
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenEwsSyncSubscriptionSearches,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenProviderRefreshes,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenSearchQueries,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfSubscriptionSyncsPerEwsSyncRun,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfUsersEwsSyncWillProcessAtOnce,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfUsersPerEwsSyncBatch 
+        $InstallAccount
     )
+
     Write-Verbose -Message "Getting Work management service app '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -55,13 +57,14 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         
-        $serviceApps = Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue
+        $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
+
         $nullReturn = @{
             Name            = $params.Name
             Ensure          = "Absent"
             ApplicationPool = $params.ApplicationPool
         } 
+
         if ($null -eq $serviceApps) 
         { 
             return $nullReturn 
@@ -88,6 +91,7 @@ function Get-TargetResource
                     $proxyName = $serviceAppProxy.Name
                 }
             }
+
             return @{
                 Name                                          = $serviceApp.DisplayName
                 ProxyName                                     = $proxyName
@@ -113,53 +117,55 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
+        
         [parameter(Mandatory = $false)]
         [System.String]
         $ProxyName,
-
+        
         [parameter(Mandatory = $false)]
         [System.String]
         $ApplicationPool,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenProviderRefreshes, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenSearchQueries, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfSubscriptionSyncsPerEwsSyncRun, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfUsersEwsSyncWillProcessAtOnce, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfUsersPerEwsSyncBatch,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure = "Present",
-
+        [System.String]
+        $Ensure = "Present",
+        
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenEwsSyncSubscriptionSearches,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenProviderRefreshes,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenSearchQueries,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfSubscriptionSyncsPerEwsSyncRun,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfUsersEwsSyncWillProcessAtOnce,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfUsersPerEwsSyncBatch 
+        $InstallAccount
     )
 
+    Write-Verbose -Message "Setting Work management service app '$Name'"
     $PSBoundParameters.Ensure = $Ensure
-    if (($Ensure -eq "Present") -and -not ($ApplicationPool)) 
+
+    if ($Ensure -ne "Absent" -and $null -eq $ApplicationPool)
     {
-        throw ("An Application Pool is required to configure the Work " + `
-               "Management Service Application")
+        throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
 
     $result = Get-TargetResource @PSBoundParameters
@@ -192,8 +198,8 @@ function Set-TargetResource
             if ($null -ne $app)
             {
                 New-SPWorkManagementServiceApplicationProxy -Name $pName `
-                                                      -ServiceApplication $app `
-                                                      -DefaultProxyGroup
+                                                            -ServiceApplication $app `
+                                                            -DefaultProxyGroup
                 Start-Sleep -Milliseconds 200
             }
         }
@@ -311,63 +317,75 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
+        
         [parameter(Mandatory = $false)]
         [System.String]
         $ProxyName,
-
+        
         [parameter(Mandatory = $false)]
         [System.String]
         $ApplicationPool,
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenProviderRefreshes, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $MinimumTimeBetweenSearchQueries, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfSubscriptionSyncsPerEwsSyncRun, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfUsersEwsSyncWillProcessAtOnce, 
+        
+        [parameter(Mandatory = $false)]
+        [System.UInt32]
+        $NumberOfUsersPerEwsSyncBatch,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
-        [System.String] $Ensure = "Present",
-
+        [System.String]
+        $Ensure = "Present",
+        
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
-        $InstallAccount,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenEwsSyncSubscriptionSearches,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenProviderRefreshes,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $MinimumTimeBetweenSearchQueries,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfSubscriptionSyncsPerEwsSyncRun,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfUsersEwsSyncWillProcessAtOnce,
-
-        [parameter(Mandatory = $false)]
-        [System.UInt32]
-        $NumberOfUsersPerEwsSyncBatch 
+        $InstallAccount
     )
     
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for Work Management Service Application '$Name'"
+    Write-Verbose -Message "Testing Work management service app '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool",
-                                                     "MinimumTimeBetweenEwsSyncSubscriptionSearches",
-                                                     "MinimumTimeBetweenProviderRefreshes",
-                                                     "MinimumTimeBetweenSearchQueries",
-                                                     "Name",
-                                                     "NumberOfSubscriptionSyncsPerEwsSyncRun",
-                                                     "NumberOfUsersEwsSyncWillProcessAtOnce",
-                                                     "NumberOfUsersPerEwsSyncBatch",
-                                                     "Ensure"
-                                                     )    
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    if ($Ensure -eq "Present")
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("ApplicationPool",
+                                                         "MinimumTimeBetweenEwsSyncSubscriptionSearches",
+                                                         "MinimumTimeBetweenProviderRefreshes",
+                                                         "MinimumTimeBetweenSearchQueries",
+                                                         "Name",
+                                                         "NumberOfSubscriptionSyncsPerEwsSyncRun",
+                                                         "NumberOfUsersEwsSyncWillProcessAtOnce",
+                                                         "NumberOfUsersPerEwsSyncBatch",
+                                                         "Ensure")
+    }
+    else
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Ensure")
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource

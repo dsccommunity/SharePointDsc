@@ -73,7 +73,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -92,6 +91,8 @@ function Set-TargetResource
         [System.String] 
         $Ensure = "Present"
     )
+
+    Write-Verbose -Message "Setting service instance '$Name'"
 
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
@@ -159,7 +160,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -181,6 +181,7 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing service instance '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
 
     $testArgs = @{

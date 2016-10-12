@@ -33,6 +33,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
     Write-Verbose -Message "Getting App management service app '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -122,6 +123,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting App management service app '$Name'"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -240,10 +243,11 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
-        
-    Write-Verbose -Message "Testing for App management Service Application '$Name'"
+    
+    Write-Verbose -Message "Testing App management service app '$Name'"
     
     $PSBoundParameters.Ensure = $Ensure
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")

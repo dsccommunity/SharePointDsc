@@ -35,7 +35,6 @@ Describe "SPTrustedIdentityTokenIssuer - SharePoint Build $((Get-Item $SharePoin
             ClaimProviderName            = "LDAPCP"
             ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
             Ensure                       = "Present"
-            Verbose                      = $true
         }
 
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")

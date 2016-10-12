@@ -29,6 +29,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
     Write-Verbose -Message "Getting BCS service app '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -104,6 +105,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting BCS service app '$Name'"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -198,9 +201,10 @@ function Test-TargetResource
         $InstallAccount
     )
     
-    Write-Verbose -Message "Testing for BCS Service Application '$Name'"
+    Write-Verbose -Message "Testing BCS service app '$Name'"
     
     $PSBoundParameters.Ensure = $Ensure
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")

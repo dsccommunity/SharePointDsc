@@ -50,7 +50,7 @@ function Get-TargetResource
         $ServerRole
     )
 
-    Write-Verbose -Message "Checking for local SP Farm"
+    Write-Verbose -Message "Getting local SP Farm settings"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
@@ -157,6 +157,8 @@ function Set-TargetResource
         $ServerRole
     )
     
+    Write-Verbose -Message "Setting local SP Farm settings"
+
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
     {
@@ -226,7 +228,8 @@ function Set-TargetResource
         Initialize-SPResourceSecurity
         Install-SPService
         Install-SPFeature -AllExistingFeatures -Force 
-        New-SPCentralAdministration -Port $params.CentralAdministrationPort -WindowsAuthProvider $params.CentralAdministrationAuth
+        New-SPCentralAdministration -Port $params.CentralAdministrationPort `
+                                    -WindowsAuthProvider $params.CentralAdministrationAuth
         Install-SPApplicationContent
     } | Out-Null
 }
@@ -283,6 +286,8 @@ function Test-TargetResource
         $ServerRole
     )
 
+    Write-Verbose -Message "Testing local SP Farm settings"
+
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
     {
@@ -290,8 +295,12 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose "Checking for local farm presence"
-    if ($null -eq $CurrentValues) { return $false }
+
+    if ($null -eq $CurrentValues)
+    {
+        return $false
+    }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("FarmConfigDatabaseName")

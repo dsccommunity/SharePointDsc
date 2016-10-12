@@ -109,7 +109,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -254,7 +253,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -307,9 +305,12 @@ function Test-TargetResource
         $UsageLogMaxSpaceGB
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for usage application '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

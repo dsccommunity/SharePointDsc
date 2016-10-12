@@ -92,7 +92,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -131,6 +130,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount    
     )
+
+    Write-Verbose -Message "Setting managed metadata service application $Name"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -217,7 +218,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -258,13 +258,15 @@ function Test-TargetResource
         $InstallAccount      
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for Managed Metadata Service Application '$Name'"
+    Write-Verbose -Message "Testing managed metadata service application $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")
 }
-
 
 Export-ModuleMember -Function *-TargetResource

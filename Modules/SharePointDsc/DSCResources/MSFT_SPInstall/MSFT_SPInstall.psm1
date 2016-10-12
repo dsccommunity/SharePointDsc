@@ -26,7 +26,8 @@ function Get-TargetResource
         $Ensure = "Present"
     )
 
-    Write-Verbose -Message "Getting install status of SP binaries"
+    Write-Verbose -Message "Getting install status of SharePoint"
+
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName
     
@@ -89,6 +90,8 @@ function Set-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Setting install status of SharePoint"
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
@@ -100,18 +103,43 @@ function Set-TargetResource
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
     if ($majorVersion -eq 15) 
     {
-        $ndp = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP'
-        $dotNet46Check = $ndp | Get-ItemProperty -name Version,Release -EA 0 `
-                              | Where-Object -FilterScript { 
-                                  $_.PSChildName -match '^(?!S)\p{L}' -and $_.Version -like "4.6.*"
-                                }
-        if ($null -ne $dotNet46Check -and $dotNet46Check.Length -gt 0) 
+        $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
+        $checkDotNet = $true
+        if (Test-Path -Path $svrsetupDll)
         {
-            throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
-                               "servers that have .NET 4.6 already installed. See details " + `
-                               "at https://support.microsoft.com/en-us/kb/3087184")
-            return
-        }    
+            $svrsetupDllFileInfo = Get-ItemProperty -Path $svrsetupDll
+            $fileVersion = $svrsetupDllFileInfo.VersionInfo.FileVersion
+            if ($fileVersion -ge "15.0.4709.1000")
+            {
+                $checkDotNet = $false
+            }
+        }
+
+        if ($checkDotNet -eq $true)
+        {
+            $ndpKey = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4"
+            $dotNet46Installed = $false
+            if (Test-Path -Path $ndpKey)
+            {
+                $dotNetv4Keys = Get-ChildItem -Path $ndpKey
+                foreach ($dotnetInstance in $dotNetv4Keys)
+                {
+                    if ($dotnetInstance.GetValue("Release") -ge 390000)
+                    {
+                        $dotNet46Installed = $true
+                        break
+                    }
+                }
+            }
+
+            if ($dotNet46Installed -eq $true) 
+            {
+                throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
+                                   "servers that have .NET 4.6 already installed. See details " + `
+                                   "at https://support.microsoft.com/en-us/kb/3087184")
+                return
+            }
+        }
     }
 
     Write-Verbose -Message "Writing install config file"
@@ -176,7 +204,7 @@ function Set-TargetResource
                 -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
                 ) {
                     
-                Write-Verbose -Message ("xSPInstall has detected the server has pending " + `
+                Write-Verbose -Message ("SPInstall has detected the server has pending " + `
                                         "a reboot. Flagging to the DSC engine that the " + `
                                         "server should reboot before continuing.")
                 $global:DSCMachineStatus = 1
@@ -220,6 +248,10 @@ function Test-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Testing install status of SharePoint"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
@@ -227,10 +259,7 @@ function Test-TargetResource
         return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Testing for installation of SharePoint"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
