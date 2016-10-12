@@ -134,11 +134,28 @@ function Test-TargetResource
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
-    return Test-SPDscParameterState -CurrentValues $currentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("WebAppUrl", `
-                                                     "AllowAppPurchases", `
-                                                     "AllowAppsForOffice") 
+    if ($null -eq $currentValues.WebAppUrl) {
+        Write-Verbose -Message "Specified web application does not exist."
+        return $false
+    }
+
+    if ($AllowAppPurchases)
+    {
+        if ($AllowAppPurchases -ne $currentValues.AllowAppPurchases)
+        {
+            return $false
+        }
+    }
+
+    if ($AllowAppsForOffice)
+    {
+        if ($AllowAppsForOffice -ne $currentValues.AllowAppsForOffice)
+        {
+            return $false
+        }
+    }
+
+    return $true
 }
 
 Export-ModuleMember -Function *-TargetResource
