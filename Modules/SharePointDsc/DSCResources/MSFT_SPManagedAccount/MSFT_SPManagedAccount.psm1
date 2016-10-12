@@ -34,7 +34,7 @@ function Get-TargetResource
         $AccountName
     )
 
-    Write-Verbose -Message "Checking for managed account $AccountName"
+    Write-Verbose -Message "Getting managed account $AccountName"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -105,6 +105,8 @@ function Set-TargetResource
         $AccountName
     )
 
+    Write-Verbose -Message "Setting managed account $AccountName"
+
     if ($Ensure -eq "Present" -and $null -eq $Account) 
     {
         throw ("You must specify the 'Account' property as a PSCredential to create a " + `
@@ -163,7 +165,6 @@ function Set-TargetResource
     }   
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -200,9 +201,12 @@ function Test-TargetResource
         $AccountName
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing managed account $AccountName"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("AccountName", 

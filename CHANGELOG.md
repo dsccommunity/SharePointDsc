@@ -2,6 +2,10 @@
 
 ### Unreleased
  * Fixed issue with SPInstallLanguagePack to install before farm creation 
+ * Fixed issue with mounting SPContentDatabase
+ * Fixed issue with SPShellAdmin and Content Database method
+ * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
+ * Improved code styling
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup

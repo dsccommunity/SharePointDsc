@@ -37,7 +37,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
-        
+    
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `

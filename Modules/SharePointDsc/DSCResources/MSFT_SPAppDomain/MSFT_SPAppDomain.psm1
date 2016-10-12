@@ -17,7 +17,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Checking app urls settings"
+    Write-Verbose -Message "Getting app domain settings"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -53,7 +53,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Updating app domain settings "
+    Write-Verbose -Message "Setting app domain settings"
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
@@ -83,7 +84,8 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing app domain settings"
+    Write-Verbose -Message "Getting app domain settings"
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("AppDomain", "Prefix") 

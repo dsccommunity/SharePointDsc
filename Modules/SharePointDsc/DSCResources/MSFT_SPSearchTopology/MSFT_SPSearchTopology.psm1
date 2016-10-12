@@ -41,6 +41,8 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting Search Topology for '$ServiceAppName'"
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -152,7 +154,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -194,6 +195,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Search Topology for '$ServiceAppName'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -400,7 +403,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -444,8 +446,15 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing Search Topology for '$ServiceAppName'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($null -eq $CurrentValues) { return $false }
+
+    if ($null -eq $CurrentValues)
+    {
+        return $false
+    }
+    
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @(

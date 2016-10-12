@@ -83,7 +83,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing status of Configuration Wizard"
+    Write-Verbose -Message "Setting status of Configuration Wizard"
 
     $now = Get-Date
     if ($DatabaseUpgradeDays)
@@ -229,14 +229,14 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing status of Configuration Wizard"
+
     if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message ("Ensure is set to Absent, so running the Configuration Wizard " + `
                                 "is not required")
         return $true
     }
-
-    Write-Verbose -Message "Testing status of Configuration Wizard"
 
     $currentValues = Get-TargetResource @PSBoundParameters
 

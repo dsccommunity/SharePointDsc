@@ -69,7 +69,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -102,7 +101,6 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting web application '$Url' Site Use and Deletion settings"
-
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -154,7 +152,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -187,8 +184,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing for web application '$Url' Site Use and Deletion"
+    Write-Verbose -Message "Testing web application '$url' site use and deletion settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+    
     if ($null -eq $CurrentValues) 
     { 
         return $false 

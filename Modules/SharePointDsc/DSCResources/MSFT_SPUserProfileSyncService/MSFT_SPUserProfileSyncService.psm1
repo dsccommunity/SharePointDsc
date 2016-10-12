@@ -25,13 +25,13 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting user profile sync service for $UserProfileServiceAppName"
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
-
-    Write-Verbose -Message "Getting the local user profile sync service instance"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -126,7 +126,10 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting user profile sync service for $UserProfileServiceAppName"
+
     $PSBoundParameters.Ensure = $Ensure
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
@@ -150,8 +153,6 @@ function Set-TargetResource
             $PSBoundParameters.Ensure = "Present"
         }
     }
-
-    Write-Verbose -Message "Setting User Profile Synchronization Service"
 
     # Add the FarmAccount to the local Admins group, if it's not already there
     $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
@@ -274,6 +275,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing user profile sync service for $UserProfileServiceAppName"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
@@ -281,7 +286,7 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    $PSBoundParameters.Ensure = $Ensure
+
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
