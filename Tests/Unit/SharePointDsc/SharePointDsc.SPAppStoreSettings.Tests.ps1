@@ -56,7 +56,7 @@ Describe "SPAppStoreSettings - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
             Mock Get-SPOfficeStoreAppsDefaultActivation {
                 return @{
-                    Enabled = $false
+                    Enable = $false
                 }
             }
 
@@ -93,7 +93,7 @@ Describe "SPAppStoreSettings - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
             Mock Get-SPOfficeStoreAppsDefaultActivation {
                 return @{
-                    Enabled = $true
+                    Enable = $true
                 }
             }
 
@@ -126,7 +126,7 @@ Describe "SPAppStoreSettings - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
             Mock Get-SPOfficeStoreAppsDefaultActivation {
                 return @{
-                    Enabled = $true
+                    Enable = $true
                 }
             }
 
