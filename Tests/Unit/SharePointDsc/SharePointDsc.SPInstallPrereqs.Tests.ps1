@@ -476,7 +476,7 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                 $pathExits = $false
                 Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $true ; restartneeded = "no"})  }
                 Mock Start-Process { return @{ ExitCode = 0 } }
-                Mock Test-Path -ParameterFilter {$testParams.InstallerPath} {$res = $pathExits; $pathExits = $true; return $res}
+                Mock Test-Path -ParameterFilter {$Path -eq $testParams.InstallerPath} {$res = $pathExits; $pathExits = $true; return $res}
                 Mock Sleep
 
                 Get-TargetResource @testParams

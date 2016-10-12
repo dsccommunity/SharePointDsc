@@ -141,9 +141,9 @@ function Get-TargetResource
 
     # This is the first access to the installer binary. If not yet exist (e.g. network share) give it a some time
     $retrycount = 3
-    while (-not (Test-Path $InstallerPath) -and $retrycount -gt 0)
+    while (-not (Test-Path -Path $InstallerPath) -and $retrycount -gt 0)
     {
-        sleep 10
+        sleep -Seconds 10
         $retrycount--
     }
     
