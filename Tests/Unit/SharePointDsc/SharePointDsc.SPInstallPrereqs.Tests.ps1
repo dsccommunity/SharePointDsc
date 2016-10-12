@@ -454,5 +454,44 @@ Describe "SPInstallPrereqs - SharePoint Build $((Get-Item $SharePointCmdletModul
                 {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"                
             }
         }
+
+        Context "Prerequisites are on a share and needs some time to access" {
+            $testParams = @{
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode = $true
+                Ensure = "Present"
+            }
+
+            It "should not wait if binary exist" {
+                Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $true ; restartneeded = "no"})  }
+                Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path { return $true }
+                Mock Sleep
+
+                Get-TargetResource @testParams
+                Assert-MockCalled Sleep -Times 0 -Scope It 
+            }
+
+            It "should wait if binary not exist first" {
+                $pathExits = $false
+                Mock Install-WindowsFeature { @( @{ Name = "ExampleFeature"; Success = $true ; restartneeded = "no"})  }
+                Mock Start-Process { return @{ ExitCode = 0 } }
+                Mock Test-Path -ParameterFilter {$testParams.InstallerPath} {$res = $pathExits; $pathExits = $true; return $res}
+                Mock Sleep
+
+                Get-TargetResource @testParams
+                Assert-MockCalled Sleep -Times 1 -Scope It 
+                Assert-MockCalled Get-SPDSCAssemblyVersion 
+            }
+
+            It "should throw if binary not exist after all" {
+                Mock Test-Path {return $false}
+                Mock Sleep
+                Mock Get-SPDSCAssemblyVersion {throw}
+
+                {Get-TargetResource @testParams} | Should throw
+                Assert-MockCalled Sleep -Times 3 -Scope It 
+            }
+        }
     }    
 }

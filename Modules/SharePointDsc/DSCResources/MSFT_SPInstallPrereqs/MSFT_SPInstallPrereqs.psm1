@@ -138,6 +138,14 @@ function Get-TargetResource
         [System.String] 
         $Ensure = "Present"
     )
+
+    # This is the first access to the installer binary. If not yet exist (e.g. network share) give it a some time
+    $retrycount = 3
+    while (-not (Test-Path $InstallerPath) -and $retrycount -gt 0)
+    {
+        sleep 10
+        $retrycount--
+    }
     
     Write-Verbose -Message "Getting installation status of SharePoint prerequisites"
 
