@@ -28,7 +28,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Retrieving farm wide automatic password change settings"
+    Write-Verbose -Message "Getting farm wide automatic password change settings"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -79,7 +79,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Updating farm wide automatic password change settings"
+    Write-Verbose -Message "Setting farm wide automatic password change settings"
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
@@ -107,7 +108,6 @@ function Set-TargetResource
         $farm.Update();
     }
 }
-
 
 function Test-TargetResource
 {
@@ -139,9 +139,14 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing farm wide automatic password change settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing retrieving farm wide automatic password change settings"
-    if ($null -eq $CurrentValues) { return $false }
+
+    if ($null -eq $CurrentValues)
+    {
+        return $false
+    }
     
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

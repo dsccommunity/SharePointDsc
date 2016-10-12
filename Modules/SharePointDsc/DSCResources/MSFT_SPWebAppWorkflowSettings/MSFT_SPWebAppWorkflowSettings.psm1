@@ -50,7 +50,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -96,7 +95,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -124,8 +122,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing web application '$Url' workflow settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for web application '$Url' workflow settings"
+
     if ($null -eq $CurrentValues) { return $false }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Workflow.psm1"
@@ -133,6 +133,5 @@ function Test-TargetResource
     return Test-SPDSCWebApplicationWorkflowConfig -CurrentSettings $CurrentValues `
                                                   -DesiredSettings $PSBoundParameters
 }
-
 
 Export-ModuleMember -Function *-TargetResource

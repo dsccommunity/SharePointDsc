@@ -42,6 +42,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting permissions for Web Application '$WebAppUrl'"
+
     Test-SPDSCInput @PSBoundParameters
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -231,7 +232,9 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
     Write-Verbose -Message "Setting permissions for Web Application '$WebAppUrl'"
+
     Test-SPDSCInput @PSBoundParameters
 
     $result = Get-TargetResource @PSBoundParameters
@@ -439,6 +442,7 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing permissions for Web Application '$WebAppUrl'"
+
     Test-SPDSCInput @PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters

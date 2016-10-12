@@ -25,9 +25,9 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
-
     Write-Verbose -Message "Getting permissions for user profile service proxy '$ProxyName"
+
+    Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
@@ -137,6 +137,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting permissions for user profile service proxy '$ProxyName"
+
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -330,6 +331,7 @@ function Test-TargetResource
     Confirm-SPDscUpaPermissionsConfig -Parameters $PSBoundParameters
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("CreatePersonalSite", `

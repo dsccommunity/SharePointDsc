@@ -25,6 +25,8 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting Search Index Partition '$Index' settings"
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -76,6 +78,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Search Index Partition '$Index' settings"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -244,7 +248,11 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Testing Search Index Partition '$Index' settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                               -DesiredValues $PSBoundParameters `
                                               -ValuesToCheck @("Servers")

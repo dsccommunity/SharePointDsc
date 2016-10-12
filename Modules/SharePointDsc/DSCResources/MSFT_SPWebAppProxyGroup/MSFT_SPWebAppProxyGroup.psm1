@@ -125,3 +125,5 @@ function Test-TargetResource
         return $false 
     }
 }
+
+Export-ModuleMember -Function *-TargetResource
