@@ -21,7 +21,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting app catalog status of $SiteUrl"
+    Write-Verbose -Message "Getting app catalog status of $WebAppUrl"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -74,7 +74,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting app catalog status of $SiteUrl"
+    Write-Verbose -Message "Setting app catalog status of $WebAppUrl"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -87,16 +87,22 @@ function Set-TargetResource
             throw ("Specified web application does not exist.")
         }
 
-        $AllowAppPurchases = (Get-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl).Enabled
-        if ($AllowAppPurchases -ne $params.AllowAppPurchases)
+        if ($params.AllowAppPurchases)
         {
-            Set-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl -Enable $params.AllowAppPurchases
+            $AllowAppPurchases = (Get-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl).Enabled
+            if ($AllowAppPurchases -ne $params.AllowAppPurchases)
+            {
+                Set-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl -Enable $params.AllowAppPurchases
+            }
         }
 
-        $AllowAppsForOffice = (Get-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl).Enabled
-        if ($AllowAppsForOffice -ne $params.AllowAppsForOffice)
+        if ($params.AllowAppsForOffice)
         {
-            Set-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl -Enable $params.AllowAppsForOffice
+            $AllowAppsForOffice = (Get-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl).Enabled
+            if ($AllowAppsForOffice -ne $params.AllowAppsForOffice)
+            {
+                Set-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl -Enable $params.AllowAppsForOffice
+            }
         }
     }
 }
@@ -124,7 +130,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing app catalog status of $SiteUrl"
+    Write-Verbose -Message "Testing app catalog status of $WebAppUrl"
 
     $currentValues = Get-TargetResource @PSBoundParameters
 

@@ -82,7 +82,7 @@ function Get-TargetResource
         }
 
         $SetCacheAccountsPolicy = $false
-        if ($param.SetCacheAccountsPolicy) 
+        if ($params.SetCacheAccountsPolicy) 
         {
             if (($wa.Properties.ContainsKey("portalsuperuseraccount") -eq $true) -and `
                 ($wa.Properties.ContainsKey("portalsuperreaderaccount") -eq $true)) 
