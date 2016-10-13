@@ -39,8 +39,10 @@ function Get-TargetResource
             return $nullreturn
         }
 
-        $AllowAppPurchases = [System.Convert]::ToBoolean((Get-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl).Enabled)
-        $AllowAppsForOffice = [System.Convert]::ToBoolean((Get-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl).Enable)
+        $currentAAP = (Get-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl).Enabled
+        $AllowAppPurchases = [System.Convert]::ToBoolean($currentAAP)
+        $currentAAFO = (Get-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl).Enable
+        $AllowAppsForOffice = [System.Convert]::ToBoolean($currentAAFO)
 
         return @{
             WebAppUrl = $params.WebAppUrl
@@ -89,19 +91,23 @@ function Set-TargetResource
 
         if ($params.ContainsKey("AllowAppPurchases"))
         {
-            $AllowAppPurchases = [System.Convert]::ToBoolean((Get-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl).Enabled)
+            $current = (Get-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl).Enabled
+            $AllowAppPurchases = [System.Convert]::ToBoolean($current)
             if ($AllowAppPurchases -ne $params.AllowAppPurchases)
             {
-                Set-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl -Enable $params.AllowAppPurchases
+                Set-SPAppAcquisitionConfiguration -WebApplication $params.WebAppUrl `
+                                                  -Enable $params.AllowAppPurchases
             }
         }
 
         if ($params.ContainsKey("AllowAppsForOffice"))
         {
-            $AllowAppsForOffice = [System.Convert]::ToBoolean((Get-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl).Enable)
+            $current = (Get-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl).Enable
+            $AllowAppsForOffice = [System.Convert]::ToBoolean($current)
             if ($AllowAppsForOffice -ne $params.AllowAppsForOffice)
             {
-                Set-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl -Enable $params.AllowAppsForOffice
+                Set-SPOfficeStoreAppsDefaultActivation -WebApplication $params.WebAppUrl `
+                                                       -Enable $params.AllowAppsForOffice
             }
         }
     }
