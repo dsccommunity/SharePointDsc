@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Fixed issue with SPInstallLanguagePack to install before farm creation 
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
