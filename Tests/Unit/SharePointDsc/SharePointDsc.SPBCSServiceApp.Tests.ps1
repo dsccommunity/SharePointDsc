@@ -32,8 +32,6 @@ Describe "SPBCSServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
 
         Mock Remove-SPServiceApplication { }
-        Mock Get-SPServiceApplicationProxy { }
-
         Context "When no service applications exist in the current farm and it should" {
 
             Mock Get-SPServiceApplication { return $null }
