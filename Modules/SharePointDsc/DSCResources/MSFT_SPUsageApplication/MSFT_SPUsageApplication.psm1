@@ -69,7 +69,6 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Usage and Health Data Collection Service Application" -or `
             $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
         }
 
@@ -80,7 +79,6 @@ function Get-TargetResource
         else
         {
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
-                $_.TypeName -eq "Usage and Health Data Collection Proxy" -or `
                 $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
@@ -204,7 +202,6 @@ function Set-TargetResource
             $params = $args[0]
             
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
-                $_.TypeName -eq "Usage and Health Data Collection Proxy" -or `
                 $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
@@ -245,7 +242,6 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Usage and Health Data Collection Service Application" -or `
                         $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
                     }
             Remove-SPServiceApplication $service -Confirm:$false

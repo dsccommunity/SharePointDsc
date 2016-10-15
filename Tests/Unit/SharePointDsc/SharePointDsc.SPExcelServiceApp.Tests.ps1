@@ -18,6 +18,8 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             Name = "Test Excel Services App"
             ApplicationPool = "Test App Pool"
         }
+        $getTypeFullName = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
@@ -55,10 +57,15 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                 }
 
                 Context "When service applications exist in the current farm but the specific Excel Services app does not" {
-
-                    Mock Get-SPServiceApplication { return @(@{
-                        TypeName = "Some other service app type"
-                    }) }
+                    Mock Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            DisplayName = $testParams.Name
+                        }
+                        $spServiceApp | Add-Member ScriptMethod GetType { 
+                            return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
 
                     It "returns absent from the Get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -67,12 +74,15 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                 }
 
                 Context "When a service application exists and is configured correctly" {
-                    Mock Get-SPServiceApplication { 
-                        return @(@{
-                            TypeName = "Excel Services Application Web Service Application"
+                    Mock Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
                             DisplayName = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        })
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
                     }
 
                     It "returns values from the get method" {
@@ -90,13 +100,15 @@ Describe "SPExcelServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                     Ensure = "Absent"
                 }
                 Context "When the service application exists but it shouldn't" {
-                    Mock Get-SPServiceApplication { 
-                        return @(@{
-                            TypeName = "Excel Services Application Web Service Application"
+                    Mock Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
                             DisplayName = $testParams.Name
-                            DatabaseServer = $testParams.DatabaseServer
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        })
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
                     }
                     
                     It "returns present from the Get method" {

@@ -33,7 +33,9 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             MaximumSyncConversionRequests = 25 
             KeepAliveTimeout = 30
             MaximumConversionTime = 300
-        } 
+        }
+        $getTypeFullName = "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc") 
 
         Mock Invoke-SPDSCCommand {  
@@ -45,8 +47,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
 
         Mock Remove-SPServiceApplication { }
 
-        Context "When no service applications exist in the current farm and Ensure is set to Present" { 
-
+        Context "When no service applications exist in the current farm and Ensure is set to Present" {
             Mock Get-SPServiceApplication { return $null }
             Mock Get-SPServiceApplicationPool {
                 return @(@{ 
@@ -102,9 +103,15 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         }
 
         Context "When service applications exist in the current farm but the specific word automation app does not" { 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
@@ -116,11 +123,10 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         }
 
         Context "When a service application exists and is configured correctly" { 
-            Mock Get-SPServiceApplication {  
-                return @(@{ 
-                    TypeName = "Word Automation Services" 
-                    DisplayName = $testParams.Name 
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool } 
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                             Name = $testParams.DatabaseName
                             Server = @{ Name = $testParams.DatabaseServer }
@@ -144,8 +150,12 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     MaximumSyncConversionRequests = 25
                     KeepAliveTimeout = @{ TotalSeconds = 30 }
                     MaximumConversionTime = @{ TotalSeconds = 300 }
-                }) 
-            } 
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns values from the get method" { 
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty 
@@ -157,9 +167,8 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         } 
 
         Context "When a service application exists and incorrect application pool is configured" { 
-            Mock Get-SPServiceApplication {  
-                $returnval = @(@{ 
-                    TypeName = "Word Automation Services" 
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name 
                     ApplicationPool = @{ Name = "Wrong App Pool Name" } 
                     Database = @{
@@ -185,10 +194,15 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     MaximumSyncConversionRequests = 25
                     KeepAliveTimeout = 30
                     MaximumConversionTime = 300
-                }) 
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
-                return $returnval
-            } 
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update { 
+                    $Global:SPDSCSiteUseUpdated = $true 
+                } -PassThru
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } } 
             Mock Set-SPWordConversionServiceApplication {}
@@ -214,9 +228,8 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         } 
 
         Context "When a service application exists and incorrect settings are configured" { 
-            Mock Get-SPServiceApplication {  
-                $returnval = @(@{
-                    TypeName = "Word Automation Services" 
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     Database = @{
                             Name = $testParams.DatabaseName
@@ -242,9 +255,14 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     MaximumSyncConversionRequests = 25
                     KeepAliveTimeout = 30
                     MaximumConversionTime = 300
-                })
-                $returnVal = $returnVal | Add-Member ScriptMethod Update { $Global:SPDSCSiteUseUpdated = $true } -PassThru
-                return $returnval
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update { 
+                    $Global:SPDSCSiteUseUpdated = $true 
+                } -PassThru
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } } 
             Mock Get-SPTimerJob {
@@ -284,9 +302,8 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
         }
 
         Context "When a service application exists and Ensure is set to Absent" {
-            Mock Get-SPServiceApplication {  
-                return @(@{ 
-                    TypeName = "Word Automation Services" 
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name 
                     ApplicationPool = @{ Name = $testParams.ApplicationPool } 
                     Database = @{
@@ -312,7 +329,11 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     MaximumSyncConversionRequests = 25
                     KeepAliveTimeout = @{ TotalSeconds = 30 }
                     MaximumConversionTime = @{ TotalSeconds = 300 }
-                }) 
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns present from the Get method" {

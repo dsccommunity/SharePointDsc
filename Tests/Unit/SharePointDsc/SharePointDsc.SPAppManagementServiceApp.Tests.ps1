@@ -21,6 +21,8 @@ Describe "SPAppManagementServiceApp - SharePoint Build $((Get-Item $SharePointCm
             Ensure = "Present"
             DatabaseServer = "TestServer\Instance"
         }
+        $getTypeFullName = "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         
@@ -54,10 +56,15 @@ Describe "SPAppManagementServiceApp - SharePoint Build $((Get-Item $SharePointCm
         }
 
         Context "When service applications exist in the current farm with the same name but is the wrong type" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -67,16 +74,19 @@ Describe "SPAppManagementServiceApp - SharePoint Build $((Get-Item $SharePointCm
         }
 
         Context "When a service application exists and it should, and is also configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "App Management Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns present from the get method" {
@@ -90,21 +100,23 @@ Describe "SPAppManagementServiceApp - SharePoint Build $((Get-Item $SharePointCm
         }
 
         Context "When a service application exists and it should, but the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication { 
-                $service = @(@{
-                    TypeName = "App Management Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
-                    
-                $service = $service | Add-Member ScriptMethod Update {
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
                     $Global:SPAppServiceUpdateCalled = $true
                 } -PassThru 
-                return $service
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationPool { 
                 @{ Name = $testParams.ApplicationPool } }
@@ -144,16 +156,19 @@ Describe "SPAppManagementServiceApp - SharePoint Build $((Get-Item $SharePointCm
             Ensure = "Absent"
         }
         Context "When the service application exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "App Management Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "returns present from the Get method" {

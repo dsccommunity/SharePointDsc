@@ -53,7 +53,6 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.TypeName -eq "PerformancePoint Service Application" -or `
             $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
         }
 
@@ -175,7 +174,6 @@ function Set-TargetResource
 
                 Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "PerformancePoint Service Application" -or `
                         $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
                     } | Set-SPPerformancePointServiceApplication -ApplicationPool $appPool
             }
@@ -190,7 +188,6 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "PerformancePoint Service Application" -or `
                 $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
             }
             Remove-SPServiceApplication $app -Confirm:$false

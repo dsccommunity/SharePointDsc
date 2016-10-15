@@ -142,7 +142,6 @@ function Get-TargetResource
         }
         
         $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.TypeName -eq "Word Automation Services" -or `
             $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
         }          
 
@@ -392,7 +391,6 @@ function Set-TargetResource
                 
             $serviceApp = Get-SPServiceApplication -Name $params.Name `
                 | Where-Object -FilterScript {
-                    $_.TypeName -eq "Word Automation Services" -or `
                     $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
             }
 
@@ -542,7 +540,6 @@ function Set-TargetResource
             $params = $args[0] 
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "Word Automation Services" -or `
                 $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
             }
             if ($null -ne $serviceApp) 

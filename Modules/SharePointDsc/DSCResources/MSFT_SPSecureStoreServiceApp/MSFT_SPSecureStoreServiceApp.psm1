@@ -83,7 +83,6 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Secure Store Service Application" -or `
             $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
         }
 
@@ -249,7 +248,6 @@ function Set-TargetResource
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                    $_.TypeName -eq "Secure Store Service Application" -or `
                     $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
@@ -268,7 +266,6 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "Secure Store Service Application" -or `
                 $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
             }
             Remove-SPServiceApplication $serviceApp -Confirm:$false

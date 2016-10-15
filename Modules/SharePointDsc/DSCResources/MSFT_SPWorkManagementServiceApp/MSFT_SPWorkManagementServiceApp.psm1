@@ -70,7 +70,6 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Work Management Service Application" -or `
             $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
         }
 
@@ -217,7 +216,6 @@ function Set-TargetResource
                 $params = $args[0]
                 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.TypeName -eq "Work Management Service Application" -or `
                     $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
@@ -281,7 +279,6 @@ function Set-TargetResource
                 }
                 $setParams.Add("Confirm", $false)
                 $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.TypeName -eq "Work Management Service Application" -or `
                     $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication" 
                 }
 
@@ -300,7 +297,6 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Work Management Service Application" -or `
                 $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
             }
             Remove-SPServiceApplication $serviceApp -Confirm:$false
