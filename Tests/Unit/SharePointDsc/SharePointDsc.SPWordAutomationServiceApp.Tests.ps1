@@ -79,18 +79,6 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 return $returnval
             }
 
-            Mock Get-SPTimerJob {
-                $returnval = @(@{ Name = "Just a name" })
-                return ,$returnval
-            }
-            Mock Set-SPTimerJob {}
-            Mock Get-SPServiceApplicationProxy { }
-
-            It "returns null from the Get method" { 
-                Get-TargetResource @testParams | Should BeNullOrEmpty 
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }  
-            }
-
             It "returns absent from the Get method" { 
                 (Get-TargetResource @testParams).Ensure | Should Be "absent" 
             } 
@@ -282,6 +270,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 return ,$returnval
             }
             Mock Set-SPTimerJob {}
+            Mock Get-SPServiceApplicationProxy { }
 
             It "returns false when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $false 
