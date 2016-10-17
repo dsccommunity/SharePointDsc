@@ -60,7 +60,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [System.Management.Automation.PSCustomObject]@{ 
+                $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
@@ -86,7 +86,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [System.Management.Automation.PSCustomObject]@{ 
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatabaseName
@@ -120,7 +120,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [System.Management.Automation.PSCustomObject]@{ 
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatabaseName
