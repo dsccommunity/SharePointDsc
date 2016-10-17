@@ -60,31 +60,33 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
-            Name = $params.Name
-            Ensure = "Absent"
+            Name            = $params.Name
+            Ensure          = "Absent"
+            ApplicationPool = $params.ApplicationPool
         } 
 
-        if ($null -eq $serviceApps)
+        if ($null -eq $serviceApps) 
         { 
             return $nullReturn 
+        }
+        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
         }
 
-        $serviceApp = $serviceApps | Where-Object -FilterScript {
-            $_.TypeName -eq "Work Management Service Application"
-        }
         if ($null -eq $serviceApp)
-        { 
-            return $nullReturn 
+        {
+            return $nullReturn
         }
         else
         {
+            $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
                     $serviceApp.IsConnected($_)
                 }
-                if ($null -ne $serviceAppProxy)
-                {
+                if ($null -ne $serviceAppProxy) 
+                { 
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -158,12 +160,14 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting Work management service app '$Name'"
+    $PSBoundParameters.Ensure = $Ensure
 
     if ($Ensure -ne "Absent" -and $null -eq $ApplicationPool)
     {
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
 
+<<<<<<< HEAD
     $PSBoundParameters.Ensure = $Ensure
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -216,12 +220,43 @@ function Set-TargetResource
             $appService = New-SPWorkManagementServiceApplication @newParams
             if ($null -eq $params.ProxyName)
             {
+=======
+    $result = Get-TargetResource @PSBoundParameters
+
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    {
+        Write-Verbose -Message "Creating work management Service Application $Name"
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
+            if ($params.ContainsKey("Ensure")) 
+            { 
+                $params.Remove("Ensure") | Out-Null 
+            }
+            if ($params.ContainsKey("InstallAccount")) 
+            { 
+                $params.Remove("InstallAccount") | Out-Null 
+            }
+            if ($params.ContainsKey("ProxyName")) 
+            { 
+                $pName = $params.ProxyName
+                $params.Remove("ProxyName") | Out-Null 
+            }
+            if ($null -eq $pName) {
+>>>>>>> refs/remotes/PowerShell/dev
                 $pName = "$($params.Name) Proxy"
             }
-            else
+
+            $app = New-SPWorkManagementServiceApplication @params 
+            if ($null -ne $app)
             {
-                $pName = $params.ProxyName
+                New-SPWorkManagementServiceApplicationProxy -Name $pName `
+                                                            -ServiceApplication $app `
+                                                            -DefaultProxyGroup
+                Start-Sleep -Milliseconds 200
             }
+<<<<<<< HEAD
             New-SPWorkManagementServiceApplicationProxy -Name $pName `
                                                         -DefaultProxyGroup `
                                                         -ServiceApplication $appService | Out-Null
@@ -247,33 +282,109 @@ function Set-TargetResource
         if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun"))
         {
             $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", $params.NumberOfSubscriptionSyncsPerEwsSyncRun)
+=======
+>>>>>>> refs/remotes/PowerShell/dev
         }
-        
-        if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce"))
-        {
-            $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce", $params.NumberOfUsersEwsSyncWillProcessAtOnce)
-        }
-        
-        if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch"))
-        {
-            $setParams.Add("NumberOfUsersPerEwsSyncBatch", $params.NumberOfUsersPerEwsSyncBatch)
-        }
+    }
 
-        $setParams.Add("Name", $params.Name) 
-        $setParams.Add("ApplicationPool", $params.ApplicationPool) 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    {
+        if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
+            -and $ApplicationPool -ne $result.ApplicationPool) 
+        {
+            Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
+                
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+                }
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+                Set-SPWorkManagementServiceApplication -Identity $serviceApp -ApplicationPool $appPool
+            }
+        }
+        else
+        {
+            Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
+                Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
+                $params = $args[0]
+                
+                $setParams = @{}
+                if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) 
+                { 
+                    $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", 
+                    $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) 
+                }
+                if ($params.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
+                { 
+                    $setParams.Add("MinimumTimeBetweenProviderRefreshes", 
+                    $params.MinimumTimeBetweenProviderRefreshes) 
+                }
+                if ($params.ContainsKey("MinimumTimeBetweenSearchQueries")) 
+                { 
+                    $setParams.Add("MinimumTimeBetweenSearchQueries", 
+                    $params.MinimumTimeBetweenSearchQueries) 
+                }
+                if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun")) 
+                { 
+                    $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", 
+                    $params.NumberOfSubscriptionSyncsPerEwsSyncRun) 
+                }
+                if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce")) 
+                { 
+                    $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce", 
+                    $params.NumberOfUsersEwsSyncWillProcessAtOnce) 
+                }
+                if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch")) 
+                { 
+                    $setParams.Add("NumberOfUsersPerEwsSyncBatch", 
+                    $params.NumberOfUsersPerEwsSyncBatch) 
+                }
 
-        if ($setParams.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
-        { 
-            $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches = New-TimeSpan -Days $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches
+                $setParams.Add("Name", $params.Name) 
+                $setParams.Add("ApplicationPool", $params.ApplicationPool) 
+
+                if ($setParams.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
+                { 
+                    $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches = New-TimeSpan -Days $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches
+                }
+                if ($setParams.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
+                {
+                    $setParams.MinimumTimeBetweenProviderRefreshes = New-TimeSpan -Days $setParams.MinimumTimeBetweenProviderRefreshes
+                }
+                if ($setParams.ContainsKey("MinimumTimeBetweenSearchQueries"))
+                { 
+                    $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
+                }
+                $setParams.Add("Confirm", $false)
+                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication" 
+                }
+
+                $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
+            }
         }
-        if ($setParams.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
-        { 
-            $setParams.MinimumTimeBetweenProviderRefreshes = New-TimeSpan -Days $setParams.MinimumTimeBetweenProviderRefreshes
+    }
+
+    if ($Ensure -eq "Absent") 
+    {
+        # The service app should not exit
+        Write-Verbose -Message "Removing Work Management Service Application $Name"
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
+            
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
+            }
+            Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
-        if ($setParams.ContainsKey("MinimumTimeBetweenSearchQueries"))
-        { 
-            $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
-        }
+<<<<<<< HEAD
         $setParams.Add("Confirm", $false)
 
         $app =  Get-SPServiceApplication -Name $params.Name `
@@ -285,6 +396,8 @@ function Set-TargetResource
                           }
 
         $app | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
+=======
+>>>>>>> refs/remotes/PowerShell/dev
     }
 }
 
