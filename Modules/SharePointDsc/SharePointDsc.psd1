@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.2.0.0'
+ModuleVersion = '1.3.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -27,7 +27,7 @@ CompanyName = 'Microsoft Corporation'
 Copyright = '(c) 2015-2016 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'This DSC module is used to deploy and configure SharePoint Server 2013 and 2016, and convers a wide range of areas including web apps, service apps and farm configuration.'
+Description = 'This DSC module is used to deploy and configure SharePoint Server 2013 and 2016, and covers a wide range of areas including web apps, service apps and farm configuration.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -126,19 +126,21 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = '
- * Fixed bugs SPWebAppPolicy and SPServiceApPSecurity that prevented the get methods from returning AD group names presented as claims tokens
- * Minor tweaks to the PowerShell module manifest
- * Modified all resources to ensure $null values are on the left of comparisson operations
- * Added RunOnlyWhenWriteable property to SPUserProfileSyncService resource
- * Added better logging to all test method output to make it clear what property is causing a test to fail
- * Added support for NetBIOS domain names resolution to SPUserProfileServiceApp
- * Removed chocolatey from the AppVeyor build process in favour of the PowerShell Gallery build of Pester
- * Fixed a bug in SPContentDatabase that caused it to not function correctly. 
- * Fixed the use of plural nouns in cmdlet names within the module
- * Removed dependency on Win32_Product from SPInstall
- * Added SPTrustedIdentityTokenIssuer, SPRemoteFarmTrust and SPSearchResultSource resources
- * Added HostHeader parameter in examples for Web Application, so subsequent web applications won''t error out
- * Prevented SPCreateFarm and SPJoinFarm from executing set methods where the local server is already a member of a farm 
+ * Fixed typo on return value in SPServiceAppProxyGroup
+ * Fixed SPJoinFarm to not write output during successful farm join
+ * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
+ * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
+ * Added ProxyName parameter to all service application resources
+ * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
+ * Fixed typos in documentation for InstallAccount parameter on most resources
+ * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
+ * New resources: SPConfigWizard, SPProductUpdate and SPPublishServiceApplication
+ * Updated style of all script in module to align with PowerShell team standards
+ * Changed parameter ClaimsMappings in SPTrustedIdentityTokenIssuer to consume an array of custom object MSFT_SPClaimTypeMapping
+ * Changed SPTrustedIdentityTokenIssuer to throw an exception if certificate specified has a private key, since SharePoint doesn''t accept it
+ * Fixed issue with SPTrustedIdentityTokenIssuer to stop if cmdlet New-SPTrustedIdentityTokenIssuer returns null
+ * Fixed issue with SPTrustedIdentityTokenIssuer to correctly get parameters ClaimProviderName and ProviderSignOutUri
+ * Fixed issue with SPTrustedIdentityTokenIssuer to effectively remove the SPTrustedAuthenticationProvider from all zones before deleting the SPTrustedIdentityTokenIssuer
 '
 
     } # End of PSData hashtable

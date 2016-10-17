@@ -18,6 +18,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
+
         # Mocks for all contexts
         Mock -CommandName New-SPAccessServicesApplication -MockWith { }
         Mock -CommandName Set-SPAccessServicesApplication -MockWith { }
@@ -35,7 +38,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null 
             }
             
-            It "Should return null from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
@@ -45,7 +48,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPAccessServicesApplication 
+                Assert-MockCalled New-SPAccessServicesApplication
             }
         }
 
@@ -57,9 +60,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [System.Management.Automation.PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
 
             It "Should return null from the Get method" {
@@ -75,16 +86,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [System.Management.Automation.PSCustomObject]@{ 
                     TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
-                    DatabaseServer = $testParams.DatebaseName
+                    DatabaseServer = $testParams.DatabaseName
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = $getTypeFullName 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp
             }
 
-            It "Should return values from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            It "returns Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return true when the Test method is called" {
@@ -101,12 +120,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [System.Management.Automation.PSCustomObject]@{ 
                     TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
-                    DatabaseServer = $testParams.DatabaseServer
+                    DatabaseServer = $testParams.DatabaseName
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = $getTypeFullName 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp
             }
             
             It "Should return present from the Get method" {

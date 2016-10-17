@@ -276,6 +276,9 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Search Crawl Rule '$Path'"
+    
     $result = Get-TargetResource @PSBoundParameters
 
     # AuthenticationType=CertificateName and CertificateRuleAccess parameters not specified
@@ -502,10 +505,12 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing Search Crawl Rule '$Path'"
-        
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+        
     if ($Ensure -eq "Present") 
     {
         if ($CrawlConfigurationRules) 

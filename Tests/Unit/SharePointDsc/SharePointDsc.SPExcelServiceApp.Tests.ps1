@@ -19,6 +19,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication" 
 
         # Mocks for all contexts   
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
@@ -58,6 +59,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         ApplicationPool = "Test App Pool"
                     }
 
+                    Mock -CommandName Get-SPServiceApplication -MockWith { 
+                        $spServiceApp = [PSCustomObject]@{ 
+                                            DisplayName = $testParams.Name 
+                                        } 
+                        $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                                -Name GetType `
+                                                -Value {  
+                                                        return @{ 
+                                                            FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                        }  
+                                                    } -PassThru -Force 
+                        return $spServiceApp 
+                    }
+
                     Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
                         TypeName = "Some other service app type"
                     }) }
@@ -75,11 +90,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        return @(@{
+                        $spServiceApp = [PSCustomObject]@{ 
                             TypeName = "Excel Services Application Web Service Application"
                             DisplayName = $testParams.Name
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        })
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
                     }
 
                     It "Should return values from the get method" {
@@ -99,12 +118,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith { 
-                        return @(@{
+                        $spServiceApp = [PSCustomObject]@{ 
                             TypeName = "Excel Services Application Web Service Application"
                             DisplayName = $testParams.Name
-                            DatabaseServer = $testParams.DatabaseServer
                             ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        })
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
                     }
                     
                     It "Should return present from the Get method" {

@@ -18,6 +18,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        #Initialize Tests
+        $getTypeFullName = "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
+
         # Mocks for all contexts
         Mock -CommandName New-SPMetadataServiceApplication -MockWith { return @{} }
         Mock -CommandName New-SPMetadataServiceApplicationProxy -MockWith { return @{} }
@@ -60,9 +63,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
             
             It "Should return absent from the Get method" {
@@ -84,7 +95,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "Managed Metadata Service"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -94,7 +105,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return present from the get method" {
@@ -106,6 +121,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+
         Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
             $testParams = @{
                 Name = "Managed Metadata Service App"
@@ -116,7 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Managed Metadata Service"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -128,7 +144,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
@@ -159,7 +179,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "Managed Metadata Service"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -171,7 +191,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "Should return present from the Get method" {

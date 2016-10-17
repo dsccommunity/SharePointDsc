@@ -41,7 +41,7 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Visio Graphics Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
@@ -84,6 +84,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting Visio Graphics service app '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -112,7 +114,7 @@ function Set-TargetResource
 
                 Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Visio Graphics Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     } | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
             }
         }
@@ -128,7 +130,7 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Visio Graphics Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     }
             Remove-SPServiceApplication $service -Confirm:$false
         }
@@ -159,9 +161,12 @@ function Test-TargetResource
         $InstallAccount
     )
     
-    Write-Verbose -Message "Testing for Visio Graphics Service Application '$Name'"
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing Visio Graphics service app '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")

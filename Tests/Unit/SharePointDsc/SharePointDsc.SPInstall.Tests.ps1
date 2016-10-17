@@ -37,19 +37,27 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts   
         Mock -CommandName Get-ChildItem -MockWith {
-            return @(
-                @{
+            $full = @{
                     Version = "4.5.0.0"
                     Release = "0"
                     PSChildName = "Full"
-                },
-                @{
+                } 
+
+                $client = @{
                     Version = "4.5.0.0"
                     Release = "0"
                     PSChildName = "Client"
-                }
-            )
+                } 
+
+                $returnval = @($full, $client)
+                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+                return $returnval
         }
+
+        Mock -CommandName Get-SPDSCAssemblyVersion -MockWith { 
+            return $Global:SPDscHelper.CurrentStubBuildNumber.Major 
+        }
+        
 
         # Test contexts
         Context -Name "SharePoint binaries are not installed but should be" -Fixture {
@@ -84,7 +92,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
                     (New-SPDscMockPrereq -Name "Something else")
                 ) 
-            } 
+            } -ParameterFilter { $null -ne $Path }
+
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return @{
+                    VersionInfo = @{
+                        FileVersion = "15.0.4709.1000"
+                    }
+                } 
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -139,7 +159,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Absent"
             }
             
-            Mock -CommandName Get-ItemProperty -MockWith { return @{} } 
+            Mock -CommandName Get-ItemProperty -MockWith { return @{} }  -ParameterFilter { $null -ne $Path }
 
             It "Should throw in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
@@ -158,18 +178,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-ChildItem -MockWith {
-                return @(
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Full"
-                    },
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Client"
-                    }
-                )
+                $full = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                } 
+
+                $client = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                } 
+
+                $returnval = @($full, $client)
+                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                return $returnval
             }
             
             It "Should throw an error in the set method" {
@@ -188,6 +211,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-ItemProperty -MockWith { 
                 return $null 
+            } -ParameterFilter { 
+                $null -ne $Path 
             }
 
             It "Should return absent from the get method" {

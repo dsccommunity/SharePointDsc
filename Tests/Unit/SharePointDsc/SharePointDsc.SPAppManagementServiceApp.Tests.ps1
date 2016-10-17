@@ -18,6 +18,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        #initialise tests
+        $getTypeFullName = "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication" 
+
         # Mocks for all contexts
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
@@ -59,9 +62,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseServer = "TestServer\Instance"
             }
             
-            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
+            }
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -80,7 +93,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                 $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "App Management Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -88,7 +101,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return present from the get method" {
@@ -111,20 +128,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $service = @(@{
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "App Management Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    ApplicationPool = @{ Name = "Wrong app pool" }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
                     
-                $service = $service | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                     $Global:SPDscAppServiceUpdateCalled = $true
                 } -PassThru 
-                return $service
+                return $spServiceApp
             }
             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
                 @{ Name = $testParams.ApplicationPool } }
@@ -166,7 +186,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "App Management Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -174,7 +194,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "Should return present from the get method" {

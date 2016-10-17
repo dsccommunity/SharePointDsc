@@ -18,6 +18,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        #Initialize tests 
+        $getTypeFullName = "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
+        
         # Mocks for all contexts   
         Mock -CommandName Remove-SPServiceApplication -MockWith  { }
         Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
@@ -52,9 +55,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
+            }
+
+            It "Should return null from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
             It "Should return absent from the Get method" {
@@ -70,13 +85,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
                         Name = $testParams.ApplicationPool 
                     }
-                })
+                }
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = $getTypeFullName 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp
             }
 
             It "Should return present from the get method" {
@@ -95,14 +118,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "PerformancePoint Service Application"
+                $spServiceApp = [PSCustomObject]@{ 
+                    TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ 
-                        Name = "Wrong App Pool Name" 
-                    }
-                })
+                    DatabaseServer = $testParams.DatabaseName
+                    ApplicationPool = @{ Name = "Wrong app pool name" }
+                }
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = $getTypeFullName 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp
             }
+
             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
                 return @{ 
                     Name = $testParams.ApplicationPool 
@@ -127,11 +158,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "PerformancePoint Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "Should return present from the Get method" {

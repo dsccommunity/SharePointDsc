@@ -20,6 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Server.Administration.UserProfileApplication"
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
@@ -79,9 +80,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } 
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
 
             It "Should return absent from the Get method" {
@@ -131,6 +140,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                    -Name GetType `
                                    -Value {
                                         New-Object -TypeName "Object" |
+                                            Add-Member -MemberType NoteProperty `
+                                                       -Name FullName `
+                                                       -Value $getTypeFullName `
+                                                       -PassThru | 
                                             Add-Member -MemberType ScriptMethod `
                                                        -Name GetProperties `
                                                        -Value {
@@ -190,17 +203,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     } -PassThru -Force 
                 )
             }
-
             
             It "Should return false from the Get method" {
                 (Get-TargetResource @testParams).EnableNetBIOS | Should Be $false  
             }
-            It "Should call Update method on Service Application before finishing set  method" {
-                $Global:SPDscUPSAUpdateCalled= $false
-            
+
+            It "Should call Update method on Service Application before finishing set method" {
+                $Global:SPDscUPSAUpdateCalled = $false            
                 Set-TargetResource @testParams
                 $Global:SPDscUPSAUpdateCalled | Should Be $true  
-
             }
 
             It "Should return false when the Test method is called" {
@@ -250,6 +261,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                    -Name GetType `
                                    -Value {
                                         New-Object -TypeName "Object" |
+                                            Add-Member -MemberType NoteProperty `
+                                                       -Name FullName `
+                                                       -Value $getTypeFullName `
+                                                       -PassThru |
                                             Add-Member -MemberType ScriptMethod `
                                                        -Name GetProperties `
                                                        -Value {
@@ -363,6 +378,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                    -Name GetType `
                                    -Value {
                                         New-Object -TypeName "Object" |
+                                            Add-Member -MemberType NoteProperty `
+                                                       -Name FullName `
+                                                       -Value $getTypeFullName `
+                                                       -PassThru |
                                             Add-Member -MemberType ScriptMethod `
                                                        -Name GetProperties `
                                                        -Value {

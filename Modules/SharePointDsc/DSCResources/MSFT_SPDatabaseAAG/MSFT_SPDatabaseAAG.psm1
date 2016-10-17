@@ -26,7 +26,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting current AAG config for $DatabaseName"
+    Write-Verbose -Message "Getting AAG configuration for $DatabaseName"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -90,7 +90,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting AAG config for $DatabaseName"
+    Write-Verbose -Message "Setting AAG configuration for $DatabaseName"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
@@ -187,10 +187,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $PSBoundParameters.Ensure = $Ensure
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing AAG configuration for $DatabaseName"
 
-    Write-Verbose -Message "Checking AAG configuration for $DatabaseName"
+    $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

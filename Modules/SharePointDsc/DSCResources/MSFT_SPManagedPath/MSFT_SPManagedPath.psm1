@@ -30,7 +30,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
+    Write-Verbose -Message "Getting managed path $RelativeUrl in $WebAppUrl"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -73,7 +73,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -104,6 +103,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting managed path $RelativeUrl in $WebAppUrl"
 
     $CurrentResults = Get-TargetResource @PSBoundParameters
 
@@ -156,7 +157,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -189,9 +189,12 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Looking up the managed path $RelativeUrl in $WebAppUrl"
+    Write-Verbose -Message "Testing managed path $RelativeUrl in $WebAppUrl"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("WebAppUrl",
@@ -202,4 +205,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-

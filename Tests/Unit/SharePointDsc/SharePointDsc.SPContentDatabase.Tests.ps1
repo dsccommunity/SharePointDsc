@@ -171,8 +171,9 @@ namespace Microsoft.SharePoint.Administration {
                 } -PassThru
                 return $returnVal
             }
-            
-            Mock -CommandName Mount-SPContentDatabase -ModuleName SPContentDatabase -MockWith { 
+
+            Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
+            Mock Mount-SPContentDatabase { 
                 $returnval = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"
@@ -308,8 +309,10 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 return $returnVal
             }
-            
-            Mock -CommandName Mount-SPContentDatabase -ModuleName SPContentDatabase -MockWith { 
+
+            Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
+            Mock Dismount-SPContentDatabase { }
+            Mock Mount-SPContentDatabase { 
                 $returnVal = @{
                     Name = "SharePoint_Content_01"
                     Server = "SQLSrv"

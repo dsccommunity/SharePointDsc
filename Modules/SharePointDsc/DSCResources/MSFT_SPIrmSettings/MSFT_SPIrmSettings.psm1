@@ -22,11 +22,11 @@ function Get-TargetResource
         $InstallAccount
     )
     
-   write-verbose "Getting SharePoint IRM Settings"
+    Write-Verbose "Getting SharePoint IRM Settings"
     
-   $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                 -Arguments $PSBoundParameters `
-                                 -ScriptBlock {
+    $result = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
         $params = $args[0]
         
         try 
@@ -65,7 +65,6 @@ function Get-TargetResource
    return $Result 
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -89,7 +88,7 @@ function Set-TargetResource
         $InstallAccount
     )
     
-    write-verbose "Applying SharePoint IRM settings"
+    Write-Verbose "Setting SharePoint IRM Settings"
      
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -134,7 +133,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -175,7 +173,6 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters
-    
 }
 
 Export-ModuleMember -Function *-TargetResource

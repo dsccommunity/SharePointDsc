@@ -18,6 +18,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Initialize Tests 
+        $getTypeFullName = "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
+
         # Mocks for all contexts   
         Mock -CommandName New-SPVisioServiceApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
@@ -56,9 +59,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
 
             It "Should return absent from the Get method" {
@@ -74,11 +85,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return present from the get method" {
@@ -98,11 +113,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock -CommandName Get-SPServiceApplicationPool { 
                 return @{ 
@@ -129,11 +148,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "Should return present from the Get method" {

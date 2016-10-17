@@ -33,7 +33,7 @@ function Get-TargetResource
         $ServerRole
     )
 
-    Write-Verbose -Message "Checking for local SP Farm"
+    Write-Verbose -Message "Getting local farm presence"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
@@ -74,7 +74,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -109,7 +108,7 @@ function Set-TargetResource
         $ServerRole
     )
 
-    Write-Verbose -Message "Joining existing farm configuration database"
+    Write-Verbose -Message "Setting local farm"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
@@ -190,7 +189,6 @@ function Set-TargetResource
     $global:DSCMachineStatus = 1
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -226,6 +224,8 @@ function Test-TargetResource
         $ServerRole
     )
 
+    Write-Verbose -Message "Testing for local farm presence"
+
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
     {
@@ -233,12 +233,10 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose "Testing for local farm presence"
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("FarmConfigDatabaseName") 
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

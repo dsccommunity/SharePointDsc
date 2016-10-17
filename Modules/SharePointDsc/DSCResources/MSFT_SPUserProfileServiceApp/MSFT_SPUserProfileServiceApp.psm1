@@ -79,7 +79,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"            
         }
 
         if ($null -eq $serviceApp)
@@ -214,6 +214,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting user profile service application $Name"
+
     if ($Ensure -eq "Present") 
     {    
         if ($PSBoundParameters.ContainsKey("FarmAccount") -eq $false) 
@@ -314,13 +316,12 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "User Profile Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"  
                     }
             Remove-SPServiceApplication $service -Confirm:$false
         }
     }        
 }
-
 
 function Test-TargetResource
 {
@@ -386,9 +387,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service application $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if($Ensure -eq "Present")
     {
@@ -405,4 +408,3 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
-

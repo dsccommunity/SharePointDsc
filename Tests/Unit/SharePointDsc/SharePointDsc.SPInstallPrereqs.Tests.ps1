@@ -52,21 +52,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         
         Mock -CommandName Get-ChildItem {
-            return @(
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Full"
-                }, 
-                @{
-                    Version = "4.5.0.0"
-                    Release = "0"
-                    PSChildName = "Client"
-                }
-            )
+            $full = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Full"
+            } 
+
+           $client = @{
+                Version = "4.5.0.0"
+                Release = "0"
+                PSChildName = "Client"
+            } 
+
+            $returnval = @($full, $client)
+            $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+            return $returnval
         }
 
-        Mock -CommandName Get-SPDscOSVersion {
+        Mock Get-ItemProperty -ParameterFilter { 
+            $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
+        } -MockWith {
+            return @()
+        }
+
+        Mock -CommandName Test-Path -MockWith {
+            return $true
+        }
+
+        Mock -CommandName Get-SPDscOSVersion -MockWith {
             return @{
                 Major = 6
                 Minor = 3
@@ -83,14 +96,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Prerequisites are not installed but should be and are to be installed in online mode" -Fixture {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Present"
             }
             
             Mock -CommandName Get-ItemProperty -MockWith {
                 return @()
-            }
+            } -ParameterFilter { $null -ne $Path }
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -142,7 +155,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Prerequisites are installed and should be" -Fixture {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Present"
             }
@@ -210,7 +223,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         {
             Context -Name "Prerequisites are installed and should be (with SQL 2012 native client for SP2013)" -Fixture {
                 $testParams = @{
-                    InstallerPath = "C:\SPInstall"
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                     OnlineMode = $true
                     Ensure = "Present"
                 }
@@ -249,7 +262,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         
         Context -Name "Prerequisites are installed but should not be" -Fixture {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $true
                 Ensure = "Absent"
             }
@@ -265,14 +278,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode" -Fixture {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 Ensure = "Present"
             }
 
             Mock -CommandName Get-ItemProperty -MockWith {
                 return @()
-            }
+            } -ParameterFilter { $null -ne $Path }
 
             Mock -CommandName Start-Process -MockWith { 
                 return @{ 
@@ -311,7 +324,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode, but invalid paths have been passed" -Fixture {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 Ensure = "Present"
             }
@@ -361,30 +374,97 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
-            Mock -CommandName Get-ChildItem -MockWith {
-                return @(
-                    @{
+        if ($majorBuildNumber -eq 15)
+        {
+            Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
+                $testParams = @{
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock Get-ChildItem {
+                $full = @{
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Full"
-                    }, 
-                    @{
+                    } 
+
+                $client = @{
                         Version = "4.6.0.0"
                         Release = "0"
                         PSChildName = "Client"
+                    } 
+
+                    $returnval = @($full, $client)
+                    $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                    return $returnval
+                }
+
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.4600.1000"
+                        }
                     }
-                )
+                } -ParameterFilter { 
+                    $Path -eq "C:\SPInstall\updates\svrsetup.dll"
+                }
+                
+                It "throws an error in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw ("A known issue prevents installation of SharePoint 2013 on " + `
+                                                                       "servers that have .NET 4.6 already installed")
+                }
             }
-            
-            It "Should throw an error in the set method" {
-                { Set-TargetResource @testParams } | Should Throw
+
+            Context "SharePoint 2013 is installing on a server with .NET 4.6 with compatibility update" {
+                $testParams = @{
+                    InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+                    OnlineMode = $true
+                    Ensure = "Present"
+                }
+
+                Mock Get-ChildItem {
+                $full = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Full"
+                    } 
+
+                $client = @{
+                        Version = "4.6.0.0"
+                        Release = "0"
+                        PSChildName = "Client"
+                    } 
+
+                    $returnval = @($full, $client)
+                    $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                    return $returnval
+                }
+
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    return @{
+                        VersionInfo = @{
+                            FileVersion = "15.0.4709.1000"
+                        }
+                    }
+                } -ParameterFilter { 
+                    $Path -eq "C:\SPInstall\updates\svrsetup.dll"
+                }
+                
+                It "should install prereqs" {
+                    Mock Start-Process { return @{ ExitCode = 0 } }
+                    Mock Test-Path { return $true }
+
+                    Set-TargetResource @testParams
+                    Assert-MockCalled Start-Process -Scope It 
+                }
             }
-        }
+        }        
         
         Context -Name "Prerequisites are not installed but should be and are to be installed in offline mode, with SXSstore specified" -Fixture {
             $testParams = @{
-                InstallerPath = "C:\SPInstall"
+                InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                 OnlineMode = $false
                 SXSpath = "C:\SPInstall\SXS"
                 Ensure = "Present"
@@ -441,7 +521,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         RestartNeeded = "Yes"
                     })  
                 }
-                
+
                 Set-TargetResource @testParams
                 $global:DSCMachineStatus | Should Be 1 
             }
@@ -455,8 +535,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     })  
                 }
 
-                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"
-                
+                {Set-TargetResource @testParams} | should Throw "Error installing ExampleFeature"                
             }
         } 
     }

@@ -93,7 +93,9 @@ function Get-TargetResource
     ) 
 
     Write-Verbose -Message "Getting Word Automation service app '$Name'" 
+
     $PSBoundParameters.Ensure = $Ensure
+    
     if (($ApplicationPool `
             -or $DatabaseName `
             -or $DatabaseServer `
@@ -124,20 +126,31 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock { 
-        $params = $args[0] 
-          
-        $serviceApp = Get-SPServiceApplication `
-                            -Name $params.Name `
-                            -ErrorAction SilentlyContinue | Where-Object -FilterScript { 
-                                $_.TypeName -eq "Word Automation Services" 
-                            }
+        $params = $args[0]
+
+        $serviceApps = Get-SPServiceApplication -Name $params.Name `
+                                                -ErrorAction SilentlyContinue
+        $nullReturn = @{
+            Name            = $params.Name
+            Ensure          = "Absent"
+            ApplicationPool = $params.ApplicationPool
+        }
+
+        if ($null -eq $serviceApps) 
+        { 
+            return $nullReturn 
+        }
+        
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+        }          
 
         switch ($params.Ensure) 
         {
             "Present" {
                 if ($null -eq $serviceApp) 
                 {  
-                    return $null  
+                    return $nullReturn  
                 } 
                 else 
                 { 
@@ -190,7 +203,7 @@ function Get-TargetResource
             "Absent" {
                 if ($null -ne $serviceApp) 
                 {  
-                    return $null  
+                    return $nullReturn  
                 } 
                 else 
                 { 
@@ -301,6 +314,8 @@ function Set-TargetResource
         $InstallAccount 
     ) 
 
+    Write-Verbose -Message "Setting Word Automation service app '$Name'" 
+
     if (($ApplicationPool `
             -or $DatabaseName `
             -or $DatabaseServer `
@@ -321,102 +336,95 @@ function Set-TargetResource
     {
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
+    
     $PSBoundParameters.Ensure = $Ensure
+
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) 
     {
         throw ("An Application Pool and Database Name are required to configure the Word " + `
                "Automation Service Application")
     }
 
-    switch ($Ensure) 
+    $result = Get-TargetResource @PSBoundParameters
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
     {
-        "Present" {
-            Write-Verbose -Message "Creating and/or configuring Word Automation Service Application $Name" 
-            Invoke-SPDSCCommand -Credential $InstallAccount `
-                                -Arguments $PSBoundParameters `
-                                -ScriptBlock { 
-                $params = $args[0] 
+        Write-Verbose -Message "Creating Word Automation Service Application $Name" 
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock { 
+            $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication `
-                                    -Name $params.Name `
-                                    -ErrorAction SilentlyContinue | Where-Object -FilterScript { 
-                                        $_.TypeName -eq "Word Automation Services" 
-                                    }
+            $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
+            if ($appPool) 
+            {
+                $cmdletparams = @{}
+                $cmdletparams.Name = $params.Name
+                if ($params.Name) 
+                { 
+                    $cmdletparams.DatabaseName = $params.DatabaseName 
+                }
+                if ($params.Name) 
+                { 
+                    $cmdletparams.DatabaseServer = $params.DatabaseServer 
+                }
+                if ($params.Name) 
+                { 
+                    $cmdletparams.ApplicationPool = $params.ApplicationPool 
+                }
+
+                $serviceApp = New-SPWordConversionServiceApplication @cmdletparams
+            } 
+            else 
+            {
+                throw "Specified application pool does not exist"
+            }
+        }
+    }
+
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
+    {
+        Write-Verbose -Message "Updating Word Automation Service Application $Name"
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
                 
-                if ($null -eq $serviceApp) 
-                {
-                    # Service application does not exist, create it 
-                    $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
-                    if ($appPool) 
-                    {
-                        $cmdletparams = @{}
-                        $cmdletparams.Name = $params.Name
-                        if ($params.Name) 
-                        { 
-                            $cmdletparams.DatabaseName = $params.DatabaseName 
-                        }
-                        if ($params.Name) 
-                        { 
-                            $cmdletparams.DatabaseServer = $params.DatabaseServer 
-                        }
-                        if ($params.Name) 
-                        { 
-                            $cmdletparams.ApplicationPool = $params.ApplicationPool 
-                        }
+            $serviceApp = Get-SPServiceApplication -Name $params.Name `
+                | Where-Object -FilterScript {
+                    $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+            }
 
-                        $serviceApp = New-SPWordConversionServiceApplication @cmdletparams
-                    } 
-                    else 
-                    {
-                        throw "Specified application pool does not exist"
+            # Check if the specified Application Pool is different and change if so
+            if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
+                -and $ApplicationPool -ne $result.ApplicationPool)
+            {
+                $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
+                Set-SPWordConversionServiceApplication -Identity $serviceApp -ApplicationPool $appPool
+            }
+            # Check if the specified Database Name and Server are different and change if so
+            if ($params.DatabaseName) 
+            {
+                if ($params.DatabaseServer) 
+                {
+                    if ($serviceApp.Database.Server.Name -ne $params.DatabaseServer) 
+                    { 
+                        Set-SPWordConversionServiceApplication -Identity $serviceApp `
+                                                               -DatabaseServer $params.DatabaseServer `
+                                                               -DatabaseName $params.DatabaseName 
                     }
                 } 
                 else 
                 {
-                    # Service application existed
-                    # Check if the specified Application Pool is different and change if so
-                    if ($params.ApplicationPool) 
-                    {
-                        if ($serviceApp.ApplicationPool.Name -ne $params.ApplicationPool) 
-                        { 
-                            $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
-                            if ($appPool) 
-                            {
-                                Set-SPWordConversionServiceApplication -Identity $serviceApp `
-                                                                       -ApplicationPool $appPool
-                            } 
-                            else 
-                            {
-                                throw "Specified application pool does not exist"
-                            }
-                        }
-                    }
-
-                    # Check if the specified Database Name and Server are different and change if so
-                    if ($params.DatabaseName) 
-                    {
-                        if ($params.DatabaseServer) 
-                        {
-                            if ($serviceApp.Database.Server.Name -ne $params.DatabaseServer) 
-                            { 
-                                Set-SPWordConversionServiceApplication -Identity $serviceApp `
-                                                                       -DatabaseServer $params.DatabaseServer `
-                                                                       -DatabaseName $params.DatabaseName 
-                            }
-                        } 
-                        else 
-                        {
-                            if ($serviceApp.Database.Name -ne $params.DatabaseName) 
-                            { 
-                                Set-SPWordConversionServiceApplication -Identity $serviceApp `
-                                                                       -DatabaseName $params.DatabaseName 
-                            }
-                        }
+                    if ($serviceApp.Database.Name -ne $params.DatabaseName) 
+                    { 
+                        Set-SPWordConversionServiceApplication -Identity $serviceApp `
+                                                               -DatabaseName $params.DatabaseName 
                     }
                 }
+            }
 
-                if ($params.SupportedFileFormats) 
-                {
+            if ($params.SupportedFileFormats) 
+            {
                     if ($params.SupportedFileFormats.Contains("docx")) 
                     { 
                         $serviceApp.WordServiceFormats.OpenXmlDocument = $true 
@@ -459,28 +467,28 @@ function Set-TargetResource
                     }
                 }
 
-                if ($params.DisableEmbeddedFonts) 
-                { 
-                    $serviceApp.DisableEmbeddedFonts = $params.DisableEmbeddedFonts 
-                }
-                if ($params.MaximumMemoryUsage) 
-                { 
-                    $serviceApp.MaximumMemoryUsage = $params.MaximumMemoryUsage 
-                }
-                if ($params.RecycleThreshold) 
-                { 
-                    $serviceApp.RecycleProcessThreshold = $params.RecycleThreshold 
-                }
-                if ($params.DisableBinaryFileScan) 
-                { 
-                    $serviceApp.DisableBinaryFileScan = $params.DisableBinaryFileScan 
-                }
-                if ($params.ConversionProcesses) 
-                { 
-                    $serviceApp.TotalActiveProcesses = $params.ConversionProcesses 
-                }
-                if ($params.JobConversionFrequency) 
-                {
+            if ($params.DisableEmbeddedFonts) 
+            { 
+                $serviceApp.DisableEmbeddedFonts = $params.DisableEmbeddedFonts 
+            }
+            if ($params.MaximumMemoryUsage) 
+            { 
+                $serviceApp.MaximumMemoryUsage = $params.MaximumMemoryUsage 
+            }
+            if ($params.RecycleThreshold) 
+            { 
+                $serviceApp.RecycleProcessThreshold = $params.RecycleThreshold 
+            }
+            if ($params.DisableBinaryFileScan) 
+            { 
+                $serviceApp.DisableBinaryFileScan = $params.DisableBinaryFileScan 
+            }
+            if ($params.ConversionProcesses) 
+            { 
+                $serviceApp.TotalActiveProcesses = $params.ConversionProcesses 
+            }
+            if ($params.JobConversionFrequency) 
+            {
                     # Check for TimerJob and change schedule
                     $wordAutomationTimerjob = Get-SPTimerJob $params.Name
                     if ($wordAutomationTimerjob.Count -eq 1) 
@@ -493,53 +501,52 @@ function Set-TargetResource
                         throw "Timerjob could not be found"
                     }
                 }
-                if ($params.NumberOfConversionsPerProcess) 
-                { 
-                    $serviceApp.ConversionsPerInstance = $params.NumberOfConversionsPerProcess 
-                }
-                if ($params.TimeBeforeConversionIsMonitored)
-                {
-                    $timespan = New-TimeSpan -Minutes $params.TimeBeforeConversionIsMonitored
-                    $serviceApp.ConversionTimeout = $timespan
-                }
-                if ($params.MaximumConversionAttempts) 
-                { 
-                    $serviceApp.MaximumConversionAttempts = $params.MaximumConversionAttempts 
-                }
-                if ($params.MaximumSyncConversionRequests) 
-                { 
-                    $serviceApp.MaximumSyncConversionRequests = $params.MaximumSyncConversionRequests 
-                }
-                if ($params.KeepAliveTimeout) 
-                {
-                    $timespan = New-TimeSpan -Seconds $params.KeepAliveTimeout
-                    $serviceApp.KeepAliveTimeout = $timespan
-                }
-                if ($params.MaximumConversionTime) 
-                {
-                    $timespan = New-TimeSpan -Seconds $params.MaximumConversionTime
-                    $serviceApp.MaximumConversionTime = $timespan
-                }
-
-                $serviceApp.Update()
-            } 
-        }
-        "Absent" {
-            Write-Verbose -Message "Removing Word Automation Service Application $Name" 
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
-                $params = $args[0] 
-
-                $serviceApp = Get-SPServiceApplication `
-                                    -Name $params.Name `
-                                    -ErrorAction SilentlyContinue | Where-Object -FilterScript { 
-                                        $_.TypeName -eq "Word Automation Services" 
-                                    }
-                if ($null -ne $serviceApp) 
-                {
-                    # Service app existed, deleting
-                    Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
-                } 
+            if ($params.NumberOfConversionsPerProcess) 
+            { 
+                $serviceApp.ConversionsPerInstance = $params.NumberOfConversionsPerProcess 
             }
+            if ($params.TimeBeforeConversionIsMonitored)
+            {
+                $timespan = New-TimeSpan -Minutes $params.TimeBeforeConversionIsMonitored
+                $serviceApp.ConversionTimeout = $timespan
+            }
+            if ($params.MaximumConversionAttempts) 
+            { 
+                $serviceApp.MaximumConversionAttempts = $params.MaximumConversionAttempts 
+            }
+            if ($params.MaximumSyncConversionRequests) 
+            { 
+                $serviceApp.MaximumSyncConversionRequests = $params.MaximumSyncConversionRequests 
+            }
+            if ($params.KeepAliveTimeout) 
+            {
+                $timespan = New-TimeSpan -Seconds $params.KeepAliveTimeout
+                $serviceApp.KeepAliveTimeout = $timespan
+            }
+            if ($params.MaximumConversionTime) 
+            {
+                $timespan = New-TimeSpan -Seconds $params.MaximumConversionTime
+                $serviceApp.MaximumConversionTime = $timespan
+            }
+
+            $serviceApp.Update()
+        }
+    }
+    
+    if ($Ensure -eq "Absent") 
+    {
+        Write-Verbose -Message "Removing Word Automation Service Application $Name" 
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
+            $params = $args[0] 
+
+            $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+                $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
+            }
+            if ($null -ne $serviceApp) 
+            {
+                # Service app existed, deleting
+                Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
+            } 
         }
     }
 } 
@@ -638,6 +645,10 @@ function Test-TargetResource
         $InstallAccount 
     ) 
 
+    Write-Verbose -Message "Testing Word Automation service app '$Name'" 
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if (($ApplicationPool `
             -or $DatabaseName `
             -or $DatabaseServer `
@@ -659,15 +670,12 @@ function Test-TargetResource
         throw "You cannot use any of the parameters when Ensure is specified as Absent"
     }
     
-    $PSBoundParameters.Ensure = $Ensure
-
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) 
     {
         throw ("An Application Pool and Database Name are required to configure the Word " + ` 
                "Automation Service Application")
     }
 
-    Write-Verbose -Message "Testing for Word Automation Service Application '$Name'" 
     $CurrentValues = Get-TargetResource @PSBoundParameters 
      
     if ($null -eq $CurrentValues) 

@@ -143,7 +143,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 )
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -193,7 +193,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -245,7 +245,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -363,7 +363,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -423,7 +423,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -542,7 +542,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -601,7 +601,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -720,7 +720,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -778,7 +778,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
-            Mock -CommandName Get-SPDSCContentDatabase -MockWith {
+
+            Mock -CommandName Get-SPContentDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"

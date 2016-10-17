@@ -21,17 +21,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
 
         # Mocks for all contexts   
-        Mock -CommandName Test-Path {
+        Mock -CommandName Test-Path -MockWith {
             return $true
         }
 
-        Mock -CommandName Get-ChildItem {
+        Mock -CommandName Get-ChildItem -MockWith {
             return @{
                 Name = "C:\SPInstall\osrv.nl-nl"
             }
         }
 
-        Mock -CommandName Get-SPDSCRegistryKey {
+        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
             if ($Value -eq "SetupType")
             {
                 return "CLEAN_INSTALL"
@@ -43,7 +43,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Start-Process {
+        Mock -CommandName Start-Process -MockWith {
             return @{
                 ExitCode = 0
             }
@@ -79,7 +79,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey {
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osrv.nl-nl"
+                }
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -91,7 +101,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
             
-            Mock -CommandName Get-SPDscFarmProductsInfo {
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
                     15 {
@@ -122,7 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
             
-            Mock -CommandName Get-SPDscFarmProductsInfo {
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
                     15 {
@@ -134,6 +144,35 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
+                }
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "CLEAN_INSTALL"
+                }
+
+                if ($Value -eq "LanguagePackInstalled")
+                {
+                    return 0
+                }
+            }
+            
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
+            }
+            
+            Mock -CommandName Start-Process -MockWith {
+                return @{
+                    ExitCode = 0
                 }
             }
 
@@ -158,7 +197,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
             
-            Mock -CommandName Get-SPDscFarmProductsInfo {
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
                     15 {
@@ -172,8 +211,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
             }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "CLEAN_INSTALL"
+                }
+
+                if ($Value -eq "LanguagePackInstalled")
+                {
+                    return 0
+                }
+            }
             
-            Mock -CommandName Start-Process {
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
+            }
+            
+            Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 17022
                 }
@@ -200,7 +262,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
 
-            Mock -CommandName Get-SPDscFarmProductsInfo {
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
                     15 {
@@ -215,7 +277,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Start-Process {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "CLEAN_INSTALL"
+                }
+
+                if ($Value -eq "LanguagePackInstalled")
+                {
+                    return 0
+                }
+            }
+            
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016")
+                }
+            }
+
+            Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 1
                 }
@@ -263,6 +348,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "CLEAN_INSTALL"
+                }
+
+                if ($Value -eq "LanguagePackInstalled")
+                {
+                    return 0
+                }
+            }
+            
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                }
+            }
+
             It "Should throw exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "Update does not contain the language code in the correct format."
             }
@@ -274,13 +382,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
 
-            Mock -CommandName Get-ChildItem {
+            Mock -CommandName Get-ChildItem -MockWith {
                 return @{
                     Name = "C:\SPInstall\osrv.xx-xx"
                 }
             }
             
-            Mock -CommandName Get-SPDscFarmProductsInfo {
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
                     15 {
@@ -292,6 +400,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
+                }
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "SetupType")
+                {
+                    return "CLEAN_INSTALL"
+                }
+
+                if ($Value -eq "LanguagePackInstalled")
+                {
+                    return 0
+                }
+            }
+            
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
+                {
+                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                }
+                else 
+                {
+                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
                 }
             }
             
@@ -306,7 +437,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure    = "Present"
             }
             
-            Mock -CommandName Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"

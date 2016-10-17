@@ -56,8 +56,8 @@ function Get-TargetResource
         { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Managed Metadata Service" 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
         }
 
         if ($null -eq $serviceApp)
@@ -90,7 +90,6 @@ function Get-TargetResource
     }
     return $result
 }
-
 
 function Set-TargetResource
 {
@@ -130,6 +129,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount    
     )
+
+    Write-Verbose -Message "Setting managed metadata service application $Name"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -188,8 +189,8 @@ function Set-TargetResource
                 $params = $args[0]
                 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Managed Metadata Service" 
+                    | Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 Set-SPMetadataServiceApplication -Identity $serviceApp -ApplicationPool $appPool
@@ -207,13 +208,12 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Managed Metadata Service"  
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"  
             }
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -255,13 +255,15 @@ function Test-TargetResource
         $InstallAccount      
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for Managed Metadata Service Application '$Name'"
+    Write-Verbose -Message "Testing managed metadata service application $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")
 }
-
 
 Export-ModuleMember -Function *-TargetResource

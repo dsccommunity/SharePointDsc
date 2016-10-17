@@ -28,30 +28,34 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
             NumberOfUsersEwsSyncWillProcessAtOnce=10
             NumberOfUsersPerEwsSyncBatch=10
         }
+        $getTypeFullName = "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc") 
 
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
+        Mock Invoke-SPDSCCommand {  
+            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope 
+        } 
+         
+        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue 
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+
+        Mock Remove-SPServiceApplication { }
         
         Context -Name "When a service application exists and Ensure equals 'absent'" {
             $testParamsAbsent = @{
                 Name = "Test Work Management App"
                 Ensure = "Absent"
             }
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Work Management Service Application"
-                    DisplayName = $testParamsAbsent.Name
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
-            Mock -CommandName Remove-SPServiceApplication{ }
 
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParamsAbsent | Should Be $false
@@ -63,14 +67,12 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
-        Context -Name "When no service applications exist in the current farm" {
+        Context "When no service applications exist in the current farm" {
+            Mock Get-SPServiceApplication { return $null }
+            Mock New-SPWorkManagementServiceApplication { }
+            Mock New-SPWorkManagementServiceApplicationProxy { }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPWorkManagementServiceApplication { }
-            Mock -CommandName Set-SPWorkManagementServiceApplication { }
-
-            Mock -CommandName New-SPWorkManagementServiceApplicationProxy { }
-            It "Should return null from the Get method" {
+            It "returns null from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
@@ -83,42 +85,31 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Assert-MockCalled New-SPWorkManagementServiceApplication 
             }
         }
-
-        Context -Name "When service applications exist in the current farm but the specific Work Management app does not" {
-            Mock -CommandName Set-SPWorkManagementServiceApplication { }
-            Mock -CommandName New-SPWorkManagementServiceApplication { }
-            Mock -CommandName New-SPWorkManagementServiceApplicationProxy { }
-            $Global:GetSpServiceApplicationCalled=$false
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                if($Global:GetSpServiceApplicationCalled -eq $false){
-                    $Global:GetSpServiceApplicationCalled=$true;
-                    return @(@{
-                    TypeName = "Some other service app type"
-                    })
-                }
-                return @(@{
-                    TypeName = "Work Management Service Application" 
-                        })
-            }
-            
         
-            It "Should return null from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+        Context "When service applications exist in the current farm but the specific Work Management app does not" { 
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
-            It "Should create  new app from the Get method" {
-                Set-TargetResource @testParams 
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
-                Assert-MockCalled Set-SPWorkManagementServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
+            It "returns absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
+            It "returns false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
         }
 
-        Context -Name "When a service application exists and is configured correctly" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Work Management Service Application"
-                    DisplayName = $testParamsComplete.Name
+        Context "When a service application exists and is configured correctly" {
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParamsComplete.ApplicationPool }
                     AdminSettings = @{
                             MinimumTimeBetweenEwsSyncSubscriptionSearches =  (new-timespan -minutes 10)
@@ -127,10 +118,12 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                             NumberOfSubscriptionSyncsPerEwsSyncRun=10
                             NumberOfUsersEwsSyncWillProcessAtOnce=  10
                             NumberOfUsersPerEwsSyncBatch=  10
-            
                     }
-
-                })
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return values from the get method" {
@@ -142,10 +135,9 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
-        Context -Name "When a service application exists and is not configured correctly" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Work Management Service Application"
+        Context "When a service application exists and is not configured correctly" {
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     AdminSettings = @{
@@ -155,10 +147,12 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                             NumberOfSubscriptionSyncsPerEwsSyncRun=10
                             NumberOfUsersEwsSyncWillProcessAtOnce=  10
                             NumberOfUsersPerEwsSyncBatch=  10
-            
                     }
-
-                })
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock -CommandName Set-SPWorkManagementServiceApplication { }
 
@@ -172,6 +166,5 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Assert-MockCalled Get-SPServiceApplication
             }
         }
-
     }
 }

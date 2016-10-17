@@ -20,6 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
+        $getTypeFullName = "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication"
         $mockPassword = ConvertTo-SecureString -String "passwprd" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                       -ArgumentList @("SqlUser", $mockPassword)
@@ -72,9 +73,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
         
             It "Should return absent from the Get method" {
@@ -95,7 +104,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -107,7 +116,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return present from the get method" {
@@ -128,7 +141,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -140,7 +153,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
                 return @{ 
@@ -231,7 +248,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Secure Store Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -243,7 +260,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "Should return present from the Get method" {

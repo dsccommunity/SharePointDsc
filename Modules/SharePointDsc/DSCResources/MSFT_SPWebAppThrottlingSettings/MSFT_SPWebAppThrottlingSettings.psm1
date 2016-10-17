@@ -81,7 +81,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -141,7 +140,9 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting web application '$Url' throttling settings"
+
     $paramArgs = @($PSBoundParameters,$PSScriptRoot)
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
@@ -167,7 +168,6 @@ function Set-TargetResource
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -228,8 +228,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing web application '$url' throttling settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for web application '$Url' throttling settings"
+
     if ($null -eq $CurrentValues) 
     { 
         return $false 

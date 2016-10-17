@@ -73,7 +73,6 @@ function Get-SPDscFarmVersionInfo
     # Loop through all products
     foreach ($product in $products)
     {
-        #Write-Verbose -Verbose "Product: $product"
         $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
         $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
 
@@ -89,7 +88,6 @@ function Get-SPDscFarmVersionInfo
                 ($patchableUnit -notmatch "Project Server") -and
                 ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
             {
-                #Write-Verbose -Verbose "  - $patchableUnit"
                 $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
                 $currentVersion = ""
                 foreach ($patchableUnitInfo in $patchableUnitsInfo)
@@ -129,6 +127,18 @@ function Get-SPDscFarmProductsInfo
 
     $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
     return $serverProductInfo.Products
+}
+
+function Get-SPDscRegProductsInfo
+{
+    $registryLocation = Get-ChildItem -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
+    $sharePointPrograms = $registryLocation | Where-Object -FilterScript {
+         $_.PsPath -like "*\Office*" 
+    } | ForEach-Object -Process { 
+        Get-ItemProperty -Path $_.PsPath 
+    }
+    
+    return $sharePointPrograms.DisplayName 
 }
 
 function Get-SPDSCRegistryKey

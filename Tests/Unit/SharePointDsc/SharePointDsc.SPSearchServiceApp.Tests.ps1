@@ -20,6 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
                 public static class SearchContext {
@@ -106,9 +107,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Some other service app type"
-                }) 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
 
             It "Should return absent from the Get method" {
@@ -133,7 +142,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -141,7 +150,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "Should return present from the get method" {
@@ -162,7 +175,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
@@ -170,8 +183,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
+
             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
                 return @{ 
                     Name = $testParams.ApplicationPool 
@@ -199,7 +217,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -207,7 +225,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             Mock -CommandName New-Object -MockWith {
@@ -239,7 +261,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -251,7 +273,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             Mock -CommandName New-Object -MockWith {
@@ -278,20 +304,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $Global:SPDscSearchURLUpdated = $false
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    SearchCenterUrl = "http://wrong.url.here"
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                    SearchCenterUrl = "http://wrong.url.here"
-                } | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPDscSearchURLUpdated = $true
-                } -PassThru)
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
+                    $Global:SPDSCSearchURLUpdated = $true
+                } -PassThru
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
-            Mock -CommandName Get-SPServiceApplicationPool { 
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
                 return @{ 
                     Name = $testParams.ApplicationPool 
                 } 
@@ -338,16 +370,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    SearchCenterUrl = "http://search.sp.contoso.com"
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                    SearchCenterUrl = "http://search.sp.contoso.com"
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
            
             Mock -CommandName Get-SPWebapplication -MockWith { 
@@ -382,7 +418,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -394,7 +430,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name = $testParams.DatabaseServer 
                         }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "Should return present from the Get method" {
@@ -440,7 +480,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
+                $spServiceApp = [PSCustomObject]@{
                     TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -449,8 +489,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
+
             Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
                 return @{ 
                     FileMajorPart = 15

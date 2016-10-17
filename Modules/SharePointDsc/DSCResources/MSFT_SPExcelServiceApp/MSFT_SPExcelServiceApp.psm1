@@ -21,6 +21,8 @@ function Get-TargetResource
         $InstallAccount
     )
     
+    Write-Verbose -Message "Getting Excel Services Application '$Name'"
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
@@ -29,8 +31,6 @@ function Get-TargetResource
                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
                           "for more info."
     }
-
-    Write-Verbose -Message "Getting Excel Services service app '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -50,7 +50,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Excel Services Application Web Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"    
         }
 
         if ($null -eq $serviceApp) 
@@ -94,6 +94,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting Excel Services Application '$Name'"
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
@@ -116,6 +118,7 @@ function Set-TargetResource
                                           -ApplicationPool $params.ApplicationPool
         }
     }
+
     if ($Ensure -eq "Absent") 
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
@@ -125,7 +128,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.TypeName -eq "Excel Services Application Web Service Application"  
+                $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
             }
             Remove-SPServiceApplication $appService -Confirm:$false
         }
@@ -156,6 +159,10 @@ function Test-TargetResource
         $InstallAccount
     )
     
+    Write-Verbose -Message "Testing Excel Services Application '$Name'"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
@@ -165,9 +172,8 @@ function Test-TargetResource
                           "for more info."
     }
     
-    $PSBoundParameters.Ensure = $Ensure
-    Write-Verbose -Message "Testing for Excel Services Application '$Name'"
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")
