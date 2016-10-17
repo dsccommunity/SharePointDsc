@@ -745,12 +745,12 @@ function Test-TargetResource
     $currentAddresses = @()
     foreach ($address in $CurrentValues.Addresses) 
     { 
-        $currentAddresses += New-Object System.Uri -ArgumentList $address 
+        $currentAddresses += New-Object -TypeName System.Uri -ArgumentList $address 
     }
     $desiredAddresses = @()
     foreach ($address in $Addresses) 
     { 
-        $desiredAddresses += New-Object System.Uri -ArgumentList $address 
+        $desiredAddresses += New-Object -TypeName System.Uri -ArgumentList $address 
     }
     
     if ($null -ne (Compare-Object -ReferenceObject $currentAddresses `

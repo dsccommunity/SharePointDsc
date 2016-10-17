@@ -1,52 +1,60 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
-    
-$ModuleName = "MSFT_SPUserProfileServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPUserProfileServiceApp"
 
-Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "User Profile Service App"
-            ApplicationPool = "SharePoint Service Applications"
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            Ensure = "Present"
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+        # Initialize tests
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("DOMAIN\username", $mockPassword)
+
+        # Mocks for all contexts   
+        Mock -CommandName Get-SPFarm -MockWith { 
+            return @{
+                DefaultServiceAccount = @{ 
+                    Name = $mockCredential.Username 
+                }
+            }
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-        Mock -CommandName Get-SPFarm -MockWith { return @{
-            DefaultServiceAccount = @{ Name = $testParams.FarmAccount.Username }
-        }}
-        Mock -CommandName New-SPProfileServiceApplication { return (@{
-                                        NetBIOSDomainNamesEnabled =  $false})
+        Mock -CommandName New-SPProfileServiceApplication -MockWith { 
+            return (@{
+                NetBIOSDomainNamesEnabled =  $false}
+            )
+        } 
+        Mock -CommandName New-SPProfileServiceApplicationProxy -MockWith { }
+        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { } 
+        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { return $false }
+        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock -CommandName Remove-SPServiceApplication -MockWith { } 
 
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "User Profile Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = $mockCredential
+                Ensure = "Present"
+            } 
 
-         } 
-        Mock -CommandName New-SPProfileServiceApplicationProxy { }
-        Mock -CommandName Add-SPDSCUserToLocalAdmin { } 
-        Mock -CommandName Test-SPDSCUserIsLocalAdmin { return $false }
-        Mock -CommandName Remove-SPDSCUserToLocalAdmin { }
-        Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
-        Mock -CommandName Remove-SPServiceApplication { } 
-
-        Context -Name "When no service applications exist in the current farm" {
-
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
 
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
@@ -60,20 +68,21 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPProfileServiceApplication
             }
-
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "Should create a new service application in the set method when InstallAccount is used" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPProfileServiceApplication
-            }
-            $testParams.Remove("InstallAccount")
         }
 
-        Context -Name "When service applications exist in the current farm but not the specific user profile service app" {
+        Context -Name "When service applications exist in the current farm but not the specific user profile service app" -Fixture {
+            $testParams = @{
+                Name = "User Profile Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = $mockCredential
+                Ensure = "Present"
+            } 
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return @(@{
+                    TypeName = "Some other service app type"
+                }) 
+            }
 
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
@@ -84,127 +93,220 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
 
-       Context -Name "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" {
-        $testParamsEnableNetBIOS = @{
-            Name = "User Profile Service App"
-            ApplicationPool = "SharePoint Service Applications"
-            EnableNetBIOS=$true
-            FarmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            Ensure = "Present"
-        }
-                Mock -CommandName Get-SPServiceApplication -MockWith { 
+        Context -Name "When service applications exist in the current farm and NetBios isn't enabled but it needs to be" -Fixture {
+            $testParams = @{
+                Name = "User Profile Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                EnableNetBIOS = $true
+                FarmAccount = $mockCredential
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
                     New-Object -TypeName "Object" |            
-                        Add-Member -MemberType NoteProperty TypeName "User Profile Service Application" -PassThru |
-                        Add-Member -MemberType NoteProperty DisplayName $testParamsEnableNetBIOS.Name -PassThru | 
-                        Add-Member -MemberType NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
-                        Add-Member -MemberType ScriptMethod -Name Update -Value {$Global:SPUPSAUpdateCalled  = $true} -PassThru |
-                        Add-Member -MemberType NoteProperty ApplicationPool @{ Name = $testParamsEnableNetBIOS.ApplicationPool } -PassThru |             
-                        Add-Member -MemberType ScriptMethod GetType {
-                            New-Object -TypeName "Object" |
-                                Add-Member -MemberType ScriptMethod GetProperties {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "SocialDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                param($x)
-                                                return @{
-                                                    Name = "SP_SocialDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "ProfileDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                return @{
-                                                    Name = "SP_ProfileDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "SynchronizationDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                return @{
-                                                    Name = "SP_ProfileSyncDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                    } -PassThru -Force 
+                        Add-Member -MemberType NoteProperty `
+                                   -Name TypeName `
+                                   -Value "User Profile Service Application" `
+                                   -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name DisplayName `
+                                   -Value $testParams.Name `
+                                   -PassThru | 
+                        Add-Member -MemberType NoteProperty `
+                                   -Name "NetBIOSDomainNamesEnabled" `
+                                   -Value $false `
+                                   -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name Update `
+                                   -Value {
+                                       $Global:SPDscUPSAUpdateCalled  = $true
+                                    } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name ApplicationPool `
+                                   -Value @{ 
+                                       Name = $testParams.ApplicationPool 
+                                    } -PassThru |             
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name GetType `
+                                   -Value {
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                       -Name GetProperties `
+                                                       -Value {
+                                                            param($x)
+                                                            return @(
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SocialDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    param($x)
+                                                                                    return @{
+                                                                                        Name = "SP_SocialDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "ProfileDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SynchronizationDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileSyncDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                )
+                                                            )
+                                                        } -PassThru
+                                    } -PassThru -Force 
                 )
             }
 
             
             It "Should return false from the Get method" {
-                (Get-TargetResource @testParamsEnableNetBIOS).EnableNetBIOS | Should Be $false  
+                (Get-TargetResource @testParams).EnableNetBIOS | Should Be $false  
             }
             It "Should call Update method on Service Application before finishing set  method" {
-                $Global:SPUPSAUpdateCalled= $false
+                $Global:SPDscUPSAUpdateCalled= $false
             
-                Set-TargetResource @testParamsEnableNetBIOS
-                $Global:SPUPSAUpdateCalled | Should Be $true  
+                Set-TargetResource @testParams
+                $Global:SPDscUPSAUpdateCalled | Should Be $true  
 
             }
 
             It "Should return false when the Test method is called" {
-                Test-TargetResource @testParamsEnableNetBIOS | Should Be $false
+                Test-TargetResource @testParams | Should Be $false
             }
 
-               It "Should return true when the Test method is called" {
-               $testParamsEnableNetBIOS.EnableNetBIOS = $false
-                Test-TargetResource @testParamsEnableNetBIOS | Should Be $true
+            It "Should return true when the Test method is called" {
+                $testParams.EnableNetBIOS = $false
+                Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context -Name "When a service application exists and is configured correctly" {
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "User Profile Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = $mockCredential
+                Ensure = "Present"
+            } 
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
                     New-Object -TypeName "Object" |            
-                        Add-Member -MemberType NoteProperty TypeName "User Profile Service Application" -PassThru |
-                        Add-Member -MemberType NoteProperty DisplayName $testParams.Name -PassThru | 
-                        Add-Member -MemberType NoteProperty "NetBIOSDomainNamesEnabled" $false -PassThru |
-                        Add-Member -MemberType NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
-                        Add-Member -MemberType ScriptMethod GetType {
-                            New-Object -TypeName "Object" |
-                                Add-Member -MemberType ScriptMethod GetProperties {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "SocialDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                param($x)
-                                                return @{
-                                                    Name = "SP_SocialDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "ProfileDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                return @{
-                                                    Name = "SP_ProfileDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "SynchronizationDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                return @{
-                                                    Name = "SP_ProfileSyncDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                    } -PassThru -Force 
+                        Add-Member -MemberType NoteProperty `
+                                   -Name TypeName `
+                                   -Value "User Profile Service Application" `
+                                   -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name DisplayName `
+                                   -Value $testParams.Name `
+                                   -PassThru | 
+                        Add-Member -MemberType NoteProperty `
+                                   -Name "NetBIOSDomainNamesEnabled" `
+                                   -Value $false `
+                                   -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name Update `
+                                   -Value {
+                                       $Global:SPDscUPSAUpdateCalled  = $true
+                                    } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name ApplicationPool `
+                                   -Value @{ 
+                                       Name = $testParams.ApplicationPool 
+                                    } -PassThru |             
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name GetType `
+                                   -Value {
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                       -Name GetProperties `
+                                                       -Value {
+                                                            param($x)
+                                                            return @(
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SocialDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    param($x)
+                                                                                    return @{
+                                                                                        Name = "SP_SocialDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "ProfileDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SynchronizationDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileSyncDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                )
+                                                            )
+                                                        } -PassThru
+                                    } -PassThru -Force 
                 )
             }
 
@@ -225,56 +327,99 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
         
-        $testParams = @{
-            Name = "Test App"
-            ApplicationPool = "-"
-            Ensure = "Absent"
-        }
-        
-        Context -Name "When the service app exists but it shouldn't" {
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
                     New-Object -TypeName "Object" |            
-                        Add-Member -MemberType NoteProperty TypeName "User Profile Service Application" -PassThru |
-                        Add-Member -MemberType NoteProperty DisplayName $testParams.Name -PassThru | 
-                        Add-Member -MemberType NoteProperty "NetBIOSDomainNamesEnabled" -value $false -PassThru |
-                        Add-Member -MemberType NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
-                        Add-Member -MemberType ScriptMethod GetType {
-                            New-Object -TypeName "Object" |
-                                Add-Member -MemberType ScriptMethod GetProperties {
-                                    param($x)
-                                    return @(
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "SocialDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                param($x)
-                                                return @{
-                                                    Name = "SP_SocialDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "ProfileDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                return @{
-                                                    Name = "SP_ProfileDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        ),
-                                        (New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty Name "SynchronizationDatabase" -PassThru |
-                                            Add-Member -MemberType ScriptMethod GetValue {
-                                                return @{
-                                                    Name = "SP_ProfileSyncDB"
-                                                    Server = @{ Name = "SQL.domain.local" }
-                                                }
-                                            } -PassThru
-                                        )
-                                    )
-                                } -PassThru
-                    } -PassThru -Force 
+                        Add-Member -MemberType NoteProperty `
+                                   -Name TypeName `
+                                   -Value "User Profile Service Application" `
+                                   -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name DisplayName `
+                                   -Value $testParams.Name `
+                                   -PassThru | 
+                        Add-Member -MemberType NoteProperty `
+                                   -Name "NetBIOSDomainNamesEnabled" `
+                                   -Value $false `
+                                   -PassThru |
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name Update `
+                                   -Value {
+                                       $Global:SPDscUPSAUpdateCalled  = $true
+                                    } -PassThru |
+                        Add-Member -MemberType NoteProperty `
+                                   -Name ApplicationPool `
+                                   -Value @{ 
+                                       Name = $testParams.ApplicationPool 
+                                    } -PassThru |             
+                        Add-Member -MemberType ScriptMethod `
+                                   -Name GetType `
+                                   -Value {
+                                        New-Object -TypeName "Object" |
+                                            Add-Member -MemberType ScriptMethod `
+                                                       -Name GetProperties `
+                                                       -Value {
+                                                            param($x)
+                                                            return @(
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SocialDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    param($x)
+                                                                                    return @{
+                                                                                        Name = "SP_SocialDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "ProfileDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                ),
+                                                                (New-Object -TypeName "Object" |
+                                                                    Add-Member -MemberType NoteProperty `
+                                                                               -Name Name `
+                                                                               -Value "SynchronizationDatabase" `
+                                                                               -PassThru |
+                                                                    Add-Member -MemberType ScriptMethod `
+                                                                               -Name GetValue `
+                                                                               -Value {
+                                                                                    return @{
+                                                                                        Name = "SP_ProfileSyncDB"
+                                                                                        Server = @{ 
+                                                                                            Name = "SQL.domain.local" 
+                                                                                        }
+                                                                                    }
+                                                                                } -PassThru
+                                                                )
+                                                            )
+                                                        } -PassThru
+                                    } -PassThru -Force 
                 )
             }
             
@@ -292,8 +437,16 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
             }
         }
         
-        Context -Name "When the service app doesn't exist and shouldn't" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -303,5 +456,7 @@ Describe "SPUserProfileServiceApp - SharePoint Build $((Get-Item $SharePointCmdl
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

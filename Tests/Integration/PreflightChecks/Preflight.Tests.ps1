@@ -25,7 +25,7 @@ Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check
             $cred = $Global:SPDscIntegrationCredPool.$_
             $username = $cred.username
             $password = $cred.GetNetworkCredential().password
-            $domain = New-Object System.DirectoryServices.DirectoryEntry("",$UserName,$Password)
+            $domain = New-Object -TypeName System.DirectoryServices.DirectoryEntry("",$UserName,$Password)
             if ($domain.name -eq $null)
             {
                 Write-Warning "Credential for $username is not valid"
@@ -39,7 +39,7 @@ Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check
 
         { 
             Invoke-Command -Credential $Global:SPDscIntegrationCredPool.Setup -ComputerName . {
-                $SqlConnection = New-Object System.Data.SqlClient.SqlConnection
+                $SqlConnection = New-Object -TypeName System.Data.SqlClient.SqlConnection
                 $SqlConnection.ConnectionString = "Server=$($Global:SPDscIntegrationGlobals.SQL.DatabaseServer);Database=master;Trusted_Connection=True;"
                 $SqlConnection.Open()
                 $SqlConnection.Close()

@@ -1,41 +1,33 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
-    
-$ModuleName = "MSFT_SPUserProfileServiceAppPermissions"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPUserProfileServiceAppPermissions"
 
-Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            ProxyName = "User Profile Service App Proxy"
-            CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
-            FollowAndEditProfile = @("Everyone")
-            UseTagsAndNotes      = @("None")
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-        Mock -CommandName New-SPClaimsPrincipal { 
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
+
+        # Initialize tests
+
+        # Mocks for all contexts   
+        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
             return @{
                 Value = $Identity -replace "i:0#.w\|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
 
-        Mock -CommandName New-SPClaimsPrincipal { 
+        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
             $Global:SPDscClaimsPrincipalUser = $Identity
             return (
                 New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 
@@ -44,19 +36,34 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
 
-        Mock Grant-SPObjectSecurity { }
-        Mock Revoke-SPObjectSecurity { }
-        Mock -CommandName Set-SPProfileServiceApplicationSecurity { }
+        Mock Grant-SPObjectSecurity -MockWith { }
+        Mock Revoke-SPObjectSecurity -MockWith { }
+        Mock -CommandName Set-SPProfileServiceApplicationSecurity -MockWith { }
 
-        Mock -CommandName Start-Sleep { }
-        Mock -CommandName Test-SPDSCIsADUser { return $true }
-        Mock Write-Warning { }
+        Mock -CommandName Start-Sleep -MockWith { }
+        Mock -CommandName Test-SPDSCIsADUser -MockWith { return $true }
+        Mock -CommandName Write-Warning -MockWith { }
 
-        Mock -CommandName Get-SPServiceApplicationProxy {
-            return @()
+        Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+            return @(
+                @{
+                    DisplayName = $testParams.ProxyName
+                }
+            )
         }
-        
-        Context -Name "The proxy does not exist" {
+
+        # Test contexts
+        Context -Name "The proxy does not exist" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+                CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @()
+            }
 
             It "Should return null values from the get method" {
                 $results = Get-TargetResource @testParams
@@ -74,16 +81,15 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Mock -CommandName Get-SPServiceApplicationProxy {
-            return @(
-                @{
-                    DisplayName = $testParams.ProxyName
-                }
-            )
-        }
+        Context -Name "Users who should have access do not have access" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+                CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+            }
 
-        Context -Name "Users who should have access do not have access" {
-            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity -MockWith {
                 return @{
                     AccessRules = @()
                 }
@@ -103,8 +109,15 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context -Name "Users who should have access have incorrect permissions" {
-            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should have access have incorrect permissions" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+                CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+            }
+
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity -MockWith {
                 return @{
                     AccessRules = @(
                         @{
@@ -137,8 +150,15 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context -Name "Users who should have permissions have the correct permissions" {
-            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should have permissions have the correct permissions" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+                CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+            }
+
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity -MockWith {
                 return @{
                     AccessRules = @(
                         @{
@@ -166,8 +186,15 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context -Name "Users who should not have access have permissions assigned" {
-            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
+        Context -Name "Users who should not have access have permissions assigned" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+                CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+            }
+
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity -MockWith {
                 return @{
                     AccessRules = @(
                         @{
@@ -204,8 +231,15 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
             }
         }
 
-        Context -Name "The old non-claims 'Authenticated Users' entry exists in the permissions" {
-            Mock -CommandName Get-SPProfileServiceApplicationSecurity {
+        Context -Name "The old non-claims 'Authenticated Users' entry exists in the permissions" -Fixture {
+            $testParams = @{
+                ProxyName = "User Profile Service App Proxy"
+                CreatePersonalSite   = @("DEMO\User2", "DEMO\User1")
+                FollowAndEditProfile = @("Everyone")
+                UseTagsAndNotes      = @("None")
+            }
+
+            Mock -CommandName Get-SPProfileServiceApplicationSecurity -MockWith {
                 return @{
                     AccessRules = @(
                         @{
@@ -241,5 +275,7 @@ Describe "SPUserProfileServiceAppPermissions- SharePoint Build $((Get-Item $Shar
                 Assert-MockCalled Set-SPProfileServiceApplicationSecurity
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

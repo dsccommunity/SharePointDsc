@@ -237,7 +237,7 @@ function Set-TargetResource
 
                 if ($params.ProviderSignOutUri) 
                 { 
-                    $trust.ProviderSignOutUri = New-Object System.Uri ($params.ProviderSignOutUri) 
+                    $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri) 
                 }
                 $trust.Update()
              }

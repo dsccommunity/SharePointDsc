@@ -58,14 +58,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should execute a command as the specified InstallAccount user where it is different to the current user" {
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                $mockCredential = New-Object System.Management.Automation.PSCredential ("username", $mockPassword)
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                 Invoke-SPDSCCommand -ScriptBlock { return "value" } `
                                     -Credential $mockCredential 4>&1
             }
 
             It "Should throw an exception when the run as user is the same as the InstallAccount user" {
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                $mockCredential = New-Object System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("$($Env:USERDOMAIN)\$($Env:USERNAME)", $mockPassword)
                 { Invoke-SPDSCCommand -ScriptBlock { return "value" } `
                                       -Credential $mockCredential 4>&1 } | Should Throw
             }
@@ -84,7 +84,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                $mockCredential = New-Object System.Management.Automation.PSCredential ("username", $mockPassword)
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                 { Invoke-SPDSCCommand -ScriptBlock { return "value" } `
                                       -Credential $mockCredential 4>&1 } | Should Throw
             }
@@ -103,7 +103,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
-                $mockCredential = New-Object System.Management.Automation.PSCredential ("username", $mockPassword)
+                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential ("username", $mockPassword)
                 { Invoke-SPDSCCommand -ScriptBlock { return "value" } `
                                       -Credential $mockCredential 4>&1 } | Should Not Throw
             }

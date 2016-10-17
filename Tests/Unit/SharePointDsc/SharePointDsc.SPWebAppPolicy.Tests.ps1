@@ -43,13 +43,13 @@ Describe "SPWebAppPolicy - SharePoint Build $((Get-Item $SharePointCmdletModule)
             return $true
         }
 
-        Mock -CommandName New-SPClaimsPrincipal { 
+        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
             return @{
                 Value = $Identity -replace "i:0#.w\|"
             }
         } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
 
-        Mock -CommandName New-SPClaimsPrincipal { 
+        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
             $Global:SPDscClaimsPrincipalUser = $Identity
             return (
                 New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 

@@ -73,7 +73,7 @@ Describe "SPWebApplication - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
 
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
+            $testParams.Add("InstallAccount", (New-Object -TypeName System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
             It "Should call the new cmdlet from the set method where InstallAccount is used" {
                 Set-TargetResource @testParams
 

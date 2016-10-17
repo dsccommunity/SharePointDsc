@@ -43,7 +43,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            UserOverridePrivacy = $false
         }
         
-        $farmAccount = New-Object System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
+        $farmAccount = New-Object -TypeName System.Management.Automation.PSCredential ("domain\username", (ConvertTo-SecureString "password" -AsPlainText -Force))
         $testParamsUpdateProperty = @{
            Name = "WorkEmailUpdate"
            UserProfileService = "User Profile Service Application"
@@ -337,7 +337,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             ApplicationPool = "SharePoint Service Applications"
             FarmAccount = $farmAccount 
             ServiceApplicationProxyGroup = "Proxy Group"
-            ConnectionManager=  @($connection) #New-Object System.Collections.ArrayList
+            ConnectionManager=  @($connection) #New-Object -TypeName System.Collections.ArrayList
         }
 
         Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }

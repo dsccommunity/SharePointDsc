@@ -1,41 +1,39 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPVisioServiceApp"
 
-$ModuleName = "MSFT_SPVisioServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Test Visio App"
-            ApplicationPool = "Test App Pool"
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        # Mocks for all contexts   
+        Mock -CommandName New-SPVisioServiceApplication -MockWith { }
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
 
-        Mock -CommandName Remove-SPServiceApplication { }
-
-        Context -Name "When no service applications exist in the current farm" {
-
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
-            Mock -CommandName New-SPVisioServiceApplication { }
-
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
+            
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
@@ -50,19 +48,31 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
 
-        Context -Name "When service applications exist in the current farm but the specific Visio Graphics app does not" {
-
-            Mock -CommandName Get-SPServiceApplication -MockWith { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+        Context -Name "When service applications exist in the current farm but the specific Visio Graphics app does not" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return @(@{
+                    TypeName = "Some other service app type"
+                }) 
+            }
 
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
-
         }
 
-        Context -Name "When a service application exists and is configured correctly" {
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
+            
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
@@ -80,7 +90,13 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
 
-        Context -Name "When a service application exists and is not configured correctly" {
+        Context -Name "When a service application exists and is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
+            
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
@@ -88,7 +104,11 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 })
             }
-            Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock -CommandName Get-SPServiceApplicationPool { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
@@ -100,14 +120,14 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Assert-MockCalled Get-SPServiceApplicationPool
             }
         }
+              
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
         
-        $testParams = @{
-            Name = "Test App"
-            ApplicationPool = "-"
-            Ensure = "Absent"
-        }
-        
-        Context -Name "When the service app exists but it shouldn't" {
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(@{
                     TypeName = "Visio Graphics Service Application"
@@ -130,8 +150,16 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
         
-        Context -Name "When the service app doesn't exist and shouldn't" {
-            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+        
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -143,3 +171,5 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

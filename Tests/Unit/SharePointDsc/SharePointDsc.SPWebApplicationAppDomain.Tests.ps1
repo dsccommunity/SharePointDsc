@@ -32,7 +32,7 @@ Describe "SPWebApplicationAppDomain - SharePoint Build $((Get-Item $SharePointCm
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
         Mock -CommandName New-SPWebApplicationAppDomain { }
         Mock -CommandName Remove-SPWebApplicationAppDomain { }
-        Mock -CommandName Start-Sleep { }
+        Mock -CommandName Start-Sleep -MockWith { }
 
         Context -Name "No app domain settings have been configured for the specified web app and zone" {
             Mock -CommandName Get-SPWebApplicationAppDomain { return $null }
