@@ -89,6 +89,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
             It "returns null from the Get method" { 
                 Get-TargetResource @testParams | Should BeNullOrEmpty 
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name }  
+            }
 
             It "returns absent from the Get method" { 
                 (Get-TargetResource @testParams).Ensure | Should Be "absent" 
