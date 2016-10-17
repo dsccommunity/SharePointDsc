@@ -531,7 +531,7 @@ function Set-TargetResource
 
             $serviceApp.Update()
         }
-<<<<<<< HEAD
+
         "Absent" {
             Write-Verbose -Message "Removing Word Automation Service Application $Name" 
             Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
@@ -554,8 +554,7 @@ function Set-TargetResource
                     }
 
                     Remove-SPServiceApplication -Identity $app -RemoveData -Confirm:$false
-                } 
-=======
+                }
     }
     
     if ($Ensure -eq "Absent") 
@@ -566,7 +565,6 @@ function Set-TargetResource
 
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
                 $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
->>>>>>> refs/remotes/PowerShell/dev
             }
             if ($null -ne $serviceApp) 
             {

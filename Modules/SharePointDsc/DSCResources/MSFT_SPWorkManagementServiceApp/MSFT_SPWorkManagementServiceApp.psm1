@@ -167,60 +167,6 @@ function Set-TargetResource
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
 
-<<<<<<< HEAD
-    $PSBoundParameters.Ensure = $Ensure
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
-        $params = $args[0]
-
-        $app =  Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue `
-        | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
-
-        if($null -ne $app -and $params.ContainsKey("Ensure") -and $params.Ensure -eq "Absent")
-        {
-            $proxies = Get-SPServiceApplicationProxy
-            foreach($proxyInstance in $proxies)
-            {
-                if($app.IsConnected($proxyInstance))
-                {
-                    $proxyInstance.Delete()
-                }
-            }
-
-            Remove-SPServiceApplication -Identity $app -RemoveData -Confirm:$false
-            return
-        } elseif ($null -eq $app){
-
-            $appService =  Get-SPServiceApplication -Name $params.Name `
-                                                -ErrorAction SilentlyContinue `
-                       | Where-Object -FilterScript {
-                           $_.TypeName -eq "Work Management Service Application"
-                        }
-        }
-        if ($null -ne $appService `
-            -and $params.ContainsKey("Ensure") `
-            -and $params.Ensure -eq "Absent")
-        {
-            #remove existing app
-            Remove-SPServiceApplication $appService 
-            return
-        }
-        elseif ($null -eq $appService)
-        {
-
-            $newParams = @{}
-            $newParams.Add("Name", $params.Name) 
-            $newParams.Add("ApplicationPool", $params.ApplicationPool) 
-
-            $app = New-SPWorkManagementServiceApplication @newParams
-            if ($null -eq $params.ProxyName) {$pName = "$($params.Name) Proxy"} Else {$pName = $params.ProxyName}
-            New-SPWorkManagementServiceApplicationProxy -Name $pName -DefaultProxyGroup -ServiceApplication $app | Out-Null
-
-            $appService = New-SPWorkManagementServiceApplication @newParams
-            if ($null -eq $params.ProxyName)
-            {
-=======
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -244,7 +190,6 @@ function Set-TargetResource
                 $params.Remove("ProxyName") | Out-Null 
             }
             if ($null -eq $pName) {
->>>>>>> refs/remotes/PowerShell/dev
                 $pName = "$($params.Name) Proxy"
             }
 
@@ -256,34 +201,6 @@ function Set-TargetResource
                                                             -DefaultProxyGroup
                 Start-Sleep -Milliseconds 200
             }
-<<<<<<< HEAD
-            New-SPWorkManagementServiceApplicationProxy -Name $pName `
-                                                        -DefaultProxyGroup `
-                                                        -ServiceApplication $appService | Out-Null
-
-            Start-Sleep -Milliseconds 200
-        }
-        $setParams = @{}
-        if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
-        {
-            $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", $params.MinimumTimeBetweenEwsSyncSubscriptionSearches)
-        }
-        
-        if ($params.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
-        {
-            $setParams.Add("MinimumTimeBetweenProviderRefreshes", $params.MinimumTimeBetweenProviderRefreshes)
-        }
-        
-        if ($params.ContainsKey("MinimumTimeBetweenSearchQueries"))
-        {
-            $setParams.Add("MinimumTimeBetweenSearchQueries", $params.MinimumTimeBetweenSearchQueries)
-        }
-        
-        if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun"))
-        {
-            $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", $params.NumberOfSubscriptionSyncsPerEwsSyncRun)
-=======
->>>>>>> refs/remotes/PowerShell/dev
         }
     }
 
@@ -382,22 +299,18 @@ function Set-TargetResource
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
             }
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
-<<<<<<< HEAD
-        $setParams.Add("Confirm", $false)
-
-        $app =  Get-SPServiceApplication -Name $params.Name `
-            | Where-Object { $_.TypeName -eq "Work Management Service Application"  }
-
-        $appService =  Get-SPServiceApplication -Name $params.Name `
-                        | Where-Object -FilterScript {
-                            $_.TypeName -eq "Work Management Service Application"
-                          }
-
-        $app | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
-=======
->>>>>>> refs/remotes/PowerShell/dev
     }
 }
 
@@ -482,3 +395,4 @@ function Test-TargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
+

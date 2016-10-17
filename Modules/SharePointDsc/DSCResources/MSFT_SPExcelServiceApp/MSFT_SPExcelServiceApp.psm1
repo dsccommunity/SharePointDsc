@@ -127,25 +127,20 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-<<<<<<< HEAD
-            $app =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.TypeName -eq "Excel Services Application Web Service Application"  
-=======
-            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
->>>>>>> refs/remotes/PowerShell/dev
             }
 
             $proxies = Get-SPServiceApplicationProxy
             foreach($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
             }
 
-            Remove-SPServiceApplication -Identity $app -Confirm:$false
+            Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
         }
     }
 }

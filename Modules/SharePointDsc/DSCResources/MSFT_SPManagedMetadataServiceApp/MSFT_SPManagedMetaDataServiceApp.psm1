@@ -205,27 +205,23 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
-            $params = $args[0]
-            
-<<<<<<< HEAD
-            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Managed Metadata Service"  
-=======
+            $params = $args[0] 
+
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"  
->>>>>>> refs/remotes/PowerShell/dev
+
             }
 
             $proxies = Get-SPServiceApplicationProxy
             foreach($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
             }
 
-            Remove-SPServiceApplication -Identity $app -Confirm:$false
+            Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
         }
     }
 }

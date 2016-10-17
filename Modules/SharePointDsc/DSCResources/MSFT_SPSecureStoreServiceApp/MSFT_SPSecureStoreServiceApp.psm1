@@ -265,26 +265,21 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-<<<<<<< HEAD
-            $app =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "Secure Store Service Application"
-=======
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
                 $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
->>>>>>> refs/remotes/PowerShell/dev
             }
 
             # Remove the connected proxy(ies)
             $proxies = Get-SPServiceApplicationProxy
             foreach($proxyInstance in $proxies)
             {
-                if($app.IsConnected($proxyInstance))
+                if($serviceApp.IsConnected($proxyInstance))
                 {
                     $proxyInstance.Delete()
                 }
             }
 
-            Remove-SPServiceApplication $app -Confirm:$false
+            Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
     }    
 }

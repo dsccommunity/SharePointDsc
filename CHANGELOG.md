@@ -2,7 +2,6 @@
 
 ### Unreleased
  * Set-TargetResource of Service Application now also removes all associated proxies
-=======
  * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
   - SPAccessServiceApp
   - SPAppManagementServiceApp
