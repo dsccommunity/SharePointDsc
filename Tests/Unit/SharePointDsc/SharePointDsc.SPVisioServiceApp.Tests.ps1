@@ -19,6 +19,7 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
             ApplicationPool = "Test App Pool"
             Ensure = "Present"
         }
+        $getTypeFullName = "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
         
@@ -52,10 +53,15 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
 
         Context "When service applications exist in the current farm but the specific Visio Graphics app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -64,12 +70,15 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
 
         Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Visio Graphics Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns present from the get method" {
@@ -82,12 +91,15 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
 
         Context "When a service application exists and is not configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Visio Graphics Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
 
@@ -109,12 +121,15 @@ Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
         
         Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Visio Graphics Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "returns present from the Get method" {

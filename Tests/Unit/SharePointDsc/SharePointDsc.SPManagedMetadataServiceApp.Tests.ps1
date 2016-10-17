@@ -21,6 +21,8 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
             DatabaseName = "SP_MMS"
             Ensure = "Present"
         }
+        $getTypeFullName = "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
@@ -34,7 +36,6 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
         Mock Get-SPServiceApplicationProxy { }
 
         Context "When no service applications exist in the current farm" {
-
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPMetadataServiceApplication { return @{} }
             Mock New-SPMetadataServiceApplicationProxy { return @{} }
@@ -61,10 +62,15 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
         }
 
         Context "When service applications exist in the current farm but the specific MMS app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
@@ -76,16 +82,19 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
         }
 
         Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Managed Metadata Service"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns present from the get method" {
@@ -98,17 +107,21 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
         }
 
         Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Managed Metadata Service"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
+
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Set-SPMetadataServiceApplication { }
 
@@ -129,17 +142,21 @@ Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePoint
             ApplicationPool = "-"
             Ensure = "Absent"
         }
+        
         Context "When the service application exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Managed Metadata Service"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "returns present from the Get method" {

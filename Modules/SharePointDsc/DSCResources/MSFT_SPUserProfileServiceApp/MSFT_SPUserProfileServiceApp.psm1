@@ -79,7 +79,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"            
         }
 
         if ($null -eq $serviceApp)
@@ -316,7 +316,7 @@ function Set-TargetResource
             
             $app = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "User Profile Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"  
                     }
 
             $proxies = Get-SPServiceApplicationProxy

@@ -1,0 +1,67 @@
+﻿Merge remote-tracking branch 'refs/remotes/PowerShell/dev' into Issue-360-Fix
+
+# Conflicts:
+#	CHANGELOG.md
+#	Modules/SharePointDsc/DSCResources/MSFT_SPExcelServiceApp/MSFT_SPExcelServiceApp.psm1
+#	Modules/SharePointDsc/DSCResources/MSFT_SPManagedMetadataServiceApp/MSFT_SPManagedMetaDataServiceApp.psm1
+#	Modules/SharePointDsc/DSCResources/MSFT_SPSearchServiceApp/MSFT_SPSearchServiceApp.psm1
+#	Modules/SharePointDsc/DSCResources/MSFT_SPSecureStoreServiceApp/MSFT_SPSecureStoreServiceApp.psm1
+#	Modules/SharePointDsc/DSCResources/MSFT_SPWordAutomationServiceApp/MSFT_SPWordAutomationServiceApp.psm1
+#	Modules/SharePointDsc/DSCResources/MSFT_SPWorkManagementServiceApp/MSFT_SPWorkManagementServiceApp.psm1
+#	Tests/Unit/SharePointDsc/SharePointDsc.SPWordAutomationServiceApp.Tests.ps1
+#	Tests/Unit/SharePointDsc/SharePointDsc.SPWorkManagementServiceApp.Tests.ps1
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please remove the file
+#	.git/MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch Issue-360-Fix
+# Your branch is up-to-date with 'origin/Issue-360-Fix'.
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	modified:   CHANGELOG.md
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPAccessServiceApp/MSFT_SPAccessServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPAppManagementServiceApp/MSFT_SPAppManagementServiceApp.psm1
+#	new file:   Modules/SharePointDsc/DSCResources/MSFT_SPAppStoreSettings/MSFT_SPAppStoreSettings.psm1
+#	new file:   Modules/SharePointDsc/DSCResources/MSFT_SPAppStoreSettings/MSFT_SPAppStoreSettings.schema.mof
+#	new file:   Modules/SharePointDsc/DSCResources/MSFT_SPAppStoreSettings/readme.md
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPBCSServiceApp/MSFT_SPBCSServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPExcelServiceApp/MSFT_SPExcelServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPInstallLanguagePack/MSFT_SPInstallLanguagePack.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPManagedMetadataServiceApp/MSFT_SPManagedMetaDataServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPPerformancePointServiceApp/MSFT_SPPerformancePointServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPSearchServiceApp/MSFT_SPSearchServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPSecureStoreServiceApp/MSFT_SPSecureStoreServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPUsageApplication/MSFT_SPUsageApplication.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPUserProfileServiceApp/MSFT_SPUserProfileServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPVisioServiceApp/MSFT_SPVisioServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPWebAppPolicy/MSFT_SPWebAppPolicy.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPWordAutomationServiceApp/MSFT_SPWordAutomationServiceApp.psm1
+#	modified:   Modules/SharePointDsc/DSCResources/MSFT_SPWorkManagementServiceApp/MSFT_SPWorkManagementServiceApp.psm1
+#	new file:   Modules/SharePointDsc/Examples/Resources/SPAppStoreSettings/1-EnableSharePointAppStore.ps1
+#	new file:   Modules/SharePointDsc/Examples/Resources/SPAppStoreSettings/2-EnableAppStores.ps1
+#	new file:   Modules/SharePointDsc/Examples/Resources/SPAppStoreSettings/3-DisableAppStores.ps1
+#	modified:   Modules/SharePointDsc/Modules/SharePointDsc.Util/SharePointDsc.Util.psm1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPAccessServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPAppManagementServiceApp.Tests.ps1
+#	new file:   Tests/Unit/SharePointDsc/SharePointDsc.SPAppStoreSettings.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPBCSServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPExcelServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPInstallLanguagePack.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPManagedMetadataServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPPerformancePointServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPSearchServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPSecureStoreServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPUserProfileServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPVisioServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPWordAutomationServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPWorkManagementServiceApp.Tests.ps1
+#	modified:   Tests/Unit/SharePointDsc/SharePointDsc.SPusageApplication.Tests.ps1
+#
+

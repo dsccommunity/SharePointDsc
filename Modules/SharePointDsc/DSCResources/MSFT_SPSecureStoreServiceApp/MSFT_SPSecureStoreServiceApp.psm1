@@ -83,7 +83,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Secure Store Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
@@ -248,7 +248,7 @@ function Set-TargetResource
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                    $_.TypeName -eq "Secure Store Service Application" 
+                    $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
                 Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool
@@ -265,8 +265,13 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
+<<<<<<< HEAD
             $app =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
                 $_.TypeName -eq "Secure Store Service Application"
+=======
+            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+                $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
+>>>>>>> refs/remotes/PowerShell/dev
             }
 
             # Remove the connected proxy(ies)
