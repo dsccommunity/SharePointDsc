@@ -56,11 +56,9 @@ Describe "SPWorkManagement - SharePoint Build $((Get-Item $SharePointCmdletModul
                 } -PassThru -Force
                 return $spServiceApp
             }
-<<<<<<< HEAD
+
             Mock Remove-SPServiceApplication{ }
             Mock Get-SPServiceApplicationProxy { }
-=======
->>>>>>> refs/remotes/PowerShell/dev
 
             It "returns true when the Test method is called" {
                 Test-TargetResource @testParamsAbsent | Should Be $false
