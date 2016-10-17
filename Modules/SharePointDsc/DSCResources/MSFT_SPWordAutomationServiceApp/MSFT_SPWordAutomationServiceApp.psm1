@@ -530,31 +530,7 @@ function Set-TargetResource
             }
 
             $serviceApp.Update()
-        }
-
-        "Absent" {
-            Write-Verbose -Message "Removing Word Automation Service Application $Name" 
-            Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock { 
-                $params = $args[0] 
-
-                $app = Get-SPServiceApplication `
-                                    -Name $params.Name `
-                                    -ErrorAction SilentlyContinue | Where-Object -FilterScript { 
-                                        $_.TypeName -eq "Word Automation Services" 
-                                    }
-                if ($null -ne $app) 
-                {
-                    $proxies = Get-SPServiceApplicationProxy
-                    foreach($proxyInstance in $proxies)
-                    {
-                        if($app.IsConnected($proxyInstance))
-                        {
-                            $proxyInstance.Delete()
-                        }
-                    }
-
-                    Remove-SPServiceApplication -Identity $app -RemoveData -Confirm:$false
-                }
+        }        
     }
     
     if ($Ensure -eq "Absent") 
@@ -568,8 +544,17 @@ function Set-TargetResource
             }
             if ($null -ne $serviceApp) 
             {
+                $proxies = Get-SPServiceApplicationProxy
+                foreach($proxyInstance in $proxies)
+                {
+                    if($serviceApp.IsConnected($proxyInstance))
+                    {
+                        $proxyInstance.Delete()
+                    }
+                }
+
                 # Service app existed, deleting
-                Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
+                Remove-SPServiceApplication -Identity $serviceApp -RemoveData -Confirm:$false
             } 
         }
     }
