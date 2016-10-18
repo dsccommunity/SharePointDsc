@@ -663,7 +663,7 @@ function Test-TargetResource
     
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) 
     {
-        throw ("An Application Pool and Database Name are required to configure the Word " + ` 
+        throw ("An Application Pool and Database Name are required to configure the Word " + `
                "Automation Service Application")
     }
 

@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter(Mandatory = $false)]
     [string] 
@@ -312,7 +313,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 $forest, `
                                                 $useSSL, `
                                                 $userName, `
-                                                $securePassword, `
+                                                $pwd, `
                                                 $namingContext, `
                                                 $p1, $p2 `
                                             )
