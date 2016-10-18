@@ -14,6 +14,16 @@ Describe 'SharePointDsc whole of module tests' {
     Context -Name "Validate example files" {
         
         It "Should compile MOFs for all examples correctly" {
+
+            ## For Appveyor builds copy the module to the system modules directory so it falls 
+            ## in to a PSModulePath folder and is picked up correctly. 
+            if ($env:APPVEYOR -eq $true) 
+            {
+                Copy-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" `
+                          -Destination 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' `
+                          -Recurse
+            }
+
             $examplesWithErrors = 0
             $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
             $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("username", $dummyPassword)
