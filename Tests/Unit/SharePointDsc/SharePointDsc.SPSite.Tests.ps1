@@ -12,7 +12,7 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
-                                              -DscResource "SPConfigWizard"
+                                              -DscResource "SPSite"
 
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
