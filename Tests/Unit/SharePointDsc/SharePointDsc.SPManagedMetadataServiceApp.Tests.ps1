@@ -106,7 +106,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
@@ -145,7 +145,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
@@ -192,7 +192,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp

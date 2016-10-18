@@ -235,7 +235,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context "The IdentifierClaim does not match one of the claim types in ClaimsMappings" -Fixture {
+        Context -Name "The IdentifierClaim does not match one of the claim types in ClaimsMappings" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -259,7 +259,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure                       = "Present"
             }
 
-            Mock New-SPClaimTypeMapping -MockWith {
+            Mock -CommandName New-SPClaimTypeMapping -MockWith {
                 return [pscustomobject]@{
                     MappedClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
                 }

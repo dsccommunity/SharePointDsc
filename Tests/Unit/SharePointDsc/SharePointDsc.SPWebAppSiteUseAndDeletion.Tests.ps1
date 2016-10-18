@@ -1,36 +1,37 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppSiteUseAndDeletion"
 
-$ModuleName = "MSFT_SPWebAppSiteUseAndDeletion"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Url                                      = "http://example.contoso.local"
-            SendUnusedSiteCollectionNotifications    = $true
-            UnusedSiteNotificationPeriod             = 90
-            AutomaticallyDeleteUnusedSiteCollections = $true
-            UnusedSiteNotificationsBeforeDeletion    = 30
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        # Initialize tests
 
-        Context -Name "The server is not part of SharePoint farm" {
+        # Mocks for all contexts   
+
+        # Test contexts
+        Context -Name "The server is not part of SharePoint farm" -Fixture {
+            $testParams = @{
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 30
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
             It "Should return null from the get method" {
@@ -46,8 +47,17 @@ Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointC
             }
         }
 
-        Context -Name "The Web Application isn't available" {
-            Mock -CommandName Get-SPWebApplication -MockWith  { return $null
+        Context -Name "The Web Application isn't available" -Fixture {
+            $testParams = @{
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 30
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith  { 
+                return $null
             }
 
             It "Should return null from the get method" {
@@ -63,7 +73,15 @@ Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointC
             }
         }
 
-        Context -Name "The server is in a farm and the incorrect settings have been applied" {
+        Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
+            $testParams = @{
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 30
+            }
+
             Mock -CommandName Get-SPWebApplication -MockWith  {
                 $returnVal = @{
                         SendUnusedSiteCollectionNotifications    = $false
@@ -92,7 +110,15 @@ Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointC
             }
         }
 
-        Context -Name "The server is in a farm and the correct settings have been applied" {
+        Context -Name "The server is in a farm and the correct settings have been applied" -Fixture {
+            $testParams = @{
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 30
+            }
+
             Mock -CommandName Get-SPWebApplication -MockWith  {
                 $returnVal = @{
                     SendUnusedSiteCollectionNotifications    = $true
@@ -116,3 +142,5 @@ Describe "SPWebAppSiteUseAndDeletion - SharePoint Build $((Get-Item $SharePointC
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

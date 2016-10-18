@@ -163,7 +163,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp

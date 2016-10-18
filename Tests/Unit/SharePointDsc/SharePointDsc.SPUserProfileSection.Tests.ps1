@@ -62,13 +62,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                             $Global:SPUPGetSectionByNameCalled  = $true
                             return $result
-                        } -PassThru| Add-Member -MemberType ScriptMethod Add {
+                        } -PassThru| Add-Member -MemberType ScriptMethod -Name Add -Value {
                             $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force 
         $coreProperties = @{ProfileInformation = $coreProperty}
         $userProfileSubTypePropertiesProperty = @{"ProfileInformation" = $subTypeProperty } | Add-Member -MemberType ScriptMethod Create {
                             $Global:SPUPSubTypeCreateCalled = $true
-                        } -PassThru | Add-Member -MemberType ScriptMethod Add {
+                        } -PassThru | Add-Member -MemberType ScriptMethod -Name Add -Value {
                             $Global:SPUPSubTypeAddCalled = $true
                         } -PassThru -Force
         Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {

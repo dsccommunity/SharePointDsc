@@ -1,40 +1,44 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppWorkflowSettings"
 
-$ModuleName = "MSFT_SPWebAppWorkflowSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Url = "http://sites.sharepoint.com"
-            ExternalWorkflowParticipantsEnabled = $true
-            UserDefinedWorkflowsEnabled = $true
-            EmailToNoPermissionWorkflowParticipantsEnable = $true
+        # Initialize tests
+
+        # Mocks for all contexts   
+        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+        Mock -CommandName New-SPWebApplication -MockWith { }
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+            return @{ 
+                DisableKerberos = $true
+                AllowAnonymous = $false 
+            } 
         }
-        
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock -CommandName New-SPAuthenticationProvider { }
-        Mock -CommandName New-SPWebApplication { }
-        Mock -CommandName Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
 
-        Context -Name "The web appliation exists and has the correct workflow settings" {
+        # Test contexts
+        Context -Name "The web appliation exists and has the correct workflow settings" -Fixture {
+            $testParams = @{
+                Url = "http://sites.sharepoint.com"
+                ExternalWorkflowParticipantsEnabled = $true
+                UserDefinedWorkflowsEnabled = $true
+                EmailToNoPermissionWorkflowParticipantsEnable = $true
+            }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 
@@ -65,7 +69,14 @@ Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmd
             }
         }
 
-        Context -Name "The web appliation exists and uses incorrect workflow settings" {    
+        Context -Name "The web appliation exists and uses incorrect workflow settings" -Fixture {
+            $testParams = @{
+                Url = "http://sites.sharepoint.com"
+                ExternalWorkflowParticipantsEnabled = $true
+                UserDefinedWorkflowsEnabled = $true
+                EmailToNoPermissionWorkflowParticipantsEnable = $true
+            }
+
             Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
@@ -87,10 +98,9 @@ Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmd
                     EmailToNoPermissionWorkflowParticipantsEnabled = $false
                     ExternalWorkflowParticipantsEnabled = $false
                 }
-                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
-                } -PassThru | Add-Member -MemberType ScriptMethod UpdateWorkflowConfigurationSettings {
-                    $Global:SPWebApplicationUpdateWorkflowCalled = $true
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {} -PassThru | 
+                                    Add-Member -MemberType ScriptMethod -Name UpdateWorkflowConfigurationSettings -Value {
+                    $Global:SPDscWebApplicationUpdateWorkflowCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -103,12 +113,13 @@ Describe "SPWebAppWorkflowSettings - SharePoint Build $((Get-Item $SharePointCmd
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
-            $Global:SPWebApplicationUpdateWorkflowCalled = $false
+            $Global:SPDscWebApplicationUpdateWorkflowCalled = $false
             It "Should update the workflow settings" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateWorkflowCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateWorkflowCalled | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

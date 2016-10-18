@@ -1,43 +1,48 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppPermissions"
 
-$ModuleName = "MSFT_SPWebAppPermissions"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDSC\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppPermissions" {
-    InModuleScope $ModuleName {
+        # Initialize tests
+        try { [Microsoft.SharePoint.SPBasePermissions] }
+        catch {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint {
+    public enum SPBasePermissions { 
+        FullMask, EmptyMask, ManageLists, CancelCheckout, AddListItems, EditListItems, DeleteListItems, 
+        ViewListItems, ApproveItems, OpenItems, ViewVersions, DeleteVersions, CreateAlerts, 
+        ViewFormPages, ManagePermissions, ViewUsageData, ManageSubwebs, ManageWeb, AddAndCustomizePages, 
+        ApplyThemeAndBorder, ApplyStyleSheets, CreateGroups, BrowseDirectories,CreateSSCSite, ViewPages, 
+        EnumeratePermissions, BrowseUserInfo, ManageAlerts, UseRemoteAPIs, UseClientIntegration, Open, 
+        EditMyUserInfo, ManagePersonalViews, AddDelPrivateWebParts, UpdatePersonalWebParts
+    };
+}
+"@
+        }
+        # Mocks for all contexts   
+
+        # Test contexts
+        Context -Name "The web application doesn't exist" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
                 AllPermissions = $true
             }
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-
-        try { [Microsoft.SharePoint.SPBasePermissions] }
-        catch {
-            Add-Type -TypeDefinition @"
-namespace Microsoft.SharePoint {
-    public enum SPBasePermissions { FullMask, EmptyMask, ManageLists, CancelCheckout, AddListItems, EditListItems, DeleteListItems, ViewListItems, ApproveItems, OpenItems, ViewVersions, DeleteVersions, CreateAlerts, ViewFormPages, ManagePermissions, ViewUsageData, ManageSubwebs, ManageWeb, AddAndCustomizePages, ApplyThemeAndBorder, ApplyStyleSheets, CreateGroups, BrowseDirectories,CreateSSCSite, ViewPages, EnumeratePermissions, BrowseUserInfo, ManageAlerts, UseRemoteAPIs, UseClientIntegration, Open, EditMyUserInfo, ManagePersonalViews, AddDelPrivateWebParts, UpdatePersonalWebParts};
-}
-"@
-        }
-
-        Context -Name "The web application doesn't exist" {
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -53,57 +58,96 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "AllPermissions specified together with one of the other parameters" {
+        Context -Name "AllPermissions specified together with one of the other parameters" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
                 AllPermissions = $true
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "Do not specify parameters ListPermissions, SitePermissions or PersonalPermissions when specifying parameter AllPermissions"
+                { Get-TargetResource @testParams } | Should throw ("Do not specify parameters " + `
+                        "ListPermissions, SitePermissions or PersonalPermissions when " + `
+                        "specifying parameter AllPermissions")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Do not specify parameters ListPermissions, SitePermissions or PersonalPermissions when specifying parameter AllPermissions"
+                { Test-TargetResource @testParams } | Should throw ("Do not specify parameters " + `
+                        "ListPermissions, SitePermissions or PersonalPermissions when " + `
+                        "specifying parameter AllPermissions")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "Do not specify parameters ListPermissions, SitePermissions or PersonalPermissions when specifying parameter AllPermissions"
+                { Set-TargetResource @testParams } | Should throw ("Do not specify parameters " + `
+                        "ListPermissions, SitePermissions or PersonalPermissions when " + `
+                        "specifying parameter AllPermissions")
             }
         }
 
-        Context -Name "Not all three parameters specified" {
+        Context -Name "Not all three parameters specified" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+                { Get-TargetResource @testParams } | Should throw ("One of the parameters " + `
+                            "ListPermissions, SitePermissions or PersonalPermissions is missing")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+                { Test-TargetResource @testParams } | Should throw ("One of the parameters " + `
+                            "ListPermissions, SitePermissions or PersonalPermissions is missing")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "One of the parameters ListPermissions, SitePermissions or PersonalPermissions is missing"
+                { Set-TargetResource @testParams } | Should throw ("One of the parameters " + `
+                            "ListPermissions, SitePermissions or PersonalPermissions is missing")
             }
         }
 
-        Context -Name "Approve items without Edit Items" {
+        Context -Name "Approve items without Edit Items" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Delete Items","View Items","Approve Items","Open Items",
+                                        "View Versions","Delete Versions","Create Alerts",
+                                        "View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -119,79 +163,155 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "View Items missing for various other parameters" {
+        Context -Name "View Items missing for various other parameters" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","Approve Items","Open Items",
+                                        "View Versions","Delete Versions","Create Alerts",
+                                        "View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+                { Get-TargetResource @testParams } | Should throw ("View Items is required when " + `
+                        "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
+                        "Items, Delete Items, Approve Items, Open Items, View Versions, Delete " + `
+                        "Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and " + `
+                        "Customize Pages, Manage Alerts, Use Client Integration Features, " + `
+                        "Manage Personal Views, Add/Remove Personal Web Parts or Update " + `
+                        "Personal Web Parts")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+                { Test-TargetResource @testParams } | Should throw ("View Items is required when " + `
+                        "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
+                        "Items, Delete Items, Approve Items, Open Items, View Versions, Delete " + `
+                        "Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and " + `
+                        "Customize Pages, Manage Alerts, Use Client Integration Features, " + `
+                        "Manage Personal Views, Add/Remove Personal Web Parts or Update " + `
+                        "Personal Web Parts")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "View Items is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and Customize Pages, Manage Alerts, Use Client Integration Features, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+                { Set-TargetResource @testParams } | Should throw ("View Items is required when " + `
+                        "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
+                        "Items, Delete Items, Approve Items, Open Items, View Versions, Delete " + `
+                        "Versions, Create Alerts, Manage Permissions, Manage Web Site, Add and " + `
+                        "Customize Pages, Manage Alerts, Use Client Integration Features, " + `
+                        "Manage Personal Views, Add/Remove Personal Web Parts or Update " + `
+                        "Personal Web Parts")
             }
         }
 
-        Context -Name "View Versions or Manage Permissions without Open Items" {
+        Context -Name "View Versions or Manage Permissions without Open Items" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items",
+                                        "Approve Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "Open Items is required when specifying View Versions or Manage Permissions"
+                { Get-TargetResource @testParams } | Should throw ("Open Items is required when " + `
+                            "specifying View Versions or Manage Permissions")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Open Items is required when specifying View Versions or Manage Permissions"
+                { Test-TargetResource @testParams } | Should throw ("Open Items is required when " + `
+                            "specifying View Versions or Manage Permissions")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "Open Items is required when specifying View Versions or Manage Permissions"
+                { Set-TargetResource @testParams } | Should throw ("Open Items is required when " + `
+                            "specifying View Versions or Manage Permissions")
             }
         }
 
-        Context -Name "Delete Versions or Manage Permissions without View Versions" {
+        Context -Name "Delete Versions or Manage Permissions without View Versions" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items",
+                                        "Approve Items","Open Items","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+                { Get-TargetResource @testParams } | Should throw ("View Versions is required " + `
+                                "when specifying Delete Versions or Manage Permissions")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+                { Test-TargetResource @testParams } | Should throw ("View Versions is required " + `
+                                "when specifying Delete Versions or Manage Permissions")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "View Versions is required when specifying Delete Versions or Manage Permissions"
+                { Set-TargetResource @testParams } | Should throw ("View Versions is required " + `
+                                "when specifying Delete Versions or Manage Permissions")
             }
         }
         
-        Context -Name "Manage Alerts without Create Alerts" {
+        Context -Name "Manage Alerts without Create Alerts" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -207,12 +327,24 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "Manage Web Site without Add and Customize Pages" {
+        Context -Name "Manage Web Site without Add and Customize Pages" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Apply Themes and Borders","Apply Style Sheets",
+                                        "Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
@@ -229,57 +361,122 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions without Browse Directories" {
+        Context -Name "Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions without Browse Directories" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "Browse Directories is required when specifying Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions"
+                { Get-TargetResource @testParams } | Should throw ("Browse Directories is " + `
+                            "required when specifying Manage Permissions, Manage Web Site, " + `
+                            "Add and Customize Pages or Enumerate Permissions")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Browse Directories is required when specifying Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions"
+                { Test-TargetResource @testParams } | Should throw ("Browse Directories is " + `
+                            "required when specifying Manage Permissions, Manage Web Site, " + `
+                            "Add and Customize Pages or Enumerate Permissions")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "Browse Directories is required when specifying Manage Permissions, Manage Web Site, Add and Customize Pages or Enumerate Permissions"
+                { Set-TargetResource @testParams } | Should throw ("Browse Directories is " + `
+                            "required when specifying Manage Permissions, Manage Web Site, " + `
+                            "Add and Customize Pages or Enumerate Permissions")
             }
         }
     
-        Context -Name "View Pages missing for various other parameters" {
+        Context -Name "View Pages missing for various other parameters" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","Enumerate Permissions",
+                                        "Browse User Information","Manage Alerts",
+                                        "Use Remote Interfaces","Use Client Integration Features",
+                                        "Open","Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "View Pages is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+                { Get-TargetResource @testParams } | Should throw ("View Pages is required when " + `
+                            "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
+                            "Items, Delete Items, View Items, Approve Items, Open Items, View " + `
+                            "Versions, Delete Versions, Create Alerts, Manage Permissions, View " + `
+                            "Web Analytics Data, Create Subsites, Manage Web Site, Add and " + `
+                            "Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create " + `
+                            "Groups, Browse Directories, Use Self-Service Site Creation, Enumerate " + `
+                            "Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal " + `
+                            "Web Parts or Update Personal Web Parts")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "View Pages is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+                { Test-TargetResource @testParams } | Should throw ("View Pages is required when " + `
+                            "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
+                            "Items, Delete Items, View Items, Approve Items, Open Items, View " + `
+                            "Versions, Delete Versions, Create Alerts, Manage Permissions, View " + `
+                            "Web Analytics Data, Create Subsites, Manage Web Site, Add and " + `
+                            "Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create " + `
+                            "Groups, Browse Directories, Use Self-Service Site Creation, Enumerate " + `
+                            "Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal " + `
+                            "Web Parts or Update Personal Web Parts")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "View Pages is required when specifying Manage Lists, Override List Behaviors, Add Items, Edit Items, Delete Items, View Items, Approve Items, Open Items, View Versions, Delete Versions, Create Alerts, Manage Permissions, View Web Analytics Data, Create Subsites, Manage Web Site, Add and Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create Groups, Browse Directories, Use Self-Service Site Creation, Enumerate Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal Web Parts or Update Personal Web Parts"
+                { Set-TargetResource @testParams } | Should throw ("View Pages is required when " + `
+                            "specifying Manage Lists, Override List Behaviors, Add Items, Edit " + `
+                            "Items, Delete Items, View Items, Approve Items, Open Items, View " + `
+                            "Versions, Delete Versions, Create Alerts, Manage Permissions, View " + `
+                            "Web Analytics Data, Create Subsites, Manage Web Site, Add and " + `
+                            "Customize Pages, Apply Themes and Borders, Apply Style Sheets, Create " + `
+                            "Groups, Browse Directories, Use Self-Service Site Creation, Enumerate " + `
+                            "Permissions, Manage Alerts, Manage Personal Views, Add/Remove Personal " + `
+                            "Web Parts or Update Personal Web Parts")
             }
         }
 
-        Context -Name "Manage Permissions or Manage Web Site without Enumerate Permissions" {
+        Context -Name "Manage Permissions or Manage Web Site without Enumerate Permissions" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Browse User Information","Manage Alerts",
+                                        "Use Remote Interfaces","Use Client Integration Features",
+                                        "Open","Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -295,35 +492,67 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information without Browse User Information" {
+        Context -Name "Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information without Browse User Information" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Manage Alerts",
+                                        "Use Remote Interfaces","Use Client Integration Features",
+                                        "Open","Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
-                { Get-TargetResource @testParams } | Should throw "Browse User Information is required when specifying Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information"
+                { Get-TargetResource @testParams } | Should throw ("Browse User Information is " + `
+                            "required when specifying Manage Permissions, Create Subsites, " + `
+                            "Manage Web Site, Create Groups, Use Self-Service Site Creation, " + `
+                            "Enumerate Permissions or Edit Personal User Information")
             }
 
             It "Should return exception from the test method" {
-                { Test-TargetResource @testParams } | Should throw "Browse User Information is required when specifying Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information"
+                { Test-TargetResource @testParams } | Should throw ("Browse User Information is " + `
+                            "required when specifying Manage Permissions, Create Subsites, " + `
+                            "Manage Web Site, Create Groups, Use Self-Service Site Creation, " + `
+                            "Enumerate Permissions or Edit Personal User Information")
             }
 
             It "Should return exception from the set method" {
-                { Set-TargetResource @testParams } | Should throw "Browse User Information is required when specifying Manage Permissions, Create Subsites, Manage Web Site, Create Groups, Use Self-Service Site Creation, Enumerate Permissions or Edit Personal User Information"
+                { Set-TargetResource @testParams } | Should throw ("Browse User Information is " + `
+                            "required when specifying Manage Permissions, Create Subsites, " + `
+                            "Manage Web Site, Create Groups, Use Self-Service Site Creation, " + `
+                            "Enumerate Permissions or Edit Personal User Information")
             }
         }
 
-        Context -Name "Use Client Integration Features without Use Remote Interfaces" {
+        Context -Name "Use Client Integration Features without Use Remote Interfaces" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -339,13 +568,26 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "Open is required when specifying any of the other permissions" {
+        Context -Name "Open is required when specifying any of the other permissions" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -361,13 +603,25 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "Add/Remove Personal Web Parts without Update Personal Web Parts" {
+        Context -Name "Add/Remove Personal Web Parts without Update Personal Web Parts" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
                 PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts"
             }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return exception from the get method" {
@@ -383,7 +637,7 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "AllPermissions specified, but FullMask is not set" {
+        Context -Name "AllPermissions specified, but FullMask is not set" -Fixture {
             $testParams = @{
                 WebAppUrl      = "http://sharepoint.contoso.com"
                 AllPermissions = $true
@@ -391,11 +645,13 @@ namespace Microsoft.SharePoint {
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $returnval = @{
-                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages"
+                    RightsMask = @("ManageLists","CancelCheckout","AddListItems","EditListItems",
+                                   "DeleteListItems","ViewListItems","ApproveItems","OpenItems",
+                                   "ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages")
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -408,19 +664,31 @@ namespace Microsoft.SharePoint {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "Should update Web App permissions from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "FullMask is set, but AllPermissions is not specified" {
+        Context -Name "FullMask is set, but AllPermissions is not specified" -Fixture {
             $testParams = @{
                 WebAppUrl           = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
@@ -429,7 +697,7 @@ namespace Microsoft.SharePoint {
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -442,14 +710,14 @@ namespace Microsoft.SharePoint {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "Should update Web App permissions from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "AllPermissions specified and FullMask is set" {
+        Context -Name "AllPermissions specified and FullMask is set" -Fixture {
             $testParams = @{
                 WebAppUrl       = "http://sharepoint.contoso.com"
                 AllPermissions  = $true
@@ -461,7 +729,7 @@ namespace Microsoft.SharePoint {
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -475,21 +743,41 @@ namespace Microsoft.SharePoint {
             }
         }
 
-        Context -Name "List/Site/Personal permissions set, but ListPermissions does not match" {
+        Context -Name "List/Site/Personal permissions set, but ListPermissions does not match" -Fixture {
             $testParams = @{
                 WebAppUrl           = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $returnval = @{
-                    RightsMask = "CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                    RightsMask = @("CancelCheckout","AddListItems","EditListItems","DeleteListItems",
+                                   "ViewListItems","ApproveItems","OpenItems","ViewVersions",
+                                   "DeleteVersions","CreateAlerts","ViewFormPages",
+                                   "ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb",
+                                   "AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets",
+                                   "CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages",
+                                   "EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs",
+                                   "UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews",
+                                   "AddDelPrivateWebParts","UpdatePersonalWebParts")
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -502,28 +790,49 @@ namespace Microsoft.SharePoint {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "Should update Web App permissions from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "List/Site/Personal permissions set, but SitePermissions does not match" {
+        Context -Name "List/Site/Personal permissions set, but SitePermissions does not match" -Fixture {
             $testParams = @{
                 WebAppUrl           = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $returnval = @{
-                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                    RightsMask = @("ManageLists","CancelCheckout","AddListItems","EditListItems",
+                                   "DeleteListItems","ViewListItems","ApproveItems","OpenItems",
+                                   "ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages",
+                                   "ViewUsageData","ManageSubwebs","ManageWeb",
+                                   "AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets",
+                                   "CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages",
+                                   "EnumeratePermissions","BrowseUserInfo","ManageAlerts",
+                                   "UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo",
+                                   "ManagePersonalViews","AddDelPrivateWebParts",
+                                   "UpdatePersonalWebParts")
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -536,28 +845,48 @@ namespace Microsoft.SharePoint {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "Should update Web App permissions from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
         
-        Context -Name "List/Site/Personal permissions set, but PersonalPermissions does not match" {
+        Context -Name "List/Site/Personal permissions set, but PersonalPermissions does not match" -Fixture {
             $testParams = @{
                 WebAppUrl           = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $returnval = @{
-                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                    RightsMask = @("ManageLists","CancelCheckout","AddListItems","EditListItems",
+                                   "DeleteListItems","ViewListItems","ApproveItems","OpenItems",
+                                   "ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages",
+                                   "ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb",
+                                   "AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets",
+                                   "CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages",
+                                   "EnumeratePermissions","BrowseUserInfo","ManageAlerts",
+                                   "UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo",
+                                   "AddDelPrivateWebParts","UpdatePersonalWebParts")
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -570,28 +899,49 @@ namespace Microsoft.SharePoint {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "Should update Web App permissions from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "List/Site/Personal permissions set and all permissions match" {
+        Context -Name "List/Site/Personal permissions set and all permissions match" -Fixture {
             $testParams = @{
                 WebAppUrl           = "http://sharepoint.contoso.com"
-                ListPermissions     = "Manage Lists","Override List Behaviors", "Add Items","Edit Items","Delete Items","View Items","Approve Items","Open Items","View Versions","Delete Versions","Create Alerts","View Application Pages"
-                SitePermissions     = "Manage Permissions","View Web Analytics Data","Create Subsites","Manage Web Site","Add and Customize Pages","Apply Themes and Borders","Apply Style Sheets","Create Groups","Browse Directories","Use Self-Service Site Creation","View Pages","Enumerate Permissions","Browse User Information","Manage Alerts","Use Remote Interfaces","Use Client Integration Features","Open","Edit Personal User Information"
-                PersonalPermissions = "Manage Personal Views","Add/Remove Personal Web Parts","Update Personal Web Parts"
+                ListPermissions     = @("Manage Lists","Override List Behaviors", "Add Items",
+                                        "Edit Items","Delete Items","View Items","Approve Items",
+                                        "Open Items","View Versions","Delete Versions",
+                                        "Create Alerts","View Application Pages")
+                SitePermissions     = @("Manage Permissions","View Web Analytics Data",
+                                        "Create Subsites","Manage Web Site",
+                                        "Add and Customize Pages","Apply Themes and Borders",
+                                        "Apply Style Sheets","Create Groups","Browse Directories",
+                                        "Use Self-Service Site Creation","View Pages",
+                                        "Enumerate Permissions","Browse User Information",
+                                        "Manage Alerts","Use Remote Interfaces",
+                                        "Use Client Integration Features","Open",
+                                        "Edit Personal User Information")
+                PersonalPermissions = @("Manage Personal Views","Add/Remove Personal Web Parts",
+                                        "Update Personal Web Parts")
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
                 $returnval = @{
-                    RightsMask = "ManageLists","CancelCheckout","AddListItems","EditListItems","DeleteListItems","ViewListItems","ApproveItems","OpenItems","ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages","ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb","AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets","CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages","EnumeratePermissions","BrowseUserInfo","ManageAlerts","UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo","ManagePersonalViews","AddDelPrivateWebParts","UpdatePersonalWebParts"
+                    RightsMask = @("ManageLists","CancelCheckout","AddListItems","EditListItems",
+                                   "DeleteListItems","ViewListItems","ApproveItems","OpenItems",
+                                   "ViewVersions","DeleteVersions","CreateAlerts","ViewFormPages",
+                                   "ManagePermissions","ViewUsageData","ManageSubwebs","ManageWeb",
+                                   "AddAndCustomizePages","ApplyThemeAndBorder","ApplyStyleSheets",
+                                   "CreateGroups","BrowseDirectories","CreateSSCSite","ViewPages",
+                                   "EnumeratePermissions","BrowseUserInfo","ManageAlerts",
+                                   "UseRemoteAPIs","UseClientIntegration","Open","EditMyUserInfo",
+                                   "ManagePersonalViews","AddDelPrivateWebParts",
+                                   "UpdatePersonalWebParts")
                 }
                 
                 $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return $returnval
              }
@@ -604,5 +954,7 @@ namespace Microsoft.SharePoint {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

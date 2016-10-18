@@ -172,7 +172,7 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
 
-            Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
+            Mock -CommandName Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
             Mock Mount-SPContentDatabase { 
                 $returnval = @{
                     Name = "SharePoint_Content_01"
@@ -310,7 +310,7 @@ namespace Microsoft.SharePoint.Administration {
                 return $returnVal
             }
 
-            Mock Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
+            Mock -CommandName Get-SPWebApplication { return @{ Url="http://sharepoint.contoso.com/" } }
             Mock Dismount-SPContentDatabase { }
             Mock Mount-SPContentDatabase { 
                 $returnVal = @{

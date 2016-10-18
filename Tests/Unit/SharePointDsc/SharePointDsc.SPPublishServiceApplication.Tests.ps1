@@ -29,19 +29,19 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
         Mock Publish-SPServiceApplication { }
         Mock Unpublish-SPServiceApplication { }
 
-        Context "An invalid service application is specified to be published" {
-            Mock Get-SPServiceApplication {
+        Context -Name "An invalid service application is specified to be published" {
+            Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
                     Name = $testParams.Name
                     Uri = $null
                 }
                 return $spServiceApp
             }
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -50,8 +50,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
             }
         }
 
-        Context "The service application is not published but should be" {
-            Mock Get-SPServiceApplication {
+        Context -Name "The service application is not published but should be" {
+            Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
                     Name = $testParams.Name
                     Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
@@ -60,11 +60,11 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 return $spServiceApp
             }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -75,8 +75,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
             }
         }
 
-        Context "The service application is published and should be" {
-            Mock Get-SPServiceApplication {
+        Context -Name "The service application is published and should be" {
+            Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
                     Name = $testParams.Name
                     Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
@@ -85,23 +85,23 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 return $spServiceApp
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The service application specified does not exist" {
-            Mock Get-SPServiceApplication  { return $null }
+        Context -Name "The service application specified does not exist" {
+            Mock -CommandName Get-SPServiceApplication  { return $null }
                         
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -112,8 +112,8 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
 
         $testParams.Ensure = "Absent"
 
-        Context "The service application is not published and should not be" {
-            Mock Get-SPServiceApplication {
+        Context -Name "The service application is not published and should not be" {
+            Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
                     Name = $testParams.Name
                     Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
@@ -122,17 +122,17 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 return $spServiceApp
             }
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The service application is published and should not be" {
-            Mock Get-SPServiceApplication {
+        Context -Name "The service application is published and should not be" {
+            Mock -CommandName Get-SPServiceApplication {
                 $spServiceApp = [pscustomobject]@{
                     Name = $testParams.Name
                     Uri = "urn:schemas-microsoft-com:sharepoint:service:mmsid"
@@ -141,11 +141,11 @@ Describe "SPPublishServiceApplication - SharePoint Build $((Get-Item $SharePoint
                 return $spServiceApp
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 

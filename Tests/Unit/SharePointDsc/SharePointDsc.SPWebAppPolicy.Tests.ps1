@@ -1,44 +1,34 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppPolicy"
 
-$ModuleName = "MSFT_SPWebAppPolicy"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppPolicy - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-            $testParams = @{
-                WebAppUrl   = "http://sharepoint.contoso.com"
-                Members = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
-                        Username           = "contoso\user1"
-                        PermissionLevel    = "Full Control"
-                        ActAsSystemAccount = $true
-                    } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
-                        Username           = "contoso\user2"
-                        PermissionLevel    = "Full Read"
-                        ActAsSystemAccount = $false
-                    } -ClientOnly)
-                )
-            }
-
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        # Initialize tests
+        try { [Microsoft.SharePoint.Administration.SPPolicyRoleType] }
+        catch {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public enum SPPolicyRoleType { FullRead, FullControl, DenyWrite, DenyAll };
+}        
+"@
         }
 
+        # Mocks for all contexts   
         Mock -CommandName Test-SPDSCIsADUser {
             return $true
         }
@@ -59,18 +49,25 @@ Describe "SPWebAppPolicy - SharePoint Build $((Get-Item $SharePointCmdletModule)
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
 
         Mock -CommandName Remove-SPDSCGenericObject { }
-        
-        try { [Microsoft.SharePoint.Administration.SPPolicyRoleType] }
-        catch {
-            Add-Type -TypeDefinition @"
-namespace Microsoft.SharePoint.Administration {
-    public enum SPPolicyRoleType { FullRead, FullControl, DenyWrite, DenyAll };
-}        
-"@
-        }  
 
+        # Test contexts
+        Context -Name "The web application doesn't exist" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sharepoint.contoso.com"
+                Members = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
+                        Username           = "contoso\user1"
+                        PermissionLevel    = "Full Control"
+                        ActAsSystemAccount = $true
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
+                        Username           = "contoso\user2"
+                        PermissionLevel    = "Full Read"
+                        ActAsSystemAccount = $false
+                    } -ClientOnly)
+                )
+            }
 
-        Context -Name "The web application doesn't exist" {
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
 
             It "Should return null from the get method" {
@@ -86,7 +83,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
         
-        Context -Name "Members and MembersToInclude parameters used simultaniously" {
+        Context -Name "Members and MembersToInclude parameters used simultaniously" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -106,7 +103,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -118,13 +115,13 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
         
-        Context -Name "No Member parameters at all" {
+        Context -Name "No Member parameters at all" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -136,7 +133,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
         
-        Context -Name "ActAsSystemAccount parameter specified without Full Control in Members" {
+        Context -Name "ActAsSystemAccount parameter specified without Full Control in Members" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -149,7 +146,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -161,7 +158,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "ActAsSystemAccount parameter specified without Full Control in MembersToInclude" {
+        Context -Name "ActAsSystemAccount parameter specified without Full Control in MembersToInclude" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -174,7 +171,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                Get-TargetResource @testParams | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -186,7 +183,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
+        Context -Name "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -204,8 +201,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -215,12 +212,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -229,7 +226,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -238,7 +235,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -252,14 +249,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" {
+        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -277,8 +274,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -288,12 +285,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -302,7 +299,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -311,7 +308,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -325,14 +322,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
+        Context -Name "The Members parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -350,8 +347,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -361,12 +358,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -375,14 +372,14 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                     }
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -401,7 +398,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" {
+        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True, but the Cache Users users aren't configured in the webapp" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -419,8 +416,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -430,12 +427,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -444,14 +441,14 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                     }
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -470,7 +467,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The Members parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
+        Context -Name "The Members parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -488,8 +485,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $roleBindingsFC = @(
@@ -497,8 +494,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -518,12 +515,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -532,7 +529,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "i:0#.w|contoso\sp_psu"
@@ -541,7 +538,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -556,7 +553,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" {
+        Context -Name "The MembersToInclude parameter used with SetCacheAccounts to True and the Cache Users users are configured correctly" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -574,8 +571,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $roleBindingsFC = @(
@@ -583,8 +580,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -604,12 +601,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -618,7 +615,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -627,7 +624,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -642,7 +639,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The MembersToExclude parameter used, but it specifies a Cache User" {
+        Context -Name "The MembersToExclude parameter used, but it specifies a Cache User" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
@@ -659,8 +656,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $roleBindingsFC = @(
@@ -668,8 +665,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -689,12 +686,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -703,7 +700,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{
                         portalsuperuseraccount = "contoso\sp_psu"
@@ -712,7 +709,7 @@ namespace Microsoft.SharePoint.Administration {
                 }
                 
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 
                 return @($webApp)
@@ -731,7 +728,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The Members parameter contains users that aren't configured in the policy" {
+        Context -Name "The Members parameter contains users that aren't configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -753,8 +750,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -764,12 +761,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -778,12 +775,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -796,14 +793,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The Members parameter does not contains users that are configured in the policy" {
+        Context -Name "The Members parameter does not contains users that are configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -820,8 +817,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -841,12 +838,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -859,14 +856,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "remove user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The MembersToInclude parameter contains users that are not configured in the policy" {
+        Context -Name "The MembersToInclude parameter contains users that are not configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -888,8 +885,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -899,12 +896,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -913,12 +910,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -931,14 +928,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "add user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The MembersToInclude parameter contains users that are configured in the policy" {
+        Context -Name "The MembersToInclude parameter contains users that are configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -973,7 +970,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -991,7 +988,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The MembersToExclude parameter contains users that are configured in the policy" {
+        Context -Name "The MembersToExclude parameter contains users that are configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
@@ -1006,8 +1003,8 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
 
                 $policies = @(
@@ -1027,12 +1024,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru | 
                 Add-Member -MemberType NoteProperty Properties @{} -PassThru
                 return @($webApp)
@@ -1046,14 +1043,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "remove user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The users in the Members parameter have different settings than configured in the policy" {
+        Context -Name "The users in the Members parameter have different settings than configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1070,11 +1067,11 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
-                    $Global:SPWebAppPolicyAddCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name Add -Value {
+                    $Global:SPDscWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1084,12 +1081,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1098,12 +1095,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1116,14 +1113,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The users in the MembersToInclude parameter have different settings than configured in the policy" {
+        Context -Name "The users in the MembersToInclude parameter have different settings than configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -1140,11 +1137,11 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Read"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
-                    $Global:SPWebAppPolicyAddCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name Add -Value {
+                    $Global:SPDscWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1154,12 +1151,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1168,12 +1165,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1186,14 +1183,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The users in the Members parameter have different settings than configured in the policy - ActAsSystemAccount" {
+        Context -Name "The users in the Members parameter have different settings than configured in the policy - ActAsSystemAccount" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1210,11 +1207,11 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
-                    $Global:SPWebAppPolicyAddCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name Add -Value {
+                    $Global:SPDscWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1224,12 +1221,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1238,12 +1235,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1256,14 +1253,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The users in the MembersToInclude parameter have different settings than configured in the policy - ActAsSystemAccount" {
+        Context -Name "The users in the MembersToInclude parameter have different settings than configured in the policy - ActAsSystemAccount" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -1280,11 +1277,11 @@ namespace Microsoft.SharePoint.Administration {
                         Name = "Full Control"
                     }
                 )
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod RemoveAll {
-                    $Global:SPWebAppPolicyRemoveAllCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
+                    $Global:SPDscWebAppPolicyRemoveAllCalled = $true
                 } -PassThru
-                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod Add {
-                    $Global:SPWebAppPolicyAddCalled = $true
+                $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name Add -Value {
+                    $Global:SPDscWebAppPolicyAddCalled = $true
                 } -PassThru -Force
 
                 $policies = @(
@@ -1294,12 +1291,12 @@ namespace Microsoft.SharePoint.Administration {
                         IsSystemUser = $false
                     }   
                 )
-                $policies = $policies | Add-Member -MemberType ScriptMethod Add {
+                $policies = $policies | Add-Member -MemberType ScriptMethod -Name Add -Value {
                     $policy = @{
                         IsSystemUser = $false
                     }
-                    $policy = $policy | Add-Member ScriptProperty PolicyRoleBindings {
-                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod Add {} -PassThru
+                    $policy = $policy | Add-Member ScriptProperty -Name PolicyRoleBindings -Value {
+                        return New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod -Name Add -Value {} -PassThru
                     } -PassThru
                     return $policy
                 } -PassThru -Force
@@ -1308,12 +1305,12 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -1326,14 +1323,14 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
             It "correct user policy from the set method" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
 
-        Context -Name "The users in the Members parameter have the same settings as configured in the policy" {
+        Context -Name "The users in the Members parameter have the same settings as configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1364,7 +1361,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -1380,7 +1377,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The users in the Members parameter have the same settings as configured in the policy, in Claims format" {
+        Context -Name "The users in the Members parameter have the same settings as configured in the policy, in Claims format" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1411,7 +1408,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -1427,7 +1424,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The users in the MembersToInclude parameter have the same  settings as configured in the policy" {
+        Context -Name "The users in the MembersToInclude parameter have the same  settings as configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToInclude = @(
@@ -1457,7 +1454,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -1473,7 +1470,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The users in the MembersToExclude parameter aren't configured in the policy" {
+        Context -Name "The users in the MembersToExclude parameter aren't configured in the policy" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 MembersToExclude = @(
@@ -1501,7 +1498,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -1517,7 +1514,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The users in the Members parameter have the same settings as configured in the policy, in Claims format with a windows group in the results" {
+        Context -Name "The users in the Members parameter have the same settings as configured in the policy, in Claims format with a windows group in the results" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Members = @(
@@ -1548,7 +1545,7 @@ namespace Microsoft.SharePoint.Administration {
                     Url = $testParams.WebAppUrl
                     UseClaimsAuthentication = $true
                     PolicyRoles = New-Object -TypeName "Object" |
-                                    Add-Member -MemberType ScriptMethod GetSpecialRole { return @{} } -PassThru
+                                    Add-Member -MemberType ScriptMethod -Name GetSpecialRole -Value { return @{} } -PassThru
                     Policies = $policies
                     Properties = @{}
                 }
@@ -1566,5 +1563,7 @@ namespace Microsoft.SharePoint.Administration {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

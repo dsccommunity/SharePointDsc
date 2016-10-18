@@ -1,52 +1,56 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppThrottlingSettings"
 
-$ModuleName = "MSFT_SPWebAppThrottlingSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppThrottlingSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Url = "http://sites.sharepoint.com"
-            ListViewThreshold = 1000
-            AllowObjectModelOverride = $true
-            AdminThreshold = 2000
-            ListViewLookupThreshold = 12
-            HappyHourEnabled = $true
-            HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
-                Hour = 2
-                Minute = 0
-                Duration = 1
-            } -ClientOnly)
-            UniquePermissionThreshold = 100
-            RequestThrottling = $true
-            ChangeLogEnabled = $true
-            ChangeLogExpiryDays = 30
-            EventHandlersEnabled = $true
+        # Initialize tests
+
+        # Mocks for all contexts   
+        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+        Mock -CommandName New-SPWebApplication -MockWith { }
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+            return @{ 
+                DisableKerberos = $true 
+                AllowAnonymous = $false 
+            } 
         }
-        
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock -CommandName New-SPAuthenticationProvider { }
-        Mock -CommandName New-SPWebApplication { }
-        Mock -CommandName Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
 
-        Context -Name "The web appliation exists and has the correct throttling settings" {
+        # Test contexts
+        Context -Name "The web appliation exists and has the correct throttling settings" -Fixture {
+            $testParams = @{
+                Url = "http://sites.sharepoint.com"
+                ListViewThreshold = 1000
+                AllowObjectModelOverride = $true
+                AdminThreshold = 2000
+                ListViewLookupThreshold = 12
+                HappyHourEnabled = $true
+                HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                    Hour = 2
+                    Minute = 0
+                    Duration = 1
+                } -ClientOnly)
+                UniquePermissionThreshold = 100
+                RequestThrottling = $true
+                ChangeLogEnabled = $true
+                ChangeLogExpiryDays = 30
+                EventHandlersEnabled = $true
+            }
+
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 
@@ -91,7 +95,26 @@ Describe "SPWebAppThrottlingSettings - SharePoint Build $((Get-Item $SharePointC
             }
         }
 
-        Context -Name "The web appliation exists and uses incorrect throttling settings" {    
+        Context -Name "The web appliation exists and uses incorrect throttling settings" -Fixture {    
+            $testParams = @{
+                Url = "http://sites.sharepoint.com"
+                ListViewThreshold = 1000
+                AllowObjectModelOverride = $true
+                AdminThreshold = 2000
+                ListViewLookupThreshold = 12
+                HappyHourEnabled = $true
+                HappyHour = (New-CimInstance -ClassName MSFT_SPWebApplicationHappyHour -Property @{
+                    Hour = 2
+                    Minute = 0
+                    Duration = 1
+                } -ClientOnly)
+                UniquePermissionThreshold = 100
+                RequestThrottling = $true
+                ChangeLogEnabled = $true
+                ChangeLogExpiryDays = 30
+                EventHandlersEnabled = $true
+            }
+
             Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
@@ -128,9 +151,9 @@ Describe "SPWebAppThrottlingSettings - SharePoint Build $((Get-Item $SharePointC
                     EventHandlersEnabled = $testParams.EventHandlersEnabled
                 }
                 $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru | Add-Member -MemberType ScriptMethod SetDailyUnthrottledPrivilegedOperationWindow {
-                    $Global:SPWebApplicationUpdateHappyHourCalled = $true
+                    $Global:SPDscWebApplicationUpdateHappyHourCalled = $true
                 } -PassThru
                 return @($webApp)
             }
@@ -143,11 +166,11 @@ Describe "SPWebAppThrottlingSettings - SharePoint Build $((Get-Item $SharePointC
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
-            $Global:SPWebApplicationUpdateHappyHourCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateHappyHourCalled = $false
             It "Should update the throttling settings" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
 
             $testParams = @{
@@ -168,12 +191,12 @@ Describe "SPWebAppThrottlingSettings - SharePoint Build $((Get-Item $SharePointC
                 ChangeLogExpiryDays = 30
                 EventHandlersEnabled = $true
             }
-            $Global:SPWebApplicationUpdateCalled = $false
-            $Global:SPWebApplicationUpdateHappyHourCalled = $false
+            $Global:SPDscWebApplicationUpdateCalled = $false
+            $Global:SPDscWebApplicationUpdateHappyHourCalled = $false
             It "Should update the incorrect happy hour settings" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
-                $Global:SPWebApplicationUpdateHappyHourCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateHappyHourCalled | Should Be $true
             }
 
             It "Should throw exceptions where invalid happy hour settings are provided" {
@@ -229,5 +252,7 @@ Describe "SPWebAppThrottlingSettings - SharePoint Build $((Get-Item $SharePointC
                 { Set-TargetResource @testParams } | Should throw
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

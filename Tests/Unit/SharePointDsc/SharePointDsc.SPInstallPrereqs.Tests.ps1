@@ -69,7 +69,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $returnval
         }
 
-        Mock Get-ItemProperty -ParameterFilter { 
+        Mock -CommandName Get-ItemProperty -ParameterFilter { 
             $Path -eq "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" 
         } -MockWith {
             return @()
@@ -383,7 +383,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"
                 }
 
-                Mock Get-ChildItem {
+                Mock -CommandName Get-ChildItem {
                 $full = @{
                         Version = "4.6.0.0"
                         Release = "0"
@@ -417,14 +417,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Context "SharePoint 2013 is installing on a server with .NET 4.6 with compatibility update" {
+            Context -Name "SharePoint 2013 is installing on a server with .NET 4.6 with compatibility update" {
                 $testParams = @{
                     InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
                     OnlineMode = $true
                     Ensure = "Present"
                 }
 
-                Mock Get-ChildItem {
+                Mock -CommandName Get-ChildItem {
                 $full = @{
                         Version = "4.6.0.0"
                         Release = "0"

@@ -204,7 +204,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return $subTypePropertyUpdate
                         } -PassThru
          #$userProfileSubTypePropertiesValidProperty.Add($subTypeProperty);
-        mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
         $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                             $Global:SPUPGetProfileSubtypeCalled = $true
                             return @{
@@ -216,7 +216,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
         
 
-        Mock Get-SPWebApplication -MockWith {
+        Mock -CommandName Get-SPWebApplication -MockWith {
             return @(
                     @{
                         IsAdministrationWebApplication=$true
@@ -239,13 +239,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 }}    
 
 
-        Mock New-Object -MockWith {
+        Mock -CommandName New-Object -MockWith {
             return (@{
                 TermStores = $TermStoresList
             })
         } -ParameterFilter { $TypeName -eq "Microsoft.SharePoint.Taxonomy.TaxonomySession" } 
 
-        Mock New-Object -MockWith {
+        Mock -CommandName New-Object -MockWith {
             return (@{
                 Properties = @{} | Add-Member ScriptMethod SetDisplayOrderByPropertyName {
                 $Global:UpsSetDisplayOrderByPropertyNameCalled=$true;
@@ -260,7 +260,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
   
         
-        Mock New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
+        Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         $propertyMappingItem =  @{
                                     DataSourcePropertyName="mail"
                                     IsImport=$true
@@ -313,7 +313,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         } -PassThru
         
         
-        Mock New-Object -MockWith {
+        Mock -CommandName New-Object -MockWith {
             $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
                 $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
 
@@ -340,12 +340,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             ConnectionManager=  @($connection) #New-Object -TypeName System.Collections.ArrayList
         }
 
-        Mock Get-SPServiceApplication { return $userProfileServiceValidConnection }
+        Mock -CommandName Get-SPServiceApplication { return $userProfileServiceValidConnection }
 
         
-        Context "When property doesn't exist" {
+        Context -Name "When property doesn't exist" {
             
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -356,7 +356,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -375,8 +375,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context "When property doesn't exist, connection doesn't exist" {
-            Mock New-Object -MockWith {
+        Context -Name "When property doesn't exist, connection doesn't exist" {
+            Mock -CommandName New-Object -MockWith {
                 $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
                 $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
 
@@ -394,7 +394,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } -PassThru   )
         } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -405,7 +405,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -429,11 +429,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context "When property doesn't exist, term set doesn't exist" {
+        Context -Name "When property doesn't exist, term set doesn't exist" {
             $termSet = $testParamsNewProperty.TermSet 
             $testParamsNewProperty.TermSet = "Invalid"
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -444,7 +444,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -464,11 +464,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context "When property doesn't exist, term group doesn't exist" {
+        Context -Name "When property doesn't exist, term group doesn't exist" {
             $termGroup = $testParamsNewProperty.TermGroup
             $testParamsNewProperty.TermGroup = "InvalidGroup"
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -479,7 +479,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -499,11 +499,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context "When property doesn't exist, term store doesn't exist" {
+        Context -Name "When property doesn't exist, term store doesn't exist" {
             $termStore = $testParamsNewProperty.TermStore
             $testParamsNewProperty.TermStore = "InvalidStore"
 
-            It "returns null from the Get method" {
+            It "Should return null from the Get method" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -514,7 +514,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -536,8 +536,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
 
-        Context "When property exists and all properties match" {
-            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Context -Name "When property exists and all properties match" {
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -548,7 +548,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -559,7 +559,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -577,10 +577,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context "When property exists and type is different - throws exception" {
+        Context -Name "When property exists and type is different - throws exception" {
             $currentType = $testParamsUpdateProperty.Type
             $testParamsUpdateProperty.Type = "StringMultiValue"
-            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -591,7 +591,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -602,7 +602,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -623,11 +623,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context "When property exists and mapping exists, mapping config does not match" {
+        Context -Name "When property exists and mapping exists, mapping config does not match" {
             
             $propertyMappingItem.DataSourcePropertyName = "property"
 
-            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -638,7 +638,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -649,7 +649,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -667,9 +667,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
         }
-        Context "When property exists and mapping does not " {
+        Context -Name "When property exists and mapping does not " {
            $propertyMappingItem=$null
-                       mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+                       Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{
@@ -680,7 +680,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return $result
             }
                     
-            It "returns valid value from the Get method" {
+            It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
@@ -691,7 +691,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
@@ -710,8 +710,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context "When property exists and ensure equals Absent" {
-            mock Get-SPDSCUserProfileSubTypeManager -MockWith {
+        Context -Name "When property exists and ensure equals Absent" {
+            Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true
                                 return @{

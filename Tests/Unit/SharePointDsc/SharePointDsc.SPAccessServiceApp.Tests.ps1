@@ -102,7 +102,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
 
-            It "returns Present from the get method" {
+            It "Should return Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
