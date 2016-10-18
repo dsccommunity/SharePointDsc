@@ -21,6 +21,7 @@
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
  * Improved code styling
  * New resources: SPAppStoreSettings
+ * Refactored unit tests to consolidate and streamline test approaches
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
