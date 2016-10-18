@@ -70,6 +70,8 @@ Describe 'SharePointDsc whole of module tests' {
             {
                 Remove-item -Path 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' `
                             -Recurse -Force -Confirm:$false
+                # Restore the load of the module to ensure future tests have access to it
+                Import-Module -Name "$RepoRoot\modules\SharePointDsc\SharePointDsc.psd1" -Global -Force
             }    
         }
     }
