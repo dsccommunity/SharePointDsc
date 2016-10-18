@@ -269,7 +269,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
   
         
-        Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
         $propertyMappingItem =  @{
                                     DataSourcePropertyName="mail"
                                     IsImport=$true
