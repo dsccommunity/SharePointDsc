@@ -69,8 +69,7 @@ Describe 'SharePointDsc whole of module tests' {
             if ($env:APPVEYOR -eq $true) 
             {
                 Remove-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" `
-                            -Destination 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' `
-                            -Recurse
+                            -Recurse -Force -Confirm:$false
             }    
         }
     }
