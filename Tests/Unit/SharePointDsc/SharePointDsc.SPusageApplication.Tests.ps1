@@ -330,13 +330,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullNameProxy } 
+                    return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
-                return (New-Object -TypeName "Object" | 
+                $proxy = (New-Object -TypeName "Object" | 
                             Add-Member -MemberType ScriptMethod `
                                        -Name Provision `
                                        -Value { 
@@ -348,6 +348,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Add-Member -NotePropertyName TypeName `
                                        -NotePropertyValue "Usage and Health Data Collection Proxy" `
                                        -PassThru)
+                $proxy = $proxy | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{ FullName = $getTypeFullNameProxy } 
+                } -PassThru -Force
+                return $proxy
             }    
             
             It "Should return absent from the get method" {
