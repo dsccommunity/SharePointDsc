@@ -89,10 +89,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         IsAdministrationWebApplication=$true
                         Url ="caURL"
                      })
-        }  
-        
-        Mock -CommandName New-PSSession { return $null } -ModuleName "SharePointDsc.Util"
-        
+        }     
         
         Mock -CommandName New-Object -MockWith {
             $ProfilePropertyManager = @{"Contoso"  = $connection}      
