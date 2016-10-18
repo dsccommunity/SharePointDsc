@@ -44,7 +44,7 @@ Describe 'SharePointDsc whole of module tests' {
                 )
             }
             
-            Get-ChildItem "$RepoRoot\Modules\SharePointDsc\Examples" -Filter "*.ps1" -Recurse | ForEach-Object -Process {
+            Get-ChildItem -Path "$RepoRoot\Modules\SharePointDsc\Examples" -Filter "*.ps1" -Recurse | ForEach-Object -Process {
                     $path = $_.FullName
                     try
                     {
@@ -64,7 +64,14 @@ Describe 'SharePointDsc whole of module tests' {
                         Write-Warning $_.Exception.Message
                     }
                 } 
-            $examplesWithErrors | Should Be 0    
+            $examplesWithErrors | Should Be 0
+
+            if ($env:APPVEYOR -eq $true) 
+            {
+                Remove-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" `
+                            -Destination 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' `
+                            -Recurse
+            }    
         }
     }
 }
