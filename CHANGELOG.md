@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Set-TargetResource of Service Application now also removes all associated proxies
  * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
   - SPAccessServiceApp
   - SPAppManagementServiceApp
@@ -15,7 +16,7 @@
   - SPVisioServiceApp
   - SPWordAutomationServiceApp
   - SPWorkManagementServiceApp
- * Fixed issue with SPInstallLanguagePack to install before farm creation 
+ * Fixed issue with SPInstallLanguagePack to install before farm creation
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
