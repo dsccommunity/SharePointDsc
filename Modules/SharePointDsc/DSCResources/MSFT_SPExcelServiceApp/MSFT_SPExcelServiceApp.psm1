@@ -163,7 +163,7 @@ function Get-TargetResource
                 $fileLocationsToReturn += @{
                     Address = $_.Address
                     LocationType = $_.LocationType
-                    IncludeChildren = [Boolean]::Parse($_.IncludeChildren)
+                    IncludeChildren = [Convert]::ToBoolean($_.IncludeChildren)
                     SessionTimeout = $_.SessionTimeout
                     ShortSessionTimeout = $_.ShortSessionTimeout
                     NewWorkbookSessionTimeout = $_.NewWorkbookSessionTimeout
@@ -174,15 +174,15 @@ function Get-TargetResource
                     AutomaticVolatileFunctionCacheLifetime = $_.AutomaticVolatileFunctionCacheLifetime
                     DefaultWorkbookCalcMode = $_.DefaultWorkbookCalcMode
                     ExternalDataAllowed = $_.ExternalDataAllowed
-                    WarnOnDataRefresh = [Boolean]::Parse($_.WarnOnDataRefresh)
-                    DisplayGranularExtDataErrors = [Boolean]::Parse($_.DisplayGranularExtDataErrors)
-                    AbortOnRefreshOnOpenFail = [Boolean]::Parse($_.AbortOnRefreshOnOpenFail)
+                    WarnOnDataRefresh = [Convert]::ToBoolean($_.WarnOnDataRefresh)
+                    DisplayGranularExtDataErrors = [Convert]::ToBoolean($_.DisplayGranularExtDataErrors)
+                    AbortOnRefreshOnOpenFail = [Convert]::ToBoolean($_.AbortOnRefreshOnOpenFail)
                     PeriodicExtDataCacheLifetime = $_.PeriodicExtDataCacheLifetime
                     ManualExtDataCacheLifetime = $_.ManualExtDataCacheLifetime
                     ConcurrentDataRequestsPerSessionMax = $_.ConcurrentDataRequestsPerSessionMax
-                    UdfsAllowed = [Boolean]::Parse($_.UdfsAllowed)
+                    UdfsAllowed = [Convert]::ToBoolean($_.UdfsAllowed)
                     Description = $_.Description
-                    RESTExternalDataAllowed = [Boolean]::Parse($_.RESTExternalDataAllowed)
+                    RESTExternalDataAllowed = [Convert]::ToBoolean($_.RESTExternalDataAllowed)
                 }
             }
 
@@ -358,82 +358,85 @@ function Set-TargetResource
 
 
         # Update trusted locations
-        $TrustedFileLocations | ForEach-Object -Process {
-            $desiredLocation = $_
-            $matchingCurrentValue = $result.TrustedFileLocations | Where-Object -FilterScript {
-                $_.Address -eq $desiredLocation.Address 
-            }
-            if ($null -eq $matchingCurrentValue)
-            {
-                Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
-                                    -Arguments $($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
-                                    -ScriptBlock {
-                    $params = $args[0]
-                    $desiredLocation = $args[1]
-                    $trustLocationProperties = $args[2]
-                    $serviceAppObjectType  = $args[3]
+        if ($null -ne $TrustedFileLocations)
+        {
+            $TrustedFileLocations | ForEach-Object -Process {
+                $desiredLocation = $_
+                $matchingCurrentValue = $result.TrustedFileLocations | Where-Object -FilterScript {
+                    $_.Address -eq $desiredLocation.Address 
+                }
+                if ($null -eq $matchingCurrentValue)
+                {
+                    Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
+                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                                        -ScriptBlock {
+                        $params = $args[0]
+                        $desiredLocation = $args[1]
+                        $trustLocationProperties = $args[2]
+                        $serviceAppObjectType  = $args[3]
 
-                    $newArgs = @{}
-                    $trustLocationProperties | ForEach-Object -Process {
-                        if ($null -ne $desiredLocation.$_)
-                        {
-                            $newArgs.Add($_, $desiredLocation.$_)
+                        $newArgs = @{}
+                        $trustLocationProperties | ForEach-Object -Process {
+                            if ($null -ne $desiredLocation.$_)
+                            {
+                                $newArgs.Add($_, $desiredLocation.$_)
+                            }
                         }
-                    }
-                    $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq $serviceAppObjectType
-                    }
-                    $newArgs.Add("ExcelServiceApplication", $serviceApp)
+                        $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                            $_.GetType().FullName -eq $serviceAppObjectType
+                        }
+                        $newArgs.Add("ExcelServiceApplication", $serviceApp)
 
-                    New-SPExcelFileLocation @newArgs
+                        New-SPExcelFileLocation @newArgs
+                    }
+                }
+                else
+                {
+                    Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
+                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                                        -Arguments @($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                                        -ScriptBlock {
+                        $params = $args[0]
+                        $desiredLocation = $args[1]
+                        $trustLocationProperties = $args[2]
+                        $serviceAppObjectType  = $args[3]
+
+                        $updateArgs = @{}
+                        $trustLocationProperties | ForEach-Object -Process {
+                            if ($null -ne $desiredLocation.$_)
+                            {
+                                $updateArgs.Add($_, $desiredLocation.$_)
+                            }
+                        }
+                        $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                            $_.GetType().FullName -eq $serviceAppObjectType
+                        }
+                        $updateArgs.Add("Identity", $desiredLocation.Address)
+                        $updateArgs.Add("ExcelServiceApplication", $serviceApp)
+
+                        Set-SPExcelFileLocation @updateArgs
+                    }
                 }
             }
-            else
-            {
-                Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
-                                    -Arguments $($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
-                                    -ScriptBlock {
-                    $params = $args[0]
-                    $desiredLocation = $args[1]
-                    $trustLocationProperties = $args[2]
-                    $serviceAppObjectType  = $args[3]
 
-                    $updateArgs = @{}
-                    $trustLocationProperties | ForEach-Object -Process {
-                        if ($null -ne $desiredLocation.$_)
-                        {
-                            $updateArgs.Add($_, $desiredLocation.$_)
-                        }
-                    }
-                    $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                        $_.GetType().FullName -eq $serviceAppObjectType
-                    }
-                    $updateArgs.Add("Identity", $desiredLocation.Address)
-                    $updateArgs.Add("ExcelServiceApplication", $serviceApp)
-
-                    Set-SPExcelFileLocation @updateArgs
+            # Remove unlisted trusted locations
+            $result.TrustedFileLocations | ForEach-Object -Process {
+                $currentLocation = $_
+                $matchingDesiredValue = $TrustedFileLocations | Where-Object -FilterScript {
+                    $_.Address -eq $currentLocation.Address 
                 }
-            }
-        }
+                if ($null -eq $matchingDesiredValue)
+                {
+                    Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
+                    Invoke-SPDSCCommand -Credential $InstallAccount `
+                                        -Arguments @($Name, $currentLocation) `
+                                        -ScriptBlock {
+                        $name = $args[0]
+                        $currentLocation = $args[1]
 
-        # Remove unlisted trusted locations
-        $result.TrustedFileLocations | ForEach-Object -Process {
-            $currentLocation = $_
-            $matchingDesiredValue = $TrustedFileLocations | Where-Object -FilterScript {
-                $_.Address -eq $currentLocation.Address 
-            }
-            if ($null -eq $matchingDesiredValue)
-            {
-                Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
-                                    -Arguments @($PSBoundParameters, $currentLocation) `
-                                    -ScriptBlock {
-                    $params = $args[0]
-                    $currentLocation = $args[1]
-
-                    Remove-SPExcelFileLocation -ExcelServiceApplication $params.Name -Identity $currentLocation.Address -Confirm:$false
+                        Remove-SPExcelFileLocation -ExcelServiceApplication $name -Identity $currentLocation.Address -Confirm:$false
+                    }
                 }
             }
         }
@@ -448,7 +451,7 @@ function Set-TargetResource
             $params = $args[0]
             $serviceAppObjectType = $args[1]
 
-            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq $serviceAppObjectType  
             }
 
