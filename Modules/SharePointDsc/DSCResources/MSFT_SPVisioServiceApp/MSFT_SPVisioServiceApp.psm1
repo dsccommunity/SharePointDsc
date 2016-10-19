@@ -106,8 +106,19 @@ function Set-TargetResource
         
             $visioApp = New-SPVisioServiceApplication -Name $params.Name `
                                       -ApplicationPool $params.ApplicationPool
+            if ($params.ContainsKey("ProxyName"))
+            {
+                $pName = $params.ProxyName
+                $params.Remove("ProxyName") | Out-Null 
+            }
 
-            $visioProxy = New-SPVisioServiceApplicationProxy -Name ($params.ProxyName + "Proxy") -ServiceApplication $params.Name
+            if ($null -eq $pName) {
+                $pName = "$($params.Name) Proxy"
+            }
+            if ($null -ne $visioApp)
+            {
+                $visioProxy = New-SPVisioServiceApplicationProxy -Name $pName -ServiceApplication $params.Name
+            }
         }
     }
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
