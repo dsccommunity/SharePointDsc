@@ -1,3 +1,29 @@
+$Script:TrustLocationProperties = @(
+    "Address",
+    "LocationType",
+    "IncludeChildren",
+    "SessionTimeout",
+    "ShortSessionTimeout",
+    "NewWorkbookSessionTimeout",
+    "RequestDurationMax",
+    "ChartRenderDurationMax",
+    "WorkbookSizeMax",
+    "ChartAndImageSizeMax",
+    "AutomaticVolatileFunctionCacheLifetime",
+    "DefaultWorkbookCalcMode",
+    "ExternalDataAllowed",
+    "WarnOnDataRefresh",
+    "DisplayGranularExtDataErrors",
+    "AbortOnRefreshOnOpenFail",
+    "PeriodicExtDataCacheLifetime",
+    "ManualExtDataCacheLifetime",
+    "ConcurrentDataRequestsPerSessionMax",
+    "UdfsAllowed",
+    "Description",
+    "RESTExternalDataAllowed"
+)
+$Script:ServiceAppObjectType = "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -37,9 +63,10 @@ function Get-TargetResource
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
+                                  -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
                                   -ScriptBlock {
         $params = $args[0]
+        $serviceAppObjectType = $args[1]
         
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
@@ -54,7 +81,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"    
+            $_.GetType().FullName -eq $serviceAppObjectType    
         }
 
         if ($null -eq $serviceApp) 
@@ -96,7 +123,7 @@ function Get-TargetResource
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 Ensure = "Present"
-                FileLocations = $fileLocationsToReturn
+                TrustedFileLocations = $fileLocationsToReturn
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -157,16 +184,101 @@ function Set-TargetResource
         }
     }
 
+    if ($Ensure -eq "Present")
+    {
+        # Update trusted locations
+        $TrustedFileLocations | ForEach-Object -Process {
+            $desiredLocation = $_
+            $matchingCurrentValue = $result.TrustedFileLocations | Where-Object -FilterScript {
+                $_.Address -eq $desiredLocation.Address 
+            }
+            if ($null -eq $matchingCurrentValue)
+            {
+                Write-Verbose -Message "Adding trusted location '$($desiredLocation.Address)' to service app"
+                Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments $($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                                    -ScriptBlock {
+                    $params = $args[0]
+                    $desiredLocation = $args[1]
+                    $trustLocationProperties = $args[2]
+                    $serviceAppObjectType  = $args[3]
+
+                    $newArgs = @{}
+                    $trustLocationProperties | ForEach-Object -Process {
+                        if ($null -ne $desiredLocation.$_)
+                        {
+                            $newArgs.Add($_, $desiredLocation.$_)
+                        }
+                    }
+                    $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                        $_.GetType().FullName -eq $serviceAppObjectType
+                    }
+                    $newArgs.Add("ExcelServiceApplication", $serviceApp)
+
+                    New-SPExcelFileLocation @newArgs
+                }
+            }
+            else
+            {
+                Write-Verbose -Message "Updating trusted location '$($desiredLocation.Address)' in service app"
+                Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments $($PSBoundParameters, $desiredLocation, $Script:TrustLocationProperties, $Script:ServiceAppObjectType) `
+                                    -ScriptBlock {
+                    $params = $args[0]
+                    $desiredLocation = $args[1]
+                    $trustLocationProperties = $args[2]
+                    $serviceAppObjectType  = $args[3]
+
+                    $updateArgs = @{}
+                    $trustLocationProperties | ForEach-Object -Process {
+                        if ($null -ne $desiredLocation.$_)
+                        {
+                            $updateArgs.Add($_, $desiredLocation.$_)
+                        }
+                    }
+                    $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                        $_.GetType().FullName -eq $serviceAppObjectType
+                    }
+                    $updateArgs.Add("Identity", $desiredLocation.Address)
+                    $updateArgs.Add("ExcelServiceApplication", $serviceApp)
+
+                    Set-SPExcelFileLocation @updateArgs
+                }
+            }
+        }
+
+        # Remove unlisted trusted locations
+        $result.TrustedFileLocations | ForEach-Object -Process {
+            $currentLocation = $_
+            $matchingDesiredValue = $TrustedFileLocations | Where-Object -FilterScript {
+                $_.Address -eq $currentLocation.Address 
+            }
+            if ($null -eq $matchingDesiredValue)
+            {
+                Write-Verbose -Message "Removing trusted location '$($currentLocation.Address)' from service app"
+                Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments @($PSBoundParameters, $currentLocation) `
+                                    -ScriptBlock {
+                    $params = $args[0]
+                    $currentLocation = $args[1]
+
+                    Remove-SPExcelFileLocation -ExcelServiceApplication $params.Name -Identity $currentLocation.Address -Confirm:$false
+                }
+            }
+        }
+    }
+
     if ($Ensure -eq "Absent") 
     {
         Write-Verbose -Message "Removing Excel Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
+                            -Arguments @($PSBoundParameters, $Script:ServiceAppObjectType) `
                             -ScriptBlock {
             $params = $args[0]
-            
+            $serviceAppObjectType = $args[1]
+
             $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
+                $_.GetType().FullName -eq $serviceAppObjectType  
             }
             Remove-SPServiceApplication $appService -Confirm:$false
         }
@@ -223,7 +335,7 @@ function Test-TargetResource
     if ($Ensure -eq "Present" -and $existsCheck -eq $true -and $null -ne $TrustedFileLocations) 
     {
         # Check that all the desired types are in the current values and match
-        $TrustedFileLocations | ForEach-Object -Process {
+        $locationCheck = $TrustedFileLocations | ForEach-Object -Process {
             $desiredLocation = $_
             $matchingCurrentValue = $CurrentValues.TrustedFileLocations | Where-Object -FilterScript {
                 $_.Address -eq $desiredLocation.Address 
@@ -236,43 +348,29 @@ function Test-TargetResource
             }
             else
             {
-                $result = Test-SPDscParameterState -CurrentValues $matchingCurrentValue `
-                                                   -DesiredValues $desiredLocation `
-                                                   -ValuesToCheck @(
-                                                       "Address",
-                                                       "LocationType",
-                                                       "IncludeChildren",
-                                                       "SessionTimeout",
-                                                       "ShortSessionTimeout",
-                                                       "NewWorkbookSessionTimeout",
-                                                       "RequestDurationMax",
-                                                       "ChartRenderDurationMax",
-                                                       "WorkbookSizeMax",
-                                                       "ChartAndImageSizeMax",
-                                                       "AutomaticVolatileFunctionCacheLifetime",
-                                                       "DefaultWorkbookCalcMode",
-                                                       "ExternalDataAllowed",
-                                                       "WarnOnDataRefresh",
-                                                       "DisplayGranularExtDataErrors",
-                                                       "AbortOnRefreshOnOpenFail",
-                                                       "PeriodicExtDataCacheLifetime",
-                                                       "ManualExtDataCacheLifetime",
-                                                       "ConcurrentDataRequestsPerSessionMax",
-                                                       "UdfsAllowed",
-                                                       "Description",
-                                                       "RESTExternalDataAllowed"
-                                                   )
-                if ($result -eq $false)
-                {
-                    Write-Verbose -Message ("Trusted file location '$($_.Address)' did not match" + `
-                                            "desired properties. Desired state is false.")
-                    return $false
+                $Script:TrustLocationProperties | ForEach-Object -Process {
+                    if ($desiredLocation.CimInstanceProperties.Name -contains $_)
+                    {
+                        if ($desiredLocation.$_ -ne $matchingCurrentValue.$_)
+                        {
+                            Write-Verbose -Message ("Trusted file location '$($desiredLocation.Address)' did not match " + `
+                                                    "desired property '$_'. Desired value is " + `
+                                                    "'$($desiredLocation.$_)' but the current value is " + `
+                                                    "'$($matchingCurrentValue.$_)'")
+                            return $false
+                        }
+                    }
                 }
             }
+            return $true
+        }
+        if ($locationCheck -contains $false)
+        {
+            return $false
         }
 
         # Check that any other existing trusted locations are in the desired state
-        $CurrentValues.TrustedFileLocations | ForEach-Object -Process {
+        $locationCheck = $CurrentValues.TrustedFileLocations | ForEach-Object -Process {
             $currentLocation = $_
             $matchingDesiredValue = $TrustedFileLocations | Where-Object -FilterScript {
                 $_.Address -eq $currentLocation.Address 
@@ -284,6 +382,11 @@ function Test-TargetResource
                                         "application. Desired state is false.")
                 return $false
             }
+            return $true
+        }
+        if ($locationCheck -contains $false)
+        {
+            return $false
         }
         
         # at this point if no other value has been returned, all desired entires exist and are 
