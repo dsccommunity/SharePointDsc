@@ -503,7 +503,7 @@ function Test-SPDscParameterState
 
     if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck)) 
     {
-        throw ("If 'DesiredValues' is a Hashtable then property 'ValuesToCheck' must contain " + `
+        throw ("If 'DesiredValues' is a CimInstance then property 'ValuesToCheck' must contain " + `
                "a value")
     }
 
