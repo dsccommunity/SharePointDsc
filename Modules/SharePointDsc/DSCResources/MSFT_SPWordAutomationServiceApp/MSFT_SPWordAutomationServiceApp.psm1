@@ -150,63 +150,50 @@ function Get-TargetResource
             return $nullReturn  
         }      
 
-        switch ($params.Ensure) 
-        {
-            "Present" {
-                $supportedFileFormats = @()
-                if ($serviceApp.WordServiceFormats.OpenXmlDocument) 
-                { 
-                    $supportedFileFormats += "docx" 
-                }
-                if ($serviceApp.WordServiceFormats.Word972003Document) 
-                { 
-                    $supportedFileFormats += "doc" 
-                }
-                if ($serviceApp.WordServiceFormats.RichTextFormat) 
-                { 
-                    $supportedFileFormats += "rtf" 
-                }
-                if ($serviceApp.WordServiceFormats.WebPage) 
-                { 
-                    $supportedFileFormats += "mht"
-                }
-                if ($serviceApp.WordServiceFormats.Word2003Xml) 
-                { 
-                    $supportedFileFormats += "xml" 
-                }
+        $supportedFileFormats = @()
+        if ($serviceApp.WordServiceFormats.OpenXmlDocument) 
+        { 
+            $supportedFileFormats += "docx" 
+        }
+        if ($serviceApp.WordServiceFormats.Word972003Document) 
+        { 
+            $supportedFileFormats += "doc" 
+        }
+        if ($serviceApp.WordServiceFormats.RichTextFormat) 
+        { 
+            $supportedFileFormats += "rtf" 
+        }
+        if ($serviceApp.WordServiceFormats.WebPage) 
+        { 
+            $supportedFileFormats += "mht"
+        }
+        if ($serviceApp.WordServiceFormats.Word2003Xml) 
+        { 
+            $supportedFileFormats += "xml" 
+        }
 
-                $returnVal =  @{ 
-                    Name = $serviceApp.DisplayName 
-                    Ensure = "Present"
-                    ApplicationPool = $serviceApp.ApplicationPool.Name 
-                    DatabaseName = $serviceApp.Database.Name 
-                    DatabaseServer = $serviceApp.Database.Server.Name 
-                    SupportedFileFormats = $supportedFileFormats
-                    DisableEmbeddedFonts = $serviceApp.DisableEmbeddedFonts
-                    MaximumMemoryUsage = $serviceApp.MaximumMemoryUsage
-                    RecycleThreshold = $serviceApp.RecycleProcessThreshold
-                    DisableBinaryFileScan = $serviceApp.DisableBinaryFileScan
-                    ConversionProcesses = $serviceApp.TotalActiveProcesses
-                    JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
-                    NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
-                    TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
-                    MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
-                    MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
-                    KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
-                    MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalSeconds
-                    InstallAccount = $params.InstallAccount
-                } 
-                return $returnVal 
-            }
-            "Absent" {
-                $returnVal =  @{ 
-                    Name = $params.Name 
-                    Ensure = "Present"
-                    InstallAccount = $params.InstallAccount
-                } 
-                return $returnVal 
-            }
+        $returnVal =  @{ 
+            Name = $serviceApp.DisplayName 
+            Ensure = "Present"
+            ApplicationPool = $serviceApp.ApplicationPool.Name 
+            DatabaseName = $serviceApp.Database.Name 
+            DatabaseServer = $serviceApp.Database.Server.Name 
+            SupportedFileFormats = $supportedFileFormats
+            DisableEmbeddedFonts = $serviceApp.DisableEmbeddedFonts
+            MaximumMemoryUsage = $serviceApp.MaximumMemoryUsage
+            RecycleThreshold = $serviceApp.RecycleProcessThreshold
+            DisableBinaryFileScan = $serviceApp.DisableBinaryFileScan
+            ConversionProcesses = $serviceApp.TotalActiveProcesses
+            JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
+            NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
+            TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
+            MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
+            MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
+            KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
+            MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalSeconds
+            InstallAccount = $params.InstallAccount
         } 
+        return $returnVal  
     }
     
     return $result 
