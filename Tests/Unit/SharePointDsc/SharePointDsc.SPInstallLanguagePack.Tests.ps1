@@ -86,7 +86,7 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
+            Mock Get-SPDscRegProductsInfo {
                 if ($majorBuildNumber -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
@@ -145,7 +145,7 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
+            Mock Get-SPDscRegProductsInfo {
                 if ($majorBuildNumber -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
@@ -215,7 +215,7 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
+            Mock Get-SPDscRegProductsInfo {
                 if ($majorBuildNumber -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
@@ -285,7 +285,7 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
+            Mock Get-SPDscRegProductsInfo {
                 if ($majorBuildNumber -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
@@ -355,7 +355,7 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
+            Mock Get-SPDscRegProductsInfo {
                 if ($majorBuildNumber -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
@@ -409,7 +409,7 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
+            Mock Get-SPDscRegProductsInfo {
                 if ($majorBuildNumber -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")

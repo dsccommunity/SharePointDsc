@@ -19,8 +19,9 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             DatabaseServer = "SQL.contoso.local"
             ApplicationPool = "Test App Pool"
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        $getTypeFullName = "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
 
+        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -33,11 +34,10 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         Mock Remove-SPServiceApplication { }
 
         Context "When no service applications exist in the current farm" {
-
             Mock Get-SPServiceApplication { return $null }
             
-            It "returns null from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            It "returns Absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "returns false when the Test method is called" {
@@ -46,34 +46,42 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
 
             It "creates a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPAccessServicesApplication 
+                Assert-MockCalled New-SPAccessServicesApplication
             }
         }
 
         Context "When service applications exist in the current farm but the specific Access Services app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
-
-            It "returns null from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
+            It "returns Absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                Assert-MockCalled Get-SPServiceApplication
+            }
         }
 
         Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Access Services Web Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     DatabaseServer = $testParams.DatebaseName
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
-            It "returns values from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            It "returns Present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "returns true when the Test method is called" {
@@ -88,16 +96,19 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             Ensure = "Absent"
         }
         Context "When the service application exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Access Services Web Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
-                    DatabaseServer = $testParams.DatabaseServer
+                    DatabaseServer = $testParams.DatebaseName
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
-            It "returns present from the Get method" {
+            It "returns Present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
@@ -114,7 +125,7 @@ Describe "SPAccessServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         Context "When the serivce application doesn't exist and it shouldn't" {
             Mock Get-SPServiceApplication { return $null }
             
-            It "returns absent from the Get method" {
+            It "returns Absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             

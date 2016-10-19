@@ -45,7 +45,7 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Visio Graphics Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
@@ -124,7 +124,7 @@ function Set-TargetResource
 
                 Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Visio Graphics Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     } | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
             }
         }
@@ -140,7 +140,7 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Visio Graphics Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     }
             Remove-SPServiceApplication $service -Confirm:$false
         }
