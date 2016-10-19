@@ -24,6 +24,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts   
         Mock -CommandName New-SPVisioServiceApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
+        Mock -CommandName New-SPVisioServiceApplicationProxy -MockWith { }
 
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
@@ -47,7 +48,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
-                Assert-MockCalled New-SPVisioServiceApplication 
             }
         }
 
