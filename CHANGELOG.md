@@ -21,6 +21,7 @@
  * Fixed issue with SPShellAdmin and Content Database method
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
  * Improved code styling
+ * SPVisioServiceapplication now creates proxy and lets you specify a name for it
  * New resources: SPAppStoreSettings
 
 ### 1.3
