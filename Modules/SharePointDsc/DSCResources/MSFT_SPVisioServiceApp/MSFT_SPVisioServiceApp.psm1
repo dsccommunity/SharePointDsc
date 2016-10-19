@@ -128,11 +128,21 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $service = Get-SPServiceApplication -Name $params.Name `
+            $app = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
                         $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     }
-            Remove-SPServiceApplication $service -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $app -Confirm:$false
         }
     }   
 }

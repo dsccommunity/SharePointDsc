@@ -21,6 +21,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
         $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
                 public static class SearchContext {
