@@ -41,6 +41,73 @@ function Get-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $TrustedFileLocations,
 
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $CachingOfUnusedFilesEnable,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $CrossDomainAccessAllowed,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("None","Connection")] 
+        [System.String] 
+        $EncryptedUserConnectionRequired,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $ExternalDataConnectionLifetime,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
+        [System.String] 
+        $FileAccessMethod,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("RoundRobin","Local","WorkbookURL")] 
+        [System.String] 
+        $LoadBalancingScheme,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $MemoryCacheThreshold,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $PrivateBytesMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $SessionsPerUserMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $SiteCollectionAnonymousSessionsMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $TerminateProcessOnAccessViolation,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $ThrottleAccessViolationsPerSiteCollection,
+
+        [parameter(Mandatory = $false)]  
+        [System.String] 
+        $UnattendedAccountApplicationId,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $UnusedObjectAgeMax,
+
+        [parameter(Mandatory = $false)]   
+        [System.String] 
+        $WorkbookCache,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $WorkbookCacheSizeMax,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -96,7 +163,7 @@ function Get-TargetResource
                 $fileLocationsToReturn += @{
                     Address = $_.Address
                     LocationType = $_.LocationType
-                    IncludeChildren = $_.IncludeChildren
+                    IncludeChildren = [Boolean]::Parse($_.IncludeChildren)
                     SessionTimeout = $_.SessionTimeout
                     ShortSessionTimeout = $_.ShortSessionTimeout
                     NewWorkbookSessionTimeout = $_.NewWorkbookSessionTimeout
@@ -107,15 +174,15 @@ function Get-TargetResource
                     AutomaticVolatileFunctionCacheLifetime = $_.AutomaticVolatileFunctionCacheLifetime
                     DefaultWorkbookCalcMode = $_.DefaultWorkbookCalcMode
                     ExternalDataAllowed = $_.ExternalDataAllowed
-                    WarnOnDataRefresh = $_.WarnOnDataRefresh
-                    DisplayGranularExtDataErrors = $_.DisplayGranularExtDataErrors
-                    AbortOnRefreshOnOpenFail = $_.AbortOnRefreshOnOpenFail
+                    WarnOnDataRefresh = [Boolean]::Parse($_.WarnOnDataRefresh)
+                    DisplayGranularExtDataErrors = [Boolean]::Parse($_.DisplayGranularExtDataErrors)
+                    AbortOnRefreshOnOpenFail = [Boolean]::Parse($_.AbortOnRefreshOnOpenFail)
                     PeriodicExtDataCacheLifetime = $_.PeriodicExtDataCacheLifetime
                     ManualExtDataCacheLifetime = $_.ManualExtDataCacheLifetime
                     ConcurrentDataRequestsPerSessionMax = $_.ConcurrentDataRequestsPerSessionMax
-                    UdfsAllowed = $_.UdfsAllowed
+                    UdfsAllowed = [Boolean]::Parse($_.UdfsAllowed)
                     Description = $_.Description
-                    RESTExternalDataAllowed = $_.RESTExternalDataAllowed
+                    RESTExternalDataAllowed = [Boolean]::Parse($_.RESTExternalDataAllowed)
                 }
             }
 
@@ -124,6 +191,22 @@ function Get-TargetResource
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 Ensure = "Present"
                 TrustedFileLocations = $fileLocationsToReturn
+                CachingOfUnusedFilesEnable = $serviceApp.CachingOfUnusedFilesEnable 
+                CrossDomainAccessAllowed = $serviceApp.CrossDomainAccessAllowed
+                EncryptedUserConnectionRequired = $serviceApp.EncryptedUserConnectionRequired
+                ExternalDataConnectionLifetime = $serviceApp.ExternalDataConnectionLifetime
+                FileAccessMethod = $serviceApp.FileAccessMethod
+                LoadBalancingScheme = $serviceApp.LoadBalancingScheme
+                MemoryCacheThreshold = $serviceApp.MemoryCacheThreshold
+                PrivateBytesMax = $serviceApp.PrivateBytesMax
+                SessionsPerUserMax = $serviceApp.SessionsPerUserMax
+                SiteCollectionAnonymousSessionsMax = $serviceApp.SiteCollectionAnonymousSessionsMax
+                TerminateProcessOnAccessViolation = $serviceApp.TerminateProcessOnAccessViolation
+                ThrottleAccessViolationsPerSiteCollection = $serviceApp.ThrottleAccessViolationsPerSiteCollection
+                UnattendedAccountApplicationId = $serviceApp.UnattendedAccountApplicationId
+                UnusedObjectAgeMax = $serviceApp.UnusedObjectAgeMax
+                WorkbookCache = $serviceApp.WorkbookCache
+                WorkbookCacheSizeMax = $serviceApp.WorkbookCacheSizeMax
                 InstallAccount = $params.InstallAccount
             }
             return $returnVal
@@ -148,6 +231,73 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $TrustedFileLocations,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $CachingOfUnusedFilesEnable,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $CrossDomainAccessAllowed,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("None","Connection")] 
+        [System.String] 
+        $EncryptedUserConnectionRequired,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $ExternalDataConnectionLifetime,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
+        [System.String] 
+        $FileAccessMethod,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("RoundRobin","Local","WorkbookURL")] 
+        [System.String] 
+        $LoadBalancingScheme,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $MemoryCacheThreshold,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $PrivateBytesMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $SessionsPerUserMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $SiteCollectionAnonymousSessionsMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $TerminateProcessOnAccessViolation,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $ThrottleAccessViolationsPerSiteCollection,
+
+        [parameter(Mandatory = $false)]  
+        [System.String] 
+        $UnattendedAccountApplicationId,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $UnusedObjectAgeMax,
+
+        [parameter(Mandatory = $false)]   
+        [System.String] 
+        $WorkbookCache,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $WorkbookCacheSizeMax,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
@@ -186,6 +336,27 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present")
     {
+        Write-Verbose -Message "Updating settings for Excel Services Application $Name"
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments $PSBoundParameters `
+                            -ScriptBlock {
+            $params = $args[0]
+
+            $params.Add("Identity", $params.Name)
+
+            # Remove parameters that do not belong on the set method
+            @("InstallAccount", "Ensure", "TrustedFileLocations", "Name", "ApplicationPool") | 
+                ForEach-Object -Process {
+                    if ($params.ContainsKey($_) -eq $true) 
+                    {
+                        $params.Remove($_) | Out-Null
+                    }
+                }
+
+            Set-SPExcelServiceApplication @params
+        }
+
+
         # Update trusted locations
         $TrustedFileLocations | ForEach-Object -Process {
             $desiredLocation = $_
@@ -303,6 +474,73 @@ function Test-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $TrustedFileLocations,
 
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $CachingOfUnusedFilesEnable,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $CrossDomainAccessAllowed,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("None","Connection")] 
+        [System.String] 
+        $EncryptedUserConnectionRequired,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $ExternalDataConnectionLifetime,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
+        [System.String] 
+        $FileAccessMethod,
+
+        [parameter(Mandatory = $false)]  
+        [ValidateSet("RoundRobin","Local","WorkbookURL")] 
+        [System.String] 
+        $LoadBalancingScheme,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $MemoryCacheThreshold,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $PrivateBytesMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $SessionsPerUserMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $SiteCollectionAnonymousSessionsMax,
+
+        [parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $TerminateProcessOnAccessViolation,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $ThrottleAccessViolationsPerSiteCollection,
+
+        [parameter(Mandatory = $false)]  
+        [System.String] 
+        $UnattendedAccountApplicationId,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $UnusedObjectAgeMax,
+
+        [parameter(Mandatory = $false)]   
+        [System.String] 
+        $WorkbookCache,
+
+        [parameter(Mandatory = $false)]  
+        [System.UInt32] 
+        $WorkbookCacheSizeMax,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -328,11 +566,30 @@ function Test-TargetResource
     
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $existsCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
+    $mainCheck = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                             -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @("Ensure")
+                                            -ValuesToCheck @(
+                                                "Ensure",
+                                                "CachingOfUnusedFilesEnable",
+                                                "CrossDomainAccessAllowed",
+                                                "EncryptedUserConnectionRequired",
+                                                "ExternalDataConnectionLifetime",
+                                                "FileAccessMethod",
+                                                "LoadBalancingScheme",
+                                                "MemoryCacheThreshold",
+                                                "PrivateBytesMax",
+                                                "SessionsPerUserMax",
+                                                "SiteCollectionAnonymousSessionsMax",
+                                                "TerminateProcessOnAccessViolation",
+                                                "ThrottleAccessViolationsPerSiteCollection",
+                                                "UnattendedAccountApplicationId",
+                                                "UnusedObjectAgeMax",
+                                                "WorkbookCache",
+                                                "WorkbookCacheSizeMax"
+                                                )
+
     
-    if ($Ensure -eq "Present" -and $existsCheck -eq $true -and $null -ne $TrustedFileLocations) 
+    if ($Ensure -eq "Present" -and $mainCheck -eq $true -and $null -ne $TrustedFileLocations) 
     {
         # Check that all the desired types are in the current values and match
         $locationCheck = $TrustedFileLocations | ForEach-Object -Process {
@@ -395,7 +652,7 @@ function Test-TargetResource
     }
     else
     {
-        return $existsCheck
+        return $mainCheck
     }
 }
 
