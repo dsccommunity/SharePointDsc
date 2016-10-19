@@ -530,7 +530,7 @@ function Set-TargetResource
             }
 
             $serviceApp.Update()
-        }
+        }        
     }
     
     if ($Ensure -eq "Absent") 
@@ -544,8 +544,17 @@ function Set-TargetResource
             }
             if ($null -ne $serviceApp) 
             {
+                $proxies = Get-SPServiceApplicationProxy
+                foreach($proxyInstance in $proxies)
+                {
+                    if($serviceApp.IsConnected($proxyInstance))
+                    {
+                        $proxyInstance.Delete()
+                    }
+                }
+
                 # Service app existed, deleting
-                Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
+                Remove-SPServiceApplication -Identity $serviceApp -RemoveData -Confirm:$false
             } 
         }
     }

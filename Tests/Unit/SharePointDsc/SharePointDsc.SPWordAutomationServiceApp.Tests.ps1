@@ -270,6 +270,7 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 return ,$returnval
             }
             Mock Set-SPTimerJob {}
+            Mock Get-SPServiceApplicationProxy { }
 
             It "returns false when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $false 
