@@ -23,6 +23,7 @@
  * Improved code styling
  * SPVisioServiceapplication now creates proxy and lets you specify a name for it
  * New resources: SPAppStoreSettings
+ * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
