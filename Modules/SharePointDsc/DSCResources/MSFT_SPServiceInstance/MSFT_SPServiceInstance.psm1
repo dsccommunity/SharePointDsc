@@ -8,11 +8,9 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -82,11 +80,9 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -106,6 +102,7 @@ function Set-TargetResource
 
         Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
+            $newName = $args[1]
             
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
                 $_.TypeName -eq $params.Name -or `
@@ -135,6 +132,7 @@ function Set-TargetResource
 
         Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
+            $newName = $args[1]
             
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
                 $_.TypeName -eq $params.Name -or `
@@ -170,11 +168,9 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"

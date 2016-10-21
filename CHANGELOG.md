@@ -19,6 +19,7 @@
  * Fixed issue with SPInstallLanguagePack to install before farm creation
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method
+ * Fixed issue with SPServiceInstance (Set-TargetResource) for OS not in En-Us language
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
  * Improved code styling
  * SPVisioServiceapplication now creates proxy and lets you specify a name for it
