@@ -12,16 +12,20 @@ function Get-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
         [System.String] 
         $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String] 
         $DatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -81,16 +85,20 @@ function Set-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
         [System.String] 
         $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String] 
         $DatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -174,16 +182,20 @@ function Test-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
         [System.String] 
         $DatabaseName,
 
+        [parameter(Mandatory = $false)]
         [System.String] 
         $DatabaseServer,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

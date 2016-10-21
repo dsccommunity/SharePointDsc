@@ -20,13 +20,16 @@ function Get-TargetResource
         [System.Boolean] 
         $CreateFirewallRules,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
+        [parameter(Mandatory = $false)]
         [System.String[]] 
         $ServerProvisionOrder,
         
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -104,13 +107,16 @@ function Set-TargetResource
         [System.Boolean] 
         $CreateFirewallRules,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
+        [parameter(Mandatory = $false)]
         [System.String[]] 
         $ServerProvisionOrder,
         
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -371,13 +377,16 @@ function Test-TargetResource
         [System.Boolean] 
         $CreateFirewallRules,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
+        [parameter(Mandatory = $false)]
         [System.String[]] 
         $ServerProvisionOrder,
         
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

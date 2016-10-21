@@ -8,6 +8,7 @@ function Get-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -15,9 +16,11 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
+        [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -57,6 +60,8 @@ function Get-TargetResource
         { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $currentServer = "$($env:COMPUTERNAME).$domain"
+            $syncServices = Get-SPServiceInstance -Server $currentServer `
+                                                  -ErrorAction SilentlyContinue
             $syncService = $syncServices | Where-Object -FilterScript { 
                 $_.GetType().Name -eq "UserProfileServiceInstance" 
             }
@@ -119,6 +124,7 @@ function Set-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -126,9 +132,11 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
+        [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -265,6 +273,7 @@ function Test-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -272,9 +281,11 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
+        [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
