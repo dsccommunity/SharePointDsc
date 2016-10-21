@@ -58,24 +58,27 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
         Mock Stop-SPServiceInstance { $Global:SPDSCDCacheOnline = $false }
         Mock Start-SPServiceInstance { $Global:SPDSCDCacheOnline = $true }
 
-        Mock Get-SPServiceInstance { 
-                if ($Global:SPDSCDCacheOnline -eq $false) {
-                    return @(New-Object Object |            
-                                Add-Member NoteProperty TypeName "Distributed Cache" -PassThru |
-                                Add-Member NoteProperty Status "Disabled" -PassThru |
-                                Add-Member NoteProperty Service "SPDistributedCacheService Name=AppFabricCachingService" -PassThru |
-                                Add-Member NoteProperty Server @{ Name = $env:COMPUTERNAME } -PassThru |             
-                                Add-Member ScriptMethod Delete {} -PassThru)
-                } else {
-                    return @(New-Object Object |            
-                                Add-Member NoteProperty TypeName "Distributed Cache" -PassThru |
-                                Add-Member NoteProperty Status "Online" -PassThru |
-                                Add-Member NoteProperty Service "SPDistributedCacheService Name=AppFabricCachingService" -PassThru |
-                                Add-Member NoteProperty Server @{ Name = $env:COMPUTERNAME } -PassThru |             
-                                Add-Member ScriptMethod Delete {} -PassThru)
-                }
-                
+        Mock Get-SPServiceInstance {
+            $spSvcInstance = [pscustomobject]@{
+                Server = @{ Name = $env:COMPUTERNAME }
+                Service = "SPDistributedCacheService Name=AppFabricCachingService"
             }
+            $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod Delete {} -PassThru
+            $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                return @{ Name = "SPDistributedCacheServiceInstance" } 
+            } -PassThru -Force
+
+            if ($Global:SPDSCDCacheOnline -eq $false) 
+            {
+                $Global:SPDSCUPACheck = $true
+                $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+            } 
+            else
+            {
+                $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+            }
+            return $spSvcInstance
+        }
 
         Context "Distributed cache is not configured" {
             Mock Use-CacheCluster { throw [Exception] "ERRPS001 Error in reading provider and connection string values." }

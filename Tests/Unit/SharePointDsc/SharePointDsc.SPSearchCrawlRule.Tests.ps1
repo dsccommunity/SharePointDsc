@@ -21,7 +21,9 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
             CrawlConfigurationRules = "FollowLinksNoPageCrawl","CrawlComplexUrls", "CrawlAsHTTP"
             AuthenticationType = "DefaultRuleAccess"
             Ensure = "Present"
-        }
+        }                
+        $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
@@ -44,9 +46,20 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns null from the Get method" {
                 { Get-TargetResource @testParams } | Should throw "When AuthenticationType=CertificateRuleAccess, the parameter CertificateName is required"  
@@ -71,9 +84,20 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns null from the Get method" {
                 { Get-TargetResource @testParams } | Should throw "When specifying CertificateName, the AuthenticationType parameter is required"  
@@ -97,9 +121,20 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns null from the Get method" {
                 { Get-TargetResource @testParams } | Should throw "When AuthenticationType is NTLMAccountRuleAccess or BasicAccountRuleAccess, the parameter AuthenticationCredentials is required"
@@ -128,9 +163,20 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns null from the Get method" {
                 { Get-TargetResource @testParams } | Should throw "When specifying AuthenticationCredentials, the AuthenticationType parameter is required"
@@ -155,9 +201,20 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns null from the Get method" {
                 { Get-TargetResource @testParams } | Should throw "When RuleType=ExclusionRule, CrawlConfigurationRules cannot contain the values FollowLinksNoPageCrawl or CrawlAsHTTP"
@@ -182,9 +239,20 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                 Ensure = "Present"
             }
 
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns null from the Get method" {
                 { Get-TargetResource @testParams } | Should throw "When Type=ExclusionRule, parameters AuthenticationCredentials, CertificateName or AuthenticationType are not allowed"
@@ -200,7 +268,6 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
 
         Context "When no service applications exist in the current farm" {
-
             Mock Get-SPServiceApplication { return $null }
             
             It "returns absent from the Get method" {
@@ -218,10 +285,15 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
 
         Context "When service applications exist in the current farm but the specific search app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -237,8 +309,7 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
             }
         }
 
-        Context "When a crawl rule exists and is configured correctly" {
-            
+        Context "When a crawl rule exists and is configured correctly" {            
             Mock Get-SPEnterpriseSearchCrawlRule { return @{
                     Path = "http://www.contoso.com"
                     Type = "InclusionRule"
@@ -248,9 +319,21 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                     AuthenticationType = "DefaultRuleAccess"
                 }
             }
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
             
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -262,7 +345,6 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
         }
 
         Context "When a crawl rule exists, but isn't configured correctly" {
-
             Mock Get-SPEnterpriseSearchCrawlRule { return @{
                     Path = "http://www.contoso.com"
                     Type = "InclusionRule"
@@ -272,9 +354,21 @@ Describe "SPSearchCrawlRule - SharePoint Build $((Get-Item $SharePointCmdletModu
                     AuthenticationType = "DefaultRuleAccess"
                 }
             }
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Search Service Application"
-            }) }
+
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"

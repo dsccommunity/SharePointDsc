@@ -8,7 +8,6 @@ function Get-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -16,11 +15,9 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
-        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -38,17 +35,30 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         
-        $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                           | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Synchronization Service" 
+        $syncServices = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                        -ErrorAction SilentlyContinue
+        
+        if ($null -eq $syncServices)
+        {
+            return @{
+                UserProfileServiceAppName = $params.UserProfileServiceAppName
+                Ensure = "Absent"
+                FarmAccount = $params.FarmAccount
+                RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
+                InstallAccount = $params.InstallAccount
+            }
         }
+        
+        $syncService = $syncServices | Where-Object -FilterScript { 
+            $_.GetType().Name -eq "UserProfileServiceInstance"
+        }
+
         if ($null -eq $syncService) 
         { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $currentServer = "$($env:COMPUTERNAME).$domain"
-            $syncService = Get-SPServiceInstance -Server $currentServer `
-                               | Where-Object -FilterScript { 
-                $_.TypeName -eq "User Profile Synchronization Service" 
+            $syncService = $syncServices | Where-Object -FilterScript { 
+                $_.GetType().Name -eq "UserProfileServiceInstance" 
             }
         }
 
@@ -109,7 +119,6 @@ function Set-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -117,11 +126,9 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
-        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -171,17 +178,18 @@ function Set-TargetResource
             $params = $args[0]
             
             $currentServer = $env:COMPUTERNAME
-            $syncService = Get-SPServiceInstance -Server $currentServer `
-                            | Where-Object -FilterScript { 
-                $_.TypeName -eq "User Profile Synchronization Service" 
+
+            $syncServices = Get-SPServiceInstance -Server $currentServer `
+                                                  -ErrorAction SilentlyContinue
+            $syncService = $syncServices | Where-Object -FilterScript { 
+                $_.GetType().Name -eq "UserProfileServiceInstance"  
             }
             if ($null -eq $syncService) 
             { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$currentServer.$domain"
-                $syncService = Get-SPServiceInstance -Server $currentServer `
-                                | Where-Object -FilterScript { 
-                    $_.TypeName -eq "User Profile Synchronization Service" 
+                $syncService = $syncServices | Where-Object -FilterScript { 
+                    $_.GetType().Name -eq "UserProfileServiceInstance"  
                 }
             }
             if ($null -eq $syncService) 
@@ -199,7 +207,7 @@ function Set-TargetResource
                                     "named $($params.UserProfileServiceAppName)")
                 }
                 $ups = $serviceApps | Where-Object -FilterScript { 
-                    $_.TypeName -eq "User Profile Service Application" 
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication" 
                 }
 
                 $userName = $params.FarmAccount.UserName
@@ -230,9 +238,8 @@ function Set-TargetResource
                 Write-Verbose ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user profile " + `
                             "sync service to become '$desiredState' (waited $count of " + `
                             "$maxCount minutes)")
-                $syncService = Get-SPServiceInstance -Server $currentServer `
-                                | Where-Object -FilterScript { 
-                    $_.TypeName -eq "User Profile Synchronization Service" 
+                $syncService = $syncServices | Where-Object -FilterScript { 
+                    $_.GetType().Name -eq "UserProfileServiceInstance"  
                 }
                 $count++
             }
@@ -258,7 +265,6 @@ function Test-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -266,11 +272,9 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
-        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -337,7 +341,7 @@ function Test-SPDscUserProfileDBReadOnly()
                                "named $UserProfileServiceAppName")
         }
         $ups = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
         }
 
         $propType = $ups.GetType()

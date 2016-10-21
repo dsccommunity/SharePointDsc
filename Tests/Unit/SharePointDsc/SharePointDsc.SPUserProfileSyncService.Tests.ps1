@@ -19,6 +19,8 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
             FarmAccount = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
             Ensure = "Present"
         }
+        $getTypeFullName = "Microsoft.Office.Server.Administration.UserProfileApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
@@ -47,11 +49,11 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
         Mock Get-SPServiceApplication { 
             return @(
                 New-Object Object |            
-                    Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
                     Add-Member NoteProperty DisplayName $testParams.Name -PassThru | 
                     Add-Member NoteProperty ApplicationPool @{ Name = $testParams.ApplicationPool } -PassThru |             
                     Add-Member ScriptMethod GetType {
                         New-Object Object |
+                            Add-Member NoteProperty FullName $getTypeFullName -PassThru -Force |
                             Add-Member ScriptMethod GetProperties {
                                 param($x)
                                 return @(
@@ -101,31 +103,39 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context "User profile sync service is not running and should be" {
-                    Mock Get-SPServiceInstance { if ($Global:SPDSCUPACheck -eq $false) {
-                            $Global:SPDSCUPACheck = $true
-                            return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            }) 
-                        } else {
-                            return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
+                    Mock Get-SPServiceInstance {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                         }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        if ($Global:SPDSCUPACheck -eq $false) 
+                        {
+                            $Global:SPDSCUPACheck = $true
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        } 
+                        else
+                        {
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        }
+                        return $spSvcInstance
                     }
-                    Mock Get-SPServiceApplication { return @(
-                        New-Object Object |            
-                            Add-Member NoteProperty ID ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) -PassThru |
-                            Add-Member NoteProperty TypeName "User Profile Service Application" -PassThru |
-                            Add-Member ScriptMethod SetSynchronizationMachine {
-                                param($computerName, $syncServiceID, $FarmUserName, $FarmPassword)
-                            } -PassThru      
-                    )} 
+
+                    Mock Get-SPServiceApplication {
+                        $spServiceApp = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod SetSynchronizationMachine { 
+                            param($computerName, $syncServiceID, $FarmUserName, $FarmPassword) 
+                        } -PassThru -Force
+                        $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
 
                     It "returns absent from the get method" {
                         $Global:SPDSCUPACheck = $false
@@ -160,14 +170,18 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context "User profile sync service is running and should be" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
-                    } 
-        
+                    Mock Get-SPServiceInstance {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
+
                     It "returns present from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
@@ -180,23 +194,26 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 $testParams.Ensure = "Absent"
 
                 Context "User profile sync service is running and shouldn't be" {
-                    Mock Get-SPServiceInstance { if ($Global:SPDSCUPACheck -eq $false) {
-                            $Global:SPDSCUPACheck = $true
-                            return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            }) 
-                        } else {
-                            return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Empty
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            })
+                    Mock Get-SPServiceInstance {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                         }
-                    } 
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        if ($Global:SPDSCUPACheck -eq $false) 
+                        {
+                            $Global:SPDSCUPACheck = $true
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        } 
+                        else
+                        {
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        }
+                        return $spSvcInstance
+                    }
 
                     It "returns present from the get method" {
                         $Global:SPDSCUPACheck = $false
@@ -217,13 +234,17 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context "User profile sync service is not running and shouldn't be" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                            Status = "Disabled"
+                    Mock Get-SPServiceInstance {
+                        $spSvcInstance = [pscustomobject]@{
                             ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                            UserProfileApplicationGuid = [Guid]::Empty
-                            TypeName = "User Profile Synchronization Service" 
-                        })
-                    } 
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        return $spSvcInstance
+                    }
 
                     It "returns absent from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -234,17 +255,20 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                     }
                 }
 
-
-
                 $testParams.Ensure = "Present"
                 $testParams.Add("RunOnlyWhenWriteable", $true)
+
                 Context "User profile sync service is not running and shouldn't be because the database is read only" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                            Status = "Disabled"
+                    Mock Get-SPServiceInstance {
+                        $spSvcInstance = [pscustomobject]@{
                             ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                            UserProfileApplicationGuid = [Guid]::Empty
-                            TypeName = "User Profile Synchronization Service" 
-                        })
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        return $spSvcInstance
                     }
 
                     Mock Get-SPDatabase {
@@ -266,13 +290,17 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                 }
 
                 Context "User profile sync service is running and shouldn't be because the database is read only" {
-                    Mock Get-SPServiceInstance { return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
-                    } 
+                    Mock Get-SPServiceInstance {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
 
                     Mock Get-SPDatabase {
                         return @(
@@ -299,6 +327,7 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                     }
                 }
             }
+
             16 {
                 Context "All methods throw exceptions as user profile sync doesn't exist in 2016" {
                     It "throws on the get method" {
@@ -314,12 +343,6 @@ Describe "SPUserProfileSyncService - SharePoint Build $((Get-Item $SharePointCmd
                     }
                 }
             }
-        }
-        
-
-
-        
-
-        
+        }          
     }    
 }

@@ -21,8 +21,9 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
             DatabaseServer = "TestServer\Instance"
             Ensure = "Present"
         }
+        $getTypeFullName = "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
+        
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-
         
         Mock Invoke-SPDSCCommand { 
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
@@ -33,7 +34,6 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
         Mock Remove-SPServiceApplication {}
 
         Context "When no service applications exist in the current farm" {
-
             Mock Get-SPServiceApplication { return $null }
             Mock New-SPSubscriptionSettingsServiceApplication { return @{}}
             Mock New-SPSubscriptionSettingsServiceApplicationProxy { return @{}}
@@ -53,10 +53,15 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
         }
 
         Context "When service applications exist in the current farm but the specific subscription settings service app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -65,16 +70,19 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
         }
 
         Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns present from the get method" {
@@ -87,24 +95,24 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
         }
 
         Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication { 
-                $service = @(@{
-                    TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
-                    
-                $service = $service | Add-Member ScriptMethod Update {
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
                     $Global:SPSubscriptionServiceUpdateCalled = $true
                 } -PassThru 
-                return $service
-
-
+                return $spServiceApp
             }
+
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Set-SPSubscriptionSettingsServiceApplication { }
 
@@ -146,16 +154,19 @@ Describe "SPSubscriptionSettingsServiceApp - SharePoint Build $((Get-Item $Share
         }
         
         Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
-                        Name = "Database"
-                        Server = @{ Name = "Server" }
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "returns present from the Get method" {
