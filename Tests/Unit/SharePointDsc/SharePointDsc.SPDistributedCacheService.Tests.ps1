@@ -32,7 +32,7 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
         $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
         Import-Module "$RepoRoot\Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
         Mock Use-CacheCluster { }
-        Mock Get-WmiObject { return @{ StartName = $testParams.ServiceAccount } }
+        Mock Get-CimInstance { return @{ StartName = $testParams.ServiceAccount } }
         Mock Get-NetFirewallRule { return @{} }
         Mock Get-NetFirewallRule { return @{} } 
         Mock Enable-NetFirewallRule { }  

@@ -60,7 +60,7 @@ function Get-TargetResource
                                                             -CachePort $cachePort `
                                                             -ErrorAction SilentlyContinue
 
-            $windowsService = Get-WmiObject "win32_service" -Filter "Name='AppFabricCachingService'"
+            $windowsService = Get-CimInstance -Class Win32_Service -Filter "Name='AppFabricCachingService'"
             $firewallRule = Get-NetFirewallRule -DisplayName "SharePoint Distributed Cache" `
                                                 -ErrorAction SilentlyContinue
 
