@@ -1,106 +1,144 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPManagedAccount"
 
-$ModuleName = "MSFT_SPManagedAccount"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPManagedAccount - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Account = New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))
-            EmailNotification = 7
-            PreExpireDays = 7
-            Schedule = ""
-            Ensure = "Present"
-            AccountName = "username"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue         
-        Mock New-SPManagedAccount { }
-        Mock Set-SPManagedAccount { }
-        Mock Remove-SPManagedAccount { }
+        # Initialize tests
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("username", $mockPassword)
 
-        Context "The specified managed account does not exist in the farm and it should" {
-            Mock Get-SPManagedAccount { return $null }
+        # Mocks for all contexts   
+        Mock -CommandName New-SPManagedAccount -MockWith { }
+        Mock -CommandName Set-SPManagedAccount -MockWith { }
+        Mock -CommandName Remove-SPManagedAccount -MockWith { }
 
-            It "returns null from the get method" {
+        # Test contexts
+        Context -Name "The specified managed account does not exist in the farm and it should" -Fixture {
+            $testParams = @{
+                Account = $mockCredential
+                EmailNotification = 7
+                PreExpireDays = 7
+                Schedule = ""
+                Ensure = "Present"
+                AccountName = $mockCredential.Username
+            }
+
+            Mock -CommandName Get-SPManagedAccount -MockWith { return $null }
+
+            It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the new and set methods from the set function" {
+            It "Should call the new and set methods from the set function" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPManagedAccount
                 Assert-MockCalled Set-SPManagedAccount
             }
         }
 
-        Context "The specified managed account exists and it should but has an incorrect schedule" {
-            Mock Get-SPManagedAccount { return @{
-                Username = $testParams.AccountName
-                DaysBeforeChangeToEmail = $testParams.EmailNotification
-                DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                ChangeSchedule = "wrong schedule"
-            }}
+        Context -Name "The specified managed account exists and it should but has an incorrect schedule" -Fixture {
+            $testParams = @{
+                Account = $mockCredential
+                EmailNotification = 7
+                PreExpireDays = 7
+                Schedule = ""
+                Ensure = "Present"
+                AccountName = $mockCredential.Username
+            }
+            
+            Mock -CommandName Get-SPManagedAccount -MockWith { 
+                return @{
+                    Username = $testParams.AccountName
+                    DaysBeforeChangeToEmail = $testParams.EmailNotification
+                    DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                    ChangeSchedule = "wrong schedule"
+                }
+            }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the set methods from the set function" {
+            It "Should call the set methods from the set function" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPManagedAccount
             }
         }
 
-        Context "The specified managed account exists and it should but has incorrect notifcation settings" {
-            Mock Get-SPManagedAccount { return @{
-                Username = $testParams.AccountName
-                DaysBeforeChangeToEmail = 0
-                DaysBeforeExpiryToChange = 0
-                ChangeSchedule = $testParams.Schedule
-            }}
+        Context -Name "The specified managed account exists and it should but has incorrect notifcation settings" -Fixture {
+            $testParams = @{
+                Account = $mockCredential
+                EmailNotification = 7
+                PreExpireDays = 7
+                Schedule = ""
+                Ensure = "Present"
+                AccountName = $mockCredential.Username
+            }
+            
+            Mock -CommandName Get-SPManagedAccount -MockWith { 
+                return @{
+                    Username = $testParams.AccountName
+                    DaysBeforeChangeToEmail = 0
+                    DaysBeforeExpiryToChange = 0
+                    ChangeSchedule = $testParams.Schedule
+                }
+            }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "The specified managed account exists and it should and is also configured correctly" {
-            Mock Get-SPManagedAccount { return @{
-                Username = $testParams.AccountName
-                DaysBeforeChangeToEmail = $testParams.EmailNotification
-                DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                ChangeSchedule = $testParams.Schedule
-            }}
+        Context -Name "The specified managed account exists and it should and is also configured correctly" -Fixture {
+            $testParams = @{
+                Account = $mockCredential
+                EmailNotification = 7
+                PreExpireDays = 7
+                Schedule = ""
+                Ensure = "Present"
+                AccountName = $mockCredential.Username
+            }
+            
+            Mock -CommandName Get-SPManagedAccount -MockWith { 
+                return @{
+                    Username = $testParams.AccountName
+                    DaysBeforeChangeToEmail = $testParams.EmailNotification
+                    DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                    ChangeSchedule = $testParams.Schedule
+                }
+            }
 
-            It "returns the current values from the get method" {
+            It "Should return the current values from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "The specified account should exist but the account property has not been specified" {
+        Context -Name "The specified account should exist but the account property has not been specified" -Fixture {
             $testParams = @{
                 EmailNotification = 7
                 PreExpireDays = 7
@@ -109,55 +147,68 @@ Describe "SPManagedAccount - SharePoint Build $((Get-Item $SharePointCmdletModul
                 AccountName = "username"
             }
             
-            Mock Get-SPManagedAccount { return @{
-                Username = $testParams.AccountName
-                DaysBeforeChangeToEmail = $testParams.EmailNotification
-                DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                ChangeSchedule = $testParams.Schedule
-            }}
+            Mock -CommandName Get-SPManagedAccount -MockWith { 
+                return @{
+                    Username = $testParams.AccountName
+                    DaysBeforeChangeToEmail = $testParams.EmailNotification
+                    DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                    ChangeSchedule = $testParams.Schedule
+                }
+            }
             
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
-        
-        $testParams = @{
-            Ensure = "Absent"
-            AccountName = "username"
-        }
             
-        Context "The specified account exists but it should not" {
-            Mock Get-SPManagedAccount { return @{
-                Username = $testParams.AccountName
-                DaysBeforeChangeToEmail = $testParams.EmailNotification
-                DaysBeforeExpiryToChange = $testParams.PreExpireDays
-                ChangeSchedule = $testParams.Schedule
-            }}
+        Context -Name "The specified account exists but it should not" -Fixture {
+            $testParams = @{
+                Ensure = "Absent"
+                AccountName = "username"
+            }
+
+            Mock -CommandName Get-SPManagedAccount -MockWith { 
+                return @{
+                    Username = $testParams.AccountName
+                    DaysBeforeChangeToEmail = $testParams.EmailNotification
+                    DaysBeforeExpiryToChange = $testParams.PreExpireDays
+                    ChangeSchedule = $testParams.Schedule
+                }
+            }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should call the remove cmdlet from the set method" {
+            It "Should call the remove cmdlet from the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPManagedAccount
             }
         }
         
-        Context "The specified account does not exist and it should not" {
-            Mock Get-SPManagedAccount { return $null }
+        Context -Name "The specified account does not exist and it should not" -Fixture {
+            $testParams = @{
+                Ensure = "Absent"
+                AccountName = "username"
+            }
+
+            Mock -CommandName Get-SPManagedAccount -MockWith { 
+                return $null 
+            }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

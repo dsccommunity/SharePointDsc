@@ -1,48 +1,27 @@
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPSearchServiceApp"
 
-$ModuleName = "MSFT_SPSearchServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Search Service Application"
-            ApplicationPool = "SharePoint Search Services"
-            Ensure = "Present"
-        }
+        # Initialize tests
         $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock Start-SPEnterpriseSearchServiceInstance {}
-        Mock Remove-SPServiceApplication {}   
-        Mock Get-SPServiceApplicationProxy { }
-        Mock New-SPEnterpriseSearchServiceApplicationProxy {}
-        Mock Set-SPEnterpriseSearchServiceApplication {} 
-        Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-        Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-        Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-        
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber; FileBuildPart = 0 } }
-        
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
                 public static class SearchContext {
@@ -52,74 +31,120 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                 }
             }
 "@
+        
+        $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
+        $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+                                     -ArgumentList @("DOMAIN\username", $mockPassword)
 
-            Mock Get-SPWebApplication { return @(@{
+        # Mocks for all contexts   
+        Mock -CommandName Start-SPEnterpriseSearchServiceInstance -MockWith {}
+        Mock -CommandName Remove-SPServiceApplication -MockWith {}   
+        Mock -CommandName New-SPEnterpriseSearchServiceApplicationProxy -MockWith {}
+        Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith {} 
+        Mock -CommandName New-SPBusinessDataCatalogServiceApplication -MockWith { }
+        Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith { } 
+        
+        Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith { 
+            return @{} 
+        }
+        Mock -CommandName New-SPEnterpriseSearchServiceApplication -MockWith { 
+            return @{} 
+        }
+        Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+            return @{ 
+                Name = $testParams.ApplicationPool 
+            } 
+        }
+        Mock -CommandName Get-SPWebapplication -MockWith { 
+            return @(@{
                 Url = "http://centraladmin.contoso.com"
                 IsAdministrationWebApplication = $true
-            }) }
-            Mock Get-SPSite { @{} }
-            
-            Mock New-Object {
-                return @{
-                    DefaultGatheringAccount = "Domain\username"
-                }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
-            
-            Mock Import-Module {} -ParameterFilter { $_.Name -eq $ModuleName }
-
-        Context "When no service applications exist in the current farm" {
-
-            Mock Get-SPServiceApplication { return $null }
-            
-            It "returns absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
-            }
-
-            It "returns false when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "creates a new service application in the set method" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchServiceApplication 
-            }
-
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "creates a new service application in the set method where InstallAccount is used" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPEnterpriseSearchServiceApplication 
-            }
-            $testParams.Remove("InstallAccount")
+            }) 
         }
+        Mock -CommandName Get-SPSite -MockWith { 
+            @{} 
+        }
+        Mock -CommandName New-Object -MockWith {
+            return @{
+                DefaultGatheringAccount = "Domain\username"
+            }
+        } -ParameterFilter { 
+            $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" 
+        }
+        
+        Mock Import-Module -MockWith {} -ParameterFilter { $_.Name -eq $ModuleName }
 
-        Context "When service applications exist in the current farm but the specific search app does not" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
-                    DisplayName = $testParams.Name
-                }
-                $spServiceApp | Add-Member ScriptMethod GetType { 
-                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
-                } -PassThru -Force
-                return $spServiceApp
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
             }
 
-            It "returns absent from the Get method" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
+            
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchServiceApplication 
             }
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When service applications exist in the current farm but the specific search app does not" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
+            }
+
+            It "Should return absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPEnterpriseSearchServiceApplication 
+            }
+        }
+
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
@@ -127,25 +152,32 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
                 Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParams.Name } 
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
@@ -153,19 +185,23 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
 
-            It "returns false when the Test method is called" {
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            } 
+
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
@@ -173,11 +209,17 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
         
-        $testParams.Add("DefaultContentAccessAccount", (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-        
-        Context "When the default content access account does not match" {    
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the default content access account does not match" -Fixture {    
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                DefaultContentAccessAccount = $mockCredential
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
@@ -185,19 +227,21 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
-
-            Mock New-Object {
+            
+            Mock -CommandName New-Object -MockWith {
                 return @{
                     DefaultGatheringAccount = "WRONG\username"
                 }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            } -ParameterFilter { 
+                $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" 
+            }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
@@ -209,38 +253,60 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
         
-        Context "When the default content access account does match" {    
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the default content access account does match" -Fixture {    
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                DefaultContentAccessAccount = $mockCredential
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
             
-            Mock New-Object {
+            Mock -CommandName New-Object -MockWith {
                 return @{
-                    DefaultGatheringAccount = "Domain\username"
+                    DefaultGatheringAccount = "DOMAIN\username"
                 }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            } -ParameterFilter { 
+                $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" 
+            }
             
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        $testParams.Add("SearchCenterUrl", "http://search.sp.contoso.com")
-        $Global:SPDSCSearchURLUpdated = $false
-        Context "When the search center URL does not match" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the search center URL does not match" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                SearchCenterUrl = "http://search.sp.contoso.com"
+            }
+
+            $Global:SPDscSearchURLUpdated = $false
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     SearchCenterUrl = "http://wrong.url.here"
@@ -250,46 +316,63 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
-                    $Global:SPDSCSearchURLUpdated = $true
+                    $Global:SPDscSearchURLUpdated = $true
                 } -PassThru
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
             
-            Mock Get-SPWebApplication { return @(@{
-                Url = "http://centraladmin.contoso.com"
-                IsAdministrationWebApplication = $true
-            }) }
-            Mock Get-SPSite { @{} }
+            Mock -CommandName Get-SPWebapplication -MockWith { 
+                return @(@{
+                    Url = "http://centraladmin.contoso.com"
+                    IsAdministrationWebApplication = $true
+                }) 
+            }
+
+            Mock -CommandName Get-SPSite -MockWith { @{} }
             
-            Mock New-Object {
+            Mock -CommandName New-Object -MockWith {
                 return @{
                     DefaultGatheringAccount = "Domain\username"
                 }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            } -ParameterFilter { 
+                $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" 
+            }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should update the service app in the set method" {
+            It "Should update the service app in the set method" {
                 Set-TargetResource @testParams
-                $Global:SPDSCSearchURLUpdated | Should Be $true
+                $Global:SPDscSearchURLUpdated | Should Be $true
             }
         }
         
-        Context "When the search center URL does match" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the search center URL does match" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     SearchCenterUrl = "http://search.sp.contoso.com"
@@ -298,90 +381,108 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
-            Mock New-SPBusinessDataCatalogServiceApplication { }
-            Mock Start-SPEnterpriseSearchServiceInstance { }
-            Mock New-SPEnterpriseSearchServiceApplication { return @{} }
-            Mock New-SPEnterpriseSearchServiceApplicationProxy { }
-            Mock Set-SPEnterpriseSearchServiceApplication { } 
+           
+            Mock -CommandName Get-SPWebapplication -MockWith { 
+                return @(@{
+                    Url = "http://centraladmin.contoso.com"
+                    IsAdministrationWebApplication = $true
+                }) 
+            }
+
+            Mock -CommandName Get-SPSite -MockWith { 
+                return @{} 
+            }
             
-            Mock Get-SPWebApplication { return @(@{
-                Url = "http://centraladmin.contoso.com"
-                IsAdministrationWebApplication = $true
-            }) }
-            Mock Get-SPSite { @{} }
-            
-            Mock New-Object {
+            Mock -CommandName New-Object {
                 return @{
                     DefaultGatheringAccount = "Domain\username"
                 }
-            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" }
+            } -ParameterFilter { 
+                $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" 
+            }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        $testParams.Ensure = "Absent"
-        
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        $testParams = @{
-            Name = "Search Service Application"
-            ApplicationPool = "SharePoint Search Services"
-            Ensure = "Present"
-            CloudIndex = $true
-        }
-        
-        Context "When the service app exists and is cloud enabled" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the service app exists and is cloud enabled" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                CloudIndex = $true
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     CloudIndex = $true
@@ -390,39 +491,70 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
-            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
+                return @{ 
+                    FileMajorPart = 15
+                    FileBuildPart = 0 
+                } 
+            }
             
-            It "should return false if the version is too low" {
+            It "Should return false if the version is too low" {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $false
             }
             
-            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
+                return @{ 
+                    FileMajorPart = 15
+                    FileBuildPart = 5000 
+                } 
+            }
             
-            It "should return that the web app is hybrid enabled from the get method" {
+            It "Should return that the web app is hybrid enabled from the get method" {
                 (Get-TargetResource @testParams).CloudIndex | Should Be $true
             }
         }
         
-        Context "When the service doesn't exist and it should be cloud enabled" {            
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service doesn't exist and it should be cloud enabled" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                CloudIndex = $true
+            }
             
-            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
-            It "creates the service app in the set method" {
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
+                return @{ 
+                    FileMajorPart = 15
+                    FileBuildPart = 5000 
+                }
+            }
+            
+            It "Should create the service app in the set method" {
                 Set-TargetResource @testParams
             }
             
-            Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
+                return @{ 
+                    FileMajorPart = 15
+                    FileBuildPart = 0 
+                } 
+            }
             
-            It "throws an error in the set method if the version of SharePoint isn't high enough" {
+            It "Should throw an error in the set method if the version of SharePoint isn't high enough" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

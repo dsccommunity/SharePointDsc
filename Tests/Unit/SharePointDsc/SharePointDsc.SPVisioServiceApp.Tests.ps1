@@ -1,161 +1,198 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPVisioServiceApp"
 
-$ModuleName = "MSFT_SPVisioServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPVisioServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Test Visio App"
-            ApplicationPool = "Test App Pool"
-            Ensure = "Present"
-        }
+        # Initialize Tests 
         $getTypeFullName = "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        # Mocks for all contexts   
+        Mock -CommandName New-SPVisioServiceApplication -MockWith { }
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+        Mock -CommandName New-SPVisioServiceApplicationProxy -MockWith { }
 
-        Mock Remove-SPServiceApplication { }
-        Mock Get-SPServiceApplicationProxy { }
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
 
-        Context "When no service applications exist in the current farm" {
-
-            Mock Get-SPServiceApplication { }
-            Mock New-SPVisioServiceApplication { }
-            Mock New-SPVisioServiceApplicationProxy { }
-
-            It "returns absent from the Get method" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
+            
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
             }
         }
 
-        Context "When service applications exist in the current farm but the specific Visio Graphics app does not" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
-                    DisplayName = $testParams.Name
-                }
-                $spServiceApp | Add-Member ScriptMethod GetType { 
-                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
-                } -PassThru -Force
-                return $spServiceApp
+        Context -Name "When service applications exist in the current farm but the specific Visio Graphics app does not" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
-
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and is not configured correctly" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When a service application exists and is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Test Visio App"
+                ApplicationPool = "Test App Pool"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
+            Mock -CommandName Get-SPServiceApplicationPool { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
             }
         }
+              
+        Context -Name "When the service app exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
         
-        $testParams = @{
-            Name = "Test App"
-            ApplicationPool = "-"
-            Ensure = "Absent"
-        }
-        
-        Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the service application in the set method" {
+            It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the service app doesn't exist and shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+        
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

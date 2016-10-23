@@ -1,87 +1,94 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPAppDomain"
 
-$ModuleName = "MSFT_SPAppDomain"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPAppDomain - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            AppDomain = "apps.contoso.com"
-            Prefix = "apps"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-      
-        Mock Set-SPAppDomain {}
-        Mock Set-SPAppSiteSubscriptionName  {}
+        # Mocks for all contexts
+        Mock -CommandName Set-SPAppDomain -MockWith {}
+        Mock -CommandName Set-SPAppSiteSubscriptionName -MockWith {}
 
-        Context "No app URLs have been configured locally" {
-            Mock Get-SPAppDomain {  }
-            Mock Get-SPAppSiteSubscriptionName  {  }   
+        # Test contexts 
+        Context -Name "No app URLs have been configured locally" -Fixture {
+            $testParams = @{
+                AppDomain = "apps.contoso.com"
+                Prefix = "apps"
+            }
 
-            It "returns values from the get method" {
+            Mock -CommandName Get-SPAppDomain -MockWith { }
+            Mock -CommandName Get-SPAppSiteSubscriptionName -MockWith {  }   
+
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "saves settings when executed" {
+            It "Should save settings when the set method is run" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPAppDomain
                 Assert-MockCalled Set-SPAppSiteSubscriptionName  
             }
         }
 
-        Context "Incorrect app URLs have been configured locally" {
-            Mock Get-SPAppDomain { return "wrong.domain" }
-            Mock Get-SPAppSiteSubscriptionName  { return "wrongprefix" }   
+        Context -Name "Incorrect app URLs have been configured locally" -Fixture {
+            $testParams = @{
+                AppDomain = "apps.contoso.com"
+                Prefix = "apps"
+            }
+            
+            Mock -CommandName Get-SPAppDomain -MockWith { return "wrong.domain" }
+            Mock -CommandName Get-SPAppSiteSubscriptionName -MockWith { return "wrongprefix" }   
 
-            It "returns values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "saves settings when executed" {
+            It "Should save settings when the set method is run" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPAppDomain
                 Assert-MockCalled Set-SPAppSiteSubscriptionName  
             }
         }
 
-        Context "Correct app URLs have been configured locally" {
-            Mock Get-SPAppDomain { return $testParams.AppDomain }
-            Mock Get-SPAppSiteSubscriptionName  { $testParams.Prefix }   
+        Context -Name "Correct app URLs have been configured locally" -Fixture {
+            $testParams = @{
+                AppDomain = "apps.contoso.com"
+                Prefix = "apps"
+            }
+            
+            Mock -CommandName Get-SPAppDomain -MockWith { return $testParams.AppDomain }
+            Mock -CommandName Get-SPAppSiteSubscriptionName -MockWith { $testParams.Prefix }   
 
-            It "returns values from the get method" {
+            It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
 
-
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

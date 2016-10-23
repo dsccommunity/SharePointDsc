@@ -23,6 +23,7 @@
  * Improved code styling
  * SPVisioServiceapplication now creates proxy and lets you specify a name for it
  * New resources: SPAppStoreSettings
+ * Refactored unit tests to consolidate and streamline test approaches
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup

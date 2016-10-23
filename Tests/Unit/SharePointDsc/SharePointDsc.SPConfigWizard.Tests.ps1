@@ -1,90 +1,95 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPConfigWizard"
 
-$ModuleName = "MSFT_SPConfigWizard"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Ensure               = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        # Test contexts
+        Context -Name "Upgrade required for Language Pack" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+            }
 
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = $majorBuildNumber } }
-
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-
-        Context "Upgrade required for Language Pack" {
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "LanguagePackInstalled")
                 {
                     return 1
                 }
             }
 
-            Mock Start-Process { return @{ ExitCode = 0 }}
+            Mock -CommandName Start-Process -MockWith { 
+                return @{ 
+                    ExitCode = 0 
+                }
+            }
 
-            It "should return Ensure=Absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should run Start-Process in the set method" {
+            It "Should run Start-Process in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
             }
         }
 
-        Context "Upgrade required for Cumulative Update" {
-            Mock Get-SPDSCRegistryKey {
+        Context -Name "Upgrade required for Cumulative Update" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
                 }
             }
 
-            Mock Start-Process { @{ ExitCode = 0 }}
+            Mock -CommandName Start-Process -MockWith { 
+                return @{ 
+                    ExitCode = 0 
+                }
+            }
 
-            It "should return Ensure=Absent from the get method" {
+            It "Should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should run Start-Process in the set method" {
+            It "Should run Start-Process in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
             }
         }
 
-        Context "Current date outside Upgrade Days" {
+        Context -Name "Current date outside Upgrade Days" -Fixture {
             $testParams = @{
                 Ensure              = "Present"
                 DatabaseUpgradeDays = "mon"
             }
             
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -92,32 +97,31 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-
-            Mock Get-Date {
-                 return $testDate
+            Mock -CommandName Get-Date -MockWith {
+                 return $testDate 
             }
 
-            It "should return Ensure=Absent from the get method" {
+            It "Should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should run Start-Process in the set method" {
+            It "Should run Start-Process in the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
 
-        Context "Current date outside Upgrade Time" {
+        Context -Name "Current date outside Upgrade Time" -Fixture {
             $testParams = @{
                 Ensure              = "Present"
                 DatabaseUpgradeDays = "sun"
                 DatabaseUpgradeTime = "3:00am to 5:00am"
             }
             
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -125,24 +129,23 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
 
-            It "should return null from the set method" {
+            It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
 
-        Context "Upgrade Time incorrectly formatted" {
+        Context -Name "Upgrade Time incorrectly formatted" -Fixture {
             $testParams = @{
                 Ensure              = "Present"
                 DatabaseUpgradeDays = "sun"
                 DatabaseUpgradeTime = "error 3:00am to 5:00am"
             }
             
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -150,24 +153,23 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-
-            Mock Get-Date {
-                 return $testDate
+            Mock -CommandName Get-Date -MockWith {
+                 return $testDate 
             }
 
-            It "should return exception from the set method" {
+            It "Should return exception from the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
             }
         }
 
-        Context "Start time Upgrade Time incorrectly formatted" {
+        Context -Name "Start time Upgrade Time incorrectly formatted" -Fixture {
             $testParams = @{
                 Ensure              = "Present"
                 DatabaseUpgradeDays = "sun"
                 DatabaseUpgradeTime = "3:00xm to 5:00am"
             }
             
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -175,24 +177,23 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-
-            Mock Get-Date {
-                 return $testDate
+            Mock -CommandName Get-Date -MockWith {
+                 return $testDate 
             }
 
-            It "should return exception from the set method" {
+            It "Should return exception from the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting start time"
             }
         }
 
-        Context "End time Upgrade Time incorrectly formatted" {
+        Context -Name "End time Upgrade Time incorrectly formatted" -Fixture {
             $testParams = @{
                 Ensure              = "Present"
                 DatabaseUpgradeDays = "sun"
                 DatabaseUpgradeTime = "3:00am to 5:00xm"
             }
             
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -200,24 +201,23 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
 
-            It "should return exception from the set method" {
+            It "Should return exception from the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting end time"
             }
         }
 
-        Context "Start time of Upgrade Time larger than end time" {
+        Context -Name "Start time of Upgrade Time larger than end time" -Fixture {
             $testParams = @{
                 Ensure              = "Present"
                 DatabaseUpgradeDays = "sun"
                 DatabaseUpgradeTime = "3:00pm to 5:00am"
             }
             
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "B2B_UPGRADE"
@@ -225,61 +225,74 @@ Describe "SPConfigWizard - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
 
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
-
-            Mock Get-Date {
-                 return $testDate
+            Mock -CommandName Get-Date -MockWith {
+                 return $testDate 
             }
 
-            It "should return exception from the set method" {
+            It "Should return exception from the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
             }
         }
 
-        Context "ExitCode of process is not 0" {
-            Mock Get-SPDSCRegistryKey {
+        Context -Name "ExitCode of process is not 0" -Fixture {
+            $testParams = @{
+                Ensure              = "Present"
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "LanguagePackInstalled")
                 {
                     return 1
                 }
             }
 
-            Mock Start-Process { @{ ExitCode = -1 }}
+            Mock -CommandName Start-Process -MockWith { return 
+                @{ 
+                    ExitCode = -1 
+                }
+            }
 
-            It "should return Ensure=Absent from the get method" {
+            It "Should return Ensure=Absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint Post Setup Configuration Wizard failed, exit code was"
             }
         }
 
-        Context "Ensure is set to Absent, Config Wizard not required" {
+        Context -Name "Ensure is set to Absent, Config Wizard not required" -Fixture {
             $testParams = @{
                 Ensure = "Absent"
             }
 
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 return 0
             }
 
-            Mock Start-Process { @{ ExitCode = 0 }}
+            Mock -CommandName Start-Process -MockWith { 
+                return @{ 
+                    ExitCode = 0 
+                }
+            }
 
-            It "should return Ensure=Present from the get method" {
+            It "Should return Ensure=Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            It "should return null from the set method" {
+            It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

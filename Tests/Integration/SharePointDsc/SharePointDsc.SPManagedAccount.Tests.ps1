@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("PostFarm") "SPManagedAccount - Integration Tests" {
-    Context "Creates new new managed accounts" {
+    Context -Name "Creates new new managed accounts" {
         It "Is able to create a new managed account" {
             $configName = "SPManagedAccounts_CreateNewManagedAccounts"
             Configuration $configName {
@@ -35,7 +35,7 @@ Describe -Tags @("PostFarm") "SPManagedAccount - Integration Tests" {
         }
     }
     
-    Context "Updates managed accounts" {
+    Context -Name "Updates managed accounts" {
         It "is able to set a schedule" {
             $configName = "SPManagedAccounts_SetSchedules"
             Configuration $configName {
