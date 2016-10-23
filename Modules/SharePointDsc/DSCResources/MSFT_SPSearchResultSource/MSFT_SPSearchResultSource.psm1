@@ -47,10 +47,27 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
-            
+
+        $nullReturn = @{
+            Name = $params.Name
+            SearchServiceAppName = $params.SearchServiceAppName
+            Query = $null
+            ProviderType = $null
+            ConnectionUrl = $null
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        }            
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
         $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-        $searchSite = Get-SPWeb -Identity $searchSiteUrl
+        $searchSite = Get-SPWeb -Identity $searchSiteUrl -ErrorAction SilentlyContinue
+
+        if ($null -eq $searchSite)
+        {
+            Write-Verbose -Message ("Search centre site collection does not exist at " + `
+                                    "$searchSiteUrl. Unable to create search context " + `
+                                    "to determine result source details.")
+            return $nullReturn
+        }
 
         $adminNamespace = "Microsoft.Office.Server.Search.Administration"
         $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
@@ -83,15 +100,7 @@ function Get-TargetResource
         }
         else 
         {
-            return @{
-                Name = $params.Name
-                SearchServiceAppName = $params.SearchServiceAppName
-                Query = $null
-                ProviderType = $null
-                ConnectionUrl = $null
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
-            }
+            return $nullReturn
         }
     }
     return $result
@@ -155,7 +164,15 @@ function Set-TargetResource
                             -Identity $params.SearchServiceAppName
 
             $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-            $searchSite = Get-SPWeb -Identity $searchSiteUrl
+            $searchSite = Get-SPWeb -Identity $searchSiteUrl -ErrorAction SilentlyContinue
+
+            if ($null -eq $searchSite)
+            {
+                throw ("Search centre site collection does not exist at " + `
+                       "$searchSiteUrl. Unable to create search context " + `
+                       "to set result source.")
+                return
+            }
 
             $adminNamespace = "Microsoft.Office.Server.Search.Administration"
             $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
