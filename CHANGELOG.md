@@ -23,6 +23,7 @@
  * Improved code styling
  * SPVisioServiceapplication now creates proxy and lets you specify a name for it
  * New resources: SPAppStoreSettings
+ * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
  * Refactored unit tests to consolidate and streamline test approaches
 
 ### 1.3
