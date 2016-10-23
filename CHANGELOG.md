@@ -23,6 +23,7 @@
  * Improved code styling
  * SPVisioServiceapplication now creates proxy and lets you specify a name for it
  * New resources: SPAppStoreSettings
+ * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
  * Refactored unit tests to consolidate and streamline test approaches
  * Updated SPExcelServiceApp resource to add support for trusted file locations and most other properties of the service app
 
