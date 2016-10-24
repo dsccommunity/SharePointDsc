@@ -212,7 +212,7 @@ function Set-TargetResource
                                                         -ErrorAction SilentlyContinue 
                 if ($null -eq $serviceApps) { 
                     throw [Exception] ("No user profile service was found " + `
-                                    "named $($params.UserProfileServiceAppName)")
+                                       "named $($params.UserProfileServiceAppName)")
                 }
                 $ups = $serviceApps | Where-Object -FilterScript { 
                     $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication" 

@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("Site") "SPSite - Integration Tests" {
-    Context "Creates new new site collections" {
+    Context -Name "Creates new new site collections" {
         It "Is able to create a new path based site collection" {
             $configName = "SPSite_CreateNewPathBasedSite"
             Configuration $configName {

@@ -267,24 +267,24 @@ function Get-TargetResource
                 SearchValue = "Microsoft ODBC Driver 11 for SQL Server"
             },
             [PSObject]@{
-                Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"
-                SearchType = "Equals"
-                SearchValue = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.61030"
+                Name = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0"
+                SearchType = "Like"
+                SearchValue = "Microsoft Visual C++ 2012 x64 Minimum Runtime - 11.0.*"
             },
             [PSObject]@{
-                Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"
-                SearchType = "Equals"
-                SearchValue = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.61030"
+                Name = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0"
+                SearchType = "Like"
+                SearchValue = "Microsoft Visual C++ 2012 x64 Additional Runtime - 11.0.*"
             },
             [PSObject]@{
-                Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"
-                SearchType = "Equals"
-                SearchValue = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026"
+                Name = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0"
+                SearchType = "Like"
+                SearchValue = "Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.*"
             },
             [PSObject]@{
-                Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"
-                SearchType = "Equals"
-                SearchValue = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.23026"
+                Name = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0"
+                SearchType = "Like"
+                SearchValue = "Microsoft Visual C++ 2015 x64 Additional Runtime - 14.0.*"
             }
         )            
     }

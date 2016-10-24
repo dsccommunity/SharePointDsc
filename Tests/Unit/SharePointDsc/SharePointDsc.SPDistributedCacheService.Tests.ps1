@@ -1,121 +1,216 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPDistributedCacheService" `
+                                              -IncludeDistributedCacheStubs
 
-$ModuleName = "MSFT_SPDistributedCacheService"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "AppFabricCache"
-            Ensure = "Present"
-            CacheSizeInMB = 1024
-            ServiceAccount = "DOMAIN\user"
-            CreateFirewallRules = $true
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-        Import-Module "$RepoRoot\Tests\Unit\Stubs\DistributedCache\DistributedCache.psm1" -WarningAction SilentlyContinue
-        Mock Use-CacheCluster { }
-        Mock Get-CimInstance { return @{ StartName = $testParams.ServiceAccount } }
-        Mock Get-NetFirewallRule { return @{} }
-        Mock Get-NetFirewallRule { return @{} } 
-        Mock Enable-NetFirewallRule { }  
-        Mock New-NetFirewallRule { }  
-        Mock Disable-NetFirewallRule { } 
-        Mock Add-SPDistributedCacheServiceInstance { } 
-        Mock Update-SPDistributedCacheSize { } 
-        Mock Get-SPManagedAccount { return @{} } 
-        Mock Add-SPDSCUserToLocalAdmin { } 
-        Mock Test-SPDSCUserIsLocalAdmin { return $false }
-        Mock Remove-SPDSCUserToLocalAdmin { }
-        Mock Restart-Service { }
-        Mock Get-SPFarm { return @{ 
-            Services = @(@{ 
-                Name = "AppFabricCachingService"
-                ProcessIdentity = New-Object Object |            
-                                    Add-Member NoteProperty ManagedAccount $null -PassThru |
-                                    Add-Member NoteProperty CurrentIdentityType $null -PassThru |             
-                                    Add-Member ScriptMethod Update {} -PassThru | 
-                                    Add-Member ScriptMethod Deploy {} -PassThru  
-            }) 
-        } }
-        Mock Stop-SPServiceInstance { $Global:SPDSCDCacheOnline = $false }
-        Mock Start-SPServiceInstance { $Global:SPDSCDCacheOnline = $true }
-
-        Mock Get-SPServiceInstance {
-            $spSvcInstance = [pscustomobject]@{
-                Server = @{ Name = $env:COMPUTERNAME }
-                Service = "SPDistributedCacheService Name=AppFabricCachingService"
-            }
-            $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod Delete {} -PassThru
-            $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
-                return @{ Name = "SPDistributedCacheServiceInstance" } 
-            } -PassThru -Force
-
-            if ($Global:SPDSCDCacheOnline -eq $false) 
-            {
-                $Global:SPDSCUPACheck = $true
-                $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+        # Mocks for all contexts
+        Mock Use-CacheCluster -MockWith { }
+        Mock -CommandName Get-WmiObject -MockWith { 
+            return @{ 
+                StartName = $testParams.ServiceAccount 
             } 
-            else
-            {
-                $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
-            }
-            return $spSvcInstance
+        }
+        Mock -CommandName Get-NetFirewallRule -MockWith { 
+            return @{} 
+        }
+        Mock -CommandName Get-NetFirewallRule -MockWith { 
+            return @{} 
+        } 
+        Mock -CommandName Enable-NetFirewallRule -MockWith { }  
+        Mock -CommandName New-NetFirewallRule -MockWith { }  
+        Mock -CommandName Disable-NetFirewallRule -MockWith { } 
+        Mock -CommandName Add-SPDistributedCacheServiceInstance -MockWith { } 
+        Mock Update-SPDistributedCacheSize -MockWith { } 
+        Mock -CommandName Get-SPManagedAccount -MockWith { 
+            return @{} 
+        } 
+        Mock -CommandName Add-SPDSCUserToLocalAdmin -MockWith { } 
+        Mock -CommandName Test-SPDSCUserIsLocalAdmin -MockWith { 
+            return $false 
+        }
+        Mock -CommandName Remove-SPDSCUserToLocalAdmin -MockWith { }
+        Mock Restart-Service -MockWith { }
+        Mock -CommandName Get-SPFarm -MockWith { 
+            return @{ 
+                Services = @(@{ 
+                    Name = "AppFabricCachingService"
+                    ProcessIdentity = New-Object -TypeName "Object" |            
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name ManagedAccount `
+                                                   -Value $null `
+                                                   -PassThru |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name CurrentIdentityType `
+                                                   -Value $null `
+                                                   -PassThru |             
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name Update `
+                                                   -Value {} `
+                                                   -PassThru | 
+                                        Add-Member -MemberType ScriptMethod `
+                                                   -Name Deploy `
+                                                   -Value {} `
+                                                   -PassThru  
+                }) 
+        } }
+        Mock -CommandName Stop-SPServiceInstance -MockWith { 
+            $Global:SPDscDCacheOnline = $false 
+        }
+        Mock -CommandName Start-SPServiceInstance -MockWith { 
+            $Global:SPDscDCacheOnline = $true 
         }
 
-        Context "Distributed cache is not configured" {
-            Mock Use-CacheCluster { throw [Exception] "ERRPS001 Error in reading provider and connection string values." }
-            $Global:SPDSCDCacheOnline = $false
+        Mock -CommandName Get-SPServiceInstance -MockWith { 
+            if ($Global:SPDscDCacheOnline -eq $false) 
+            {
+                return @(New-Object -TypeName "Object" |            
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Status `
+                                       -Value "Disabled" `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Service `
+                                       -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Server `
+                                       -Value @{ 
+                                           Name = $env:COMPUTERNAME 
+                                        } -PassThru |             
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name Delete `
+                                       -Value {} `
+                                       -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                    New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Name `
+                                                   -Value "SPDistributedCacheServiceInstance" `
+                                                   -PassThru
+                                        } -PassThru -Force)
+            } 
+            else 
+            {
+                return @(New-Object -TypeName "Object" |            
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Status `
+                                       -Value "Online" `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Service `
+                                       -Value "SPDistributedCacheService Name=AppFabricCachingService" `
+                                       -PassThru |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name Server `
+                                       -Value @{ 
+                                           Name = $env:COMPUTERNAME 
+                                        } -PassThru |             
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name Delete `
+                                       -Value {} `
+                                       -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                    New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Name `
+                                                   -Value "SPDistributedCacheServiceInstance" `
+                                                   -PassThru
+                                        } -PassThru -Force)
+            }
+        }   
+
+        # Test contexts
+        Context -Name "Distributed cache is not configured" -Fixture {
+            $testParams = @{
+                Name = "AppFabricCache"
+                Ensure = "Present"
+                CacheSizeInMB = 1024
+                ServiceAccount = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
+
+            Mock Use-CacheCluster -MockWith { 
+                throw [Exception] "ERRPS001 Error in reading provider and connection string values." 
+            }
+            $Global:SPDscDCacheOnline = $false
             
-            It "returns null from the get method" {
+            It "Should return null from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Sets up the cache correctly" {
+            It "Should set up the cache correctly" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Add-SPDistributedCacheServiceInstance 
             }
         }
 
-        Context "Distributed cache is configured correctly and running as required" {
-            $Global:SPDSCDCacheOnline = $true
+        Context -Name "Distributed cache is configured correctly and running as required" -Fixture {
+            $testParams = @{
+                Name = "AppFabricCache"
+                Ensure = "Present"
+                CacheSizeInMB = 1024
+                ServiceAccount = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
+            
+            $Global:SPDscDCacheOnline = $true
 
-            Mock Get-AFCacheHostConfiguration { return @{
-                Size = $testParams.CacheSizeInMB
-            }}
-            Mock Get-CacheHost { return @{ PortNo = 22233 } }
+            Mock -CommandName Get-AFCacheHostConfiguration -MockWith { 
+                return @{
+                    Size = $testParams.CacheSizeInMB
+                }
+            }
+            Mock -CommandName Get-CacheHost -MockWith { 
+                return @{ 
+                    PortNo = 22233 
+                } 
+            }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Distributed cache is configured but the required firewall rules are not deployed" {
-            $Global:SPDSCDCacheOnline = $true
-            Mock Get-NetFirewallRule { return $null }
+        Context -Name "Distributed cache is configured but the required firewall rules are not deployed" -Fixture {
+            $testParams = @{
+                Name = "AppFabricCache"
+                Ensure = "Present"
+                CacheSizeInMB = 1024
+                ServiceAccount = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
 
-            It "returns false from the test method" {
+            $Global:SPDscDCacheOnline = $true
+
+            Mock -CommandName Get-NetFirewallRule -MockWith { 
+                return $null 
+            }
+
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -125,17 +220,33 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
             }
         }
 
-        Context "Distributed cache is confgured but should not be running on this machine" {
-            $Global:SPDSCDCacheOnline = $true
-            $testParams.Ensure = "Absent"
-            Mock Get-AFCacheHostConfiguration { return @{
-                Size = $testParams.CacheSizeInMB
-            }}
-            Mock Get-CacheHost { return @{ PortNo = 22233 } }
-            Mock Get-NetFirewallRule { return @{} } 
-            Mock Remove-SPDistributedCacheServiceInstance { }
+        Context -Name "Distributed cache is confgured but should not be running on this machine" -Fixture {
+            $testParams = @{
+                Name = "AppFabricCache"
+                Ensure = "Absent"
+                CacheSizeInMB = 1024
+                ServiceAccount = "DOMAIN\user"
+                CreateFirewallRules = $true
+            }
 
-            It "returns false from the test method" {
+            $Global:SPDscDCacheOnline = $true
+
+            Mock -CommandName Get-AFCacheHostConfiguration -MockWith { 
+                return @{
+                    Size = $testParams.CacheSizeInMB
+                }
+            }
+            Mock -CommandName Get-CacheHost -MockWith { 
+                return @{ 
+                    PortNo = 22233 
+                } 
+            }
+            Mock -CommandName Get-NetFirewallRule -MockWith { 
+                return @{} 
+            } 
+            Mock -CommandName Remove-SPDistributedCacheServiceInstance -MockWith { }
+
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -145,5 +256,7 @@ Describe "SPDistributedCacheService - SharePoint Build $((Get-Item $SharePointCm
                 Assert-MockCalled Disable-NetFirewallRule 
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

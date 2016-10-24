@@ -98,7 +98,7 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
             Passphrase = $params.Passphrase.password 
             AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
-            CentralAdministrationPort = (New-Object System.Uri $centralAdminSite.Url).Port
+            CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
             CentralAdministrationAuth = $params.CentralAdministrationAuth
         }
         return $returnValue
