@@ -107,8 +107,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
-                } -PassThru -Force
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -146,8 +156,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
-                } -PassThru -Force
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -168,6 +188,63 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter { 
                     $ApplicationPool.Name -eq $testParams.ApplicationPool 
                 }
+            }
+        }
+
+        Context -Name "When a service application exists and the content type hub is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                ContentTypeHubUrl = "https://contenttypes.contoso.com"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Managed Metadata Service"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.AookucationPool
+                    }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should call the update service app cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled set-SPMetadataServiceApplication
             }
         }
         
@@ -193,8 +270,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
-                } -PassThru -Force
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
                 return $spServiceApp
             }
             

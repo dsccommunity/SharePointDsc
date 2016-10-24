@@ -25,6 +25,7 @@
  * New resources: SPAppStoreSettings
  * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
  * Refactored unit tests to consolidate and streamline test approaches
+ * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
