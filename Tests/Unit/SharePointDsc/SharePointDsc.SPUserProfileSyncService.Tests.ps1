@@ -20,6 +20,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Server.Administration.UserProfileApplication"
         $mockPassword = ConvertTo-SecureString -String "password" -AsPlainText -Force
         $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
@@ -58,7 +59,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Add-Member -MemberType ScriptMethod `
                                -Name GetType `
                                -Value {
-                                    New-Object -TypeName "Object" |
+                                   New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name FullName `
+                                                   -Value $getTypeFullName `
+                                                   -PassThru |
                                         Add-Member -MemberType ScriptMethod `
                                                    -Name GetProperties `
                                                    -Value {
@@ -147,26 +152,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Ensure = "Present"
                     }
 
-                    Mock -CommandName Get-SPServiceInstance -MockWith { 
-                        if ($Global:SPDscUPACheck -eq $false) 
-                        {
-                            $Global:SPDscUPACheck = $true
-                            return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            }) 
-                        } 
-                        else 
-                        {
-                            return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                         }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        if ($Global:SPDSCUPACheck -eq $false) 
+                        {
+                            $Global:SPDSCUPACheck = $true
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        } 
+                        else
+                        {
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        }
+                        return $spSvcInstance
                     }
 
                     Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -176,10 +180,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                            -Name ID `
                                            -Value ([Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")) `
                                            -PassThru |
-                                Add-Member -MemberType NoteProperty `
-                                           -Name TypeName `
-                                           -Value "User Profile Service Application" `
-                                           -PassThru |
+                                Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {
+                                   New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name FullName `
+                                                   -Value $getTypeFullName `
+                                                   -PassThru
+                                           } `
+                                           -PassThru -Force |
                                 Add-Member -MemberType ScriptMethod `
                                            -Name SetSynchronizationMachine `
                                            -Value {
@@ -189,7 +199,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     $FarmUserName, 
                                                     $FarmPassword
                                                 )
-                                            } -PassThru      
+                                            } -PassThru
                         )
                     } 
 
@@ -238,13 +248,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
-                        return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
-                    } 
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
         
                     It "Should return present from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -263,25 +276,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
-                        if ($Global:SPDscUPACheck -eq $false) 
-                        {
-                            $Global:SPDscUPACheck = $true
-                            return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::Empty
-                                TypeName = "User Profile Synchronization Service" 
-                            }) 
-                        } 
-                        else 
-                        {
-                            return @( @{ 
-                                Status = "Disabled"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            })
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
                         }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        if ($Global:SPDSCUPACheck -eq $false) 
+                        {
+                            $Global:SPDSCUPACheck = $true
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        } 
+                        else
+                        {
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                            $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        }
+                        return $spSvcInstance
                     }
 
                     It "Should return present from the get method" {
@@ -309,13 +321,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Ensure = "Absent"
                     }
 
-                    Mock -CommandName Get-SPServiceInstance -MockWith { return @( @{ 
-                            Status = "Disabled"
+                    Mock -CommandName Get-SPServiceInstance -MockWith { 
+                        $spSvcInstance = [pscustomobject]@{
                             ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                            UserProfileApplicationGuid = [Guid]::Empty
-                            TypeName = "User Profile Synchronization Service" 
-                        })
-                    } 
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
+                        return $spSvcInstance
+                    }
 
                     It "Should return absent from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
@@ -335,12 +351,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
-                        return @( @{ 
-                            Status = "Disabled"
+                        $spSvcInstance = [pscustomobject]@{
                             ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                            UserProfileApplicationGuid = [Guid]::Empty
-                            TypeName = "User Profile Synchronization Service" 
-                        })
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
                     }
 
                     Mock -CommandName Get-SPDatabase -MockWith {
@@ -370,14 +389,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
-                        return @( @{ 
-                                Status = "Online"
-                                ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
-                                UserProfileApplicationGuid = [Guid]::NewGuid()
-                                TypeName = "User Profile Synchronization Service" 
-                            }
-                        )
-                    } 
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType { 
+                            return @{ Name = "UserProfileServiceInstance" } 
+                        } -PassThru -Force
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
+                        $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
+                        return $spSvcInstance
+                    }
 
                     Mock -CommandName Get-SPDatabase -MockWith {
                         return @(
@@ -388,11 +409,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         )
                     } 
 
-                    It "Should return absent from the get method" {
+                    It "Should return present from the get method" {
                         (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
 
-                    It "Should return true from the test method" {
+                    It "Should return false from the test method" {
                         Test-TargetResource @testParams | Should Be $false
                     }
 

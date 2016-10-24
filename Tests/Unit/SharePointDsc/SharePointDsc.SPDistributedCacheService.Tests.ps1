@@ -81,10 +81,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             {
                 return @(New-Object -TypeName "Object" |            
                             Add-Member -MemberType NoteProperty `
-                                       -Name TypeName `
-                                       -Value "Distributed Cache" `
-                                       -PassThru |
-                            Add-Member -MemberType NoteProperty `
                                        -Name Status `
                                        -Value "Disabled" `
                                        -PassThru |
@@ -100,15 +96,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Add-Member -MemberType ScriptMethod `
                                        -Name Delete `
                                        -Value {} `
-                                       -PassThru)
+                                       -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                    New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Name `
+                                                   -Value "SPDistributedCacheServiceInstance" `
+                                                   -PassThru
+                                        } -PassThru -Force)
             } 
             else 
             {
                 return @(New-Object -TypeName "Object" |            
-                            Add-Member -MemberType NoteProperty `
-                                       -Name TypeName `
-                                       -Value "Distributed Cache" `
-                                       -PassThru |
                             Add-Member -MemberType NoteProperty `
                                        -Name Status `
                                        -Value "Online" `
@@ -125,7 +126,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Add-Member -MemberType ScriptMethod `
                                        -Name Delete `
                                        -Value {} `
-                                       -PassThru)
+                                       -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                                       -Name GetType `
+                                       -Value {
+                                    New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                                   -Name Name `
+                                                   -Value "SPDistributedCacheServiceInstance" `
+                                                   -PassThru
+                                        } -PassThru -Force)
             }
         }   
 

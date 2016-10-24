@@ -10,12 +10,17 @@
   - SPManagedMetaDataServiceApp
   - SPPerformancePointServiceApp
   - SPSearchServiceApp
+  - SPSearchCrawlRule
   - SPSecureStoreServiceApp
+  - SPSubscriptionSettingsServiceApp
   - SPUsageApplication
   - SPUserProfileServiceApp
   - SPVisioServiceApp
   - SPWordAutomationServiceApp
   - SPWorkManagementServiceApp
+ * Fixed issue with SPServiceInstance for OS not in En-Us language, add GetType().Name method in:
+  - SPDistributedCacheService
+  - SPUserProfileSyncService
  * Fixed issue with SPInstallLanguagePack to install before farm creation
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method

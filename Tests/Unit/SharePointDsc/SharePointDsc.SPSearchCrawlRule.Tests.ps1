@@ -18,16 +18,28 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        # Initialize tests
+        $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+
         # Mocks for all contexts   
         Mock -CommandName Remove-SPEnterpriseSearchCrawlRule -MockWith {}   
         Mock -CommandName New-SPEnterpriseSearchCrawlRule -MockWith {}   
         Mock -CommandName Set-SPEnterpriseSearchCrawlRule -MockWith {}   
 
         Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return @(@{
-                    TypeName = "Search Service Application"
-                }) 
-            }
+            return @(
+                New-Object -TypeName "Object" |  
+                    Add-Member -MemberType ScriptMethod `
+                               -Name GetType `
+                               -Value {
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                       -Name FullName `
+                                       -Value $getTypeFullName `
+                                       -PassThru
+                                        } `
+                            -PassThru -Force)
+        }
 
         # Test contexts
         Context -Name "AuthenticationType=CertificateRuleAccess specified, but CertificateName missing" -Fixture {
