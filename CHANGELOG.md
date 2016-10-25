@@ -31,6 +31,7 @@
  * New resources: SPAppStoreSettings
  * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
  * Refactored unit tests to consolidate and streamline test approaches
+ * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
  * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
 
 ### 1.3
