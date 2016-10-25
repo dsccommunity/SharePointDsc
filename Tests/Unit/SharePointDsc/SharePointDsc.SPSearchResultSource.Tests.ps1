@@ -112,7 +112,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }  
 
         # Test contexts
-        Context -Name "A search result source doesn't exist and should" {
+        Context -Name "A search result source doesn't exist and should" -Fixture {
             $testParams = @{
                 Name = "Test source"
                 SearchServiceAppName = "Search Service Application"
@@ -137,7 +137,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "A search result source exists and should" {
+        Context -Name "A search result source exists and should" -Fixture {
             $testParams = @{
                 Name = "Test source"
                 SearchServiceAppName = "Search Service Application"
@@ -164,7 +164,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "A search result source exists and shouldn't" {
+        Context -Name "A search result source exists and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test source"
                 SearchServiceAppName = "Search Service Application"
@@ -195,7 +195,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "A search result source doesn't exist and shouldn't" {
+        Context -Name "A search result source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test source"
                 SearchServiceAppName = "Search Service Application"
@@ -213,6 +213,33 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The search centre site collection does not exist when trying to set a result source" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPWeb -MockWith {
+                return $null
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception trying to create the result source in the set method" {
+                { Set-TargetResource @testParams } | Should throw
             }
         }
     }

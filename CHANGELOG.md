@@ -31,6 +31,7 @@
  * New resources: SPAppStoreSettings
  * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
  * Refactored unit tests to consolidate and streamline test approaches
+ * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
