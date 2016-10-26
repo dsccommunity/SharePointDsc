@@ -33,6 +33,7 @@
  * Refactored unit tests to consolidate and streamline test approaches
  * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
  * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
+ * Updated documentation of SPProductUpdate to reflect the required install order of product updates
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
