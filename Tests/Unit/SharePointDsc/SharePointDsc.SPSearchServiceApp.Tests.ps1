@@ -19,6 +19,8 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             ApplicationPool = "SharePoint Search Services"
             Ensure = "Present"
         }
+        $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
@@ -90,10 +92,15 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When service applications exist in the current farm but the specific search app does not" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
@@ -110,17 +117,19 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When a service application exists and is configured correctly" {
-            
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns present from the get method" {
@@ -134,17 +143,19 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When a service application exists and the app pool is not configured correctly" {
-
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Set-SPEnterpriseSearchServiceApplication { } 
@@ -164,18 +175,21 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         $testParams.Add("DefaultContentAccessAccount", (New-Object System.Management.Automation.PSCredential ("DOMAIN\username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
         
         Context "When the default content access account does not match" {    
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
-            
+
             Mock New-Object {
                 return @{
                     DefaultGatheringAccount = "WRONG\username"
@@ -195,16 +209,19 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
         
         Context "When the default content access account does match" {    
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             Mock New-Object {
@@ -221,19 +238,23 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         $testParams.Add("SearchCenterUrl", "http://search.sp.contoso.com")
         $Global:SPDSCSearchURLUpdated = $false
         Context "When the search center URL does not match" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    SearchCenterUrl = "http://wrong.url.here"
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                    SearchCenterUrl = "http://wrong.url.here"
-                } | Add-Member ScriptMethod Update {
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update {
                     $Global:SPDSCSearchURLUpdated = $true
-                } -PassThru)
+                } -PassThru
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
@@ -266,17 +287,20 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
         
         Context "When the search center URL does match" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    SearchCenterUrl = "http://search.sp.contoso.com"
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                    SearchCenterUrl = "http://search.sp.contoso.com"
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
             Mock Get-SPEnterpriseSearchServiceInstance { return @{} }
@@ -306,16 +330,19 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         $testParams.Ensure = "Absent"
         
         Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "returns present from the Get method" {
@@ -352,10 +379,8 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
         
         Context "When the service app exists and is cloud enabled" {
-            
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Search Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     CloudIndex = $true
@@ -363,8 +388,13 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
+
             Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 0 } }
             
             It "should return false if the version is too low" {
@@ -378,8 +408,7 @@ Describe "SPSearchServiceApp - SharePoint Build $((Get-Item $SharePointCmdletMod
             }
         }
         
-        Context "When the service doesn't exist and it should be cloud enabled" {
-            
+        Context "When the service doesn't exist and it should be cloud enabled" {            
             Mock Get-SPServiceApplication { return $null }
             
             Mock Get-SPDSCInstalledProductVersion { return @{ FileMajorPart = 15; FileBuildPart = 5000 } }

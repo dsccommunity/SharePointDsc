@@ -1,6 +1,21 @@
 # Change log for SharePointDsc
 
 ### Unreleased
+ * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
+  - SPAccessServiceApp
+  - SPAppManagementServiceApp
+  - SPBCSServiceApp
+  - SPExcelServiceApp
+  - SPManagedMetaDataServiceApp
+  - SPPerformancePointServiceApp
+  - SPSearchServiceApp
+  - SPSecureStoreServiceApp
+  - SPUsageApplication
+  - SPUserProfileServiceApp
+  - SPVisioServiceApp
+  - SPWordAutomationServiceApp
+  - SPWorkManagementServiceApp
+ * Fixed issue with SPInstallLanguagePack to install before farm creation 
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
