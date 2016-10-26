@@ -5,7 +5,7 @@ Set-StrictMode -Off
 
 Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check" {
     
-    it "Includes all required service accounts" {
+    It "Includes all required service accounts" {
         $Global:SPDscIntegrationCredPool.ContainsKey("Setup") | Should Be $true
         $Global:SPDscIntegrationCredPool.ContainsKey("Farm") | Should Be $true
         $Global:SPDscIntegrationCredPool.ContainsKey("WebApp") | Should Be $true
@@ -21,11 +21,11 @@ Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check
 
     it "Has valid credentials for all service accounts" {
         $failedCredentials = $false
-        $Global:SPDscIntegrationCredPool.Keys | ForEach-Object {
+        $Global:SPDscIntegrationCredPool.Keys | ForEach-Object -Process {
             $cred = $Global:SPDscIntegrationCredPool.$_
             $username = $cred.username
             $password = $cred.GetNetworkCredential().password
-            $domain = New-Object System.DirectoryServices.DirectoryEntry("",$UserName,$Password)
+            $domain = New-Object -TypeName System.DirectoryServices.DirectoryEntry("",$UserName,$Password)
             if ($domain.name -eq $null)
             {
                 Write-Warning "Credential for $username is not valid"
@@ -39,7 +39,7 @@ Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check
 
         { 
             Invoke-Command -Credential $Global:SPDscIntegrationCredPool.Setup -ComputerName . {
-                $SqlConnection = New-Object System.Data.SqlClient.SqlConnection
+                $SqlConnection = New-Object -TypeName System.Data.SqlClient.SqlConnection
                 $SqlConnection.ConnectionString = "Server=$($Global:SPDscIntegrationGlobals.SQL.DatabaseServer);Database=master;Trusted_Connection=True;"
                 $SqlConnection.Open()
                 $SqlConnection.Close()

@@ -1,56 +1,60 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4693.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWeb"
 
-$ModuleName = "MSFT_SPWeb"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-
-    InModuleScope $ModuleName {
-
-        $testParams = @{
-            Url = "http://site.sharepoint.com/sites/web"
-            Name = "Team Site"
-            Description = "desc"
-        }
-
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
+        # Initialize tests
         $fakeWebApp = [PSCustomObject]@{ }
-        $fakeWebApp | Add-Member -MemberType ScriptMethod -Name GrantAccessToProcessIdentity -PassThru -Value { }
+        $fakeWebApp | Add-Member -MemberType ScriptMethod `
+                                 -Name GrantAccessToProcessIdentity `
+                                 -PassThru `
+                                 -Value { }
 
-        Mock New-Object { [PSCustomObject]@{ WebApplication = $fakeWebApp} } -Verifiable -ParameterFilter { $TypeName -eq "Microsoft.SharePoint.SPSite" }
+        # Mocks for all contexts   
+        Mock -CommandName New-Object -MockWith { 
+            [PSCustomObject]@{ 
+                WebApplication = $fakeWebApp
+            } 
+        } -ParameterFilter { 
+            $TypeName -eq "Microsoft.SharePoint.SPSite" 
+        }
+        Mock -CommandName Remove-SPWeb -MockWith { }
         
-        Mock Remove-SPWeb { } -Verifiable
+        # Test contexts
+        Context -Name "The SPWeb doesn't exist yet and should" -Fixture {
+            $testParams = @{
+                Url = "http://site.sharepoint.com/sites/web"
+                Name = "Team Site"
+                Description = "desc"
+            }
 
-        Context "The SPWeb doesn't exist yet and should" {
+            Mock -CommandName Get-SPWeb -MockWith { return $null }
 
-            Mock Get-SPWeb { return $null }
-
-            It "returns 'Absent' from the get method" {
+            It "Should return 'Absent' from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new SPWeb from the set method" {
-                Mock New-SPWeb { } -Verifiable
+            It "Should create a new SPWeb from the set method" {
+                Mock -CommandName New-SPWeb { } -Verifiable
 
                 Set-TargetResource @testParams
 
@@ -59,9 +63,14 @@ Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Director
             }
         }
 
-        Context "The SPWeb exists and has the correct name and description" {
+        Context -Name "The SPWeb exists and has the correct name and description" -Fixture {
+            $testParams = @{
+                Url = "http://site.sharepoint.com/sites/web"
+                Name = "Team Site"
+                Description = "desc"
+            }
 
-            Mock Get-SPWeb { 
+            Mock -CommandName Get-SPWeb -MockWith { 
                 return @{
                     Url           = $testParams.Url
                     Title         = $testParams.Name
@@ -74,7 +83,7 @@ Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Director
                 }
             }
 
-            It "returns the SPWeb data from the get method" {
+            It "Should return the SPWeb data from the get method" {
                 
                 $result = Get-TargetResource @testParams
 
@@ -85,44 +94,48 @@ Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Director
 
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        context "The SPWeb exists and should not" {
-            
-            $testParams.Ensure = "Absent"
+        Context -Name "The SPWeb exists and should not" -Fixture {
+            $testParams = @{
+                Url = "http://site.sharepoint.com/sites/web"
+                Name = "Team Site"
+                Description = "desc"
+                Ensure = "Absent"
+            }
 
-            Mock Get-SPWeb { 
+            Mock -CommandName Get-SPWeb -MockWith { 
                 return @{
                     Url           = $testParams.Url
                 }
             }
 
-            It "returns 'Present' from the get method" {
-                
+            It "Should return 'Present' from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be "Present"             
-
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "removes the SPWeb in the set method" {
-
+            It "Should remove the SPWeb in the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Remove-SPWeb
             }
         }
 
-        context "The SPWeb exists but has the wrong editable values" {
-
-            $testParams.Ensure = "Present"
-            $testParams.UseParentTopNav = $false
-            $testParams.UniquePermissions = $true
+        Context -Name "The SPWeb exists but has the wrong editable values" -Fixture {
+            $testParams = @{
+                Url = "http://site.sharepoint.com/sites/web"
+                Name = "Team Site"
+                Description = "desc"
+                UseParentTopNav = $false
+                UniquePermissions = $true
+            }
 
             $web = [pscustomobject] @{
                 Url           = $testParams.Url
@@ -132,11 +145,13 @@ Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Director
                 HasUniquePerm = $false
             }
 
-            $web |  Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+            $web |  Add-Member -Name Update `
+                               -MemberType ScriptMethod `
+                               -Value { }
 
-            Mock Get-SPWeb { $web }
+            Mock -CommandName Get-SPWeb -MockWith { $web }
 
-            It "returns the SPWeb data from the get method" {
+            It "Should return the SPWeb data from the get method" {
                 
                 $result = Get-TargetResource @testParams
 
@@ -146,11 +161,11 @@ Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Director
 
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "updates the values in the set method" {
+            It "Should update the values in the set method" {
                 
                 Set-TargetResource @testParams
 
@@ -162,5 +177,7 @@ Describe "SPWeb - SharePoint Build $((Get-Item $SharePointCmdletModule).Director
                 Assert-MockCalled New-Object
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

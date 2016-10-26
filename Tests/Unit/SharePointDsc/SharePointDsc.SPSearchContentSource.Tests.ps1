@@ -1,30 +1,24 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPSearchContentSource"
 
-$ModuleName = "MSFT_SPSearchContentSource"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPSearchContentSource - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        Mock Start-Sleep {}
-        Mock Set-SPEnterpriseSearchCrawlContentSource {}
-        Mock Remove-SPEnterpriseSearchCrawlContentSource {}
-     
+        # Initialize tests
         Add-Type -TypeDefinition @"
 namespace Microsoft.Office.Server.Search.Administration {
     [System.Flags]
@@ -60,9 +54,13 @@ namespace Microsoft.Office.Server.Search.Administration {
 }
 "@
 
+        # Mocks for all contexts   
+        Mock -CommandName Start-Sleep -MockWith {}
+        Mock -CommandName Set-SPEnterpriseSearchCrawlContentSource -MockWith {}
+        Mock -CommandName Remove-SPEnterpriseSearchCrawlContentSource -MockWith {}
 
-        
-        Context "A SharePoint content source doesn't exist but should" {
+        # Test contexts
+        Context -Name "A SharePoint content source doesn't exist but should" {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -71,10 +69,12 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
-            Mock New-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
@@ -91,16 +91,16 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should create the content source in the set method" {
+            It "Should create the content source in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
@@ -108,7 +108,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
         }
         
-        Context "A SharePoint content source does exist and should" {
+        Context -Name "A SharePoint content source does exist and should" {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -117,7 +117,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
@@ -134,17 +134,17 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A SharePoint content source does exist and shouldn't" {
+        Context -Name "A SharePoint content source does exist and shouldn't" {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -153,7 +153,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
@@ -170,23 +170,23 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the content source in the set method" {
+            It "Should remove the content source in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
         
-        Context "A SharePoint content source doesn't exist and shouldn't" {
+        Context -Name "A SharePoint content source doesn't exist and shouldn't" {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -195,21 +195,21 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A SharePoint source that uses continuous crawl has incorrect settings applied" {
+        Context -Name "A SharePoint source that uses continuous crawl has incorrect settings applied" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -219,7 +219,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 ContinuousCrawl = $true
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "SharePoint"
                     SharePointCrawlBehavior = "CrawlVirtualServers"
@@ -236,19 +236,23 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should disable continuous crawl and then re-enable it when updating the content source" {
+            It "Should disable continuous crawl and then re-enable it when updating the content source" {
                 Set-TargetResource @testParams
                 
-                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $EnableContinuousCrawls -eq $false }
-                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $EnableContinuousCrawls -eq $true }
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { 
+                    $EnableContinuousCrawls -eq $false 
+                }
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { 
+                    $EnableContinuousCrawls -eq $true 
+                }
             }
         }
         
-        Context "A website content source doesn't exist but should" {
+        Context -Name "A website content source doesn't exist but should" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -257,10 +261,10 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
-            Mock New-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "Web"
                     MaxPageEnumerationDepth = [System.Int32]::MaxValue
@@ -277,16 +281,16 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should create the content source in the set method" {
+            It "Should create the content source in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
@@ -294,7 +298,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
         }
         
-        Context "A website content source does exist and should" {
+        Context -Name "A website content source does exist and should" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -303,7 +307,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "Web"
                     MaxPageEnumerationDepth = [System.Int32]::MaxValue
@@ -320,18 +324,17 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A website content source does exist and shouldn't" {
-            
+        Context -Name "A website content source does exist and shouldn't" -Fixture {          
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -340,7 +343,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "Web"
                     MaxPageEnumerationDepth = [System.Int32]::MaxValue
@@ -357,23 +361,23 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the content source in the set method" {
+            It "Should remove the content source in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
         
-        Context "A website content source doesn't exist and shouldn't" {
+        Context -Name "A website content source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -382,21 +386,22 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A website content source has incorrect crawl depth settings applied" {
+        Context -Name "A website content source has incorrect crawl depth settings applied" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -405,7 +410,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "Web"
                     MaxPageEnumerationDepth = 0
@@ -422,18 +428,18 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should update the settings in the set method" {
+            It "Should update the settings in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
-        Context "A file share content source doesn't exist but should" {
+        Context -Name "A file share content source doesn't exist but should" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -442,10 +448,10 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
-            Mock New-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "File"
                     FollowDirectories = $true
@@ -461,16 +467,16 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should create the content source in the set method" {
+            It "Should create the content source in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
@@ -478,7 +484,7 @@ namespace Microsoft.Office.Server.Search.Administration {
             }
         }
         
-        Context "A file share content source does exist and should" {
+        Context -Name "A file share content source does exist and should" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -487,7 +493,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "File"
                     FollowDirectories = $true
@@ -503,17 +510,17 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A file share content source does exist and shouldn't" {
+        Context -Name "A file share content source does exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -522,7 +529,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "File"
                     FollowDirectories = $true
@@ -538,23 +546,23 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the content source in the set method" {
+            It "Should remove the content source in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
             }
         }
         
-        Context "A file share content source doesn't exist and shouldn't" {
+        Context -Name "A file share content source doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -563,21 +571,21 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Absent"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return $null
             }
             
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A file share content source has incorrect crawl depth settings applied" {
+        Context -Name "A file share content source has incorrect crawl depth settings applied" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -586,7 +594,7 @@ namespace Microsoft.Office.Server.Search.Administration {
                 CrawlSetting = "CrawlEverything"
                 Ensure = "Present"
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 return @{
                     Type = "File"
                     FollowDirectories = $false
@@ -602,18 +610,18 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should update the settings in the set method" {
+            It "Should update the settings in the set method" {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
             }
         }
         
-        Context "A content source has a full schedule that does not match the desired schedule" {
+        Context -Name "A content source has a full schedule that does not match the desired schedule" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -629,7 +637,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                     CrawlScheduleRepeatInterval = "5"
                 } -ClientOnly)
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.DailySchedule
                 $schedule.RepeatDuration = 1439 
                 $schedule.RepeatInterval = 5
@@ -652,17 +661,17 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should update the schedule in the set method" {
+            It "Should update the schedule in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $ScheduleType -eq "Full" }
             }
         }
         
-        Context "A content source has a full schedule that does match the desired schedule" {
+        Context -Name "A content source has a full schedule that does match the desired schedule" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -678,7 +687,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                     CrawlScheduleRepeatInterval = "5"
                 } -ClientOnly)
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.DailySchedule
                 $schedule.RepeatDuration = 1440 
                 $schedule.RepeatInterval = 5
@@ -701,12 +711,12 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        Context "A content source has a incremental schedule that does not match the desired schedule" {
+        Context -Name "A content source has a incremental schedule that does not match the desired schedule" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -721,7 +731,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                     CrawlScheduleDaysOfWeek = @("Monday", "Wednesday")
                 } -ClientOnly)
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.WeeklySchedule
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
@@ -742,17 +753,17 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should update the schedule in the set method" {
+            It "Should update the schedule in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -ParameterFilter { $ScheduleType -eq "Incremental" }
             }
         }
         
-        Context "A content source has a incremental schedule that does match the desired schedule" {
+        Context -Name "A content source has a incremental schedule that does match the desired schedule" -Fixture {
             $testParams = @{
                 Name = "Example content source"
                 ServiceAppName = "Search Service Application"
@@ -767,7 +778,8 @@ namespace Microsoft.Office.Server.Search.Administration {
                     CrawlScheduleDaysOfWeek = @("Monday", "Wednesday", "Friday")
                 } -ClientOnly)
             }
-            Mock Get-SPEnterpriseSearchCrawlContentSource {
+
+            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
                 $schedule = New-Object -TypeName Microsoft.Office.Server.Search.Administration.WeeklySchedule
                 $schedule.StartHour = 0
                 $schedule.StartMinute = 0
@@ -788,9 +800,11 @@ namespace Microsoft.Office.Server.Search.Administration {
                 }
             }
             
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

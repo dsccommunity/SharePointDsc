@@ -1,60 +1,62 @@
-[CmdletBinding()] 
-param( 
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve) 
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop' 
-Set-StrictMode -Version latest 
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path 
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule  
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWordAutomationServiceApp"
 
-$ModuleName = "MSFT_SPWordAutomationServiceApp" 
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" { 
-    InModuleScope $ModuleName { 
-        $testParams = @{ 
-            Name = "Word Automation Service Application" 
-            Ensure = "Present"
-            ApplicationPool = "SharePoint Web Services"
-            DatabaseName = "WordAutomation_DB"
-            DatabaseServer = "SQLServer"
-            SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
-            DisableEmbeddedFonts = $false
-            MaximumMemoryUsage = 100
-            RecycleThreshold = 100
-            DisableBinaryFileScan = $false
-            ConversionProcesses = 8
-            JobConversionFrequency = 15
-            NumberOfConversionsPerProcess = 12
-            TimeBeforeConversionIsMonitored = 5
-            MaximumConversionAttempts = 2
-            MaximumSyncConversionRequests = 25 
-            KeepAliveTimeout = 30
-            MaximumConversionTime = 300
-        }
+        # Initialize tests
         $getTypeFullName = "Microsoft.Office.Word.Server.Service.WordServiceApplication"
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc") 
+        # Mocks for all contexts   
+        Mock -CommandName Remove-SPServiceApplication -MockWith {}
+        Mock -CommandName Set-SPWordConversionServiceApplication -MockWith {}
+        Mock -CommandName Set-SPTimerJob {}
 
-        Mock Invoke-SPDSCCommand {  
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope 
-        } 
-         
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue 
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm and Ensure is set to Present" -Fixture {
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+            }
 
-        Mock Remove-SPServiceApplication { }
-
-        Context "When no service applications exist in the current farm and Ensure is set to Present" {
-            Mock Get-SPServiceApplication { return $null }
-            Mock Get-SPServiceApplicationPool {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
                 return @(@{ 
                     Name = $testParams.ApplicationPool
                 }) 
             }
-            Mock New-SPWordConversionServiceApplication {
+            
+            Mock -CommandName New-SPWordConversionServiceApplication -MockWith {
                 $returnval = @(@{
                     WordServiceFormats = @{
                         OpenXmlDocument = $false
@@ -79,51 +81,114 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                 return $returnval
             }
 
-            It "returns absent from the Get method" { 
+            It "Should return absent from the Get method" { 
                 (Get-TargetResource @testParams).Ensure | Should Be "absent" 
             } 
 
-            It "returns false when the Test method is called" { 
+            It "Should return false when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-             It "creates a new service application in the set method" { 
+             It "Should create a new service application in the set method" { 
                 Set-TargetResource @testParams 
                 Assert-MockCalled New-SPWordConversionServiceApplication  
             }
         }
 
-        Context "When no service applications exist in the current farm and Ensure is set to Present, but the Application Pool does not exist" {
-            Mock Get-SPServiceApplication { return $null } 
-            Mock Get-SPServiceApplicationPool { return $null }
+        Context -Name "When no service applications exist in the current farm and Ensure is set to Present, but the Application Pool does not exist" -Fixture {
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null } 
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { return $null }
 
             It "fails to create a new service application in the set method because the specified application pool is missing" { 
                 { Set-TargetResource @testParams } | Should throw "Specified application pool does not exist"
             } 
         }
 
-        Context "When service applications exist in the current farm but the specific word automation app does not" { 
-            Mock Get-SPServiceApplication {
+        Context -Name "When service applications exist in the current farm but the specific word automation app does not" -Fixture { 
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                 }
-                $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
                 } -PassThru -Force
                 return $spServiceApp
             }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "When a service application exists and is configured correctly" { 
-            Mock Get-SPServiceApplication {
+        Context -Name "When a service application exists and is configured correctly" -Fixture { 
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
@@ -151,23 +216,44 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     KeepAliveTimeout = @{ TotalSeconds = 30 }
                     MaximumConversionTime = @{ TotalSeconds = 300 }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
-            It "returns values from the get method" { 
+            It "Should return values from the get method" { 
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty 
             } 
 
-            It "returns true when the Test method is called" { 
+            It "Should return true when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $true 
             } 
         } 
 
-        Context "When a service application exists and incorrect application pool is configured" { 
-            Mock Get-SPServiceApplication {
+        Context -Name "When a service application exists and incorrect application pool is configured" -Fixture { 
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name 
                     ApplicationPool = @{ Name = "Wrong App Pool Name" } 
@@ -196,39 +282,58 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     MaximumConversionTime = 300
                 }
                 $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update { 
-                    $Global:SPDSCSiteUseUpdated = $true 
+                    $Global:SPDscSiteUseUpdated = $true 
                 } -PassThru
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } } 
-            Mock Set-SPWordConversionServiceApplication {}
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { return @{ Name = $testParams.ApplicationPool } } 
 
-            Mock Get-SPTimerJob {
+            Mock -CommandName Get-SPTimerJob {
                 $returnval = @(@{ Name = "Just a name" })
                 return ,$returnval
             }
-            Mock Set-SPTimerJob {}
 
-            It "returns false when the Test method is called" { 
+            It "Should return false when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-            $Global:SPDSCSiteUseUpdated = $false
+            $Global:SPDscSiteUseUpdated = $false
             It "calls Set-SPWordConversionServiceApplication and update service app cmdlet from the set method" { 
                 Set-TargetResource @testParams 
 
                 Assert-MockCalled Get-SPServiceApplicationPool 
                 Assert-MockCalled Set-SPWordConversionServiceApplication 
-                $Global:SPDSCSiteUseUpdated | Should Be $true
+                $Global:SPDscSiteUseUpdated | Should Be $true
             } 
         } 
 
-        Context "When a service application exists and incorrect settings are configured" { 
-            Mock Get-SPServiceApplication {
+        Context -Name "When a service application exists and incorrect settings are configured" -Fixture { 
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Present"
+                ApplicationPool = "SharePoint Web Services"
+                DatabaseName = "WordAutomation_DB"
+                DatabaseServer = "SQLServer"
+                SupportedFileFormats = "docx", "doc", "mht", "rtf", "xml"
+                DisableEmbeddedFonts = $false
+                MaximumMemoryUsage = 100
+                RecycleThreshold = 100
+                DisableBinaryFileScan = $false
+                ConversionProcesses = 8
+                JobConversionFrequency = 15
+                NumberOfConversionsPerProcess = 12
+                TimeBeforeConversionIsMonitored = 5
+                MaximumConversionAttempts = 2
+                MaximumSyncConversionRequests = 25 
+                KeepAliveTimeout = 30
+                MaximumConversionTime = 300
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     Database = @{
@@ -257,55 +362,59 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     MaximumConversionTime = 300
                 }
                 $spServiceApp = $spServiceApp | Add-Member ScriptMethod Update { 
-                    $Global:SPDSCSiteUseUpdated = $true 
+                    $Global:SPDscSiteUseUpdated = $true 
                 } -PassThru
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } } 
-            Mock Get-SPTimerJob {
+
+            Mock -CommandName Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } } 
+            Mock -CommandName Get-SPTimerJob {
                 $returnval = @(@{ Name = "Just a name" })
                 return ,$returnval
             }
-            Mock Set-SPTimerJob {}
 
-            It "returns false when the Test method is called" { 
+            It "Should return false when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $false 
             } 
 
-            $Global:SPDSCSiteUseUpdated = $false
-            It "calls the update service app cmdlet from the set method" { 
+            $Global:SPDscSiteUseUpdated = $false
+            It "Should call the update service app cmdlet from the set method" { 
                 Set-TargetResource @testParams 
-
                 Assert-MockCalled Get-SPServiceApplication 
-                $Global:SPDSCSiteUseUpdated | Should Be $true
+                $Global:SPDscSiteUseUpdated | Should Be $true
             } 
         }
 
-        Context "When no service application exists and Ensure is set to Absent" {
+        Context -Name "When no service application exists and Ensure is set to Absent" -Fixture {
             $testParams = @{ 
                 Name = "Word Automation Service Application" 
                 Ensure = "Absent"
             }
 
-            Mock Get-SPServiceApplication { return $null } 
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null } 
 
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns true when the Test method is called" { 
+            It "Should return true when the Test method is called" { 
                 Test-TargetResource @testParams | Should Be $true 
             } 
         }
 
-        Context "When a service application exists and Ensure is set to Absent" {
-            Mock Get-SPServiceApplication {
+        Context -Name "When a service application exists and Ensure is set to Absent" -Fixture {
+            $testParams = @{ 
+                Name = "Word Automation Service Application" 
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [pscustomobject]@{
-                    DisplayName = $testParams.Name 
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool } 
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                             Name = $testParams.DatabaseName
                             Server = @{ Name = $testParams.DatabaseServer }
@@ -330,69 +439,66 @@ Describe "SPWordAutomationServiceApp - SharePoint Build $((Get-Item $SharePointC
                     KeepAliveTimeout = @{ TotalSeconds = 30 }
                     MaximumConversionTime = @{ TotalSeconds = 300 }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
                     return @{ FullName = $getTypeFullName } 
                 } -PassThru -Force
                 return $spServiceApp
             }
 
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "returns true when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $true
+            It "Should return true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
             }
 
-            $testParams = @{ 
-                Name = "Word Automation Service Application" 
-                Ensure = "Absent"
-            }
-
-            It "calls the remove service application cmdlet in the set method" {
+            It "Should call the remove service application cmdlet in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
 
-        Context "When Ensure is set to Absent, but another parameter is also used" {
+        Context -Name "When Ensure is set to Absent, but another parameter is also used" -Fixture {
             $testParams = @{
                 Name = "Word Automation Service Application" 
                 Ensure = "Absent"
                 ApplicationPool = "SharePoint Web Services"
             } 
 
-            It "should return null from the get method" {
+            It "Should return null from the get method" {
                 { Get-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 { Test-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "You cannot use any of the parameters when Ensure is specified as Absent"
             }
         } 
 
-        Context "When Ensure is set to Present, but the Application Pool or Database parameters are missing" {
+        Context -Name "When Ensure is set to Present, but the Application Pool or Database parameters are missing" -Fixture {
             $testParams = @{
                 Name = "Word Automation Service Application" 
                 Ensure = "Present"
                 ApplicationPool = "SharePoint Web Services"
             } 
 
-            It "should return null from the get method" {
+            It "Should return null from the get method" {
                 { Get-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 { Test-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
             }
 
-            It "should throw an exception in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "An Application Pool and Database Name are required to configure the Word Automation Service Application"
             }
-        } 
-    } 
-} 
+        }
+    }
+}
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
-    Context "Creates a new alternate URL" {
+    Context -Name "Creates a new alternate URL" {
         It "Is able to create a service app" {
             $configName = "SPAlternateUrl_CreateNewUrl"
             Configuration $configName {
@@ -32,7 +32,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
         }
     }
 
-    Context "Updates existing alternate URLs" {
+    Context -Name "Updates existing alternate URLs" {
         It "Is able to update an existing alternate URL" {
             $configName = "SPAlternateUrl_UpdateUrl"
             Configuration $configName {
@@ -53,7 +53,7 @@ Describe -Tags @("PostWebApp") "SPAlternateUrl - Integration Tests" {
         }
     }
 
-    Context "Delete existing alternate URLs" {
+    Context -Name "Delete existing alternate URLs" {
         It "Is able to delete an existing alternate URL" {
             $configName = "SPAlternateUrl_DeleteUrl"
             Configuration $configName {
