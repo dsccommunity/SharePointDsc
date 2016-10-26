@@ -1,35 +1,24 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPSearchresultSource"
 
-$ModuleName = "MSFT_SPSearchresultSource"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPSearchresultSource - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Test source"
-            SearchServiceAppName = "Search Service Application"
-            ProviderType = "Remote SharePoint Provider"
-            Query = "{searchTerms}"
-            ConnectionUrl = "https://sharepoint.contoso.com"
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-
+        # Initialize tests
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration
             {
@@ -38,15 +27,18 @@ Describe "SPSearchresultSource - SharePoint Build $((Get-Item $SharePointCmdletM
                 }
             }
 "@
-        
-        Mock Get-SPEnterpriseSearchServiceApplication {
+
+        # Mocks for all contexts 
+        Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
             return @{
                 SearchCenterUrl = "http://example.sharepoint.com/pages"
             }
         }
-        Mock Get-SPWeb {
+
+        Mock -CommandName Get-SPWeb -MockWith {
             return @{}
         }
+        
         $Global:SPDscResultSourceProvicers = @(
             @{
                 Id = "c1e2843d-1825-4a37-ad15-dce5d50f46d2"
@@ -74,7 +66,7 @@ Describe "SPSearchresultSource - SharePoint Build $((Get-Item $SharePointCmdletM
             }
         )
  
-        Mock New-Object {
+        Mock -CommandName New-Object {
             switch ($TypeName) {
                 "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" {
                     return [System.Object]::new()
@@ -117,26 +109,43 @@ Describe "SPSearchresultSource - SharePoint Build $((Get-Item $SharePointCmdletM
                                              -Value { }
                 }
             }
-        }
+        }  
 
-        Context "A search result source doesn't exist and should" {
-
+        # Test contexts
+        Context -Name "A search result source doesn't exist and should" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+            
             $Global:SPDscCurrentResultSourceMocks = $null
 
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should create the result source in the set method" {
+            It "Should create the result source in the set method" {
                 Set-TargetResource @testParams
             }
         }
 
-        Context "A search result source exists and should" {
+        Context -Name "A search result source exists and should" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
 
             $Global:SPDscCurrentResultSourceMocks = @{
                 Name = $testParams.Name
@@ -146,18 +155,24 @@ Describe "SPSearchresultSource - SharePoint Build $((Get-Item $SharePointCmdletM
                 ProviderId = "f7a3db86-fb85-40e4-a178-7ad85c732ba6"
             }
 
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        $testParams.Ensure = "Absent"
-
-        Context "A search result source exists and shouldn't" {
+        Context -Name "A search result source exists and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Absent"
+            }
 
             $Global:SPDscCurrentResultSourceMocks = @{
                 Name = $testParams.Name
@@ -167,30 +182,67 @@ Describe "SPSearchresultSource - SharePoint Build $((Get-Item $SharePointCmdletM
                 ProviderId = "f7a3db86-fb85-40e4-a178-7ad85c732ba6"
             }
 
-            It "should return present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "should remove the result source in the set method" {
+            It "Should remove the result source in the set method" {
                 Set-TargetResource @testParams
             }
         }
 
-        Context "A search result source doesn't exist and shouldn't" {
+        Context -Name "A search result source doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Absent"
+            }
 
             $Global:SPDscCurrentResultSourceMocks = $null
 
-            It "should return absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should be "Absent"
             }
 
-            It "should return true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The search centre site collection does not exist when trying to set a result source" -Fixture {
+            $testParams = @{
+                Name = "Test source"
+                SearchServiceAppName = "Search Service Application"
+                ProviderType = "Remote SharePoint Provider"
+                Query = "{searchTerms}"
+                ConnectionUrl = "https://sharepoint.contoso.com"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPWeb -MockWith {
+                return $null
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception trying to create the result source in the set method" {
+                { Set-TargetResource @testParams } | Should throw
             }
         }
     }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -384,7 +384,7 @@ function New-SPDSCDirectoryServiceNamingContext
 function New-SPDSCDirectoryServiceNamingContextList 
 {
     param ()
-    return New-Object System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
+    return New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
 }
             
 Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject, New-SPDSCDirectoryServiceNamingContext, New-SPDSCDirectoryServiceNamingContextList

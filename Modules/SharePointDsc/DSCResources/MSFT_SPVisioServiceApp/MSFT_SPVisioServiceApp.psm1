@@ -12,6 +12,10 @@ function Get-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $ProxyName,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -41,7 +45,7 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Visio Graphics Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
@@ -74,6 +78,10 @@ function Set-TargetResource
         [System.String] 
         $ApplicationPool,
 
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $ProxyName,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -96,8 +104,21 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
         
-        New-SPVisioServiceApplication -Name $params.Name `
+            $visioApp = New-SPVisioServiceApplication -Name $params.Name `
                                       -ApplicationPool $params.ApplicationPool
+            if ($params.ContainsKey("ProxyName"))
+            {
+                $pName = $params.ProxyName
+                $params.Remove("ProxyName") | Out-Null 
+            }
+
+            if ($null -eq $pName) {
+                $pName = "$($params.Name) Proxy"
+            }
+            if ($null -ne $visioApp)
+            {
+                $visioProxy = New-SPVisioServiceApplicationProxy -Name $pName -ServiceApplication $params.Name
+            }
         }
     }
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
@@ -114,7 +135,7 @@ function Set-TargetResource
 
                 Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Visio Graphics Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     } | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
             }
         }
@@ -128,11 +149,21 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $service = Get-SPServiceApplication -Name $params.Name `
+            $app = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Visio Graphics Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     }
-            Remove-SPServiceApplication $service -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $app -Confirm:$false
         }
     }   
 }
@@ -150,6 +181,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String] 
         $ApplicationPool,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $ProxyName,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 

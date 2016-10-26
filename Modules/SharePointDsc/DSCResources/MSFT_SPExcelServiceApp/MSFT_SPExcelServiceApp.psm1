@@ -50,7 +50,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Excel Services Application Web Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"    
         }
 
         if ($null -eq $serviceApp) 
@@ -127,10 +127,20 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.TypeName -eq "Excel Services Application Web Service Application"  
+            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
             }
-            Remove-SPServiceApplication $appService -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
         }
     }
 }

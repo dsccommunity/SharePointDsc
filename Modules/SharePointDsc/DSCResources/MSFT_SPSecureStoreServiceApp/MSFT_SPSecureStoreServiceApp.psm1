@@ -83,7 +83,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Secure Store Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
@@ -248,7 +248,7 @@ function Set-TargetResource
                 $params = $args[0]
 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                    $_.TypeName -eq "Secure Store Service Application" 
+                    $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
                 Set-SPSecureStoreServiceApplication -Identity $serviceApp -ApplicationPool $appPool
@@ -266,8 +266,19 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "Secure Store Service Application"
+                $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
             }
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
     }    
