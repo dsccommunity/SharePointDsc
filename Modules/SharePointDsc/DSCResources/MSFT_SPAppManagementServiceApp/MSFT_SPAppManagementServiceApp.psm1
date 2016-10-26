@@ -54,7 +54,7 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "App Management Service Application" 
+            $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"            
         }
 
         if ($null -eq $serviceApp) 
@@ -180,7 +180,7 @@ function Set-TargetResource
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 
                 $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                    $_.TypeName -eq "App Management Service Application"  
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"   
                 }
                 $app.ApplicationPool = $appPool
                 $app.Update()
@@ -198,7 +198,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "App Management Service Application"
+                $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"   
             }
             Remove-SPServiceApplication $app -Confirm:$false
         }

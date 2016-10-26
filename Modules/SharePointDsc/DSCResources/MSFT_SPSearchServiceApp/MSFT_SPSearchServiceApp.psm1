@@ -78,7 +78,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Search Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
@@ -257,7 +257,7 @@ function Set-TargetResource
                 {
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                         Where-Object -FilterScript { 
-                            $_.TypeName -eq "Search Service Application" 
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                         }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
@@ -277,7 +277,7 @@ function Set-TargetResource
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                 Where-Object -FilterScript { 
-                    $_.TypeName -eq "Search Service Application" 
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                 }
             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
             $setParams = @{
@@ -296,7 +296,7 @@ function Set-TargetResource
             {
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                     Where-Object -FilterScript { 
-                        $_.TypeName -eq "Search Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
                     }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
@@ -314,7 +314,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Search Service Application"
+                $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
             }
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }

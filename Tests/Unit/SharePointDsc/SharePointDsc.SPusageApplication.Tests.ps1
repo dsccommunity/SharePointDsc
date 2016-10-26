@@ -25,6 +25,9 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
             FailoverDatabaseServer = "anothersql.test.domain"
             Ensure = "Present"
         }
+        $getTypeFullName = "Microsoft.SharePoint.Administration.SPUsageApplication"
+        $getTypeFullNameProxy = "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
+        
         Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
         
         Mock Invoke-SPDSCCommand { 
@@ -44,7 +47,14 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }}
         Mock Remove-SPServiceApplication
         Mock Get-SPServiceApplicationProxy {
-            return (New-Object Object | Add-Member ScriptMethod Provision {} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Online" -PassThru  | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
+            $spServiceAppProxy = [pscustomobject]@{
+                    Status = "Online"
+                }
+                $spServiceAppProxy | Add-Member ScriptMethod Provision {} -PassThru
+                $spServiceAppProxy | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullNameProxy } 
+                } -PassThru -Force
+                return $spServiceAppProxy
         }
 
         Context "When no service applications exist in the current farm" {
@@ -72,10 +82,15 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When service applications exist in the current farm but not the specific usage service app" {
-
-            Mock Get-SPServiceApplication { return @(@{
-                TypeName = "Some other service app type"
-            }) }
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
+                    DisplayName = $testParams.Name
+                }
+                $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
 
             It "returns absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
@@ -87,15 +102,18 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Usage and Health Data Collection Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
 
             It "returns values from the get method" {
@@ -108,15 +126,18 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When a service application exists and log path are not configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Usage and Health Data Collection Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPUsageService { return @{
                 UsageLogCutTime = $testParams.UsageLogCutTime
@@ -137,15 +158,18 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
 
         Context "When a service application exists and log size is not configured correctly" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Usage and Health Data Collection Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPUsageService { return @{
                 UsageLogCutTime = $testParams.UsageLogCutTime
@@ -171,15 +195,18 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
         
         Context "When the service app exists but it shouldn't" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Usage and Health Data Collection Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
-                        Name = "db"
-                        Server = @{ Name = "server" }
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             
             It "returns present from the Get method" {
@@ -214,19 +241,32 @@ Describe "SPUsageApplication - SharePoint Build $((Get-Item $SharePointCmdletMod
         }
         
         Context "The proxy for the service app is offline when it should be running" {
-            Mock Get-SPServiceApplication { 
-                return @(@{
-                    TypeName = "Usage and Health Data Collection Service Application"
+            Mock Get-SPServiceApplication {
+                $spServiceApp = [pscustomobject]@{
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
-                        Name = "db"
-                        Server = @{ Name = "server" }
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
                     }
-                })
+                }
+                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
             }
             Mock Get-SPServiceApplicationProxy {
-                return (New-Object Object | Add-Member ScriptMethod Provision {$Global:SPDSCUSageAppProxyStarted = $true} -PassThru | Add-Member -NotePropertyName Status -NotePropertyValue "Disabled" -PassThru | Add-Member -NotePropertyName TypeName -NotePropertyValue "Usage and Health Data Collection Proxy" -PassThru)
-            }    
+            $spServiceAppProxy = [pscustomobject]@{
+                    Status = "Disabled"
+                }
+                $spServiceAppProxy | Add-Member ScriptMethod Provision {
+                    $Global:SPDSCUSageAppProxyStarted = $true
+                } -PassThru
+                $spServiceAppProxy | Add-Member ScriptMethod GetType { 
+                    return @{ FullName = $getTypeFullNameProxy } 
+                } -PassThru -Force
+                return $spServiceAppProxy
+            }
+  
             $Global:SPDSCUSageAppProxyStarted = $false
             
             It "should return absent from the get method" {

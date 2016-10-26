@@ -50,7 +50,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Excel Services Application Web Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"    
         }
 
         if ($null -eq $serviceApp) 
@@ -128,7 +128,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.TypeName -eq "Excel Services Application Web Service Application"  
+                $_.GetType().FullName -eq "Microsoft.Office.Excel.Server.MossHost.ExcelServerWebServiceApplication"  
             }
             Remove-SPServiceApplication $appService -Confirm:$false
         }
