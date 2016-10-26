@@ -88,7 +88,7 @@ function Start-AppveyorAfterTestTask
 
     # Add the appropriate build number to the manifest and zip/publish everything to appveyor
     $manifest = Join-Path -Path $env:APPVEYOR_BUILD_FOLDER -ChildPath "modules\SharePointDsc\SharePointDsc.psd1"
-    (Get-Content $manifest -Raw).Replace("1.3.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
+    (Get-Content $manifest -Raw).Replace("1.4.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
     $zipFileName = "SharePointDsc_$($env:APPVEYOR_BUILD_VERSION).zip"
     [System.IO.Compression.ZipFile]::CreateFromDirectory($mainModulePath, "$env:APPVEYOR_BUILD_FOLDER\$zipFileName")
     New-DscChecksum -Path $env:APPVEYOR_BUILD_FOLDER -Outpath $env:APPVEYOR_BUILD_FOLDER
