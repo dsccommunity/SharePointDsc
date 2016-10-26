@@ -129,7 +129,7 @@ function Get-TargetResource
         }
         
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Search Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 

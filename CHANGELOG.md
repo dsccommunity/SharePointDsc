@@ -10,15 +10,21 @@
   - SPManagedMetaDataServiceApp
   - SPPerformancePointServiceApp
   - SPSearchServiceApp
+  - SPSearchCrawlRule
   - SPSecureStoreServiceApp
+  - SPSubscriptionSettingsServiceApp
   - SPUsageApplication
   - SPUserProfileServiceApp
   - SPVisioServiceApp
   - SPWordAutomationServiceApp
   - SPWorkManagementServiceApp
+ * Fixed issue with SPServiceInstance for OS not in En-Us language, add GetType().Name method in:
+  - SPDistributedCacheService
+  - SPUserProfileSyncService
  * Fixed issue with SPInstallLanguagePack to install before farm creation
  * Fixed issue with mounting SPContentDatabase
  * Fixed issue with SPShellAdmin and Content Database method
+ * Fixed issue with SPServiceInstance (Set-TargetResource) for OS not in En-Us language
  * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
  * Improved code styling
  * SPVisioServiceapplication now creates proxy and lets you specify a name for it
@@ -26,6 +32,8 @@
  * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
  * Refactored unit tests to consolidate and streamline test approaches
  * Updated SPExcelServiceApp resource to add support for trusted file locations and most other properties of the service app
+ * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
+ * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
 
 ### 1.3
  * Fixed typo on return value in SPServiceAppProxyGroup
