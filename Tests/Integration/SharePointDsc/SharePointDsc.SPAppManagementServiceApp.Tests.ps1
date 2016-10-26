@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("PreServiceApp") "SPAppManagementServiceApp - Integration Tests" {
-    Context "Creates a new app management service application" {
+    Context -Name "Creates a new app management service application" {
         It "Is able to create a service app" {
             $configName = "SPAppManagementServiceApp_CreateNewApp"
             Configuration $configName {
@@ -32,7 +32,7 @@ Describe -Tags @("PreServiceApp") "SPAppManagementServiceApp - Integration Tests
         }
     }
 
-    Context "Removes an existing App management service application" {
+    Context -Name "Removes an existing App management service application" {
         It "Is able to remove a service app" {
             $configName = "SPAppManagementServiceApp_RemoveApp"
             Configuration $configName {
@@ -53,7 +53,7 @@ Describe -Tags @("PreServiceApp") "SPAppManagementServiceApp - Integration Tests
         }
     }
 
-    Context "Creates a new app management service application" {
+    Context -Name "Creates a new app management service application" {
         It "Is able to create a service app to persist for other service apps" {
             $configName = "SPAppManagementServiceApp_CreateNewApp2"
             Configuration $configName {

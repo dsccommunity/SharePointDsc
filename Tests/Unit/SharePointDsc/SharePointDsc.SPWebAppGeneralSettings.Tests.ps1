@@ -1,55 +1,59 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebAppGeneralSettings"
 
-$ModuleName = "MSFT_SPWebAppGeneralSettings"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Url = "http://sites.sharepoint.com"
-            TimeZone = 3081
-            Alerts = $true
-            AlertsLimit = 10
-            RSS = $true
-            BlogAPI = $true
-            BlogAPIAuthenticated = $true
-            BrowserFileHandling = "Permissive"
-            SecurityValidation = $true
-            SecurityValidationExpires = $true
-            SecurityValidationTimeoutMinutes = 10
-            RecycleBinEnabled = $true
-            RecycleBinCleanupEnabled = $true
-            RecycleBinRetentionPeriod = 30
-            SecondStageRecycleBinQuota = 30
-            MaximumUploadSize = 100
-            CustomerExperienceProgram = $true
-            PresenceEnabled = $true
+        # Initialize tests
+
+        # Mocks for all contexts   
+        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+        Mock -CommandName New-SPWebApplication -MockWith { }
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+            return @{ 
+                DisableKerberos = $true
+                AllowAnonymous = $false 
+            } 
         }
-        
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock New-SPAuthenticationProvider { }
-        Mock New-SPWebApplication { }
-        Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
 
-        Context "The web appliation exists and has the correct general settings" {
-            Mock Get-SPWebApplication { 
+        # Test contexts
+        Context -Name "The web appliation exists and has the correct general settings" -Fixture {
+            $testParams = @{
+                Url = "http://sites.sharepoint.com"
+                TimeZone = 3081
+                Alerts = $true
+                AlertsLimit = 10
+                RSS = $true
+                BlogAPI = $true
+                BlogAPIAuthenticated = $true
+                BrowserFileHandling = "Permissive"
+                SecurityValidation = $true
+                SecurityValidationExpires = $true
+                SecurityValidationTimeoutMinutes = 10
+                RecycleBinEnabled = $true
+                RecycleBinCleanupEnabled = $true
+                RecycleBinRetentionPeriod = 30
+                SecondStageRecycleBinQuota = 30
+                MaximumUploadSize = 100
+                CustomerExperienceProgram = $true
+                PresenceEnabled = $true
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -86,23 +90,44 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                     BrowserCEIPEnabled = $testParams.CustomerExperienceProgram
                     PresenceEnabled = $testParams.PresenceEnabled
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The web appliation exists and uses incorrect general settings" {    
-            Mock Get-SPWebApplication { 
+        Context -Name "The web appliation exists and uses incorrect general settings" -Fixture {    
+            $testParams = @{
+                Url = "http://sites.sharepoint.com"
+                TimeZone = 3081
+                Alerts = $true
+                AlertsLimit = 10
+                RSS = $true
+                BlogAPI = $true
+                BlogAPIAuthenticated = $true
+                BrowserFileHandling = "Permissive"
+                SecurityValidation = $true
+                SecurityValidationExpires = $true
+                SecurityValidationTimeoutMinutes = 10
+                RecycleBinEnabled = $true
+                RecycleBinCleanupEnabled = $true
+                RecycleBinRetentionPeriod = 30
+                SecondStageRecycleBinQuota = 30
+                MaximumUploadSize = 100
+                CustomerExperienceProgram = $true
+                PresenceEnabled = $true
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { 
                 $webApp = @{
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ 
@@ -137,25 +162,27 @@ Describe "SPWebAppGeneralSettings - SharePoint Build $((Get-Item $SharePointCmdl
                     BrowserCEIPEnabled = $false
                     PresenceEnabled = $false
                 }
-                $webApp = $webApp | Add-Member ScriptMethod Update {
-                    $Global:SPWebApplicationUpdateCalled = $true
+                $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscWebApplicationUpdateCalled = $true
                 } -PassThru
                 return @($webApp)
             }
 
-            It "returns the current data from the get method" {
+            It "Should return the current data from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            $Global:SPWebApplicationUpdateCalled = $false
-            It "updates the general settings" {
+            $Global:SPDscWebApplicationUpdateCalled = $false
+            It "Should update the general settings" {
                 Set-TargetResource @testParams
-                $Global:SPWebApplicationUpdateCalled | Should Be $true
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

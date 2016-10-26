@@ -268,6 +268,17 @@ function Set-TargetResource
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
                 $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
             }
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
     }    

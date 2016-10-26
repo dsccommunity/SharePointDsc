@@ -1,67 +1,73 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPFarmSolution"
 
-$ModuleName = "MSFT_SPFarmSolution"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    
-    InModuleScope $ModuleName {
-    
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
+        # Initialize tests
 
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
+        # Mocks for all contexts   
+        Mock -CommandName Update-SPSolution -MockWith { }
+        Mock -CommandName Wait-SPDSCSolutionJob -MockWith { }
+        Mock -CommandName Install-SPFeature -MockWith { }
+        Mock -CommandName Install-SPSolution -MockWith { }
+        Mock -CommandName Uninstall-SPSolution -MockWith { }
+        Mock -CommandName Remove-SPSolution -MockWith { }
 
-        $testParams = @{
-            Name            = "SomeSolution"
-            LiteralPath     = "\\server\share\file.wsp"
-            Deployed        = $true
-            Ensure          = "Present"
-            Version         = "1.0.0.0"
-            WebApplications = @("http://app1", "http://app2")
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        # Test contexts
+        Context -Name "The solution isn't installed, but should be" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Present"
+                Version         = "1.0.0.0"
+                WebApplications = @("http://app1", "http://app2")
+            }
 
-        Context "The solution isn't installed, but should be" {
+            $global:SPDscSolutionAdded = $false
 
-            $global:SolutionAdded = $false
-            Mock Get-SPSolution { 
-                if ($global:SolutionAdded) { 
+            Mock -CommandName Get-SPSolution -MockWith { 
+                if ($global:SPDscSolutionAdded)
+                { 
                     return [pscustomobject] @{ } 
-                }else{
+                }
+                else
+                {
                     return $null 
                 }
-            } -Verifiable
-            Mock Add-SPSolution { 
+            }
+
+            Mock -CommandName Add-SPSolution -MockWith { 
                 $solution = [pscustomobject] @{ Properties = @{ Version = "" }}
-                $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-                $global:SolutionAdded = $true
+                $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                $global:SPDscSolutionAdded = $true
                 return $solution
-            } -Verifiable
-            Mock Install-SPSolution { } -Verifiable
-            Mock Wait-SPDSCSolutionJob { } -Verifiable
+            }
 
             $getResults = Get-TargetResource @testParams
 
-            It "returns the expected empty values from the get method" {
+            It "Should return the expected empty values from the get method" {
                 $getResults.Ensure | Should Be "Absent"
                 $getResults.Version | Should Be "0.0.0.0"
                 $getResults.Deployed | Should Be $false
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -74,33 +80,34 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
         }
 
-        Context "The solution is installed, but should not be"{
+        Context -Name "The solution is installed, but should not be" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Absent"
+                Version         = "1.0.0.0"
+                WebApplications = @("http://app1", "http://app2")
+            }
 
-            $testParams.Ensure = "Absent"
-
-            Mock Get-SPSolution {
+            Mock -CommandName Get-SPSolution -MockWith {
                 return [pscustomobject]@{
                     Deployed                = $true
                     Properties              = @{ Version = "1.0.0.0" }
                     DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
                     ContainsGlobalAssembly  = $true
                 }
-            } -Verifiable
-
-            Mock Uninstall-SPSolution { } -Verifiable
-            Mock Wait-SPDSCSolutionJob { } -Verifiable
-            Mock Remove-SPSolution { } -Verifiable
-            
+            }
 
             $getResults = Get-TargetResource @testParams
 
-            It "returns the expected values from the get method" {
+            It "Should return the expected values from the get method" {
                 $getResults.Ensure | Should Be "Present"
                 $getResults.Version | Should Be "1.0.0.0"
                 $getResults.Deployed | Should Be $true
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
@@ -113,8 +120,7 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
         }
 
-        Context "The solution isn't installed, and should not be"{
-
+        Context -Name "The solution isn't installed, and should not be" -Fixture {
             $testParams = @{
                 Name            = "SomeSolution"
                 LiteralPath     = "\\server\share\file.wsp"
@@ -124,56 +130,55 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 WebApplications = @()
             }
 
-            Mock Get-SPSolution { $null } -Verifiable
+            Mock -CommandName Get-SPSolution -MockWith { $null }
 
             $getResults = Get-TargetResource @testParams
 
-            It "returns the expected empty values from the get method" {
+            It "Should return the expected empty values from the get method" {
                 $getResults.Ensure | Should Be "Absent"
                 $getResults.Version | Should Be "0.0.0.0"
                 $getResults.Deployed | Should Be $false
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The solution is installed, but needs update"{
+        Context -Name "The solution is installed, but needs update" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Present"
+                Version         = "1.1.0.0"
+                WebApplications = @("http://app1", "http://app2")
+            }
 
-            $testParams.Version = "1.1.0.0"
-            $testParams.Ensure = "Present"
-
-            Mock Get-SPSolution {
+            Mock -CommandName Get-SPSolution -MockWith {
                 $s = [pscustomobject]@{
                     Deployed                = $true
                     Properties              = @{ Version = "1.0.0.0" }
                     DeployedWebApplications = @( [pscustomobject]@{Url="http://app1"}, [pscustomobject]@{Url="http://app2"})
                     ContainsGlobalAssembly  = $true
                 } 
-                $s | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
+                $s | Add-Member -Name Update -MemberType ScriptMethod -Value { }
                 return $s
             }        
 
             $getResults = Get-TargetResource @testParams
 
-            Mock Update-SPSolution { } -Verifiable
-            Mock Wait-SPDSCSolutionJob { } -Verifiable
-            Mock Install-SPFeature { } -Verifiable
-
-            $getResults = Get-TargetResource @testParams
-
-            It "returns the expected values from the get method" {
+            It "Should return the expected values from the get method" {
                 $getResults.Ensure | Should Be "Present"
                 $getResults.Version | Should Be "1.0.0.0"
                 $getResults.Deployed | Should Be $true
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "updates the solution in the set method" {
+            It "Should update the solution in the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Update-SPSolution
@@ -182,12 +187,17 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
         }
 
-        Context "The solution is installed, and should be"{
-            
-            $testParams.Version = "1.0.0.0"
-            $testParams.Ensure = "Present"
-
-            Mock Get-SPSolution {
+        Context -Name "The solution is installed, and should be" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Present"
+                Version         = "1.0.0.0"
+                WebApplications = @("http://app1", "http://app2")
+            }
+        
+            Mock -CommandName Get-SPSolution -MockWith {
                 return [pscustomobject]@{
                     Deployed                = $true
                     Properties              = @{ Version = "1.0.0.0" }
@@ -198,21 +208,26 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
 
             $getResults = Get-TargetResource @testParams
 
-            It "returns the expected values from the get method" {
+            It "Should return the expected values from the get method" {
                 $getResults.Ensure | Should Be "Present"
                 $getResults.Version | Should Be "1.0.0.0"
                 $getResults.Deployed | Should Be $true
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "The solution exists but is not deloyed, and needs update"{
-        
-            $testParams.Version = "1.1.0.0"
-            $testParams.Ensure = "Present"
+        Context -Name "The solution exists but is not deloyed, and needs update" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Present"
+                Version         = "1.1.0.0"
+                WebApplications = @()
+            }
 
             $solution = [pscustomobject]@{
                     Deployed                = $false
@@ -222,29 +237,22 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 } 
             $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
 
-            Mock Get-SPSolution { $solution }      
+            Mock -CommandName Get-SPSolution -MockWith { $solution }
+            Mock -CommandName Add-SPSolution -MockWith { $solution }
 
             $getResults = Get-TargetResource @testParams
 
-            Mock Remove-SPSolution { } -Verifiable
-            Mock Add-SPSolution { $solution } -Verifiable
-
-            Mock Install-SPSolution { } -Verifiable
-            Mock Wait-SPDSCSolutionJob { } -Verifiable
-
-            $getResults = Get-TargetResource @testParams
-
-            It "returns the expected values from the get method" {
+            It "Should return the expected values from the get method" {
                 $getResults.Ensure | Should Be "Present"
                 $getResults.Version | Should Be "1.0.0.0"
                 $getResults.Deployed | Should Be $false
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "updates the solution in the set method" {
+            It "Should update the solution in the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Remove-SPSolution
@@ -254,10 +262,16 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
             }
         }
 
-        Context "A solution deployment can target a specific compatability level" {
-            $testParams.Version = "1.0.0.0"
-            $testParams.Ensure = "Present"
-            $testParams.Add("SolutionLevel", "All")
+        Context -Name "A solution deployment can target a specific compatability level" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Present"
+                Version         = "1.1.0.0"
+                WebApplications = @()
+                SolutionLevel   = "All"
+            }
 
             $solution = [pscustomobject]@{
                     Deployed                = $false
@@ -267,13 +281,8 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 } 
             $solution | Add-Member -Name Update -MemberType ScriptMethod  -Value { }
 
-            Mock Get-SPSolution { $solution }    
-            
-            Mock Remove-SPSolution { }
-            Mock Add-SPSolution { $solution } 
-
-            Mock Install-SPSolution { } 
-            Mock Wait-SPDSCSolutionJob { } 
+            Mock -CommandName Get-SPSolution -MockWith { $solution }    
+            Mock -CommandName Add-SPSolution -MockWith { $solution }  
 
             It "deploys the solution using the correct compatability level" {
                 Set-TargetResource @testParams
@@ -281,5 +290,7 @@ Describe "SPFarmSolution - SharePoint Build $((Get-Item $SharePointCmdletModule)
                 Assert-MockCalled Install-SPSolution -ParameterFilter { $CompatibilityLevel -eq $testParams.SolutionLevel }
             }
         }
-    }   
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

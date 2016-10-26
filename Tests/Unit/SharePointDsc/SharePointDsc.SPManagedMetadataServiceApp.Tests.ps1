@@ -1,187 +1,324 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPManagedMetaDataServiceApp"
 
-$ModuleName = "MSFT_SPManagedMetaDataServiceApp"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPManagedMetaDataServiceApp - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "Managed Metadata Service App"
-            ApplicationPool = "SharePoint Service Applications"
-            DatabaseServer = "databaseserver\instance"
-            DatabaseName = "SP_MMS"
-            Ensure = "Present"
-        }
+        #Initialize Tests
         $getTypeFullName = "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
 
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
-        
-        Mock Remove-SPServiceApplication { } 
+        # Mocks for all contexts
+        Mock -CommandName New-SPMetadataServiceApplication -MockWith { return @{} }
+        Mock -CommandName New-SPMetadataServiceApplicationProxy -MockWith { return @{} }
+        Mock -CommandName Set-SPMetadataServiceApplication -MockWith { }
+        Mock -CommandName Remove-SPServiceApplication -MockWith { }   
 
-        Context "When no service applications exist in the current farm" {
-            Mock Get-SPServiceApplication { return $null }
-            Mock New-SPMetadataServiceApplication { return @{} }
-            Mock New-SPMetadataServiceApplicationProxy { return @{} }
+        # Test contexts
+        Context -Name "When no service applications exist in the current farm" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+            }
 
-            It "returns absent from the Get method" {
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "creates a new service application in the set method" {
+            It "Should create a new service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPMetadataServiceApplication
             }
-
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "creates a new service application in the set method where InstallAccount is used" {
-                Set-TargetResource @testParams
-                Assert-MockCalled New-SPMetadataServiceApplication
-            }
-            $testParams.Remove("InstallAccount")
         }
 
-        Context "When service applications exist in the current farm but the specific MMS app does not" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
-                    DisplayName = $testParams.Name
-                }
-                $spServiceApp | Add-Member ScriptMethod GetType { 
-                    return @{ FullName = "Microsoft.Office.UnKnownWebServiceApplication" } 
-                } -PassThru -Force
-                return $spServiceApp
+        Context -Name "When service applications exist in the current farm but the specific MMS app does not" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
             }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
             }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "When a service application exists and is configured correctly" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When a service application exists and is configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                    TypeName = "Managed Metadata Service"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
                         Server = @{ Name = $testParams.DatabaseServer }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
-                    return @{ FullName = $getTypeFullName } 
-                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
                 return $spServiceApp
             }
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"  
             }
 
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "When a service application exists and the app pool is not configured correctly" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+
+        Context -Name "When a service application exists and the app pool is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Managed Metadata Service"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = "Wrong App Pool Name" }
+                    ApplicationPool = @{ 
+                        Name = "Wrong App Pool Name" 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
-                    return @{ FullName = $getTypeFullName } 
-                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
                 return $spServiceApp
             }
 
-            Mock Get-SPServiceApplicationPool { return @{ Name = $testParams.ApplicationPool } }
-            Mock Set-SPMetadataServiceApplication { }
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
 
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the update service app cmdlet from the set method" {
+            It "Should call the update service app cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Get-SPServiceApplicationPool
-                Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter { $ApplicationPool.Name -eq $testParams.ApplicationPool }
+                Assert-MockCalled Set-SPMetadataServiceApplication -ParameterFilter { 
+                    $ApplicationPool.Name -eq $testParams.ApplicationPool 
+                }
+            }
+        }
+
+        Context -Name "When a service application exists and the content type hub is not configured correctly" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                ContentTypeHubUrl = "https://contenttypes.contoso.com"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Managed Metadata Service"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.AookucationPool
+                    }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should call the update service app cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled set-SPMetadataServiceApplication
             }
         }
         
-        $testParams = @{
-            Name = "Test App"
-            ApplicationPool = "-"
-            Ensure = "Absent"
-        }
-        
-        Context "When the service application exists but it shouldn't" {
-            Mock Get-SPServiceApplication {
-                $spServiceApp = [pscustomobject]@{
+        Context -Name "When the service application exists but it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                    TypeName = "Managed Metadata Service"
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    ApplicationPool = @{ 
+                        Name = "Wrong App Pool Name" 
+                    }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
                     }
                 }
-                $spServiceApp = $spServiceApp | Add-Member ScriptMethod GetType { 
-                    return @{ FullName = $getTypeFullName } 
-                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
                 return $spServiceApp
             }
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "returns false when the Test method is called" {
+            It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "calls the remove service application cmdlet in the set method" {
+            It "Should call the remove service application cmdlet in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
         
-        Context "When the serivce application doesn't exist and it shouldn't" {
-            Mock Get-SPServiceApplication { return $null }
+        Context -Name "When the serivce application doesn't exist and it shouldn't" -Fixture {
+            $testParams = @{
+                Name = "Test App"
+                ApplicationPool = "-"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "returns true when the Test method is called" {
+            It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

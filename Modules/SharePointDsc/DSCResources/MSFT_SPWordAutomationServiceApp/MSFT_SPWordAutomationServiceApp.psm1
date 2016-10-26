@@ -143,79 +143,57 @@ function Get-TargetResource
         
         $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Word.Server.Service.WordServiceApplication"
-        }          
+        }     
 
-        switch ($params.Ensure) 
-        {
-            "Present" {
-                if ($null -eq $serviceApp) 
-                {  
-                    return $nullReturn  
-                } 
-                else 
-                { 
-                    $supportedFileFormats = @()
-                    if ($serviceApp.WordServiceFormats.OpenXmlDocument) 
-                    { 
-                        $supportedFileFormats += "docx" 
-                    }
-                    if ($serviceApp.WordServiceFormats.Word972003Document) 
-                    { 
-                        $supportedFileFormats += "doc" 
-                    }
-                    if ($serviceApp.WordServiceFormats.RichTextFormat) 
-                    { 
-                        $supportedFileFormats += "rtf" 
-                    }
-                    if ($serviceApp.WordServiceFormats.WebPage) 
-                    { 
-                        $supportedFileFormats += "mht"
-                    }
-                    if ($serviceApp.WordServiceFormats.Word2003Xml) 
-                    { 
-                        $supportedFileFormats += "xml" 
-                    }
+        if ($null -eq $serviceApp) 
+        {  
+            return $nullReturn  
+        }      
 
-                    $returnVal =  @{ 
-                        Name = $serviceApp.DisplayName 
-                        Ensure = $params.Ensure
-                        ApplicationPool = $serviceApp.ApplicationPool.Name 
-                        DatabaseName = $serviceApp.Database.Name 
-                        DatabaseServer = $serviceApp.Database.Server.Name 
-                        SupportedFileFormats = $supportedFileFormats
-                        DisableEmbeddedFonts = $serviceApp.DisableEmbeddedFonts
-                        MaximumMemoryUsage = $serviceApp.MaximumMemoryUsage
-                        RecycleThreshold = $serviceApp.RecycleProcessThreshold
-                        DisableBinaryFileScan = $serviceApp.DisableBinaryFileScan
-                        ConversionProcesses = $serviceApp.TotalActiveProcesses
-                        JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
-                        NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
-                        TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
-                        MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
-                        MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
-                        KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
-                        MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalSeconds
-                        InstallAccount = $params.InstallAccount
-                    } 
-                    return $returnVal 
-                }
-            }
-            "Absent" {
-                if ($null -ne $serviceApp) 
-                {  
-                    return $nullReturn  
-                } 
-                else 
-                { 
-                    $returnVal =  @{ 
-                        Name = $params.Name 
-                        Ensure = $params.Ensure
-                        InstallAccount = $params.InstallAccount
-                    } 
-                    return $returnVal 
-                }
-            }
+        $supportedFileFormats = @()
+        if ($serviceApp.WordServiceFormats.OpenXmlDocument) 
+        { 
+            $supportedFileFormats += "docx" 
+        }
+        if ($serviceApp.WordServiceFormats.Word972003Document) 
+        { 
+            $supportedFileFormats += "doc" 
+        }
+        if ($serviceApp.WordServiceFormats.RichTextFormat) 
+        { 
+            $supportedFileFormats += "rtf" 
+        }
+        if ($serviceApp.WordServiceFormats.WebPage) 
+        { 
+            $supportedFileFormats += "mht"
+        }
+        if ($serviceApp.WordServiceFormats.Word2003Xml) 
+        { 
+            $supportedFileFormats += "xml" 
+        }
+
+        $returnVal =  @{ 
+            Name = $serviceApp.DisplayName 
+            Ensure = "Present"
+            ApplicationPool = $serviceApp.ApplicationPool.Name 
+            DatabaseName = $serviceApp.Database.Name 
+            DatabaseServer = $serviceApp.Database.Server.Name 
+            SupportedFileFormats = $supportedFileFormats
+            DisableEmbeddedFonts = $serviceApp.DisableEmbeddedFonts
+            MaximumMemoryUsage = $serviceApp.MaximumMemoryUsage
+            RecycleThreshold = $serviceApp.RecycleProcessThreshold
+            DisableBinaryFileScan = $serviceApp.DisableBinaryFileScan
+            ConversionProcesses = $serviceApp.TotalActiveProcesses
+            JobConversionFrequency = $serviceApp.TimerJobFrequency.TotalMinutes
+            NumberOfConversionsPerProcess = $serviceApp.ConversionsPerInstance
+            TimeBeforeConversionIsMonitored = $serviceApp.ConversionTimeout.TotalMinutes
+            MaximumConversionAttempts = $serviceApp.MaximumConversionAttempts
+            MaximumSyncConversionRequests = $serviceApp.MaximumSyncConversionRequests
+            KeepAliveTimeout = $serviceApp.KeepAliveTimeout.TotalSeconds
+            MaximumConversionTime = $serviceApp.MaximumConversionTime.TotalSeconds
+            InstallAccount = $params.InstallAccount
         } 
+        return $returnVal  
     }
     
     return $result 
@@ -530,7 +508,7 @@ function Set-TargetResource
             }
 
             $serviceApp.Update()
-        }
+        }        
     }
     
     if ($Ensure -eq "Absent") 
@@ -544,8 +522,17 @@ function Set-TargetResource
             }
             if ($null -ne $serviceApp) 
             {
+                $proxies = Get-SPServiceApplicationProxy
+                foreach($proxyInstance in $proxies)
+                {
+                    if($serviceApp.IsConnected($proxyInstance))
+                    {
+                        $proxyInstance.Delete()
+                    }
+                }
+
                 # Service app existed, deleting
-                Remove-SPServiceApplication $serviceApp -RemoveData -Confirm:$false
+                Remove-SPServiceApplication -Identity $serviceApp -RemoveData -Confirm:$false
             } 
         }
     }
@@ -672,7 +659,7 @@ function Test-TargetResource
     
     if (($Ensure -eq "Present") -and -not ($ApplicationPool -and $DatabaseName)) 
     {
-        throw ("An Application Pool and Database Name are required to configure the Word " + ` 
+        throw ("An Application Pool and Database Name are required to configure the Word " + `
                "Automation Service Application")
     }
 
