@@ -15,6 +15,10 @@
     Required - string
     The name of the application pool to run the service app in
 
+.PARAMETER ProxyName
+    Write - string
+    The name of the Visio Service Application Proxy
+
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent
