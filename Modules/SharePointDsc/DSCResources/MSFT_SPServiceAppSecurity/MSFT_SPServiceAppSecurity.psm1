@@ -30,6 +30,8 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
+
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
         throw ("Cannot use the Members parameter together with the MembersToInclude or " + `
@@ -41,8 +43,6 @@ function Get-TargetResource
         throw ("At least one of the following parameters must be specified: Members, " + `
                "MembersToInclude, MembersToExclude")
     }
-
-    Write-Verbose -Message "Getting all security options for $SecurityType in $ServiceAppName"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -104,7 +104,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -136,7 +135,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting service app security config"
+    Write-Verbose -Message "Setting all security options for $SecurityType in $ServiceAppName"
     
     if ($Members -and (($MembersToInclude) -or ($MembersToExclude))) 
     {
@@ -303,7 +302,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -336,7 +334,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing service app security config"
+    Write-Verbose -Message "Testing all security options for $SecurityType in $ServiceAppName"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

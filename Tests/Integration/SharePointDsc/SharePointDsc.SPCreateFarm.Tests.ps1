@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("Farm") "SPCreateFarm - Integration Tests" {
-    Context "Creates new farms where no farm exists" {
+    Context -Name "Creates new farms where no farm exists" {
         It "Is able to create a new farm on the local server" {
             $configName = "SPCreateFarm_CreateNewFarm"
             Configuration $configName {

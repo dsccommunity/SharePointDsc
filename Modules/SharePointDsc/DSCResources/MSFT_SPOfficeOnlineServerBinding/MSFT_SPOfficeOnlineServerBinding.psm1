@@ -23,7 +23,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Looking up the Office Online Server details for '$Zone' zone"
+    Write-Verbose -Message "Getting Office Online Server details for '$Zone' zone"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -55,7 +55,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -79,6 +78,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Office Online Server details for '$Zone' zone"
 
     $CurrentResults = Get-TargetResource @PSBoundParameters
 
@@ -129,7 +130,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -155,10 +155,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message "Testing Office Online Server details for '$Zone' zone"
+
     $PSBoundParameters.Ensure = $Ensure
 
-    Write-Verbose -Message "Testing Office Online Server details for '$Zone' zone"
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     
     $paramsToCheck = @("Ensure")   
     if ($Ensure -eq "Present") 

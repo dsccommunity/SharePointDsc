@@ -115,7 +115,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -207,7 +206,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Applying general settings '$Url'"
+    Write-Verbose -Message "Setting web application '$url' general settings"
     
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
@@ -229,7 +228,6 @@ function Set-TargetResource
         $wa.Update()
     }
 }
-
 
 function Test-TargetResource
 {
@@ -323,8 +321,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing web application '$url' general settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for web application general settings '$Url'"
+
     if ($null -eq $CurrentValues) 
     { 
         return $false 
@@ -336,6 +336,4 @@ function Test-TargetResource
     return Test-SPDSCWebApplicationGeneralConfig -CurrentSettings $CurrentValues -DesiredSettings $PSBoundParameters
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

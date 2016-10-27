@@ -45,7 +45,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Access Services Web Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"            
         }
 
         if ($null -eq $serviceApp) 
@@ -91,6 +91,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting Access Services service app '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -120,9 +122,19 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "Access Services Web Service Application"  
+                $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
             }
-            Remove-SPServiceApplication $app -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $app -Confirm:$false
         }
     }
 }
@@ -156,7 +168,9 @@ function Test-TargetResource
     )
     
     Write-Verbose -Message "Testing for Access Service Application '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")

@@ -50,7 +50,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -74,10 +73,10 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting service application pool '$Name'"
+    
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    Write-Verbose -Message "Creating service application pool '$Name'"
-
     if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") 
     {
         Write-Verbose -Message "Creating Service Application Pool $Name"
@@ -154,9 +153,12 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing service application pool '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

@@ -50,7 +50,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting user profile service sync connection $ConnectionDomain"
+    Write-Verbose -Message "Getting user profile service sync connection $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -152,7 +152,7 @@ function Set-TargetResource
         $InstallAccount
    )
 
-    Write-Verbose -Message "Creating user profile service application $Name"
+    Write-Verbose -Message "Setting user profile service sync connection $Name"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters, $PSScriptRoot) `
@@ -287,8 +287,6 @@ function Set-TargetResource
     }
 }
 
-
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -341,16 +339,20 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile service sync connection $Name"
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($null -eq $CurrentValues) 
     { 
         return $false 
     }
+
     if ($Force -eq $true)
     {
         return $false 
     }    
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Name", 
@@ -382,7 +384,7 @@ function New-SPDSCDirectoryServiceNamingContext
 function New-SPDSCDirectoryServiceNamingContextList 
 {
     param ()
-    return New-Object System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
+    return New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
 }
             
 Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject, New-SPDSCDirectoryServiceNamingContext, New-SPDSCDirectoryServiceNamingContextList

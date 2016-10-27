@@ -63,7 +63,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting web application '$Name'"
+    Write-Verbose -Message "Getting web application '$Name' config"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
@@ -101,11 +101,11 @@ function Get-TargetResource
             AllowAnonymous = $authProvider.AllowAnonymous
             DatabaseName = $wa.ContentDatabases[0].Name
             DatabaseServer = $wa.ContentDatabases[0].Server
-            HostHeader = (New-Object System.Uri $wa.Url).Host
+            HostHeader = (New-Object -TypeName System.Uri $wa.Url).Host
             Path = $wa.IisSettings[0].Path
-            Port = (New-Object System.Uri $wa.Url).Port
+            Port = (New-Object -TypeName System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
-            UseSSL = (New-Object System.Uri $wa.Url).Scheme -eq "https"
+            UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
         }
@@ -178,7 +178,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Creating web application '$Name'"
+    Write-Verbose -Message "Setting web application '$Name' config"
     
     if ($Ensure -eq "Present") 
     {
@@ -295,7 +295,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -361,15 +360,16 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for web application '$Name'"
+    Write-Verbose -Message "Testing for web application '$Name' config"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure")
     return $testReturn
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

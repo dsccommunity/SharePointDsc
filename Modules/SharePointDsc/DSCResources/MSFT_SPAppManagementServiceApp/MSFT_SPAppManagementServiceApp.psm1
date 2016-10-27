@@ -33,6 +33,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
     Write-Verbose -Message "Getting App management service app '$Name'"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -53,7 +54,7 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "App Management Service Application" 
+            $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"            
         }
 
         if ($null -eq $serviceApp) 
@@ -122,6 +123,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting App management service app '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -177,7 +180,7 @@ function Set-TargetResource
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 
                 $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                    $_.TypeName -eq "App Management Service Application"  
+                    $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"   
                 }
                 $app.ApplicationPool = $appPool
                 $app.Update()
@@ -195,9 +198,19 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
-                $_.TypeName -eq "App Management Service Application"
+                $_.GetType().FullName -eq "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication"   
             }
-            Remove-SPServiceApplication $app -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($app.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $app -Confirm:$false
         }
     }
 }
@@ -237,10 +250,11 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
-        
-    Write-Verbose -Message "Testing for App management Service Application '$Name'"
+    
+    Write-Verbose -Message "Testing App management service app '$Name'"
     
     $PSBoundParameters.Ensure = $Ensure
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", "Ensure")

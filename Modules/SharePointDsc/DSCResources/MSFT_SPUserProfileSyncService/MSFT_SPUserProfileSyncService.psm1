@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -16,7 +16,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
@@ -25,30 +25,45 @@ function Get-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting user profile sync service for $UserProfileServiceAppName"
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
-    Write-Verbose -Message "Getting the local user profile sync service instance"
-
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
         
-        $syncService = Get-SPServiceInstance -Server $env:COMPUTERNAME `
-                           | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Synchronization Service" 
+        $syncServices = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                        -ErrorAction SilentlyContinue
+        
+        if ($null -eq $syncServices)
+        {
+            return @{
+                UserProfileServiceAppName = $params.UserProfileServiceAppName
+                Ensure = "Absent"
+                FarmAccount = $params.FarmAccount
+                RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
+                InstallAccount = $params.InstallAccount
+            }
         }
+        
+        $syncService = $syncServices | Where-Object -FilterScript { 
+            $_.GetType().Name -eq "UserProfileServiceInstance"
+        }
+
         if ($null -eq $syncService) 
         { 
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $currentServer = "$($env:COMPUTERNAME).$domain"
-            $syncService = Get-SPServiceInstance -Server $currentServer `
-                               | Where-Object -FilterScript { 
-                $_.TypeName -eq "User Profile Synchronization Service" 
+            $syncServices = Get-SPServiceInstance -Server $currentServer `
+                                                  -ErrorAction SilentlyContinue
+            $syncService = $syncServices | Where-Object -FilterScript { 
+                $_.GetType().Name -eq "UserProfileServiceInstance" 
             }
         }
 
@@ -109,7 +124,7 @@ function Set-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -117,7 +132,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
@@ -126,7 +141,10 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting user profile sync service for $UserProfileServiceAppName"
+
     $PSBoundParameters.Ensure = $Ensure
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
@@ -151,8 +169,6 @@ function Set-TargetResource
         }
     }
 
-    Write-Verbose -Message "Setting User Profile Synchronization Service"
-
     # Add the FarmAccount to the local Admins group, if it's not already there
     $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
 
@@ -170,17 +186,18 @@ function Set-TargetResource
             $params = $args[0]
             
             $currentServer = $env:COMPUTERNAME
-            $syncService = Get-SPServiceInstance -Server $currentServer `
-                            | Where-Object -FilterScript { 
-                $_.TypeName -eq "User Profile Synchronization Service" 
+
+            $syncServices = Get-SPServiceInstance -Server $currentServer `
+                                                  -ErrorAction SilentlyContinue
+            $syncService = $syncServices | Where-Object -FilterScript { 
+                $_.GetType().Name -eq "UserProfileServiceInstance"  
             }
             if ($null -eq $syncService) 
             { 
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$currentServer.$domain"
-                $syncService = Get-SPServiceInstance -Server $currentServer `
-                                | Where-Object -FilterScript { 
-                    $_.TypeName -eq "User Profile Synchronization Service" 
+                $syncService = $syncServices | Where-Object -FilterScript { 
+                    $_.GetType().Name -eq "UserProfileServiceInstance"  
                 }
             }
             if ($null -eq $syncService) 
@@ -195,10 +212,10 @@ function Set-TargetResource
                                                         -ErrorAction SilentlyContinue 
                 if ($null -eq $serviceApps) { 
                     throw [Exception] ("No user profile service was found " + `
-                                    "named $($params.UserProfileServiceAppName)")
+                                       "named $($params.UserProfileServiceAppName)")
                 }
                 $ups = $serviceApps | Where-Object -FilterScript { 
-                    $_.TypeName -eq "User Profile Service Application" 
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication" 
                 }
 
                 $userName = $params.FarmAccount.UserName
@@ -229,9 +246,8 @@ function Set-TargetResource
                 Write-Verbose ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user profile " + `
                             "sync service to become '$desiredState' (waited $count of " + `
                             "$maxCount minutes)")
-                $syncService = Get-SPServiceInstance -Server $currentServer `
-                                | Where-Object -FilterScript { 
-                    $_.TypeName -eq "User Profile Synchronization Service" 
+                $syncService = $syncServices | Where-Object -FilterScript { 
+                    $_.GetType().Name -eq "UserProfileServiceInstance"  
                 }
                 $count++
             }
@@ -257,7 +273,7 @@ function Test-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -265,7 +281,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
@@ -274,6 +290,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing user profile sync service for $UserProfileServiceAppName"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
@@ -281,7 +301,7 @@ function Test-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    $PSBoundParameters.Ensure = $Ensure
+
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
@@ -332,7 +352,7 @@ function Test-SPDscUserProfileDBReadOnly()
                                "named $UserProfileServiceAppName")
         }
         $ups = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "User Profile Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"
         }
 
         $propType = $ups.GetType()

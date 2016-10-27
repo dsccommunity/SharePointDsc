@@ -198,6 +198,7 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing antivirus configuration settings"
+    
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters
 }
