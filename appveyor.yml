@@ -3,7 +3,9 @@ image: WMF 5
 
 install:
     - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-    - npm install gulp   
+    - npm install -g gulp
+    - npm install -g through2
+    - npm install -g markdownlint    
     - ps: |
         Import-Module "$env:APPVEYOR_BUILD_FOLDER\.appveyor\appveyor.psm1"
         Start-AppveyorInstallTask
@@ -11,6 +13,8 @@ install:
 build: off
 
 test_script:
+    - cmd: |
+        gulp
     - ps: |
         Start-AppveyorTestScriptTask
 
