@@ -74,5 +74,47 @@ Describe 'SharePointDsc whole of module tests' {
                 Import-Module -Name "$RepoRoot\modules\SharePointDsc\SharePointDsc.psd1" -Global -Force
             }    
         }
+
+        It "Should not have errors in any markdown files" {
+            $runGulp = $false
+            try {
+                Start-Process -FilePath "npm" -ArgumentList "install" -WorkingDirectory $RepoRoot -Wait -PassThru -NoNewWindow
+                $runGulp = $true
+            }
+            catch [System.Exception] {
+                Write-Warning -Message ("Unable to run npm to install dependencies needed to " + `
+                                        "test markdown files. Please be sure that you have " + `
+                                        "installed nodejs.")
+            }
+            
+            if ($runGulp -eq $true)
+            {
+                $mdErrors = 0
+                try {
+                    Start-Process -FilePath "gulp" -Wait -WorkingDirectory $RepoRoot -PassThru -NoNewWindow
+                    Start-Sleep -Seconds 3
+                    $mdIssuesPath = Join-Path -Path $RepoRoot -ChildPath "markdownissues.txt"
+                    
+                    if ((Test-Path -Path $mdIssuesPath) -eq $true)
+                    {
+                        Get-Content -Path $mdIssuesPath | ForEach-Object -Process {
+                            if ([string]::IsNullOrEmpty($_) -eq $false)
+                            {
+                                Write-Warning -Message $_
+                                $mdErrors ++
+                            }
+                        }
+                    }
+                }
+                catch [System.Exception] {
+                    Write-Warning -Message ("Unable to run gulp to test markdown files. Please " + `
+                                            "be sure that you have installed nodejs and have " + `
+                                            "run 'npm install -g gulp' in order to have this " + `
+                                            "text execute.")
+                }
+                Remove-Item -Path $mdIssuesPath -Force -ErrorAction SilentlyContinue
+                $mdErrors | Should Be 0
+            }
+        }
     }
 }

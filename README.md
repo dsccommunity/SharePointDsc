@@ -4,7 +4,7 @@ Build status: [![Build status](https://ci.appveyor.com/api/projects/status/aj6ce
 
 Discuss SharePointDsc now: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/PowerShell/xSharePoint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-The SharePointDsc PowerShell module (formerly known as xSharePoint) provides DSC resources that can be used to deploy and manage a SharePoint farm. 
+The SharePointDsc PowerShell module (formerly known as xSharePoint) provides DSC resources that can be used to deploy and manage a SharePoint farm.
 
 Please leave comments, feature requests, and bug reports in the issues tab for this module.
 
