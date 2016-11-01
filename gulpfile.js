@@ -3,8 +3,8 @@ var through2 = require("through2");
 var markdownlint = require("markdownlint");
 var fs = require('fs');
 
-gulp.task("default", function task() {
-  return gulp.src("*.md", { "read": false })
+gulp.task("test-mdsyntax", function task() {
+  return gulp.src("Modules/**/*.md", { "read": false })
     .pipe(through2.obj(function obj(file, enc, next) {
       markdownlint(
         { "files": [ file.path ] },
