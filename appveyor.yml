@@ -12,8 +12,6 @@ install:
 build: off
 
 test_script:
-    - cmd: |
-        gulp
     - ps: |
         Start-AppveyorTestScriptTask
 
