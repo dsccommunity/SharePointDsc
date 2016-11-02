@@ -91,7 +91,7 @@ Describe 'SharePointDsc whole of module tests' {
             {
                 $mdErrors = 0
                 try {
-                    Start-Process -FilePath "gulp" -ArgumentList "test-mdsyntax" -Wait -WorkingDirectory $RepoRoot -PassThru -NoNewWindow
+                    Start-Process -FilePath "gulp" -ArgumentList "test-mdsyntax --silent" -Wait -WorkingDirectory $RepoRoot -PassThru -NoNewWindow
                     Start-Sleep -Seconds 3
                     $mdIssuesPath = Join-Path -Path $RepoRoot -ChildPath "markdownissues.txt"
                     
