@@ -1,48 +1,47 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPWebApplication"
 
-$ModuleName = "MSFT_SPWebApplication"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPWebApplication - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            Name = "SharePoint Sites"
-            ApplicationPool = "SharePoint Web Apps"
-            ApplicationPoolAccount = "DEMO\ServiceAccount"
-            Url = "http://sites.sharepoint.com"
-            AuthenticationMethod = "NTLM"
-            Ensure = "Present"
-        }
-        
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue
+        # Initialize tests
 
-        Mock New-SPAuthenticationProvider { }
-        Mock New-SPWebApplication { }
-        Mock Remove-SPWebApplication { }
+        # Mocks for all contexts   
+        Mock -CommandName New-SPAuthenticationProvider -MockWith { }
+        Mock -CommandName New-SPWebApplication -MockWith { }
+        Mock -CommandName Remove-SPWebApplication -MockWith { }
+        Mock -CommandName Get-SPManagedAccount -MockWith {}
 
-        Context "The specified Managed Account does not exist" {
-            Mock Get-SPWebApplication { return $null }
-            Mock Get-SPDSCContentService {
+        # Test contexts
+        Context -Name "The specified Managed Account does not exist" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+            Mock -CommandName Get-SPDSCContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
-            Mock Get-SPManagedAccount {
+            Mock -CommandName Get-SPManagedAccount -MockWith {
                 Throw "No matching accounts were found"
             }
 
@@ -51,76 +50,94 @@ Describe "SPWebApplication - SharePoint Build $((Get-Item $SharePointCmdletModul
             }
         }
 
-        Context "The web application that uses NTLM doesn't exist but should" {
-            Mock Get-SPWebApplication { return $null }
-            Mock Get-SPDSCContentService {
+        Context -Name "The web application that uses NTLM doesn't exist but should" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+            Mock -CommandName Get-SPDSCContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
-            Mock Get-SPManagedAccount {}
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the new cmdlet from the set method" {
+            It "Should call the new cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
-
-            $testParams.Add("InstallAccount", (New-Object System.Management.Automation.PSCredential ("username", (ConvertTo-SecureString "password" -AsPlainText -Force))))
-            It "calls the new cmdlet from the set method where InstallAccount is used" {
-                Set-TargetResource @testParams
-
-                Assert-MockCalled New-SPWebApplication
-                Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
-            }
-            $testParams.Remove("InstallAccount")
 
             $testParams.Add("AllowAnonymous", $true)
-            It "calls the new cmdlet from the set where anonymous authentication is requested" {
+            It "Should call the new cmdlet from the set where anonymous authentication is requested" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
                 Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
-            $testParams.Remove("AllowAnonymous")
         }
 
-        $testParams.AuthenticationMethod = "Kerberos"
+        Context -Name "The web application that uses Kerberos doesn't exist but should" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Kerberos"
+                Ensure = "Present"
+            }
 
-        Context "The web application that uses Kerberos doesn't exist but should" {
-            Mock Get-SPWebApplication { return $null }
-            Mock Get-SPDSCContentService {
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+            Mock -CommandName Get-SPDSCContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
-            Mock Get-SPManagedAccount {}
+            Mock -CommandName Get-SPManagedAccount -MockWith {}
 
-            It "returns absent from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "calls the new cmdlet from the set method" {
+            It "Should call the new cmdlet from the set method" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
             }
         }
 
-        $testParams.AuthenticationMethod = "NTLM"
+        Context -Name "The web appliation does exist and should that uses NTLM" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Present"
+            }
 
-        Context "The web appliation does exist and should that uses NTLM" {
-            Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
-            Mock Get-SPWebApplication { return @(@{
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisableKerberos = $true 
+                    AllowAnonymous = $false 
+                } 
+            }
+            
+            Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 
                     Name = $testParams.ApplicationPool
@@ -138,20 +155,33 @@ Describe "SPWebApplication - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Url = $testParams.Url
             })}
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        $testParams.AuthenticationMethod = "Kerberos"
+        Context -Name "The web appliation does exist and should that uses Kerberos" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Kerberos"
+                Ensure = "Present"
+            }
 
-        Context "The web appliation does exist and should that uses Kerberos" {
-            Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $false; AllowAnonymous = $false } }
-            Mock Get-SPWebApplication { return @(@{
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisableKerberos = $false 
+                    AllowAnonymous = $false 
+                } 
+            }
+            
+            Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 
                     Name = $testParams.ApplicationPool
@@ -169,27 +199,33 @@ Describe "SPWebApplication - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Url = $testParams.Url
             })}
 
-            It "returns present from the get method" {
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
         
-        $testParams = @{
-            Name = "SharePoint Sites"
-            ApplicationPool = "SharePoint Web Apps"
-            ApplicationPoolAccount = "DEMO\ServiceAccount"
-            Url = "http://sites.sharepoint.com"
-            AuthenticationMethod = "NTLM"
-            Ensure = "Absent"
-        }
-        
-        Context "A web application exists but shouldn't" {
-            Mock Get-SPAuthenticationProvider { return @{ DisableKerberos = $true; AllowAnonymous = $false } }
-            Mock Get-SPWebApplication { return @(@{
+        Context -Name "A web application exists but shouldn't" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisableKerberos = $true
+                    AllowAnonymous = $false 
+                } 
+            }
+            
+            Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
                 ApplicationPool = @{ 
                     Name = $testParams.ApplicationPool
@@ -207,30 +243,41 @@ Describe "SPWebApplication - SharePoint Build $((Get-Item $SharePointCmdletModul
                 Url = $testParams.Url
             })}
             
-            It "returns present from the Get method" {
+            It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "should remove the web application in the set method" {
+            It "Should remove the web application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPWebApplication
             }
         }
         
-        Context "A web application doesn't exist and shouldn't" {
-            Mock Get-SPWebApplication { return $null }
+        Context -Name "A web application doesn't exist and shouldn't" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
             
-            It "returns absent from the Get method" {
+            It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             
-            It "should return false from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

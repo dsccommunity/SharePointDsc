@@ -34,7 +34,8 @@ function Get-TargetResource
         $InstallAccount
     )
     
-    Write-Verbose -Message "Getting Quota Template settings"
+    Write-Verbose -Message "Getting Quota Template settings for quota $Name"
+
     if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
         Throw "StorageMaxInMB must be larger than StorageWarningInMB."
@@ -99,7 +100,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -135,7 +135,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting quota template settings"
+    Write-Verbose -Message "Setting Quota Template settings for quota $Name"
 
     if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
@@ -261,7 +261,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -298,7 +297,8 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing quota template settings"
+    Write-Verbose -Message "Testing Quota Template settings for quota $Name"
+
     if ($StorageMaxInMB -le $StorageWarningInMB) 
     {
         Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."

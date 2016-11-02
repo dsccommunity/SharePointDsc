@@ -105,6 +105,8 @@ function Set-TargetResource
         $Version
     )
 
+    Write-Verbose -Message "Setting feature $Name at $FeatureScope scope"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     $PSBoundParameters.Add("CurrentValues", $CurrentValues)
@@ -201,10 +203,11 @@ function Test-TargetResource
         $Version
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for feature $Name at $FeatureScope scope"
+    Write-Verbose -Message "Testing feature $Name at $FeatureScope scope"
 
     $PSBoundParameters.Ensure = $Ensure 
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

@@ -29,7 +29,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Retrieving outgoing email settings configuration "
+    Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -91,7 +91,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Updating outgoing email settings configuration for $WebAppUrl"
+    Write-Verbose -Message "Setting outgoing email settings configuration for $WebAppUrl"
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
@@ -111,7 +112,6 @@ function Set-TargetResource
                                    $params.CharacterSet) 
     }
 }
-
 
 function Test-TargetResource
 {
@@ -144,9 +144,14 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Comparing Current and Target Outgoing email settings"
-    if ($null -eq $CurrentValues) { return $false }
+
+    if ($null -eq $CurrentValues)
+    {
+        return $false
+    }
     
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

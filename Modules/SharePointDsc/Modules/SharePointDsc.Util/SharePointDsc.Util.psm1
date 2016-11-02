@@ -73,7 +73,6 @@ function Get-SPDscFarmVersionInfo
     # Loop through all products
     foreach ($product in $products)
     {
-        #Write-Verbose -Verbose "Product: $product"
         $singleProductInfo = $serverProductInfo.GetSingleProductInfo($product)
         $patchableUnits = $singleProductInfo.PatchableUnitDisplayNames
 
@@ -89,7 +88,6 @@ function Get-SPDscFarmVersionInfo
                 ($patchableUnit -notmatch "Project Server") -and
                 ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
             {
-                #Write-Verbose -Verbose "  - $patchableUnit"
                 $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
                 $currentVersion = ""
                 foreach ($patchableUnitInfo in $patchableUnitsInfo)
@@ -129,6 +127,18 @@ function Get-SPDscFarmProductsInfo
 
     $serverProductInfo = $productVersions.GetServerProductInfo($server.id)
     return $serverProductInfo.Products
+}
+
+function Get-SPDscRegProductsInfo
+{
+    $registryLocation = Get-ChildItem -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
+    $sharePointPrograms = $registryLocation | Where-Object -FilterScript {
+         $_.PsPath -like "*\Office*" 
+    } | ForEach-Object -Process { 
+        Get-ItemProperty -Path $_.PsPath 
+    }
+    
+    return $sharePointPrograms.DisplayName 
 }
 
 function Get-SPDSCRegistryKey
@@ -493,7 +503,7 @@ function Test-SPDscParameterState
 
     if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck)) 
     {
-        throw ("If 'DesiredValues' is a Hashtable then property 'ValuesToCheck' must contain " + `
+        throw ("If 'DesiredValues' is a CimInstance then property 'ValuesToCheck' must contain " + `
                "a value")
     }
 
@@ -511,12 +521,11 @@ function Test-SPDscParameterState
         {
             if (($CurrentValues.ContainsKey($_) -eq $false) `
             -or ($CurrentValues.$_ -ne $DesiredValues.$_) `
-            -or (($DesiredValues.ContainsKey($_) -eq $true) -and ($DesiredValues.$_.GetType().IsArray))) 
+            -or (($DesiredValues.ContainsKey($_) -eq $true) -and ($null -ne $DesiredValues.$_ -and $DesiredValues.$_.GetType().IsArray)))  
             {
                 if ($DesiredValues.GetType().Name -eq "HashTable" -or `
                     $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary") 
                 {
-                    
                     $CheckDesiredValue = $DesiredValues.ContainsKey($_)
                 } 
                 else 
@@ -662,7 +671,7 @@ function Test-SPDSCIsADUser
         $IdentityName = $IdentityName.Substring($IdentityName.IndexOf('\') + 1)
     }
 
-    $searcher = New-Object System.DirectoryServices.DirectorySearcher
+    $searcher = New-Object -TypeName System.DirectoryServices.DirectorySearcher
     $searcher.filter = "((samAccountName=$IdentityName))"
     $searcher.SearchScope = "subtree"
     $searcher.PropertiesToLoad.Add("objectClass") | Out-Null

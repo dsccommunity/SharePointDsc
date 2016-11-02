@@ -50,7 +50,7 @@
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer '$Name'..."
+    Write-Verbose -Message "Getting SPTrustedIdentityTokenIssuer '$Name' settings"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -157,13 +157,15 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer '$Name' settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($Ensure -eq "Present") 
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'..."
+            Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'"
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
@@ -237,7 +239,7 @@ function Set-TargetResource
 
                 if ($params.ProviderSignOutUri) 
                 { 
-                    $trust.ProviderSignOutUri = New-Object System.Uri ($params.ProviderSignOutUri) 
+                    $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri) 
                 }
                 $trust.Update()
              }
@@ -245,7 +247,7 @@ function Set-TargetResource
     }
     else
     {
-        Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'..."
+        Write-Verbose "Removing SPTrustedIdentityTokenIssuer '$Name'"
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
@@ -275,7 +277,7 @@ function Set-TargetResource
                     {
                         Write-Verbose -Message ("Removing SPTrustedAuthenticationProvider " + `
                                                 "'$Name' from web app '$webAppUrl' in zone " + `
-                                                "'$zone'...")
+                                                "'$zone'")
                         $wa.GetIisSettingsWithFallback($zone).ClaimsAuthenticationProviders.Remove($trustedProviderToRemove) | Out-Null
                         $update = $true
                     }
@@ -347,8 +349,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing if SPTrustedIdentityTokenIssuer '$Name' exists ..."
+    Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer '$Name' settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")

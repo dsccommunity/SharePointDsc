@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\SharePointDsc.psd1")
 
 Describe -Tags @("WebApp") "SPWebApplication - Integration Tests" {
-    Context "Creates new new web applications" {
+    Context -Name "Creates new new web applications" {
         It "Is able to create a new web application" {
             $configName = "SPWebApplication_CreateWebApp"
             Configuration $configName {

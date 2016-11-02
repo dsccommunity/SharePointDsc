@@ -69,7 +69,7 @@ function Get-TargetResource
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Usage and Health Data Collection Service Application" 
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
         }
 
         if ($null -eq $serviceApp)
@@ -79,7 +79,7 @@ function Get-TargetResource
         else
         {
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
-                $_.TypeName -eq "Usage and Health Data Collection Proxy" 
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
             $ensure = "Present"
@@ -106,7 +106,6 @@ function Get-TargetResource
     }
     return $result
 }
-
 
 function Set-TargetResource
 {
@@ -203,7 +202,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
-                $_.TypeName -eq "Usage and Health Data Collection Proxy" 
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
             if($spUsageApplicationProxy.Status -eq "Disabled") 
@@ -243,13 +242,12 @@ function Set-TargetResource
             
             $service = Get-SPServiceApplication -Name $params.Name `
                     | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Usage and Health Data Collection Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
                     }
             Remove-SPServiceApplication $service -Confirm:$false
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -303,9 +301,12 @@ function Test-TargetResource
         $UsageLogMaxSpaceGB
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for usage application '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

@@ -120,7 +120,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting user profile service application $Name"
+    Write-Verbose -Message "Getting user profile property $Name"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -139,13 +139,11 @@ function Get-TargetResource
             return $nullReturn 
         }
 
-        $caURL = (Get-SpWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { 
+        $caURL = (Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { 
             $_.IsAdministrationWebApplication -eq $true 
         }).Url
 
         $context = Get-SPServiceContext -Site $caURL 
-        $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
-                                                -ArgumentList $context
         
         $userProfileSubTypeManager = Get-SPDSCUserProfileSubTypeManager -Context $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
@@ -173,6 +171,9 @@ function Get-TargetResource
             PropertyName =""
             Direction = ""
         }
+
+        $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
+                                                -ArgumentList $context
         $syncConnection  = $userProfileConfigManager.ConnectionManager | `
             Where-Object -FilterScript { 
                 $null -ne $_.PropertyMapping.Item($params.Name) 
@@ -347,7 +348,8 @@ function Set-TargetResource
     # Note for integration test: CA can take a couple of minutes to notice the change. don't try 
     # refreshing properties page. Go through from a fresh "flow" from Service apps page 
 
-    Write-Verbose -Message "Creating user profile property $Name"
+    Write-Verbose -Message "Setting user profile property $Name"
+
     $PSBoundParameters.Ensure = $Ensure
 
     $test = $PSBoundParameters
@@ -383,7 +385,7 @@ function Set-TargetResource
             return $null
         }
         
-        $caURL = (Get-SpWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { 
+        $caURL = (Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript { 
             $_.IsAdministrationWebApplication -eq $true 
         }).Url
         $context = Get-SPServiceContext $caURL 
@@ -398,13 +400,8 @@ function Set-TargetResource
         }
         $coreProperties = $userProfileConfigManager.ProfilePropertyManager.GetCoreProperties()                              
         
-        $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
-        $userProfileTypeProperties = $userProfilePropertyManager.GetProfileTypeProperties([Microsoft.Office.Server.UserProfiles.ProfileType]::User)
-        
         $userProfileSubTypeManager = Get-SPDSCUserProfileSubTypeManager $context
         $userProfileSubType = $userProfileSubTypeManager.GetProfileSubtype("UserProfile")
-        
-        $userProfileSubTypeProperties = $userProfileSubType.Properties
 
         $userProfileProperty = $userProfileSubType.Properties.GetPropertyByName($params.Name) 
 
@@ -419,11 +416,11 @@ function Set-TargetResource
 
         if ($params.ContainsKey("TermSet"))
         {
-            $currentTermSet=$userProfileProperty.CoreProperty.TermSet;
+            $currentTermSet = $userProfileProperty.CoreProperty.TermSet;
             if($currentTermSet.Name -ne $params.TermSet -or 
                 $currentTermSet.Group.Name -ne $params.TermGroup -or 
-                $currentTermSet.TermStore.Name -ne $params.TermStore){
-
+                $currentTermSet.TermStore.Name -ne $params.TermStore)
+            {
                 $session = New-Object -TypeName Microsoft.SharePoint.Taxonomy.TaxonomySession `
                                       -ArgumentList $caURL
 
@@ -478,6 +475,10 @@ function Set-TargetResource
             {
                 $coreProperty.TermSet = $termSet 
             }
+
+            $userProfilePropertyManager = $userProfileConfigManager.ProfilePropertyManager
+            $userProfileTypeProperties = $userProfilePropertyManager.GetProfileTypeProperties([Microsoft.Office.Server.UserProfiles.ProfileType]::User)
+            $userProfileSubTypeProperties = $userProfileSubType.Properties
 
             $CoreProperties.Add($coreProperty)
             $upTypeProperty = $userProfileTypeProperties.Create($coreProperty)                                                                
@@ -737,9 +738,12 @@ function Test-TargetResource
 
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing for user profile property $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

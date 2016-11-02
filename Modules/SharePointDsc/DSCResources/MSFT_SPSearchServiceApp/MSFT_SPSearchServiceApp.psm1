@@ -78,7 +78,7 @@ function Get-TargetResource
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Search Service Application" 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
@@ -183,6 +183,9 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting Search service application '$Name'"
+
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
@@ -254,7 +257,7 @@ function Set-TargetResource
                 {
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                         Where-Object -FilterScript { 
-                            $_.TypeName -eq "Search Service Application" 
+                            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                         }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
@@ -274,7 +277,7 @@ function Set-TargetResource
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                 Where-Object -FilterScript { 
-                    $_.TypeName -eq "Search Service Application" 
+                    $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                 }
             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
             $setParams = @{
@@ -293,7 +296,7 @@ function Set-TargetResource
             {
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                     Where-Object -FilterScript { 
-                        $_.TypeName -eq "Search Service Application" 
+                        $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
                     }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
@@ -311,9 +314,20 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Search Service Application"
+                $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
+
             }
-            Remove-SPServiceApplication $serviceApp -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
         }
     }
 }
@@ -366,8 +380,11 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing Search service application '$Name'"
+
+    $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($PSBoundParameters.ContainsKey("DefaultContentAccessAccount") `
         -and $Ensure -eq "Present") 
@@ -379,7 +396,6 @@ function Test-TargetResource
         }
     }
     
-    $PSBoundParameters.Ensure = $Ensure
     if ($Ensure -eq "Present") 
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `

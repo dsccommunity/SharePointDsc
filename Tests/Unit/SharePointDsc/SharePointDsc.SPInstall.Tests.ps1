@@ -1,21 +1,25 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPInstall"
 
-$ModuleName = "MSFT_SPInstall"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-
-        function New-SPDscMockPrereq()
+        # Initialize tests
+        function New-SPDscMockPrereq
         {
             param
             (
@@ -24,73 +28,105 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
                 $Name
             )
             $object = New-Object -TypeName System.Object
-            $object = $object | Add-Member -type NoteProperty -Name "DisplayName" -Value $Name -PassThru
+            $object = $object | Add-Member -Type NoteProperty `
+                                           -Name "DisplayName" `
+                                           -Value $Name `
+                                           -PassThru
             return $object
         }
 
-
-        $testParams = @{
-            BinaryDir = "C:\SPInstall"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            Ensure = "Present"
-        }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
-        
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber }
-        
-        Mock Get-ChildItem {
-            return @(
-                @{
+        # Mocks for all contexts   
+        Mock -CommandName Get-ChildItem -MockWith {
+            $full = @{
                     Version = "4.5.0.0"
                     Release = "0"
                     PSChildName = "Full"
-                },
-                @{
+                } 
+
+                $client = @{
                     Version = "4.5.0.0"
                     Release = "0"
                     PSChildName = "Client"
-                }
-            )
+                } 
+
+                $returnval = @($full, $client)
+                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 380000 } -PassThru
+                return $returnval
+        }
+
+        Mock -CommandName Get-SPDSCAssemblyVersion -MockWith { 
+            return $Global:SPDscHelper.CurrentStubBuildNumber.Major 
         }
         
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
-        }
-        
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
 
-        Context "SharePoint binaries are not installed but should be" {
-            Mock Get-ItemProperty { return $null }
+        # Test contexts
+        Context -Name "SharePoint binaries are not installed but should be" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
 
-            It "returns absent from the get method" {
+            Mock -CommandName Get-ItemProperty -MockWith { 
+                return $null 
+            }
+
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method"  {
+            It "Should return false from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "SharePoint binaries are installed and should be" {
-            Mock Get-ItemProperty { return @(
-                (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
-                (New-SPDscMockPrereq -Name "Something else")
-            ) } 
+        Context -Name "SharePoint binaries are installed and should be" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-ItemProperty -MockWith { 
+                return @(
+                    (New-SPDscMockPrereq -Name "Microsoft SharePoint Server 2013"),
+                    (New-SPDscMockPrereq -Name "Something else")
+                ) 
+            } -ParameterFilter { $null -ne $Path }
 
-            It "returns present from the get method" {
+            Mock -CommandName Get-ItemProperty -MockWith {
+                return @{
+                    VersionInfo = @{
+                        FileVersion = "15.0.4709.1000"
+                    }
+                } 
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
-            It "returns true from the test method" {
+            It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "SharePoint installation executes as expected" {
-            Mock Start-Process { @{ ExitCode = 0 }}
+        Context -Name "SharePoint installation executes as expected" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Start-Process -MockWith { 
+                return @{ 
+                    ExitCode = 0 
+                }
+            }
 
             It "reboots the server after a successful installation" {
                 Set-TargetResource @testParams
@@ -98,74 +134,107 @@ Describe "SPInstall - SharePoint Build $((Get-Item $SharePointCmdletModule).Dire
             }
         }
 
-        Context "SharePoint installation fails" {
-            Mock Start-Process { @{ ExitCode = -1 }}
+        Context -Name "SharePoint installation fails" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Start-Process -MockWith { 
+                return @{ 
+                    ExitCode = -1 
+                }
+            }
 
-            It "throws an exception on an unknown exit code" {
+            It "Should throw an exception on an unknown exit code" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
 
-        $testParams.Ensure = "Absent"
+        Context -Name "SharePoint binaries are installed and should not be" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Absent"
+            }
+            
+            Mock -CommandName Get-ItemProperty -MockWith { return @{} }  -ParameterFilter { $null -ne $Path }
 
-        Context "SharePoint binaries are installed and should not be" {
-            Mock Get-ItemProperty { return @{} } 
-
-            It "throws in the test method because uninstall is unsupported" {
+            It "Should throw in the test method because uninstall is unsupported" {
                 { Test-TargetResource @testParams } | Should Throw
             }
 
-            It "throws in the set method because uninstall is unsupported" {
+            It "Should throw in the set method because uninstall is unsupported" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
         
-        Context "SharePoint 2013 is installing on a server with .NET 4.6" {
-            Mock Get-ChildItem {
-                return @(
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Full"
-                    },
-                    @{
-                        Version = "4.6.0.0"
-                        Release = "0"
-                        PSChildName = "Client"
-                    }
-                )
+        Context -Name "SharePoint 2013 is installing on a server with .NET 4.6" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                $full = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Full"
+                } 
+
+                $client = @{
+                    Version = "4.6.0.0"
+                    Release = "0"
+                    PSChildName = "Client"
+                } 
+
+                $returnval = @($full, $client)
+                $returnVal = $returnVal | Add-Member ScriptMethod GetValue { return 391000 } -PassThru
+                return $returnval
             }
             
-            It "throws an error in the set method" {
+            It "Should throw an error in the set method" {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
         
-        
-        $testParams = @{
-            BinaryDir = "C:\SPInstall"
-            ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
-            Ensure = "Present"
-            InstallPath = "C:\somewhere"
-            DataPath = "C:\somewhere\else"
-        }
-        Context "SharePoint is not installed and should be, using custom install directories" {
-            Mock Get-ItemProperty { return $null }
+        Context -Name "SharePoint is not installed and should be, using custom install directories" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                Ensure = "Present"
+                InstallPath = "C:\somewhere"
+                DataPath = "C:\somewhere\else"
+            }
 
-            It "returns absent from the get method" {
+            Mock -CommandName Get-ItemProperty -MockWith { 
+                return $null 
+            } -ParameterFilter { 
+                $null -ne $Path 
+            }
+
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "returns false from the test method"  {
+            It "Should return false from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            Mock Start-Process { @{ ExitCode = 0 }}
+            Mock -CommandName Start-Process { 
+                return @{ 
+                    ExitCode = 0 
+                }
+            }
 
             It "reboots the server after a successful installation" {
                 Set-TargetResource @testParams
                 $global:DSCMachineStatus | Should Be 1
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -8,11 +8,11 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -73,7 +73,6 @@ function Get-TargetResource
     return $result
 }
 
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -83,15 +82,17 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
     )
+
+    Write-Verbose -Message "Setting service instance '$Name'"
 
     $newName = (Get-SPDscServiceTypeName -DisplayName $Name)
     $invokeArgs = @{
@@ -105,6 +106,7 @@ function Set-TargetResource
 
         Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
+            $newName = $args[1]
             
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
                 $_.TypeName -eq $params.Name -or `
@@ -134,6 +136,7 @@ function Set-TargetResource
 
         Invoke-SPDSCCommand @invokeArgs -ScriptBlock {
             $params = $args[0]
+            $newName = $args[1]
             
             $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
                 $_.TypeName -eq $params.Name -or `
@@ -159,7 +162,6 @@ function Set-TargetResource
     }
 }
 
-
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -170,17 +172,18 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
     )
 
     Write-Verbose -Message "Testing service instance '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
 
     $testArgs = @{

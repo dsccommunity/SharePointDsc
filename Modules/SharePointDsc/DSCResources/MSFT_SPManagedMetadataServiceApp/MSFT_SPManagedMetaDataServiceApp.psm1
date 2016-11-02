@@ -56,8 +56,8 @@ function Get-TargetResource
         { 
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
-            $_.TypeName -eq "Managed Metadata Service" 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
         }
 
         if ($null -eq $serviceApp)
@@ -77,20 +77,40 @@ function Get-TargetResource
                     $proxyName = $serviceAppProxy.Name
                 }
             }
+
+            # Get the ContentTypeHubUrl value
+            $hubUrl = ""
+            try 
+            {
+                $propertyFlags = [System.Reflection.BindingFlags]::Instance `
+                                -bor [System.Reflection.BindingFlags]::NonPublic
+
+                $propData = $serviceApp.GetType().GetMethods($propertyFlags)
+                $method = $propData | Where-Object -FilterScript {
+                    $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                } 
+                $defaultPartitionId = [Guid]::Parse("0C37852B-34D0-418e-91C6-2AC25AF4BE5B")
+                $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri
+            }
+            catch [System.Exception] 
+            {
+                $hubUrl = ""
+            }
+
             return @{
-                Name            = $serviceApp.DisplayName
-                ProxyName       = $proxyName
-                Ensure          = "Present"
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName    = $serviceApp.Database.Name
-                DatabaseServer  = $serviceApp.Database.Server.Name
-                InstallAccount  = $params.InstallAccount
+                Name              = $serviceApp.DisplayName
+                ProxyName         = $proxyName
+                Ensure            = "Present"
+                ApplicationPool   = $serviceApp.ApplicationPool.Name
+                DatabaseName      = $serviceApp.Database.Name
+                DatabaseServer    = $serviceApp.Database.Server.Name
+                ContentTypeHubUrl = $hubUrl.TrimEnd('/')
+                InstallAccount    = $params.InstallAccount
             }
         }
     }
     return $result
 }
-
 
 function Set-TargetResource
 {
@@ -130,6 +150,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $InstallAccount    
     )
+
+    Write-Verbose -Message "Setting managed metadata service application $Name"
 
     $result = Get-TargetResource @PSBoundParameters
 
@@ -188,11 +210,28 @@ function Set-TargetResource
                 $params = $args[0]
                 
                 $serviceApp = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
-                        $_.TypeName -eq "Managed Metadata Service" 
+                    | Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 Set-SPMetadataServiceApplication -Identity $serviceApp -ApplicationPool $appPool
+            }
+        }
+
+        if (($PSBoundParameters.ContainsKey("ContentTypeHubUrl") -eq $true) `
+            -and ($ContentTypeHubUrl.TrimEnd('/') -ne $result.ContentTypeHubUrl.TrimEnd('/')))
+        {
+            Write-Verbose -Message "Updating Content type hub for Managed Metadata Service Application $Name"
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+                $params = $args[0]
+                
+                $serviceApp = Get-SPServiceApplication -Name $params.Name `
+                    | Where-Object -FilterScript {
+                        $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication" 
+                }
+                Set-SPMetadataServiceApplication -Identity $serviceApp -HubUri $params.ContentTypeHubUrl
             }
         }
     }
@@ -204,16 +243,26 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
-            $params = $args[0]
-            
+            $params = $args[0] 
+
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.TypeName -eq "Managed Metadata Service"  
+                $_.GetType().FullName -eq "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"  
+
             }
-            Remove-SPServiceApplication $serviceApp -Confirm:$false
+
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
+            Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
         }
     }
 }
-
 
 function Test-TargetResource
 {
@@ -255,13 +304,21 @@ function Test-TargetResource
         $InstallAccount      
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
-    Write-Verbose -Message "Testing for Managed Metadata Service Application '$Name'"
+    Write-Verbose -Message "Testing managed metadata service application $Name"
+
     $PSBoundParameters.Ensure = $Ensure
+    if ($PSBoundParameters.ContainsKey("ContentTypeHubUrl") -eq $true)
+    {
+        $PSBoundParameters.ContentTypeHubUrl = $ContentTypeHubUrl.TrimEnd('/')
+    }
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "Ensure")
+                                    -ValuesToCheck @("ApplicationPool", 
+                                                     "ContentTypeHubUrl", 
+                                                     "Ensure")
 }
-
 
 Export-ModuleMember -Function *-TargetResource

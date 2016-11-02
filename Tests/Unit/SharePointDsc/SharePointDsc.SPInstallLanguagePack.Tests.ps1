@@ -1,80 +1,95 @@
 [CmdletBinding()]
 param(
-    [string] $SharePointCmdletModule = (Join-Path $PSScriptRoot "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" -Resolve)
+    [Parameter(Mandatory = $false)]
+    [string] 
+    $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
+                                         -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
+                                         -Resolve)
 )
 
-$ErrorActionPreference = 'stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $PSScriptRoot `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -Resolve)
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
-$Global:CurrentSharePointStubModule = $SharePointCmdletModule 
+$Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
+                                              -DscResource "SPInstallLanguagePack"
 
-$ModuleName = "MSFT_SPInstallLanguagePack"
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\DSCResources\$ModuleName\$ModuleName.psm1") -Force
-Import-Module (Join-Path $RepoRoot "Modules\SharePointDsc\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1") -Force
+Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
+    InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
+        Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdletModule).Directory.BaseName)" {
-    InModuleScope $ModuleName {
-        $testParams = @{
-            BinaryDir = "C:\SPInstall"
-            Ensure    = "Present"
+        # Initialize tests
+
+        # Mocks for all contexts   
+        Mock -CommandName Test-Path -MockWith {
+            return $true
         }
-        Import-Module (Join-Path ((Resolve-Path $PSScriptRoot\..\..\..).Path) "Modules\SharePointDsc")
 
-        $versionBeingTested = (Get-Item $Global:CurrentSharePointStubModule).Directory.BaseName
-        $majorBuildNumber = $versionBeingTested.Substring(0, $versionBeingTested.IndexOf("."))
-        Mock Get-SPDSCAssemblyVersion { return $majorBuildNumber }
-                
-        Mock Invoke-SPDSCCommand { 
-            return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
+        Mock -CommandName Get-ChildItem -MockWith {
+            return @{
+                Name = "C:\SPInstall\osrv.nl-nl"
+            }
         }
- 
-        Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
-        Import-Module $Global:CurrentSharePointStubModule -WarningAction SilentlyContinue 
-        
-        Context "Specified update file not found" {
-            Mock Test-Path { return $false }
 
-            It "should throw exception in the get method" {
+        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+            if ($Value -eq "SetupType")
+            {
+                return "CLEAN_INSTALL"
+            }
+
+            if ($Value -eq "LanguagePackInstalled")
+            {
+                return 0
+            }
+        }
+
+        Mock -CommandName Start-Process -MockWith {
+            return @{
+                ExitCode = 0
+            }
+        }
+
+        # Test contexts
+        Context -Name "Specified update file not found" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path { 
+                return $false 
+            }
+
+            It "Should throw exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
 
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
 
-            It "should throw exception in the test method"  {
+            It "Should throw exception in the test method"  {
                 { Test-TargetResource @testParams } | Should Throw "Specified path cannot be found"
             }
         }
 
-        Context "Language Pack is installed, installation not required" {
-            Mock Test-Path {
+        Context -Name "Language Pack is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
                 return $true
             }
-            
-            Mock Get-ChildItem {
+
+            Mock -CommandName Get-ChildItem -MockWith {
                 return @{
                     Name = "C:\SPInstall\osrv.nl-nl"
                 }
             }
 
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
-                {
-                    return @{
-                        FileMajorPart = 15
-                    }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
-                    }
-                }
-            }
-
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -86,54 +101,53 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
-                }
-                else 
-                {
-                    return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
                 }
             }
 
-            It "should return Ensure is Present from the get method" {
+            It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
             }
 
-            It "should return true from the test method"  {
+            It "Should return true from the test method"  {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
 
-        Context "Language Pack is not installed, installation executed successfully" {
-            Mock Test-Path {
-                return $true
+        Context -Name "Language Pack is not installed, installation executed successfully" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
             }
             
-            Mock Get-ChildItem {
-                return @{
-                    Name = "C:\SPInstall\osrv.nl-nl"
-                }
-            }
-            
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    return @{
-                        FileMajorPart = 15
+                    15 {
+                        return @("Microsoft SharePoint Server 2013")
                     }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
+                    16 {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -145,8 +159,8 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
@@ -156,54 +170,49 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Start-Process {
+            Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 0
                 }
             }
 
-            It "should return Ensure is Present from the get method" {
+            It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
 
-            It "should run the Start-Process function in the set method" {
+            It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
             }
 
-            It "should return true from the test method"  {
+            It "Should return true from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "Language Pack is not installed, installation executed, reboot required" {
-            Mock Test-Path {
-                return $true
+        Context -Name "Language Pack is not installed, installation executed, reboot required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
             }
             
-            Mock Get-ChildItem {
-                return @{
-                    Name = "C:\SPInstall\osrv.nl-nl"
-                }
-            }
-
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    return @{
-                        FileMajorPart = 15
+                    15 {
+                        return @("Microsoft SharePoint Server 2013")
                     }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
+                    16 {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -215,8 +224,8 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
@@ -226,54 +235,49 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Start-Process {
+            Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 17022
                 }
             }
 
-            It "should return Ensure is Present from the get method" {
+            It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
 
-            It "should run the Start-Process function in the set method" {
+            It "Should run the Start-Process function in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Start-Process
             }
 
-            It "should return true from the test method"  {
+            It "Should return true from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "Language Pack is not installed, installation executed, which failed" {
-            Mock Test-Path {
-                return $true
-            }
-            
-            Mock Get-ChildItem {
-                return @{
-                    Name = "C:\SPInstall\osrv.nl-nl"
-                }
+        Context -Name "Language Pack is not installed, installation executed, which failed" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
             }
 
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    return @{
-                        FileMajorPart = 15
+                    15 {
+                        return @("Microsoft SharePoint Server 2013")
                     }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
+                    16 {
+                        return @("Microsoft SharePoint Server 2016")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -285,8 +289,8 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013")
                 }
@@ -296,54 +300,55 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
 
-            Mock Start-Process {
+            Mock -CommandName Start-Process -MockWith {
                 return @{
                     ExitCode = 1
                 }
             }
 
-            It "should return Ensure is Present from the get method" {
+            It "Should return Ensure is Present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
             }
 
-            It "should run the Start-Process function in the set method" {
+            It "Should run the Start-Process function in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint Language Pack install failed, exit code was 1"
                 Assert-MockCalled Start-Process
             }
 
-            It "should return true from the test method"  {
+            It "Should return true from the test method"  {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
 
-        Context "Language Pack does not have language in the name, throws exception" {
-            Mock Test-Path {
-                return $true
+        Context -Name "Language Pack does not have language in the name, throws exception" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
             }
-            
-            Mock Get-ChildItem {
+
+            Mock -CommandName Get-ChildItem {
                 return @{
                     Name = "C:\SPInstall\osrv"
                 }
             }
-
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
+            
+            Mock -CommandName Get-SPDscFarmProductsInfo {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    return @{
-                        FileMajorPart = 15
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -355,8 +360,8 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
@@ -366,38 +371,39 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
 
-            It "should throw exception in the get method" {
+            It "Should throw exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "Update does not contain the language code in the correct format."
             }
         }
 
-        Context "Language Pack has unknown language in the name, throws exception" {
-            Mock Test-Path {
-                return $true
+        Context -Name "Language Pack has unknown language in the name, throws exception" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osrv.xx-xx"
+                }
             }
             
-            Mock Get-ChildItem {
-                return @{
-                    Name = "C:\SPInstall\osrv.ab-cd"
-                }
-            }
-
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscFarmProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
-                    return @{
-                        FileMajorPart = 15
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                     }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
                 }
             }
 
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -409,8 +415,8 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            Mock Get-SPDscFarmProductsInfo {
-                if ($majorBuildNumber -eq  15)
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
                     return @("Microsoft SharePoint Server 2013", "Language Pack for SharePoint and Project Server 2013  - Dutch/Nederlands")
                 }
@@ -420,38 +426,18 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
             
-            It "should throw exception in the get method" {
+            It "Should throw exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "Error while converting language information:"
             }
         }
 
-        Context "Upgrade pending - Skipping install" {
-            Mock Test-Path {
-                return $true
+        Context -Name "Upgrade pending - Skipping install" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
             }
             
-            Mock Get-ChildItem {
-                return @{
-                    Name = "C:\SPInstall\osrv.nl-nl"
-                }
-            }
-
-            Mock Get-SPDSCInstalledProductVersion {
-                if ($majorBuildNumber -eq  15)
-                {
-                    return @{
-                        FileMajorPart = 15
-                    }
-                }
-                else 
-                {
-                    return @{
-                        FileMajorPart = 16
-                    }
-                }
-            }
-
-            Mock Get-SPDSCRegistryKey {
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "SetupType")
                 {
                     return "CLEAN_INSTALL"
@@ -463,34 +449,30 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 }
             }
 
-            It "should return null from  the set method" {
+            It "Should return null from  the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
 
-        Context "BinaryInstallDays outside range" {
+        Context -Name "BinaryInstallDays outside range" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 BinaryInstallDays    = "mon"
                 Ensure               = "Present"
             }
 
-            Mock Test-Path {
-                return $true
-            }
-
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
             
-            It "should return null from the set method" {
+            It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
 
-        Context "BinaryInstallTime outside range" {
+        Context -Name "BinaryInstallTime outside range" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 BinaryInstallDays    = "sun"
@@ -498,22 +480,18 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 Ensure               = "Present"
             }
 
-            Mock Test-Path {
-                return $true
-            }
-
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
             
-            It "should return null from the set method" {
+            It "Should return null from the set method" {
                 Set-TargetResource @testParams | Should BeNullOrEmpty
             }
         }
 
-        Context "BinaryInstallTime incorrectly formatted, too many arguments" {
+        Context -Name "BinaryInstallTime incorrectly formatted, too many arguments" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 BinaryInstallDays    = "sun"
@@ -521,22 +499,18 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 Ensure               = "Present"
             }
 
-            Mock Test-Path {
-                return $true
-            }
-
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
             
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Time window incorrectly formatted."
             }
         }
 
-        Context "BinaryInstallTime incorrectly formatted, incorrect start time" {
+        Context -Name "BinaryInstallTime incorrectly formatted, incorrect start time" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 BinaryInstallDays    = "sun"
@@ -544,22 +518,18 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 Ensure               = "Present"
             }
 
-            Mock Test-Path {
-                return $true
-            }
-
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
             
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting start time"
             }
         }
 
-        Context "BinaryInstallTime incorrectly formatted, incorrect end time" {
+        Context -Name "BinaryInstallTime incorrectly formatted, incorrect end time" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 BinaryInstallDays    = "sun"
@@ -567,22 +537,18 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 Ensure               = "Present"
             }
 
-            Mock Test-Path {
-                return $true
-            }
-
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
             
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error converting end time"
             }
         }
 
-        Context "BinaryInstallTime start time larger than end time" {
+        Context -Name "BinaryInstallTime start time larger than end time" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 BinaryInstallDays    = "sun"
@@ -590,35 +556,32 @@ Describe "SPInstallLanguagePack - SharePoint Build $((Get-Item $SharePointCmdlet
                 Ensure               = "Present"
             }
 
-            Mock Test-Path {
-                return $true
-            }
-
             $testDate = Get-Date -Day 17 -Month 7 -Year 2016 -Hour 12 -Minute 00 -Second 00
 
-            Mock Get-Date {
+            Mock -CommandName Get-Date -MockWith {
                  return $testDate
             }
             
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Error: Start time cannot be larger than end time"
             }
         }
 
-        Context "Ensure is set to Absent" {
+        Context -Name "Ensure is set to Absent" -Fixture {
             $testParams = @{
                 BinaryDir            = "C:\SPInstall"
                 Ensure               = "Absent"
             }
-            Mock Test-Path { return $true }
 
-            It "should throw exception in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
             }
 
-            It "should throw exception in the test method"  {
+            It "Should throw exception in the test method"  {
                 { Test-TargetResource @testParams } | Should Throw "SharePointDsc does not support uninstalling SharePoint Language Packs. Please remove this manually."
             }
         }
-    }    
+    }
 }
+
+Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

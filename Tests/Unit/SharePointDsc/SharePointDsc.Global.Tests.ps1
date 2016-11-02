@@ -11,9 +11,19 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..\..).Path
 
 Describe 'SharePointDsc whole of module tests' {
 
-    Context "Validate example files" {
+    Context -Name "Validate example files" {
         
-        It "should compile MOFs for all examples correctly" {
+        It "Should compile MOFs for all examples correctly" {
+
+            ## For Appveyor builds copy the module to the system modules directory so it falls 
+            ## in to a PSModulePath folder and is picked up correctly. 
+            if ($env:APPVEYOR -eq $true) 
+            {
+                Copy-item -Path "$env:APPVEYOR_BUILD_FOLDER\Modules\SharePointDsc" `
+                          -Destination 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' `
+                          -Recurse
+            }
+
             $examplesWithErrors = 0
             $dummyPassword = ConvertTo-SecureString "-" -AsPlainText -Force
             $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("username", $dummyPassword)
@@ -34,7 +44,7 @@ Describe 'SharePointDsc whole of module tests' {
                 )
             }
             
-            Get-ChildItem "$RepoRoot\Modules\SharePointDsc\Examples" -Filter "*.ps1" -Recurse | ForEach-Object -Process {
+            Get-ChildItem -Path "$RepoRoot\Modules\SharePointDsc\Examples" -Filter "*.ps1" -Recurse | ForEach-Object -Process {
                     $path = $_.FullName
                     try
                     {
@@ -54,7 +64,15 @@ Describe 'SharePointDsc whole of module tests' {
                         Write-Warning $_.Exception.Message
                     }
                 } 
-            $examplesWithErrors | Should Be 0    
+            $examplesWithErrors | Should Be 0
+
+            if ($env:APPVEYOR -eq $true) 
+            {
+                Remove-item -Path 'C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\SharePointDsc' `
+                            -Recurse -Force -Confirm:$false
+                # Restore the load of the module to ensure future tests have access to it
+                Import-Module -Name "$RepoRoot\modules\SharePointDsc\SharePointDsc.psd1" -Global -Force
+            }    
         }
     }
 }

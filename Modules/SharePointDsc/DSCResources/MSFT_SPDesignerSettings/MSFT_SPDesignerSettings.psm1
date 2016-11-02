@@ -407,9 +407,13 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing SharePoint Designer configuration settings"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) { return $false }
+    if ($null -eq $CurrentValues)
+    {
+        return $false
+    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters

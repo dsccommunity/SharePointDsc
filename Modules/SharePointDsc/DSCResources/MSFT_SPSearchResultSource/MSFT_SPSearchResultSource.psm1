@@ -47,10 +47,27 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         [void] [Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Server.Search")
-            
+
+        $nullReturn = @{
+            Name = $params.Name
+            SearchServiceAppName = $params.SearchServiceAppName
+            Query = $null
+            ProviderType = $null
+            ConnectionUrl = $null
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        }            
         $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.SearchServiceAppName
         $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-        $searchSite = Get-SPWeb -Identity $searchSiteUrl
+        $searchSite = Get-SPWeb -Identity $searchSiteUrl -ErrorAction SilentlyContinue
+
+        if ($null -eq $searchSite)
+        {
+            Write-Verbose -Message ("Search centre site collection does not exist at " + `
+                                    "$searchSiteUrl. Unable to create search context " + `
+                                    "to determine result source details.")
+            return $nullReturn
+        }
 
         $adminNamespace = "Microsoft.Office.Server.Search.Administration"
         $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
@@ -83,20 +100,11 @@ function Get-TargetResource
         }
         else 
         {
-            return @{
-                Name = $params.Name
-                SearchServiceAppName = $params.SearchServiceAppName
-                Query = $null
-                ProviderType = $null
-                ConnectionUrl = $null
-                Ensure = "Absent"
-                InstallAccount = $params.InstallAccount
-            }
+            return $nullReturn
         }
     }
     return $result
 }
-
 
 function Set-TargetResource
 {
@@ -139,11 +147,12 @@ function Set-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Setting search result source '$Name'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    Write-Verbose -Message "Creating search result source '$Name'"
-
-    if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present") {
+    if ($CurrentValues.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    {
         Write-Verbose -Message "Creating search result source $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -155,7 +164,15 @@ function Set-TargetResource
                             -Identity $params.SearchServiceAppName
 
             $searchSiteUrl = $serviceApp.SearchCenterUrl -replace "/pages"
-            $searchSite = Get-SPWeb -Identity $searchSiteUrl
+            $searchSite = Get-SPWeb -Identity $searchSiteUrl -ErrorAction SilentlyContinue
+
+            if ($null -eq $searchSite)
+            {
+                throw ("Search centre site collection does not exist at " + `
+                       "$searchSiteUrl. Unable to create search context " + `
+                       "to set result source.")
+                return
+            }
 
             $adminNamespace = "Microsoft.Office.Server.Search.Administration"
             $queryNamespace = "Microsoft.Office.Server.Search.Administration.Query"
@@ -185,7 +202,9 @@ function Set-TargetResource
             $resultSource.Commit()
         }
     }
-    if ($Ensure -eq "Absent") {
+
+    if ($Ensure -eq "Absent")
+    {
         Write-Verbose -Message "Removing search result source $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
@@ -259,12 +278,15 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
     Write-Verbose -Message "Testing search result source '$Name'"
+
     $PSBoundParameters.Ensure = $Ensure
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters -ValuesToCheck @("Ensure") 
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Ensure") 
 }
 
 Export-ModuleMember -Function *-TargetResource
-

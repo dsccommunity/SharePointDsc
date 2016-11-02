@@ -45,7 +45,7 @@ function Get-TargetResource
 
     $products = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -ScriptBlock {
-        return Get-SPDscFarmProductsInfo
+        return Get-SPDscRegProductsInfo 
     }
 
     # Extract language from filename
@@ -158,6 +158,8 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
+
+    Write-Verbose -Message "Setting install status of SharePoint Language Pack"
 
     if ($Ensure -eq "Absent") 
     {
@@ -344,6 +346,10 @@ function Test-TargetResource
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing install status of SharePoint Language Pack"
+
+    $PSBoundParameters.Ensure = $Ensure
+
     if ($Ensure -eq "Absent") 
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint " + `
@@ -351,10 +357,7 @@ function Test-TargetResource
         return
     }
 
-    $PSBoundParameters.Ensure = $Ensure
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    Write-Verbose -Message "Testing for installation of the SharePoint Language Pack"
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `

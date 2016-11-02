@@ -61,7 +61,8 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Updating app domain settings for $SiteUrl"
+    Write-Verbose -Message "Setting app catalog status of $SiteUrl"
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
@@ -85,7 +86,8 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing app domain settings"
+    Write-Verbose -Message "Testing app catalog status of $SiteUrl"
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("SiteUrl") 

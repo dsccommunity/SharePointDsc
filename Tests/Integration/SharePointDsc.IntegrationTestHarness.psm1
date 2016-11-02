@@ -47,7 +47,7 @@ function Invoke-SPDscIntegrationTest() {
     $testResults = @{}
     
     # Execute Pre, main and Post tests for each sequence object
-    $testSequence | ForEach-Object {
+    $testSequence | ForEach-Object -Process {
         Write-Verbose "Starting tests for 'Pre$_'"
         $testResults.Add("Pre$_", (Invoke-Pester "$repoDir\Tests\Integration" -Tag "Pre$_" -PassThru))
         
@@ -59,7 +59,7 @@ function Invoke-SPDscIntegrationTest() {
     }
     
     # Output the results
-    $testResults.Keys | ForEach-Object {
+    $testResults.Keys | ForEach-Object -Process {
         $result = $testResults.$_
         Write-Output -InputObject "$_ - Passed: $($result.PassedCount) Failed: $($result.FailedCount)"
         $result.TestResult | Where-Object { $_.Passed -ne $true }
