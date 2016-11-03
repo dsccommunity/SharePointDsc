@@ -8,7 +8,9 @@
     "through2": "^2.0.1",
     "markdownlint": "^0.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp-concat": "^2.6.0"
+  },
   "scripts": {
     "test": "powershell -File .vscode\\RunPesterTests.ps1"
   },

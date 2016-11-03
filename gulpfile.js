@@ -1,19 +1,21 @@
 var gulp = require("gulp");
+var concat = require("gulp-concat");
 var through2 = require("through2");
 var markdownlint = require("markdownlint");
-var fs = require('fs');
 
 gulp.task("test-mdsyntax", function task() {
-  return gulp.src("Modules/**/*.md", { "read": false })
+  return gulp.src("Modules/SharePointDsc/**/*.md", { "read": false })
     .pipe(through2.obj(function obj(file, enc, next) {
       markdownlint(
         { "files": [ file.path ] },
         function callback(err, result) {
           var resultString = (result || "").toString();
           if (resultString) {
-            fs.writeFile('markdownissues.txt', resultString, null);
+            file.contents = new Buffer(resultString);
           }
           next(err, file);
         });
     }))
+    .pipe(concat("markdownissues.txt", { newLine: "\r\n" }))
+    .pipe(gulp.dest("."));
 });
