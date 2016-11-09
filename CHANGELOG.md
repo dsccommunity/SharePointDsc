@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Added testing for valid markdown syntax to unit tests 
+
 ## 1.4
 
 * Set-TargetResource of Service Application now also removes all associated
