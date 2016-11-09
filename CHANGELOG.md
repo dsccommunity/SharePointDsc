@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Added testing for valid markdown syntax to unit tests 
+* Added testing for valid markdown syntax to unit tests
 
 ## 1.4
 
