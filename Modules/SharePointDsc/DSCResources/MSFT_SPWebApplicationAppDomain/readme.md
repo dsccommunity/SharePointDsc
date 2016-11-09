@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource will configure the App Domain at a specific zone for the given
 Web Application. The configuration is done per zone on the specified web

@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to manage SharePoint Service Application Proxy Groups.
 The "Ensure" parameter controls whether or not the Proxy Group should exist. A

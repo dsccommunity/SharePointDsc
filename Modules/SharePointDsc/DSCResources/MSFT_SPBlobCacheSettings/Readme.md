@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to configure the Blob Cache settings for a web
 application.
@@ -18,4 +18,3 @@ Note:
 Best practice:
 Specify a directory that is not on the same drive as where either the server
 operating system swap files or server log files are stored.
-

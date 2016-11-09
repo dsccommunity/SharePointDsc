@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to provision a new SharePoint farm. It should only be
 used on the first server in the farm to create the configuration database, all

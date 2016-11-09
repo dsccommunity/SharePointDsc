@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource will provision an instance of the user profile service to the
 farm. It creates the required databases using the parameters that are passed

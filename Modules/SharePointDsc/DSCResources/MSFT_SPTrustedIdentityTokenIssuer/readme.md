@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to create or remove SPTrustedIdentityTokenIssuer in a
 SharePoint farm.

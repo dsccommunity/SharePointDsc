@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to make sure that a specific farm solution is either
 present or absent in a farm. The solution can be deployed to one or more web

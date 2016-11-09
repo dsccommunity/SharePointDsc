@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource will create a binding to an Office Online Server (formerly known
 as Office Web Apps). The DnsName property can be a single server name, or a

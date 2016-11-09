@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to install the SharePoint binaries. The BinaryDir
 parameter should point to the path that setup.exe is located (not to setup.exe

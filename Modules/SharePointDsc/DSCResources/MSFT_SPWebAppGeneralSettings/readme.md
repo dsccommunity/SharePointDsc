@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is responsible for setting web application settings that are
 found under the "general settings" screen in central admin. The web

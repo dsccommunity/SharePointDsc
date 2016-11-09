@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is responsible for controlling the blocked file type setting on a
 specific web application. It has two modes of operation, the first is to use

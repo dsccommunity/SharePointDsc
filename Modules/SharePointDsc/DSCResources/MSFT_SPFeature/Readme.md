@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to make sure that a specific feature is either enabled
 or disabled at a given URL/scope. The Ensure property will dictate if the

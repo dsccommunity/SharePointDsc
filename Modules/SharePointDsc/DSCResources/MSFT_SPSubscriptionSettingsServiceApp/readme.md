@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to provision and manage an instance of the App Management
 Services Service Application. It will identify an instance of the subscription

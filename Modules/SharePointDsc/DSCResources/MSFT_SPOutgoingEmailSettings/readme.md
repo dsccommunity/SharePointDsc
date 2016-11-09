@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to set the outgoing email settings for either a single
 web application, or the whole farm. To configure the resource for a specific

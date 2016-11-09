@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to perform the update step of installing SharePoint
 updates, like Cumulative Updates and Service Packs. The SetupFile parameter
@@ -14,7 +14,11 @@ IMPORTANT:
 This resource retrieves build information from the Configuration Database.
 Therefore it requires SharePoint to be installed and a farm created. If you
 like to deploy a new farm and install updates automatically, you need to
-implement the following order: 1. Install the SharePoint Binaries (SPInstall)
+implement the following order:
+
+1. Install the SharePoint Binaries (SPInstall)
 2. (Optional) Install SharePoint Language Pack(s) Binaries
-(SPInstallLanguagePack) 3. Create SPFarm (SPCreateFarm) 4. Install Cumulative
-Updates (SPProductUpdate) 5. Run the Configuration Wizard (SPConfigWizard)
+   (SPInstallLanguagePack)
+3. Create SPFarm (SPCreateFarm)
+4. Install Cumulative Updates (SPProductUpdate)
+5. Run the Configuration Wizard (SPConfigWizard)

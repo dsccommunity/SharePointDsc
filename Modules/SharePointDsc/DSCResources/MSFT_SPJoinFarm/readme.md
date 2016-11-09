@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource will be responsible for joining a server to an existing
 SharePoint farm. To create a new farm use the SPCreateFarm resource on a

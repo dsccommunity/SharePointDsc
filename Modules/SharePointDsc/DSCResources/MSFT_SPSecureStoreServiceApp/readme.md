@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is responsible for provisioning and configuring the secure store
 service application. The parameters passed in (except those related to database

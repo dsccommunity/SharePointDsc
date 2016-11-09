@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 This resource is used to configure quota templates in the farm. These settings
 will be used to make sure a certain quota template exists or not. When it
