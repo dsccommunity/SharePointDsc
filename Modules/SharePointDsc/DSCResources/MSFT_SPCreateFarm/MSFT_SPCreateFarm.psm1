@@ -60,7 +60,7 @@ function Get-TargetResource
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
-        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16 `
+        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -eq 16 `
         -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4456 `
         -and ($ServerRole -eq "ApplicationWithSearch" `
              -or $ServerRole -eq "WebFrontEndWithDistributedCache")) 
@@ -180,7 +180,7 @@ function Set-TargetResource
     }
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
-        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16 `
+        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -eq 16 `
         -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4456 `
         -and ($ServerRole -eq "ApplicationWithSearch" `
              -or $ServerRole -eq "WebFrontEndWithDistributedCache")) 

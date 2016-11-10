@@ -42,6 +42,18 @@ function Get-TargetResource
         throw [Exception] "Server role is only supported in SharePoint 2016."
     }
 
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
+        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -eq 16 `
+        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4456 `
+        -and ($ServerRole -eq "ApplicationWithSearch" `
+             -or $ServerRole -eq "WebFrontEndWithDistributedCache")) 
+    {
+        throw [Exception] ("ServerRole values of 'ApplicationWithSearch' or " + `
+                           "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " + `
+                           "Feature Pack 1 to be installed. See " + `
+                           "https://support.microsoft.com/en-au/kb/3127940")
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -116,6 +128,18 @@ function Set-TargetResource
         -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
     {
         throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
+
+    if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
+        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -eq 16 `
+        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4456 `
+        -and ($ServerRole -eq "ApplicationWithSearch" `
+             -or $ServerRole -eq "WebFrontEndWithDistributedCache")) 
+    {
+        throw [Exception] ("ServerRole values of 'ApplicationWithSearch' or " + `
+                           "'WebFrontEndWithDistributedCache' require the SharePoint 2016 " + `
+                           "Feature Pack 1 to be installed. See " + `
+                           "https://support.microsoft.com/en-au/kb/3127940")
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
