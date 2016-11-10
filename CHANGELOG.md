@@ -3,6 +3,7 @@
 ### Unreleased
  * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is null
  * Fixed bug with search topology that caused issues with names of servers needing to all be the same case
+ * Added minimum PowerShell version to module manifest
 
 ### 1.4
  * Set-TargetResource of Service Application now also removes all associated proxies
