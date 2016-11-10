@@ -2,6 +2,7 @@
 
 ### Unreleased
  * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is null
+ * Fixed bug with search topology that caused issues with names of servers needing to all be the same case
 
 ### 1.4
  * Set-TargetResource of Service Application now also removes all associated proxies
