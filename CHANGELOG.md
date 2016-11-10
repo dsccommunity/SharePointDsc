@@ -250,7 +250,6 @@
   PowerShell 5
 
 ## 0.5.0.0
->>>>>>> 2a5fa47f1f0abe14eb8338f060627b68033bd61a
 
 * Fixed bug with detection of version in create farm
 * Minor fixes
