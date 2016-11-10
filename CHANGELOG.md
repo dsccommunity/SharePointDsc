@@ -4,6 +4,7 @@
 
 * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
   null
+* Added minimum PowerShell version to module manifest
 * Added testing for valid markdown syntax to unit tests
 
 ## 1.4
