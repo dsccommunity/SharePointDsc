@@ -2,6 +2,7 @@
 
 ### Unreleased
  * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is null
+ * Added minimum PowerShell version to module manifest
 
 ### 1.4
  * Set-TargetResource of Service Application now also removes all associated proxies
