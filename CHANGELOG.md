@@ -3,6 +3,7 @@
 ### Unreleased
  * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is null
  * Added minimum PowerShell version to module manifest
+ * Added support for MinRole enhancements added in SP2016 Feature Pack 1
 
 ### 1.4
  * Set-TargetResource of Service Application now also removes all associated proxies

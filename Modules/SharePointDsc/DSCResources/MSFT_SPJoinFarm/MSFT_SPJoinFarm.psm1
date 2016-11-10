@@ -23,13 +23,14 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] 
         [System.String] 
         [ValidateSet("Application",
+                     "ApplicationWithSearch",
                      "Custom",
                      "DistributedCache",
                      "Search",
                      "SingleServer",
                      "SingleServerFarm",
-                     "SpecialLoad",
-                     "WebFrontEnd")] 
+                     "WebFrontEnd",
+                     "WebFrontEndWithDistributedCache")] 
         $ServerRole
     )
 
@@ -98,13 +99,14 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] 
         [System.String] 
         [ValidateSet("Application",
+                     "ApplicationWithSearch",
                      "Custom",
                      "DistributedCache",
                      "Search",
                      "SingleServer",
                      "SingleServerFarm",
-                     "SpecialLoad",
-                     "WebFrontEnd")] 
+                     "WebFrontEnd",
+                     "WebFrontEndWithDistributedCache")] 
         $ServerRole
     )
 
@@ -214,13 +216,14 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] 
         [System.String] 
         [ValidateSet("Application",
+                     "ApplicationWithSearch",
                      "Custom",
                      "DistributedCache",
                      "Search",
                      "SingleServer",
                      "SingleServerFarm",
-                     "SpecialLoad",
-                     "WebFrontEnd")] 
+                     "WebFrontEnd",
+                     "WebFrontEndWithDistributedCache")] 
         $ServerRole
     )
 
