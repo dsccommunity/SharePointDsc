@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.3.0.0'
+ModuleVersion = '1.4.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -126,21 +126,40 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = '
- * Fixed typo on return value in SPServiceAppProxyGroup
- * Fixed SPJoinFarm to not write output during successful farm join
- * Fixed issue with SPSearchTopology to keep array of strings in the hashtable returned by Get-Target  
- * Fixed issue with SPSearchTopology that prevented topology from updating where ServerName was not returned on each component
- * Added ProxyName parameter to all service application resources
- * Changed SPServiceInstance to look for object type names instead of the display name to ensure consistency with language packs
- * Fixed typos in documentation for InstallAccount parameter on most resources
- * Fixed a bug where SPQuotaTemplate would not allow warning and limit values to be equal
- * New resources: SPConfigWizard, SPProductUpdate and SPPublishServiceApplication
- * Updated style of all script in module to align with PowerShell team standards
- * Changed parameter ClaimsMappings in SPTrustedIdentityTokenIssuer to consume an array of custom object MSFT_SPClaimTypeMapping
- * Changed SPTrustedIdentityTokenIssuer to throw an exception if certificate specified has a private key, since SharePoint doesn''t accept it
- * Fixed issue with SPTrustedIdentityTokenIssuer to stop if cmdlet New-SPTrustedIdentityTokenIssuer returns null
- * Fixed issue with SPTrustedIdentityTokenIssuer to correctly get parameters ClaimProviderName and ProviderSignOutUri
- * Fixed issue with SPTrustedIdentityTokenIssuer to effectively remove the SPTrustedAuthenticationProvider from all zones before deleting the SPTrustedIdentityTokenIssuer
+ * Set-TargetResource of Service Application now also removes all associated proxies
+ * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
+  - SPAccessServiceApp
+  - SPAppManagementServiceApp
+  - SPBCSServiceApp
+  - SPExcelServiceApp
+  - SPManagedMetaDataServiceApp
+  - SPPerformancePointServiceApp
+  - SPSearchServiceApp
+  - SPSearchCrawlRule
+  - SPSecureStoreServiceApp
+  - SPSubscriptionSettingsServiceApp
+  - SPUsageApplication
+  - SPUserProfileServiceApp
+  - SPVisioServiceApp
+  - SPWordAutomationServiceApp
+  - SPWorkManagementServiceApp
+ * Fixed issue with SPServiceInstance for OS not in En-Us language, add GetType().Name method in:
+  - SPDistributedCacheService
+  - SPUserProfileSyncService
+ * Fixed issue with SPInstallLanguagePack to install before farm creation
+ * Fixed issue with mounting SPContentDatabase
+ * Fixed issue with SPShellAdmin and Content Database method
+ * Fixed issue with SPServiceInstance (Set-TargetResource) for OS not in En-Us language
+ * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
+ * Improved code styling
+ * SPVisioServiceapplication now creates proxy and lets you specify a name for it
+ * New resources: SPAppStoreSettings
+ * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
+ * Refactored unit tests to consolidate and streamline test approaches
+ * Updated SPExcelServiceApp resource to add support for trusted file locations and most other properties of the service app
+ * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
+ * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
+ * Updated documentation of SPProductUpdate to reflect the required install order of product updates
 '
 
     } # End of PSData hashtable

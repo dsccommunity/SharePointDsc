@@ -24,6 +24,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts   
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
         Mock -CommandName New-SPExcelServiceApplication -MockWith { }
+        Mock -CommandName Get-SPExcelFileLocation -MockWith { }
+        Mock -CommandName Set-SPExcelServiceApplication -MockWith { }
+        Mock -CommandName New-SPExcelFileLocation -MockWith { }
+        Mock -CommandName Set-SPExcelFileLocation -MockWith { }
+        Mock -CommandName Remove-SPExcelFileLocation -MockWith { }
 
         # Test contexts
         switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major) 
@@ -158,6 +163,190 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     
                     It "Should return true when the Test method is called" {
                         Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+
+                Context -Name "When the service app should have trusted locations, but doesn't" -Fixture {
+                    $testParams = @{
+                        Name = "Test Excel Services App"
+                        ApplicationPool = "Test App Pool"
+                        TrustedFileLocations = @(
+                            (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
+                                Address = "http://"
+                                LocationType = "SharePoint"
+                                WorkbookSizeMax = 10
+                            })
+                        )
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { 
+                        $spServiceApp = [PSCustomObject]@{ 
+                            TypeName = "Excel Services Application Web Service Application"
+                            DisplayName = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                        return @()
+                    }
+
+                    It "Should return no trusted location results from the get method" {
+                        (Get-TargetResource @testParams).TrustedFileLocations | Should BeNullOrEmpty
+                    }
+
+                    It "Should return false from the test method" {
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+
+                    It "Should create the trusted location in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName New-SPExcelFileLocation
+                    }
+                }
+
+                Context -Name "When the service app should have trusted locations, but the settings don't match" -Fixture {
+                    $testParams = @{
+                        Name = "Test Excel Services App"
+                        ApplicationPool = "Test App Pool"
+                        TrustedFileLocations = @(
+                            (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
+                                Address = "http://"
+                                LocationType = "SharePoint"
+                                WorkbookSizeMax = 10
+                            })
+                        )
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { 
+                        $spServiceApp = [PSCustomObject]@{ 
+                            TypeName = "Excel Services Application Web Service Application"
+                            DisplayName = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                        return @(@{
+                            Address = "http://"
+                            LocationType = "SharePoint"
+                            WorkbookSizeMax = 2
+                        })
+                    }
+
+                    It "Should return trusted location results from the get method" {
+                        (Get-TargetResource @testParams).TrustedFileLocations | Should Not BeNullOrEmpty
+                    }
+
+                    It "Should return false from the test method" {
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+
+                    It "Should update the trusted location in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName Set-SPExcelFileLocation
+                    }
+                }
+
+                Context -Name "When the service app should have trusted locations, and does" -Fixture {
+                    $testParams = @{
+                        Name = "Test Excel Services App"
+                        ApplicationPool = "Test App Pool"
+                        TrustedFileLocations = @(
+                            (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
+                                Address = "http://"
+                                LocationType = "SharePoint"
+                                WorkbookSizeMax = 10
+                            })
+                        )
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { 
+                        $spServiceApp = [PSCustomObject]@{ 
+                            TypeName = "Excel Services Application Web Service Application"
+                            DisplayName = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                        return @(@{
+                            Address = "http://"
+                            LocationType = "SharePoint"
+                            WorkbookSizeMax = 10
+                        })
+                    }
+
+                    It "Should return trusted location results from the get method" {
+                        (Get-TargetResource @testParams).TrustedFileLocations | Should Not BeNullOrEmpty
+                    }
+
+                    It "Should return true from the test method" {
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+
+                Context -Name "When the service app should have trusted locations, and does but also has an extra one that should be removed" -Fixture {
+                    $testParams = @{
+                        Name = "Test Excel Services App"
+                        ApplicationPool = "Test App Pool"
+                        TrustedFileLocations = @(
+                            (New-CimInstance -ClassName MSFT_SPExcelFileLocation -ClientOnly -Property @{
+                                Address = "http://"
+                                LocationType = "SharePoint"
+                                WorkbookSizeMax = 10
+                            })
+                        )
+                    }
+
+                    Mock -CommandName Get-SPServiceApplication -MockWith { 
+                        $spServiceApp = [PSCustomObject]@{ 
+                            TypeName = "Excel Services Application Web Service Application"
+                            DisplayName = $testParams.Name
+                            ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        }
+                        $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                            return @{ FullName = $getTypeFullName } 
+                        } -PassThru -Force
+                        return $spServiceApp
+                    }
+
+                    Mock -CommandName Get-SPExcelFileLocation -MockWith { 
+                        return @(@{
+                            Address = "http://"
+                            LocationType = "SharePoint"
+                            WorkbookSizeMax = 10
+                        },
+                        @{
+                            Address = "https://"
+                            LocationType = "SharePoint"
+                            WorkbookSizeMax = 10
+                        })
+                    }
+
+                    It "Should return trusted location results from the get method" {
+                        (Get-TargetResource @testParams).TrustedFileLocations | Should Not BeNullOrEmpty
+                    }
+
+                    It "Should return false from the test method" {
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+
+                    It "Should remove the trusted location in the set method" {
+                        Set-TargetResource @testParams
+                        Assert-MockCalled -CommandName Remove-SPExcelFileLocation
                     }
                 }
             }
