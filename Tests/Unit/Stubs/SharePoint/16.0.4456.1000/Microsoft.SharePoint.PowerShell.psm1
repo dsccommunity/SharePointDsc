@@ -68,9 +68,9 @@ param(
 function Add-SPDiagnosticsPerformanceCounter { 
   [CmdletBinding(DefaultParameterSetName='AddCounter', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
-    [Parameter(ParameterSetName='AddInstance', Mandatory=$true, Position=1, ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddMultipleCounters', Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddCounter', Mandatory=$true, Position=1, ValueFromPipelineByPropertyName=$true)]
+    [Parameter(ParameterSetName='AddInstance', Mandatory=$true, Position=1, ValueFromPipelineByPropertyName=$true)]
     [string]
     ${Category},
 
@@ -84,26 +84,26 @@ param(
     [string[]]
     ${CounterList},
 
-    [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddInstance', Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+    [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
     [string]
     ${Instance},
 
-    [Parameter(ParameterSetName='AddInstance', ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddCounter', ValueFromPipelineByPropertyName=$true)]
+    [Parameter(ParameterSetName='AddInstance', ValueFromPipelineByPropertyName=$true)]
     [switch]
     ${WebFrontEnd},
 
+    [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddCounter', ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddInstance', ValueFromPipelineByPropertyName=$true)]
-    [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
     [switch]
     ${DatabaseServer},
 
-    [Parameter(ParameterSetName='AddInstance', ValueFromPipelineByPropertyName=$true)]
-    [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='AddCounter', ValueFromPipelineByPropertyName=$true)]
+    [Parameter(ParameterSetName='AddMultipleCounters', ValueFromPipelineByPropertyName=$true)]
+    [Parameter(ParameterSetName='AddInstance', ValueFromPipelineByPropertyName=$true)]
     [switch]
     ${AllInstances},
 
@@ -116,8 +116,18 @@ param(
 
 
 function Add-SPDistributedCacheServiceInstance { 
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName='NoArgumentsDefaultSet')]
 param(
+    [Parameter(ParameterSetName='LocalServerRoleSet')]
+    [ValidateSet('DistributedCache','SingleServerFarm','WebFrontEndWithDistributedCache')]
+    [object]
+    ${Role},
+
+    [Parameter(ParameterSetName='CacheSizeSet')]
+    [ValidateRange(1, 2147483647)]
+    [int]
+    ${CacheSizeInMB},
+
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
@@ -269,11 +279,11 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Availability},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${OutgoingScheme},
 
     [System.Nullable[int]]
@@ -1093,8 +1103,8 @@ param(
     [string]
     ${DatabaseFailOverPartner},
 
-    [ValidateSet('Application','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd')]
-    [object]
+    [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
+    [System.Nullable[object]]
     ${LocalServerRole},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -1274,6 +1284,43 @@ param(
 
     [switch]
     ${PreserveSiteId},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Copy-SPTaxonomyGroups { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [string]
+    ${LocalTermStoreName},
+
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [uri]
+    ${RemoteSiteUrl},
+
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [uri]
+    ${LocalSiteUrl},
+
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [string[]]
+    ${GroupNames},
+
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [pscredential]
+    ${Credential},
+
+    [string]
+    ${AuthEndpoint},
+
+    [string]
+    ${GraphApiEndpoint},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -1482,6 +1529,17 @@ param(
 
 function Disable-SPUserLicensing { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
+param(
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Disable-SPUserSolutionAllowList { 
+  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -1803,6 +1861,17 @@ param(
 
 function Enable-SPUserLicensing { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
+param(
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Enable-SPUserSolutionAllowList { 
+  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -3328,7 +3397,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [string]
@@ -4824,7 +4893,7 @@ param(
     ${Name},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Availability},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -4942,7 +5011,7 @@ param(
     [int]
     ${Count},
 
-    [object]
+    [System.Nullable[object]]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -5088,7 +5157,7 @@ param(
     [int]
     ${Count},
 
-    [object]
+    [System.Nullable[object]]
     ${MajorAction},
 
     [System.Nullable[guid]]
@@ -5983,6 +6052,22 @@ param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
     [object]
     ${Site},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Get-SPUserSolutionAllowList { 
+  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNull()]
+    [object]
+    ${WebApplication},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -6995,8 +7080,8 @@ param(
 function Install-SPSolution { 
   [CmdletBinding(DefaultParameterSetName='Deploy', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
-    [Parameter(ParameterSetName='Deploy', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='Synchronize', Position=0, ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='Deploy', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [object]
     ${Identity},
 
@@ -7185,6 +7270,36 @@ param(
 
     [switch]
     ${ExcludeNestedCorrelation},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Merge-SPUsageLog { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [object]
+    ${Identity},
+
+    [datetime]
+    ${StartTime},
+
+    [datetime]
+    ${EndTime},
+
+    [string[]]
+    ${Servers},
+
+    [string]
+    ${DiagnosticLogPath},
+
+    [switch]
+    ${OverWrite},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -8206,14 +8321,14 @@ param(
 function New-SPClaimsPrincipal { 
   [CmdletBinding(DefaultParameterSetName='IdentityType')]
 param(
-    [Parameter(ParameterSetName='IdentityType', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='TrustIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='IdentityType', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${Identity},
 
-    [Parameter(ParameterSetName='STSIdentity', Mandatory=$true, Position=2)]
     [Parameter(ParameterSetName='TrustIdentity', Mandatory=$true, Position=1)]
+    [Parameter(ParameterSetName='STSIdentity', Mandatory=$true, Position=2)]
     [ValidateNotNullOrEmpty()]
     [object]
     ${TrustedIdentityTokenIssuer},
@@ -8228,14 +8343,14 @@ param(
     [string]
     ${EncodedClaim},
 
-    [Parameter(ParameterSetName='STSIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='ClaimProvider', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='STSIdentity', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${ClaimValue},
 
-    [Parameter(ParameterSetName='STSIdentity', Position=1)]
     [Parameter(ParameterSetName='ClaimProvider', Mandatory=$true, Position=1)]
+    [Parameter(ParameterSetName='STSIdentity', Position=1)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${ClaimType},
@@ -8358,8 +8473,8 @@ param(
     [string]
     ${DatabaseFailOverServer},
 
-    [ValidateSet('Application','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd')]
-    [object]
+    [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
+    [System.Nullable[object]]
     ${LocalServerRole},
 
     [switch]
@@ -8658,7 +8773,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlPriority},
 
     [System.Nullable[int]]
@@ -8667,7 +8782,7 @@ param(
     [System.Nullable[int]]
     ${MaxSiteEnumerationDepth},
 
-    [object]
+    [System.Nullable[object]]
     ${SharePointCrawlBehavior},
 
     [object]
@@ -8825,7 +8940,7 @@ param(
     [string]
     ${ContentClass},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -8909,7 +9024,7 @@ param(
     ${SearchApplication},
 
     [Parameter(Mandatory=$true)]
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [Parameter(Mandatory=$true)]
@@ -9506,7 +9621,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -9794,8 +9909,8 @@ param(
     ${HubUri},
 
     [Parameter(ParameterSetName='Quota', Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-    [Parameter(ParameterSetName='NoQuota', Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
     [Parameter(ParameterSetName='Default', Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [Parameter(ParameterSetName='NoQuota', Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
     [string]
     ${Name},
 
@@ -9905,8 +10020,8 @@ param(
     ${ServiceContext},
 
     [Parameter(Mandatory=$true)]
-    [ValidateLength(0, 246)]
     [ValidateNotNull()]
+    [ValidateLength(0, 246)]
     [string]
     ${Name},
 
@@ -10320,8 +10435,8 @@ param(
 function New-SPRequestManagementRuleCriteria { 
   [CmdletBinding()]
 param(
-    [Parameter(ParameterSetName='CustomPropertyParameterSet', Mandatory=$true, Position=0)]
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=0)]
+    [Parameter(ParameterSetName='CustomPropertyParameterSet', Mandatory=$true, Position=0)]
     [string]
     ${Value},
 
@@ -10331,13 +10446,13 @@ param(
 
     [Parameter(ParameterSetName='StandardParameterSet', Mandatory=$true, Position=1)]
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Property},
 
-    [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
+    [Parameter(ParameterSetName='CustomPropertyParameterSet', Position=2)]
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${MatchType},
 
     [Parameter(ParameterSetName='StandardParameterSet', Position=2)]
@@ -10553,9 +10668,9 @@ function New-SPServiceApplicationProxyGroup {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
-    [ValidateLength(0, 100)]
-    [ValidateNotNull()]
     [AllowEmptyString()]
+    [ValidateNotNull()]
+    [ValidateLength(0, 100)]
     [string]
     ${Name},
 
@@ -10877,16 +10992,16 @@ param(
 function New-SPTrustedIdentityTokenIssuer { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
-    [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
+    [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet', Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${Name},
 
-    [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
+    [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet', Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${Description},
@@ -10894,7 +11009,7 @@ param(
     [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet')]
     [ValidateNotNull()]
-    [Object]
+    [System.Security.Cryptography.X509Certificates.X509Certificate2]
     ${ImportTrustCertificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -10902,15 +11017,15 @@ param(
     [uri]
     ${MetadataEndPoint},
 
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
     [object]
     ${ClaimsMappings},
 
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
-    [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet', Mandatory=$true)]
+    [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
     ${SignInUrl},
@@ -10921,13 +11036,13 @@ param(
     [string]
     ${IdentifierClaim},
 
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName='BasicParameterSet')]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [object]
     ${ClaimProvider},
 
-    [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
+    [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true)]
     [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
     [string]
@@ -10948,9 +11063,9 @@ param(
     [string]
     ${IdentifierClaimIs},
 
-    [Parameter(ParameterSetName='BasicParameterSet')]
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName='ActiveDirectoryBackedParameterSet')]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
+    [Parameter(ParameterSetName='BasicParameterSet')]
     [ValidateNotNullOrEmpty()]
     [string]
     ${SignOutUrl},
@@ -11075,13 +11190,13 @@ param(
     [string]
     ${DatabaseServer},
 
-    [ValidateNotNullOrEmpty()]
     [ValidateLength(1, 135)]
+    [ValidateNotNullOrEmpty()]
     [string]
     ${FailoverDatabaseServer},
 
-    [ValidateNotNullOrEmpty()]
     [ValidateLength(1, 128)]
+    [ValidateNotNullOrEmpty()]
     [string]
     ${DatabaseName},
 
@@ -11229,6 +11344,27 @@ param(
     [Parameter(Mandatory=$true)]
     [string]
     ${Type},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function New-SPUserSolutionAllowList { 
+  [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNull()]
+    [object]
+    ${Site},
+
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    ${ListTitle},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -12319,7 +12455,7 @@ param(
     [object]
     ${SearchApplication},
 
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [string]
@@ -14762,14 +14898,14 @@ param(
     [object]
     ${SiteSubscription},
 
-    [Parameter(ParameterSetName='WebHostSetup', Mandatory=$true)]
     [Parameter(ParameterSetName='WebHostCredential', Mandatory=$true)]
+    [Parameter(ParameterSetName='WebHostSetup', Mandatory=$true)]
     [Parameter(ParameterSetName='WebHostEndPoint', Mandatory=$true)]
     [object]
     ${ConnectionType},
 
-    [Parameter(ParameterSetName='WebHostCredential', Mandatory=$true)]
     [Parameter(ParameterSetName='WebHostSetup', Mandatory=$true)]
+    [Parameter(ParameterSetName='WebHostCredential', Mandatory=$true)]
     [string]
     ${Username},
 
@@ -14814,8 +14950,8 @@ function Set-SPAppDomain {
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
 param(
     [Parameter(Mandatory=$true, Position=0)]
-    [AllowNull()]
     [AllowEmptyString()]
+    [AllowNull()]
     [string]
     ${AppDomain},
 
@@ -15124,8 +15260,8 @@ param(
     [string]
     ${DisplayName},
 
-    [Parameter(ParameterSetName='NameRemove')]
     [Parameter(ParameterSetName='NameValue')]
+    [Parameter(ParameterSetName='NameRemove')]
     [ValidateNotNull()]
     [string]
     ${PropertyName},
@@ -15747,7 +15883,7 @@ param(
     ${StartAddresses},
 
     [Alias('p')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlPriority},
 
     [Parameter(ParameterSetName='Weekly')]
@@ -15804,7 +15940,7 @@ param(
     ${CrawlScheduleRunEveryInterval},
 
     [Parameter(ParameterSetName='Weekly')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlScheduleDaysOfWeek},
 
     [Parameter(ParameterSetName='MonthlyDate')]
@@ -15813,7 +15949,7 @@ param(
 
     [Parameter(ParameterSetName='MonthlyDate')]
     [Alias('month')]
-    [object]
+    [System.Nullable[object]]
     ${CrawlScheduleMonthsOfYear},
 
     [System.Nullable[int]]
@@ -15911,7 +16047,7 @@ param(
     ${SearchApplication},
 
     [Alias('t')]
-    [object]
+    [System.Nullable[object]]
     ${Type},
 
     [System.Nullable[bool]]
@@ -15935,7 +16071,7 @@ param(
     [string]
     ${ContentClass},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -16419,7 +16555,7 @@ param(
     [System.Nullable[bool]]
     ${SecurityTrimmingEnabled},
 
-    [object]
+    [System.Nullable[object]]
     ${SpellingDictionary},
 
     [System.Nullable[timespan]]
@@ -16548,7 +16684,7 @@ param(
     [System.Nullable[bool]]
     ${AutoDiscover},
 
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationType},
 
     [string]
@@ -16626,7 +16762,7 @@ param(
     [string]
     ${DiacriticSensitive},
 
-    [object]
+    [System.Nullable[object]]
     ${DefaultSearchProvider},
 
     [string]
@@ -16751,7 +16887,7 @@ param(
     [string]
     ${ServiceConnectionPointBindingInformation},
 
-    [object]
+    [System.Nullable[object]]
     ${SiteMasterMode},
 
     [System.Nullable[uint32]]
@@ -17074,8 +17210,8 @@ param(
     [switch]
     ${DoNotUnpublishAllPackages},
 
-    [Parameter(ParameterSetName='Quota', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='NoQuota', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='Quota', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='Default', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [object]
     ${Identity},
@@ -17282,11 +17418,11 @@ param(
     ${ServiceAddressURL},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationMode},
 
-    [ValidateNotNull()]
     [ValidateLength(0, 1024)]
+    [ValidateNotNull()]
     [string]
     ${SecureStoreTargetApplicationId},
 
@@ -17315,8 +17451,8 @@ param(
     ${ServiceContext},
 
     [Parameter(ParameterSetName='Name', Mandatory=$true)]
-    [ValidateNotNull()]
     [ValidateLength(0, 255)]
+    [ValidateNotNull()]
     [string]
     ${Name},
 
@@ -17325,11 +17461,11 @@ param(
     ${ServiceAddressMetadataURL},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${AuthenticationMode},
 
-    [ValidateNotNull()]
     [ValidateLength(0, 1024)]
+    [ValidateNotNull()]
     [string]
     ${SecureStoreTargetApplicationId},
 
@@ -18011,7 +18147,7 @@ param(
     ${ThrottlingEnabled},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${RoutingScheme},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18031,15 +18167,15 @@ param(
     ${Identity},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${Availability},
 
     [ValidateNotNull()]
-    [object]
+    [System.Nullable[object]]
     ${OutgoingScheme},
 
-    [ValidateNotNull()]
     [ValidateRange(1, 65535)]
+    [ValidateNotNull()]
     [System.Nullable[int]]
     ${OutgoingPort},
 
@@ -18357,11 +18493,11 @@ param(
     [object]
     ${Identity},
 
-    [object]
+    [System.Nullable[object]]
     ${Status},
 
-    [ValidateSet('WebFrontEnd','Application','DistributedCache','Search','SingleServerFarm','Custom')]
-    [object]
+    [ValidateSet('Application','ApplicationWithSearch','Custom','DistributedCache','Search','SingleServerFarm','WebFrontEnd','WebFrontEndWithDistributedCache')]
+    [System.Nullable[object]]
     ${Role},
 
     [Parameter(ValueFromPipeline=$true)]
@@ -18548,8 +18684,8 @@ param(
     [object]
     ${Identity},
 
-    [Parameter(ParameterSetName='SslCertificateImport')]
     [Parameter(ParameterSetName='SslCertificateReference')]
+    [Parameter(ParameterSetName='SslCertificateImport')]
     [Alias('Port')]
     [ValidateRange(1, 65535)]
     [int]
@@ -19222,15 +19358,15 @@ param(
 function Set-SPTrustedIdentityTokenIssuer { 
   [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
 param(
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='BasicParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Parameter(ParameterSetName='ImportCertificateParameterSet', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [ValidateNotNull()]
     [object]
     ${Identity},
 
-    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
+    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [Parameter(ParameterSetName='BasicParameterSet')]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -19246,15 +19382,15 @@ param(
     [uri]
     ${MetadataEndPoint},
 
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [object]
     ${ClaimsMappings},
 
+    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
-    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [ValidateNotNullOrEmpty()]
     [string]
     ${SignInUrl},
@@ -19266,20 +19402,20 @@ param(
     ${ClaimProvider},
 
     [Parameter(ParameterSetName='BasicParameterSet')]
-    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
+    [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [string]
     ${Realm},
 
-    [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='ImportCertificateParameterSet')]
+    [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
     [switch]
     ${UseWReply},
 
+    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [Parameter(ParameterSetName='BasicParameterSet')]
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
-    [Parameter(ParameterSetName='ImportCertificateParameterSet')]
     [string]
     ${RegisteredIssuerName},
 
@@ -20250,6 +20386,9 @@ param(
     [object]
     ${Identity},
 
+    [switch]
+    ${IncludeCustomServerRole},
+
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
@@ -20390,6 +20529,9 @@ param(
     [object]
     ${Identity},
 
+    [switch]
+    ${IncludeCustomServerRole},
+
     [Parameter(ValueFromPipeline=$true)]
     [object]
     ${AssignmentCollection})
@@ -20405,6 +20547,21 @@ param(
     [ValidateNotNull()]
     [object]
     ${Identity},
+
+    [Parameter(ValueFromPipeline=$true)]
+    [object]
+    ${AssignmentCollection})
+
+ 
+ } 
+
+
+function Stop-SPTaxonomyReplication { 
+  [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+    [pscredential]
+    ${Credential},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
@@ -21409,6 +21566,3 @@ param(
 
  
  } 
-
-
-
