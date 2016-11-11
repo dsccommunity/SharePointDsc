@@ -6,3 +6,6 @@
 .sln
 Modules/SharePointDsc/DscResource.Tests
 Modules/SharePointDsc/DscResource.Tests/*
+node_modules
+node_modules/*
+markdownissues.txt

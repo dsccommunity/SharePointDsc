@@ -210,22 +210,22 @@ function Set-TargetResource
 
         $AllSearchServers = @()
         $AllSearchServers += ($params.Admin | Where-Object -FilterScript { 
-                                $AllSearchServers.Contains($_) -eq $false 
+                                ($AllSearchServers -contains $_) -eq $false 
                             })
         $AllSearchServers += ($params.Crawler | Where-Object -FilterScript { 
-                                $AllSearchServers.Contains($_) -eq $false 
+                                ($AllSearchServers -contains $_) -eq $false 
                             })
         $AllSearchServers += ($params.ContentProcessing | Where-Object -FilterScript { 
-                                $AllSearchServers.Contains($_) -eq $false 
+                                ($AllSearchServers -contains $_) -eq $false 
                             })
         $AllSearchServers += ($params.AnalyticsProcessing | Where-Object -FilterScript { 
-                                $AllSearchServers.Contains($_) -eq $false 
+                                ($AllSearchServers -contains $_) -eq $false 
                             })
         $AllSearchServers += ($params.QueryProcessing | Where-Object -FilterScript { 
-                                $AllSearchServers.Contains($_) -eq $false 
+                                ($AllSearchServers -contains $_) -eq $false 
                             })
         $AllSearchServers += ($params.IndexPartition | Where-Object -FilterScript { 
-                                $AllSearchServers.Contains($_) -eq $false 
+                                ($AllSearchServers -contains $_) -eq $false 
                             })
 
         # Ensure the search service instance is running on all servers
