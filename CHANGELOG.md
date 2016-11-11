@@ -6,6 +6,8 @@
   null
 * Added minimum PowerShell version to module manifest
 * Added testing for valid markdown syntax to unit tests
+* Fixed bug with search topology that caused issues with names of servers needing
+  to all be the same case
 
 ## 1.4
 
