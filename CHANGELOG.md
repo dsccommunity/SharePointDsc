@@ -8,6 +8,8 @@
 * Added testing for valid markdown syntax to unit tests
 * Fixed bug with search topology that caused issues with names of servers needing
   to all be the same case
+* Fixed bug in SPInstallLanguagePack where language packs could not be installed
+  on SharePoint 2016
 
 ## 1.4
 
