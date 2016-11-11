@@ -91,6 +91,10 @@ function Get-TargetResource
                 } 
                 $defaultPartitionId = [Guid]::Parse("0C37852B-34D0-418e-91C6-2AC25AF4BE5B")
                 $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri
+                if ($hubUrl)
+                {
+                    $hubUrl = $hubUrl.TrimEnd('/')
+                }
             }
             catch [System.Exception] 
             {
@@ -104,7 +108,7 @@ function Get-TargetResource
                 ApplicationPool   = $serviceApp.ApplicationPool.Name
                 DatabaseName      = $serviceApp.Database.Name
                 DatabaseServer    = $serviceApp.Database.Server.Name
-                ContentTypeHubUrl = $hubUrl.TrimEnd('/')
+                ContentTypeHubUrl = $hubUrl
                 InstallAccount    = $params.InstallAccount
             }
         }
