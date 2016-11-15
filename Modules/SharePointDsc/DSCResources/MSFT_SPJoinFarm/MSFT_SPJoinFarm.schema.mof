@@ -4,6 +4,6 @@ class MSFT_SPJoinFarm : OMI_BaseResource
     [Key, Description("The name of the config database to connect to")] string FarmConfigDatabaseName;
     [Key, Description("The server that hosts the config database")] string DatabaseServer;
     [Required, Description("The passphrase that should be used to join the farm") , EmbeddedInstance("MSFT_Credential")] string Passphrase;
-    [Write, Description("SharePoint 2016 only - the MinRole role to enroll this server as"), ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
+    [Write, Description("SharePoint 2016 only - the MinRole role to enroll this server as"), ValueMap{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}, Values{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}] string ServerRole;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

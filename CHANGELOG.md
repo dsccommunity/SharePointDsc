@@ -6,6 +6,7 @@
   null
 * Added minimum PowerShell version to module manifest
 * Added testing for valid markdown syntax to unit tests
+* Added support for MinRole enhancements added in SP2016 Feature Pack 1
 * Fixed bug with search topology that caused issues with names of servers needing
   to all be the same case
 * Fixed bug in SPInstallLanguagePack where language packs could not be installed
