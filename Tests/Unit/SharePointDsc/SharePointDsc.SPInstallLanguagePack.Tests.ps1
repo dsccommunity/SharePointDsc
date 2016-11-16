@@ -27,7 +27,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Mock -CommandName Get-ChildItem -MockWith {
             return @{
-                Name = "C:\SPInstall\osrv.nl-nl"
+                Name = "C:\SPInstall\osmui.nl-nl"
             }
         }
 
@@ -85,7 +85,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-ChildItem -MockWith {
                 return @{
-                    Name = "C:\SPInstall\osrv.nl-nl"
+                    Name = "C:\SPInstall\osmui.nl-nl"
                 }
             }
 
@@ -329,7 +329,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-ChildItem {
                 return @{
-                    Name = "C:\SPInstall\osrv"
+                    Name = "C:\SPInstall\osmui"
                 }
             }
             
@@ -384,7 +384,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-ChildItem -MockWith {
                 return @{
-                    Name = "C:\SPInstall\osrv.xx-xx"
+                    Name = "C:\SPInstall\osmui.xx-xx"
                 }
             }
             

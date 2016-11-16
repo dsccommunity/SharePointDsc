@@ -8,6 +8,6 @@ class MSFT_SPCreateFarm : OMI_BaseResource
     [Required, Description("The name of the admin content database")] String AdminContentDatabaseName;
     [Write, Description("What port will Central Admin be provisioned to - default is 9999")] uint32 CentralAdministrationPort;
     [Write, Description("The authentication provider of the CentralAdministration web application"), ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] String CentralAdministrationAuth;
-    [Write, Description("SharePoint 2016 only - the MinRole role to enroll this server as"), ValueMap{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}, Values{"Application","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","SpecialLoad","WebFrontEnd"}] string ServerRole;
+    [Write, Description("SharePoint 2016 only - the MinRole role to enroll this server as"), ValueMap{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}, Values{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}] string ServerRole;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
