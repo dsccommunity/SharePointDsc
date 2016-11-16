@@ -11,6 +11,8 @@
   to all be the same case
 * Fixed bug in SPInstallLanguagePack where language packs could not be installed
   on SharePoint 2016
+* Changed SPWebApplication to infer the use of SSL based on the URL instead of the
+  UseSSL parameter
 
 ## 1.4
 
