@@ -28,6 +28,15 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting AAG configuration for $DatabaseName"
 
+    # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4605)
+    {
+        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+                           "require the SharePoint 2013 April 2014 CU to be installed. " + `
+                           "http://support.microsoft.com/kb/2880551")
+    }
+
     if ($Ensure -eq "Present") 
     {
         Write-Verbose -Message "Database(s) must be included in AAG $AGName"
@@ -144,6 +153,15 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting AAG configuration for $DatabaseName"
+
+    # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4605)
+    {
+        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+                           "require the SharePoint 2013 April 2014 CU to be installed. " + `
+                           "http://support.microsoft.com/kb/2880551")
+    }
 
     if ($Ensure -eq "Present") 
     {
@@ -266,6 +284,15 @@ function Test-TargetResource
     Write-Verbose -Message "Testing AAG configuration for $DatabaseName"
 
     $PSBoundParameters.Ensure = $Ensure
+
+    # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15 `
+        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4605)
+    {
+        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
+                           "require the SharePoint 2013 April 2014 CU to be installed. " + `
+                           "http://support.microsoft.com/kb/2880551")
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     

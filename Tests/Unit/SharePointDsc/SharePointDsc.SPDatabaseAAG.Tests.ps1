@@ -21,7 +21,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts   
         Mock -CommandName Add-DatabaseToAvailabilityGroup -MockWith { }
         Mock -CommandName Remove-DatabaseFromAvailabilityGroup -MockWith { }
-
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15) 
+        {
+            Mock -CommandName Get-SPDSCInstalledProductVersion { 
+                return @{ 
+                    FileMajorPart = 15
+                    FileBuildPart = 4805
+                } 
+            }
+        }
+        
         # Test contexts
         Context -Name "The database is not in an availability group, but should be" -Fixture {
             $testParams = @{
@@ -446,7 +455,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Specified database(s) not found."
             }
-        }        
+        }
+
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15) 
+        {
+            Context -Name "An unsupported version of SharePoint is installed on the server" {
+                $testParams = @{
+                    DatabaseName = "SampleDatabase"
+                    AGName = "AGName"
+                    Ensure = "Present"
+                }
+                
+                Mock -CommandName Get-SPDSCInstalledProductVersion { 
+                    return @{
+                        FileMajorPart = 15
+                        FileBuildPart = 4000
+                    } 
+                }
+
+                It "Should throw when an unsupported version is installed and get is called" {
+                    { Get-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
+                }
+
+                It "Should throw when an unsupported version is installed and test is called" {
+                    { Test-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
+                }
+
+                It "Should throw when an unsupported version is installed and set is called" {
+                    { Set-TargetResource @testParams } | Should throw "Adding databases to SQL Always-On Availability Groups require the SharePoint 2013 April 2014 CU to be installed"
+                }
+            }            
+        }
     }
 }
 
