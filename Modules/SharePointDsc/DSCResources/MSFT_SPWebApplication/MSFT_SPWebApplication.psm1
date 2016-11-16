@@ -45,10 +45,6 @@ function Get-TargetResource
         $Port,
 
         [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
-
-        [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos")]
         [System.String] 
         $AuthenticationMethod,
@@ -105,7 +101,6 @@ function Get-TargetResource
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
-            UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
         }
@@ -158,10 +153,6 @@ function Set-TargetResource
         [parameter(Mandatory = $false)]
         [System.String] 
         $Port,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos")]
@@ -267,10 +258,10 @@ function Set-TargetResource
                 if ($params.ContainsKey("Port") -eq $true) 
                 { 
                     $newWebAppParams.Add("Port", $params.Port) 
-                } 
-                if ($params.ContainsKey("UseSSL") -eq $true) 
+                }
+                if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https") 
                 { 
-                    $newWebAppParams.Add("SecureSocketsLayer", $params.UseSSL) 
+                    $newWebAppParams.Add("SecureSocketsLayer", $true) 
                 } 
             
                 New-SPWebApplication @newWebAppParams | Out-Null
@@ -340,10 +331,6 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]
         [System.String] 
         $Port,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos")]
