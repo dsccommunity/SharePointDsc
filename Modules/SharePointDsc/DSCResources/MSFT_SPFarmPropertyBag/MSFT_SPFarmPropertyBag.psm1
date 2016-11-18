@@ -34,7 +34,7 @@ function Get-TargetResource()
             Write-Verbose -Message ("No local SharePoint farm was detected.")
             return @{
                 Key = $params.Key
-	            Value = $null
+                Value = $null
                 Ensure = 'Absent'
             }
         }
