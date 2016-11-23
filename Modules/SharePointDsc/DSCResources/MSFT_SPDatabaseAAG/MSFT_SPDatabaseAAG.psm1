@@ -47,7 +47,7 @@ function Get-TargetResource
 
             $Ensure = "Present"
             $databases = Get-SPDatabase | Where-Object -FilterScript { 
-                $_.Name -like "*$($params.DatabaseName)*" 
+                $_.Name -like $params.DatabaseName 
             }
 
             if ($null -ne $databases) 
@@ -71,7 +71,7 @@ function Get-TargetResource
             else
             {
                 Write-Verbose -Message "Specified database(s) not found."
-                $Ensure = "Not found"
+                $Ensure = ""
             }
 
             return @{
@@ -92,7 +92,7 @@ function Get-TargetResource
             $params = $args[0]
             
             $databases = Get-SPDatabase | Where-Object -FilterScript { 
-                $_.Name -like "*$($params.DatabaseName)*" 
+                $_.Name -like $params.DatabaseName
             }
 
             $Ensure = "Absent"
@@ -110,7 +110,7 @@ function Get-TargetResource
             else
             {
                 Write-Verbose -Message "Specified database(s) not found."
-                $Ensure = "Not found"
+                $Ensure = ""
             }
 
             return @{
@@ -172,7 +172,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $databases = Get-SPDatabase | Where-Object -FilterScript { 
-                $_.Name -like "*$($params.DatabaseName)*" 
+                $_.Name -like $params.DatabaseName
             }
 
             if ($null -ne $databases) 
@@ -203,7 +203,6 @@ function Set-TargetResource
                     }
                     else
                     {
-                        # Add to AAG
                         Write-Verbose -Message "Adding $DatabaseName to $AGName"
                         $cmdParams = @{
                             AGName = $params.AGName
@@ -225,7 +224,6 @@ function Set-TargetResource
     } 
     else 
     {
-        # Remove from the AAG
         Write-Verbose -Message "Removing $DatabaseName from $AGName"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -233,10 +231,10 @@ function Set-TargetResource
             $params = $args[0]
 
             $databases = Get-SPDatabase | Where-Object -FilterScript { 
-                $_.Name -like "*$($params.DatabaseName)*" 
+                $_.Name -like $params.DatabaseName
             }
 
-            if ($null -ne $databases) 
+            if ($null -ne $databases)
             {
                 foreach ($database in $databases)
                 {
@@ -284,15 +282,6 @@ function Test-TargetResource
     Write-Verbose -Message "Testing AAG configuration for $DatabaseName"
 
     $PSBoundParameters.Ensure = $Ensure
-
-    # Check if the April 2014 CU has been installed. The cmdlets have been added in this CU
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15 `
-        -and (Get-SPDSCInstalledProductVersion).FileBuildPart -lt 4605)
-    {
-        throw [Exception] ("Adding databases to SQL Always-On Availability Groups " + `
-                           "require the SharePoint 2013 April 2014 CU to be installed. " + `
-                           "http://support.microsoft.com/kb/2880551")
-    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     

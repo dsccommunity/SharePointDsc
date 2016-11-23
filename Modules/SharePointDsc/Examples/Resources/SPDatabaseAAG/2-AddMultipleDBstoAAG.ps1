@@ -16,7 +16,7 @@
         node localhost {
             SPDatabaseAAG ConfigDBAAG
             {
-                DatabaseName         = "Content"
+                DatabaseName         = "*Content*"
                 AGName               = "MyAvailabilityGroup"
                 FileShare            = "\\SQL\Backups"
                 PsDscRunAsCredential = $SetupAccount

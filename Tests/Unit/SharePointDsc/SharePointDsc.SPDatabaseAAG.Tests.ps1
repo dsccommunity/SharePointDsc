@@ -62,9 +62,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The databases are not in an availability group, but should be" -Fixture {
+        Context -Name "Multiple databases matching the name pattern are not in an availability group, but should be" -Fixture {
             $testParams = @{
-                DatabaseName = "Sample"
+                DatabaseName = "Sample*"
                 AGName = "AGName"
                 Ensure = "Present"
             }
@@ -98,7 +98,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Single database is not in an availability group, but should be" -Fixture {
             $testParams = @{
-                DatabaseName = "Sample"
+                DatabaseName = "Sample*"
                 AGName = "AGName"
                 Ensure = "Present"
             }
@@ -157,9 +157,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The databases are not in the availability group and should not be" -Fixture {
+        Context -Name "Multiple databases matching the name pattern are not in the availability group and should not be" -Fixture {
             $testParams = @{
-                DatabaseName = "SampleDatabase"
+                DatabaseName = "SampleDatabase*"
                 AGName = "AGName"
                 Ensure = "Absent"
             }
@@ -213,9 +213,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The databases are in the correct availability group and should be" -Fixture {
+        Context -Name "Multiple databases matching the name pattern are in the correct availability group and should be" -Fixture {
             $testParams = @{
-                DatabaseName = "SampleDatabase"
+                DatabaseName = "SampleDatabase*"
                 AGName = "AGName"
                 Ensure = "Present"
             }
@@ -278,9 +278,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The databases are in an availability group and should not be" -Fixture {
+        Context -Name "Multiple databases matching the name pattern are in an availability group and should not be" -Fixture {
             $testParams = @{
-                DatabaseName = "SampleDatabase"
+                DatabaseName = "SampleDatabase*"
                 AGName = "AGName"
                 Ensure = "Absent"
             }
@@ -318,7 +318,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Single database is in an availability group and should not be" -Fixture {
             $testParams = @{
-                DatabaseName = "SampleDatabase"
+                DatabaseName = "SampleDatabase*"
                 AGName = "AGName"
                 Ensure = "Absent"
             }
@@ -445,7 +445,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return Ensure='Not Found' from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Not Found"
+                (Get-TargetResource @testParams).Ensure | Should Be ""
             }
 
             It "Should return false from the test method" {
