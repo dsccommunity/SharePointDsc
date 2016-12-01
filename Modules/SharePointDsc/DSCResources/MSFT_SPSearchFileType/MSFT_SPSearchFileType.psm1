@@ -20,7 +20,7 @@ function Get-TargetResource
         [System.String] 
         $MimeType,
         
-        [parameter(Mandatory = $true)]  
+        [parameter(Mandatory = $false)]  
         [System.Boolean] 
         $Enabled,
         
@@ -35,6 +35,20 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting Search File Type '$FileType'"
+
+    if ($Ensure -eq "Present" -and `
+        (-not($PSBoundParameters.ContainsKey("MimeType")) -or `
+         -not($PSBoundParameters.ContainsKey("Description"))))
+    {
+        Write-Verbose -Message "Ensure is configured as Present, but MimeType and/or Description is missing"
+        $nullReturn = @{
+            FileType = $params.FileType
+            ServiceAppName = $params.ServiceAppName
+            Ensure = "Absent"
+            InstallAccount = $params.InstallAccount
+        }
+        return $nullReturn
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -53,7 +67,7 @@ function Get-TargetResource
          
         if ($null -eq $serviceApps) 
         {
-            Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
+            Write-Verbose -Message "Service Application $($params.ServiceAppName) is not found"
             return $nullReturn 
         }
         
@@ -63,7 +77,7 @@ function Get-TargetResource
 
         if ($null -eq $serviceApp) 
         { 
-            Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
+            Write-Verbose -Message "Service Application $($params.ServiceAppName) is not a search service application"
             return $nullReturn
         } 
         else 
@@ -118,7 +132,7 @@ function Set-TargetResource
         [System.String] 
         $MimeType,
         
-        [parameter(Mandatory = $true)]  
+        [parameter(Mandatory = $false)]  
         [System.Boolean] 
         $Enabled,
         
@@ -134,7 +148,40 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Search File Type '$FileType'"
     
+    if ($Ensure -eq "Present" -and `
+        (-not($PSBoundParameters.ContainsKey("MimeType")) -or `
+         -not($PSBoundParameters.ContainsKey("Description"))))
+    {
+        throw "Ensure is configured as Present, but MimeType and/or Description is missing"
+    }
+
+    $PSBoundParameters.Ensure = $Ensure
+    
     $result = Get-TargetResource @PSBoundParameters
+
+    Write-Verbose -Message "Checking if Service Application '$ServiceAppName' exists"
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
+        $params = $args[0]
+
+        $serviceApps = Get-SPServiceApplication -Name $params.ServiceAppName `
+                                                -ErrorAction SilentlyContinue
+         
+        if ($null -eq $serviceApps) 
+        {
+            throw "Service Application $($params.ServiceAppName) is not found"
+        }
+        
+        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
+        }
+
+        if ($null -eq $serviceApp) 
+        { 
+            throw  "Service Application $($params.ServiceAppName) is not a search service application"
+        } 
+    }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
     {
@@ -147,14 +194,8 @@ function Set-TargetResource
             $newParams = @{
                 FormatId = $params.FileType
                 SearchApplication = $params.ServiceAppName
-            }
-            if ($params.ContainsKey("Description") -eq $true) 
-            {
-                $newParams.Add("FormatName", $params.Description) 
-            }
-            if ($params.ContainsKey("MimeType") -eq $true) 
-            {
-                $newParams.Add("MimeType", $params.MimeType) 
+                FormatName = $params.Description 
+                MimeType = $params.MimeType 
             }
             
             New-SPEnterpriseSearchFileFormat @newParams
@@ -194,14 +235,8 @@ function Set-TargetResource
                     $newParams = @{
                         FormatId = $params.FileType
                         SearchApplication = $params.ServiceAppName
-                    }
-                    if ($params.ContainsKey("Description") -eq $true) 
-                    { 
-                        $newParams.Add("FormatName", $params.Description) 
-                    }
-                    if ($params.ContainsKey("MimeType") -eq $true) 
-                    { 
-                        $newParams.Add("MimeType", $params.MimeType) 
+                        FormatName = $params.Description
+                        MimeType = $params.MimeType
                     }
                     
                     New-SPEnterpriseSearchFileFormat @newParams
@@ -261,7 +296,7 @@ function Test-TargetResource
         [System.String] 
         $MimeType,
         
-        [parameter(Mandatory = $true)]  
+        [parameter(Mandatory = $false)]  
         [System.Boolean] 
         $Enabled,
         

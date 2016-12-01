@@ -17,7 +17,8 @@
             {
                 FileType = "pdf"
                 ServiceAppName = "Search Service Application"
-                Description = "PDF Document"
+                Description = "PDF"
+                MimeType = "application/pdf"
                 Ensure = "Present"
                 PsDscRunAsCredential = $SetupAccount
             }

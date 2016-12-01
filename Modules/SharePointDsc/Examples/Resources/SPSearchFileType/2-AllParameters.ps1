@@ -17,7 +17,7 @@
             {
                 FileType = "pdf"
                 ServiceAppName = "Search Service Application"
-                Description = "PDF Document"
+                Description = "PDF"
                 MimeType = "application/pdf"
                 Enabled = $false
                 Ensure = "Present"

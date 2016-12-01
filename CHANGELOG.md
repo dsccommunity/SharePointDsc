@@ -11,6 +11,7 @@
   to all be the same case
 * Fixed bug in SPInstallLanguagePack where language packs could not be installed
   on SharePoint 2016
+* Added new resource SPSearchFileType
 
 ## 1.4
 
