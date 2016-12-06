@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to set a certificate for authentication to a content source
+    This example shows how to apply settings to a specific file type in search, using all parameters
 #>
 
     Configuration Example 

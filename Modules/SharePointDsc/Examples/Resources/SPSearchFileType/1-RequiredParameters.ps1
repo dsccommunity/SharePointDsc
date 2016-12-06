@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to apply settings to a sepcific URL in search
+    This example shows how to apply settings to a specific file type in search, using the required parameters
 #>
 
     Configuration Example 
