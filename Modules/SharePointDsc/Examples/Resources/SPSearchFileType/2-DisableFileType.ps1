@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to apply settings to a specific file type in search, using all parameters
+    This example shows how to disable a specific file type in search
 #>
 
     Configuration Example 
