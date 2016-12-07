@@ -444,8 +444,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 )
             }
 
-            It "Should return Ensure='Not Found' from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be ""
+            It "Should return DatabaseName='' from the get method" {
+                (Get-TargetResource @testParams).DatabaseName | Should Be ""
             }
 
             It "Should return false from the test method" {

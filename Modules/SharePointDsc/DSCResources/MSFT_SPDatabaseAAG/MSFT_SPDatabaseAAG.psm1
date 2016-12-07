@@ -50,6 +50,7 @@ function Get-TargetResource
                 $_.Name -like $params.DatabaseName 
             }
 
+            $dbname = $params.DatabaseName
             if ($null -ne $databases) 
             {
                 foreach ($database in $databases)
@@ -71,11 +72,11 @@ function Get-TargetResource
             else
             {
                 Write-Verbose -Message "Specified database(s) not found."
-                $Ensure = ""
+                $dbname = ""
             }
 
             return @{
-                DatabaseName = $params.DatabaseName
+                DatabaseName = $dbname
                 AGName = $params.AGName
                 FileShare = $params.FileShare
                 Ensure = $Ensure
@@ -91,11 +92,12 @@ function Get-TargetResource
                                     -ScriptBlock {
             $params = $args[0]
             
+            $Ensure = "Absent"
             $databases = Get-SPDatabase | Where-Object -FilterScript { 
                 $_.Name -like $params.DatabaseName
             }
 
-            $Ensure = "Absent"
+            $dbname = $params.DatabaseName
             if ($null -ne $databases) 
             {
                 foreach ($database in $databases)
@@ -110,11 +112,11 @@ function Get-TargetResource
             else
             {
                 Write-Verbose -Message "Specified database(s) not found."
-                $Ensure = ""
+                $dbname = ""
             }
 
             return @{
-                DatabaseName = $params.DatabaseName
+                DatabaseName = $dbname
                 AGName = $params.AGName
                 FileShare = $params.FileShare
                 Ensure = $Ensure
@@ -287,6 +289,6 @@ function Test-TargetResource
     
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+                                    -ValuesToCheck @("Ensure", "DatabaseName")
 }
 
