@@ -12,6 +12,7 @@
 * Fixed bug in SPInstallLanguagePack where language packs could not be installed
   on SharePoint 2016
 * Added new resource SPSearchFileType
+* Updated SPDatabaseAAG to allow database name patterns
 
 ## 1.4
 
