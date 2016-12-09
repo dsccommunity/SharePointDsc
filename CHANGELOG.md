@@ -16,6 +16,8 @@
 * Fixed a bug were PerformancePoint and Excel Services Service Application
   proxies would not be added to the default proxy group when they are
   provisioned
+* Added an error catch to provide more detail about running SPAppCatalog with
+  accounts other than the farm account
 
 ## 1.4
 

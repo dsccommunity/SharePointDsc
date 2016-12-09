@@ -67,7 +67,16 @@ function Set-TargetResource
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
-        Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false 
+        try 
+        {
+            Update-SPAppCatalogConfiguration -Site $params.SiteUrl -Confirm:$false 
+        }
+        catch [System.UnauthorizedAccessException] 
+        {
+            throw ("This resource must be run as the farm account (not a setup account). " + `
+                   "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
+                   "credentials are set to the farm account and run this resource again")
+        }
     }
 }
 
