@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 1.5
 
 * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
   null
