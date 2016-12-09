@@ -156,7 +156,8 @@ function Set-TargetResource
                 $pName = $params.ProxyName
             }
             New-SPPerformancePointServiceApplicationProxy -Name $pName `
-                                                          -ServiceApplication $params.Name 
+                                                          -ServiceApplication $params.Name `
+                                                          -Default
         }
     }
 

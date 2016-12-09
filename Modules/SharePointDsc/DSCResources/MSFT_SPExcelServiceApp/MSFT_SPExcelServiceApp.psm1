@@ -330,7 +330,8 @@ function Set-TargetResource
             $params = $args[0]
 
             New-SPExcelServiceApplication -Name $params.Name `
-                                          -ApplicationPool $params.ApplicationPool
+                                          -ApplicationPool $params.ApplicationPool `
+                                          -Default
         }
     }
 
