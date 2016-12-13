@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Updated documentation in regards to guidance on installing binaries from
+  network locations instead of locally
+
 ## 1.5
 
 * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
