@@ -96,6 +96,65 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+        {
+            Context -Name "enhanced minrole options fail when Feature Pack 1 is not installed" -Fixture {
+                $testParams = @{
+                    FarmConfigDatabaseName = "SP_Config"
+                    DatabaseServer = "DatabaseServer\Instance"
+                    Passphrase = $mockPassphraseCredential
+                    ServerRole = "ApplicationWithSearch"
+                }
+
+                Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+                    return @{
+                        FileMajorPart = 16
+                        FileBuildPart = 0
+                    }
+                }
+
+                It "Should throw if an invalid server role is used in the get method" {
+                    { Get-TargetResource @testParams } | Should Throw
+                }
+
+                It "Should throw if an invalid server role is used in the test method" {
+                    { Test-TargetResource @testParams } | Should Throw
+                }
+
+                It "Should throw if an invalid server role is used in the set method" {
+                    { Set-TargetResource @testParams } | Should Throw
+                }
+            }
+
+            Context -Name "enhanced minrole options succeed when Feature Pack 1 is installed" -Fixture {
+                $testParams = @{
+                    FarmConfigDatabaseName = "SP_Config"
+                    DatabaseServer = "DatabaseServer\Instance"
+                    Passphrase = $mockPassphraseCredential
+                    ServerRole = "ApplicationWithSearch"
+                }
+
+                Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+                    return @{
+                        FileMajorPart = 16
+                        FileBuildPart = 4456
+                    }
+                }
+
+                It "Should throw if an invalid server role is used in the get method" {
+                    { Get-TargetResource @testParams } | Should Not Throw
+                }
+
+                It "Should throw if an invalid server role is used in the test method" {
+                    { Test-TargetResource @testParams } | Should Not Throw
+                }
+
+                It "Should throw if an invalid server role is used in the set method" {
+                    { Set-TargetResource @testParams } | Should Not Throw
+                }
+            }
+        }
+
         Context -Name "no farm is configured locally and an unsupported version of SharePoint is installed on the server" {
             $testParams = @{
                 FarmConfigDatabaseName = "SP_Config"

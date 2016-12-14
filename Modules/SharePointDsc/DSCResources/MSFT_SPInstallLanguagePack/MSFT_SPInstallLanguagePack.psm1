@@ -36,7 +36,7 @@ function Get-TargetResource
     }
 
     $osrvFolder = Get-ChildItem -Path (Join-Path -Path $BinaryDir `
-                                                 -ChildPath "\osrv*.*")
+                                                 -ChildPath "\osmui*.*")
 
     if ($osrvFolder.Count -ne 1)
     {
