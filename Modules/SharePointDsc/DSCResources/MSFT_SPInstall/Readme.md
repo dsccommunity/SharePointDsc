@@ -8,7 +8,7 @@ depends on the prerequisites already being installed, which can be done
 
 ## Installing from network locations
 
-If you wish to install the SharePoint from a network location this can
+If you wish to install SharePoint from a network location this can
 be done, however you must disable User Account Control (UAC) on the server
 to allow DSC to run the executable from a remote location, and also set
 the PsDscRunAsCredential value to run as an account with local admin
