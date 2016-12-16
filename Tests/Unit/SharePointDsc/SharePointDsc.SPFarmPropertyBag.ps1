@@ -79,13 +79,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.Ensure | Should Be 'absent'
             }
 
-            It 'Should return the same values as passed as parameters' {
+            It 'Should return the same key value as passed as parameter' {
                 $result.Key | Should Be $testParams.Key
-                $result.value | Should Be $testParams.Value
-            }           
+            }      
 
-            It 'Should return true from the test method' {
-                Test-TargetResource @testParams | Should Be $true
+            It 'Should return false from the test method' {
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It 'Should not throw an exception in the set method' {
@@ -96,7 +95,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It 'Calls Get-SPFarm and update farm property bag from the set method' { 
                 Set-TargetResource @testParams 
 
-                Assert-MockCalled Get-SPFarm 
                 $Global:SPDscFarmPropertyUpdated | Should Be $true
             }
         }
@@ -126,8 +124,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name 'The farm property does not exist, and should be' -Fixture {
             $testParams = @{
-                Key = 'FARM_TYPE'
-                Value = 'UnKnwownValue'
+                Key = 'FARM_TYPED'
                 Ensure = 'Absent'
             }
             
@@ -174,10 +171,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             $Global:SPDscFarmPropertyUpdated = $false
-            It 'Calls Get-SPFarm and update farm property bag from the set method' { 
+            It 'Calls Get-SPFarm and remove farm property bag from the set method' { 
                 Set-TargetResource @testParams 
 
-                Assert-MockCalled Get-SPFarm 
                 $Global:SPDscFarmPropertyUpdated | Should Be $true
             }
         }

@@ -20,7 +20,6 @@ Configuration Example
         {
             PsDscRunAsCredential = $SetupAccount
             Key = "KeyToRemove"
-            Value = "ContentFarm"
             Ensure = "Absent"
         }
     }

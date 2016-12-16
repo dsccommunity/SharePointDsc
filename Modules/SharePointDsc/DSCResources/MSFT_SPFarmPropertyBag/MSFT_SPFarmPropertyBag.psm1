@@ -8,14 +8,18 @@ function Get-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $Value,
 
         [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
-        $Ensure = 'Present'
+        $Ensure = 'Present',
+
+        [Parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     Write-Verbose -Message "Looking for SPFarm property '$Name'"
@@ -41,15 +45,25 @@ function Get-TargetResource()
 
         if ($null -ne $spFarm)
         {
-            $currentValue = $spFarm.Properties[$params.Key]
+            if ($spFarm.Properties)
+            {            
+                if ($spFarm.Properties.Contains($params.Key))
+                {
+                    $currentValue = $spFarm.Properties[$params.Key]
 
-            if ($currentValue -eq $params.Value)
-            {
-                $localEnsure = 'Present'
-            }
-            else 
-            {
-                $localEnsure = 'Absent'
+                    if ($currentValue -eq $params.Value)
+                    {
+                        $localEnsure = 'Present'
+                    }
+                    else 
+                    {
+                        $localEnsure = 'Absent'
+                    }
+                }
+                else
+                {
+                    $localEnsure = 'Absent'
+                }
             }
         }
         else
@@ -76,17 +90,21 @@ function Set-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $Value,
 
         [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
-        $Ensure = 'Present'
+        $Ensure = 'Present',
+
+        [Parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
-    Write-Verbose -Message "Setting antivirus configuration settings"
+    Write-Verbose -Message "Setting SPFarm property '$Name'"
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -103,16 +121,22 @@ function Set-TargetResource()
             return
         }
 
-        if ($Ensure -eq 'Present')
+        if ($params.Ensure -eq 'Present')
         {
-            Write-Verbose -Message "Adding property '$key'='$value' to SPFarm.properties"
-
-            $spFarm.Properties[$params.Key] = $params.Value
-            $spFarm.Update()        
+            if ($params.Value)
+            {
+                Write-Verbose -Message "Adding property '$params.Key'='$params.value' to SPFarm.properties"
+                $spFarm.Properties[$params.Key] = $params.Value
+                $spFarm.Update()
+            }
+            else
+            {
+                Write-Warning -Message 'Ensure = Present, value parameter cannot be null'
+            }  
         }
         else
         {
-            Write-Verbose -Message "Removing property '$key'='$value' from SPFarm.properties"
+            Write-Verbose -Message "Removing property '$params.Key' from SPFarm.properties"
 
             $spFarm.Properties.Remove($params.Key)
             $spFarm.Update()
@@ -130,21 +154,25 @@ function Test-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $Value,
 
         [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
-        $Ensure = 'Present'
+        $Ensure = 'Present',
+
+        [Parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount
     )
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @('Ensure','Value')
+                                    -ValuesToCheck @('Ensure','Key','Value')
 }
 
 Export-ModuleMember -Function *-TargetResource
