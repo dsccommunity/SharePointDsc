@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPWarmUp")]
+class MSFT_SPWarmUp : OMI_BaseResource
+{
+    [Key, Description("Specify in which time frame the warmup is allowed")] String WarmUpTime;
+    [Write, Description("Specify on which dates the warmup is allowed"), ValueMap{"mon","tue","wed","thu","fri","sat","sun"}, Values{"mon","tue","wed","thu","fri","sat","sun"}] String WarmUpDays[];
+    [Read, Description("List of All SPSite from the Get-TargetResource method.")] String Url[];
+    [Write, Description("Specify in which time frame the installation is allowed")] Boolean IncludeCentralAdmin;
+    [Write, Description("Present to warmup SharePoint sites. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
