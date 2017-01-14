@@ -4,6 +4,15 @@
 
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally
+* Bugfix in SPSite, which wasn't returing the quota template name in a correct way (issue 467)
+* Bugfix in SPAppManagementServiceApp which wasn't returning the correct database name (issue 476)
+* Bugfix in SPAccessServiceApp which did not return the database server (issue 477)
+* Bugfix in SPDesignerSettings which filtered site collections with an incorrect parameter (issue 478)
+* Updated the parameters in SPFarmSolution to use the full namespace (issue 479)
+* Bugfix in SPFarmsolution where it returned non declared parameters (issue 480) 
+* Corrected typo in parameter name in Get method of SPFeature (issue 481)
+* Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of one rule (issue 482)
+* Bugfix in SPSearchServiceApp in which the database and dbserver were not returned correctly (issue 485)
 
 ## 1.5
 

@@ -45,8 +45,6 @@ function Get-TargetResource
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
-            DatabaseName = $null
-            DatabaseServer = $null
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         } 
@@ -76,9 +74,10 @@ function Get-TargetResource
             }
             return  @{
                 Name = $serviceApp.DisplayName
+                ProxyName = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $serviceApp.Database.Name
-                DatabaseServer = $serviceApp.Database.Server.Name
+                DatabaseName = $serviceApp.Databases.Name
+                DatabaseServer = $serviceApp.Databases.Server.Name
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }

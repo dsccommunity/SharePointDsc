@@ -123,8 +123,8 @@ function Get-TargetResource
                 Name                        = $serviceApp.DisplayName
                 ProxyName                   = $proxyName
                 ApplicationPool             = $serviceApp.ApplicationPool.Name
-                DatabaseName                = $serviceApp.Database.Name
-                DatabaseServer              = $serviceApp.Database.Server.Name
+                DatabaseName                = $serviceApp.SearchAdminDatabase.Name
+                DatabaseServer              = $serviceApp.SearchAdminDatabase.Server.Name
                 Ensure                      = "Present"
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
@@ -212,7 +212,7 @@ function Set-TargetResource
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             
-            if ($params.ContainsKey("CloudIndex") -eq $true) 
+            if ($params.Get_Item("CloudIndex") -eq $true)
             {
                 $version = Get-SPDSCInstalledProductVersion
                 if (($version.FileMajorPart -gt 15) `

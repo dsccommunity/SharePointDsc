@@ -20,6 +20,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Mocks for all contexts   
         Mock -CommandName New-SPSite -MockWith { }
+        Mock -CommandName Get-SPDSCContentService -MockWith {
+            $quotaTemplates = @(@{
+                    Test = @{
+                        QuotaId = 65000
+                    }
+                })
+            $quotaTemplatesCol = {$quotaTemplates}.Invoke() 
+
+            $contentService = @{
+                QuotaTemplates = $quotaTemplatesCol
+            } 
+
+            $contentService = $contentService | Add-Member -MemberType ScriptMethod `
+                                                            -Name Update `
+                                                            -Value { 
+                                                                $Global:SPDscQuotaTemplatesUpdated = $true 
+                                                            } -PassThru
+            return $contentService
+        }
 
         # Test contexts
         Context -Name "The site doesn't exist yet and should" -Fixture {
@@ -87,6 +106,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
+                    Quota = @{ QuotaId = 65000 }
                 }
             }
 
@@ -130,6 +150,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
                     SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+                    Quota = @{ QuotaId = 65000 }
                 }
             }
 
@@ -153,6 +174,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
+                    Quota = @{ QuotaId = 65000 }
                 }
             }
 
@@ -174,6 +196,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Url = $testParams.Url
                     Owner = @{ UserLogin = "DEMO\owner" }
                     SecondaryContact = @{ UserLogin = "DEMO\secondary" }
+                    Quota = @{ QuotaId = 65000 }
                 }
             }
 
