@@ -12,6 +12,7 @@
 * Bugfix in SPFarmsolution where it returned non declared parameters (issue 480) 
 * Corrected typo in parameter name in Get method of SPFeature (issue 481)
 * Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of one rule (issue 482)
+* Improved check for CloudSSA in SPSearchServiceApp (issue 484)
 * Bugfix in SPSearchServiceApp in which the database and dbserver were not returned correctly (issue 485)
 
 ## 1.5
