@@ -212,7 +212,7 @@ function Set-TargetResource
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             
-            if ($params.ContainsKey("CloudIndex") -eq $true and $params.CloudIndex -eq $true)
+            if ($params.ContainsKey("CloudIndex") -eq $true -and $params.CloudIndex -eq $true)
             {
                 $version = Get-SPDSCInstalledProductVersion
                 if (($version.FileMajorPart -gt 15) `
