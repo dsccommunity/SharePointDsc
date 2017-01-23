@@ -121,6 +121,44 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
+
+        Context -Name "The specified site exists and the resource tries to set the site using the farm account" -Fixture {
+
+            $testParams = @{
+                SiteUrl = "https://content.sharepoint.contoso.com/sites/AppCatalog"
+            }
+
+            Mock -CommandName Update-SPAppCatalogConfiguration -MockWith { 
+                throw [System.UnauthorizedAccessException] "ACCESS IS DENIED"
+            }
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    WebApplication = @{
+                        Features = @( @{} ) | Add-Member -MemberType ScriptMethod `
+                                                         -Name "Item" `
+                                                         -Value { return $null } `
+                                                         -PassThru `
+                                                         -Force
+                    }
+                    ID = $mockSiteId
+                }
+            }
+
+            It "Should return null from the get method" {
+                (Get-TargetResource @testParams).SiteUrl | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw `
+                    "This resource must be run as the farm account (not a setup account). " + `
+                    "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
+                    "credentials are set to the farm account and run this resource again"
+            } 
+        }
     }
 }
 

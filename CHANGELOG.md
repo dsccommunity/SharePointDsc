@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+* Updated documentation in regards to guidance on installing binaries from
+  network locations instead of locally
+
+## 1.5
+
 * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
   null
 * Added minimum PowerShell version to module manifest
@@ -11,7 +16,13 @@
   to all be the same case
 * Fixed bug in SPInstallLanguagePack where language packs could not be installed
   on SharePoint 2016
+* Added new resource SPSearchFileType
 * Updated SPDatabaseAAG to allow database name patterns
+* Fixed a bug were PerformancePoint and Excel Services Service Application
+  proxies would not be added to the default proxy group when they are
+  provisioned
+* Added an error catch to provide more detail about running SPAppCatalog with
+  accounts other than the farm account
 
 ## 1.4
 
