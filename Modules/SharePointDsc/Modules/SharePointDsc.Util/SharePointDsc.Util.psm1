@@ -747,4 +747,70 @@ function Remove-SPDSCGenericObject
     $SourceCollection.Remove($Target)
 }
 
+function Check-SPDscSqlAccess
+{
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $SqlServer
+    )
+
+    $currentUser = ([Security.Principal.WindowsIdentity]::GetCurrent()).Name
+    $serverRolesToCheck = 'dbcreator','securityadmin'
+
+    $objSQLConnection = New-Object -TypeName System.Data.SqlClient.SqlConnection
+    $objSQLCommand = New-Object -TypeName System.Data.SqlClient.SqlCommand
+    try
+    {
+        Write-Verbose -Message "Testing access to SQL server/instance/alias: $SqlServer"
+        $objSQLConnection.ConnectionString = "Server=$SqlServer;Integrated Security=SSPI;"
+        $objSQLConnection.Open() | Out-Null
+        
+        foreach ($serverRole in $serverRolesToCheck)
+        {
+            Write-Verbose -Message "Checking if $currentUser has $serverRole server role"
+            $objSQLCommand.CommandText = "SELECT IS_SRVROLEMEMBER('$serverRole')"
+            $objSQLCommand.Connection = $objSQLConnection
+            $objSQLDataReader = $objSQLCommand.ExecuteReader()
+
+            if ($objSQLDataReader.Read() -and $objSQLDataReader.GetValue(0) -eq 1)
+            {
+                Write-Verbose -Message "$currentUser has $serverRole server role"
+            }
+            elseif ($objSQLDataReader.GetValue(0) -eq 0)
+            {
+                Throw "$currentUser does not have `'$serverRole`' role!"
+            }
+            $objSQLDataReader.Close()
+        }
+        $objSQLConnection.Close()
+    }
+    catch
+    {
+        $errText = $error[0].ToString()
+        If ($errText.Contains('network-related'))
+        {
+            Write-Warning -Message 'Connection Error. Check server name, port, firewall.'
+        }
+        ElseIf ($errText.Contains('Login failed'))
+        {
+            Throw 'Not able to login. SQL Server login not created.'
+        }
+        Else
+        {
+            If (!([string]::IsNullOrEmpty($serverRole)))
+            {
+                Throw "$currentUser does not have `'$serverRole`' role!"
+            }
+            Else 
+            {
+                Throw $errText
+            }
+        }
+    }
+}
+
 Export-ModuleMember -Function *

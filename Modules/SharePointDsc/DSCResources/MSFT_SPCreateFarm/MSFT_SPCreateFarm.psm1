@@ -80,16 +80,38 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $getSPMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
+        $cfgDbRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$getSPMajorVersion.0\Secure\ConfigDB"
+        $configDbDsn = Get-SPDSCRegistryKey -Key $cfgDbRegKey -Value "dsn"
+        $serverIsJoined = $true
+
+        if ($null -eq $configDbDsn)
+        {
+            $serverIsJoined = $false
+        }
+        elseif (-NOT($configDbDsn.Contains($params.FarmConfigDatabaseName)))
+        {
+            $serverIsJoined = $false
+        } 
+
         try 
         {
+            Check-SPDscSqlAccess -SqlServer $params.DatabaseServer
             $spFarm = Get-SPFarm
         } 
         catch 
         {
             Write-Verbose -Message "Unable to detect local farm."
+            if ($serverIsJoined)
+            {
+                throw 'Server already joined to farm but SPFarm not reachable'
+            }
         }
         
-        if ($null -eq $spFarm) { return $null }
+        if ($null -eq $spFarm) 
+        {
+            return $null
+        }
 
         $configDb = Get-SPDatabase | Where-Object -FilterScript { 
             $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
