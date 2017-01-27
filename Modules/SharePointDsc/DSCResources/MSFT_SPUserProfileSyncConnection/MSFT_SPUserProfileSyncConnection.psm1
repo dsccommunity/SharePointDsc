@@ -364,6 +364,15 @@ function Test-TargetResource
                                                      "ExcludedOUs")
 }
 
+<#
+    .NAME
+
+    Get-SPDSCADSIObject
+
+    .DESCTIPTION
+
+    This method is not intensed for public use, and was created to facilitate unit testing
+#>
 function Get-SPDSCADSIObject 
 {
     param(
@@ -372,6 +381,15 @@ function Get-SPDSCADSIObject
     return [ADSI]($LdapPath)
 }
 
+<#
+    .NAME
+
+    New-SPDSCDirectoryServiceNamingContext
+
+    .DESCTIPTION
+
+    This method is not intensed for public use, and was created to facilitate unit testing
+#>
 function New-SPDSCDirectoryServiceNamingContext 
 {
     param(
@@ -381,6 +399,15 @@ function New-SPDSCDirectoryServiceNamingContext
                       -ArgumentList $ArgumentList
 }
 
+<#
+    .NAME
+
+    New-SPDSCDirectoryServiceNamingContextList
+
+    .DESCTIPTION
+
+    This method is not intensed for public use, and was created to facilitate unit testing
+#>
 function New-SPDSCDirectoryServiceNamingContextList 
 {
     param ()
