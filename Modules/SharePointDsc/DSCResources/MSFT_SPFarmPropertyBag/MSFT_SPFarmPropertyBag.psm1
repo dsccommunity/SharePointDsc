@@ -47,22 +47,15 @@ function Get-TargetResource()
         {
             if ($spFarm.Properties)
             {            
-                if ($spFarm.Properties.Contains($params.Key))
+                if ($spFarm.Properties.Contains($params.Key) -eq $true)
                 {
+                    $localEnsure = "Present"
                     $currentValue = $spFarm.Properties[$params.Key]
-
-                    if ($currentValue -eq $params.Value)
-                    {
-                        $localEnsure = 'Present'
-                    }
-                    else 
-                    {
-                        $localEnsure = 'Absent'
-                    }
                 }
                 else
                 {
-                    $localEnsure = 'Absent'
+                    $localEnsure = "Absent"
+                    $currentValue = $null
                 }
             }
         }

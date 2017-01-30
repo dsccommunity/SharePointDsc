@@ -75,8 +75,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             
             $result = Get-TargetResource @testParams
 
-            It 'Should return absent from the get method' {
-                $result.Ensure | Should Be 'absent'
+            It 'Should return present from the get method' {
+                $result.Ensure | Should Be 'present'
             }
 
             It 'Should return the same key value as passed as parameter' {
