@@ -4,6 +4,7 @@
 
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally
+* New resources: SPFarmPropertyBag
 
 ## 1.5
 
