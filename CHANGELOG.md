@@ -6,15 +6,20 @@
   network locations instead of locally
 * New resources: SPFarmPropertyBag
 * Bugfix in SPSite, which wasn't returing the quota template name in a correct way
-* Bugfix in SPAppManagementServiceApp which wasn't returning the correct database name
+* Bugfix in SPAppManagementServiceApp which wasn't returning the correct database
+  name
 * Bugfix in SPAccessServiceApp which did not return the database server
-* Bugfix in SPDesignerSettings which filtered site collections with an incorrect parameter
+* Bugfix in SPDesignerSettings which filtered site collections with an incorrect
+  parameter
 * Updated the parameters in SPFarmSolution to use the full namespace
-* Bugfix in SPFarmsolution where it returned non declared parameters 
+* Bugfix in SPFarmsolution where it returned non declared parameters
 * Corrected typo in parameter name in Get method of SPFeature
-* Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of one rule
+* Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of
+  one rule
 * Improved check for CloudSSA in SPSearchServiceApp
-* Bugfix in SPSearchServiceApp in which the database and dbserver were not returned correctly
+* Bugfix in SPSearchServiceApp in which the database and dbserver were not
+  returned correctly
+* Improved runtime of SPSearchTopology by streamlining wait processes
 
 ## 1.5
 
