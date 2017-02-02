@@ -26,6 +26,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Set-SPAccessServicesApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
+        try 
+        { 
+            [Microsoft.SharePoint.SPServiceContext] 
+        }
+        catch 
+        {
+            $CsharpCode2 = @"
+namespace Microsoft.SharePoint {
+    public enum SPSiteSubscriptionIdentifier { Default };     
+
+    public class SPServiceContext {
+        public static string GetContext(System.Object[] serviceApplicationProxyGroup, SPSiteSubscriptionIdentifier siteSubscriptionId) {
+            return "";
+        }
+    }
+}        
+"@
+            Add-Type -TypeDefinition $CsharpCode2
+        }
+
         # Test contexts 
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
@@ -89,7 +109,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = [PSCustomObject]@{ 
                     TypeName = "Access Services Web Service Application"
                     DisplayName = $testParams.Name
-                    DatabaseServer = $testParams.DatabaseName
+                    DatabaseServer = $testParams.DatabaseServer
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
@@ -100,6 +120,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 }  
                                             } -PassThru -Force 
                 return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPAccessServicesDatabaseServer -MockWith {
+                return @{
+                    ServerName = $testParams.DatabaseServer
+                }
             }
 
             It "Should return Present from the get method" {
@@ -150,7 +176,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When the serivce application doesn't exist and it shouldn't" -Fixture {
+        Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "-"
