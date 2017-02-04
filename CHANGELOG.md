@@ -20,6 +20,7 @@
 * Bugfix in SPSearchServiceApp in which the database and dbserver were not
   returned correctly
 * Improved runtime of SPSearchTopology by streamlining wait processes
+* Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
 
 ## 1.5
 
