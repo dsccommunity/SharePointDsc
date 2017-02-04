@@ -36,8 +36,8 @@ function Get-SPDSCConfigDBStatus
         $Database
     )
 
-    $connection = New-Object -TypeName "System.Data.SqlClient.SqlServer"
-    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;" #TODO: Add database name here to connect to master
+    $connection = New-Object -TypeName "System.Data.SqlClient.SqlConnection"
+    $connection.ConnectionString = "Server=$SQLServer;Integrated Security=SSPI;Database=Master"
     $command = New-Object -TypeName "System.Data.SqlClient.SqlCommand"
 
     try 
@@ -46,19 +46,15 @@ function Get-SPDSCConfigDBStatus
         $connection.Open()
         $command.Connection = $connection
 
-        #TODO: Do a query against the master database to determine if the config DB exists
-        $configDBexists = $false
+        $command.CommandText = "SELECT COUNT(*) FROM sys.databases WHERE name = '$Database'"
+        $configDBexists = ($command.ExecuteScalar() -eq 1)
 
         $serverRolesToCheck = @("dbcreator", "securityadmin")
-        $hasPermissions = $false
+        $hasPermissions = $true
         foreach ($serverRole in $serverRolesToCheck)
         {
             $command.CommandText = "SELECT IS_SRVROLEMEMBER('$serverRole')"
-            $reader = $command.ExecuteReader()
-            $reader.Read()
-
-            #TODO: Validate that this works
-            if ($objSQLDataReader.GetValue(0) -eq 0)
+            if ($command.ExecuteScalar() -eq "0")
             {
                 Write-Verbose -Message "$currentUser does not have '$serverRole' role on server '$SQLServer'"
                 $hasPermissions = $false

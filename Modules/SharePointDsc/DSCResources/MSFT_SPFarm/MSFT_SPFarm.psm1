@@ -33,6 +33,10 @@ function Get-TargetResource
         [System.String] 
         $AdminContentDatabaseName,
 
+        [parameter(Mandatory = $true)]
+        [System.Boolean]
+        $RunCentralAdmin,
+
         [parameter(Mandatory = $false)] 
         [System.UInt32] 
         $CentralAdministrationPort,
@@ -143,7 +147,7 @@ function Get-TargetResource
                 DatabaseServer = $configDb.Server.Name
                 FarmAccount = $farmAccount
                 InstallAccount = $params.InstallAccount
-                Passphrase = $params.Passphrase.password 
+                Passphrase = $params.Passphrase 
                 AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $params.CentralAdministrationAuth
@@ -229,6 +233,10 @@ function Set-TargetResource
         [System.String] 
         $AdminContentDatabaseName,
 
+        [parameter(Mandatory = $true)]
+        [System.Boolean]
+        $RunCentralAdmin,
+
         [parameter(Mandatory = $false)] 
         [System.UInt32] 
         $CentralAdministrationPort,
@@ -288,99 +296,138 @@ function Set-TargetResource
             return
         }
 
+        $executeArgs = @{
+            DatabaseServer = $params.DatabaseServer
+            DatabaseName = $params.FarmConfigDatabaseName
+            Passphrase = $params.Passphrase.Password
+            SkipRegisterAsDistributedCacheHost = $true
+        }
+
+        switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
+            15 {
+                Write-Verbose -Message "Detected Version: SharePoint 2013"
+            }
+            16 {
+                if ($params.ContainsKey("ServerRole") -eq $true) {
+                    Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
+                                            "configuring server as $($params.ServerRole)")
+                    $executeArgs.Add("LocalServerRole", $params.ServerRole)
+                } else {
+                    Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
+                                            "role provided, configuring server without a " + `
+                                            "specific role")
+                    $executeArgs.Add("ServerRoleOptional", $true)
+                }
+            }
+            Default {
+                throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
+                                    "was detected. Only versions 15 (SharePoint 2013) or " + `
+                                    "16 (SharePoint 2016) are supported.")
+            }
+        }
+
+        $farmAction = ""
         if ($dbStatus.DatabaseExists)
         {
             # The database exists, so attempt to join the farm to the server
-            $joinFarmArgs = @{
-                DatabaseServer = $params.DatabaseServer
-                DatabaseName = $params.FarmConfigDatabaseName
-                Passphrase = $params.Passphrase.password
-                SkipRegisterAsDistributedCacheHost = $true
+
+            # Remove the server role optional attribute as it is only used when creating
+            # a new farm
+            if ($executeArgs.ContainsKey("ServerRoleOptional") -eq $true)
+            {
+                $executeArgs.Remove("ServerRoleOptional") 
             }
             
-            switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
-                15 {
-                    Write-Verbose -Message "Detected Version: SharePoint 2013"
+            $loopCount = 0
+            $connectedToFarm = $false
+            $lastException = $null
+            while ($connectedToFarm -eq $false -and $loopCount -lt 15)
+            {
+                try 
+                {
+                    Connect-SPConfigurationDatabase @joinFarmArgs | Out-Null 
+                    $connectedToFarm = $true
                 }
-                16 {
-                    if ($params.ContainsKey("ServerRole") -eq $true) {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                                "configuring server as $($params.ServerRole)")
-                        $joinFarmArgs.Add("LocalServerRole", $params.ServerRole)
-                    } else {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
-                                                "role provided, configuring server without a " + `
-                                                "specific role")
-                    }
-                }
-                Default {
-                    throw [Exception] ("An unknown version of SharePoint (Major version $_) " + `
-                                       "was detected. Only versions 15 (SharePoint 2013) or " + `
-                                       "16 (SharePoint 2016) are supported.")
+                catch 
+                {
+                    $lastException = $_.Exception
+                    Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - An error " + `
+                                            "occured joining config database " + `
+                                            "'$($params.FarmConfigDatabaseName)' on " + `
+                                            "'$($params.DatabaseServer)'. This resource will " + `
+                                            "wait and retry automatically for up to 15 minutes. " + `
+                                            "(waited $loopCount of 15 minutes)")
+                    $loopCount++
+                    Start-Sleep -Seconds 60
                 }
             }
 
-            Connect-SPConfigurationDatabase @joinFarmArgs
-            Install-SPHelpCollection -All
-            Initialize-SPResourceSecurity
-            Install-SPService
-            Install-SPFeature -AllExistingFeatures -Force  | Out-Null 
-            Install-SPApplicationContent
-
-            return "JoinedFarm"
+            if ($connectedToFarm -eq $false)
+            {
+                Write-Verbose -Message ("Unable to join config database. Throwing exception.")
+                throw $lastException
+                return
+            }
+            $farmAction = "JoinedFarm"
         }
         else
         {
             # The database does not exist, so create the farm
-            $newFarmArgs = @{
-                DatabaseServer = $params.DatabaseServer
-                DatabaseName = $params.FarmConfigDatabaseName
+            $executeArgs += @{
                 FarmCredentials = $params.FarmAccount
                 AdministrationContentDatabaseName = $params.AdminContentDatabaseName
-                Passphrase = ($params.Passphrase).Password
-                SkipRegisterAsDistributedCacheHost = $true
             }
+
+            New-SPConfigurationDatabase @executeArgs
+
             
-            switch((Get-SPDSCInstalledProductVersion).FileMajorPart) 
-            {
-                15 {
-                    Write-Verbose -Message "Detected Version: SharePoint 2013"
-                }
-                16 {
-                    if ($params.ContainsKey("ServerRole") -eq $true) 
-                    {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
-                                                "configuring server as $($params.ServerRole)")
-                        $newFarmArgs.Add("LocalServerRole", $params.ServerRole)
-                    } 
-                    else 
-                    {
-                        Write-Verbose -Message ("Detected Version: SharePoint 2016 - no " + `
-                                                "server role provided, configuring server " + `
-                                                "without a specific role")
-                        $newFarmArgs.Add("ServerRoleOptional", $true)
-                    }
-                }
-                Default {
-                    throw [Exception] ("An unknown version of SharePoint (Major version $_) was " + `
-                                    "detected. Only versions 15 (SharePoint 2013) or 16 " + `
-                                    "(SharePoint 2016) are supported.")
-                }
-            }
 
-            New-SPConfigurationDatabase @newFarmArgs
-            Install-SPHelpCollection -All
-            Initialize-SPResourceSecurity
-            Install-SPService
-            Install-SPFeature -AllExistingFeatures -Force
-
-            #TODO: Handle which servers will get central admin 
-            New-SPCentralAdministration -Port $params.CentralAdministrationPort `
-                                        -WindowsAuthProvider $params.CentralAdministrationAuth
-            Install-SPApplicationContent
-
-            return "CreatedFarm"
+            $farmAction = "CreatedFarm"
         }
+
+        # Run common tasks for a new server
+        Install-SPHelpCollection -All | Out-Null 
+        Initialize-SPResourceSecurity | Out-Null 
+        Install-SPService | Out-Null 
+        Install-SPFeature -AllExistingFeatures -Force | Out-Null 
+        Install-SPApplicationContent | Out-Null 
+
+        # Provision central administration
+        if ($params.RunCentralAdmin -eq $true)
+        {
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                | Where-Object -FilterScript { 
+                                    $_.IsAdministrationWebApplication -eq $true 
+                                }
+
+            if ($null -eq $centralAdminSite)
+            {
+                New-SPCentralAdministration -Port $params.CentralAdministrationPort `
+                                            -WindowsAuthProvider $params.CentralAdministrationAuth
+            }
+            else 
+            {
+                $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                        | Where-Object -FilterScript {
+                                            $_.TypeName -eq "Central Administration"
+                                        }
+                if ($null -eq $serviceInstance) 
+                { 
+                    $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
+                    $fqdn = "$($env:COMPUTERNAME).$domain"
+                    $serviceInstance = Get-SPServiceInstance -Server $fqdn `
+                                        | Where-Object -FilterScript {
+                                            $_.TypeName -eq "Central Administration"
+                                        }
+                }
+                if ($null -eq $si) { 
+                    throw [Exception] "Unable to locate Central Admin service instance on this server"
+                }
+                Start-SPServiceInstance -Identity $serviceInstance 
+            }
+        }
+
+        return $farmAction
     }
 
     if ($actionResult -eq "JoinedFarm")
@@ -432,6 +479,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
+
+        [parameter(Mandatory = $true)]
+        [System.Boolean]
+        $RunCentralAdmin,
 
         [parameter(Mandatory = $false)] 
         [System.UInt32] 

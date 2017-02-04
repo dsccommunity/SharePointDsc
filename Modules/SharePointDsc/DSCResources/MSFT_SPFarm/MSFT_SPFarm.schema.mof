@@ -7,6 +7,7 @@ class MSFT_SPFarm : OMI_BaseResource
     [Required, Description("The account to use as the main farm account"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
     [Required, Description("The passphrase to use to allow servers to join this farm"), EmbeddedInstance("MSFT_Credential")] String Passphrase;
     [Required, Description("The name of the admin content database")] String AdminContentDatabaseName;
+    [Required, Description("Should the central admin site run on this specific server?")] Boolean RunCentralAdmin;
     [Write, Description("What port will Central Admin be provisioned to - default is 9999")] uint32 CentralAdministrationPort;
     [Write, Description("The authentication provider of the CentralAdministration web application"), ValueMap{"NTLM","Kerberos"}, Values{"NTLM","Kerberos"}] String CentralAdministrationAuth;
     [Write, Description("SharePoint 2016 only - the MinRole role to enroll this server as"), ValueMap{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}, Values{"Application","ApplicationWithSearch","Custom","DistributedCache","Search","SingleServer","SingleServerFarm","WebFrontEnd","WebFrontEndWithDistributedCache"}] string ServerRole;
