@@ -249,7 +249,7 @@ function Set-TargetResource
             # Wait for Search Service Instance to come online
             $loopCount = 0
             $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer 
-            do 
+            while ($online.Status -ne "Online" -and $loopCount -lt 15) 
             {
                 $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for " + `
@@ -258,7 +258,6 @@ function Set-TargetResource
                 $loopCount++
                 Start-Sleep -Seconds 60
             } 
-            until ($online.Status -eq "Online" -or $loopCount -eq 15)
         }
 
         # Create the index partition directory on each remote server

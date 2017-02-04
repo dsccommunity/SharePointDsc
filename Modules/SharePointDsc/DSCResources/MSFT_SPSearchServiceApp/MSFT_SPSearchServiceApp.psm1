@@ -87,13 +87,7 @@ function Get-TargetResource
         } 
         else 
         {
-            $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | `
-                Where-Object -FilterScript { 
-                    $_.IsAdministrationWebApplication 
-                } 
-
-            $s = Get-SPSite $caWebApp.Url
-            $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s)
+            $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($serviceApp.Name)
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content `
                              -ArgumentList $c;
             $dummyPassword = ConvertTo-SecureString -String "-" -AsPlainText -Force
