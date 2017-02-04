@@ -39,7 +39,21 @@ function Start-AppveyorTestScriptTask
                           $testResultsFilePath)
     
     if ($result.FailedCount -gt 0) 
-    { 
+    {
+        Write-Output -InputObject "Failed test result summary:"
+        $result.TestResult | Where-Object -FilterScript { 
+            $_.Passed -eq $false 
+        } | ForEach-Object -Process {
+            Write-Output -InputObject "-----------------------------------------------------------"
+            $outputObject = @{
+                Context = $_.Context
+                Describe = $_.Describe
+                Name = $_.Name
+                FailureMessage = $_.FailureMessage
+            }
+            New-Object -TypeName PSObject -Property $outputObject | Format-List
+        }
+
         throw "$($result.FailedCount) tests failed."
     }
 }
