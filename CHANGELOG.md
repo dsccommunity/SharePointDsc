@@ -21,6 +21,7 @@
   returned correctly
 * Improved runtime of SPSearchTopology by streamlining wait processes
 * Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
+* Improved output of test results for AppVeyor and VS Code based test runs
 
 ## 1.5
 
