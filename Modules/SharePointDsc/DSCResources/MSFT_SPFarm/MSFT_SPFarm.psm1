@@ -145,12 +145,12 @@ function Get-TargetResource
             $returnValue = @{
                 FarmConfigDatabaseName = $spFarm.Name
                 DatabaseServer = $configDb.Server.Name
-                FarmAccount = $farmAccount
-                InstallAccount = $params.InstallAccount
-                Passphrase = $params.Passphrase 
+                FarmAccount = $farmAccount # Need to return this as a credential to match the type expected
+                InstallAccount = $null
+                Passphrase = $null 
                 AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
-                CentralAdministrationAuth = $params.CentralAdministrationAuth
+                CentralAdministrationAuth = $params.CentralAdministrationAuth #TODO: Need to return this as the current value
             }
             return $returnValue
         }   
@@ -201,7 +201,9 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    # Supressing the global variable use to allow passing DSC the reboot message
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
         [parameter(Mandatory = $true)] 
