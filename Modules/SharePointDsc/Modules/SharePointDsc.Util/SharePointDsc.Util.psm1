@@ -747,7 +747,7 @@ function Remove-SPDSCGenericObject
     $SourceCollection.Remove($Target)
 }
 
-function Check-SPDscSqlAccess
+function Test-SPDscSqlAccess
 {
     [CmdletBinding()]
     param
