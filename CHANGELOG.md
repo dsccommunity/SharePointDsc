@@ -4,6 +4,7 @@
 
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally
+* Fixed issue with SPWebAppPolicy if OS language is not En-Us
 
 ## 1.5
 
