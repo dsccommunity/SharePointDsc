@@ -47,6 +47,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationPort = 1234
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
 
             It "the get method returns null when the farm is not configured" {
@@ -208,6 +215,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationPort = 1234
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+            
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ 
@@ -257,6 +271,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationPort = 1234
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return "WrongDBName"
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ Name = $testParams.FarmAccount.UserName }
@@ -300,6 +321,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationPort = 1234
             }
             
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ Name = "WRONG\account" }
