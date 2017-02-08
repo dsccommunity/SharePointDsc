@@ -199,6 +199,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -272,6 +273,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -345,6 +347,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -414,6 +417,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -483,6 +487,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -492,6 +497,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -569,6 +575,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -578,6 +585,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -654,6 +662,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -663,6 +672,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -748,6 +758,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -815,6 +826,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -883,6 +895,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -950,6 +963,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
 
@@ -1001,6 +1015,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1065,6 +1080,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1135,6 +1151,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1205,6 +1222,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1275,6 +1293,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1346,6 +1365,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
 
@@ -1393,6 +1413,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
 
@@ -1439,6 +1460,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
 
@@ -1483,6 +1505,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
 
@@ -1530,6 +1553,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = 'FullControl'
                     }
                 )
 
