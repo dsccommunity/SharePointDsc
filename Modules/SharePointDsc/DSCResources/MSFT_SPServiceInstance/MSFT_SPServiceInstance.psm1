@@ -197,6 +197,7 @@ function Test-TargetResource
 function Get-SPDscServiceTypeName
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param(
         [Parameter(Mandatory = $true)]
         [string]

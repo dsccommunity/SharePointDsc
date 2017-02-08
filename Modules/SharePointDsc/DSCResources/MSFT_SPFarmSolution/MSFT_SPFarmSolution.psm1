@@ -5,33 +5,33 @@ function Get-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  
-        [String]   
+        [System.String]   
         $Name,
 
         [parameter(Mandatory = $true)]  
-        [String]   
+        [System.String]   
         $LiteralPath,
 
         [parameter(Mandatory = $false)] 
-        [String[]] 
+        [System.String[]] 
         $WebApplications = @(),
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")]
-        [String]
+        [System.String]
         $Ensure = "Present",
         
         [parameter(Mandatory = $false)]
-        [String]
+        [System.String]
         $Version = "1.0.0.0",
 
         [parameter(Mandatory = $false)] 
-        [Boolean]
+        [System.Boolean]
         $Deployed = $true,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("14","15","All")]
-        [String]
+        [System.String]
         $SolutionLevel,
         
         [parameter(Mandatory = $false)]
@@ -57,7 +57,6 @@ function Get-TargetResource
             $version = $Solution.Properties["Version"]
             $deployedWebApplications = @($solution.DeployedWebApplications `
                                          | Select-Object -ExpandProperty Url)
-            $ContainsGlobalAssembly = $solution.ContainsGlobalAssembly
         } 
         else 
         { 
@@ -65,7 +64,6 @@ function Get-TargetResource
             $deployed = $false
             $version = "0.0.0.0"
             $deployedWebApplications = @()
-            $ContainsGlobalAssembly = $false
         }
 
         return @{
@@ -76,7 +74,6 @@ function Get-TargetResource
             Version         = $version
             WebApplications = $deployedWebApplications
             SolutionLevel   = $params.SolutionLevel
-            ContainsGlobalAssembly = $ContainsGlobalAssembly
         }
     }
     return $result
@@ -88,33 +85,33 @@ function Set-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  
-        [String]   
+        [System.String]   
         $Name,
 
         [parameter(Mandatory = $true)]  
-        [String]   
+        [System.String]   
         $LiteralPath,
 
         [parameter(Mandatory = $false)] 
-        [String[]] 
+        [System.String[]] 
         $WebApplications = @(),
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")]
-        [String]
+        [System.String]
         $Ensure = "Present",
         
         [parameter(Mandatory = $false)]
-        [String]
+        [System.String]
         $Version = "1.0.0.0",
 
         [parameter(Mandatory = $false)] 
-        [Boolean]
+        [System.Boolean]
         $Deployed = $true,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("14","15","All")]
-        [String]
+        [System.String]
         $SolutionLevel,
         
         [parameter(Mandatory = $false)]
@@ -129,7 +126,6 @@ function Set-TargetResource
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.Version = $Version
     $PSBoundParameters.Deployed = $Deployed
-    $PSBoundParameters.ContainsGlobalAssembly = $CurrentValues.ContainsGlobalAssembly
 
     if ($Ensure -eq "Present") 
     {
@@ -155,7 +151,6 @@ function Set-TargetResource
             }
 
             $CurrentValues.Version = $result.Properties["Version"]
-            $CurrentValues.ContainsGlobalAssembly = $result.ContainsGlobalAssembly
         }
     
         if ($CurrentValues.Version -ne $Version)
@@ -191,7 +186,6 @@ function Set-TargetResource
                 }
 
                 $CurrentValues.Version = $result.Properties["Version"]
-                $CurrentValues.ContainsGlobalAssembly = $result.ContainsGlobalAssembly
             }
             else
             {
@@ -203,17 +197,19 @@ function Set-TargetResource
                                               -ScriptBlock {
                     $params = $args[0]
         
+                    $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
+
                     $runParams = @{}
                     $runParams.Add("Identity", $params.Name)
                     $runParams.Add("LiteralPath", $params.LiteralPath)
-                    $runParams.Add("GACDeployment", $params.ContainsGlobalAssembly)
+                    $runParams.Add("GACDeployment", $solution.ContainsGlobalAssembly)
                     $runParams.Add("Confirm", $false) 
                     $runParams.Add("Local", $false) 
                     $runParams.Add("Verbose", $false)
 
                     Update-SPSolution @runParams
 
-                    $Solution = Get-SPSolution $params.Name -Verbose:$false
+                    $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
                     $solution.Properties["Version"] = $params.Version 
                     $solution.Update()
 
@@ -346,33 +342,33 @@ function Test-TargetResource
     param
     (
         [parameter(Mandatory = $true)]  
-        [String]   
+        [System.String]   
         $Name,
 
         [parameter(Mandatory = $true)]  
-        [String]   
+        [System.String]   
         $LiteralPath,
 
         [parameter(Mandatory = $false)] 
-        [String[]] 
+        [System.String[]] 
         $WebApplications = @(),
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")]
-        [String]
+        [System.String]
         $Ensure = "Present",
         
         [parameter(Mandatory = $false)]
-        [String]
+        [System.String]
         $Version = "1.0.0.0",
 
         [parameter(Mandatory = $false)] 
-        [Boolean]
+        [System.Boolean]
         $Deployed = $true,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("14","15","All")]
-        [String]
+        [System.String]
         $SolutionLevel,
         
         [parameter(Mandatory = $false)]
