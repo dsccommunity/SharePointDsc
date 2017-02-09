@@ -202,6 +202,24 @@ function Get-SPDSCInstalledProductVersion
     return (Get-Command $fullPath).FileVersionInfo
 }
 
+function Get-SPDSCWebAppExtension
+{
+    [CmdletBinding()]
+   param(
+       [Parameter(Mandatory = $true)]
+       [System.String]
+       $WebAppUrl,
+
+       [parameter(Mandatory = $true)]
+       [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
+       [System.String] 
+       $Zone
+   )    
+
+   $wa = Get-SpWebApplication -Identity $WebAppUrl
+   return ($wa.IisSettings[[Microsoft.SharePoint.Administration.SPUrlZone]::($zone)])
+}
+
 function Invoke-SPDSCCommand 
 {
     [CmdletBinding()]
