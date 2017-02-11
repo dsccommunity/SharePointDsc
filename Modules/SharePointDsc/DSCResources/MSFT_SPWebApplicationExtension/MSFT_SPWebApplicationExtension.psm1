@@ -64,6 +64,9 @@ function Get-TargetResource
         $params = $args[0]
         $ScriptRoot = $args[1]
         
+        $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Extension.psm1"
+        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
         if ($null -eq $wa) 
@@ -78,7 +81,7 @@ function Get-TargetResource
             } 
         }
 
-        $waExt = Get-SPDSCWebAppExtension -WebAppUrl $wa.url -Zone $params.zone
+        $waExt = Get-SPDSCWebAppExtension -WebApplication $wa -Zone $params.zone
         if ($null -eq $waExt) 
         { 
             return @{
@@ -201,6 +204,9 @@ function Set-TargetResource
             $params = $args[0]
             $ScriptRoot = $args[1]
 
+            $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Extension.psm1"
+            Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
+
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa) 
             {
@@ -209,7 +215,7 @@ function Set-TargetResource
 
 
         #$waExt = $wa.IisSettings[[Microsoft.SharePoint.Administration.SPUrlZone]::($params.zone)]
-        $waExt = Get-SPDSCWebAppExtension -WebAppUrl $wa.url -Zone $params.zone
+        $waExt = Get-SPDSCWebAppExtension -WebApplication $wa -Zone $params.zone
         if ($null -eq $waExt) 
             {
                 $newWebAppExtParams = @{
@@ -291,7 +297,11 @@ function Set-TargetResource
             $params = $args[0]
             $ScriptRoot = $args[1]
 
-            $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
+            $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+            if ($null -eq $wa) 
+            {
+                throw "Web Application with URL $($params.WebAppUrl) does not exist"
+            }
             if ($null -ne $wa) 
             {
                 $wa | Remove-SPWebApplication -Zone $params.zone -Confirm:$false -DeleteIISSite
@@ -364,9 +374,12 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    Write-Verbose "Got the current Values"
+
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure","AuthenticationMethod","AllowAnonymous")
+    Write-Verbose "Tested the current Values"
     return $testReturn
 }
 
