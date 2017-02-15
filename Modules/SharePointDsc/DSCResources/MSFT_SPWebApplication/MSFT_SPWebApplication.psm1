@@ -54,6 +54,10 @@ function Get-TargetResource
         $AuthenticationMethod,
 
         [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
+
+        [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -84,13 +88,20 @@ function Get-TargetResource
         }
 
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
-        if ($authProvider.DisableKerberos -eq $true) 
-        { 
-            $localAuthMode = "NTLM" 
-        } 
-        else 
-        { 
-            $localAuthMode = "Kerberos" 
+        if($authProvider.DisplayName -eq "Windows Authentication") {
+            if ($authProvider.DisableKerberos -eq $true) 
+            { 
+                $localAuthMode = "NTLM" 
+            } 
+            else 
+            { 
+                $localAuthMode = "Kerberos" 
+            }
+            $AuthenticationProvider = $null
+        }
+        else {
+            $localAuthMode = "Claims"
+            $AuthenticationProvider = "$($authProvider.DisplayName)"
         }
 
         return @{
@@ -105,6 +116,7 @@ function Get-TargetResource
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
+            AuthenticationProvider = $AuthenticationProvider
             UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -164,9 +176,13 @@ function Set-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -236,6 +252,9 @@ function Set-TargetResource
                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
                                                            -DisableKerberos:$true
                     } 
+                    elseif ($params.AuthenticationMethod -eq "Claims" -and $params.AuthenticationProvider -ne "") {
+                        $ap = Get-SPTrustedIdentityTokenIsser -Identity "$($params.AuthenticationProvider)"
+                    }
                     else 
                     {
                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
@@ -349,6 +368,10 @@ function Test-TargetResource
         [ValidateSet("NTLM","Kerberos")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
