@@ -1,0 +1,20 @@
+[ClassVersion("1.0.0")]
+Class MSFT_SPContentDatabasePermissions
+{
+    [Key, Description("Name of the Content Database")] String Name;
+    [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
+    [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
+    [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];
+};
+[ClassVersion("1.0.0.0"), FriendlyName("SPShellAdmins")]
+class MSFT_SPShellAdmins : OMI_BaseResource
+{
+    [Key, Description("Name for the config, used for administration purposes")] String Name;
+    [Write, Description("Exact list of accounts that will have to get Shell Admin permissions")] String Members[];
+    [Write, Description("List of all accounts that must be in the Shell Admins group")] String MembersToInclude[];
+    [Write, Description("List of all accounts that are not allowed to have Shell Admin permissions")] String MembersToExclude[];
+    [Write, Description("Shell Admin configuration of Content Databases"), EmbeddedInstance("MSFT_SPContentDatabasePermissions")] String ContentDatabases[];
+    [Write, Description("Specify if all content databases must get the same config as the general config")] Boolean AllContentDatabases;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

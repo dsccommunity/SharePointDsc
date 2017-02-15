@@ -1,30 +1,20 @@
-version: 0.2.0.{build}
+version: 1.4.0.{build}
+image: WMF 5
 
 install:
-- cinst -y pester
-- git clone https://github.com/PowerShell/DscResource.Tests
-
+    - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+    - npm install -g gulp    
+    - npm install  
+    - ps: |
+        Import-Module "$env:APPVEYOR_BUILD_FOLDER\.appveyor\appveyor.psm1"
+        Start-AppveyorInstallTask
+        
 build: off
 
 test_script:
     - ps: |
-        $testResultsFile = ".\TestsResults.xml"
-        $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
-        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
-        if ($res.FailedCount -gt 0) { 
-            throw "$($res.FailedCount) tests failed."
-        }
-deploy: off
-on_finish:
+        Start-AppveyorTestScriptTask
+
+after_test:
     - ps: |
-        $stagingDirectory = (Resolve-Path ..).Path
-        $pwd = Join-Path $pwd "modules\xSharePoint"
-        Remove-Item (Join-Path $pwd "xSharePoint.pssproj")
-        $manifest = Join-Path $pwd "xSharePoint.psd1"
-        (Get-Content $manifest -Raw).Replace("0.2.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
-        $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
-        Add-Type -assemblyname System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFile)
-        @(
-            (ls $zipFile)
-        ) | % { Push-AppveyorArtifact $_.FullName }
+        Start-AppveyorAfterTestTask

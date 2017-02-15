@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPTimerJobState")]
+class MSFT_SPTimerJobState : OMI_BaseResource
+{
+    [Key, Description("The internal name of the timer job (not the display name)")] String Name;
+    [Write, Description("The name of the web application that the timer job belongs to")] String WebApplication;
+    [Write, Description("Should the timer job be enabled or not")] Boolean Enabled;
+    [Write, Description("The schedule for the timer job to execute on")] String Schedule;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
+};
+

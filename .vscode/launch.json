@@ -1,0 +1,23 @@
+{
+    "version": "0.3.0",
+    "configurations": [
+        {
+            "name": "Debug current file",
+            "type": "PowerShell",
+            "request": "launch",
+            "program": "${file}"
+        },
+        {
+            "name": "Run core DSC resource tests only",
+            "type": "PowerShell",
+            "request": "launch",
+            "program": "${workspaceRoot}/.vscode/RunGlobalTests.ps1"
+        },
+        {
+            "name": "Run all tests",
+            "type": "PowerShell",
+            "request": "launch",
+            "program": "${workspaceRoot}/.vscode/RunPesterTests.ps1"
+        }
+    ]
+}
