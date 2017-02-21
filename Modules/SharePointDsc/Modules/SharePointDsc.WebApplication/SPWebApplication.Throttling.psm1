@@ -100,9 +100,9 @@ function Set-SPDSCWebApplicationHappyHourConfig
         {
             throw "Happy hour setting 'hour' must be between 0 and 23"
         }
-        $h = $happyHour.Hour
-        $m = $happyHour.Minute
-        $d = $happyHour.Duration
+        $h = $Settings.Hour
+        $m = $Settings.Minute
+        $d = $Settings.Duration
         $WebApplication.SetDailyUnthrottledPrivilegedOperationWindow($h, $m, $d)
     }
 }

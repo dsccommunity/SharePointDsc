@@ -165,6 +165,7 @@ function Set-TargetResource
             # Happy hour settins use separate update method so use a fresh web app to update these
             $wa2 = Get-SPWebApplication -Identity $params.Url
             Set-SPDSCWebApplicationHappyHourConfig -WebApplication $wa2 -Settings $params.HappyHour
+            $wa2.Update()
         }
     }
 }
