@@ -116,6 +116,12 @@ function Get-TargetResource
                 }
             }
 
+            $admService = Get-SPDSCContentService
+            $quota = ($admService.QuotaTemplates | `
+                      Where-Object -FilterScript {
+                          $_.QuotaID -eq $site.Quota.QuotaID
+                      }).Name
+            
             return @{
                 Url = $site.Url
                 OwnerAlias = $owner
@@ -126,7 +132,7 @@ function Get-TargetResource
                 Language = $site.RootWeb.Language
                 Name = $site.RootWeb.Name
                 OwnerEmail = $site.Owner.Email
-                QuotaTemplate = $site.Quota
+                QuotaTemplate = $quota
                 SecondaryEmail = $site.SecondaryContact.Email
                 SecondaryOwnerAlias = $secondaryOwner
                 Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.WebTemplateId)"

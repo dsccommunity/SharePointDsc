@@ -87,13 +87,7 @@ function Get-TargetResource
         } 
         else 
         {
-            $caWebApp = Get-SPWebApplication -IncludeCentralAdministration | `
-                Where-Object -FilterScript { 
-                    $_.IsAdministrationWebApplication 
-                } 
-
-            $s = Get-SPSite $caWebApp.Url
-            $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($s)
+            $c = [Microsoft.Office.Server.Search.Administration.SearchContext]::GetContext($serviceApp.Name)
             $sc = New-Object -TypeName Microsoft.Office.Server.Search.Administration.Content `
                              -ArgumentList $c;
             $dummyPassword = ConvertTo-SecureString -String "-" -AsPlainText -Force
@@ -123,8 +117,8 @@ function Get-TargetResource
                 Name                        = $serviceApp.DisplayName
                 ProxyName                   = $proxyName
                 ApplicationPool             = $serviceApp.ApplicationPool.Name
-                DatabaseName                = $serviceApp.Database.Name
-                DatabaseServer              = $serviceApp.Database.Server.Name
+                DatabaseName                = $serviceApp.SearchAdminDatabase.Name
+                DatabaseServer              = $serviceApp.SearchAdminDatabase.Server.Name
                 Ensure                      = "Present"
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
@@ -212,7 +206,7 @@ function Set-TargetResource
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             
-            if ($params.ContainsKey("CloudIndex") -eq $true) 
+            if ($params.ContainsKey("CloudIndex") -eq $true -and $params.CloudIndex -eq $true)
             {
                 $version = Get-SPDSCInstalledProductVersion
                 if (($version.FileMajorPart -gt 15) `
