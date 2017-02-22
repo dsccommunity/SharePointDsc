@@ -291,7 +291,6 @@ Configuration AutoInstallerExample
             ApplicationPoolAccount = $WebPoolManagedAccount.UserName
             AllowAnonymous         = $false
             AuthenticationMethod   = "NTLM"
-            AuthenticationProvider = "Windows Authentication"
             DatabaseName           = "SP_Content"
             Url                    = "http://sites.contoso.com"
             HostHeader             = "sites.contoso.com"
