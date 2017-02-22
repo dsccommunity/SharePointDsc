@@ -49,7 +49,7 @@ function Get-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
@@ -365,7 +365,7 @@ function Test-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
