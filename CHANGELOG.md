@@ -1,7 +1,11 @@
 # Change log for SharePointDsc
 
 ## Unreleased
-
+* Added Example of how to build a DSC Configuration that will take an XML file
+  from AutoSPInstaller
+* Added Claims to MSFT_SPWebApplication resource, and an AuthenticationProvider
+  to specify Windows Authentication or the SPTrustedIdentityTokenIssuer Name 
+  to be used for Claims Authentication
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally
 * New resources: SPFarmPropertyBag
