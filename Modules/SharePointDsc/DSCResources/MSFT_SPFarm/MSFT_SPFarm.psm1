@@ -60,7 +60,7 @@ function Get-TargetResource
         $ServerRole
     )
 
-    Write-Verbose -Message "Getting teh settings of the current local SharePoint Farm (if any)"
+    Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
 
     $installedVersion = Get-SPDSCInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
@@ -100,7 +100,7 @@ function Get-TargetResource
     # Determine if a connection to a farm already exists
     $majorVersion = $installedVersion.FileMajorPart
     $regPath = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$majorVersion.0\Secure\ConfigDB"
-    $dsnValue = Get-SPDSCRegistryKey -Key $regPath -Value "dsn"
+    $dsnValue = Get-SPDSCRegistryKey -Key $regPath -Value "dsn" -ErrorAction SilentlyContinue
 
     if ($null -ne $dsnValue)
     {
@@ -284,11 +284,12 @@ function Set-TargetResource
     }
     
     $actionResult = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                        -Arguments $PSBoundParameters `
+                                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
                                         -ScriptBlock {
         $params = $args[0]
+        $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.SPFarm\SPFarm.psm1"
+        $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
         $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer -Database $params.FarmConfigDatabaseName
 
@@ -347,7 +348,7 @@ function Set-TargetResource
             {
                 try 
                 {
-                    Connect-SPConfigurationDatabase @joinFarmArgs | Out-Null 
+                    Connect-SPConfigurationDatabase @executeArgs | Out-Null 
                     $connectedToFarm = $true
                 }
                 catch 
@@ -382,8 +383,6 @@ function Set-TargetResource
 
             New-SPConfigurationDatabase @executeArgs
 
-            
-
             $farmAction = "CreatedFarm"
         }
 
@@ -392,7 +391,6 @@ function Set-TargetResource
         Initialize-SPResourceSecurity | Out-Null 
         Install-SPService | Out-Null 
         Install-SPFeature -AllExistingFeatures -Force | Out-Null 
-        Install-SPApplicationContent | Out-Null 
 
         # Provision central administration
         if ($params.RunCentralAdmin -eq $true)
@@ -402,7 +400,14 @@ function Set-TargetResource
                                     $_.IsAdministrationWebApplication -eq $true 
                                 }
 
-            if ($null -eq $centralAdminSite)
+            
+            $centralAdminProvisioned = $false
+            if ((New-Object -TypeName System.Uri $centralAdminSite.Url).Port -eq $params.CentralAdministrationPort)
+            {
+                $centralAdminProvisioned = $true
+            }
+            
+            if ($centralAdminProvisioned -eq $false)
             {
                 New-SPCentralAdministration -Port $params.CentralAdministrationPort `
                                             -WindowsAuthProvider $params.CentralAdministrationAuth
@@ -422,12 +427,15 @@ function Set-TargetResource
                                             $_.TypeName -eq "Central Administration"
                                         }
                 }
-                if ($null -eq $si) { 
+                if ($null -eq $serviceInstance) 
+                { 
                     throw [Exception] "Unable to locate Central Admin service instance on this server"
                 }
                 Start-SPServiceInstance -Identity $serviceInstance 
             }
         }
+
+        Install-SPApplicationContent | Out-Null 
 
         return $farmAction
     }
