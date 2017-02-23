@@ -433,6 +433,10 @@ Configuration AutoInstallerExample
     }
 }
 
+$scriptpath = $MyInvocation.MyCommand.Path
+$path = Split-Path $scriptpath -Parent 
+$autoInstallerXMLPath = Join-Path $path "AutoInstallerInput.xml"
+[xml]$autoInstallerXML = Get-Content $autoInstallerXMLPath
 
-[xml]$autoInstallerXML = Get-Content AutoInstallerInput.xml
+AutoInstallerExample -autoInstallerXML $autoInstallerXML 
 
