@@ -127,8 +127,7 @@ function Get-ConfigDatabaseName {
    
 }
 
-Configuration AutoInstallerExample
-{
+Configuration AutoInstallerExample {
     param (
         [Parameter(Mandatory=$true)] [ValidateNotNullOrEmpty()] [xml]$autoInstallerXML
     )
@@ -438,5 +437,5 @@ $path = Split-Path $scriptpath -Parent
 $autoInstallerXMLPath = Join-Path $path "AutoInstallerInput.xml"
 [xml]$autoInstallerXML = Get-Content $autoInstallerXMLPath
 
-AutoInstallerExample -autoInstallerXML $autoInstallerXML 
+###ASutoInstallerExample -autoInstallerXML $autoInstallerXML 
 
