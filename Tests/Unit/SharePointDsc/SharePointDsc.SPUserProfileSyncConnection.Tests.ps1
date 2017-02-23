@@ -32,7 +32,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 public enum ProfileType { User};
                 }        
 "@ -ErrorAction SilentlyContinue 
-        }   
+        }
+        try { [Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext] }
+        catch {
+            Add-Type -TypeDefinition @"
+                namespace Microsoft.Office.Server.UserProfiles {
+                    public class DirectoryServiceNamingContext {
+                        public DirectoryServiceNamingContext(System.Object a, System.Object b, System.Object c, System.Object d, System.Object e, System.Object f, System.Object g, System.Object h)
+                        {
+
+                        }
+                    }
+                }
+"@
+        }
 
         # Mocks for all contexts   
         Mock -CommandName Get-SPDSCServiceContext -MockWith { 
@@ -134,9 +147,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 objectGUID = (New-Guid).ToString()
             }
         }
-        Mock -CommandName New-SPDSCDirectoryServiceNamingContextList -MockWith {
-            return New-Object -TypeName System.Collections.Generic.List[[Object]]
-        } 
+
         Mock -CommandName Import-Module {} -ParameterFilter { 
             $_.Name -eq $ModuleName 
         }
@@ -163,7 +174,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $userProfileServiceNoConnections }
-            Mock -CommandName New-SPDSCDirectoryServiceNamingContext -MockWith {return @{} }
             
             It "Should return null from the Get method" {
                 Get-TargetResource @testParams | Should BeNullOrEmpty
@@ -278,8 +288,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } -PassThru   |  Add-Member  ConnectionManager $litwareConnnectionManager  -PassThru )
             } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
         
-            Mock -CommandName New-Object -MockWith {return @{}
-            }  -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext"}
 
             It "Should return service instance from the Get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty
