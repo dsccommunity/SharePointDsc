@@ -3,11 +3,17 @@ function Invoke-TestHarness
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $false)]
         [System.String]
         $TestResultsFile,
 
+        [Parameter(Mandatory = $false)]
         [System.String]
-        $DscTestsPath
+        $DscTestsPath,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]
+        $IgnoreCodeCoverage
     )
 
     Write-Verbose -Message 'Commencing all SharePointDsc tests'
@@ -15,14 +21,19 @@ function Invoke-TestHarness
     $repoDir = Join-Path -Path $PSScriptRoot -ChildPath '..\' -Resolve
 
     $testCoverageFiles = @()
-    Get-ChildItem -Path "$repoDir\modules\SharePointDsc\DSCResources\**\*.psm1" -Recurse | ForEach-Object {
-        if ($_.FullName -notlike '*\DSCResource.Tests\*') {
-            $testCoverageFiles += $_.FullName
+    if ($IgnoreCodeCoverage.IsPresent -eq $false)
+    {
+        Get-ChildItem -Path "$repoDir\modules\SharePointDsc\DSCResources\**\*.psm1" -Recurse | ForEach-Object {
+            if ($_.FullName -notlike '*\DSCResource.Tests\*') 
+            {
+                $testCoverageFiles += $_.FullName
+            }
         }
     }
 
     $testResultSettings = @{ }
-    if ([String]::IsNullOrEmpty($TestResultsFile) -eq $false) {
+    if ([String]::IsNullOrEmpty($TestResultsFile) -eq $false) 
+    {
         $testResultSettings.Add('OutputFormat', 'NUnitXml' )
         $testResultSettings.Add('OutputFile', $TestResultsFile)
     }
@@ -60,9 +71,12 @@ function Invoke-TestHarness
         $testsToRun += @( $DscTestsPath )
     }
 
-    $results = Invoke-Pester -Script $testsToRun `
-                             -CodeCoverage $testCoverageFiles `
-                             -PassThru @testResultSettings
+    if ($IgnoreCodeCoverage.IsPresent -eq $false)
+    {
+        $testResultSettings.Add('CodeCoverage', $testCoverageFiles)
+    }
+
+    $results = Invoke-Pester -Script $testsToRun -PassThru @testResultSettings
 
     return $results
 }
