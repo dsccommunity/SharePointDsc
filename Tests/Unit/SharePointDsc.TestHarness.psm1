@@ -26,6 +26,9 @@ function New-SPDscUnitTestHelper
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
     $moduleRoot = Join-Path -Path $repoRoot -ChildPath "Modules\SharePointDsc"
 
+    $mainModule = Join-Path -Path $moduleRoot -ChildPath "SharePointDsc.psd1"
+    Import-Module -Name $mainModule -Global
+
     if ($PSBoundParameters.ContainsKey("SubModulePath") -eq $true)
     {
         $describeHeader = "Sub-module '$SubModulePath'"
