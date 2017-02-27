@@ -60,6 +60,8 @@
   provisioned
 * Added an error catch to provide more detail about running SPAppCatalog with
   accounts other than the farm account
+* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
+  joined to a farm
 
 ## 1.4
 
