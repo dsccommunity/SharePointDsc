@@ -199,7 +199,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -497,7 +497,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -575,7 +575,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -585,7 +585,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -662,7 +662,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -672,7 +672,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -758,7 +758,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -826,7 +826,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -895,7 +895,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -963,7 +963,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
 
@@ -1015,7 +1015,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1080,7 +1080,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1151,7 +1151,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
-                        Type = 'FullRead'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1222,7 +1222,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1293,7 +1293,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1365,7 +1365,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1413,7 +1413,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1460,7 +1460,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1505,7 +1505,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1553,7 +1553,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
-                        Type = 'FullControl'
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
