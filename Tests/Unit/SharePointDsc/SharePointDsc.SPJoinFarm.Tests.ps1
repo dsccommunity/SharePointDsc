@@ -142,6 +142,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ServerRole = "ApplicationWithSearch"
                 }
 
+                Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                    if ($Value -eq "dsn")
+                    {
+                        return $null
+                    }
+                }
+
                 Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
                     return @{
                         FileMajorPart = 16
