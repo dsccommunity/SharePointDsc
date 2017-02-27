@@ -34,6 +34,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Install-SPApplicationContent -MockWith {}
         Mock -CommandName Start-Service -MockWith {}
         Mock -CommandName Start-Sleep -MockWith {}
+        Mock -CommandName Test-SPDscSqlAccess -MockWith {}
 
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" {
@@ -41,6 +42,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 FarmConfigDatabaseName = "SP_Config"
                 DatabaseServer = "DatabaseServer\Instance"
                 Passphrase = $mockPassphraseCredential
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
             }
 
             Mock -CommandName Get-SPFarm -MockWith { 
@@ -178,6 +186,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Passphrase = $mockPassphraseCredential
             }
             
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ 

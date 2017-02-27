@@ -34,6 +34,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Install-SPFeature -MockWith {}
         Mock -CommandName New-SPCentralAdministration -MockWith {}
         Mock -CommandName Install-SPApplicationContent -MockWith {}
+        Mock -CommandName Test-SPDscSqlAccess -MockWith {}
         
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" -Fixture {
@@ -45,7 +46,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AdminContentDatabaseName = "Admin_Content"
                 CentralAdministrationAuth = "Kerberos"
                 CentralAdministrationPort = 1234
-            }
+            }            
 
             Mock -CommandName Get-SPDSCRegistryKey -MockWith {
                 if ($Value -eq "dsn")
@@ -372,6 +373,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationAuth = "Kerberos"
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
+            }
+
             It "uses a default value for the central admin port" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPCentralAdministration -ParameterFilter { $Port -eq 9999 }
@@ -385,6 +393,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 FarmAccount = $mockFarmAccount
                 Passphrase =  $mockPassphrase
                 AdminContentDatabaseName = "Admin_Content"
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
             }
 
             It "uses NTLM for the Central Admin web application authentication" {
