@@ -1,6 +1,7 @@
 # Change log for SharePointDsc
 
 ## Unreleased
+* Created DSCResource for Access Services 2010
 
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally
