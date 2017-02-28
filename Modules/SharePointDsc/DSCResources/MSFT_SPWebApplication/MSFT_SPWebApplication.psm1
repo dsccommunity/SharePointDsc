@@ -88,7 +88,8 @@ function Get-TargetResource
         }
 
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
-        if($authProvider.DisplayName -eq "Windows Authentication") {
+        if($authProvider.DisplayName -eq "Windows Authentication") 
+        {
             if ($authProvider.DisableKerberos -eq $true) 
             { 
                 $localAuthMode = "NTLM" 
@@ -97,11 +98,13 @@ function Get-TargetResource
             { 
                 $localAuthMode = "Kerberos" 
             }
-            $AuthenticationProvider = $null
+            $authenticationProvider = $null
         }
-        else {
+        else 
+        {
+            ##Are there other things it could be?? For now if it's not Windows Auth we are assuming claims...
             $localAuthMode = "Claims"
-            $AuthenticationProvider = "$($authProvider.DisplayName)"
+            $authenticationProvider = $authProvider.DisplayName
         }
 
         return @{
@@ -116,7 +119,7 @@ function Get-TargetResource
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
-            AuthenticationProvider = $AuthenticationProvider
+            AuthenticationProvider = $authenticationProvider
             UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -198,6 +201,18 @@ function Set-TargetResource
     
     if ($Ensure -eq "Present") 
     {
+
+         if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
+        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
+    {
+        throw [Exception] "Server role is only supported in SharePoint 2016."
+    }
+
+        if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
+        {
+            throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+        }
+
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters,$PSScriptRoot) `
                             -ScriptBlock {
@@ -247,13 +262,18 @@ function Set-TargetResource
                 
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
                 {
+                    switch ($params.AuthenticationMethod) 
+                    {
+                        case "NTLM":
+
+                    }
                     if ($params.AuthenticationMethod -eq "NTLM") 
                     {
                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
                                                            -DisableKerberos:$true
                     } 
                     elseif ($params.AuthenticationMethod -eq "Claims" -and $params.AuthenticationProvider -ne "") {
-                        $ap = Get-SPTrustedIdentityTokenIsser -Identity "$($params.AuthenticationProvider)"
+                        $ap = Get-SPTrustedIdentityTokenIsser -Identity $params.AuthenticationProvider
                     }
                     else 
                     {
