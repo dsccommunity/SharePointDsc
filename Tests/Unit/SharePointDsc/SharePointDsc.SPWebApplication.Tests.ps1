@@ -34,8 +34,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
-                Ensure = "Present"
-                
+                Ensure = "Present"              
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
@@ -60,12 +59,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
                 Ensure = "Present"
-                 DatabaseServer = "sql.domain.local"
-                DatabaseName = "SP_Content_01"
-                HostHeader = "sites.sharepoint.com"
-                Path = "C:\inetpub\wwwroot\something"
-                Port = 80
-                UseSSL = $true
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
@@ -136,12 +129,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
                 Ensure = "Present"
-                DatabaseServer = "sql.domain.local"
-                DatabaseName = "SP_Content_01"
-                HostHeader = "sites.sharepoint.com"
-                Path = "C:\inetpub\wwwroot\something"
-                Port = 80
-                UseSSL = $true
             }
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
@@ -236,6 +223,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true
                     AllowAnonymous = $false 
                 } 
@@ -294,7 +282,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        #region SPWebApplication with Claims Tests
+      
         Context -Name "The web application does exist and should that uses Claims" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
@@ -405,14 +393,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AuthenticationProvider = "TestProvider"
                 Ensure = "Present"
             }
-
+            Mock -CommandName Get-SPTrustedIdentityTokenIsser -MockWith {
+                return @{
+                    Name = $testParams.AuthenticationProvider
+                }
+            }
              Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
 
-                   DisplayName = "TestProvider"
-                   LoginProviderName = "TestProvider"
+                   DisplayName = $testParams.AuthenticationProvider
+                   LoginProviderName = $testParams.AuthenticationProvider
                    ClaimProviderName = "TestClaimProvider"
-                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=$($testParams.AuthenticationProvider)"
                 } 
             }
 
@@ -470,7 +462,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        ##These tests are for the AuthenticationMethod and AuthenticationProvider updated logic.                
+                  
         Context -Name "The web application doesn't exists authentication method is specified with NTLM provider" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
@@ -484,6 +476,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
              Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
                     AllowAnonymous = $false 
                 } 
@@ -515,6 +508,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
              Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $false 
                     AllowAnonymous = $false 
                 } 
@@ -622,6 +616,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
                     AllowAnonymous = $false 
                 } 
@@ -645,7 +640,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
            
         }
-        #endregion      
+       
         
     }
 }

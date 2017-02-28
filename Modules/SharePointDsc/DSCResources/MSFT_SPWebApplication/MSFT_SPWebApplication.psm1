@@ -98,19 +98,10 @@ function Get-TargetResource
             { 
                 $localAuthMode = "Kerberos" 
             }
-            ##COMMENT: We need to be clever here. If the Resource specifies Windows Authentication we should return it. 
-            ## If it doesn't (specifies null we shoudl return null... 
-            ## it amounts to the same thing and will save us from weirdness later on. )
-            if($params.AuthenticationProvider -eq "Windows Authentication") {
-                $authenticationProvider = "Windows Authentication"
-            }
-            else {
-                $authenticationProvider = $null
-            }
+              $authenticationProvider = "Windows Authentication"
         }
         else 
         {
-            ##COMMENT: Are there other things it could be?? For now if it's not Windows Auth we are assuming claims...
             $localAuthMode = "Claims"
             $authenticationProvider = $authProvider.DisplayName
         }
@@ -210,12 +201,6 @@ function Set-TargetResource
     if ($Ensure -eq "Present") 
     {
 
-         if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
-        -and (Get-SPDSCInstalledProductVersion).FileMajorPart -ne 16) 
-    {
-        throw [Exception] "Server role is only supported in SharePoint 2016."
-    }
-
         if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
         {
             throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
@@ -277,7 +262,7 @@ function Set-TargetResource
                     else 
                     {
                         $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
+                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
                                                             -DisableKerberos:$disableKerberos
                     }
                     

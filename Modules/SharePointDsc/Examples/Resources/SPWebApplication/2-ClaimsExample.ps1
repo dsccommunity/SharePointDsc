@@ -1,6 +1,8 @@
 <#
 .EXAMPLE
-    This example shows how to create a new web application in the local farm
+    This example shows how to create a new web application in the local farm using a custom claim provider.
+    A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer is referenced
+    by the SPWebApplication as the AuthenticationProvider and the AuthenticationMethod is set to "Claims" value.
 #>
 
     Configuration Example 
@@ -14,16 +16,7 @@
 
         node localhost {
 
-            ##Ensure the Custom Claims Provider
-            SPFarmSolution ClaimsProviderWsp
-            {
-                Name                 = "LDAPCP.wsp"
-                LiteralPath          = "C:\src\LDAPCP.wsp"
-                Ensure               = "Present"
-                Version              = "1.0.0"
-                PsDscRunAsCredential = $SetupAccount
-            }
-            #Ensure the SPTrustedIdentityTokenIssuer
+          
              SPTrustedIdentityTokenIssuer SampleSPTrust
             {
                 Name                         = "Contoso"
@@ -47,7 +40,6 @@
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
                 PsDscRunAsCredential         = $SetupAccount
-                DependsOn = "[SPFarmSolution]ClaimsProviderWsp"
             }
             
             
