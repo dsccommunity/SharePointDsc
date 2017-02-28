@@ -277,6 +277,179 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
+        
+        #region SPWebApplication with Claims Tests
+        Context -Name "The web application does exist and should that uses Claims" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "TestProvider"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+
+                   DisplayName = "TestProvider"
+                   LoginProviderName = "TestProvider"
+                   ClaimProviderName = "TestClaimProvider"
+                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                USeClaimsAuthentication = $true
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+                }
+            )}
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The web application does exist and shouldn't that uses Claims" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "TestProvider"
+                Ensure = "Absent"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+
+                   DisplayName = "TestProvider"
+                   LoginProviderName = "TestProvider"
+                   ClaimProviderName = "TestClaimProvider"
+                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                USeClaimsAuthentication = $true
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+                }
+            )}
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        Context -Name "The web application doesn't exist and should that uses Claims" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "TestProvider"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+
+                   DisplayName = "TestProvider"
+                   LoginProviderName = "TestProvider"
+                   ClaimProviderName = "TestClaimProvider"
+                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return $null
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
+
+        
+        Context -Name "The web application doesn't exist and shouldn't that uses Claims" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "TestProvider"
+                Ensure = "Absent"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+
+                   DisplayName = "TestProvider"
+                   LoginProviderName = "TestProvider"
+                   ClaimProviderName = "TestClaimProvider"
+                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return $null
+            }
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+        #endregion      
+        
+        
     }
 }
 
