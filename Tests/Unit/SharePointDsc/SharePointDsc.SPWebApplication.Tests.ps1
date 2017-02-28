@@ -455,24 +455,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         ##These tests are for the AuthenticationMethod and AuthenticationProvider updated logic.                
-        Context -Name "The web application does exists authentication method is specified with NTLM provider" -Fixture {
+        Context -Name "The web application doesn't exists authentication method is specified with NTLM provider" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Windows Authentication"
-                AuthenticationProvider = "NTLM"
-                Ensure = "Absent"
+                AuthenticationMethod = "NTLM"
+                AuthenticationProvider = "Windows Authentication"
+                Ensure = "Present"
             }
 
              Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
-
-                   DisplayName = "TestProvider"
-                   LoginProviderName = "Windows Authentication"
-                   ClaimProviderName = "TestClaimProvider"
-                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                    DisableKerberos = $true 
+                    AllowAnonymous = $false 
                 } 
             }
 
@@ -495,8 +492,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Windows Authentication"
-                AuthenticationProvider = "Kerberos"
+                AuthenticationMethod = "Kerberos"
+                AuthenticationProvider = "Windows Authentication"
                 Ensure = "Present"
             }
 
@@ -504,18 +501,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{ 
                     DisableKerberos = $false 
                     AllowAnonymous = $false 
-                    DisplayName = "TestProvider"
-                    LoginProviderName = "TestProvider"
-                    ClaimProviderName = "TestClaimProvider"
-                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
                 } 
                
             }
             
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
-                return $null
-            }
+           Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                USeClaimsAuthentication = $false
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+                }
+            )}
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -546,12 +555,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 
             }
             
-            Mock -CommandName Get-SPWebApplication -MockWith { 
-                return $null
-            }
-
+            Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                USeClaimsAuthentication = $true
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+                }
+            )}
+            
             It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+                (Set-TargetResource @testParams).Ensure | Should Be "Present"
+            }    
+            It "Should return present from the set method" {
+                (Set-TargetResource @testParams).Ensure | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
             }
 
             It "Should return false from the test method" {
