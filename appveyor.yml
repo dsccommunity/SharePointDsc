@@ -9,7 +9,7 @@ install:
     - ps: |
         $moduleName = 'SharePointDsc'
         $mainModuleFolder = "Modules\$moduleName"
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
         
 build: off
