@@ -51,6 +51,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+
         Context -Name "The web application that uses NTLM doesn't exist but should" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
@@ -59,6 +60,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
                 Ensure = "Present"
+                 DatabaseServer = "sql.domain.local"
+                DatabaseName = "SP_Content_01"
+                HostHeader = "sites.sharepoint.com"
+                Path = "C:\inetpub\wwwroot\something"
+                Port = 80
+                UseSSL = $true
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
@@ -134,6 +141,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 HostHeader = "sites.sharepoint.com"
                 Path = "C:\inetpub\wwwroot\something"
                 Port = 80
+                UseSSL = $true
             }
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
@@ -168,6 +176,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+
+           
         }
 
         Context -Name "The web appliation does exist and should that uses Kerberos" -Fixture {
@@ -417,6 +427,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
+             It "Should call the new cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPWebApplication
+                Assert-MockCalled New-SPAuthenticationProvider
+            }
         }
 
         
@@ -482,7 +498,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 
@@ -536,6 +552,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "The web application authentication method is claims with no authentication provider" -Fixture {
+            
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
@@ -576,18 +593,59 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )}
             
             It "Should return present from the get method" {
-                (Set-TargetResource @testParams).Ensure | Should Be "Present"
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }    
-            It "Should return present from the set method" {
-                (Set-TargetResource @testParams).Ensure | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+            It "Should return exception from the set method" {
+                (Set-TargetResource @testParams) | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
             }
 
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
         }
+
+        Context -Name "The web appliation does exist and should that uses NTLM" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Present"
+                DatabaseServer = "sql.domain.local"
+                DatabaseName = "SP_Content_01"
+                HostHeader = "sites.sharepoint.com"
+                Path = "C:\inetpub\wwwroot\something"
+                Port = 80
+                UseSSL = $true
+            }
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisableKerberos = $true 
+                    AllowAnonymous = $false 
+                } 
+            }
+            
+            Mock -CommandName Get-SPWebapplication -MockWith { 
+                return $null
+            }
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should call New-SPWebApplication" {
+                Set-TargetResource @testParams | 
+            }
+
+           
+        }
         #endregion      
-        
         
     }
 }
