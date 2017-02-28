@@ -35,6 +35,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
                 Ensure = "Present"
+                
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
@@ -128,6 +129,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Url = "http://sites.sharepoint.com"
                 AuthenticationMethod = "NTLM"
                 Ensure = "Present"
+                DatabaseServer = "sql.domain.local"
+                DatabaseName = "SP_Content_01"
+                HostHeader = "sites.sharepoint.com"
+                Path = "C:\inetpub\wwwroot\something"
+                Port = 80
             }
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
