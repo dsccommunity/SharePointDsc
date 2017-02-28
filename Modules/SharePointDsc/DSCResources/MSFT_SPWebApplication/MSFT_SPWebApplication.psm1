@@ -68,7 +68,10 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting web application '$Name' config"
-
+     if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
+    {
+        throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+    }
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {

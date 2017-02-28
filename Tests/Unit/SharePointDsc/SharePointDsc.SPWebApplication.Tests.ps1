@@ -447,6 +447,111 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
         }
+
+        ##These tests are for the AuthenticationMethod and AuthenticationProvider updated logic.                
+        Context -Name "The web application does exists authentication method is specified with NTLM provider" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Windows Authentication"
+                AuthenticationProvider = "NTLM"
+                Ensure = "Absent"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+
+                   DisplayName = "TestProvider"
+                   LoginProviderName = "Windows Authentication"
+                   ClaimProviderName = "TestClaimProvider"
+                   AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return $null
+            }
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The web application does exist and authentication method is specified with Kerberos provider" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Windows Authentication"
+                AuthenticationProvider = "Kerberos"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisableKerberos = $false 
+                    AllowAnonymous = $false 
+                    DisplayName = "TestProvider"
+                    LoginProviderName = "TestProvider"
+                    ClaimProviderName = "TestClaimProvider"
+                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+               
+            }
+            
+
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return $null
+            }
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "The web application authentication method is claims with no authentication provider" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "Claims"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisplayName = "TestProvider"
+                    LoginProviderName = "TestProvider"
+                    ClaimProviderName = "TestClaimProvider"
+                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
+                } 
+                
+            }
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return $null
+            }
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+        }
         #endregion      
         
         
