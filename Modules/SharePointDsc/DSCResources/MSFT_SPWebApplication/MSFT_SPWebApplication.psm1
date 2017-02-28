@@ -86,7 +86,7 @@ function Get-TargetResource
                 Ensure = "Absent"
             } 
         }
-
+        ### COMMENT: Are we making an assumption here, about Default Zone
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
         if($authProvider.DisplayName -eq "Windows Authentication") 
         {
@@ -98,11 +98,19 @@ function Get-TargetResource
             { 
                 $localAuthMode = "Kerberos" 
             }
-            $authenticationProvider = $null
+            ##COMMENT: We need to be clever here. If the Resource specifies Windows Authentication we should return it. 
+            ## If it doesn't (specifies null we shoudl return null... 
+            ## it amounts to the same thing and will save us from weirdness later on. )
+            if($params.AuthenticationProvider -eq "Windows Authentication") {
+                $authenticationProvider = "Windows Authentication"
+            }
+            else {
+                $authenticationProvider = $null
+            }
         }
         else 
         {
-            ##Are there other things it could be?? For now if it's not Windows Auth we are assuming claims...
+            ##COMMENT: Are there other things it could be?? For now if it's not Windows Auth we are assuming claims...
             $localAuthMode = "Claims"
             $authenticationProvider = $authProvider.DisplayName
         }
@@ -262,24 +270,17 @@ function Set-TargetResource
                 
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
                 {
-                    switch ($params.AuthenticationMethod) 
+                    if($params.AuthenticationMethod -eq "Claims")
                     {
-                        case "NTLM":
-
-                    }
-                    if ($params.AuthenticationMethod -eq "NTLM") 
-                    {
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                           -DisableKerberos:$true
-                    } 
-                    elseif ($params.AuthenticationMethod -eq "Claims" -and $params.AuthenticationProvider -ne "") {
                         $ap = Get-SPTrustedIdentityTokenIsser -Identity $params.AuthenticationProvider
                     }
                     else 
                     {
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                           -DisableKerberos:$false
+                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
+                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
+                                                            -DisableKerberos:$disableKerberos
                     }
+                    
                     $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
                 
