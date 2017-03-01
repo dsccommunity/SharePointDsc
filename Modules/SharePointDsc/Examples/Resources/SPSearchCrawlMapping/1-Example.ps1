@@ -13,6 +13,7 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
+            
             SPSearchCrawlMapping IntranetCrawlMapping 
             {
                 ServiceAppName = "Search Service Application"
