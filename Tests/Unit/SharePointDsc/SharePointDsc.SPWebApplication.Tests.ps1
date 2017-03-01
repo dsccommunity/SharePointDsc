@@ -635,7 +635,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should call New-SPWebApplication" {
-                Set-TargetResource @testParams | 
+                 Assert-MockCalled New-SPWebApplication
+                
             }
 
            
