@@ -167,7 +167,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            
         }
 
-        Context -Name "The web appliation does exist and should that uses Kerberos" -Fixture {
+        Context -Name "The web application does exist and should that uses Kerberos" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
@@ -393,12 +393,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AuthenticationProvider = "TestProvider"
                 Ensure = "Present"
             }
+            
             Mock -CommandName Get-SPTrustedIdentityTokenIsser -MockWith {
                 return @{
                     Name = $testParams.AuthenticationProvider
                 }
             }
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+            
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
 
                    DisplayName = $testParams.AuthenticationProvider
@@ -423,7 +425,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
-                Assert-MockCalled New-SPAuthenticationProvider
+                Assert-MockCalled Get-SPAuthenticationProvider
             }
         }
 
@@ -593,8 +595,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Set-TargetResource @testParams) | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
             }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
             }
         }
 
@@ -630,16 +632,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
-            }
-
-            It "Should call New-SPWebApplication" {
-                 Assert-MockCalled New-SPWebApplication
-                
-            }
-
-           
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }           
         }
        
         
