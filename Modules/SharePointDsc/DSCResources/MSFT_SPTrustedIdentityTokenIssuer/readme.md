@@ -3,13 +3,9 @@
 This resource is used to create or remove SPTrustedIdentityTokenIssuer in a
 SharePoint farm.
 
-The SigningCertificateThumbPrint must match the thumbprint of a certificate in
-the store LocalMachine\My of the server that will run this resource.
-Note that the private key of the certificate must not be available in the
-certiificate store because SharePoint does not accept it.
-Once the SPTrustedIdentityTokenIssuer is successfully created, the certificate
-can be safely deleted from the certificate store as it won't be needed by
-SharePoint.
+The SigningCertificateThumbPrint must be either the thumbprint of the signing 
+certificate stored in the certificate store LocalMachine\My of the server, 
+or the file path to the public key of the certificate.
 
 ClaimsMappings is an array of MSFT_SPClaimTypeMapping to use with cmdlet
 New-SPClaimTypeMapping. Each MSFT_SPClaimTypeMapping requires properties Name

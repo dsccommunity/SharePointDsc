@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\UnitTestHelper.psm1" `
+                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -22,7 +22,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-ChildItem -MockWith {
             return @(
                 @{
-                    Thumbprint = "Mock Thumbrpint"
+                    Thumbprint = "123ABCFACE"
                 }
             )
         }
@@ -46,7 +46,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbPrint = "Mock Thumbrpint"
+                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -101,7 +101,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbPrint = "Mock Thumbrpint"
+                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -162,7 +162,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbPrint = "Mock Thumbrpint"
+                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -205,7 +205,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbPrint = "Mock Thumbrpint"
+                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Absent"
@@ -253,7 +253,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbPrint = "Mock Thumbrpint"
+                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -265,12 +265,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "validation of IdentifierClaim fails in the set method" {
+            It "should fail validation of IdentifierClaim in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "IdentifierClaim does not match any claim type specified in ClaimsMappings."
             }
         }
 
-        Context -Name "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My" -Fixture {
+        Context -Name "The signing certificate is in certificate store LocalMachine\My" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -288,14 +288,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbPrint = "UnknownSigningCertificateThumbPrint"
+                SigningCertificateThumbprintOrFilePath = "123ABCFACEFFF"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
             }
 
-            It "Should fail validation of SigningCertificateThumbPrint in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "The certificate thumbprint does not match a certificate in certificate store LocalMachine\My."
+            It "Should fail validation of SigningCertificateThumbprintOrFilePath in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Signing certificate with thumbprint 123ABCFACEFFF was not found."
             }
         }
     }

@@ -30,7 +30,7 @@
 
         [parameter(Mandatory = $true)]
         [String]
-        $SigningCertificateThumbPrint,
+        $SigningCertificateThumbprintOrFilePath,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -66,7 +66,7 @@
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
             $identifierClaim = $spTrust.IdentityClaimTypeInformation.MappedClaimType
-            $signingCertificateThumbPrint = $spTrust.SigningCertificate.Thumbprint
+            $SigningCertificateThumbprintOrFilePath = $spTrust.SigningCertificate.Thumbprint
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
@@ -84,7 +84,7 @@
             $realm = ""
             $signInUrl = ""
             $identifierClaim = ""
-            $signingCertificateThumbPrint = ""
+            $SigningCertificateThumbprintOrFilePath = ""
             $currentState = "Absent"
             $claimProviderName = ""
             $providerSignOutUri = ""
@@ -97,7 +97,7 @@
             SignInUrl                    = $signInUrl
             IdentifierClaim              = $identifierClaim
             ClaimsMappings               = $claimsMappings
-            SigningCertificateThumbPrint = $signingCertificateThumbPrint
+            SigningCertificateThumbprintOrFilePath = $SigningCertificateThumbprintOrFilePath
             Ensure                       = $currentState
             ClaimProviderName            = $claimProviderName
             ProviderSignOutUri           = $providerSignOutUri
@@ -137,7 +137,7 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [String]
-        $SigningCertificateThumbPrint,
+        $SigningCertificateThumbprintOrFilePath,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -171,21 +171,37 @@ function Set-TargetResource
                                           -ScriptBlock {
                 $params = $args[0]
 
-                $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
-                    $_.Thumbprint -match $params.SigningCertificateThumbPrint
-                }
-
-                if (!$cert) 
+                if ($params.SigningCertificateThumbprintOrFilePath -match "^[A-Fa-f0-9]+$")
                 {
-                    throw ("The certificate thumbprint does not match a certificate in " + `
-                           "certificate store LocalMachine\My.")
-                    return
-                }
+                    Write-Verbose -Message "Parameter 'SigningCertificateThumbprintOrFilePath' matches a thumbprint, getting certificate with thumbprint $($params.SigningCertificateThumbprintOrFilePath) from the certificate store of the machine"
+                    $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
+                        $_.Thumbprint -match $params.SigningCertificateThumbprintOrFilePath
+                    }
 
-                if ($cert.HasPrivateKey) 
+                    if (!$cert) 
+                    {
+                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprintOrFilePath) was not found.")
+                        return
+                    }
+
+                    if ($cert.HasPrivateKey) 
+                    {
+                        throw ("SharePoint requires that the private key of the signing " + `
+                               "certificate is not installed in the certificate store.")
+                    }
+                }
+                else
                 {
-                    throw ("SharePoint requires that the private key of the signing " + `
-                           "certificate is not installed in the certificate store.")
+                    Write-Verbose -Message "Parameter 'SigningCertificateThumbprintOrFilePath' does not match a thumbprint, getting certificate from file system path '$($params.SigningCertificateThumbprintOrFilePath)'"
+                    try
+                    {
+                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" -ArgumentList @($params.SigningCertificateThumbprintOrFilePath)
+                    }
+                    catch
+                    {
+                        throw ("Signing certificate was not found in path '$($params.SigningCertificateThumbprintOrFilePath)'.")
+                        return
+                    }
                 }
                 
                 $claimsMappingsArray = @()
@@ -329,7 +345,7 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [String]
-        $SigningCertificateThumbPrint,
+        $SigningCertificateThumbprintOrFilePath,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
