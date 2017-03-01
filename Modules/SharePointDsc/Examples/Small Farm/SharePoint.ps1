@@ -1,3 +1,16 @@
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName = 'Server1'
+            PSDscAllowPlainTextPassword = $true
+        },
+        @{
+            NodeName = 'Server2'
+            PSDscAllowPlainTextPassword = $true
+        }
+    )
+}
+
 Configuration Example
 {
     param (
