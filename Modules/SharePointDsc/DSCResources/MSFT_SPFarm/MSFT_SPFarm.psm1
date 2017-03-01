@@ -329,8 +329,23 @@ function Set-TargetResource
             }
         }
 
+        if ($dbStatus.DatabaseExists -eq $true) 
+        {
+            $createFarm = $false
+        }
+        elseif ($dbStatus.DatabaseExists -eq $false -and $params.RunCentralAdmin -eq $false)
+        {
+            # Only allow the farm to be created by a server that will run central admin
+            # to avoid a ghost CA site appearing on this server and causing issues
+            $createFarm = $false
+        }
+        else 
+        {
+            $createFarm = $true
+        }
+
         $farmAction = ""
-        if ($dbStatus.DatabaseExists)
+        if ($createFarm -eq $false)
         {
             # The database exists, so attempt to join the farm to the server
 
