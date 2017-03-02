@@ -59,18 +59,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AuthenticationMethod = "NTLM"
                 Ensure = "Present"              
             }
-            $exception = "No matching accounts were found failed for unknown reason"
-            
+           
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
             Mock -CommandName Get-SPDSCContentService -MockWith {
                 return @{ Name = "PlaceHolder" }
             }
             Mock -CommandName Get-SPManagedAccount -MockWith {
-                Throw "$($exception)"
+                Throw ""
             }
 
             It "retrieving Managed Account fails in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Error occurred. Web application was not created. Error details: $($exception)"
+                {Set-TargetResource @testParams} | Should Throw "Error occurred. Web application was not created. Error details:"
             }
         }
 
