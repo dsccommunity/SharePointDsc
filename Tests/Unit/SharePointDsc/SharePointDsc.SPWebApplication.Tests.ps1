@@ -50,6 +50,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "The specified Managed Account fails for unkown reason" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Present"              
+            }
+            $exception = "Failed for unkown reason";
+
+
+                                   "details: $($_.Exception.Message)")
+            Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+            Mock -CommandName Get-SPDSCContentService -MockWith {
+                return @{ Name = "PlaceHolder" }
+            }
+            Mock -CommandName Get-SPManagedAccount -MockWith {
+                Throw $exception
+            }
+                                   
+            It "retrieving Managed Account fails in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Error occurred. Web application was not created. Error details: $($exception)"
+            }
+        }
+
 
         Context -Name "The web application that uses NTLM doesn't exist but should" -Fixture {
             $testParams = @{
