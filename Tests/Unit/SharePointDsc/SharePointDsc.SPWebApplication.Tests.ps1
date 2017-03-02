@@ -394,7 +394,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
             
-            Mock -CommandName Get-SPTrustedIdentityTokenIsser -MockWith {
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 return @{
                     Name = $testParams.AuthenticationProvider
                 }
@@ -592,7 +592,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }    
             It "Should return exception from the set method" {
-                (Set-TargetResource @testParams) | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+                {Set-TargetResource @testParams} | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
             }
 
             It "Should return true from the test method" {
@@ -600,7 +600,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The web appliation does exist and should that uses NTLM" -Fixture {
+        Context -Name "The web appliation does not exist and should that uses NTLM" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
@@ -616,6 +616,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 UseSSL = $true
             }
 
+            
+            Mock -CommandName Get-SPDSCContentService -MockWith {
+                ApplicationPools = @(
+                     @{
+                        Name = $testParams.ApplicationPool
+                    },
+                    @{
+                        Name = "Default App Pool"
+                    },
+                    @{
+                        Name = "SharePoint Token Service App Pool"
+                    }
+                )
+            }
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
                     DisplayName = "Windows Authentication"
@@ -628,12 +642,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
 
-            It "Should return present from the get method" {
+            It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }           
+            
+            It "Should return false from the set method" {
+                Test-TargetResource @testParams | Should Be $false
             }           
         }
        

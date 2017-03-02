@@ -223,7 +223,7 @@ function Set-TargetResource
 
                 # Get a reference to the Administration WebService
                 $admService = Get-SPDSCContentService
-                $appPools = $admService.ApplicationPools | Where-Object -FIlterScript { 
+                $appPools = $admService.ApplicationPools | Where-Object -FilterScript { 
                     $_.Name -eq $params.ApplicationPool 
                 }
                 if ($null -eq $appPools) 
@@ -257,7 +257,7 @@ function Set-TargetResource
                 {
                     if($params.AuthenticationMethod -eq "Claims")
                     {
-                        $ap = Get-SPTrustedIdentityTokenIsser -Identity $params.AuthenticationProvider
+                        $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider
                     }
                     else 
                     {
