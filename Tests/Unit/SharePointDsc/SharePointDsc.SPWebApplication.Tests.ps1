@@ -417,17 +417,51 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } 
             }
 
+           Mock -CommandName Get-SPDSCContentService -MockWith {
+                @{
+                    ApplicationPools = @(
+                        @{
+                            Name = $testParams.ApplicationPool
+                        },
+                        @{
+                            Name = "Default App Pool"
+                        },
+                        @{
+                            Name = "SharePoint Token Service App Pool"
+                        }
+                    )
+                }
+            }
+
             Mock -CommandName Get-SPWebApplication -MockWith { 
                 return $null
             }
 
             Mock -CommandName New-SPWebApplication -MockWith {
-                return $null
+                return @(@{
+                DisplayName = $testParams.Name
+                ApplicationPool = @{ 
+                    Name = $testParams.ApplicationPool
+                    Username = $testParams.ApplicationPoolAccount
+                }
+                USeClaimsAuthentication = $true
+                ContentDatabases = @(
+                    @{
+                        Name = "SP_Content_01"
+                        Server = "sql.domain.local"
+                    }
+                )
+                IisSettings = @( 
+                    @{ Path = "C:\inetpub\wwwroot\something" }
+                )
+                Url = $testParams.Url
+                }
+                )
             }
+            
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-               
             }
 
             It "Should return false from the test method" {
