@@ -392,8 +392,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AuthenticationMethod = "Claims"
                 AuthenticationProvider = "TestProvider"
                 Ensure = "Present"
+                DatabaseServer = "sql.domain.local"
+                DatabaseName = "SP_Content_01"
+                HostHeader = "sites.sharepoint.com"
+                Path = "C:\inetpub\wwwroot\something"
+                Port = 80
+                UseSSL = $true
             }
-            
+  
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 return @{
                     Name = $testParams.AuthenticationProvider
@@ -414,8 +420,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
 
+            Mock -CommandName New-SPWebApplication -MockWith {
+                return $null
+            }
+
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                Assert-MockCalled Get-SPAuthenticationProvider
             }
 
             It "Should return false from the test method" {
@@ -423,9 +434,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
              It "Should call the new cmdlet from the set method" {
                 Set-TargetResource @testParams
-
+                
+                
                 Assert-MockCalled New-SPWebApplication
-                Assert-MockCalled Get-SPAuthenticationProvider
+                Assert-MockCalled  Get-SPTrustedIdentityTokenIssuer 
+                
             }
         }
 
