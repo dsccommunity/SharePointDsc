@@ -384,6 +384,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "The web application doesn't exist and should that uses Claims" -Fixture {
+            
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
@@ -426,20 +427,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
-                Assert-MockCalled Get-SPAuthenticationProvider
+               
             }
 
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-             It "Should call the new cmdlet from the set method" {
+             It "Should call the new SPWebApplication cmdlet from the set method" {
                 Set-TargetResource @testParams
-                
-                
                 Assert-MockCalled New-SPWebApplication
-                Assert-MockCalled  Get-SPTrustedIdentityTokenIssuer 
-                
             }
+            
+                
         }
 
         
