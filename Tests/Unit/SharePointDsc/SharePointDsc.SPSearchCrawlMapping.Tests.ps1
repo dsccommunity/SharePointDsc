@@ -24,7 +24,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Mocks for all contexts   
         Mock -CommandName Remove-SPEnterpriseSearchCrawlMapping -MockWith {}   
         Mock -CommandName New-SPEnterpriseSearchCrawlMapping -MockWith {}   
-        Mock -CommandName Set-SPEnterpriseSearchCrawlMapping -MockWith {}   
+        Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith {}   
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {}
 
         Mock -CommandName Get-SPServiceApplication -MockWith { 
