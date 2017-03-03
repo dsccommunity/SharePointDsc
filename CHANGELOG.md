@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for 
+* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
   Search Service Application
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally

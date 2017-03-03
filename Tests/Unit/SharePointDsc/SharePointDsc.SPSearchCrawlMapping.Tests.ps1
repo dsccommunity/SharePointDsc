@@ -1,5 +1,5 @@
-[CmdletBinding()]
-param(
+﻿[CmdletBinding()]
+param(    
     [Parameter(Mandatory = $false)]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `

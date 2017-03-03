@@ -1,6 +1,9 @@
-<#
+﻿<#
 .EXAMPLE
-    This example shows how to apply settings to a sepcific URL in search
+    This example shows how to apply a Search Crawl Mapping rule to a search application. The
+    resource takes a 'ServiceAppName' which is the name of the search service application to
+    configure and provides a Url field used to 'match' the url you want to map, and a 'Target' 
+    which provides your desired target value.
 #>
 
     Configuration Example 
@@ -20,7 +23,7 @@
                 Url = "http://crawl.sharepoint.com"
                 Target = "http://site.sharepoint.com"
                 Ensure = "Present"
-                InstallAccount = $SetupAccount
+                PsDScRunAsCredential = $SetupAccount
             }
            
         }
