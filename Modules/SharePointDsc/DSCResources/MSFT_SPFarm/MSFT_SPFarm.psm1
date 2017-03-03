@@ -291,7 +291,18 @@ function Set-TargetResource
 
         $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
-        $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer -Database $params.FarmConfigDatabaseName
+        $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                            -Database $params.FarmConfigDatabaseName
+
+        while ($dbStatus.Locked -eq $true)
+        {
+            Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
+                                    "database is currently being provisioned by a remote " + `
+                                    "server, this server will wait for this to complete")
+            Start-Sleep -Seconds 30
+            $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                -Database $params.FarmConfigDatabaseName
+        }
 
         if ($dbStatus.ValidPermissions -eq $false)
         {
@@ -331,23 +342,35 @@ function Set-TargetResource
 
         if ($dbStatus.DatabaseExists -eq $true) 
         {
+            Write-Verbose -Message ("The SharePoint config database " + `
+                                    "'$($params.FarmConfigDatabaseName)' already exists, so " + `
+                                    "this server will join the farm.")
             $createFarm = $false
         }
         elseif ($dbStatus.DatabaseExists -eq $false -and $params.RunCentralAdmin -eq $false)
         {
             # Only allow the farm to be created by a server that will run central admin
             # to avoid a ghost CA site appearing on this server and causing issues
+            Write-Verbose -Message ("The SharePoint config database " + `
+                                    "'$($params.FarmConfigDatabaseName)' does not exist, but " + `
+                                    "this server will not be running the central admin " + `
+                                    "website, so it will wait to join the farm rather than " + `
+                                    "create one.")
             $createFarm = $false
         }
         else 
         {
+            Write-Verbose -Message ("The SharePoint config database " + `
+                                    "'$($params.FarmConfigDatabaseName)' does not exist, so " + `
+                                    "this server will create the farm.")
             $createFarm = $true
         }
 
         $farmAction = ""
         if ($createFarm -eq $false)
-        {
+        {            
             # The database exists, so attempt to join the farm to the server
+            
 
             # Remove the server role optional attribute as it is only used when creating
             # a new farm
@@ -356,6 +379,8 @@ function Set-TargetResource
                 $executeArgs.Remove("ServerRoleOptional") 
             }
             
+            Write-Verbose -Message ("The server will attempt to join the farm now once every " + `
+                                    "60 seconds for the next 15 minutes.")
             $loopCount = 0
             $connectedToFarm = $false
             $lastException = $null
@@ -363,7 +388,7 @@ function Set-TargetResource
             {
                 try 
                 {
-                    Connect-SPConfigurationDatabase @executeArgs | Out-Null 
+                    $joinObject = Connect-SPConfigurationDatabase @executeArgs
                     $connectedToFarm = $true
                 }
                 catch 
@@ -390,15 +415,25 @@ function Set-TargetResource
         }
         else
         {
-            # The database does not exist, so create the farm
-            $executeArgs += @{
-                FarmCredentials = $params.FarmAccount
-                AdministrationContentDatabaseName = $params.AdminContentDatabaseName
+            Add-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
+                                  -Database $params.FarmConfigDatabaseName
+
+            try 
+            {
+                $executeArgs += @{
+                    FarmCredentials = $params.FarmAccount
+                    AdministrationContentDatabaseName = $params.AdminContentDatabaseName
+                }
+
+                New-SPConfigurationDatabase @executeArgs
+
+                $farmAction = "CreatedFarm"
             }
-
-            New-SPConfigurationDatabase @executeArgs
-
-            $farmAction = "CreatedFarm"
+            finally
+            {
+                Remove-SPDscConfigDBLock -SQLServer $params.DatabaseServer `
+                                         -Database $params.FarmConfigDatabaseName
+            }
         }
 
         # Run common tasks for a new server
