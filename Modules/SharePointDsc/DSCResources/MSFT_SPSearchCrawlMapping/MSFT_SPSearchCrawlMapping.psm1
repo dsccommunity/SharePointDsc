@@ -1,5 +1,5 @@
 ﻿function Get-TargetResource
-{
+{    
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
@@ -119,14 +119,14 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
- 	Write-Verbose -Message "Setting Search Crawl Mapping Rule '$Url'"
+     Write-Verbose -Message "Setting Search Crawl Mapping Rule '$Url'"
     $result = Get-TargetResource @PSBoundParameters
 
     if($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
     {
         Write-Verbose "Adding the Crawl Mapping '$Url'"
        
-	    Invoke-SPDSCCommand -Credential $InstallAccount `
+        Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
@@ -134,7 +134,7 @@ function Set-TargetResource
             $searchApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             if($null -eq $searchApp) 
             {
-				throw [Exception] "The Search Service Application does not exist"
+                throw [Exception] "The Search Service Application does not exist"
             }
             else 
             {
@@ -142,7 +142,7 @@ function Set-TargetResource
             }
         }
     }
-	if($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    if($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
     {
         ##Update the Crawl Rule..
         Write-Verbose "Updating the Crawl Mapping '$Url'"
@@ -202,7 +202,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-	Write-Verbose -Message "Testing Search Crawl Mapping for '$Url'"
+    Write-Verbose -Message "Testing Search Crawl Mapping for '$Url'"
     
     $PSBoundParameters.Ensure = $Ensure
 

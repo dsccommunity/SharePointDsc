@@ -8,5 +8,3 @@ class MSFT_SPSearchCrawlMapping : OMI_BaseResource
     [Write, Description("Ensure the crawl mapping is Present or Absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Write, EmbeddedInstance("MSFT_Credential"), Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5")] String InstallAccount;
 };
-
-    
