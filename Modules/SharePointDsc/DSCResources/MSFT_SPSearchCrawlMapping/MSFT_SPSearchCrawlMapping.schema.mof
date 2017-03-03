@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0.0"), FriendlyName("SPSearchCrawlMapping")]
 class MSFT_SPSearchCrawlMapping : OMI_BaseResource
 {
