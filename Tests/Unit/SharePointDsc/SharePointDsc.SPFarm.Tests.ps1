@@ -536,7 +536,43 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "The server is joined to the farm, but SQL server is unavailable" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
 
+            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { 
+                return "Connection string example" 
+            }
+            Mock -CommandName "Get-SPFarm" -MockWith { 
+                return $null
+            }
+            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $false
+                    DatabaseExists = $false
+                }
+            }
+            Mock -CommandName "Get-SPDatabase" -MockWith { 
+                return $null
+            }
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return $null
+            }
+
+            It "Should still return present in the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should still return true in the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
         }
     }
 }
