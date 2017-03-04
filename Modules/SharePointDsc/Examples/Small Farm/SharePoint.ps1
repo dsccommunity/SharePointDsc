@@ -52,14 +52,16 @@ Configuration Example
         # provisions generic services and components used by the
         # whole farm
         #**********************************************************
-        SPCreateFarm CreateSPFarm
+        SPFarm CreateSPFarm
         {
+            Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $Passphrase
             FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
             AdminContentDatabaseName = "SP_AdminContent"
+            RunCentralAdmin          = $true
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
         SPManagedAccount ServicePoolManagedAccount
@@ -295,12 +297,14 @@ Configuration Example
         # provisions generic services and components used by the
         # whole farm
         #**********************************************************
-        SPJoinFarm JoinSPFarm
+        SPFarm JoinSPFarm
         {
+            Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $Passphrase
             PsDscRunAsCredential     = $SPSetupAccount
+            RunCentralAdmin          = $false
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
 
