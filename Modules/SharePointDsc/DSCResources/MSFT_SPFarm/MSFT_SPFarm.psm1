@@ -62,6 +62,12 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting the settings of the current local SharePoint Farm (if any)"
 
+    if ($Ensure -eq "Absent")
+    {
+        throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
+               "ensure property to 'present'")
+    }
+
     $installedVersion = Get-SPDSCInstalledProductVersion
     switch ($installedVersion.FileMajorPart)
     {
@@ -263,6 +269,12 @@ function Set-TargetResource
     )
     
     Write-Verbose -Message "Setting local SP Farm settings"
+
+    if ($Ensure -eq "Absent")
+    {
+        throw ("SharePointDsc does not support removing a server from a farm, please set the " + `
+               "ensure property to 'present'")
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPFarm")]
 class MSFT_SPFarm : OMI_BaseResource
 {
-    [Key, Description("Present to install the prerequisites. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Key, Description("Present to create/join the farm. Absent is currently not supported"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Required, Description("Name of the configuration database")] String FarmConfigDatabaseName;
     [Required, Description("Server that will host the configuration and admin content databases")] String DatabaseServer;
     [Required, Description("The account to use as the main farm account"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
