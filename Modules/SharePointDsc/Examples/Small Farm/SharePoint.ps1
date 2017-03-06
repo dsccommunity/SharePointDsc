@@ -303,7 +303,9 @@ Configuration Example
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $Passphrase
+            FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
+            AdminContentDatabaseName = "SP_AdminContent"
             RunCentralAdmin          = $false
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
