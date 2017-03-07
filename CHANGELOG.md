@@ -24,6 +24,8 @@
 * Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
 * Improved output of test results for AppVeyor and VS Code based test runs
 * Fixed issue with SPWebAppPolicy if OS language is not En-Us
+* Added SPFarm resource, set SPCreateFarm and SPJoinFarm as deprecated to be
+  removed in version 2.0
 
 ## 1.5
 

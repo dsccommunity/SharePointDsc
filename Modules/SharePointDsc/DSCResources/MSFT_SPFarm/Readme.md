@@ -1,14 +1,18 @@
 # Description
 
-WARNING: This resource is deprecated. Please use SPFarm instead as
-this resource will be removed from version 2.0 of SharePointDsc
+This resource is used to create a new SharePoint farm and allow servers to
+join that farm. It will detect the presence of the configuration database
+on the SQL server as a first step, and if it does not exist then the farm
+will be created. If the database does exist, the server will join that
+configuration database. Once the config DB has been created, the
+resource will install local help collections, secure resources and activate
+features.
 
-This resource is used to provision a new SharePoint farm. It should only be
-used on the first server in the farm to create the configuration database, all
-servers to join the farm after the first server creates the configuration
-database should use SPJoinFarm. Once the config DB has been created, the
-resource will install local help collections, secure resources, activate
-features and provision the central admin site.
+If the central admin site is to be running on the local server, the
+RunCentralAdmin property should be set to true. In the event that the central
+admin site has not been provisioned, this resource will first create it,
+otherwise it will simply start the central admin service instance on the
+local server.
 
 The passphrase is passed as a Credential object.The username of this
 credential is ignored, only the value of the password is used as the farm
