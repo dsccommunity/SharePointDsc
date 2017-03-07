@@ -362,7 +362,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Service Applications" 
                 Ensure = "Absent"
             }
-            
+                
             Mock -CommandName Remove-SPServiceApplication -MockWith {
                 
             }
