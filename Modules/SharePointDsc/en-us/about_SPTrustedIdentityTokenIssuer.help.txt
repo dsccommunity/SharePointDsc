@@ -1,0 +1,115 @@
+﻿.NAME
+    SPTrustedIdentityTokenIssuer
+
+# Description
+    
+    This resource is used to create or remove SPTrustedIdentityTokenIssuer in a
+    SharePoint farm.
+    
+    The SigningCertificateThumbPrint must match the thumbprint of a certificate in
+    the store LocalMachine\My of the server that will run this resource.
+    Note that the private key of the certificate must not be available in the
+    certiificate store because SharePoint does not accept it.
+    Once the SPTrustedIdentityTokenIssuer is successfully created, the certificate
+    can be safely deleted from the certificate store as it won't be needed by
+    SharePoint.
+    
+    ClaimsMappings is an array of MSFT_SPClaimTypeMapping to use with cmdlet
+    New-SPClaimTypeMapping. Each MSFT_SPClaimTypeMapping requires properties Name
+    and IncomingClaimType. Property LocalClaimType is not required if its value is
+    identical to IncomingClaimType.
+    
+    The IdentifierClaim property must match an IncomingClaimType element in
+    ClaimsMappings array.
+    
+    The ClaimProviderName property can be set to specify a custom claims provider.
+    It must be already installed in the SharePoint farm and returned by cmdlet
+    
+.PARAMETER Name
+    Key - String
+    Name of the SPTrustedIdentityTokenIssuer
+
+.PARAMETER Description
+    Required - String
+    Description of the SPTrustedIdentityTokenIssuer
+
+.PARAMETER Realm
+    Required - String
+    Default Realm that is passed to identity provider
+
+.PARAMETER SignInUrl
+    Required - String
+    URL of the identity provider where user is redirected to for authentication
+
+.PARAMETER IdentifierClaim
+    Required - String
+    Identity claim type that uniquely identifies the user
+
+.PARAMETER ClaimsMappings
+    Required - String
+    Array of MSFT_SPClaimTypeMapping to use with cmdlet New-SPClaimTypeMapping
+
+.PARAMETER SigningCertificateThumbPrint
+    Required - String
+    Thumbprint of the signing certificate to use with this SPTrustedIdentityTokenIssuer. It must match the thumbprint of a certificate located in store LocalMachine\\My
+
+.PARAMETER ClaimProviderName
+    Write - String
+    Name of a claims provider to set with this SPTrustedIdentityTokenIssuer
+
+.PARAMETER ProviderSignOutUri
+    Write - String
+    Sign-out URL
+
+.PARAMETER Ensure
+    Write - String
+    Allowed values: Present, Absent
+    Present if the SPTrustedIdentityTokenIssuer should be created, or Absent if it should be removed
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example deploys a trusted token issuer to the local farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPTrustedIdentityTokenIssuer SampleSPTrust
+            {
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    MSFT_SPClaimTypeMapping{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    }
+                    MSFT_SPClaimTypeMapping{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    }
+                )
+                SigningCertificateThumbPrint = "F3229E7CCA1DA812E29284B0ED75A9A019A83B08"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+                PsDscRunAsCredential         = $SetupAccount
+            }
+        }
+    }
+
+

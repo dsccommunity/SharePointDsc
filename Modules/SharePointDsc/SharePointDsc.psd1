@@ -113,7 +113,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource', 'preview')
+        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/PowerShell/SharePointDsc/blob/master/LICENSE'
@@ -126,40 +126,22 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = '
- * Set-TargetResource of Service Application now also removes all associated proxies
- * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
-  - SPAccessServiceApp
-  - SPAppManagementServiceApp
-  - SPBCSServiceApp
-  - SPExcelServiceApp
-  - SPManagedMetaDataServiceApp
-  - SPPerformancePointServiceApp
-  - SPSearchServiceApp
-  - SPSearchCrawlRule
-  - SPSecureStoreServiceApp
-  - SPSubscriptionSettingsServiceApp
-  - SPUsageApplication
-  - SPUserProfileServiceApp
-  - SPVisioServiceApp
-  - SPWordAutomationServiceApp
-  - SPWorkManagementServiceApp
- * Fixed issue with SPServiceInstance for OS not in En-Us language, add GetType().Name method in:
-  - SPDistributedCacheService
-  - SPUserProfileSyncService
- * Fixed issue with SPInstallLanguagePack to install before farm creation
- * Fixed issue with mounting SPContentDatabase
- * Fixed issue with SPShellAdmin and Content Database method
- * Fixed issue with SPServiceInstance (Set-TargetResource) for OS not in En-Us language
- * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
- * Improved code styling
- * SPVisioServiceapplication now creates proxy and lets you specify a name for it
- * New resources: SPAppStoreSettings
- * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
- * Refactored unit tests to consolidate and streamline test approaches
- * Updated SPExcelServiceApp resource to add support for trusted file locations and most other properties of the service app
- * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
- * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
- * Updated documentation of SPProductUpdate to reflect the required install order of product updates
+* Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
+  null
+* Added minimum PowerShell version to module manifest
+* Added testing for valid markdown syntax to unit tests
+* Added support for MinRole enhancements added in SP2016 Feature Pack 1
+* Fixed bug with search topology that caused issues with names of servers needing
+  to all be the same case
+* Fixed bug in SPInstallLanguagePack where language packs could not be installed
+  on SharePoint 2016
+* Added new resource SPSearchFileType
+* Updated SPDatabaseAAG to allow database name patterns
+* Fixed a bug were PerformancePoint and Excel Services Service Application
+  proxies would not be added to the default proxy group when they are
+  provisioned
+* Added an error catch to provide more detail about running SPAppCatalog with
+  accounts other than the farm account
 '
 
     } # End of PSData hashtable

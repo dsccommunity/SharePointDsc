@@ -1,0 +1,169 @@
+﻿.NAME
+    SPInstallPrereqs
+
+# Description
+    
+    This resource is responsible for ensuring the installation of all SharePoint
+    prerequisites. It makes use of the PrerequisiteInstaller.exe file that is part
+    of the SharePoint binaries, and will install the required Windows features as
+    well as additional software. The OnlineMode boolean will tell the prerequisite
+    installer which mode to run in, if it is online you do not need to list any
+    other parameters for this resource. If you do not use online mode, you must
+    include all other parameters to specify where the installation files are
+    located. These additional parameters map directly to the options passed to
+    prerequisiteinstaller.exe. For installations with no connectivity to Windows
+    Update, use the SXSpath parameter to specify the path to the SXS store of your
+    Windows Server install media.
+    
+    Additionally, the process of installing the prerequisites on a Windows Server
+    usually results in 2-3 restarts of the system being required. To ensure the
+    DSC configuration is able to restart the server when needed, ensure the below
+    settings for the local configuration manager are included in your DSC file.
+    
+        LocalConfigurationManager
+        {
+            RebootNodeIfNeeded = $true
+        }
+    
+.PARAMETER InstallerPath
+    Key - String
+    The full path to prerequisiteinstaller.exe
+
+.PARAMETER OnlineMode
+    Required - Boolean
+    Should the installer download prerequisites from the internet or not
+
+.PARAMETER SXSpath
+    Write - String
+    The path to the Windows Server Operating System SXS source files, for use in closed environments without access to Windows Update
+
+.PARAMETER SQLNCli
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER PowerShell
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER NETFX
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER IDFX
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER Sync
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER AppFabric
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER IDFX11
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER MSIPCClient
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER WCFDataServices
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER KB2671763
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER WCFDataServices56
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER MSVCRT11
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER MSVCRT14
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER KB3092423
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER ODBC
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER DotNetFx
+    Write - String
+    The path to the installer for this prerequisite
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present to install the prerequisites. Absent is currently not supported
+
+
+.EXAMPLE
+    This module will install the prerequisites for SharePoint. This resource will run in
+    online mode, looking to download all prerequisites from the internet.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPInstallPrereqs InstallPrerequisites
+            {
+                InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode        = $true
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This module will install the prerequisites for SharePoint 2013. This resource will run in
+    offline mode, running all prerequisite installations from the specified paths.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPInstallPrereqs InstallPrerequisites
+            {
+                InstallerPath     = "C:\SPInstall\Prerequisiteinstaller.exe"
+                OnlineMode        = $false
+                SXSpath          = "c:\SPInstall\Windows2012r2-SXS"
+                SQLNCli           = "C:\SPInstall\prerequisiteinstallerfiles\sqlncli.msi"
+                PowerShell        = "C:\SPInstall\prerequisiteinstallerfiles\Windows6.1-KB2506143-x64.msu"
+                NETFX             = "C:\SPInstall\prerequisiteinstallerfiles\dotNetFx45_Full_setup.exe"
+                IDFX              = "C:\SPInstall\prerequisiteinstallerfiles\Windows6.1-KB974405-x64.msu"
+                Sync              = "C:\SPInstall\prerequisiteinstallerfiles\Synchronization.msi"
+                AppFabric         = "C:\SPInstall\prerequisiteinstallerfiles\WindowsServerAppFabricSetup_x64.exe"
+                IDFX11            = "C:\SPInstall\prerequisiteinstallerfiles\MicrosoftIdentityExtensions-64.msi"
+                MSIPCClient       = "C:\SPInstall\prerequisiteinstallerfiles\setup_msipc_x64.msi"
+                WCFDataServices   = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices.exe"
+                KB2671763         = "C:\SPInstall\prerequisiteinstallerfiles\AppFabric1.1-RTM-KB2671763-x64-ENU.exe"
+                WCFDataServices56 = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices56.exe"
+            }
+        }
+    }
+
+

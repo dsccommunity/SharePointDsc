@@ -1,0 +1,165 @@
+﻿.NAME
+    SPUserProfileProperty
+
+# Description
+    
+    This resource will create a property in a user profile service application. It
+    creates, update or delete a property using the parameters that are passed in to
+    it.
+    
+    The parameter DisplayOrder is absolute. ie.: If you want it to be placed as the
+    5th field of section Bla, which has propertyName value of 5000 then your
+    DisplayOrder needs to be 5005. If no DisplayOrder is added then SharePoint
+    adds it as the last property of section X.
+    
+    Length is only relevant if Field type is "String".
+    
+    This Resource doesn't currently support removing existing user profile
+    
+.PARAMETER Name
+    Key - string
+    The internal name of the user profile property
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the property should exist, absent if it should be removed
+
+.PARAMETER UserProfileService
+    Required - string
+    The name of the user profile service application
+
+.PARAMETER DisplayName
+    Write - string
+    The display name of the property
+
+.PARAMETER Type
+    Write - string
+    Allowed values: BigInteger, Binary, Boolean, Date, DateNoYear, DateTime, Email, Float, Guid, HTML, Integer, Person, String, StringMultiValue, TimeZone, URL
+    The type of the property
+
+.PARAMETER Description
+    Write - string
+    The description of the property
+
+.PARAMETER PolicySetting
+    Write - string
+    Allowed values: Mandatory, Optin, Optout, Disabled
+    The policy setting to apply to the property
+
+.PARAMETER PrivacySetting
+    Write - string
+    Allowed values: Public, Contacts, Organization, Manager, Private
+    The privacy setting for the property
+
+.PARAMETER MappingConnectionName
+    Write - string
+    The name of the UPS connect to map this property to
+
+.PARAMETER MappingPropertyName
+    Write - string
+    The name of the property from the UPS connection to map to
+
+.PARAMETER MappingDirection
+    Write - string
+    The direction of the mapping, either Import or Export
+
+.PARAMETER Length
+    Write - uint32
+    The length of the field
+
+.PARAMETER DisplayOrder
+    Write - uint32
+    The display order to put the property in to the list at
+
+.PARAMETER IsEventLog
+    Write - boolean
+    Is this field used for event logging
+
+.PARAMETER IsVisibleOnEditor
+    Write - boolean
+    Is this field visible when editing a users profile, or hidden from editing
+
+.PARAMETER IsVisibleOnViewer
+    Write - boolean
+    Is this field visible when viewing a users profile
+
+.PARAMETER IsUserEditable
+    Write - boolean
+    Is this field able to be edited by a user, or only an administrator
+
+.PARAMETER IsAlias
+    Write - boolean
+    Is this field an alias that can be used to refer to a user by
+
+.PARAMETER IsSearchable
+    Write - boolean
+    Is this field able to be searched upon
+
+.PARAMETER UserOverridePrivacy
+    Write - boolean
+    Can users override the default privacy policy
+
+.PARAMETER TermStore
+    Write - string
+    The name of the term store to look up managed terms from
+
+.PARAMETER TermGroup
+    Write - string
+    The name of the term store group that terms are in for this field
+
+.PARAMETER TermSet
+    Write - string
+    The name of the term set to allow values to be selected from
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example deploys/updates the WorkEmail2 property in the user profile service
+    app
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPUserProfileProperty WorkEmailProperty
+            {
+                Name = "WorkEmail2"
+                Ensure = "Present"
+                UserProfileService = "User Profile Service Application"
+                DisplayName = "Work Email"
+                Type = "Email"
+                Description = "" #implementation isn't using it yet
+                PolicySetting = "Mandatory"
+                PrivacySetting = "Public"
+                MappingConnectionName = "contoso.com"
+                MappingPropertyName = "mail"
+                MappingDirection = "Import"
+                Length = 10
+                DisplayOrder =25 
+                IsEventLog =$false
+                IsVisibleOnEditor=$true
+                IsVisibleOnViewer = $true
+                IsUserEditable = $true
+                IsAlias = $false 
+                IsSearchable = $false 
+                TermStore = ""
+                TermGroup = ""
+                TermSet = "" 
+                UserOverridePrivacy = $false
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+

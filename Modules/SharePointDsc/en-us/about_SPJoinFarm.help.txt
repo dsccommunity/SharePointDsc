@@ -1,0 +1,95 @@
+﻿.NAME
+    SPJoinFarm
+
+# Description
+    
+    This resource will be responsible for joining a server to an existing
+    SharePoint farm. To create a new farm use the SPCreateFarm resource on a
+    different server to begin with, and then pass the same database server and
+    configuration database name parameters to the additional servers using this
+    resource. After the server has joined the farm, the process will wait for 5
+    minutes to allow farm specific configuration to take place on the server,
+    before allowing further DSC configuration to take place.
+    
+.PARAMETER FarmConfigDatabaseName
+    Key - string
+    The name of the config database to connect to
+
+.PARAMETER DatabaseServer
+    Key - string
+    The server that hosts the config database
+
+.PARAMETER Passphrase
+    Required - string
+    The passphrase that should be used to join the farm
+
+.PARAMETER ServerRole
+    Write - string
+    Allowed values: Application, ApplicationWithSearch, Custom, DistributedCache, Search, SingleServer, SingleServerFarm, WebFrontEnd, WebFrontEndWithDistributedCache
+    SharePoint 2016 only - the MinRole role to enroll this server as
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to join an existing SharePoint farm.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $Passphrase
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPJoinFarm JoinFarm
+            {
+                DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
+                FarmConfigDatabaseName    = "SP_Config"
+                Passphrase                = $Passphrase
+                PsDscRunAsCredential      = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to join an existing SharePoint farm using a specific
+    server role (applies to SharePoint 2016 only).
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount,
+
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $Passphrase
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPJoinFarm JoinFarm
+            {
+                DatabaseServer            = "SQL.contoso.local\SQLINSTANCE"
+                FarmConfigDatabaseName    = "SP_Config"
+                ServerRole                = "WebFrontEnd"
+                Passphrase                = $Passphrase
+                PsDscRunAsCredential      = $SetupAccount
+            }
+        }
+    }
+
+

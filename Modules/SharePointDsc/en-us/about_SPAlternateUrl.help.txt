@@ -1,0 +1,84 @@
+﻿.NAME
+    SPAlternateUrl
+
+# Description
+    
+    This resource is used to define an alternate access mapping URL for a specified
+    web application. These can be assigned to specific zones for each web
+    application. Alternatively a URL can be removed from a zone to ensure that it
+    will remain empty and have no alternate URL.
+    
+.PARAMETER WebAppUrl
+    Key - String
+    The URL of the web application to apply the alternate URL to
+
+.PARAMETER Zone
+    Key - String
+    Allowed values: Default, Intranet, Extranet, Custom, Internet
+    The Zone to use for the alternate URL
+
+.PARAMETER Url
+    Write - String
+    The new alternate URL
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present ensures the URL is set for this zone on this web app, Absent ensures it is removed
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to add a new alternate URL to a specific web application
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPAlternateUrl CentralAdminAAM
+            {
+                WebAppUrl            = "http://sharepoint1:9999"
+                Zone                 = "Intranet"
+                Url                  = "https://admin.sharepoint.contoso.com"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to remove an alternate URL from a specified zone for a specific
+    web application.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPAlternateUrl CentralAdminAAM
+            {
+                WebAppUrl            = "http://sharepoint1:9999"
+                Zone                 = "Intranet"
+                Ensure               = "Absent"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
