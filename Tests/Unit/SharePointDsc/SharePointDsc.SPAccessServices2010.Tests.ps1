@@ -54,7 +54,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                            -Name GetType `
                                            -Value {  
                                                 return @{ 
-                                                    FullName = "$($getTypeFullName)" 
+                                                    FullName = "$($getTypeFullName).other" 
                                                 }  
                                             } -PassThru -Force 
                 return @($spServiceApp) 
@@ -70,7 +70,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should call Remove - Get - New on Set-TargetResource" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPServiceApplication
                 Assert-MockCalled Get-SPServiceApplication
                 Assert-MockCalled New-SPAccessServiceApplication
             }
