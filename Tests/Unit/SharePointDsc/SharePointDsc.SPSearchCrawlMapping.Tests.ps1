@@ -115,7 +115,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 return @(
                     @{
-                        Url = "http:other.sharepoint.com"
+                        Url = "http://other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
@@ -153,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 return @(
                     @{
-                        Source = "http:other.sharepoint.com"
+                        Source = "http://other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
@@ -202,7 +202,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 return @(
                     @{
-                        Source = "http:other.sharepoint.com"
+                        Source = "http://other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
@@ -250,7 +250,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 return @(
                     @{
-                        Source = "http:other.sharepoint.com"
+                        Source = "http://other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
@@ -292,7 +292,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 return @(
                     @{
-                        Source = "http:other.sharepoint.com"
+                        Source = "http://other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
@@ -340,7 +340,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 return @(
                     @{
-                        Source = "http:other.sharepoint.com"
+                        Source = "http://other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{

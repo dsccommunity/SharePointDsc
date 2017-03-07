@@ -18,7 +18,7 @@ function Get-TargetResource
         
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -60,7 +60,7 @@ function Get-TargetResource
             return $returnVal
         }
         
-        $mapping = $mappings | Where-Object { $_.Source -eq "$($params.Url)" } | Select-Object -First 1
+        $mapping = $mappings | Where-Object -FilterScript { $_.Source -eq "$($params.Url)" } | Select-Object -First 1
         
         if($null -eq $mapping) 
         {
@@ -114,7 +114,7 @@ function Set-TargetResource
 
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -144,7 +144,6 @@ function Set-TargetResource
     }
     if($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
     {
-        ##Update the Crawl Rule..
         Write-Verbose "Updating the Crawl Mapping '$Url'"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -197,7 +196,7 @@ function Test-TargetResource
 
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [System.Management.Automation.PSCredential]
         $InstallAccount
