@@ -94,7 +94,7 @@ function Get-TargetResource
                 $psu = $wa.Policies[$wa.Properties["portalsuperuseraccount"]]
                 if ($null -ne $psu) 
                 {
-                    if ($psu.PolicyRoleBindings.Name -contains "Full Control") 
+                    if ($psu.PolicyRoleBindings.Type -eq 'FullControl') 
                     { 
                         $correctPSU = $true 
                     }
@@ -103,7 +103,7 @@ function Get-TargetResource
                 $psr = $wa.Policies[$wa.Properties["portalsuperreaderaccount"]]
                 if ($null -ne $psr) 
                 {
-                    if ($psr.PolicyRoleBindings.Name -contains "Full Read") 
+                    if ($psr.PolicyRoleBindings.Type -eq 'FullRead') 
                     { 
                         $correctPSR = $true 
                     }
@@ -139,8 +139,28 @@ function Get-TargetResource
                 $memberName = Resolve-SPDscSecurityIdentifier -SID $memberName
             }
 
+            switch ($policy.PolicyRoleBindings.Type)
+            {
+                'DenyAll'
+                { 
+                    $memberPermissionlevel = 'Deny All'
+                }
+                'DenyWrite'
+                {
+                    $memberPermissionlevel = 'Deny Write'
+                }
+                'FullControl'
+                {
+                    $memberPermissionlevel = 'Full Control'
+                }
+                'FullRead'
+                {
+                    $memberPermissionlevel = 'Full Read'
+                }
+            }
+
             $member.Username = $memberName
-            $member.PermissionLevel = $policy.PolicyRoleBindings.Name
+            $member.PermissionLevel = $memberPermissionlevel
             $member.ActAsSystemAccount = $policy.IsSystemUser
             $member.IdentityType = $identityType
             $members += $member
@@ -478,7 +498,27 @@ function Set-TargetResource
                         $policy.IsSystemUser = $user.ActAsSystemAccount 
                     }
 
-                    $polbinddiff = Compare-Object -ReferenceObject $policy.PolicyRoleBindings.Name `
+                    switch ($policy.PolicyRoleBindings.Type)
+                    {
+                        'DenyAll'
+                        { 
+                            $userPermissionlevel = 'Deny All'
+                        }
+                        'DenyWrite'
+                        {
+                            $userPermissionlevel = 'Deny Write'
+                        }
+                        'FullControl'
+                        {
+                            $userPermissionlevel = 'Full Control'
+                        }
+                        'FullRead'
+                        {
+                            $userPermissionlevel = 'Full Read'
+                        }
+                    }
+
+                    $polbinddiff = Compare-Object -ReferenceObject $userPermissionlevel `
                                                   -DifferenceObject $user.PermissionLevel
                     if ($null -ne $polbinddiff) 
                     {

@@ -1,83 +1,3 @@
-function Invoke-SPDscUnitTestSuite 
-{
-    param
-    (
-        [parameter(Mandatory = $false)] 
-        [System.String]  
-        $TestResultsFile,
-
-        [parameter(Mandatory = $false)] 
-        [System.String]  
-        $DscTestsPath,
-
-        [parameter(Mandatory = $false)] 
-        [System.Boolean] 
-        $CalculateTestCoverage = $true
-    )
-
-    Write-Verbose "Commencing SharePointDsc unit tests"
-
-    $repoDir = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
-
-    $testCoverageFiles = @()
-    if ($CalculateTestCoverage -eq $true) 
-    {
-        Write-Warning -Message ("Code coverage statistics are being calculated. This will slow the " + `
-                                "start of the tests by several minutes while the code matrix is " + `
-                                "built. Please be patient")
-        Get-ChildItem "$repoDir\modules\SharePointDsc\**\*.psm1" -Recurse | ForEach-Object -Process { 
-            if ($_.FullName -notlike "*\DSCResource.Tests\*") 
-            {
-                $testCoverageFiles += $_.FullName    
-            }
-        }    
-    }
-    
-    $testResultSettings = @{ }
-    if ([string]::IsNullOrEmpty($TestResultsFile) -eq $false) 
-    {
-        $testResultSettings.Add("OutputFormat", "NUnitXml" )
-        $testResultSettings.Add("OutputFile", $TestResultsFile)
-    }
-    Import-Module -Name "$repoDir\modules\SharePointDsc\SharePointDsc.psd1"
-    
-    $versionsPath = Join-Path -Path $repoDir -ChildPath "\Tests\Unit\Stubs\SharePoint\"
-    $versionsToTest = (Get-ChildItem -Path $versionsPath).Name
-    
-    # Import the first stub found so that there is a base module loaded before the tests start
-    $firstVersion = $versionsToTest | Select-Object -First 1
-    $firstStub = Join-Path -Path $repoDir `
-                           -ChildPath "\Tests\Unit\Stubs\SharePoint\$firstVersion\Microsoft.SharePoint.PowerShell.psm1"
-    Import-Module $firstStub -WarningAction SilentlyContinue
-
-    $testsToRun = @()
-    $versionsToTest | ForEach-Object -Process {
-        $stubPath = Join-Path -Path $repoDir `
-                              -ChildPath "\Tests\Unit\Stubs\SharePoint\$_\Microsoft.SharePoint.PowerShell.psm1"
-        $testsToRun += @(@{
-            'Path' = (Join-Path -Path $repoDir -ChildPath "\Tests\Unit")
-            'Parameters' = @{ 
-                'SharePointCmdletModule' = $stubPath
-            }
-        })
-    }
-    
-    if ($PSBoundParameters.ContainsKey("DscTestsPath") -eq $true) 
-    {
-        $testsToRun += @{
-            'Path' = $DscTestsPath
-            'Parameters' = @{ }
-        }
-    }
-    $Global:VerbosePreference = "SilentlyContinue"
-    $results = Invoke-Pester -Script $testsToRun `
-                             -CodeCoverage $testCoverageFiles `
-                             -PassThru `
-                             @testResultSettings
-
-    return $results
-}
-
 function New-SPDscUnitTestHelper
 {
     [CmdletBinding()]
@@ -105,6 +25,9 @@ function New-SPDscUnitTestHelper
 
     $repoRoot = Join-Path -Path $PSScriptRoot -ChildPath "..\..\" -Resolve
     $moduleRoot = Join-Path -Path $repoRoot -ChildPath "Modules\SharePointDsc"
+
+    $mainModule = Join-Path -Path $moduleRoot -ChildPath "SharePointDsc.psd1"
+    Import-Module -Name $mainModule -Global
 
     if ($PSBoundParameters.ContainsKey("SubModulePath") -eq $true)
     {
