@@ -171,9 +171,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            It "Should call the Get Remove New-SPEnterpriseSearchCrawlMapping update the crawl mapping" {
+            It "Should call the Get Remove New SPEnterpriseSearchCrawlMapping update the crawl mapping" {
                 Set-TargetResource @testParams
-                Assert-MockCalled SPEnterpriseSearchServiceApplication
+                Assert-MockCalled Get-SPEnterpriseSearchServiceApplication
                 Assert-MockCalled Get-SPEnterpriseSearchCrawlMapping
                 Assert-MockCalled Remove-SPEnterpriseSearchCrawlMapping
                 Assert-MockCalled New-SPEnterpriseSearchCrawlMapping   

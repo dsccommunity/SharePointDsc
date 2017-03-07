@@ -79,7 +79,7 @@ function Get-TargetResource
             Write-Verbose "Search Service Application $($params.ServiceAppName) has a matching mapping"
             $returnVal = @{
                 ServiceAppName = $params.ServiceAppName
-                Url = $mapping.Url
+                Url = $mapping.Source
                 Target = $mapping.Target
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
