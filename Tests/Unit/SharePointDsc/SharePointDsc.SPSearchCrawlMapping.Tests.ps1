@@ -91,6 +91,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
+
+            It "Should throw Exception -- The Search Service Application does not exist" {
+               { Set-TargetResource @testParams } | Should throw "The Search Service Application does not exist" 
+            }
         }
 
         Context -Name "When crawl mappings exists but specific mapping does not" -Fixture {
