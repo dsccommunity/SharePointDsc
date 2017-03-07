@@ -267,12 +267,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPEnterpriseSearchCrawlMapping   
-            }
+           }
         }
 
-        }
-        
-    Context -Name "When a crawl mapping exists, but isn't configured correctly" -Fixture {
+        Context -Name "When a crawl mapping exists, but isn't configured correctly" -Fixture {
              $testParams = @{
                     ServiceAppName = "Search Service Application"
                     Url = "http://crawl.sharepoint.com"
@@ -312,7 +310,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
+            It "Should call the Get - Remove - New EnterpriseSearchCrawlMapping update the crawl mapping" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPEnterpriseSearchCrawlMapping
                 Assert-MockCalled Remove-SPEnterpriseSearchCrawlMapping
@@ -360,13 +358,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
 
-           It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
+            It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPEnterpriseSearchCrawlMapping  
                 Assert-MockCalled Remove-SPEnterpriseSearchCrawlMapping 
             }
         }
-
+    } 
 }
         
  
