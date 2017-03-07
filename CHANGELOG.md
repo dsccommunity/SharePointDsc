@@ -22,7 +22,6 @@
 * Improved runtime of SPSearchTopology by streamlining wait processes
 * Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
 * Improved output of test results for AppVeyor and VS Code based test runs
-* Fixed issue with SPWebAppPolicy if OS language is not En-Us
 
 ## 1.5
 
