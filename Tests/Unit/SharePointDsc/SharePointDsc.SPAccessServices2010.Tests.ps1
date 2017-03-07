@@ -136,7 +136,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $null
+                return $null
             }
             
             It "Should return absent from the get method" {
@@ -169,7 +169,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $null
+                return $null
             }
             
             It "Should return absent from the get method" {
