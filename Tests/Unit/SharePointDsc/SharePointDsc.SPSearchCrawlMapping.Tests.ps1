@@ -131,6 +131,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
         
         Context -Name "When a crawl mapping exists, and is configured correctly" -Fixture {
+             
              $testParams = @{
                     ServiceAppName = "Search Service Application"
                     Url = "http://crawl.sharepoint.com"
@@ -148,15 +149,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 @(
                     @{
-                        Url = "http:other.sharepoint.com"
+                        Source = "http:other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
-                        Url = "http://site.sharepoint.com"
+                        Source = "http://site.sharepoint.com"
                         Target = "http://site2.sharepoint.com"
                     },
                     @{
-                        Url = $testParams.Url
+                        Source = $testParams.Url
                         Target = $testParams.Target 
                     }
                 )
@@ -170,8 +171,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $true
             }
 
-            It "Should call the Get Remove New -SPEnterpriseSearchCrawlMapping update the crawl mapping" {
+            It "Should call the Get Remove New-SPEnterpriseSearchCrawlMapping update the crawl mapping" {
                 Set-TargetResource @testParams
+                Assert-MockCalled SPEnterpriseSearchServiceApplication
                 Assert-MockCalled Get-SPEnterpriseSearchCrawlMapping
                 Assert-MockCalled Remove-SPEnterpriseSearchCrawlMapping
                 Assert-MockCalled New-SPEnterpriseSearchCrawlMapping   
@@ -196,15 +198,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 @(
                     @{
-                        Url = "http:other.sharepoint.com"
+                        Source = "http:other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
-                        Url = "http://site.sharepoint.com"
+                        Source = "http://site.sharepoint.com"
                         Target = "http://site2.sharepoint.com"
                     },
                     @{
-                        Url = $testParams.Url
+                        Source = $testParams.Url
                         Target = "http://other.sharepoint.com"
                     }
                 )
@@ -244,11 +246,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 @(
                     @{
-                        Url = "http:other.sharepoint.com"
+                        Source = "http:other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
-                        Url = "http://site.sharepoint.com"
+                        Source = "http://site.sharepoint.com"
                         Target = "http://site2.sharepoint.com"
                     }
                 )
@@ -288,15 +290,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 @(
                     @{
-                        Url = "http:other.sharepoint.com"
+                        Source = "http:other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
-                        Url = "http://site.sharepoint.com"
+                        Source = "http://site.sharepoint.com"
                         Target = "http://site2.sharepoint.com"
                     },
                     @{
-                        Url = $testParams.Url
+                        Source = $testParams.Url
                         Target = "http://other.sharepoint.com"
                     }
                 )
@@ -336,15 +338,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchCrawlMapping -MockWith { 
                 @(
                     @{
-                        Url = "http:other.sharepoint.com"
+                        Source = "http:other.sharepoint.com"
                         Target = "http://site.sharepoint.com"
                     },
                     @{
-                        Url = "http://site.sharepoint.com"
+                        Source = "http://site.sharepoint.com"
                         Target = "http://site2.sharepoint.com"
                     },
                     @{
-                        Url = $testParams.Url
+                        Source = $testParams.Url
                         Target = $testParams.Target
                     }
                 )
