@@ -1,5 +1,32 @@
 # Change log for SharePointDsc
 
+## 1.6
+
+* Updated SPWebApplication to allow Claims Authentication configuration
+* Updated documentation in regards to guidance on installing binaries from
+  network locations instead of locally
+* New resources: SPFarmPropertyBag
+* Bugfix in SPSite, which wasn't returing the quota template name in a correct way
+* Bugfix in SPAppManagementServiceApp which wasn't returning the correct database
+  name
+* Bugfix in SPAccessServiceApp which did not return the database server
+* Bugfix in SPDesignerSettings which filtered site collections with an incorrect
+  parameter
+* Updated the parameters in SPFarmSolution to use the full namespace
+* Bugfix in SPFarmsolution where it returned non declared parameters
+* Corrected typo in parameter name in Get method of SPFeature
+* Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of
+  one rule
+* Improved check for CloudSSA in SPSearchServiceApp
+* Bugfix in SPSearchServiceApp in which the database and dbserver were not
+  returned correctly
+* Improved runtime of SPSearchTopology by streamlining wait processes
+* Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
+* Improved output of test results for AppVeyor and VS Code based test runs
+* Fixed issue with SPWebAppPolicy if OS language is not En-Us
+* Added SPFarm resource, set SPCreateFarm and SPJoinFarm as deprecated to be
+  removed in version 2.0
+
 ## 1.5
 
 * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is

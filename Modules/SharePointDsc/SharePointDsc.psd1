@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.5.0.0'
+ModuleVersion = '1.6.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -126,22 +126,30 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = '
-* Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
-  null
-* Added minimum PowerShell version to module manifest
-* Added testing for valid markdown syntax to unit tests
-* Added support for MinRole enhancements added in SP2016 Feature Pack 1
-* Fixed bug with search topology that caused issues with names of servers needing
-  to all be the same case
-* Fixed bug in SPInstallLanguagePack where language packs could not be installed
-  on SharePoint 2016
-* Added new resource SPSearchFileType
-* Updated SPDatabaseAAG to allow database name patterns
-* Fixed a bug were PerformancePoint and Excel Services Service Application
-  proxies would not be added to the default proxy group when they are
-  provisioned
-* Added an error catch to provide more detail about running SPAppCatalog with
-  accounts other than the farm account
+* Updated SPWebApplication to allow Claims Authentication configuration
+* Updated documentation in regards to guidance on installing binaries from
+  network locations instead of locally
+* New resources: SPFarmPropertyBag
+* Bugfix in SPSite, which wasnt returing the quota template name in a correct way
+* Bugfix in SPAppManagementServiceApp which wasnt returning the correct database
+  name
+* Bugfix in SPAccessServiceApp which did not return the database server
+* Bugfix in SPDesignerSettings which filtered site collections with an incorrect
+  parameter
+* Updated the parameters in SPFarmSolution to use the full namespace
+* Bugfix in SPFarmsolution where it returned non declared parameters
+* Corrected typo in parameter name in Get method of SPFeature
+* Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of
+  one rule
+* Improved check for CloudSSA in SPSearchServiceApp
+* Bugfix in SPSearchServiceApp in which the database and dbserver were not
+  returned correctly
+* Improved runtime of SPSearchTopology by streamlining wait processes
+* Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
+* Improved output of test results for AppVeyor and VS Code based test runs
+* Fixed issue with SPWebAppPolicy if OS language is not En-Us
+* Added SPFarm resource, set SPCreateFarm and SPJoinFarm as deprecated to be
+  removed in version 2.0
 '
 
     } # End of PSData hashtable

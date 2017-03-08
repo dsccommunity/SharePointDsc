@@ -34,6 +34,10 @@ function Get-TargetResource
         $ServerRole
     )
 
+    Write-Verbose -Message ("WARNING! SPCreateFarm is deprecated and will be removed in " + `
+                            "SharePointDsc v2.0. Swap to use the new SPFarm resource as " + `
+                            "an alternative. See http://aka.ms/SPDsc-SPFarm for details.")
+
     Write-Verbose -Message "Getting local farm presence"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
@@ -70,7 +74,12 @@ function Get-TargetResource
         
         if ($null -eq $spFarm) 
         {
-            return @{ }
+            return @{
+                FarmConfigDatabaseName = ""
+                DatabaseServer = ""
+                InstallAccount = ""
+                Passphrase = "" 
+            }
         }
 
         $configDb = Get-SPDatabase | Where-Object -FilterScript { 
@@ -89,7 +98,9 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    # Supressing the global variable use to allow passing DSC the reboot message
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
         [parameter(Mandatory = $true)]  
@@ -121,6 +132,10 @@ function Set-TargetResource
                      "WebFrontEndWithDistributedCache")] 
         $ServerRole
     )
+
+    Write-Verbose -Message ("WARNING! SPCreateFarm is deprecated and will be removed in " + `
+                            "SharePointDsc v2.0. Swap to use the new SPFarm resource as " + `
+                            "an alternative. See http://aka.ms/SPDsc-SPFarm for details.")
 
     Write-Verbose -Message "Setting local farm"
 

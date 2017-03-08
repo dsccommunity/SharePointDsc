@@ -1,3 +1,16 @@
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName = 'Server1'
+            PSDscAllowPlainTextPassword = $true
+        },
+        @{
+            NodeName = 'Server2'
+            PSDscAllowPlainTextPassword = $true
+        }
+    )
+}
+
 Configuration Example
 {
     param (
@@ -39,14 +52,16 @@ Configuration Example
         # provisions generic services and components used by the
         # whole farm
         #**********************************************************
-        SPCreateFarm CreateSPFarm
+        SPFarm CreateSPFarm
         {
+            Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $Passphrase
             FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
             AdminContentDatabaseName = "SP_AdminContent"
+            RunCentralAdmin          = $true
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
         SPManagedAccount ServicePoolManagedAccount
@@ -54,14 +69,14 @@ Configuration Example
             AccountName          = $ServicePoolManagedAccount.UserName
             Account              = $ServicePoolManagedAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         SPManagedAccount WebPoolManagedAccount
         {
             AccountName          = $WebPoolManagedAccount.UserName
             Account              = $WebPoolManagedAccount
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
         {
@@ -84,7 +99,7 @@ Configuration Example
             ScriptErrorReportingDelay                   = 30
             ScriptErrorReportingEnabled                 = $true
             ScriptErrorReportingRequireAuth             = $true
-            DependsOn                                   = "[SPCreateFarm]CreateSPFarm"
+            DependsOn                                   = "[SPFarm]CreateSPFarm"
         }
         SPUsageApplication UsageApplication 
         {
@@ -94,14 +109,14 @@ Configuration Example
             UsageLogLocation      = "C:\UsageLogs"
             UsageLogMaxFileSizeKB = 1024
             PsDscRunAsCredential  = $SPSetupAccount
-            DependsOn             = "[SPCreateFarm]CreateSPFarm"
+            DependsOn             = "[SPFarm]CreateSPFarm"
         }
         SPStateServiceApp StateServiceApp
         {
             Name                 = "State Service Application"
             DatabaseName         = "SP_State"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         SPDistributedCacheService EnableDistributedCache
         {
@@ -111,7 +126,7 @@ Configuration Example
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
             CreateFirewallRules  = $true
-            DependsOn            = @('[SPCreateFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
+            DependsOn            = @('[SPFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
         }
 
         #**********************************************************
@@ -169,7 +184,7 @@ Configuration Example
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }   
 
         SPServiceInstance SecureStoreServiceInstance
@@ -177,7 +192,7 @@ Configuration Example
             Name                 = "Secure Store Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         
         SPServiceInstance SearchServiceInstance
@@ -185,7 +200,7 @@ Configuration Example
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
         
         #**********************************************************
@@ -201,7 +216,7 @@ Configuration Example
             Name                 = $serviceAppPoolName
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPCreateFarm]CreateSPFarm"
+            DependsOn            = "[SPFarm]CreateSPFarm"
         }
 
         SPSecureStoreServiceApp SecureStoreServiceApp
@@ -282,12 +297,16 @@ Configuration Example
         # provisions generic services and components used by the
         # whole farm
         #**********************************************************
-        SPJoinFarm JoinSPFarm
+        SPFarm JoinSPFarm
         {
+            Ensure                   = "Present"
             DatabaseServer           = "sql.contoso.com"
             FarmConfigDatabaseName   = "SP_Config"
             Passphrase               = $Passphrase
+            FarmAccount              = $FarmAccount
             PsDscRunAsCredential     = $SPSetupAccount
+            AdminContentDatabaseName = "SP_AdminContent"
+            RunCentralAdmin          = $false
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
 
@@ -299,7 +318,7 @@ Configuration Example
             ServiceAccount       = $ServicePoolManagedAccount.UserName
             PsDscRunAsCredential = $SPSetupAccount
             CreateFirewallRules  = $true
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPFarm]JoinSPFarm"
         }
 
         #**********************************************************
@@ -314,7 +333,7 @@ Configuration Example
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPFarm]JoinSPFarm"
         }   
 
         SPServiceInstance ManagedMetadataServiceInstance
@@ -322,7 +341,7 @@ Configuration Example
             Name                 = "Managed Metadata Web Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPFarm]JoinSPFarm"
         }
 
         SPServiceInstance BCSServiceInstance
@@ -330,7 +349,7 @@ Configuration Example
             Name                 = "Business Data Connectivity Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
-            DependsOn            = "[SPJoinFarm]JoinSPFarm"
+            DependsOn            = "[SPFarm]JoinSPFarm"
         }
         
         #**********************************************************

@@ -9,7 +9,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -47,8 +47,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 throw "Unable to detect local farm" 
             }
 
-            It "Should return null from the get method when the farm is not configured" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return no database name from the get method when the farm is not configured" {
+                (Get-TargetResource @testParams).FarmConfigDatabaseName | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {

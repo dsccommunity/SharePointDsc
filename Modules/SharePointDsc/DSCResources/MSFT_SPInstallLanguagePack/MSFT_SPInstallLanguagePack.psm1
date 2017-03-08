@@ -133,7 +133,9 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    # Supressing the global variable use to allow passing DSC the reboot message
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
         [parameter(Mandatory = $true)]  

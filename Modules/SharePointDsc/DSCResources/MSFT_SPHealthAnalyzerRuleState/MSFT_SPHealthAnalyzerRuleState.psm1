@@ -77,12 +77,20 @@ function Get-TargetResource
             {
                 $item = $results[0]
 
+                # Additional check for incorrect default value of the schedule for rule
+                # "One or more app domains for web applications aren't configured correctly."
+                $ruleschedule = $item["HealthRuleSchedule"]
+                if ($ruleschedule -eq "On Demand")
+                {
+                    $ruleschedule = "OnDemandOnly"
+                }
+
                 return @{
                     # Set the Health Analyzer Rule settings
                     Name = $params.Name
                     Enabled = $item["HealthRuleCheckEnabled"]
                     RuleScope = $item["HealthRuleScope"]
-                    Schedule = $item["HealthRuleSchedule"]
+                    Schedule = $ruleschedule
                     FixAutomatically = $item["HealthRuleAutoRepairEnabled"]
                     InstallAccount = $params.InstallAccount
                 }
