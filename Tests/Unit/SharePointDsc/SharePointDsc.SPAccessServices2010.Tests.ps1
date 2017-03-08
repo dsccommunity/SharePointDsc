@@ -99,7 +99,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $spServiceApp = [PSCustomObject]@{ 
-                                    DisplayName = $testParams.Name 
+                                    DisplayName = $testParams.Name
+                                    ApplicationPool = [PSCustomObject]@{
+                                        Name = $testParams.ApplicationPool
+                                    }
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
@@ -145,6 +148,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
+                                    ApplicationPool = [PSCustomObject]@{
+                                        Name = $testParams.ApplicationPool
+                                    }
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
