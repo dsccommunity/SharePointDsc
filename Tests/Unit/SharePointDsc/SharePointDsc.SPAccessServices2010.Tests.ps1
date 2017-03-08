@@ -60,18 +60,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @($spServiceApp) 
             }
             
-            It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return true when the Test method is called" {
-                Test-TargetResource @testParams | Should Be $true
+                Test-TargetResource @testParams | Should Be $false
             }
 
-            It "Should call Remove - Get - New on Set-TargetResource" {
+            It "Should call (Get-SPServiceApplication) on Set-TargetResource" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplication
-                Assert-MockCalled New-SPAccessServiceApplication
+            }
+            It "Should call (New-SPAccessServiceApplication) on Set-TargetResource" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPAccessServiceApplication -Times 1
+            }
+            It "Should not call (New-SPAccessServiceApplication) on Set-TargetResource" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPServiceApplication -Times 0
             }
         }
 

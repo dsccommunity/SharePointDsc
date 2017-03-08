@@ -114,22 +114,21 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
 
-             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+             $apps = Get-SPServiceApplication -Name $params.Name `
+                                              -ErrorAction SilentlyContinue
+             if($null -ne $apps)
+             { 
+                $app = $apps | Where-Object -FilterScript { 
                         $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
-                    }
-            if($null -ne $app)
-            {        
-                Remove-SPServiceApplication -Identity $app -Confirm:$false
-            }
-        
-        
+                }
+                if($null -ne $app)
+                {        
+                    Remove-SPServiceApplication -Identity $app -Confirm:$false
+                }
+             }
             $accessApp = New-SPAccessServiceApplication -Name $params.Name `
-                                                        -ApplicationPool $params.ApplicationPool
-    
-                    
+                                                        -ApplicationPool $params.ApplicationPool                    
         }
-
     }
     if($Ensure -eq "Absent")
     {
@@ -139,12 +138,17 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
 
+            $apps = Get-SPServiceApplication -Name $params.Name `
+                                             -ErrorAction SilentlyContinue
+            if($null -eq $apps)
+            {
+                return
+            }
 
+            $app = $apps | Where-Object -FilterScript { 
+                   $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
+            }
 
-            $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
-                        $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
-                    }
             if($null -ne $app)
             {        
                 Remove-SPServiceApplication -Identity $app -Confirm:$false
