@@ -105,7 +105,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                            -Name GetType `
                                            -Value {  
                                                 return @{ 
-                                                    FullName = "$($getTypeFullName).other" 
+                                                    FullName = "$($getTypeFullName)" 
                                                 }  
                                             } -PassThru -Force 
                 return @($spServiceApp) 
