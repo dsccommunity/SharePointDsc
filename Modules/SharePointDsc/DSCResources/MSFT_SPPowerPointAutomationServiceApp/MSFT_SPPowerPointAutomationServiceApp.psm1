@@ -100,11 +100,11 @@ function Get-TargetResource
              Name = $serviceApp.DisplayName
              ProxyName = $proxyName
              ApplicationPool = $serviceApp.ApplicationPool.Name
-             CacheExpirationPeriodInSeconds = [System.UInt32]
-             MaximumConversionsPerWorker = [System.UInt32]
-             WorkerKeepAliveTimeoutInSeconds = [System.UInt32]
-             WorkerProcessCount = [System.UInt32]
-             WorkerTimeoutInSeconds = [System.UInt32]
+             CacheExpirationPeriodInSeconds = $serviceApp.CacheExpirationPeriodInSeconds
+             MaximumConversionsPerWorker = $serviceApp.MaximumConversionsPerWorker
+             WorkerKeepAliveTimeoutInSeconds = $serviceApp.WorkerKeepAliveTimeoutInSeconds
+             WorkerProcessCount = $serviceApp.WorkerProcessCount
+             WorkerTimeoutInSeconds = $serviceApp.WorkerTimeoutInSeconds
              Ensure = "Present"
              InstallAccount = $params.InstallAccount
             
@@ -266,10 +266,16 @@ function Set-TargetResource
             if([string]::IsNullOrEmpty($params.ProxyName) -eq $false `
             -and $params.ProxyName -ne $result.ProxyName)
             {
-                $currentProxy = Get-SPServiceApplicationProxy | where-Object -FilterScript { $_.DisplayName -eq $result.ProxyName }
-                $currentProxy.Delete();
-
-                $serviceAppProxy = New-SPPowerPointConversionServiceApplicationProxy -name $params.proxyName -ServiceApplication $serviceApp
+                $proxies = Get-SPServiceApplicationProxy
+                foreach($proxyInstance in $proxies)
+                {
+                    if($serviceApp.IsConnected($proxyInstance))
+                    {
+                        $proxyInstance.Delete()
+                    }
+                }
+                
+                $serviceAppProxy = New-SPPowerPointConversionServiceApplicationProxy -Name $params.proxyName -ServiceApplication $serviceApp
             }
             if($null -ne $params.CacheExpirationPeriodInSeconds)
             {
