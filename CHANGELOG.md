@@ -1,5 +1,8 @@
 # Change log for SharePointDsc
 
+## Unreleased
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+
 ## 1.6
 
 * Updated SPWebApplication to allow Claims Authentication configuration
