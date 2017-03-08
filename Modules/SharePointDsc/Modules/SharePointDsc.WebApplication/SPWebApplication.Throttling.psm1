@@ -137,10 +137,35 @@ function Test-SPDSCWebApplicationThrottlingConfig
                                                      )
     if ($testReturn -eq $true) 
     {
-        if ((Test-SPDSCObjectHasProperty $DesiredSettings "HappyHour") -eq $true) 
-        {
+        #if ((Test-SPDSCObjectHasProperty $DesiredSettings "HappyHour") -eq $true) 
+            if ($null -ne $DesiredSettings.HappyHour)
+            {
+                $DesiredHappyHour = @{}
+                if ($null -ne $DesiredSettings.HappyHour.Hour) 
+                {
+                    $DesiredHappyHour.Add("Hour",[int32]$DesiredSettings.HappyHour.Hour)
+                } 
+                else 
+                {
+                    $DesiredHappyHour.Add("Hour",$null)
+                }
+                if ($null -ne $DesiredSettings.HappyHour.Minute) 
+                {
+                    $DesiredHappyHour.Add("Minute",[int32]$DesiredSettings.HappyHour.Minute)
+                } else 
+                {
+                    $DesiredHappyHour.Add("Minute",$null)
+                }
+                if ($null -ne $DesiredSettings.HappyHour.Duration) 
+                {
+                    $DesiredHappyHour.Add("Duration",[int32]$DesiredSettings.HappyHour.Duration)
+                } else 
+                {
+                    $DesiredHappyHour.Add("Duration",$null)
+                }
+
             $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings.HappyHour `
-                                                   -DesiredValues $DesiredSettings.HappyHour `
+                                                   -DesiredValues $DesiredHappyHour `
                                                    -ValuesToCheck @("Hour", "Minute", "Duration")
         }
     }
