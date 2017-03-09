@@ -7,41 +7,32 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
         [parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
-        
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-
         [System.Management.Automation.PSCredential]
         $InstallAccount
-
     )
 
     Write-Verbose -Message "Getting Access 2010 Service app '$Name'"
-
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
-        
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
             Ensure = "Absent"
         }
-
         if($null -eq $serviceApps) 
         {
             return $nullReturn
         }
-
         $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
         }
@@ -57,15 +48,10 @@ function Get-TargetResource
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }
-        }
-
-
-                                  
+        }                         
     }
-
    return $result
 }
-
 
 function Set-TargetResource
 {
@@ -75,23 +61,18 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
         [parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
-
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting Access 2010 Services app '$Name'"
-    
     $result = Get-TargetResource @PSBoundParameters
-
     if($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose "Creating Access 2010 Service Application '$Name'"
@@ -99,11 +80,8 @@ function Set-TargetResource
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-
             $accessApp = New-SPAccessServiceApplication -Name $params.Name `
-                                                        -ApplicationPool $params.ApplicationPool
-    
-                    
+                                                        -ApplicationPool $params.ApplicationPool       
         }
     }
     if($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
@@ -112,8 +90,7 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
-            $params = $args[0]
-
+             $params = $args[0]
              $apps = Get-SPServiceApplication -Name $params.Name `
                                               -ErrorAction SilentlyContinue
              if($null -ne $apps)
@@ -123,11 +100,17 @@ function Set-TargetResource
                 }
                 if($null -ne $app)
                 {        
-                    Remove-SPServiceApplication -Identity $app -Confirm:$false
+                    $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool   
+                    if($null -ne $appPool)
+                    {
+                        $app.ApplicationPool = $appPool
+                        $app.Update()
+                        return;
+                    }
                 }
              }
-            $accessApp = New-SPAccessServiceApplication -Name $params.Name `
-                                                        -ApplicationPool $params.ApplicationPool                    
+             $accessApp = New-SPAccessServiceApplication -Name $params.Name `
+                                                         -ApplicationPool $params.ApplicationPool                    
         }
     }
     if($Ensure -eq "Absent")
@@ -148,16 +131,13 @@ function Set-TargetResource
             $app = $apps | Where-Object -FilterScript { 
                    $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
             }
-
             if($null -ne $app)
             {        
                 Remove-SPServiceApplication -Identity $app -Confirm:$false
             }
         }
     }
-
 }
-
 
 function Test-TargetResource
 {
@@ -168,31 +148,21 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
-
         [parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
-
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-
     Write-Verbose -Message "Testing Access 2010 service app '$Name'"
-    
     $PSBoundParameters.Ensure = $Ensure
-
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-     return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Name", "ApplicationPool", "Ensure")
-
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

@@ -21,16 +21,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Initialize tests
         $getTypeFullName = "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
         
-        
         # Mocks for all contexts
         Mock -CommandName Get-SPServiceApplication -MockWith { }
         Mock -CommandName New-SPAccessServiceApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
 
-        
         # Test contexts
-    
-
         Context -Name "When Access 2010 Services doesn't exists and should exist" -Fixture {
             $testParams = @{
                 Name = "Access 2010 Services Service Application"
@@ -38,14 +34,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith {
-                
-            }
-
-            Mock -CommandName New-SPAccessServiceApplication -MockWith {
-                
-            }
-            
+            Mock -CommandName Remove-SPServiceApplication -MockWith {}
+            Mock -CommandName New-SPAccessServiceApplication -MockWith {}            
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
@@ -59,44 +49,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                             } -PassThru -Force 
                 return @($spServiceApp) 
             }
-            
+          
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
-
-            It "Should call (Get-SPServiceApplication) on Set-TargetResource" {
+            It "Should call Methods on Set-TargetResource" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplication
-            }
-            It "Should call (New-SPAccessServiceApplication) on Set-TargetResource" {
-                Set-TargetResource @testParams
                 Assert-MockCalled New-SPAccessServiceApplication -Times 1
-            }
-            It "Should not call (New-SPAccessServiceApplication) on Set-TargetResource" {
-                Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication -Times 0
             }
         }
-
-          Context -Name "When Access 2010 Services exists and should exist" -Fixture {
+        Context -Name "When Access 2010 Services exists and should exist" -Fixture {
             $testParams = @{
                 Name = "Access 2010 Services Service Application"
                 ApplicationPool = "SharePoint Service Applications" 
                 Ensure = "Present"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith {
-                
-            }
-
-            Mock -CommandName New-SPAccessServiceApplication -MockWith {
-                
-            }
-            
+            Mock -CommandName Remove-SPServiceApplication -MockWith { }
+            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name
@@ -117,11 +92,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
             It "Should call Remove - Get - New on Set-TargetResource" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
@@ -130,21 +103,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-         Context -Name "When Access 2010 Services exists and shouldn't exist" -Fixture {
+        Context -Name "When Access 2010 Services exists and shouldn't exist" -Fixture {
             $testParams = @{
                 Name = "Access 2010 Services Service Application"
                 ApplicationPool = "SharePoint Service Applications" 
                 Ensure = "Absent"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith {
-                
-            }
-
-            Mock -CommandName New-SPAccessServiceApplication -MockWith {
-
-            }
-
+            Mock -CommandName Remove-SPServiceApplication -MockWith { }
+            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
@@ -165,11 +132,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
-
             It "Should call Remove - Get - New on Set-TargetResource" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
@@ -184,14 +149,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith {
-                
-            }
-
-            Mock -CommandName New-SPAccessServiceApplication -MockWith {
-
-            }
-
+            Mock -CommandName Remove-SPServiceApplication -MockWith { }
+            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return $null
             }
@@ -199,11 +158,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
-
             It "Should call New on Set-TargetResource" {
                 Set-TargetResource @testParams
                  Assert-MockCalled New-SPAccessServiceApplication
@@ -217,14 +174,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Absent"
             }
                 
-            Mock -CommandName Remove-SPServiceApplication -MockWith {
-                
-            }
-
-            Mock -CommandName New-SPAccessServiceApplication -MockWith {
-
-            }
-
+            Mock -CommandName Remove-SPServiceApplication -MockWith { }
+            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return $null
             }
@@ -232,11 +183,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
             It "Should call New on Set-TargetResource" {
                 Set-TargetResource @testParams
                  Assert-MockCalled Get-SPServiceApplication
