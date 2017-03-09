@@ -59,7 +59,6 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock { 
         $params = $args[0]
-
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
@@ -67,7 +66,7 @@ function Get-TargetResource
             Ensure          = "Absent"
             ApplicationPool = $params.ApplicationPool
         }
-
+        
         if ($null -eq $serviceApps) 
         { 
             return $nullReturn 
@@ -95,7 +94,6 @@ function Get-TargetResource
             }
         }        
 
-
          $returnVal = @{
              Name = $serviceApp.DisplayName
              ProxyName = $proxyName
@@ -109,14 +107,10 @@ function Get-TargetResource
              InstallAccount = $params.InstallAccount
             
          }
-
          return $returnVal        
     }
-
     return $result
-
 }
-
 
 function Set-TargetResource
 {
@@ -184,7 +178,8 @@ function Set-TargetResource
             $params = $args[0]
 
             $proxyName = $params.ProxyName
-            if($null -eq $proxyName) {
+            if($null -eq $proxyName) 
+            {
                 $proxyName = "$($params.Name) Proxy"
             }
             
@@ -193,7 +188,6 @@ function Set-TargetResource
             {
                 $serviceApp = New-SPPowerPointConversionServiceApplication -Name $params.Name -ApplicationPool $params.ApplicationPool
                 $serviceAppProxy = New-SPPowerPointConversionServiceApplicationProxy -name $proxyName -ServiceApplication $serviceApp
-            
             
                 if($null -ne $params.CacheExpirationPeriodInSeconds)
                 {
@@ -215,11 +209,8 @@ function Set-TargetResource
                 {
                     $serviceApp.WorkerTimeoutInSeconds = $params.WorkerTimeoutInSeconds
                 }
-
                 $serviceApp.Update();
-
             }   
-
             else 
             {
                 throw "Specified application ppol does not exist"
@@ -241,17 +232,14 @@ function Set-TargetResource
             {
                 throw "No Service applications are available in the farm."
             }
-            
             $serviceApp = $serviceApps `
                 | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.Office.Server.PowerPoint.Administration.PowerPointConversionServiceApplication"
             }
-
             if($null -eq $serviceApp)
             {
                 throw "Unable to find specified service application."
             }
-
             if ([string]::IsNullOrEmpty($params.ApplicationPool) -eq $false `
                 -and $params.ApplicationPool -ne $result.ApplicationPool)
             {
@@ -262,7 +250,6 @@ function Set-TargetResource
                 }
                 $serviceApp.ApplicationPool = $appPool
             }
-
             if([string]::IsNullOrEmpty($params.ProxyName) -eq $false `
             -and $params.ProxyName -ne $result.ProxyName)
             {
@@ -273,8 +260,7 @@ function Set-TargetResource
                     {
                         $proxyInstance.Delete()
                     }
-                }
-                
+                }   
                 $serviceAppProxy = New-SPPowerPointConversionServiceApplicationProxy -Name $params.proxyName -ServiceApplication $serviceApp
             }
             if($null -ne $params.CacheExpirationPeriodInSeconds)
@@ -297,12 +283,8 @@ function Set-TargetResource
             {
                 $serviceApp.WorkerTimeoutInSeconds = $params.WorkerTimeoutInSeconds
             }
-
                 $serviceApp.Update();
-
-
-
-
+        }
      }
      if($Ensure -eq "Absent")
      {
@@ -328,8 +310,6 @@ function Set-TargetResource
                         $proxyInstance.Delete()
                     }
                 }
-
-                # Service app existed, deleting
                 Remove-SPServiceApplication -Identity $serviceApp -Confirm:$false
             } 
         }
@@ -377,7 +357,6 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing PowerPoint Automation service app '$Name'" 
-
     if(($ApplicationPool `
             -or $ProxyName `
             -or $CacheExpirationPeriodInSeconds `
@@ -393,19 +372,13 @@ function Test-TargetResource
         throw ("An Application Pool and  are required to configure the PowerPoint " + `
                "Automation Service Application")
     }
-
-    $CurrentValues = xTimeZone\Get-TargetResource @PSBoundParameters
-    
+    $CurrentValues = Get-TargetResource @PSBoundParameters
     if($null -eq $CurrentValues)
     {
         return $false
     }
-
-     return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters
-
-
 }
-
 
 Export-ModuleMember -Function *-TargetResource
