@@ -97,9 +97,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             It "Should call Remove - Get - New on Set-TargetResource" {
                 Set-TargetResource @testParams
-                Assert-MockCalled Remove-SPServiceApplication
                 Assert-MockCalled Get-SPServiceApplication
-                Assert-MockCalled New-SPAccessServiceApplication
+               
             }
         }
 
