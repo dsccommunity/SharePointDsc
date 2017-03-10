@@ -1,4 +1,7 @@
 # Change log for SharePointDsc
+## Unreleased
+
+* Added new resource SPSearchAuthoratativePage
 
 ## 1.6
 

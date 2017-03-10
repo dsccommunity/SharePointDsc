@@ -12,6 +12,7 @@ function Get-TargetResource
         [System.String]
         $Path,
 
+        [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
@@ -114,6 +115,7 @@ function Set-TargetResource
         [System.String]
         $Path,
 
+        [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
@@ -227,7 +229,8 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $Path,
-
+        
+        [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
