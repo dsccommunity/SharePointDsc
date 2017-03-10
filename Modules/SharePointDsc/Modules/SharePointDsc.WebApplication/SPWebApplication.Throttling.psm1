@@ -137,7 +137,6 @@ function Test-SPDSCWebApplicationThrottlingConfig
                                                      )
     if ($testReturn -eq $true) 
     {
-        #if ((Test-SPDSCObjectHasProperty $DesiredSettings "HappyHour") -eq $true) 
             if ($null -ne $DesiredSettings.HappyHour)
             {
                 $DesiredHappyHour = @{}
