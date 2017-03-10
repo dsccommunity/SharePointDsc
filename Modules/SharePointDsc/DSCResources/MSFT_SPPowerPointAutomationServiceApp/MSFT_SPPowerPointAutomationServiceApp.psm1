@@ -377,8 +377,10 @@ function Test-TargetResource
     {
         return $false
     }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck @("Name","ApplicationPool","Ensure")                                     
 }
 
 Export-ModuleMember -Function *-TargetResource
