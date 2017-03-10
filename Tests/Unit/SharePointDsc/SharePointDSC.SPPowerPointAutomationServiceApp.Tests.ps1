@@ -98,6 +98,60 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
+             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
+
+            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
+            Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
+            
+
+                $spServiceApp = [PSCustomObject]@{ 
+                                    DisplayName = $testParams.Name 
+                                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+
+            }
+
+            It "Should return 'Absent' from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+            It "Should return 'false' from the Test method" {
+                Test-TargetResource @testParams | Should Be $false 
+            }  
+            It "Should create a new Power Point Automation Service Application from the Set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled  Get-SPServiceApplicationPool
+                Assert-MockCalled New-SPPowerPointConversionServiceApplication
+                Assert-MockCalled New-SPPowerPointConversionServiceApplicationProxy
+            }
+        }
+
+        Context -Name "When service applications should exist but the application pool doesn't exist" -Fixture {
+           $testParams = @{
+                Name = "Power Point Automation Service Application"
+                ProxyName = "Power Point Automation Service Application Proxy"
+                ApplicationPool = "SharePoint Services App Pool"
+                CacheExpirationPeriodInSeconds = 600
+                MaximumConversionsPerWorker = 5
+                WorkerKeepAliveTimeoutInSeconds = 120
+                WorkerProcessCount = 3
+                WorkerTimeoutInSeconds = 300
+                Ensure = "Present"
+            }
+
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
@@ -112,12 +166,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp 
             }
 
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
+                return $null
+            }
+
             It "Should return 'Absent' from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
             It "Should return 'false' from the Test method" {
-                (Test-TargetResource @testParams).Ensure | Should Be $false 
+                Test-TargetResource @testParams | Should Be $false 
             }  
+            It "Should create a new Power Point Automation Service Application from the Set method" {
+                 { Set-TargetResource @testParams } | Should throw "Specified application pool does not exist"
+            }
         }
 
         Context -Name "When a service application exists and is configured correctly" -Fixture {
@@ -185,12 +246,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
 
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith { }
+
             It "Should return Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+            It "Should call Get-SPServiceApplicationProxy when Set method is called." {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-SPServiceApplicationProxy
             }
         }
 

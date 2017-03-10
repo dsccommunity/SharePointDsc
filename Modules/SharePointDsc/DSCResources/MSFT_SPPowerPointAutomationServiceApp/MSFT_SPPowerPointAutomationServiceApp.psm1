@@ -213,7 +213,7 @@ function Set-TargetResource
             }   
             else 
             {
-                throw "Specified application ppol does not exist"
+                throw "Specified application pool does not exist"
             } 
         }   
      }
@@ -377,10 +377,17 @@ function Test-TargetResource
     {
         return $false
     }
-
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name","ApplicationPool","Ensure")                                     
+    if($CurrentValues.Ensure -eq "Absent")
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Name","ApplicationPool","Ensure")                                     
+    }
+    else
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource
