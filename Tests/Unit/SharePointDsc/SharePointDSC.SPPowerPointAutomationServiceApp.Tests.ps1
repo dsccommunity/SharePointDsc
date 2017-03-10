@@ -107,7 +107,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
             
-
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
                                 } 
