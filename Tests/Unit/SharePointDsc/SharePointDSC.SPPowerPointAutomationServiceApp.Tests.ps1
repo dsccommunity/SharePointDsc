@@ -168,12 +168,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } 
             }
 
-            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
+            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                        DisplayName = $testParams.Name 
+                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                        CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
+                        MaximumConversionsPerWorker = $testParams.MaximumConversionsPerWorker
+                        WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                        WorkerProcessCount = $testParams.WorkerProcessCount
+                        WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
+                } 
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name GetType `
+                                           -Value {  
+                                                return @{ 
+                                                    FullName = $getTypeFullName
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp 
+            }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
             
             Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{ 
                                     DisplayName = $testParams.Name 
+                                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
@@ -258,6 +277,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = [PSCustomObject]@{ 
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    CacheExpirationPeriodInSeconds =  $testParams.CacheExpirationPeriodInSeconds
+                    MaximumConversionsPerWorker =  $testParams.MaximumConversionsPerWorker
+                    WorkerKeepAliveTimeoutInSeconds =  $testParams.WorkerKeepAliveTimeoutInSeconds
+                    WorkerProcessCount =  $testParams.WorkerProcessCount
+                    WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
                 }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
@@ -267,7 +291,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 }  
                                             } -PassThru -Force 
                 
-                $spServiceApp | Add-Member -MemberType SCriptMethod `
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
                                             -Name IsConnected `
                                             -Value {
                                                 return $true
