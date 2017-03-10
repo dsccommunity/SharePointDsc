@@ -51,6 +51,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } 
         }
 
+        Context -Name "When Ensure is Present but we don't specify an ApplicationPool" -Fixture {
+            $testParams = @{
+                Name = "Power Point Automation Service Application"
+                ProxyName = "Power Point Automation Service Application Proxy"
+                CacheExpirationPeriodInSeconds = 600
+                MaximumConversionsPerWorker = 5
+                WorkerKeepAliveTimeoutInSeconds = 120
+                WorkerProcessCount = 3
+                WorkerTimeoutInSeconds = 300
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return $null
+            } 
+  
+            It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" { 
+                { Get-TargetResource @testParams } | Should throw "An Application Pool and  are required to configure the PowerPoint Automation Service Application"
+                { Test-TargetResource @testParams } | Should throw "An Application Pool and  are required to configure the PowerPoint Automation Service Application"
+                { Set-TargetResource @testParams } | Should throw "An Application Pool and  are required to configure the PowerPoint Automation Service Application"
+            } 
+        }
+
+        
+
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
                 Name = "Power Point Automation Service Application"
@@ -64,6 +89,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
+            }
+            
             Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -119,10 +150,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 }  
                                             } -PassThru -Force 
                 return $spServiceApp 
-            }
-
-            Mock -CommandName Get-SPServiceApplicationPool -MockWith {
-
             }
 
             It "Should return 'Absent' from the Get method" {
@@ -206,7 +233,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     FullName = $getTypeFullName 
                                                 }  
                                             } -PassThru -Force 
+                
+                $spServiceApp | Add-Member -MemberType SCriptMethod `
+                                            -Name IsConnected `
+                                            -Value {
+                                                return $true
+                                            } -PassThru -Force
+
                 return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @{
+                    Name = $testParams.ProxyName
+                }
             }
 
             It "Should return Present from the get method" {
@@ -244,6 +284,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 }  
                                             } -PassThru -Force 
                 return $spServiceApp
+            }
+
+             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+                return @{ 
+                    Name = $testParams.ApplicationPool 
+                } 
             }
 
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith { }
