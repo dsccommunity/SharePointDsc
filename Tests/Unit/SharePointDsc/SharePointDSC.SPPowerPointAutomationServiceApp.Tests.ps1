@@ -94,7 +94,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = $testParams.ApplicationPool 
                 } 
             }
-            
+                              
             Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { 
                  $spServiceApp = [PSCustomObject]@{ 
                     DisplayName = $testParams.Name
@@ -120,14 +120,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                             } -PassThru -Force 
                 return $spServiceApp
                 
-                return @{
-                    DisplayName = $testParams.Name
-                    CacheExpirationPeriodInSeconds = 0
-                    MaximumConversionsPerWorker = 0
-                    WorkerKeepAliveTimeoutInSeconds = 0
-                    WorkerProcessCount = 0
-                    WorkerTimeoutInSeconds = 0
-                }
             }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -169,24 +161,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
-                        DisplayName = $testParams.Name 
-                        ApplicationPool = @{ Name = $testParams.ApplicationPool }
-                        CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
-                        MaximumConversionsPerWorker = $testParams.MaximumConversionsPerWorker
-                        WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
-                        WorkerProcessCount = $testParams.WorkerProcessCount
-                        WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
-                } 
+                 $spServiceApp = [PSCustomObject]@{ 
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    CacheExpirationPeriodInSeconds = 0
+                    MaximumConversionsPerWorker = 0
+                    WorkerKeepAliveTimeoutInSeconds = 0
+                    WorkerProcessCount = 0
+                    WorkerTimeoutInSeconds = 0
+                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                           -Name GetType `
+                                           -Name Update `
                                            -Value {  
                                                 return @{ 
-                                                    FullName = $getTypeFullName
+                                                    DisplayName = $testParams.Name
+                                                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                                                    CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
+                                                    MaximumConversionsPerWorker = $testParams.MaximumConversionsPerWorker
+                                                    WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                                                    WorkerProcessCount = $testParams.WorkerProcessCount
+                                                    WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
                                                 }  
                                             } -PassThru -Force 
-                return $spServiceApp 
+                return $spServiceApp
+                
             }
+            
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
             
             Mock -CommandName Get-SPServiceApplication -MockWith {
