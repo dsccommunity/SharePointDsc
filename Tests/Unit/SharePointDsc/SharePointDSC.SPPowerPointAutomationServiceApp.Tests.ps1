@@ -95,7 +95,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } 
             }
             
-            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { }
+            Mock -CommandName New-SPPowerPointConversionServiceApplication -MockWith { 
+                 $spServiceApp = [PSCustomObject]@{ 
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    CacheExpirationPeriodInSeconds = 0
+                    MaximumConversionsPerWorker = 0
+                    WorkerKeepAliveTimeoutInSeconds = 0
+                    WorkerProcessCount = 0
+                    WorkerTimeoutInSeconds = 0
+                }
+                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name Update `
+                                           -Value {  
+                                                return @{ 
+                                                    DisplayName = $testParams.Name
+                                                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                                                    CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
+                                                    MaximumConversionsPerWorker = $testParams.MaximumConversionsPerWorker
+                                                    WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                                                    WorkerProcessCount = $testParams.WorkerProcessCount
+                                                    WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
+                                                }  
+                                            } -PassThru -Force 
+                return $spServiceApp
+                
+                return @{
+                    DisplayName = $testParams.Name
+                    CacheExpirationPeriodInSeconds = 0
+                    MaximumConversionsPerWorker = 0
+                    WorkerKeepAliveTimeoutInSeconds = 0
+                    WorkerProcessCount = 0
+                    WorkerTimeoutInSeconds = 0
+                }
+            }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return $null 
@@ -107,7 +140,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            It "Should create a new service application in the set method" {
+            It "Should create a new PowerPoint Automation Service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Get-SPServiceApplicationPool -Times 1
                 Assert-MockCalled New-SPPowerPointConversionServiceApplication -Times 1
@@ -283,6 +316,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     FullName = $getTypeFullName 
                                                 }  
                                             } -PassThru -Force 
+                 $spServiceApp | Add-Member -MemberType SCriptMethod `
+                                            -Name IsConnected `
+                                            -Value {
+                                                return $true
+                                            } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -292,7 +330,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } 
             }
 
-            Mock -CommandName Get-SPServiceApplicationProxy -MockWith { }
+            
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                $spServiceAppProxy = [PSCustomObject]@{
+                    Name = "$($testParams.ProxyName) other"
+                }
+                    $spServiceAppProxy | Add-Member -MemberType SCriptMethod `
+                                        -Name Delete `
+                                        -Value {
+                                            return $null
+                                        } -PassThru -Force
+                
+                return $spServiceAppProxy
+            }
 
             It "Should return Present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
