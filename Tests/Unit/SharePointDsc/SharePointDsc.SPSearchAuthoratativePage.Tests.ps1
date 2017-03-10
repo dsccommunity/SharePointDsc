@@ -60,29 +60,33 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         
         Context -Name "A search query authoratative page does exist and should" {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Authoratative"
+                Level = 0.0
                 Ensure = "Present"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @{
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
-                    EnableContinuousCrawls = $false
-                    IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
                 }
             }
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                return @{ 
+                    Identity = $testParams.Path
+                    Level = $testParams.Level
+                }
+            }
+
+            Mock -CommandName Set-SPEnterpriseSearchQueryAuthority -MockWith {
+                return @{
+                    Identity = $testParams.Path
+                    Level = $testParams.Level
+                }
+            }
+            
             
             It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
@@ -92,63 +96,82 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+
+            It "Should call Set functions from the Set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-SPEnterpriseSearchServiceApplication -Times 1
+                Assert-MockCalled Set-SPEnterpriseSearchQueryAuthority -Times 1
+            }
+
         }
         
         Context -Name "A search query authoratative page does exist and shouldn't" {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Authoratative"
+                Level = 0.0
                 Ensure = "Absent"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @{
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
-                    EnableContinuousCrawls = $false
-                    IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
                 }
             }
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                return @{ 
+                    Identity = $testParams.Path
+                    Level = $testParams.Level
+                }
+            }
+
+            Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith {
+                return $null 
+            }
+
             
-            It "Should return present from the get method" {
+            It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Ensure | Should Be "Present"
+                $result.Ensure | Should Be "Absent"
             }
             
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "Should remove the content source in the set method" {
+             It "Should call Set functions from the Set method" {
                 Set-TargetResource @testParams
-                
-                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled Get-SPEnterpriseSearchServiceApplication -Times 1
+                Assert-MockCalled Remove-SPEnterpriseSearchQueryAuthority -Times 1
             }
         }
         
         Context -Name "A search query authoratative page doesn't exist and shouldn't" {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Authoratative"
+                Level = 0.0
                 Ensure = "Absent"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+           
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
                 return $null
             }
-            
+
+            Mock -CommandName Remove-SPEnterpriseSearchQueryAuthority -MockWith {
+                return $null
+            }
+
+
             It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Absent"
@@ -157,36 +180,43 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+
+            It "Should call Set functions from the Set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Get-SPEnterpriseSearchServiceApplication -Times 1
+                Assert-MockCalled Remove-SPEnterpriseSearchQueryAuthority -Times 1
+            }
         }
         
         Context -Name "A search query authoratative page doesn't exist but should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Authoratative"
+                Level = 0.0
                 Ensure = "Present"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return $null
-            }
-            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @{
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
-                    IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+
+             Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
                 }
             }
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
+                return @{ 
+                    Identity = $testParams.Path
+                    Level = $testParams.Level
+                }
+            }
+
+            Mock -CommandName New-SPEnterpriseSearchQueryAuthority -MockWith {
+                return @{
+                    Identity = $testParams.Path
+                    Level = $testParams.Level
+                }
+            }
+            
             
             It "Should return absent from the get method" {
                 $result = Get-TargetResource @testParams
@@ -200,37 +230,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should create the content source in the set method" {
                 Set-TargetResource @testParams
                 
-                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
-                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1    
+                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -Times 1
             }
         }
         
         Context -Name "A search query demoted page does exist and should" {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Demoted"
                 Ensure = "Present"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @{
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
-                    EnableContinuousCrawls = $false
-                    IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
                 }
             }
-            
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
+                return @{ 
+                    Identity = $testParams.Path
+                }
+            }
+
             It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
@@ -239,34 +263,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+
+             It "Should create the content source in the set method" {
+                Set-TargetResource @testParams
+                
+                Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1    
+            }
         }
         
         Context -Name "A search query demoted page does exist and shouldn't" {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Demoted"
                 Ensure = "Absent"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
-                return @{
-                    Type = "SharePoint"
-                    SharePointCrawlBehavior = "CrawlVirtualServers"
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
-                    EnableContinuousCrawls = $false
-                    IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
                 }
             }
-            
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
+                return @{ 
+                    Identity = $testParams.Path
+                }
+            }
+                
             It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
                 $result.Ensure | Should Be "Present"
@@ -279,20 +303,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should remove the content source in the set method" {
                 Set-TargetResource @testParams
                 
-                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1    
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchQueryDemoted -Times 1    
             }
         }
         
         Context -Name "A search query demoted page doesn't exist and shouldn't" {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "SharePoint"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Demoted"
                 Ensure = "Absent"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
                 return $null
             }
             
@@ -304,34 +334,36 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }
+            It "Should remove the content source in the set method" {
+                Set-TargetResource @testParams
+                
+                Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1    
+                Assert-MockCalled -CommandName Remove-SPEnterpriseSearchQueryDemoted -Times 1    
+            }
         }
         
         Context -Name "A search query demoted page doesn't exist but should" -Fixture {
             $testParams = @{
-                Name = "Example content source"
                 ServiceAppName = "Search Service Application"
-                ContentSourceType = "Website"
-                Addresses = @("http://site.contoso.com")
-                CrawlSetting = "CrawlEverything"
+                Path = "http://site.sharepoint.com/pages/authoratative.aspx"
+                Action = "Authoratative"
+                Level = 0.0
                 Ensure = "Present"
             }
-            Mock -CommandName Get-SPEnterpriseSearchCrawlContentSource -MockWith {
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{ 
+                    DisplayName = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName  Get-SPEnterpriseSearchQueryDemoted -MockWith {
                 return $null
             }
-            Mock -CommandName New-SPEnterpriseSearchCrawlContentSource -MockWith {
+
+            Mock -CommandName  New-SPEnterpriseSearchQueryDemoted -MockWith {
                 return @{
-                    Type = "Web"
-                    MaxPageEnumerationDepth = [System.Int32]::MaxValue
-                    MaxSiteEnumerationDepth = 0
-                    StartAddresses = @(
-                        @{
-                            AbsoluteUri = "http://site.contoso.com"
-                        }
-                    )
-                    IncrementalCrawlSchedule = $null
-                    FullCrawlSchedule = $null
-                    CrawlPriority = "Normal"
-                    CrawlStatus = "Idle"
+                    Url = $params.Path
                 }
             }
             
@@ -344,11 +376,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-TargetResource @testParams | Should Be $false
             }
             
-            It "Should create the content source in the set method" {
+            It "Should create a new query demoted element in the set method" {
                 Set-TargetResource @testParams
                 
-                Assert-MockCalled -CommandName New-SPEnterpriseSearchCrawlContentSource
-                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource
+                Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1    
+                Assert-MockCalled -CommandName New-SPEnterpriseSearchQueryDemoted -Times 1    
             }
         }
        
