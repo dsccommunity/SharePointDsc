@@ -105,7 +105,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WorkerProcessCount = 0
                     WorkerTimeoutInSeconds = 0
                 }
-                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name Update `
                                            -Value {  
                                                 return @{ 
@@ -154,7 +154,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-             Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
+          
+            Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
                 return @{ 
                     Name = $testParams.ApplicationPool 
                 } 
@@ -170,7 +171,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WorkerProcessCount = 0
                     WorkerTimeoutInSeconds = 0
                 }
-                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name Update `
                                            -Value {  
                                                 return @{ 
@@ -332,19 +333,39 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = [PSCustomObject]@{ 
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
+                    MaximumConversionsPerWorker = $testParams.MaximumConversionsPerWorker
+                    WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                    WorkerProcessCount = $testParams.WorkerProcessCount
+                    WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
+             
                 }
-                $spServiceApp | Add-Member -MemberType ScriptMethod `
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
                                            -Value {  
                                                 return @{ 
                                                     FullName = $getTypeFullName 
                                                 }  
                                             } -PassThru -Force 
-                 $spServiceApp | Add-Member -MemberType SCriptMethod `
+                 $spServiceApp = $spServiceApp | Add-Member -MemberType SCriptMethod `
                                             -Name IsConnected `
                                             -Value {
                                                 return $true
                                             } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                                           -Name Update `
+                                           -Value {  
+                                                return @{ 
+                                                    DisplayName = $testParams.Name
+                                                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                                                    CacheExpirationPeriodInSeconds = $testParams.CacheExpirationPeriodInSeconds
+                                                    MaximumConversionsPerWorker = $testParams.MaximumConversionsPerWorker
+                                                    WorkerKeepAliveTimeoutInSeconds = $testParams.WorkerKeepAliveTimeoutInSeconds
+                                                    WorkerProcessCount = $testParams.WorkerProcessCount
+                                                    WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
+                                                }  
+                                            } -PassThru -Force 
+                
                 return $($spServiceApp)
             }
 
