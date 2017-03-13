@@ -20,7 +20,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
                               -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchAuthoritativePage.Mocks.cs"
-        Add-Type -LiteralPath $mockPath
+        Add-Type -LiteralPath $mockPath -ErrorAction SilentlyContinue
+
 
         # Mocks for all contexts   
         
