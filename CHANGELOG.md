@@ -1,4 +1,5 @@
 # Change log for SharePointDsc
+
 ## Unreleased
 
 * New resource: SPSearchCrawlerImpactRule
