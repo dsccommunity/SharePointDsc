@@ -6,4 +6,11 @@ namespace Microsoft.Office.Server.Search.Administration
         SPSiteSubscription,
         Ssa
     }
+
+    public class SearchObjectOwner {
+
+        public SearchObjectOwner(SearchObjectLevel level) {
+            
+        }
+    }
 }
