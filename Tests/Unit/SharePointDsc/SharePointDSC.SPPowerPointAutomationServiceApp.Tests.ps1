@@ -118,7 +118,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
                                                 }  
                                             } -PassThru -Force 
-                return $spServiceApp
+                return $($spServiceApp)
                 
             }
             Mock -CommandName New-SPPowerPointConversionServiceApplicationProxy -MockWith { }
@@ -183,7 +183,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     WorkerTimeoutInSeconds = $testParams.WorkerTimeoutInSeconds
                                                 }  
                                             } -PassThru -Force 
-                return $spServiceApp
+                return $($spServiceApp)
                 
             }
             
@@ -201,7 +201,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
                                                 }  
                                             } -PassThru -Force 
-                return $spServiceApp 
+                return $($spServiceApp) 
             }
 
             It "Should return 'Absent' from the Get method" {
@@ -242,7 +242,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                     FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
                                                 }  
                                             } -PassThru -Force 
-                return $spServiceApp 
+                return $($spServiceApp)
             }
 
             Mock -CommandName Get-SPServiceApplicationPool -MockWith {
@@ -297,7 +297,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 return $true
                                             } -PassThru -Force
 
-                return $spServiceApp
+                return $($spServiceApp)
             }
 
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
@@ -345,7 +345,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                             -Value {
                                                 return $true
                                             } -PassThru -Force
-                return $spServiceApp
+                return $($spServiceApp)
             }
 
              Mock -CommandName Get-SPServiceApplicationPool -MockWith { 
