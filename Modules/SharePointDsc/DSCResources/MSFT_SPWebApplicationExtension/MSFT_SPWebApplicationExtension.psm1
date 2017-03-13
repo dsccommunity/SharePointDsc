@@ -64,9 +64,6 @@ function Get-TargetResource
         $params = $args[0]
         $ScriptRoot = $args[1]
         
-        $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Extension.psm1"
-        Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
-
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
         if ($null -eq $wa) 
@@ -81,7 +78,9 @@ function Get-TargetResource
             } 
         }
 
-        $waExt = Get-SPDSCWebAppExtension -WebApplication $wa -Zone $params.zone
+        $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
+        $waExt = $wa.IisSettings[$zone]
+
         if ($null -eq $waExt) 
         { 
             return @{
@@ -204,8 +203,6 @@ function Set-TargetResource
             $params = $args[0]
             $ScriptRoot = $args[1]
 
-            $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Extension.psm1"
-            Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa) 
@@ -214,8 +211,9 @@ function Set-TargetResource
             }
 
 
-        #$waExt = $wa.IisSettings[[Microsoft.SharePoint.Administration.SPUrlZone]::($params.zone)]
-        $waExt = Get-SPDSCWebAppExtension -WebApplication $wa -Zone $params.zone
+        $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
+        $waExt = $wa.IisSettings[$zone]
+
         if ($null -eq $waExt) 
             {
                 $newWebAppExtParams = @{

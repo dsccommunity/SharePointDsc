@@ -20,22 +20,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
+        try 
+        { 
+            [Microsoft.SharePoint.Administration.SPUrlZone] 
+        }
+        catch 
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
+}        
+"@
+        }
+
         # Mocks for all contexts   
         Mock -CommandName New-SPAuthenticationProvider -MockWith { }
         Mock -CommandName New-SPWebApplicationExtension -MockWith { }
         Mock -CommandName Remove-SPWebApplication -MockWith { }
 
         
-        #Tests:
-        # extension does not exist
-        #  it should not
-        # extention exists 
-        #  it should
-        #  it should not
-        #  mismatch authentication
-        #  mismatch AllowAnonymous
-
-
+        
         # Test contexts
         Context -Name "The parent web application does not exist" -Fixture {
             $testParams = @{
@@ -68,11 +72,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                  return @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = @() 
                 } 
             }
 
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith { return $null }
-            
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
@@ -111,11 +114,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                  return @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = @()
                 } 
             }
 
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith { return $null }
-
+            
             It "Should return absent from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
@@ -151,10 +154,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
              Mock -CommandName Get-SPWebapplication -MockWith {
+                 $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return (
                   @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                   } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
                  ) 
             }
@@ -165,18 +179,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $testParams.AllowAnonymous
-                    DisableKerberos = $true  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-
+            
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -212,10 +215,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
              Mock -CommandName Get-SPWebapplication -MockWith {
+                $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return (
                   @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                   } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
                  ) 
             }
@@ -226,18 +240,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
             
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $testParams.AllowAnonymous
-                    DisableKerberos = $true  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-
+           
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -271,10 +274,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
              Mock -CommandName Get-SPWebapplication -MockWith {
+                $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return (
                   @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                   } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
                  ) 
             }
@@ -285,18 +299,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $testParams.AllowAnonymous
-                    DisableKerberos = $false  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-
+           
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -332,10 +335,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
              Mock -CommandName Get-SPWebapplication -MockWith {
+                 $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return (
                   @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                   } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
                  ) 
             }
@@ -345,18 +359,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     PublicURL = $testParams.Url 
                 }
             }
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $testParams.AllowAnonymous
-                    DisableKerberos = $false  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-
+           
 
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
@@ -391,10 +394,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
              Mock -CommandName Get-SPWebapplication -MockWith {
+                 $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return (
                   @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                   } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
                  ) 
             }
@@ -405,19 +419,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $testParams.AllowAnonymous
-                    DisableKerberos = $true  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-
-
+            
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
@@ -457,10 +459,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
             
              Mock -CommandName Get-SPWebapplication -MockWith {
+                 $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return (
                   @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                   } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
                  ) 
             }
@@ -471,19 +484,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $false 
-                    DisableKerberos = $true  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-
-
+            
             It "Should return present from the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
@@ -503,7 +504,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The web application extension exists but should" -Fixture {
+        Context -Name "The web application extension exists but shouldn't" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"
@@ -513,24 +514,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith {
+                $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
                  return @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
                 } 
             }
 
-             Mock -CommandName Get-SPDSCWebAppExtension -MockWith {
-                return @{
-                    ServerBindings = @{ 
-                        HostHeader = $testParams.HostHeader
-                        Port = 80
-                    }
-                    AllowAnonymous = $false 
-                    DisableKerberos = $true  
-                    Path = "c:\inetpub\wwwroot\wss\VirtualDirectories\intranet"
-                }
-            }
-           
+                        
             It "Should return present from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
@@ -555,13 +556,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
              Mock -CommandName Get-SPWebapplication -MockWith {
+                 
                  return @{ 
                      DisplayName = "Company SharePoint"
                      URL = "http://company.sharepoint.com"
+                     IISSettings = @()
                 } 
             }
             
-             Mock -CommandName Get-SPDSCWebAppExtension -MockWith { }
+           
 
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
