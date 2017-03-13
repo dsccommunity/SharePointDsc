@@ -51,6 +51,10 @@ function Get-TargetResource
         $ServerRole
     )
 
+    Write-Verbose -Message ("WARNING! SPCreateFarm is deprecated and will be removed in " + `
+                            "SharePointDsc v2.0. Swap to use the new SPFarm resource as " + `
+                            "an alternative. See http://aka.ms/SPDsc-SPFarm for details.")
+
     Write-Verbose -Message "Getting local SP Farm settings"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
@@ -171,6 +175,10 @@ function Set-TargetResource
         $ServerRole
     )
     
+    Write-Verbose -Message ("WARNING! SPCreateFarm is deprecated and will be removed in " + `
+                            "SharePointDsc v2.0. Swap to use the new SPFarm resource as " + `
+                            "an alternative. See http://aka.ms/SPDsc-SPFarm for details.")
+
     Write-Verbose -Message "Setting local SP Farm settings"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `

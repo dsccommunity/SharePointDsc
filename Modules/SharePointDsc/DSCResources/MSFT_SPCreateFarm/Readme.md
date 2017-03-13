@@ -1,5 +1,8 @@
 # Description
 
+WARNING: This resource is deprecated. Please use SPFarm instead as
+this resource will be removed from version 2.0 of SharePointDsc
+
 This resource is used to provision a new SharePoint farm. It should only be
 used on the first server in the farm to create the configuration database, all
 servers to join the farm after the first server creates the configuration
