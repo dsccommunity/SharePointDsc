@@ -7,23 +7,27 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
-        [parameter(Mandatory = $true)]
+
+        [parameter(Mandatory = $false)]
         [System.String]
         $Name,
         [System.UInt32]
-        $RequestLimit,
+        $RequestLimit = 0,
+
         [System.UInt32]
-        $WaitTime,
+        $WaitTime = 0,
+        
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
+        
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Crawler Impact Rule Setting for '$Name'"
     
-    if($RequestLimit -ne $null -and $WaitTime -ne $null)
+    if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
@@ -102,10 +106,10 @@ function Set-TargetResource
         $Name,
 
         [System.UInt32]
-        $RequestLimit,
+        $RequestLimit = 0,
 
         [System.UInt32]
-        $WaitTime,
+        $WaitTime = 0,
 
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -118,7 +122,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting Crawler Impact Rule Setting for '$Name'"
 
-    if($RequestLimit -ne $null -and $WaitTime -ne $null)
+    if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
@@ -226,9 +230,9 @@ function Test-TargetResource
         [System.String]
         $Name,
         [System.UInt32]
-        $RequestLimit,
+        $RequestLimit = 0,
         [System.UInt32]
-        $WaitTime,
+        $WaitTime = 0,
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
@@ -237,7 +241,7 @@ function Test-TargetResource
     )
     Write-Verbose -Message "Testing Crawler Impact Rule Setting for '$Name'"
     
-    if($RequestLimit -ne $null -and $WaitTime -ne $null)
+    if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
     }
