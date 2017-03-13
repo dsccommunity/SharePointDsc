@@ -56,7 +56,7 @@ function Get-TargetResource
         }
         else 
         {
-            $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -Name $params.Name -SearchService $ServiceApp
+            $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -Identity $params.Name -SearchService $serviceApp
             if($null -eq $crawlerImpactRule)
             {
                 return $nullReturn

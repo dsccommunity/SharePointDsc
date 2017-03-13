@@ -22,10 +22,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
 
         # Mocks for all contexts   
-        Mock -CommandName Remove-SPEnterpriseSearchCrawlRule -MockWith {}   
-        Mock -CommandName New-SPEnterpriseSearchCrawlRule -MockWith {}   
-        Mock -CommandName Set-SPEnterpriseSearchCrawlRule -MockWith {}   
-
+        Mock -CommandName Remove-SPEnterpriseSearchSiteHitRule -MockWith { }   
+        Mock -CommandName New-SPEnterpriseSearchSiteHitRule -MockWith { }   
+       
         Mock -CommandName Get-SPServiceApplication -MockWith { 
             return @(
                 New-Object -TypeName "Object" |  
@@ -92,6 +91,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     Name = $testParams.Name
                     HitRate = $testParams.RequestLimit
+                    Behavior = "0"
                 }
             }
             
