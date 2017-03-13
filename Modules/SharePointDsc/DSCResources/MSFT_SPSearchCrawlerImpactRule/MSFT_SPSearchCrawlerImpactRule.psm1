@@ -8,9 +8,10 @@ function Get-TargetResource
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $false)]
+        [parameter(Mandatory = $true)]
         [System.String]
         $Name,
+
         [System.UInt32]
         $RequestLimit = 0,
 
@@ -226,16 +227,21 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
+       
         [parameter(Mandatory = $true)]
         [System.String]
         $Name,
+        
         [System.UInt32]
         $RequestLimit = 0,
+        
         [System.UInt32]
         $WaitTime = 0,
+        
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
+        
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
