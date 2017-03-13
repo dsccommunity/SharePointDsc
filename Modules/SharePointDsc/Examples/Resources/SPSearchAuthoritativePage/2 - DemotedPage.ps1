@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to create a Search Authoratative Page
+    This example shows how to create a Search Authoritative Page
 #>
 
     Configuration Example 
@@ -13,7 +13,7 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPSearchAuthoratativePage AuthoratativePage
+            SPSearchAuthoritativePage AuthoratativePage
             {
                 ServiceAppName       = "Search Service Application"
                 Path                 = "http://site.sharepoint.com/Pages/demoted.aspx"

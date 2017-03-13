@@ -18,6 +18,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
+                              -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchAuthoritativePage.Mocks.cs"
+        Add-Type -LiteralPath $mockPath
+
         # Mocks for all contexts   
         
         Mock -CommandName Get-SPEnterpriseSearchQueryAuthority -MockWith { }

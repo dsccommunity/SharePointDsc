@@ -1,6 +1,6 @@
 
 [ClassVersion("1.0.0.0"), FriendlyName("SPSearchAuthoratativePage")]
-class MSFT_SPSearchAuthoratativePage : OMI_BaseResource
+class MSFT_SPSearchAuthoritativePage : OMI_BaseResource
 {
 	[Key, Description("Search Service Application Name")] String ServiceAppName;
 	[Key, Description("Source URI for the crawl mapping")] String Path;
