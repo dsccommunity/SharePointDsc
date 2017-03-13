@@ -136,9 +136,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             
-            It "Should return absent from the get method" {
+            It "Should return present from the get method" {
                 $result = Get-TargetResource @testParams
-                $result.Ensure | Should Be "Absent"
+                $result.Ensure | Should Be "Present"
             }
             
             It "Should return false from the test method" {
@@ -159,7 +159,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Action = "Authoratative"
                 Level = 0.0
                 Ensure = "Absent"
-            }
+            } 
            
             Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
                 return @{ 
@@ -208,10 +208,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName  Get-SPEnterpriseSearchQueryAuthority -MockWith {
-                return @{ 
-                    Identity = $testParams.Path
-                    Level = $testParams.Level
-                }
+                return $null
             }
 
             Mock -CommandName New-SPEnterpriseSearchQueryAuthority -MockWith {
@@ -235,7 +232,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
                 
                 Assert-MockCalled -CommandName Get-SPEnterpriseSearchServiceApplication -Times 1    
-                Assert-MockCalled -CommandName Set-SPEnterpriseSearchCrawlContentSource -Times 1
+               
             }
         }
         
@@ -350,8 +347,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 ServiceAppName = "Search Service Application"
                 Path = "http://site.sharepoint.com/pages/authoratative.aspx"
-                Action = "Authoratative"
-                Level = 0.0
+                Action = "Demoted"
                 Ensure = "Present"
             }
 

@@ -79,7 +79,10 @@ function Get-TargetResource
         }
         else 
         {
-            $queryDemoted = $serviceApp | Get-SPEnterpriseSearchQueryDemoted -Identity $params.Path
+            $queryDemoted = $serviceApp | Get-SPEnterpriseSearchQueryDemoted -Identity $params.Path `
+                                                                             -Owner $searchOwner `
+                                                                             -SearchApplication $serviceApp `
+                                                                             -ErrorAction SilentlyContinue
             if($null -eq $queryDemoted)
             {
                 return $nullReturn
@@ -251,22 +254,34 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if($Action -eq "Authoratative")
+    if($Ensure -eq "Present") 
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+        if($Action -eq "Authoratative")
+        {
+       
+            return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("ServiceAppName",
                                                          "Path",
                                                          "Level",
                                                          "Action", 
                                                          "Ensure")
+        }
+        else
+        {
+            return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("ServiceAppName",
+                                                         "Path",
+                                                         "Action", 
+                                                         "Ensure")
+        }
     }
     else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("ServiceAppName",
-                                                         "Path",
                                                          "Action", 
                                                          "Ensure")
     }
