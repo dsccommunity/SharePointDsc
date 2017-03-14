@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Added new resource SPSearchAuthoritativePage
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 
 ## 1.6
 
