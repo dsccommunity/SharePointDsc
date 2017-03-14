@@ -51,7 +51,7 @@ function Get-TargetResource
             }
     if (($Ensure -eq "Present") -and -not $ApplicationPool) 
     {
-        throw ("An Application Pool and  are required to configure the PowerPoint " + `
+        throw ("An Application Pool is required to configure the PowerPoint " + `
                "Automation Service Application")
     }
 
@@ -164,7 +164,7 @@ function Set-TargetResource
             }
     if (($Ensure -eq "Present") -and -not $ApplicationPool) 
     {
-        throw ("An Application Pool and  are required to configure the PowerPoint " + `
+        throw ("An Application Pool is required to configure the PowerPoint " + `
                "Automation Service Application")
     }
 
@@ -369,19 +369,16 @@ function Test-TargetResource
             }
     if (($Ensure -eq "Present") -and -not $ApplicationPool) 
     {
-        throw ("An Application Pool and  are required to configure the PowerPoint " + `
+        throw ("An Application Pool is required to configure the PowerPoint " + `
                "Automation Service Application")
     }
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if($null -eq $CurrentValues)
-    {
-        return $false
-    }
-    if($CurrentValues.Ensure -eq "Absent")
+    
+    if($Ensure -eq "Absent")
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Name","ApplicationPool","Ensure")                                     
+                                        -ValuesToCheck @("Ensure")                                     
     }
     else
     {

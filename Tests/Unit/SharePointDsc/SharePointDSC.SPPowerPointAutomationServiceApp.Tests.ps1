@@ -68,9 +68,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } 
   
             It "Should throw an exception as additional parameters are not allowed when Ensure = 'Absent'" { 
-                { Get-TargetResource @testParams } | Should throw "An Application Pool and  are required to configure the PowerPoint Automation Service Application"
-                { Test-TargetResource @testParams } | Should throw "An Application Pool and  are required to configure the PowerPoint Automation Service Application"
-                { Set-TargetResource @testParams } | Should throw "An Application Pool and  are required to configure the PowerPoint Automation Service Application"
+                { Get-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
+                { Test-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
+                { Set-TargetResource @testParams } | Should throw "An Application Pool is required to configure the PowerPoint Automation Service Application"
             } 
         }
 
