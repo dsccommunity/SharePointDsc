@@ -27,8 +27,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         }
 
+        Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
+            $sptrust = [pscustomobject]@{
+                Name              = $testParams.Name
+                ClaimProviderName = ""
+                ProviderSignOutUri = ""
+            }
+            $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+            return $sptrust
+        }
+
+        Mock -CommandName New-SPClaimTypeMapping -MockWith {
+            return [pscustomobject]@{
+                MappedClaimType = $testParams.IdentifierClaim
+            }
+        }
+
+        Mock -CommandName Get-SPClaimProvider -MockWith {
+            return [pscustomobject]@(@{
+                DisplayName = $testParams.ClaimProviderName
+            })
+        }
+
         # Test contexts
-        Context -Name "The SPTrustedIdentityTokenIssuer does not exist, but it should be present" -Fixture {
+        Context -Name "SPTrustedLoginProvider is created using a signing certificate in the certificate store" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -46,26 +68,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
-            }
-
-            Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
-                $sptrust = [pscustomobject]@{
-                    Name              = $testParams.Name
-                    ClaimProviderName = ""
-                    ProviderSignOutUri = ""
-                }
-                $sptrust | Add-Member -Name Update -MemberType ScriptMethod -Value { }
-                return $sptrust
-            }
-
-            Mock -CommandName New-SPClaimTypeMapping -MockWith {
-                return [pscustomobject]@{
-                    MappedClaimType = $testParams.IdentifierClaim
-                }
             }
 
             It "Should return absent from the get method" {
@@ -101,28 +107,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
             }
 
-            Mock -CommandName Get-SPClaimProvider -MockWith {
-                return [pscustomobject]@(@{
-                    DisplayName = $testParams.ClaimProviderName
-                })
-            }
-            
-            Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
-                $sptrust = [pscustomobject]@{
-                    Name              = $testParams.Name
-                    ClaimProviderName = ""
-                    ProviderSignOutUri = ""
-                }
-                $sptrust| Add-Member -Name Update -MemberType ScriptMethod  -Value { }
-                return $sptrust
-            }
-            
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
                 $sptrust = [pscustomobject]@{
                     Name              = $testParams.Name
@@ -133,12 +123,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $sptrust
             }
             
-            Mock -CommandName New-SPClaimTypeMapping -MockWith {
-                return [pscustomobject]@{
-                    MappedClaimType = $testParams.IdentifierClaim
-                }
-            }
-                       
             It "Should create the SPTrustedIdentityTokenIssuer and sets claims provider" {
                 Set-TargetResource @testParams
             }
@@ -162,7 +146,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -205,7 +189,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Absent"
@@ -241,7 +225,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Description                  = "Contoso"
                 Realm                        = "https://sharepoint.contoso.com"
                 SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
-                IdentifierClaim              = "UnknownClaimType"
+                IdentifierClaim              = "IdentityClaimTypeNotSpecifiedInClaimsMappings"
                 ClaimsMappings               = @(
                     (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
                         Name = "Email"
@@ -253,7 +237,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprintOrFilePath = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -270,7 +254,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The signing certificate is in certificate store LocalMachine\My" -Fixture {
+        Context -Name "SPTrustedLoginProvider is created using a signing certificate in the file path" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -288,14 +272,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprintOrFilePath = "123ABCFACEFFF"
+                SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
             }
 
-            It "Should fail validation of SigningCertificateThumbprintOrFilePath in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Signing certificate with thumbprint 123ABCFACEFFF was not found."
+            Mock -CommandName New-Object -MockWith {
+                return @(
+                    @{
+                        Thumbprint = "123ABCFACE"
+                    }
+                )
+            } -ParameterFilter { $TypeName -eq 'System.Security.Cryptography.X509Certificates.X509Certificate2' } -Verifiable
+
+            It "Should return absent from the get method" {
+                $getResults = Get-TargetResource @testParams
+                $getResults.Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create the SPTrustedIdentityTokenIssuer" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPTrustedIdentityTokenIssuer
             }
         }
     }

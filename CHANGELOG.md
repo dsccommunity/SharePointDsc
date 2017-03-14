@@ -23,6 +23,8 @@
 * Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
 * Improved output of test results for AppVeyor and VS Code based test runs
 * Fixed issue with SPWebAppPolicy if OS language is not En-Us
+* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing certificate
+  from file path as an alternative to the certificate store
 
 ## 1.5
 
