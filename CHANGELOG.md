@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+<<<<<<< HEAD
 * New resource: SPWebApplicationExtension
+=======
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+>>>>>>> a01c5ad95541ead0f1d607bb7ef2acaeca65f939
 
 ## 1.6
 
