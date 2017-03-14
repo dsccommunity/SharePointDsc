@@ -26,7 +26,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     public static string Ssa { get { return ""; } }
                 }
             }
-"@  -ErrorAction SilentlyContinue
+"@
+
 
         # Mocks for all contexts 
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication {

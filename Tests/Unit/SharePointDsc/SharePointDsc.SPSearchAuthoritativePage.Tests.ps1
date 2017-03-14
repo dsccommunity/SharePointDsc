@@ -18,9 +18,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        $mockPath = Join-Path -Path $Global:SPDscHelper.RepoRoot `
-                              -ChildPath "Tests/Unit/SharePointDsc/SharePointDsc.SPSearchAuthoritativePage.Mocks.cs"
-        Add-Type -LiteralPath $mockPath -ErrorAction SilentlyContinue
+        Add-Type -TypeDefinition @"
+        namespace Microsoft.Office.Server.Search.Administration
+        { 
+            public enum SearchObjectLevel {
+                SPWeb,
+                SPSite,
+                SPSiteSubscription,
+                Ssa
+            }
+
+            public class SearchObjectOwner {
+
+                public SearchObjectOwner(SearchObjectLevel level) {
+                    
+                }
+            }
+        }
+"@
 
 
         # Mocks for all contexts   
