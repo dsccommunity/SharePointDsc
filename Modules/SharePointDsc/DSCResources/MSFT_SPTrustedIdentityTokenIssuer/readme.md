@@ -9,7 +9,7 @@ must be set, but not both.
 The SigningCertificateThumbPrint must be the thumbprint of the signing
 certificate stored in the certificate store LocalMachine\My of the server
 
-The SigningCertificateFilePath must be the file path to the public key of 
+The SigningCertificateFilePath must be the file path to the public key of
 the signing certificate.
 
 The ClaimsMappings property is an array of MSFT_SPClaimTypeMapping to use with cmdlet

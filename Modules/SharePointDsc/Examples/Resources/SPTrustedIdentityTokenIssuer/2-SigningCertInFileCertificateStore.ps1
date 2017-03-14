@@ -35,7 +35,7 @@
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
-                PsDscRunAsCredential         = $SPSetupAccount
+                PsDscRunAsCredential         = $SetupAccount
             }
         }
     }
