@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -37,6 +37,8 @@ namespace Microsoft.SharePoint.Administration {
         Mock -CommandName New-SPAuthenticationProvider -MockWith { }
         Mock -CommandName New-SPWebApplicationExtension -MockWith { }
         Mock -CommandName Remove-SPWebApplication -MockWith { }
+        Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith { }
+        Mock -CommandName Set-SPWebApplication -MockWith { }
 
         
         
@@ -135,6 +137,42 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "The web application extension that uses Claims doesn't exist but should" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://company.sharepoint.com"
+                Name = "Intranet Zone"
+                Url = "http://intranet.sharepoint.com"
+                Zone = "Intranet"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "MyClaimsProvider"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPWebapplication -MockWith {
+                 return @{ 
+                     DisplayName = "Company SharePoint"
+                     URL = "http://company.sharepoint.com"
+                     IISSettings = @()
+                } 
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should call the new cmdlet from the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled New-SPWebApplicationExtension
+                Assert-MockCalled Get-SPTrustedIdentityTokenIssuer
+            }
+        }
+
+
         Context -Name "The web appliation extension does exist and should that uses NTLM without AllowAnonymous" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
@@ -148,6 +186,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
                     AllowAnonymous = $false 
                 } 
@@ -209,6 +248,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
                     AllowAnonymous = $true  
                 } 
@@ -268,6 +308,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $false 
                     AllowAnonymous = $false 
                 } 
@@ -314,6 +355,64 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "The web appliation extension does exist and should that uses Claims Authentication" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://company.sharepoint.com"
+                Name = "Intranet Zone"
+                Url = "http://intranet.sharepoint.com"
+                HostHeader = "intranet.sharepoint.com"
+                Zone = "Intranet"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "MyClaimsProvider"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisplayName = "MyClaimsProvider"
+                } 
+            }
+            
+             Mock -CommandName Get-SPWebapplication -MockWith {
+                $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
+                 return (
+                  @{ 
+                     DisplayName = "Company SharePoint"
+                     URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
+                  } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
+                 ) 
+            }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @{
+                    PublicURL = $testParams.Url 
+                }
+            }
+
+           
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return Claims as local auth mode from the get method" {
+                (Get-TargetResource @testParams).AuthenticationMethod | Should Be 'Claims'
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
 
         Context -Name "The web appliation extension does exist and should that uses Kerberos and AllowAnonymous" -Fixture {
             $testParams = @{
@@ -329,6 +428,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $false 
                     AllowAnonymous = $true 
                 } 
@@ -375,7 +475,7 @@ namespace Microsoft.SharePoint.Administration {
         }
 
 
-        Context -Name "The web appliation extension does exist and should with mismatched AuthenticationMethod" -Fixture {
+        Context -Name "The web appliation extension does exist and should with mismatched Windows Authentication" -Fixture {
             $testParams = @{
                 WebAppUrl = "http://company.sharepoint.com"
                 Name = "Intranet Zone"
@@ -388,6 +488,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
                     AllowAnonymous = $false 
                 } 
@@ -433,9 +534,74 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "Should update the web application extension settings in the set method" {
-                $Global:WebAppUpdateCalled = $false
                 Set-TargetResource @testParams
-                 $Global:WebAppUpdateCalled | Should Be $true 
+                Assert-MockCalled Set-SPWebApplication 
+            }
+        }
+
+        Context -Name "The web appliation extension does exist and should with mismatched Authentication (Windows / Claims)" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://company.sharepoint.com"
+                Name = "Intranet Zone"
+                Url = "http://intranet.sharepoint.com"
+                HostHeader = "intranet.sharepoint.com"
+                Zone = "Intranet"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "MyClaimsProvider"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisplayName = "Windows Authentication"
+                    DisableKerberos = $true 
+                    AllowAnonymous = $false 
+                } 
+            }
+            
+             Mock -CommandName Get-SPWebapplication -MockWith {
+                 $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{}
+                         ServerBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 80
+                         }
+                 })
+
+                 return (
+                  @{ 
+                     DisplayName = "Company SharePoint"
+                     URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
+                  } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
+                 ) 
+            }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @{
+                    PublicURL = $testParams.Url 
+                }
+            }
+
+            
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return AuthenticationMethod NTLM from the get method" {
+                (Get-TargetResource @testParams).AuthenticationMethod | Should Be "NTLM"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the web application extension authentication settings in the set method" {
+                 Set-TargetResource @testParams
+                 
+                 Assert-MockCalled Set-SPWebApplication 
             }
         }
 
@@ -453,6 +619,7 @@ namespace Microsoft.SharePoint.Administration {
 
             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
                 return @{ 
+                    DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
                     AllowAnonymous = $false 
                 } 

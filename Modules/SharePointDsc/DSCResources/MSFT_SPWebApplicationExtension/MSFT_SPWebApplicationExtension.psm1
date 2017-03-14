@@ -42,9 +42,13 @@ function Get-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -108,13 +112,21 @@ function Get-TargetResource
         }
 
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone $params.zone 
-        if ($authProvider.DisableKerberos -eq $true) 
-        { 
-            $localAuthMode = "NTLM" 
-        } 
+         if($authProvider.DisplayName -eq "Windows Authentication") 
+        {
+            if ($authProvider.DisableKerberos -eq $true) 
+            { 
+                $localAuthMode = "NTLM" 
+            } 
+            else 
+            { 
+                $localAuthMode = "Kerberos" 
+            }
+        }
         else 
-        { 
-            $localAuthMode = "Kerberos" 
+        {
+            $localAuthMode = "Claims"
+            $authenticationProvider = $authProvider.DisplayName
         }
 
          return @{
@@ -127,6 +139,7 @@ function Get-TargetResource
             Port = $Port
             Zone = $params.zone
             AuthenticationMethod = $localAuthMode
+            AuthenticationProvider = $authenticationProvider
             UseSSL = $UseSSL
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -179,9 +192,13 @@ function Set-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -197,6 +214,11 @@ function Set-TargetResource
     
     if ($Ensure -eq "Present") 
     {
+        if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
+        {
+            throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+        }
+
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters,$PSScriptRoot) `
                             -ScriptBlock {
@@ -224,17 +246,22 @@ function Set-TargetResource
 
                               
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
-                {
-                    if ($params.AuthenticationMethod -eq "NTLM") 
+                {   
+                    if($params.AuthenticationMethod -eq "Claims")
                     {
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                           -DisableKerberos:$true
-                    } 
+                       try {
+                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
+                        } catch {
+                            throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
+                        }
+                    }
                     else 
                     {
+                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                           -DisableKerberos:$false
+                                                            -DisableKerberos:$disableKerberos
                     }
+
                     $newWebAppExtParams.Add("AuthenticationProvider", $ap)
                 }
                 
@@ -262,24 +289,31 @@ function Set-TargetResource
                 $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
             }
         else {
+            write-verbose 'extension exists'
              if ($params.ContainsKey("AllowAnonymous") -eq $true) 
-                {
+            {
                 $waExt.AllowAnonymous = $params.AllowAnonymous
-                }
+                $wa.update()
+            }
 
-             if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
+             if ($params.ContainsKey("AuthenticationMethod") -eq $true)
+             { 
+                if($params.AuthenticationMethod -eq "Claims")
                 {
-                 if ($params.AuthenticationMethod -eq "NTLM") 
-                    {
-                    $waExt.DisableKerberos = $true
-                    }
-                else 
-                    {
-                    $waExt.DisableKerberos = $false         
+                    try {
+                        $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
+                    } catch {
+                        throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
                     }
                 }
-
-             $wa.update()
+                else 
+                {
+                    $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
+                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
+                                                        -DisableKerberos:$disableKerberos
+                }
+                Set-SPWebApplication -Identity $params.WebAppUrl -Zone $params.zone -AuthenticationProvider $ap 
+             }
         }
             
 
@@ -352,9 +386,13 @@ function Test-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
