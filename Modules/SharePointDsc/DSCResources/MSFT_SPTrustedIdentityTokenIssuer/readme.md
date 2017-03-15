@@ -12,10 +12,10 @@ certificate stored in the certificate store LocalMachine\My of the server
 The SigningCertificateFilePath must be the file path to the public key of
 the signing certificate.
 
-The ClaimsMappings property is an array of MSFT_SPClaimTypeMapping to use with cmdlet
-New-SPClaimTypeMapping. Each MSFT_SPClaimTypeMapping requires properties Name
-and IncomingClaimType. Property LocalClaimType is not required if its value is
-identical to IncomingClaimType.
+The ClaimsMappings property is an array of MSFT_SPClaimTypeMapping to use
+with cmdlet New-SPClaimTypeMapping. Each MSFT_SPClaimTypeMapping requires
+properties Name and IncomingClaimType. Property LocalClaimType is not
+required if its value is identical to IncomingClaimType.
 
 The IdentifierClaim property must match an IncomingClaimType element in
 ClaimsMappings array.

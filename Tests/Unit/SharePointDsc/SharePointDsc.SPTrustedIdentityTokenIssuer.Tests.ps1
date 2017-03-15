@@ -51,8 +51,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         $CsharpCode = @"
 namespace Microsoft.SharePoint.Administration {
-    public enum SPUrlZone { Default };
-
+    //public enum SPUrlZone { Default };
+    
     public class SPTrustedAuthenticationProvider {
     }
 }        
