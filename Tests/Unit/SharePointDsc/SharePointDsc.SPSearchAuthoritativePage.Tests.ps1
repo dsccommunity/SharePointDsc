@@ -17,17 +17,19 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-if (-not ([System.Management.Automation.PSTypeName]'Microsoft.Office.Server.Search.Administration.SearchObjectLevel').Type) {
-        Add-Type -TypeDefinition @"
+
+        Add-Type -TypeDefinition @"
+            namespace Microsoft.Office.Server.Search.Administration
+            {
+                public class SearchObjectLevel {
+                    public static string Ssa { get { return ""; } }
+                }
+            }
+"@        
+
+        Add-Type -TypeDefinition @"
         namespace Microsoft.Office.Server.Search.Administration
         { 
-            public enum SearchObjectLevel {
-                SPWeb,
-                SPSite,
-                SPSiteSubscription,
-                Ssa
-            }
-
             public class SearchObjectOwner {
 
                 public SearchObjectOwner(SearchObjectLevel level) {
@@ -36,7 +38,7 @@ if (-not ([System.Management.Automation.PSTypeName]'Microsoft.Office.Server.Sear
             }
         }
 "@
-}
+
 
         # Mocks for all contexts   
         
