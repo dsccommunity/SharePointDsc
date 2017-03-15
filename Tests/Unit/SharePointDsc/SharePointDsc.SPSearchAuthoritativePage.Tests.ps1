@@ -17,8 +17,8 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-
-        Add-Type -TypeDefinition @"
+if (-not ([System.Management.Automation.PSTypeName]'Microsoft.Office.Server.Search.Administration.SearchObjectLevel').Type) {
+        Add-Type -TypeDefinition @"
         namespace Microsoft.Office.Server.Search.Administration
         { 
             public enum SearchObjectLevel {
@@ -36,7 +36,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 "@
-
+}
 
         # Mocks for all contexts   
         

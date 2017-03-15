@@ -19,6 +19,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
+        if (-not ([System.Management.Automation.PSTypeName]'Microsoft.Office.Server.Search.Administration.SearchObjectLevel').Type) {
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration
             {
@@ -27,7 +28,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 "@
-
+        }
 
         # Mocks for all contexts 
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
