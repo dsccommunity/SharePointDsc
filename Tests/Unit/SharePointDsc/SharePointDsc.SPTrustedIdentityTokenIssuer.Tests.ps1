@@ -25,7 +25,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Thumbprint = "123ABCFACE"
                 }
             )
-        }
+        } { $Path -eq 'Cert:\LocalMachine\My' } -Verifiable
 
         Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
             $sptrust = [pscustomobject]@{
@@ -52,7 +52,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $CsharpCode = @"
 namespace Microsoft.SharePoint.Administration {
     //public enum SPUrlZone { Default };
-    
+
     public class SPTrustedAuthenticationProvider {
     }
 }        
@@ -173,6 +173,101 @@ namespace Microsoft.SharePoint.Administration {
 
             It "should fail validation of signing certificate parameters in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time."
+            }
+        }
+
+        Context -Name "None of parameters SigningCertificateThumbprint and SigningCertificateFilePath is set" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }            
+
+            It "should fail validation of signing certificate parameters in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "At least one of the following parameters must be specified: SigningCertificateThumbprint, SigningCertificateFilePath."
+            }
+        }
+
+        Context -Name "Thumbprint of signing certificate in parameter SigningCertificateThumbprint is invalid" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "XX123ABCFACEXX"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+           It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]+$'."
+            }
+        }
+
+        Context -Name "Priacte key of signing certificate specified in parameter SigningCertificateThumbprint has private key in certificate store" -Fixture {
+            $testParams = @{
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    } -ClientOnly)
+                    (New-CimInstance -ClassName MSFT_SPClaimTypeMapping -Property @{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    } -ClientOnly)
+                )
+                SigningCertificateThumbprint = "123ABCFACE"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @(
+                    @{
+                        Thumbprint = "123ABCFACE"
+                        HasPrivateKey = $true
+                    }
+                )
+            } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' } -Verifiable
+
+           It "should fail validation of certificate in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
             }
         }
         
