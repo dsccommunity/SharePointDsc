@@ -5,7 +5,7 @@
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 * Updated SPTrustedIdentityTokenIssuer to allow to specify the signing certificate
   from file path as an alternative to the certificate store
-  
+
 ## 1.6
 
 * Updated SPWebApplication to allow Claims Authentication configuration
