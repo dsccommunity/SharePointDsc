@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+
+## 1.6
+
+* Updated SPWebApplication to allow Claims Authentication configuration
 * Updated documentation in regards to guidance on installing binaries from
   network locations instead of locally
 * New resources: SPFarmPropertyBag
@@ -22,6 +27,9 @@
 * Improved runtime of SPSearchTopology by streamlining wait processes
 * Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
 * Improved output of test results for AppVeyor and VS Code based test runs
+* Fixed issue with SPWebAppPolicy if OS language is not En-Us
+* Added SPFarm resource, set SPCreateFarm and SPJoinFarm as deprecated to be
+  removed in version 2.0
 
 ## 1.5
 
