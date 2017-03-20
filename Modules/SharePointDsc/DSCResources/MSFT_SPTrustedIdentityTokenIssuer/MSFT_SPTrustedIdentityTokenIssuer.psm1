@@ -101,7 +101,7 @@
             SignInUrl                    = $signInUrl
             IdentifierClaim              = $identifierClaim
             ClaimsMappings               = $claimsMappings
-            SigningCertificateThumbprintOrFilePath = $SigningCertificateThumbprint
+            SigningCertificateThumbprint = $SigningCertificateThumbprint
             Ensure                       = $currentState
             ClaimProviderName            = $claimProviderName
             ProviderSignOutUri           = $providerSignOutUri
@@ -193,14 +193,14 @@ function Set-TargetResource
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
-
                 if ($params.SigningCertificateThumbprint)
                 {
-                    Write-Verbose -Message "Getting signing certificate with thumbprint $($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'"
+                    Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
+                        "$($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'")
 
-                    if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]+$")
+                    if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
                     {
-                        throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]+$'.")
+                        throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
                         return
                     }
 
@@ -210,13 +210,15 @@ function Set-TargetResource
 
                     if (!$cert) 
                     {
-                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) was not found in certificate store 'LocalMachine\My'.")
+                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
+                            "was not found in certificate store 'LocalMachine\My'.")
                         return
                     }
 
                     if ($cert.HasPrivateKey) 
                     {
-                        throw ("SharePoint requires that the private key of the signing certificate is not installed in the certificate store.")
+                        throw ("SharePoint requires that the private key of the signing certificate" + `
+                            " is not installed in the certificate store.")
                         return
                     }
                 }
@@ -225,7 +227,8 @@ function Set-TargetResource
                     Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
                     try
                     {
-                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" -ArgumentList @($params.SigningCertificateFilePath)
+                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
+                            -ArgumentList @($params.SigningCertificateFilePath)
                     }
                     catch
                     {

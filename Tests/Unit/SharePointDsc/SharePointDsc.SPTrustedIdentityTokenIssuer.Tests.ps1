@@ -22,10 +22,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-ChildItem -MockWith {
             return @(
                 @{
-                    Thumbprint = "123ABCFACE"
+                    Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 }
             )
-        } { $Path -eq 'Cert:\LocalMachine\My' } -Verifiable
+        } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' }
 
         Mock -CommandName New-SPTrustedIdentityTokenIssuer -MockWith {
             $sptrust = [pscustomobject]@{
@@ -78,7 +78,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -126,7 +126,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName New-Object -MockWith {
                 return @(
                     @{
-                        Thumbprint = "123ABCFACE"
+                        Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                     }
                 )
             } -ParameterFilter { $TypeName -eq 'System.Security.Cryptography.X509Certificates.X509Certificate2' } -Verifiable
@@ -164,7 +164,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 SigningCertificateFilePath   = "F:\Data\DSC\FakeSigning.cer"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
@@ -229,7 +229,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
            It "should fail validation of parameter SigningCertificateThumbprint in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]+$'."
+                { Set-TargetResource @testParams } | Should Throw "Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'."
             }
         }
 
@@ -251,7 +251,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -260,7 +260,7 @@ namespace Microsoft.SharePoint.Administration {
             Mock -CommandName Get-ChildItem -MockWith {
                 return @(
                     @{
-                        Thumbprint = "123ABCFACE"
+                        Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                         HasPrivateKey = $true
                     }
                 )
@@ -289,7 +289,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -329,7 +329,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
@@ -371,7 +371,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Absent"
@@ -443,7 +443,7 @@ namespace Microsoft.SharePoint.Administration {
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     } -ClientOnly)
                 )
-                SigningCertificateThumbprint = "123ABCFACE"
+                SigningCertificateThumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"

@@ -9,6 +9,9 @@ must be set, but not both.
 The SigningCertificateThumbPrint must be the thumbprint of the signing
 certificate stored in the certificate store LocalMachine\My of the server
 
+Note that the private key of the certificate must not be available in the
+certiificate store because SharePoint does not accept it.
+
 The SigningCertificateFilePath must be the file path to the public key of
 the signing certificate.
 
