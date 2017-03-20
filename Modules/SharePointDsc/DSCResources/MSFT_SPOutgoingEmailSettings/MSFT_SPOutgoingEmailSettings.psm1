@@ -23,6 +23,10 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]  
         [System.String] 
         $CharacterSet,
+        
+        [parameter(Mandatory =$true)]
+        [System.Boolean]
+        $TLSEncryptionSetting,
 
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -56,6 +60,7 @@ function Get-TargetResource
             FromAddress= $webApp.OutboundMailSenderAddress
             ReplyToAddress= $webApp.OutboundMailReplyToAddress
             CharacterSet = $webApp.OutboundMailCodePage
+            TLSEncryptionSetting = $webApp.OutboundMailEnableSsl
         }
     }
     return $result
@@ -85,6 +90,10 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]  
         [System.String] 
         $CharacterSet,
+        
+        [parameter(Mandatory =$true)]
+        [System.Boolean]
+        $TLSEncryptionSetting,
 
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -109,7 +118,8 @@ function Set-TargetResource
         $webApp.UpdateMailSettings($params.SMTPServer, `
                                    $params.FromAddress, `
                                    $params.ReplyToAddress, `
-                                   $params.CharacterSet) 
+                                   $params.CharacterSet)
+        $webApp.OutboundMailEnableSsl = $params.TLSEncryptionSetting
     }
 }
 
@@ -138,6 +148,10 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]  
         [System.String] 
         $CharacterSet,
+        
+        [parameter(Mandatory =$true)]
+        [System.Boolean]
+        $TLSEncryptionSetting
 
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -158,7 +172,8 @@ function Test-TargetResource
                                     -ValuesToCheck @("SMTPServer",
                                                      "FromAddress",
                                                      "ReplyToAddress",
-                                                     "CharacterSet") 
+                                                     "CharacterSet",
+                                                     "TLSEncryptionSetting") 
 }
 
 Export-ModuleMember -Function *-TargetResource
