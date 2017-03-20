@@ -72,7 +72,7 @@ function Get-TargetResource
         
         if ($null -eq $wa) 
         { 
-            Write-Verbose "WebApplication $($params.WebAppUrl) does not exist"
+            Write-Verbose -Message "WebApplication $($params.WebAppUrl) does not exist"
             return @{
                 WebAppUrl = $params.WebAppUrl
                 Name = $params.Name
@@ -96,7 +96,7 @@ function Get-TargetResource
             } 
         }
 
-        $PublicUrl = (Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.zone).PublicUrl
+        $publicUrl = (Get-SPAlternateURL -WebApplication $params.WebAppUrl -Zone $params.zone).PublicUrl
         
         if ($null -ne $waExt.SecureBindings.HostHeader) #default to SSL bindings if present  
         {
@@ -112,7 +112,7 @@ function Get-TargetResource
         }
 
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone $params.zone 
-         if($authProvider.DisplayName -eq "Windows Authentication") 
+        if($authProvider.DisplayName -eq "Windows Authentication") 
         {
             if ($authProvider.DisableKerberos -eq $true) 
             { 
@@ -233,10 +233,10 @@ function Set-TargetResource
             }
 
 
-        $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
-        $waExt = $wa.IisSettings[$zone]
+            $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
+            $waExt = $wa.IisSettings[$zone]
 
-        if ($null -eq $waExt) 
+            if ($null -eq $waExt) 
             {
                 $newWebAppExtParams = @{
                     Name = $params.Name
@@ -249,9 +249,12 @@ function Set-TargetResource
                 {   
                     if($params.AuthenticationMethod -eq "Claims")
                     {
-                       try {
+                        try 
+                        {
                             $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
-                        } catch {
+                        } 
+                        catch
+                        {
                             throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
                         }
                     }
@@ -264,7 +267,7 @@ function Set-TargetResource
 
                     $newWebAppExtParams.Add("AuthenticationProvider", $ap)
                 }
-                
+                    
                 if ($params.ContainsKey("AllowAnonymous") -eq $true) 
                 {
                     $newWebAppExtParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) 
@@ -285,39 +288,40 @@ function Set-TargetResource
                 { 
                     $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL) 
                 } 
-            
-                $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
+                
+                    $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
             }
-        else {
-            write-verbose 'extension exists'
-             if ($params.ContainsKey("AllowAnonymous") -eq $true) 
+            else 
             {
-                $waExt.AllowAnonymous = $params.AllowAnonymous
-                $wa.update()
-            }
-
-             if ($params.ContainsKey("AuthenticationMethod") -eq $true)
-             { 
-                if($params.AuthenticationMethod -eq "Claims")
+                if ($params.ContainsKey("AllowAnonymous") -eq $true) 
                 {
-                    try {
-                        $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
-                    } catch {
-                        throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
+                    $waExt.AllowAnonymous = $params.AllowAnonymous
+                    $wa.update()
+                }
+
+                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
+                { 
+                    if($params.AuthenticationMethod -eq "Claims")
+                    {
+                        try 
+                        {
+                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
+                        }
+                        catch
+                        {
+                            throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
+                        }
                     }
-                }
-                else 
-                {
-                    $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                    $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                        -DisableKerberos:$disableKerberos
-                }
-                Set-SPWebApplication -Identity $params.WebAppUrl -Zone $params.zone -AuthenticationProvider $ap 
-             }
-        }
-            
+                    else 
+                    {
+                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
+                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
+                                                            -DisableKerberos:$disableKerberos
+                    }
 
-           
+                    Set-SPWebApplication -Identity $params.WebAppUrl -Zone $params.zone -AuthenticationProvider $ap 
+                }
+            }
         }
     }
     
@@ -410,12 +414,9 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    Write-Verbose "Got the current Values"
-
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
                                                      -ValuesToCheck @("Ensure","AuthenticationMethod","AllowAnonymous")
-    Write-Verbose "Tested the current Values"
     return $testReturn
 }
 
