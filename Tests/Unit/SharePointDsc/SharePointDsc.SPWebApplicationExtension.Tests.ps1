@@ -54,9 +54,17 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Mock -CommandName Get-SPWebapplication -MockWith { return $null }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
             
             It "retrieving non-existent web application fails in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Web Application with URL http://nosuchwebapplication.sharepoint.com does not exist"
+                { Set-TargetResource @testParams } | Should Throw "Web Application with URL $($testParams.WebAppUrl) does not exist"
             }
         }
 
@@ -172,6 +180,72 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "The web application extension that uses Claims is desired, but no authentication provider is given" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://company.sharepoint.com"
+                Name = "Intranet Zone"
+                Url = "http://intranet.sharepoint.com"
+                Zone = "Intranet"
+                AuthenticationMethod = "Claims"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPWebapplication -MockWith {
+                 return @{ 
+                     DisplayName = "Company SharePoint"
+                     URL = "http://company.sharepoint.com"
+                     IISSettings = @()
+                } 
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an error from the set method" {
+                {Set-TargetResource @testParams }| Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+            }
+        }
+
+        Context -Name "The web application extension that uses Claims is desired, but the authentication provider is invalid" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://company.sharepoint.com"
+                Name = "Intranet Zone"
+                Url = "http://intranet.sharepoint.com"
+                Zone = "Intranet"
+                AuthenticationMethod = "Claims"
+                AuthenticationProvider = "NoSuchProvider"
+                Ensure = "Present"
+            }
+
+             Mock -CommandName Get-SPWebapplication -MockWith {
+                 return @{ 
+                     DisplayName = "Company SharePoint"
+                     URL = "http://company.sharepoint.com"
+                     IISSettings = @()
+                } 
+            }
+
+            Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
+                throw "Error"
+            }
+
+            It "Should return absent from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an error from the set method" {
+                {Set-TargetResource @testParams }| Should Throw "Cannot find Authentication Provider $($testParams.AuthenticationProvider)"
+            }
+        }
 
         Context -Name "The web appliation extension does exist and should that uses NTLM without AllowAnonymous" -Fixture {
             $testParams = @{
@@ -233,6 +307,66 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "The web appliation extension does exist and should that uses NTLM without AllowAnonymous and HTTPS" -Fixture {
+            $testParams = @{
+                WebAppUrl = "http://company.sharepoint.com"
+                Name = "Intranet Zone"
+                Url = "https://intranet.sharepoint.com"
+                HostHeader = "intranet.sharepoint.com"
+                UseSSL = $true
+                Zone = "Intranet"
+                AuthenticationMethod = "NTLM"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
+                return @{ 
+                    DisplayName = "Windows Authentication"
+                    DisableKerberos = $true 
+                    AllowAnonymous = $false 
+                } 
+            }
+            
+             Mock -CommandName Get-SPWebapplication -MockWith {
+                 $IISSettings =  @( 
+                     @{}
+                     @{
+                         SecureBindings = @{
+                             HostHeader = "intranet.sharepoint.com"
+                             Port = 443
+                         }
+                         ServerBindings = @{}
+                 })
+
+                 return (
+                  @{ 
+                     DisplayName = "Company SharePoint"
+                     URL = "http://company.sharepoint.com"
+                     IISSettings = $IISSettings
+                  } | add-member ScriptMethod Update { $Global:WebAppUpdateCalled = $true} -PassThru 
+                 ) 
+            }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @{
+                    PublicURL = $testParams.Url 
+                }
+            }
+
+            
+
+            It "Should return present from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
+            }
+
+            It "Should return AllowAnonymous False from the get method" {
+                (Get-TargetResource @testParams).AllowAnonymous | Should Be $false
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
 
         Context -Name "The web appliation extension does exist and should that uses NTLM and AllowAnonymous" -Fixture {
             $testParams = @{
