@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* New resource: SPPowerPointAutomationServiceApp
 * New resource: SPWebApplicationExtension
 * Added new resource SPAccessServices2010
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
