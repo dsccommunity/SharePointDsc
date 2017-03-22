@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to createa  Crawler Impact Rule with a Request Limit
+    This example shows how to create a Crawler Impact Rule with a Request Limit
 #>
 
     Configuration Example 

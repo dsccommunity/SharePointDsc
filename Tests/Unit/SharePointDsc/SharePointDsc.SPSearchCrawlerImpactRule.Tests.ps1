@@ -41,7 +41,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         # Test contexts
-        Context -Name "When crawler impact rule should exist and doesn't exist" -Fixture {
+        Context -Name "When crawler impact requestlimit rule should exist and doesn't exist" -Fixture {
             $testParams = @{
                 ServiceAppName = "Search Service Application"
                 Name = "http://site.sharepoint.com"
@@ -73,7 +73,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
         
-        Context -Name "When crawler impact rule should exist and does exist" -Fixture {
+        Context -Name "When crawler impact requestlimit rule should exist and does exist" -Fixture {
             $testParams = @{
                 ServiceAppName = "Search Service Application"
                 Name = "http://site.sharepoint.com"
@@ -110,8 +110,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-
-        Context -Name "When crawler impact rule shouldn't exist and doesn't exist" -Fixture {
+        Context -Name "When crawler impact requestlimit rule shouldn't exist and doesn't exist" -Fixture {
             $testParams = @{
                 ServiceAppName = "Search Service Application"
                 Name = "http://site.sharepoint.com"
@@ -146,7 +145,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "When crawler impact rule shouldn't exist and does exist" -Fixture {
+        Context -Name "When crawler impact requestlimit rule shouldn't exist and does exist" -Fixture {
             $testParams = @{
                 ServiceAppName = "Search Service Application"
                 Name = "http://site.sharepoint.com"
@@ -220,6 +219,75 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Test-TargetResource @testParams } | Should Throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"  
                 { Set-TargetResource @testParams } | Should Throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
                     
+            }
+        }
+
+        Context -Name "When crawler impact WaitTime rule should exist and doesn't exist" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Search Service Application"
+                Name = "http://site.sharepoint.com"
+                WaitTime = 300
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{
+                    DisplayName = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchSiteHitRule -MockWith { 
+                return $null 
+            }
+            
+            It "Should return absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new search site hit rule in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPEnterpriseSearchSiteHitRule 
+            }
+        }
+        
+        Context -Name "When crawler impact WaitTime rule should exist and does exist" -Fixture {
+            $testParams = @{
+                ServiceAppName = "Search Service Application"
+                Name = "http://site.sharepoint.com"
+                WaitTime = 300
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchServiceApplication -MockWith {
+                return @{
+                    DisplayName = $testParams.ServiceAppName
+                }
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchSiteHitRule -MockWith { 
+                return @{
+                    Name = $testParams.Name
+                    HitRate = $testParams.RequestLimit
+                    Behavior = "0"
+                }
+            }
+            
+            It "Should return absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+
+            It "Should return true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+
+            It "Should update a new search Site hit rule in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Remove-SPEnterpriseSearchSiteHitRule 
+                Assert-MockCalled New-SPEnterpriseSearchSiteHitRule
             }
         }
     }

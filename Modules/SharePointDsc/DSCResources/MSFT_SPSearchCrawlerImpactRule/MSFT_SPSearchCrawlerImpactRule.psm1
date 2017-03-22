@@ -20,7 +20,7 @@ function Get-TargetResource
         
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
         
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -70,6 +70,7 @@ function Get-TargetResource
                         ServiceAppName = $params.ServiceAppName
                         Name = $params.Name
                         RequestLimit = $crawlerImpactRule.HitRate
+                        WaitTime = 0
                         Ensure = "Present"
                         InstallAccount = $params.InstallAccount
                     }
@@ -79,6 +80,7 @@ function Get-TargetResource
                     return @{
                         ServiceAppName = $params.ServiceAppName
                         Name = $params.Name
+                        RequestLimit = 0
                         WaitTime = $crawlerImpactRule.HitRate
                         Ensure = "Present"
                         InstallAccount = $params.InstallAccount
@@ -114,7 +116,7 @@ function Set-TargetResource
 
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
 
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -240,7 +242,7 @@ function Test-TargetResource
         
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure,
+        $Ensure = "Present",
         
         [System.Management.Automation.PSCredential]
         $InstallAccount
