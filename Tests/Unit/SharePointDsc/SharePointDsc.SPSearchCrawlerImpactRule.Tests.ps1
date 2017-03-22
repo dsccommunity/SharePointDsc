@@ -272,7 +272,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @{
                     Name = $testParams.Name
                     WaitTime = $testParams.WaitTime
-                    Behavior = "0"
+                    Behavior = "1"
                 }
             }
             
