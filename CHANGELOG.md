@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* New resource: SPWebApplicationExtension
+* Added new resource SPAccessServices2010
 * Added new resource SPSearchAuthoritativePage
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 
