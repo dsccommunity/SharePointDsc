@@ -1,6 +1,6 @@
 <#
 .EXAMPLE
-    This example shows how to create a Search Authoritative Page
+    This example shows how to create a Search Demoted Page
 #>
 
     Configuration Example 

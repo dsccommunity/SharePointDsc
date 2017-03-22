@@ -51,7 +51,7 @@ function Get-TargetResource
         }
 
         $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
-        $searchOwner = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner($searchObjectLevel)
+        $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
         if($params.Action -eq "Authoratative")
         {
@@ -147,7 +147,7 @@ function Set-TargetResource
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
-            $searchOwner = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner($searchObjectLevel)
+            $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
             
             if($null -eq $serviceApp)
             {
@@ -155,7 +155,10 @@ function Set-TargetResource
             }
             if($params.Action -eq "Authoratative")
             {
-                 New-SPEnterpriseSearchQueryAuthority -Url $params.Path -SearchApplication $serviceApp -Owner $searchOwner -Level $params.Level
+                 New-SPEnterpriseSearchQueryAuthority -Url $params.Path `
+                                                      -SearchApplication $serviceApp `
+                                                      -Owner $searchOwner `
+                                                      -Level $params.Level
             }
             else 
             {
@@ -172,7 +175,7 @@ function Set-TargetResource
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
-            $searchOwner = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner($searchObjectLevel)
+            $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
             if($null -eq $serviceApp)
             {
@@ -181,7 +184,10 @@ function Set-TargetResource
 
             if($params.Action -eq "Authoratative")
             {
-                Set-SPEnterpriseSearchQueryAuthority -Identity $params.ServiceAppName -SearchApplication $ssa -Owner $searchOwner -Level $params.Level
+                Set-SPEnterpriseSearchQueryAuthority -Identity $params.ServiceAppName `
+                                                     -SearchApplication $ssa `
+                                                     -Owner $searchOwner `
+                                                     -Level $params.Level
             }
         }
     }
@@ -194,7 +200,7 @@ function Set-TargetResource
 
             $serviceApp = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
             $searchObjectLevel = [Microsoft.Office.Server.Search.Administration.SearchObjectLevel]::Ssa
-            $searchOwner = New-Object Microsoft.Office.Server.Search.Administration.SearchObjectOwner($searchObjectLevel)
+            $searchOwner = New-Object -TypeName "Microsoft.Office.Server.Search.Administration.SearchObjectOwner" -ArgumentList $searchObjectLevel
 
             if($null -eq $serviceApp)
             {
