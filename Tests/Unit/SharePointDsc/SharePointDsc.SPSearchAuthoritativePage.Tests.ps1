@@ -19,23 +19,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         Add-Type -TypeDefinition @"
-            namespace Microsoft.Office.Server.Search.Administration
-            {
-                public class SearchObjectLevel {
-                    public static string Ssa { get { return ""; } }
-                }
-            }
-"@        
-        Add-Type -TypeDefinition @"
-        namespace Microsoft.Office.Server.Search.Administration
-        { 
-            public class SearchObjectOwner {
+namespace Microsoft.Office.Server.Search.Administration { 
+    public class SearchObjectLevel { 
+        public static string Ssa { get { return ""; } }
+    }
 
-                public SearchObjectOwner(SearchObjectLevel level) {
-                    
-                }
-            }
-        }
+    public class SearchObjectOwner {
+        public SearchObjectOwner(Microsoft.Office.Server.Search.Administration.SearchObjectLevel level) { }
+    }
+}
 "@
         # Mocks for all contexts   
         
