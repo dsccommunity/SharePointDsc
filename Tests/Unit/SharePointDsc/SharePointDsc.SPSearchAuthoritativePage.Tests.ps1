@@ -26,7 +26,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 "@        
-
         Add-Type -TypeDefinition @"
         namespace Microsoft.Office.Server.Search.Administration
         { 
@@ -38,8 +37,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 "@
-
-
         # Mocks for all contexts   
         
         Mock -CommandName Get-SPEnterpriseSearchQueryAuthority -MockWith { }
