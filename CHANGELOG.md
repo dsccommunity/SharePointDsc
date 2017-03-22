@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* New resource: SPWebApplicationExtension
+* Added new resource SPAccessServices2010
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 * New resource: SPSearchCrawlerImpactRule
 
 ## 1.6
