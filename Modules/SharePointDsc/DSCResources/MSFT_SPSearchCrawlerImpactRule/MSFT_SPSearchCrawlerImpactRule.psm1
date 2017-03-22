@@ -255,7 +255,7 @@ function Test-TargetResource
     }
 
     $behavior = ""
-    if($RequestLimit -ne $null)
+    if($RequestLimit -ne 0)
     {
         $behavior = "RequestLimit"
     }
