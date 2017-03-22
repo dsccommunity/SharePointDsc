@@ -20,10 +20,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Add-Type -TypeDefinition @"
 namespace Microsoft.Office.Server.Search.Administration { 
-    public class SearchObjectLevel { 
-        public static string Ssa { get { return ""; } }
+    public enum SearchObjectLevel
+    {
+        SPWeb,
+        SPSite,
+        SPSiteSubscription,
+        Ssa
     }
-
+    
+   
     public class SearchObjectOwner {
         public SearchObjectOwner(Microsoft.Office.Server.Search.Administration.SearchObjectLevel level) { }
     }
