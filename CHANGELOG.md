@@ -3,7 +3,7 @@
 ## Unreleased
 
 * New resource: SPPowerPointAutomationServiceApp
-* Bugfix 542 in SPSearchFileType for ServiceAppName schema changing setting to Key.
+* Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
 * Added new resource SPAccessServices2010
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
