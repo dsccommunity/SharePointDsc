@@ -3,6 +3,7 @@
 ## Unreleased
 
 * New resource: SPPowerPointAutomationServiceApp
+* Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
 * Added new resource SPAccessServices2010
 * Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
