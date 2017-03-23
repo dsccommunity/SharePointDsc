@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* New resource: SPPowerPointAutomationServiceApp
 * Bugfix 542 in SPSearchFileType for ServiceAppName schema changing setting to Key.
 * New resource: SPWebApplicationExtension
 * Added new resource SPAccessServices2010
