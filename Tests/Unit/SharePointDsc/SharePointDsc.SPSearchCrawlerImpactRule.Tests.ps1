@@ -271,7 +271,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPEnterpriseSearchSiteHitRule -MockWith { 
                 return @{
                     Name = $testParams.Name
-                    WaitTime = $testParams.WaitTime
+                    HitRate = $testParams.WaitTime
                     Behavior = "1"
                 }
             }
