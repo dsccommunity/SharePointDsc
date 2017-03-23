@@ -17,7 +17,8 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-
+try 
+{
         Add-Type -TypeDefinition @"
 namespace Microsoft.Office.Server.Search.Administration { 
     public enum SearchObjectLevel
@@ -33,7 +34,12 @@ namespace Microsoft.Office.Server.Search.Administration {
         public SearchObjectOwner(Microsoft.Office.Server.Search.Administration.SearchObjectLevel level) { }
     }
 }
-"@
+"@ -ErrorAction SilentlyContinue
+}
+catch
+{
+
+}
         # Mocks for all contexts   
         
         Mock -CommandName Get-SPEnterpriseSearchQueryAuthority -MockWith { }

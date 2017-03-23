@@ -17,17 +17,23 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-
+try {
         # Initialize tests
-        Add-Type -TypeDefinition @"
-            namespace Microsoft.Office.Server.Search.Administration
-            {
-                public class SearchObjectLevel {
-                    public static string Ssa { get { return ""; } }
-                }
-            }
-"@
-       
+           Add-Type -TypeDefinition @"
+namespace Microsoft.Office.Server.Search.Administration { 
+    public enum SearchObjectLevel
+    {
+        SPWeb,
+        SPSite,
+        SPSiteSubscription,
+        Ssa
+    }
+}
+"@ -ErrorAction SilentlyContinue
+}
+catch {
+    
+}  
         # Mocks for all contexts 
         Mock -CommandName Get-SPEnterpriseSearchServiceApplication {
             return @{
