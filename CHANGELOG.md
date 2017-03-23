@@ -3,11 +3,12 @@
 ## Unreleased
 
 * New resource: SPPowerPointAutomationServiceApp
+* Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
 * Added new resource SPAccessServices2010
-* Added new resource SPSearchAuthoritativePage
 * Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
-  Search Service Application 
+  Search Service Application
+* Added new resource SPSearchAuthoritativePage
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 * New resource: SPSearchCrawlerImpactRule
 

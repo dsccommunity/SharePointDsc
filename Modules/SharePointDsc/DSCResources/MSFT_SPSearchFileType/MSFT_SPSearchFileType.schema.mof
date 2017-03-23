@@ -2,7 +2,7 @@
 class MSFT_SPSearchFileType : OMI_BaseResource
 {
     [Key, Description("The name of the file type")] string FileType;
-    [Required, Description("The name of the search service application")] string ServiceAppName;
+    [Key, Description("The name of the search service application")] string ServiceAppName;
     [Write, Description("The description of the file type")] string Description;
     [Write, Description("The mime type of the file type")] string MimeType;
     [Write, Description("The state of the file type")] boolean Enabled;
