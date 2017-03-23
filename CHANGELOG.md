@@ -8,6 +8,7 @@
 * Added new resource SPAccessServices2010
 * Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
   Search Service Application
+* Added new resource SPSearchAuthoritativePage
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 * New resource: SPSearchCrawlerImpactRule
 
