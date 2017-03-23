@@ -5,6 +5,8 @@
 * New resource: SPPowerPointAutomationServiceApp
 * New resource: SPWebApplicationExtension
 * Added new resource SPAccessServices2010
+* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
+  Search Service Application
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 
 ## 1.6
