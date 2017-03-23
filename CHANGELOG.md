@@ -35,7 +35,7 @@
 * Fixed issue with SPWebAppPolicy if OS language is not En-Us
 * Added SPFarm resource, set SPCreateFarm and SPJoinFarm as deprecated to be
   removed in version 2.0
-  
+
 ## 1.5
 
 * Fixed issue with SPManagedMetaDataServiceApp if ContentTypeHubUrl parameter is
