@@ -49,18 +49,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             })
         }
 
-        $CsharpCode = @"
+        try 
+        { 
+            [Microsoft.SharePoint.Administration.SPUrlZone] 
+        }
+        catch 
+        {
+            Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
-    //public enum SPUrlZone { Default };
-
-    public class SPTrustedAuthenticationProvider {
-    }
+    public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
 }        
 "@
-        Add-Type -TypeDefinition $CsharpCode
+        }
+
+        try 
+        { 
+            [Microsoft.SharePoint.Administration.SPTrustedAuthenticationProvider] 
+        }
+        catch 
+        {
+            Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint.Administration {
+    public class SPTrustedAuthenticationProvider {}
+}        
+"@
+        }        
 
         # Test contexts
-        Context -Name "SPTrustedLoginProvider is created using a signing certificate in the certificate store" -Fixture {
+        Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the certificate store" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -99,7 +115,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "SPTrustedLoginProvider is created using a signing certificate in the file path" -Fixture {
+        Context -Name "The SPTrustedLoginProvider does not exist but should, using a signing certificate in the file path" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -129,7 +145,7 @@ namespace Microsoft.SharePoint.Administration {
                         Thumbprint = "123ABCFACE123ABCFACE123ABCFACE123ABCFACE"
                     }
                 )
-            } -ParameterFilter { $TypeName -eq 'System.Security.Cryptography.X509Certificates.X509Certificate2' } -Verifiable
+            } -ParameterFilter { $TypeName -eq 'System.Security.Cryptography.X509Certificates.X509Certificate2' }
 
             It "Should return absent from the get method" {
                 $getResults = Get-TargetResource @testParams
@@ -146,7 +162,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "Both parameters SigningCertificateThumbprint and SigningCertificateFilePath are set" -Fixture {
+        Context -Name "The SPTrustedLoginProvider is desired, but both parameters SigningCertificateThumbprint and SigningCertificateFilePath are set while exactly 1 should" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -176,7 +192,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "None of parameters SigningCertificateThumbprint and SigningCertificateFilePath is set" -Fixture {
+        Context -Name "The SPTrustedLoginProvider is desired, but none of parameters SigningCertificateThumbprint and SigningCertificateFilePath is set while exactly 1 should" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -204,7 +220,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "Thumbprint of signing certificate in parameter SigningCertificateThumbprint is invalid" -Fixture {
+        Context -Name "The SPTrustedLoginProvider is desired, but the thumbprint of the signing certificate in parameter SigningCertificateThumbprint is invalid" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -233,7 +249,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "Priacte key of signing certificate specified in parameter SigningCertificateThumbprint has private key in certificate store" -Fixture {
+        Context -Name "The SPTrustedLoginProvider is desired, but the private key of the signing certificate is present in certificate store while it should not" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -264,14 +280,14 @@ namespace Microsoft.SharePoint.Administration {
                         HasPrivateKey = $true
                     }
                 )
-            } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' } -Verifiable
+            } -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My' }
 
            It "should fail validation of certificate in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SharePoint requires that the private key of the signing certificate is not installed in the certificate store."
             }
         }
         
-        Context -Name "SPTrustedLoginProvider is created with a claims provider that exists on the farm" -Fixture {
+        Context -Name "The SPTrustedLoginProvider does not exist but should, with a claims provider that exists on the farm" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -311,7 +327,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "SPTrustedLoginProvider already exists" -Fixture {
+        Context -Name "The SPTrustedLoginProvider already exists and should not be changed" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -353,7 +369,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "SPTrustedLoginProvider already exists and must be removed" -Fixture {
+        Context -Name "The SPTrustedLoginProvider already exists but should be removed" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -425,7 +441,7 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
-        Context -Name "The IdentifierClaim does not match one of the claim types in ClaimsMappings" -Fixture {
+        Context -Name "The SPTrustedLoginProvider is desired, but the IdentifierClaim parameter does not match a claim type in ClaimsMappings" -Fixture {
             $testParams = @{
                 Name                         = "Contoso"
                 Description                  = "Contoso"

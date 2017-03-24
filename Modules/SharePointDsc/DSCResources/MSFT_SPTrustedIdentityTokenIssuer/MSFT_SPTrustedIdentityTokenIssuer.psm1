@@ -102,6 +102,7 @@
             IdentifierClaim              = $identifierClaim
             ClaimsMappings               = $claimsMappings
             SigningCertificateThumbprint = $SigningCertificateThumbprint
+            SigningCertificateFilePath   = ""
             Ensure                       = $currentState
             ClaimProviderName            = $claimProviderName
             ProviderSignOutUri           = $providerSignOutUri
@@ -402,6 +403,21 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer '$Name' settings"
+
+    if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
+        $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+    {
+        throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
+        return
+    }
+
+    if (!$PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
+        !$PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+            "SigningCertificateThumbprint, SigningCertificateFilePath.")
+        return
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
