@@ -20,7 +20,7 @@
                 Realm                        = "https://sharepoint.contoso.com"
                 SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
                 IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-                ClaimsMappings               = @(
+                ClaimsMappings               =  @(
                     MSFT_SPClaimTypeMapping{
                         Name = "Email"
                         IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
@@ -31,7 +31,7 @@
                         LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     }
                 )
-                SigningCertificateThumbPrint = "F3229E7CCA1DA812E29284B0ED75A9A019A83B08"
+                SigningCertificateThumbPrint = "F0D3D9D8E38C1D55A3CEF3AAD1C18AD6A90D5628"
                 ClaimProviderName            = "LDAPCP"
                 ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
                 Ensure                       = "Present"
