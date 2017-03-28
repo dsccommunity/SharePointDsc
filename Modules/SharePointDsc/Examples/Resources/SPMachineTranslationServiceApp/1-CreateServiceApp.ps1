@@ -15,12 +15,12 @@ Configuration Example
     node localhost {
         SPMachineTranslationServiceApp MachineTranslationServiceApp
         {  
-            Name              = "Translation Service Application"
-            ApplicationPool   = "SharePoint Service Applications"
-            DatabaseServer    = "SQL.contoso.local"
-            DatabaseName      = "Translation"
-            Ensure            = "Present"
-            PsDscCredential   = $SetupAccount
+            Name                   = "Translation Service Application"
+            ApplicationPool        = "SharePoint Service Applications"
+            DatabaseServer         = "SQL.contoso.local"
+            DatabaseName           = "Translation"
+            Ensure                 = "Present"
+            PsDscRunAsCredential   = $SetupAccount
         }
     }
 }

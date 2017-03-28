@@ -5,23 +5,23 @@
 
 Configuration Example 
 {
-	param(
-		[Parameter(Mandatory = $true)]
-		[PSCredential]
-		$SetupAccount
-	)
-	Import-DscResource -ModuleName SharePointDsc
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
 
-	node localhost {
-		SPMachineTranslationServiceApp MachineTranslationServiceApp
-		{  
-			Name              = "Translation Service Application"
-			ApplicationPool   = "SharePoint Service Applications"
-			DatabaseServer    = "SQL.contoso.local"
-			DatabaseName      = "Translation"
-			Ensure            = "Absent"
-			PsDscRunAsCredential   = $SetupAccount
-				
-		}
-	}
+    node localhost {
+        SPMachineTranslationServiceApp MachineTranslationServiceApp
+        {  
+            Name                   = "Translation Service Application"
+            ApplicationPool        = "SharePoint Service Applications"
+            DatabaseServer         = "SQL.contoso.local"
+            DatabaseName           = "Translation"
+            Ensure                 = "Absent"
+            PsDscRunAsCredential   = $SetupAccount
+                
+        }
+    }
 }
