@@ -165,10 +165,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-ChildItem -MockWith {
-                return @{
-                    Thumbprint = $testParams.Certificate
-                }
+            Mock -CommandName Get-ChildItem -ParameterFilter { $Path -eq "Cert:\LocalMachine\My" } -MockWith {
+                return @(
+                    @{
+                        Subject = "CN=CertIdentifier"
+                        Thumbprint = $testParams.Certificate
+                    }
+                )
             }
 
             Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
