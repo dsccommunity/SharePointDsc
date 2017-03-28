@@ -6,7 +6,7 @@ param(
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
 )
-
+    
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
                                 -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
