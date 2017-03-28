@@ -1,4 +1,4 @@
-#
+<#
 .EXAMPLE
     This example removes a SP Trusted Root Authority from the local farm.
 #>

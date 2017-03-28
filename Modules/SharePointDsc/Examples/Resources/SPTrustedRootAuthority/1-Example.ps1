@@ -1,4 +1,4 @@
-#
+<#
 .EXAMPLE
     This example deploys a SP Trusted Root Authority to the local farm.
 #>
