@@ -20,7 +20,7 @@ Configuration Example
 			DatabaseServer    = "SQL.contoso.local"
 			DatabaseName      = "Translation"
 			Ensure            = "Absent"
-			PsDscCredential   = $SetupAccount
+			PsDscRunAsCredential   = $SetupAccount
 				
 		}
 	}
