@@ -94,8 +94,6 @@ function Get-TargetResource
             $serverIsJoined = $false
         } 
 
-        Test-SPDscSqlAccess -SqlServer $params.DatabaseServer
-
         try 
         {
             $spFarm = Get-SPFarm

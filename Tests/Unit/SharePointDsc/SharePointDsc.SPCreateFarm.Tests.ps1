@@ -34,7 +34,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Install-SPFeature -MockWith {}
         Mock -CommandName New-SPCentralAdministration -MockWith {}
         Mock -CommandName Install-SPApplicationContent -MockWith {}
-        Mock -CommandName Test-SPDscSqlAccess -MockWith {}
         
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" -Fixture {

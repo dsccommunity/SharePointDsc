@@ -20678,15 +20678,6 @@ param(
  
  } 
 
-function Test-SPDscSqlAccess {
-  [CmdletBinding()]
-param(
-    [parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [System.String]
-    $SqlServer)
-}
-
 function Test-SPInfoPathFormTemplate { 
   [CmdletBinding()]
 param(

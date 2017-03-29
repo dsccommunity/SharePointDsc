@@ -79,7 +79,6 @@ function Get-TargetResource
 
         try 
         {
-            Test-SPDscSqlAccess -SqlServer $params.DatabaseServer
             $spFarm = Get-SPFarm
         } 
         catch 
