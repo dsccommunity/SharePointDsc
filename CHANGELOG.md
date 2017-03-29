@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* New resource: SPMachineTranslationServiceApp
 * New resource: SPPowerPointAutomationServiceApp
 * Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
