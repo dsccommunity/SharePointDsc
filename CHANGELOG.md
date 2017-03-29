@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* New resouce: SPTrustedRootAuthority 
+* New resouce: SPTrustedRootAuthority
 * New resource: SPPowerPointAutomationServiceApp
 * Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
