@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("SPWebAppPeoplePickerSettingsSearchADDomains")]
+class MSFT_SPWebAppPeoplePickerSettingsSearchADDomains : OMI_BaseResource
+{
+    [Key, Description("The URL of the web application")] string Url;
+    [Key, Description("The DNS name of the domain or forest, such as exampledomain.com, but not the short domain name.")] string DomainName;
+    [Write, Description("The user name to use for searching the Active Directory domain forest.")] string LoginName;
+    [Write, Description("Present if the DomainName should exist or Absent if it should be removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
+};
