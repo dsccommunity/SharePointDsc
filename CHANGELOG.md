@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Update SPFarmSolution to eject from loop after 30m.
 * New resource: SPPowerPointAutomationServiceApp
 * Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
