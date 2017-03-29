@@ -26,15 +26,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
                                      -ArgumentList @("PASSPHRASEUSER", $mockPassword)                                      
 
+        $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.Farm\SPFarm.psm1"
+        Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
+
         # Mocks for all contexts   
         Mock -CommandName New-SPConfigurationDatabase -MockWith {}
         Mock -CommandName Install-SPHelpCollection -MockWith {}
-        Mock Initialize-SPResourceSecurity -MockWith {}
+        Mock -CommandName Initialize-SPResourceSecurity -MockWith {}
         Mock -CommandName Install-SPService -MockWith {}
         Mock -CommandName Install-SPFeature -MockWith {}
         Mock -CommandName New-SPCentralAdministration -MockWith {}
         Mock -CommandName Install-SPApplicationContent -MockWith {}
-        
+        Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            return @{
+                Locked = $false
+                ValidPermissions = $true
+                DatabaseExists = $false
+            }
+        } -Verifiable
+
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" -Fixture {
             $testParams = @{

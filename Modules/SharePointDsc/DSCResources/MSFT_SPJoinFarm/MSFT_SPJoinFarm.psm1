@@ -184,9 +184,32 @@ function Set-TargetResource
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                                  -ScriptBlock {
+                                      
         $params = $args[0]
+        $scriptRoot = $args[1]
+
+        $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+        $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                            -Database $params.FarmConfigDatabaseName
+
+        while ($dbStatus.Locked -eq $true)
+        {
+            Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
+                                    "database is currently being provisioned by a remote " + `
+                                    "server, this server will wait for this to complete")
+            Start-Sleep -Seconds 30
+            $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                -Database $params.FarmConfigDatabaseName
+        }
+
+        if ($dbStatus.ValidPermissions -eq $false)
+        {
+            throw "The current user does not have sufficient permissions to SQL Server"
+            return
+        }
         
         try {
             $joinFarmArgs = @{
