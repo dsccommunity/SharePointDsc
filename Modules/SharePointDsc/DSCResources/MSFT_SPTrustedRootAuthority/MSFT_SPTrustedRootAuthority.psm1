@@ -112,7 +112,7 @@ function Set-TargetResource
                 throw "Certificate not found in the local Certificate Store"
             } 
             
-            New-SPTrustedRootAuthority -Identity $params.Name -Certificate $cert 
+            New-SPTrustedRootAuthority -Name $params.Name -Certificate $cert 
         }
     }
     if ($Ensure -eq "Absent")
