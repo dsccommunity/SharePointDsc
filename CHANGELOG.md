@@ -3,6 +3,7 @@
 ## Unreleased
 
 * New resouce: SPTrustedRootAuthority
+* New resource: SPMachineTranslationServiceApp
 * New resource: SPPowerPointAutomationServiceApp
 * Bugfix in SPSearchFileType  made ServiceAppName a key property.
 * New resource: SPWebApplicationExtension
@@ -11,6 +12,8 @@
   Search Service Application
 * Added new resource SPSearchAuthoritativePage
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing certificate
+  from file path as an alternative to the certificate store
 * New resource: SPSearchCrawlerImpactRule
 
 ## 1.6
