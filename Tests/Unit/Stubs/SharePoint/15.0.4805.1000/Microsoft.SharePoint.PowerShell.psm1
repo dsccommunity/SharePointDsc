@@ -10582,7 +10582,7 @@ param(
 
     [Parameter(ParameterSetName='ManualUpdateCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -18711,7 +18711,7 @@ param(
 
     [Parameter(ParameterSetName='ManualUpdateCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
