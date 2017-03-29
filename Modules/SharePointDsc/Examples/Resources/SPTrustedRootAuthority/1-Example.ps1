@@ -16,7 +16,7 @@
             SPTrustedRootAuthority SampleRootAuthority
             {
                 Name                         = "Contoso"
-                Certificate                  = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint        = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure                       = "Present"
                 PsDscRunAsCredential         = $SetupAccount
             }
