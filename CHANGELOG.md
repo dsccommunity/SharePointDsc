@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* New resouce: SPTrustedRootAuthority
 * Update SPFarmSolution to eject from loop after 30m.
 * New resource: SPMachineTranslationServiceApp
 * New resource: SPPowerPointAutomationServiceApp
