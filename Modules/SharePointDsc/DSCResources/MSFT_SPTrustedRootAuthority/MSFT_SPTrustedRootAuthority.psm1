@@ -10,7 +10,7 @@ function Get-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Certificate,
+        $CertificateThumbprint,
 
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -34,7 +34,7 @@ function Get-TargetResource
         {
             return @{
                 Name = $params.Name
-                Certificate = $params.Certificate
+                CertificateThumbprint = [string]::Empty
                 Ensure = $ensure
             }
         }    
@@ -44,7 +44,7 @@ function Get-TargetResource
             
             return @{
                 Name = $params.Name
-                Certificate = $rootCert.Certificate.Thumbprint
+                CertificateThumbprint = $rootCert.Certificate.Thumbprint
                 Ensure = $ensure
             }
         }
@@ -64,7 +64,7 @@ function Set-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Certificate,
+        $CertificateThumbprint,
 
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -84,16 +84,15 @@ function Set-TargetResource
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
+            $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
+                             -ErrorAction SilentlyContinue
             
-            $cert = Get-ChildItem -Path "CERT:\LocalMachine\My" | Where-Object `
-            -FilterScript { $_.Thumbprint -eq "$($params.Certificate)" }
-
             if($null -eq $cert)
             {
                 throw "Certificate not found in the local Certificate Store"
             }
 
-            Set-SPTrustedRootAuthority -Identity "$($params.Name)" -Certificate $cert
+            Set-SPTrustedRootAuthority -Identity $params.Name -Certificate $cert
         }
     }
     if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent") 
@@ -104,9 +103,9 @@ function Set-TargetResource
                                       -ScriptBlock {
             $params = $args[0]
             
-            $cert = Get-ChildItem -Path "CERT:\LocalMachine\My" | Where-Object `
-             -FilterScript { $_.Thumbprint -eq "$($params.Certificate)" }
-
+            $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
+                             -ErrorAction SilentlyContinue
+            
             if($null -eq $cert)
             {
                 throw "Certificate not found in the local Certificate Store"
@@ -140,7 +139,7 @@ function Test-TargetResource
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $Certificate,
+        $CertificateThumbprint,
 
         [ValidateSet("Present","Absent")]
         [System.String]
@@ -153,11 +152,18 @@ function Test-TargetResource
     Write-Verbose -Message "Testing SPTrustedRootAuthority '$Name'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-
-    return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Name","Certificate","Ensure")
-
+    if($Ensure -eq "Present")
+    {
+        return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Name","CertificateThumbprint","Ensure")
+    }
+    else 
+    {
+         return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                        -DesiredValues $PSBoundParameters `
+                                        -ValuesToCheck @("Name","Ensure")
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource

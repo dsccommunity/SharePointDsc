@@ -18,37 +18,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+            Mock -CommandName  Remove-SPTrustedRootAuthority -MockWith { }
+            Mock -CommandName Set-SPTrustedRootAuthority -MockWith { }
+            Mock -CommandName New-SPTrustedRootAuthority -MockWith { }
 
         Context -Name "When TrustedRootAuthority should exist and does exist in the farm." -Fixture {
           
             $testParams = @{
                 Name = "CertIdentifier"
-                Certificate = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-ChildItem -MockWith {
-                
-                return @(
-
-                    @{
-                        Subject = "CN=CertName"
-                        Thumbprint = $testParams.Certificate
-                    }
-                )
+            Mock -CommandName Get-Item -MockWith {
+                return @{
+                            Subject = "CN=CertName"
+                            Thumbprint = $testParams.CertificateThumbprint
+                        }
             }
             
             Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
                 return @{
                     Name = $testParams.Name
                     Certificate = @{
-                        Thumbprint = $testParams.Certificate
+                        Thumbprint = $testParams.CertificateThumbprint
                     }
                 }
-            }
-
-            Mock -CommandName Set-SPTrustedRootAuthority -MockWith {
-                
             }
 
             It "Should return Present from the Get method" {
@@ -70,7 +65,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
           
             $testParams = @{
                 Name = "CertIdentifier"
-                Certificate = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure = "Present"
             }
             
@@ -83,21 +78,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-ChildItem -MockWith {
-                return @(
-                    @{
+            Mock -CommandName Get-Item -MockWith {
+                    return  @{
                         Subject = "CN=CertName"
-                        Thumbprint = $testParams.Certificate
+                        Thumbprint = $testParams.CertificateThumbprint
                     }
-                    @{
-                        Subject = "CN=SomeOtherCert"
-                        Thumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
-                    }
-                    )
-            }
-
-            Mock -CommandName Set-SPTrustedRootAuthority -MockWith {
-
             }
 
             It "Should return Present from the Get method" {
@@ -115,11 +100,45 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+          Context -Name "When TrustedRootAuthority should exist and does exist in the farm, but has incorrect certificate, but specified certificate doesn't exist;" -Fixture {
+          
+            $testParams = @{
+                Name = "CertIdentifier"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
+                return @{
+                    Name = $testParams.Name
+                    Certificate = @{
+                        Thumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
+                    }
+                }
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                    return  $null
+            }
+
+            It "Should return Present from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should thorw Certificate not found error in the set method" {
+                 { Set-TargetResource @testParams } | Should Throw "Certificate not found in the local Certificate Store"   
+            }
+        }
+
         Context -Name "When TrustedRootAuthority should exist and doesn't exist in the farm, but has an invalid certificate." -Fixture {
           
             $testParams = @{
                 Name = "CertIdentifier"
-                Certificate = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure = "Present"
             }
             
@@ -127,12 +146,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $null
             }
 
-            Mock -CommandName Get-ChildItem -MockWith {
-               return $null
-            }
-
-            Mock -CommandName Set-SPTrustedRootAuthority -MockWith {
-
+            Mock -CommandName Get-Item -MockWith {
+                    return $null
             }
 
             It "Should return Absent from the Get method" {
@@ -154,25 +169,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
           
             $testParams = @{
                 Name = "CertIdentifier"
-                Certificate = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure = "Present"
             }
-
-            Mock -CommandName Get-ChildItem -ParameterFilter { $Path -eq "Cert:\LocalMachine\My" } -MockWith {
-                return @(
-                    @{
+            
+            Mock -CommandName Get-Item -MockWith {
+                    return @{
                         Subject = "CN=CertIdentifier"
-                        Thumbprint = $testParams.Certificate
+                        Thumbprint = $testParams.CertificateThumbprint
                     }
-                )
             }
 
             Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
                 return $null
-            }
-
-            Mock -CommandName  New-SPTrustedRootAuthority -MockWith {
-
             }
 
             It "Should return Absent from the Get method" {
@@ -185,7 +194,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should create a new service application in the set method" {
                   Set-TargetResource @testParams
-                  Assert-MockCalled Get-ChildItem -Times 1
+                  Assert-MockCalled Get-Item -Times 1
                   Assert-MockCalled New-SPTrustedRootAuthority -Times 1    
             }
 
@@ -195,29 +204,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
           
             $testParams = @{
                 Name = "CertIdentifier"
-                Certificate = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure = "Absent"
             }
 
-            Mock -CommandName Get-ChildItem -MockWith {
-                return @{
-                    Thumbprint = $testParams.Certificate
-                }
+            Mock -CommandName Get-Item -MockWith {
+                    return @{
+                        Subject = "CN=CertIdentifier"
+                        Thumbprint = $testParams.CertificateThumbprint
+                    }
             }
-
-            Mock -CommandName  Remove-SPTrustedRootAuthority -MockWith { }
 
             Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
                 return @{
                     Name = $testParams.Name
                     Certificate = @{
-                        Thumbprint = $testParams.Certificate
+                        Thumbprint = $testParams.CertificateThumbprint
                     }
                 }
-            }
-
-            Mock -CommandName Set-SPTrustedRootAuthority -MockWith {
-
             }
 
             It "Should return Present from the Get method" {
@@ -238,24 +242,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
           
             $testParams = @{
                 Name = "CertIdentifier"
-                Certificate = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
                 Ensure = "Absent"
             }
 
-            Mock -CommandName Get-ChildItem -MockWith {
-                return @{
-                    Thumbprint = $testParams.Certificate
-                }
+            Mock -CommandName Get-Item -MockWith {
+                    return  @{
+                        Subject = "CN=CertIdentifier"
+                        Thumbprint = $testParams.CertificateThumbprint
+                    }
             }
-
-            Mock -CommandName  Remove-SPTrustedRootAuthority -MockWith { }
 
             Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
                 return $null
-            }
-
-            Mock -CommandName Set-SPTrustedRootAuthority -MockWith {
-
             }
 
             It "Should return Absent from the Get method" {
