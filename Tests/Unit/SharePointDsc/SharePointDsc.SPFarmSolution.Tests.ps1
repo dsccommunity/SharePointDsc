@@ -19,10 +19,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         # Initialize tests
-
+        
         # Mocks for all contexts   
         Mock -CommandName Update-SPSolution -MockWith { }
-        Mock -CommandName Wait-SPDSCSolutionJob -MockWith { }
         Mock -CommandName Install-SPFeature -MockWith { }
         Mock -CommandName Install-SPSolution -MockWith { }
         Mock -CommandName Uninstall-SPSolution -MockWith { }
@@ -73,10 +72,73 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "uploads and installes the solution to the farm" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Add-SPSolution 
                 Assert-MockCalled Install-SPSolution
-                Assert-MockCalled Wait-SPDSCSolutionJob 
+               
+            }
+        }
+
+        Context -Name "The solution isn't installed, but should be with loop testing" -Fixture {
+            $testParams = @{
+                Name            = "SomeSolution"
+                LiteralPath     = "\\server\share\file.wsp"
+                Deployed        = $true
+                Ensure          = "Present"
+                Version         = "1.0.0.0"
+                WebApplications = @("http://app1", "http://app2")
+            }
+
+            $global:SPDscSolutionAdded = $false
+            $global:SPDscLoopCount = 0
+
+            Mock -CommandName Get-SPSolution -MockWith { 
+                $global:SPDscLoopCount = $global:SPDscLoopCount + 1
+                $index = $global:SPDscLoopCount
+              if($global:SPDscSolutionAdded)
+              {
+                if(2 -eq $index)
+                {
+                    return @{
+                        JobExists = $false
+                    }
+                }
+                else 
+                {
+                    return @{
+                        JobExists = $true
+                    }                  
+                }
+              } 
+                else
+                {
+                    return $null 
+                }
+            }
+
+            Mock -CommandName Add-SPSolution -MockWith { 
+                $solution = [pscustomobject] @{ Properties = @{ Version = "" }}
+                $solution | Add-Member -Name Update -MemberType ScriptMethod -Value { }
+                $global:SPDscSolutionAdded = $true
+                return $solution
+            }
+
+            $getResults = Get-TargetResource @testParams
+
+            It "Should return the expected empty values from the get method" {
+                $getResults.Ensure | Should Be "Absent"
+                $getResults.Version | Should Be "0.0.0.0"
+                $getResults.Deployed | Should Be $false
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "uploads and installes the solution to the farm" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Add-SPSolution 
+                Assert-MockCalled Install-SPSolution
+               
             }
         }
 
@@ -113,9 +175,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "uninstalles and removes the solution from the web apps and the farm" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Uninstall-SPSolution
-                Assert-MockCalled Wait-SPDSCSolutionJob 
                 Assert-MockCalled Remove-SPSolution 
             }
         }
@@ -180,10 +240,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should update the solution in the set method" {
                 Set-TargetResource @testParams
-
                 Assert-MockCalled Update-SPSolution
                 Assert-MockCalled Install-SPFeature
-                Assert-MockCalled Wait-SPDSCSolutionJob 
             }
         }
 
@@ -258,7 +316,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Remove-SPSolution
                 Assert-MockCalled Add-SPSolution
                 Assert-MockCalled Install-SPSolution
-                Assert-MockCalled Wait-SPDSCSolutionJob 
             }
         }
 
