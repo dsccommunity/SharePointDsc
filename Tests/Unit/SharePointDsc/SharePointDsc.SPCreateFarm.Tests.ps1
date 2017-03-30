@@ -277,6 +277,63 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "a farm exists locally, is the correct farm but SPFarm is not reachable" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+            
+            Mock -CommandName Get-SPFarm -MockWith { return $null }
+            
+            Mock -CommandName Get-SPDatabase -MockWith { 
+                return @(@{ 
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    Server = @{ 
+                        Name = $testParams.DatabaseServer 
+                    }
+                })
+            } 
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return @(@{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+                })
+            }
+
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+                return @{
+                    Locked = $true
+                    ValidPermissions = $false
+                    DatabaseExists = $true
+                }
+            }
+
+            It "Should throw when server already joined to farm but SPFarm not reachable" {
+                { Get-TargetResource @testParams } | Should Throw
+            }
+
+            It "Should throw when the current user does not have sufficient permissions to SQL Server" {
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
+
         Context -Name "a farm exists locally and is not the correct farm" -Fixture {
             $testParams = @{
                 FarmConfigDatabaseName = "SP_Config"
