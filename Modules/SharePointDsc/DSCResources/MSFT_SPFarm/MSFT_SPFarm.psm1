@@ -148,6 +148,17 @@ function Get-TargetResource
                 $farmAccount = $spFarm.DefaultServiceAccount.Name
             }
 
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                | Where-Object -FilterScript { 
+                                    $_.IsAdministrationWebApplication -eq $true 
+                                }
+
+            $centralAdminProvisioned = $false
+            if ($null -ne $centralAdminSite)
+            {
+                $centralAdminProvisioned = $true
+            }
+
             $returnValue = @{
                 FarmConfigDatabaseName = $spFarm.Name
                 DatabaseServer = $configDb.Server.Name
@@ -155,6 +166,7 @@ function Get-TargetResource
                 InstallAccount = $null
                 Passphrase = $null 
                 AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
+                RunCentralAdmin = $centralAdminProvisioned
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $params.CentralAdministrationAuth #TODO: Need to return this as the current value
             }
@@ -177,6 +189,7 @@ function Get-TargetResource
                 InstallAccount = $null
                 Passphrase = $null 
                 AdminContentDatabaseName = $null
+                RunCentralAdmin = $null
                 CentralAdministrationPort = $null
                 CentralAdministrationAuth = $null
                 Ensure = "Present"
@@ -198,6 +211,7 @@ function Get-TargetResource
             InstallAccount = $null
             Passphrase = $null 
             AdminContentDatabaseName = $null
+            RunCentralAdmin = $null
             CentralAdministrationPort = $null
             CentralAdministrationAuth = $null
             Ensure = "Absent"

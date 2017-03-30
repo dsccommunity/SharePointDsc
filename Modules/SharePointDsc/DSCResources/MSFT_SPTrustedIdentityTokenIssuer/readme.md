@@ -21,3 +21,6 @@ ClaimsMappings array.
 
 The ClaimProviderName property can be set to specify a custom claims provider.
 It must be already installed in the SharePoint farm and returned by cmdlet
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the token issuer is created.

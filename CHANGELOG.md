@@ -3,6 +3,15 @@
 ## Unreleased
 
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+* Fix typo in method Get-TargetResource of SPFeature (issue 481)
+* Fix bug in SPManagedAccount not returning the correct account name value (issue 533)
+* Fix typo in method Get-TargetResource of SPSearchIndexPartition (issue 518)
+* Update documentation of SPInstallLanguagePack to add guidance on package change in SP2016 (issue 523)
+* Added returning the required RunCentralAdmin parameter to Get-TargetResource in SPFarm (issue 527)
+* Added web role check for SPBlobCacheSettings (issue 502)
+* Improved error message when rule could not be found in SPHealthAnalyzerRuleState (issue 535)
+* Extended the documentation to specify that the default value of Ensure is Present (issue 537)
+* Added documentation about the user of Host Header Site Collections and the HostHeader parameter in SPWebApplication (issue 534)
 
 ## 1.6
 
