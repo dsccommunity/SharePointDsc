@@ -37,7 +37,7 @@ function Get-TargetResource()
         $params = $args[0]
 
         $returnValue = @{
-	        Url             = $params.Url
+            Url             = $params.Url
             DomainName      = $null
             LoginName       = $params.LoginName
             Ensure          = 'Absent'
@@ -59,7 +59,7 @@ function Get-TargetResource()
         if ($spSearchADDomain.DomainName -eq $params.DomainName)
         {
             $returnValue.Ensure     = 'Present'
-	        $returnValue.DomainName = $spSearchADDomain.DomainName
+            $returnValue.DomainName = $spSearchADDomain.DomainName
             $returnValue.LoginName  = $spSearchADDomain.LoginName
         }
 
