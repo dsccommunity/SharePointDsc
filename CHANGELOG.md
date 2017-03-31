@@ -16,6 +16,8 @@
 * Updated SPTrustedIdentityTokenIssuer to allow to specify the signing certificate
   from file path as an alternative to the certificate store
 * New resource: SPSearchCrawlerImpactRule
+* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
+  joined to a farm
 
 ## 1.6
 
