@@ -19848,21 +19848,6 @@ param(
  } 
 
 
-function Test-SPInfoPathFormTemplate { 
-  [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [string]
-    ${Path},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
 function Test-SPO365LinkSettings { 
   [CmdletBinding()]
 param(
