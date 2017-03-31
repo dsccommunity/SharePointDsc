@@ -19,14 +19,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
         #Uses Managed Code, have to Add Types here.
-
-        <#
-
-         $manager = [Microsoft.SharePoint.SPAppPrincipalManager].GetManager($site);
-            $provider = [Microsoft.SharePoint.SPAppPrincipalIdentityProvider].External
-            $principalId = [Microsoft.SharePoint.SPAppPrincipalName].CreateFromAppPrincipalIdentifier($params.AppId)
-            $principal = $manager.LookupAppPrincipal($provider, $principalId)
-        #>
 try 
 {
         Add-Type -TypeDefinition @"
