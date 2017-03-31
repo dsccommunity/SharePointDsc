@@ -421,11 +421,16 @@ function Wait-SPDSCSolutionJob
         if ($solution.JobExists)
         {
             Write-Verbose -Message "Waiting for solution '$($params.Name)'..."
+            $loopCount = 0
+            while ($solution.JobExists -and $loopCount -lt 600)
+            {
+                $solution = Get-SPSolution -Identity $params.Name -Verbose:$false -AssignmentCollection $gc
 
-            while ($solution.JobExists){
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for a " + `
                                         "job for solution '$($params.Name)' to complete")
+                $loopCount++ 
                 Start-Sleep -Seconds 5
+                
             }
 
             Write-Verbose -Message "Result: $($solution.LastOperationResult)"
