@@ -2,7 +2,7 @@
 .EXAMPLE
     This example shows how to add an App Principal to a site
 #>
-
+    
     Configuration Example 
     {
         param(

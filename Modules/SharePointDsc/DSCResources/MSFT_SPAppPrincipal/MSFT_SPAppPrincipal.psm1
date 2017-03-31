@@ -124,14 +124,16 @@ function Set-TargetResource
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
-
+                                 
             $params = $args[0]
             $site = Get-SPSite -Identity $params.Site -ErrorAction SilentlyContinue
             $web = $site.OpenWeb()
             $realm = Get-SPAuthenticationRealm -ServiceContext $site;
             $nameIdentifier = "$($params.AppId)@$($realm)"
             
-            Register-SPAppPrincipal -DisplayName "$params.DisplayName" -NameIdentifier "$nameIdentifier" -Site $web
+            Register-SPAppPrincipal -DisplayName "$params.DisplayName" `
+                                    -NameIdentifier "$nameIdentifier" `
+                                    -Site $web
 
         }
     }
