@@ -20,8 +20,67 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         #Uses Managed Code, have to Add Types here.
 
+        <#
+
+         $manager = [Microsoft.SharePoint.SPAppPrincipalManager].GetManager($site);
+            $provider = [Microsoft.SharePoint.SPAppPrincipalIdentityProvider].External
+            $principalId = [Microsoft.SharePoint.SPAppPrincipalName].CreateFromAppPrincipalIdentifier($params.AppId)
+            $principal = $manager.LookupAppPrincipal($provider, $principalId)
+        #>
+try 
+{
+        Add-Type -TypeDefinition @"
+namespace Microsoft.SharePoint {
+    
+    public class SPAppPrincipalIdentityProvider {
+      
+        public static SPAppPrincipalIdentityProvider External { get { return new SPAppPrincipalIdentityProvider(); } }
+    
+    }
+
+    public class SPAppPrincipalName {
+    
+        public SPAppPrincipalName(string identifier) {
+
+        }
+        
+        public static SPAppPrincipalName CreateFromAppPrincipalIdentifier(string identifier) {
+            return new SPAppPrincipalName(identifier);
+        }
+    }
+
+    public class SPAppPrincipal {
+        public SPAppPrincipal(SPAppPrincipalIdentityProvider provider, SPAppPrincipalName name) {
+
+        }
+    }
+
+    public class SPAppPrincipalManager { 
+    
+        public SPAppPrincipalManager(object site) {
+
+        }
+
+        public static SPAppPrincipalManager GetManager(object site) 
+        {
+            return new SPAppPrincipalManager(site);
+        }
+
+        public void DeleteAppPrincipal(SPAppPrincipal principal) { }
+
+        public SPAppPrincipal LookupAppPrincipal(SPAppPrincipalIdentityProvider provider, SPAppPrincipalName name) {
+            return new SPAppPrincipal(provider, name);
+        }
+    }
+}
+"@ 
+}
+catch
+{
+    $_
+}
         # Mocks for all contexts
-       
+        Mock -CommandName Register-SPAppPrincipal -MockWith { }
         # Test contexts 
         
         Context -Name "The specified site does not exist" -Fixture {
@@ -29,6 +88,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DisplayName = "Contoso App Principal"
                 AppId       = "40c0ab1a-6cbc-4bfa-a84e-940356d76c28"
                 Site        = "http://site.sharepoint.com"
+                Right       = "Full Control"
+                Scope       = "Site"
                 Ensure      = "Present"
             }
 
@@ -40,7 +101,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return "226c3c17-e683-48e9-a66e-f90d1836affd"
             }
 
-             It "Should throw exception from the get method" {
+            It "Should throw exception from the get method" {
                 { Get-TargetResource @testParams }| Should Throw "The specified site: $($testParams.Site) was not found"
             }
 
@@ -59,6 +120,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DisplayName = "Contoso App Principal"
                 AppId       = "40c0ab1a-6cbc-4bfa-a84e-940356d76c28"
                 Site        = "http://site.sharepoint.com"
+                Right       = "Full Control"
+                Scope       = "Site"
                 Ensure      = "Present"
             }
 
@@ -72,12 +135,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return "226c3c17-e683-48e9-a66e-f90d1836affd"
             }  
 
-            Mock -CommandNameGet-SPAppPrincipal -MockWith {
+            Mock -CommandName Get-SPAppPrincipal -MockWith {
                 return @{
                     DisplayName = $testParams.DisplayName
-                    ApplicationId = "$($testParams.AppId)@226c3c17-e683-48e9-a66e-f90d1836affd"
-                    Site = "http://site.sharepoint.com"
-                    Ensure = "Present"
+                    ApplicationId = $testParams.AppId
+                    Site = $testParams.Site
+                    Right = $testParams.Right
+                    Scope = $testParams.Scope
+                    Ensure = $testParams.Ensure
                 }
             }
 
@@ -95,6 +160,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DisplayName = "Contoso App Principal"
                 AppId       = "40c0ab1a-6cbc-4bfa-a84e-940356d76c28"
                 Site        = "http://site.sharepoint.com"
+                Right       = "Full Control"
+                Scope       = "Site"
                 Ensure      = "Absent"
             }
 
@@ -108,7 +175,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return "226c3c17-e683-48e9-a66e-f90d1836affd"
             }  
 
-            Mock -CommandNameGet-SPAppPrincipal -MockWith {
+            Mock -CommandName Get-SPAppPrincipal -MockWith {
                 return @{
                     DisplayName = $testParams.DisplayName
                     ApplicationId = "$($testParams.AppId)@226c3c17-e683-48e9-a66e-f90d1836affd"
@@ -121,16 +188,58 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should do somethign from the set method" {
+                Set-TargetResource @testParams
             }
         }
+
+          Context -Name "The App Principal doesn't exists and should exist but site is null" -Fixture {
+           $testParams = @{
+                DisplayName = "Contoso App Principal"
+                AppId       = "40c0ab1a-6cbc-4bfa-a84e-940356d76c28"
+                Site        = "http://site.sharepoint.com"
+                Right       = "Full Control"
+                Scope       = "Site"
+                Ensure      = "Present"
+            }
+
+            Mock -CommandName Get-SPSite -MockWith { 
+                return $null
+            }
+
+            Mock -CommandName Get-SPAuthenticationRealm -MockWith  {
+                return "226c3c17-e683-48e9-a66e-f90d1836affd"
+            }  
+
+            Mock -CommandName Get-SPAppPrincipal -MockWith {
+                return $null
+            }
+
+            It "Should throw exception from the get method" {
+                { Get-TargetResource @testParams }| Should Throw "The specified site: $($testParams.Site) was not found"
+            }
+
+            It "Should throw exception from the test method" {
+                { Test-TargetResource @testParams } | Should Throw "The specified site: $($testParams.Site) was not found"
+            }
+
+            It "Should throw exception the set method " {
+                { Set-TargetResource @testParams } | Should Throw "The specified site: $($testParams.Site) was not found"
+            }
+        }
+
 
         Context -Name "The App Principal doesn't exists and should exist." -Fixture {
            $testParams = @{
                 DisplayName = "Contoso App Principal"
                 AppId       = "40c0ab1a-6cbc-4bfa-a84e-940356d76c28"
                 Site        = "http://site.sharepoint.com"
+                Right       = "Full Control"
+                Scope       = "Site"
                 Ensure      = "Present"
             }
 
@@ -168,6 +277,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DisplayName = "Contoso App Principal"
                 AppId       = "40c0ab1a-6cbc-4bfa-a84e-940356d76c28"
                 Site        = "http://site.sharepoint.com"
+                Right       = "Full Control"
+                Scope       = "Site"
                 Ensure      = "Absent"
             }
 
@@ -181,7 +292,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return "226c3c17-e683-48e9-a66e-f90d1836affd"
             }  
 
-            Mock -CommandNameGet-SPAppPrincipal -MockWith {
+            Mock -CommandName Get-SPAppPrincipal -MockWith {
                 return $null
             }
 
