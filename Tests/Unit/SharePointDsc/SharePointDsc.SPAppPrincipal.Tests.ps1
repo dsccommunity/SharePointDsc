@@ -126,9 +126,18 @@ catch
             }
 
             Mock -CommandName Get-SPSite -MockWith { 
-                return @{
-                    DisplayName = "SharePoint Site"
-                }
+                $spSite = [PSCustomObject]@{ 
+                                    DisplayName = "SharePoint Site"
+                                   
+                } 
+                $spSite | Add-Member -MemberType ScriptMethod `
+                                           -Name OpenWeb `
+                                           -Value {  
+                                                return @{ 
+                                                    Title = "SharePoint Web" 
+                                                }  
+                                            } -PassThru -Force 
+                return @($spSite) 
             }
 
             Mock -CommandName Get-SPAuthenticationRealm -MockWith  {
@@ -165,10 +174,19 @@ catch
                 Ensure      = "Absent"
             }
 
-            Mock -CommandName Get-SPSite -MockWith { 
-                return @{
-                    DisplayName = "SharePoint Site"
-                }
+             Mock -CommandName Get-SPSite -MockWith { 
+                $spSite = [PSCustomObject]@{ 
+                                    DisplayName = "SharePoint Site"
+                                   
+                } 
+                $spSite | Add-Member -MemberType ScriptMethod `
+                                           -Name OpenWeb `
+                                           -Value {  
+                                                return @{ 
+                                                    Title = "SharePoint Web" 
+                                                }  
+                                            } -PassThru -Force 
+                return @($spSite) 
             }
 
             Mock -CommandName Get-SPAuthenticationRealm -MockWith  {
@@ -243,10 +261,19 @@ catch
                 Ensure      = "Present"
             }
 
-            Mock -CommandName Get-SPSite -MockWith { 
-                return @{
-                    DisplayName = "SharePoint Site"
-                }
+             Mock -CommandName Get-SPSite -MockWith { 
+                $spSite = [PSCustomObject]@{ 
+                                    DisplayName = "SharePoint Site"
+                                   
+                } 
+                $spSite | Add-Member -MemberType ScriptMethod `
+                                           -Name OpenWeb `
+                                           -Value {  
+                                                return @{ 
+                                                    Title = "SharePoint Web" 
+                                                }  
+                                            } -PassThru -Force 
+                return @($spSite) 
             }
 
             Mock -CommandName Get-SPAuthenticationRealm -MockWith  {
@@ -282,10 +309,19 @@ catch
                 Ensure      = "Absent"
             }
 
-            Mock -CommandName Get-SPSite -MockWith { 
-                return @{
-                    DisplayName = "SharePoint Site"
-                }
+             Mock -CommandName Get-SPSite -MockWith { 
+                $spSite = [PSCustomObject]@{ 
+                                    DisplayName = "SharePoint Site"
+                                   
+                } 
+                $spSite | Add-Member -MemberType ScriptMethod `
+                                           -Name OpenWeb `
+                                           -Value {  
+                                                return @{ 
+                                                    Title = "SharePoint Web" 
+                                                }  
+                                            } -PassThru -Force 
+                return @($spSite) 
             }
 
             Mock -CommandName Get-SPAuthenticationRealm -MockWith  {
