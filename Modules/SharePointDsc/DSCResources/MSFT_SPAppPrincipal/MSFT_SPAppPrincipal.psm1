@@ -16,12 +16,12 @@ function Get-TargetResource
         [System.String]
         $Site,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Web","Site","Subscription")]
         $Scope,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Read","Write","Manage","Full Control")]
         $Right,
@@ -59,6 +59,8 @@ function Get-TargetResource
                 DisplayName = ""
                 AppId = $params.AppId
                 Site = $params.Site
+                Scope = ""
+                Right = ""
                 Ensure = "Absent"
             }
             return $nullReturn
@@ -69,6 +71,7 @@ function Get-TargetResource
                 DisplayName = $appPrincipal.DisplayName
                 AppId = $params.AppId
                 Site = $params.Site
+                Scope =
                 Ensure = "Present"
             }
             return $ret;
@@ -97,12 +100,12 @@ function Set-TargetResource
         [System.String]
         $Site,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Web","Site","Subscription")]
         $Scope,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Read","Write","Manage","Full Control")]
         $Right,
@@ -117,7 +120,29 @@ function Set-TargetResource
     Write-Verbose -Message "Setting App Principal '$DisplayName'"
 
     $result = Get-TargetResource @PSBoundParameters
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
+    {
+        Write-Verbose -Message "Updating App Principal $DisplayName"
+         Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments @($PSBoundParameters, $result) `
+                            -ScriptBlock {
+                                 
+            $params = $args[0]
+            $oldValues = $args[1]
+            $site = Get-SPSite -Identity $params.Site -ErrorAction SilentlyContinue
+            $web = $site.OpenWeb()
+            $realm = Get-SPAuthenticationRealm -ServiceContext $site;
+            $nameIdentifier = "$($params.AppId)@$($realm)"
+           
+            $appPrincipal = Get-SPAppPrincipal -NameIdentifier $nameIdentifier -Site $web `
+                                               -ErrorAction SilentlyContinue
 
+            Remove-SPAppPrincipalPermission -appPrincipal $appPrincipal -Site $web `
+                                                                        -Scope $oldValues.Scope
+            
+            Add-SPAppPrincipalPermission -appPrincipal $appPrincipal -Site $web `
+                                         -Scope $params.Scope -Level $params.Right
+    }
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
     {
         Write-Verbose -Message "Creating App Principal $DisplayName"
@@ -131,9 +156,12 @@ function Set-TargetResource
             $realm = Get-SPAuthenticationRealm -ServiceContext $site;
             $nameIdentifier = "$($params.AppId)@$($realm)"
             
-            Register-SPAppPrincipal -DisplayName "$params.DisplayName" `
+            $appPrincipal = Register-SPAppPrincipal -DisplayName "$params.DisplayName" `
                                     -NameIdentifier "$nameIdentifier" `
                                     -Site $web
+
+            Set-AppPrincipalPermission -appPrincipal $appPrincipal -Site $web `
+                                       -Scope $params.Scope -Level $params.Right
 
         }
     }
@@ -181,12 +209,12 @@ function Test-TargetResource
         [System.String]
         $Site,
         
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Web","Site","Subscription")]
         $Scope,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Read","Write","Manage","Full Control")]
         $Right,
@@ -205,7 +233,7 @@ function Test-TargetResource
     
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+                                    -ValuesToCheck @("Scope","Right","Ensure")
     
 }
 
