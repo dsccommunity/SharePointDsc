@@ -257,7 +257,7 @@ function Set-TargetResource
                  }
                  
                  # Check and change site count settings
-                if ($params.WarningSiteCount -and $params.WarningSiteCount -ne $cdb.WarningSiteCount)
+                if ($params.WarningSiteCount -ne $null -and $params.WarningSiteCount -ne $cdb.WarningSiteCount)
                 {
                     $cdb.WarningSiteCount = $params.WarningSiteCount
                 }
