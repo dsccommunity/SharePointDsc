@@ -18,6 +18,7 @@
 * New resource: SPSearchCrawlerImpactRule
 * Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
   joined to a farm
+* Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
 
 ## 1.6
 
