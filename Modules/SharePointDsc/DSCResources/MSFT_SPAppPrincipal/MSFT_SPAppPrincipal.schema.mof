@@ -1,0 +1,15 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("SPAppPrincipal")]
+class MSFT_SPAppPrincipal : OMI_BaseResource
+{
+    [Key, Description("Specifies the friendly name to use for the app principal that is being registered.")] String DisplayName;
+    [Key, Description("Specifies the app principal’s name identifier that needs to be added to the app management service.")] String AppId;
+    [Key, Description("The Site to add the Application Principal to")] String Site;
+    
+    [Write, Description("Specifies the scope to which to apply the principal permission. The value is any of the following scopes: Web, Site, Subscription"), ValueMap{"Web","Site","Subscription"}, Values{"Web","Site","Subscription"}] String Scope;
+    [Write, Description("Specifies the permission level for the principal object. The value is any of the following levels: Read, Write,Manage,Full Control"), ValueMap{"Read","Write","Manage","Full Control"}, Values{"Read","Write","Manage","Full Control"}] String Right;
+    
+    [Write, Description("Present ensures service app exists, absent ensures it is removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5")] String InstallAccount;
+};
+
