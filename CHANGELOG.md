@@ -20,6 +20,7 @@
 * Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
   joined to a farm
 * Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
+* Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
 
 ## 1.6
 
