@@ -12,6 +12,9 @@
 * Improved error message when rule could not be found in SPHealthAnalyzerRuleState (issue 535)
 * Extended the documentation to specify that the default value of Ensure is Present (issue 537)
 * Added documentation about the user of Host Header Site Collections and the HostHeader parameter in SPWebApplication (issue 534)
+* Fixed missing brackets in SPWebAppPolicy module file (issue 557)
+* Fixed issue with SPSecureStoreServiceApp not returning database information (issue 529)
+* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl in SP2016 (issue 532)
 
 ## 1.6
 

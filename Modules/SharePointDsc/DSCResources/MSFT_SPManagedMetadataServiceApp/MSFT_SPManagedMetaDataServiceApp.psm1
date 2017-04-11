@@ -84,13 +84,34 @@ function Get-TargetResource
             {
                 $propertyFlags = [System.Reflection.BindingFlags]::Instance `
                                 -bor [System.Reflection.BindingFlags]::NonPublic
-
-                $propData = $serviceApp.GetType().GetMethods($propertyFlags)
-                $method = $propData | Where-Object -FilterScript {
-                    $_.Name -eq "GetContentTypeSyndicationHubLocal"
-                } 
                 $defaultPartitionId = [Guid]::Parse("0C37852B-34D0-418e-91C6-2AC25AF4BE5B")
-                $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri
+
+                if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+                {
+                    $propData = $serviceApp.GetType().GetMethods($propertyFlags)
+                    $method = $propData | Where-Object -FilterScript {
+                        $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                    } 
+                    $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri
+                }
+                else
+                {
+                    Write-Verbose -Verbose "Test!!"
+                    $propData = $serviceApp.GetType().GetProperties($propertyFlags)
+                    $dbMapperProp = $propData | Where-Object -FilterScript {
+                        $_.Name -eq "DatabaseMapper"
+                    }
+
+                    $dbMapper = $dbMapperProp.GetValue($serviceApp)
+
+                    $propData2 = $dbMapper.GetType().GetMethods($propertyFlags)
+                    $cthubMethod = $propData2 | Where-Object -FilterScript {
+                        $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                    }
+
+                    $hubUrl = $cthubMethod.Invoke($dbMapper, $defaultPartitionId).AbsoluteUri
+                }
+
                 if ($hubUrl)
                 {
                     $hubUrl = $hubUrl.TrimEnd('/')
@@ -98,8 +119,10 @@ function Get-TargetResource
             }
             catch [System.Exception] 
             {
+                Write-Verbose -Verbose "CATCH! $($_.Exception.Message)"
                 $hubUrl = ""
             }
+            Write-Verbose -Verbose "HubUrl: $huburl"
 
             return @{
                 Name              = $serviceApp.DisplayName

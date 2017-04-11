@@ -103,12 +103,24 @@ function Get-TargetResource
                     $proxyName = $serviceAppProxy.Name
                 }
             }
+
+            $propertyFlags = [System.Reflection.BindingFlags]::Instance `
+                                -bor [System.Reflection.BindingFlags]::NonPublic
+
+            $propData = $serviceApp.GetType().GetProperties($propertyFlags)
+
+            $dbProp = $propData | Where-Object -FilterScript {
+                $_.Name -eq "Database"
+            }
+
+            $db = $dbProp.GetValue($serviceApp)
+            
             return  @{
                 Name = $serviceApp.DisplayName
                 ProxyName       = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $serviceApp.Database.Name
-                DatabaseServer = $serviceApp.Database.Server.Name
+                DatabaseName = $db.Name
+                DatabaseServer = $db.Server.Name
                 InstallAccount = $params.InstallAccount
                 Ensure = "Present"
             }
