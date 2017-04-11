@@ -121,6 +121,7 @@ function Get-TargetResource
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $db.Name
                 DatabaseServer = $db.Server.Name
+                FailoverDatabaseServer = $db.FailoverServer
                 InstallAccount = $params.InstallAccount
                 Ensure = "Present"
             }
@@ -369,7 +370,7 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "Ensure")
+                                    -ValuesToCheck @("ApplicationPool", "DatabaseName", "DatabaseServer", "FailoverDatabaseServer", Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

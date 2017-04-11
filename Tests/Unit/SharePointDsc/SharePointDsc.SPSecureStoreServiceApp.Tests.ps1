@@ -137,6 +137,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         Server = @{
                                                                             Name = "DBServer"
                                                                         }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
+                                                                        }
                                                                     })
                                                                 } -PassThru
                                                 )
@@ -197,6 +200,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         Name = "Database"
                                                                         Server = @{
                                                                             Name = "DBServer"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
                                                                         }
                                                                     })
                                                                 } -PassThru
@@ -329,6 +335,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         Name = "Database"
                                                                         Server = @{
                                                                             Name = "DBServer"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
                                                                         }
                                                                     })
                                                                 } -PassThru

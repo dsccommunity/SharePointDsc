@@ -13,21 +13,24 @@
   Search Service Application
 * Added new resource SPSearchAuthoritativePage
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
-* Fix typo in method Get-TargetResource of SPFeature (issue 481)
-* Fix bug in SPManagedAccount not returning the correct account name value (issue 533)
-* Fix typo in method Get-TargetResource of SPSearchIndexPartition (issue 518)
-* Update documentation of SPInstallLanguagePack to add guidance on package change in SP2016 (issue 523)
-* Added returning the required RunCentralAdmin parameter to Get-TargetResource in SPFarm (issue 527)
-* Added web role check for SPBlobCacheSettings (issue 502)
-* Improved error message when rule could not be found in SPHealthAnalyzerRuleState (issue 535)
-* Extended the documentation to specify that the default value of Ensure is Present (issue 537)
-* Added documentation about the user of Host Header Site Collections and the HostHeader parameter in SPWebApplication (issue 534)
-* Fixed missing brackets in SPWebAppPolicy module file (issue 557)
-* Fixed issue with SPSecureStoreServiceApp not returning database information (issue 529)
-* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl in SP2016 (issue 532)
+* Fix typo in method Get-TargetResource of SPFeature
+* Fix bug in SPManagedAccount not returning the correct account name value
+* Fix typo in method Get-TargetResource of SPSearchIndexPartition
+* Update documentation of SPInstallLanguagePack to add guidance on package change in SP2016
+* Added returning the required RunCentralAdmin parameter to Get-TargetResource in SPFarm
+* Added web role check for SPBlobCacheSettings
+* Improved error message when rule could not be found in SPHealthAnalyzerRuleState
+* Extended the documentation to specify that the default value of Ensure is Present
+* Added documentation about the user of Host Header Site Collections and the HostHeader parameter in SPWebApplication
+* Fixed missing brackets in SPWebAppPolicy module file
+* Fixed issue with SPSecureStoreServiceApp not returning database information
+* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl in SP2016
 * Updated SPTrustedIdentityTokenIssuer to allow to specify the signing certificate
   from file path as an alternative to the certificate store
 * New resource: SPSearchCrawlerImpactRule
+* Fixed issue in SPSite where the used template wasn't returned properly
+* Fixed issue in SPWebApplicationGeneralSettings which didn't return the security validation timeout
+properly
 
 ## 1.6
 

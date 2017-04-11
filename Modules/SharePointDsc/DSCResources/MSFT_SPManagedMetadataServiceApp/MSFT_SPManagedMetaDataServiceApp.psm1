@@ -96,7 +96,6 @@ function Get-TargetResource
                 }
                 else
                 {
-                    Write-Verbose -Verbose "Test!!"
                     $propData = $serviceApp.GetType().GetProperties($propertyFlags)
                     $dbMapperProp = $propData | Where-Object -FilterScript {
                         $_.Name -eq "DatabaseMapper"
@@ -119,10 +118,8 @@ function Get-TargetResource
             }
             catch [System.Exception] 
             {
-                Write-Verbose -Verbose "CATCH! $($_.Exception.Message)"
                 $hubUrl = ""
             }
-            Write-Verbose -Verbose "HubUrl: $huburl"
 
             return @{
                 Name              = $serviceApp.DisplayName
