@@ -75,7 +75,7 @@ function Get-TargetResource
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            Write-Verbose -Message "Detected installation of SharePoint 2013"
+            Write-Verbose -Message "Detected installation of SharePoint 2016"
         }
         default {
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `

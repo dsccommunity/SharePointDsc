@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Update SPSearchIndexPartition made ServiceAppName as a Key
 * New resouce: SPTrustedRootAuthority
 * Update SPFarmSolution to eject from loop after 30m.
 * New resource: SPMachineTranslationServiceApp
@@ -21,7 +22,8 @@
 * Added web role check for SPBlobCacheSettings
 * Improved error message when rule could not be found in SPHealthAnalyzerRuleState
 * Extended the documentation to specify that the default value of Ensure is Present
-* Added documentation about the user of Host Header Site Collections and the HostHeader parameter in SPWebApplication
+* Added documentation about the user of Host Header Site Collections and the HostHeader
+parameter in SPWebApplication
 * Fixed missing brackets in SPWebAppPolicy module file
 * Fixed issue with SPSecureStoreServiceApp not returning database information
 * Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl in SP2016
@@ -29,8 +31,12 @@
   from file path as an alternative to the certificate store
 * New resource: SPSearchCrawlerImpactRule
 * Fixed issue in SPSite where the used template wasn't returned properly
-* Fixed issue in SPWebApplicationGeneralSettings which didn't return the security validation timeout
-properly
+* Fixed issue in SPWebApplicationGeneralSettings which didn't return the security
+validation timeout properly
+* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
+  joined to a farm
+* Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
+* Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
 
 ## 1.6
 
