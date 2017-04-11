@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+* New resouce: SPTrustedRootAuthority
+* Update SPFarmSolution to eject from loop after 30m.
+* New resource: SPMachineTranslationServiceApp
+* New resource: SPPowerPointAutomationServiceApp
+* Bugfix in SPSearchFileType  made ServiceAppName a key property.
+* New resource: SPWebApplicationExtension
+* Added new resource SPAccessServices2010
+* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
+  Search Service Application
+* Added new resource SPSearchAuthoritativePage
 * Bugfix in SPWebAppThrottlingSettings for setting large list window time.
 * Fix typo in method Get-TargetResource of SPFeature (issue 481)
 * Fix bug in SPManagedAccount not returning the correct account name value (issue 533)
@@ -15,6 +25,9 @@
 * Fixed missing brackets in SPWebAppPolicy module file (issue 557)
 * Fixed issue with SPSecureStoreServiceApp not returning database information (issue 529)
 * Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl in SP2016 (issue 532)
+* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing certificate
+  from file path as an alternative to the certificate store
+* New resource: SPSearchCrawlerImpactRule
 
 ## 1.6
 
