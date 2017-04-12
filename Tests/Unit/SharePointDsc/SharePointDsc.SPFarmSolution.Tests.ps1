@@ -26,6 +26,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Install-SPSolution -MockWith { }
         Mock -CommandName Uninstall-SPSolution -MockWith { }
         Mock -CommandName Remove-SPSolution -MockWith { }
+        Mock -CommandName Start-Sleep -MockWith { }
 
         # Test contexts
         Context -Name "The solution isn't installed, but should be" -Fixture {
