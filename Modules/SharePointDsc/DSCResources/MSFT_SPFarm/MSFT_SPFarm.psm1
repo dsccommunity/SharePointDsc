@@ -154,7 +154,10 @@ function Get-TargetResource
                                 }
 
             $centralAdminProvisioned = $false
-            $ca = Get-SPServiceInstance | Where-Object -Filterscript { $_.TypeName -eq "Central Administration" }
+            $ca = Get-SPServiceInstance -Server $env:ComputerName `
+                  | Where-Object -Filterscript {
+                        $_.TypeName -eq "Central Administration" -and $_.Status -eq "Online"
+                    }
             if ($null -ne $ca)
             {
                 $centralAdminProvisioned = $true
