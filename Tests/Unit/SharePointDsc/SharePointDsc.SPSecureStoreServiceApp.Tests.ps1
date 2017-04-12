@@ -429,9 +429,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Specified database name does not match " + `
-                                                                  "the actual database name. This resource " + `
-                                                                  "cannot rename the database."
+                { Set-TargetResource @testParams } | Should Throw ("Specified database name does not match " + `
+                                                                   "the actual database name. This resource " + `
+                                                                   "cannot rename the database.")
             }
         }
 
@@ -502,10 +502,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "Specified database server does " + `
-                                                                  "not match the actual database server. " + `
-                                                                  "This resource cannot move the database " + `
-                                                                  "to a different SQL instance."
+                { Set-TargetResource @testParams } | Should Throw ("Specified database server does " + `
+                                                                   "not match the actual database server. " + `
+                                                                   "This resource cannot move the database " + `
+                                                                   "to a different SQL instance.")
             }
         }
 
