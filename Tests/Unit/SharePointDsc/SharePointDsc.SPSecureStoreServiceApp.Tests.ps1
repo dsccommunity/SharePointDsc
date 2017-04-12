@@ -362,7 +362,153 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
-        
+
+        Context -Name "When the database name does not match the actual name" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "Service App Pool"
+                AuditingEnabled = $false
+                DatabaseName = "SecureStoreDB"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Secure Store Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru | 
+                            Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "Database" `
+                                                                -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                    param($x)
+                                                                    return (@{ 
+                                                                        FullName = $getTypeFullName
+                                                                        Name = "Wrong Database"
+                                                                        Server = @{
+                                                                            Name = "DBServer"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
+                                                                        }
+                                                                    })
+                                                                } -PassThru
+                                                )
+                                            )
+                                        } -PassThru
+                } -PassThru -Force
+                
+                return $spServiceApp
+            }
+            
+            It "Should return present from the Get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+            
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified database name does not match " + `
+                                                                  "the actual database name. This resource " + `
+                                                                  "cannot rename the database."
+            }
+        }
+
+        Context -Name "When the database server does not match the actual server" -Fixture {
+            $testParams = @{
+                Name = "Secure Store Service Application"
+                ApplicationPool = "Service App Pool"
+                AuditingEnabled = $false
+                DatabaseName = "SecureStoreDB"
+                DatabaseServer = "SQL_Instance"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Secure Store Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru | 
+                            Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "Database" `
+                                                                -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                    param($x)
+                                                                    return (@{ 
+                                                                        FullName = $getTypeFullName
+                                                                        Name = "SecureStoreDB"
+                                                                        Server = @{
+                                                                            Name = "Wrong DBServer"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
+                                                                        }
+                                                                    })
+                                                                } -PassThru
+                                                )
+                                            )
+                                        } -PassThru
+                } -PassThru -Force
+                
+                return $spServiceApp
+            }
+            
+            It "Should return present from the Get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+            
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Specified database server does " + `
+                                                                  "not match the actual database server. " + `
+                                                                  "This resource cannot move the database " + `
+                                                                  "to a different SQL instance."
+            }
+        }
+
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Secure Store Service Application"

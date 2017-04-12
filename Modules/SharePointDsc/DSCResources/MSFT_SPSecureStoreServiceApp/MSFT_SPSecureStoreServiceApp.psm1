@@ -199,11 +199,11 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
     $params = $PSBoundParameters
 
-    if((($params.ContainsKey("DatabaseAuthenticationType") -eq $true) -and `
-        ($params.ContainsKey("DatabaseCredentials") -eq $false)) -or `
-        (($params.ContainsKey("DatabaseCredentials") -eq $true) -and `
-        ($params.ContainsKey("DatabaseAuthenticationType") -eq $false))) 
-        {
+    if ((($params.ContainsKey("DatabaseAuthenticationType") -eq $true) -and `
+         ($params.ContainsKey("DatabaseCredentials") -eq $false)) -or `
+         (($params.ContainsKey("DatabaseCredentials") -eq $true) -and `
+         ($params.ContainsKey("DatabaseAuthenticationType") -eq $false))) 
+    {
         throw ("Where DatabaseCredentials are specified you must also specify " + `
                "DatabaseAuthenticationType to identify the type of credentials being passed")
         return
@@ -251,6 +251,21 @@ function Set-TargetResource
     
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
     {
+        if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
+           ($result.DatabaseServer -ne $DatabaseServer))
+        {
+            throw ("Specified database server does not match the actual " + `
+                   "database server. This resource cannot move the database " + `
+                   "to a different SQL instance.")
+        }
+
+        if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
+           ($result.DatabaseName -ne $DatabaseName))
+        {
+            throw ("Specified database name does not match the actual " + `
+                   "database name. This resource cannot rename the database.")
+        }
+
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
             -and $ApplicationPool -ne $result.ApplicationPool) 
         {
@@ -368,9 +383,26 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
+    if ($PSBoundParameters.ContainsKey("DatabaseServer") -and `
+       ($CurrentValues.DatabaseServer -ne $DatabaseServer))
+    {
+        Write-Verbose -Message ("Specified database server does not match the actual " + `
+                                "database server. This resource cannot move the database " + `
+                                "to a different SQL instance.")
+        return $false
+    }
+
+    if ($PSBoundParameters.ContainsKey("DatabaseName") -and `
+       ($CurrentValues.DatabaseName -ne $DatabaseName))
+    {
+        Write-Verbose -Message ("Specified database name does not match the actual " + `
+                                "database name. This resource cannot rename the database.")
+        return $false
+    }
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("ApplicationPool", "DatabaseName", "DatabaseServer", "FailoverDatabaseServer", Ensure")
+                                    -ValuesToCheck @("ApplicationPool", "Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource

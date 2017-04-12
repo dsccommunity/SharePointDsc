@@ -86,29 +86,34 @@ function Get-TargetResource
                                 -bor [System.Reflection.BindingFlags]::NonPublic
                 $defaultPartitionId = [Guid]::Parse("0C37852B-34D0-418e-91C6-2AC25AF4BE5B")
 
-                if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+                $installedVersion = Get-SPDSCInstalledProductVersion
+                switch ($installedVersion.FileMajorPart)
                 {
-                    $propData = $serviceApp.GetType().GetMethods($propertyFlags)
-                    $method = $propData | Where-Object -FilterScript {
-                        $_.Name -eq "GetContentTypeSyndicationHubLocal"
-                    } 
-                    $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri
-                }
-                else
-                {
-                    $propData = $serviceApp.GetType().GetProperties($propertyFlags)
-                    $dbMapperProp = $propData | Where-Object -FilterScript {
-                        $_.Name -eq "DatabaseMapper"
+                    15 {
+                        $propData = $serviceApp.GetType().GetMethods($propertyFlags)
+                        $method = $propData | Where-Object -FilterScript {
+                            $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                        } 
+                        $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri                    }
+                    16 {
+                        $propData = $serviceApp.GetType().GetProperties($propertyFlags)
+                        $dbMapperProp = $propData | Where-Object -FilterScript {
+                            $_.Name -eq "DatabaseMapper"
+                        }
+
+                        $dbMapper = $dbMapperProp.GetValue($serviceApp)
+
+                        $propData2 = $dbMapper.GetType().GetMethods($propertyFlags)
+                        $cthubMethod = $propData2 | Where-Object -FilterScript {
+                            $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                        }
+
+                        $hubUrl = $cthubMethod.Invoke($dbMapper, $defaultPartitionId).AbsoluteUri
                     }
-
-                    $dbMapper = $dbMapperProp.GetValue($serviceApp)
-
-                    $propData2 = $dbMapper.GetType().GetMethods($propertyFlags)
-                    $cthubMethod = $propData2 | Where-Object -FilterScript {
-                        $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                    default {
+                        throw ("Detected an unsupported major version of SharePoint. " + `
+                               "SharePointDsc only supports SharePoint 2013 or 2016.")
                     }
-
-                    $hubUrl = $cthubMethod.Invoke($dbMapper, $defaultPartitionId).AbsoluteUri
                 }
 
                 if ($hubUrl)

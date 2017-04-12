@@ -12,3 +12,5 @@ Note: When creating Host Header Site Collections, do not use the HostHeader
 parameter in SPWebApplication. This will set the specified host header on your
 IIS site and prevent the site from listening for the URL of the Host Header
 Site Collection.
+If you want to change the IIS website binding settings, please use the xWebsite
+resource in the xWebAdministration module.

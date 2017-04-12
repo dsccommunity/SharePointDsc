@@ -154,7 +154,8 @@ function Get-TargetResource
                                 }
 
             $centralAdminProvisioned = $false
-            if ($null -ne $centralAdminSite)
+            $ca = Get-SPServiceInstance | Where-Object -Filterscript { $_.TypeName -eq "Central Administration" }
+            if ($null -ne $ca)
             {
                 $centralAdminProvisioned = $true
             }
