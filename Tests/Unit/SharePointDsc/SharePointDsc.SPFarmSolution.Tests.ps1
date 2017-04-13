@@ -26,6 +26,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Install-SPSolution -MockWith { }
         Mock -CommandName Uninstall-SPSolution -MockWith { }
         Mock -CommandName Remove-SPSolution -MockWith { }
+        Mock -CommandName Start-Sleep -MockWith { }
 
         # Test contexts
         Context -Name "The solution isn't installed, but should be" -Fixture {
@@ -96,7 +97,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $index = $global:SPDscLoopCount
               if($global:SPDscSolutionAdded)
               {
-                if(2 -eq $index)
+                if($index -gt 2)
                 {
                     return @{
                         JobExists = $false
@@ -122,19 +123,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $solution
             }
 
-            $getResults = Get-TargetResource @testParams
 
             It "Should return the expected empty values from the get method" {
+                $global:SPDscLoopCount = 0
+                $getResults = Get-TargetResource @testParams
                 $getResults.Ensure | Should Be "Absent"
                 $getResults.Version | Should Be "0.0.0.0"
                 $getResults.Deployed | Should Be $false
             }
 
             It "Should return false from the test method" {
+                $global:SPDscLoopCount = 0
                 Test-TargetResource @testParams | Should Be $false
             }
 
             It "uploads and installes the solution to the farm" {
+                $global:SPDscLoopCount = 0
                 Set-TargetResource @testParams
                 Assert-MockCalled Add-SPSolution 
                 Assert-MockCalled Install-SPSolution

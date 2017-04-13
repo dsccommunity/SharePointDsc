@@ -45,6 +45,27 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                          -ErrorAction SilentlyContinue `
+                        | Where-Object -FilterScript {
+                            $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
+                          }
+
+        if ($null -eq $webappsi) 
+        {
+            Write-Verbose -Message "Server isn't running the Web Application role"
+            return @{
+                WebAppUrl = $null
+                Zone = $null
+                EnableCache = $false
+                Location = $null
+                MaxSizeInGB = $null
+                MaxAgeInSeconds = $null
+                FileTypes = $null
+                InstallAccount = $params.InstallAccount
+            }
+        }
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
 
@@ -214,6 +235,17 @@ function Set-TargetResource
                             -ScriptBlock {
             $params  = $args[0]
             $changes = $args[1]
+
+            $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                              -ErrorAction SilentlyContinue `
+                            | Where-Object -FilterScript {
+                                $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
+                              }
+
+            if ($null -eq $webappsi) 
+            {
+                throw "Server isn't running the Web Application role"
+            }
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 

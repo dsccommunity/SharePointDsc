@@ -418,7 +418,7 @@ function Wait-SPDSCSolutionJob
     
         $solution = Get-SPSolution -Identity $params.Name -Verbose:$false -AssignmentCollection $gc
 
-        if ($solution.JobExists)
+        if ($solution.JobExists -eq $true)
         {
             Write-Verbose -Message "Waiting for solution '$($params.Name)'..."
             $loopCount = 0

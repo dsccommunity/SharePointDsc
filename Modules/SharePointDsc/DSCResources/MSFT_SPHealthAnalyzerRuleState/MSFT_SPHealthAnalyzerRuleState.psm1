@@ -97,7 +97,8 @@ function Get-TargetResource
             } 
             else 
             {
-                Write-Verbose -Message "Unable to find specified Health Analyzer Rule"
+                Write-Verbose -Message ("Unable to find specified Health Analyzer Rule. Make " + `
+                                        "sure any related service applications exists.")
                 return $null                
             }
         } 
@@ -209,7 +210,8 @@ function Set-TargetResource
             else 
             {
                 throw ("Could not find specified Health Analyzer Rule. Health Analyzer Rule " + `
-                       "settings will not be applied")
+                       "settings will not be applied. Make sure any related service " + `
+                       "applications exists")
                 return
             }
         } 

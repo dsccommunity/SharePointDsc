@@ -135,7 +135,7 @@ function Get-TargetResource
                 QuotaTemplate = $quota
                 SecondaryEmail = $site.SecondaryContact.Email
                 SecondaryOwnerAlias = $secondaryOwner
-                Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.WebTemplateId)"
+                Template = "$($site.RootWeb.WebTemplate)#$($site.RootWeb.Configuration)"
                 InstallAccount = $params.InstallAccount
             }
         }
