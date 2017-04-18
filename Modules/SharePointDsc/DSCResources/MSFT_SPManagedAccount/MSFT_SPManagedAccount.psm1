@@ -41,7 +41,7 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         
-        $ma = Get-SPManagedAccount -Identity $params.Account.UserName `
+        $ma = Get-SPManagedAccount -Identity $params.AccountName `
                                    -ErrorAction SilentlyContinue
         if ($null -eq $ma) 
         { 

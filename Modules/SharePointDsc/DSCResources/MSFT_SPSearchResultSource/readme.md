@@ -10,3 +10,6 @@ following provider types:
 * OpenSearch Provider
 * Remote People Provider
 * Remote SharePoint Provider
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the result source is created.
