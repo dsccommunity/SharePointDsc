@@ -9,7 +9,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -26,15 +26,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
                                      -ArgumentList @("PASSPHRASEUSER", $mockPassword)                                      
 
+        $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.Farm\SPFarm.psm1"
+        Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
+
         # Mocks for all contexts   
         Mock -CommandName New-SPConfigurationDatabase -MockWith {}
         Mock -CommandName Install-SPHelpCollection -MockWith {}
-        Mock Initialize-SPResourceSecurity -MockWith {}
+        Mock -CommandName Initialize-SPResourceSecurity -MockWith {}
         Mock -CommandName Install-SPService -MockWith {}
         Mock -CommandName Install-SPFeature -MockWith {}
         Mock -CommandName New-SPCentralAdministration -MockWith {}
         Mock -CommandName Install-SPApplicationContent -MockWith {}
-        
+        Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            return @{
+                Locked = $false
+                ValidPermissions = $true
+                DatabaseExists = $false
+            }
+        } -Verifiable
+
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" -Fixture {
             $testParams = @{
@@ -45,6 +55,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AdminContentDatabaseName = "Admin_Content"
                 CentralAdministrationAuth = "Kerberos"
                 CentralAdministrationPort = 1234
+            }            
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
             }
 
             Mock -CommandName Get-SPFarm -MockWith { throw "Unable to detect local farm" }
@@ -158,6 +175,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ServerRole = "ApplicationWithSearch"
                 }
 
+                Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                    if ($Value -eq "dsn")
+                    {
+                        return $null
+                    }
+                }
+
                 Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
                     return @{
                         FileMajorPart = 16
@@ -208,6 +232,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationPort = 1234
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+            
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ 
@@ -246,6 +277,63 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "a farm exists locally, is the correct farm but SPFarm is not reachable" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+            
+            Mock -CommandName Get-SPFarm -MockWith { return $null }
+            
+            Mock -CommandName Get-SPDatabase -MockWith { 
+                return @(@{ 
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    Server = @{ 
+                        Name = $testParams.DatabaseServer 
+                    }
+                })
+            } 
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return @(@{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+                })
+            }
+
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+                return @{
+                    Locked = $true
+                    ValidPermissions = $false
+                    DatabaseExists = $true
+                }
+            }
+
+            It "Should throw when server already joined to farm but SPFarm not reachable" {
+                { Get-TargetResource @testParams } | Should Throw
+            }
+
+            It "Should throw when the current user does not have sufficient permissions to SQL Server" {
+                { Set-TargetResource @testParams } | Should Throw
+            }
+        }
+
         Context -Name "a farm exists locally and is not the correct farm" -Fixture {
             $testParams = @{
                 FarmConfigDatabaseName = "SP_Config"
@@ -255,6 +343,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AdminContentDatabaseName = "Admin_Content"
                 CentralAdministrationAuth = "Kerberos"
                 CentralAdministrationPort = 1234
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return "WrongDBName"
+                }
             }
 
             Mock -CommandName Get-SPFarm -MockWith { 
@@ -300,6 +395,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationPort = 1234
             }
             
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ Name = "WRONG\account" }
@@ -344,6 +446,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 CentralAdministrationAuth = "Kerberos"
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
+            }
+
             It "uses a default value for the central admin port" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPCentralAdministration -ParameterFilter { $Port -eq 9999 }
@@ -357,6 +466,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 FarmAccount = $mockFarmAccount
                 Passphrase =  $mockPassphrase
                 AdminContentDatabaseName = "Admin_Content"
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
             }
 
             It "uses NTLM for the Central Admin web application authentication" {

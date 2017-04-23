@@ -14,3 +14,6 @@ You can publish the following service applications in a SharePoint Server
 * User Profile
 * Search
 * Secure Store
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the service application is provisioned.

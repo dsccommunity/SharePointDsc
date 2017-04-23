@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -45,6 +45,12 @@ namespace Microsoft.SharePoint.Administration {
                     Path = $Global:SPDscWebConfigRealPath
                 })
             } 
+        }
+
+        Mock -CommandName Get-SPServiceInstance -MockWith {
+            return @(@{
+                TypeName = "Microsoft SharePoint Foundation Web Application"
+            })
         }
 
         function Update-SPDscTestConfigFile
@@ -303,6 +309,39 @@ namespace Microsoft.SharePoint.Administration {
                 $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "False" 
             }
         }
+
+        Context -Name "The server doesn't have the web application role running" {
+            $testParams = @{
+                WebAppUrl   = "http://sharepoint.contoso.com"
+                Zone        = "Default"
+                EnableCache = $true
+                Location    = "c:\BlobCache"
+                MaxSizeInGB     = 30
+                FileTypes   = "\.(gif|jpg|jpeg)$"
+            }
+            
+            Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+  <SharePoint>
+    <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
+  </SharePoint>
+</configuration>'
+            
+            Mock -CommandName Test-Path -MockWith { return $true }
+            Mock -CommandName Get-SPServiceInstance -MockWith { return $null }
+
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).WebAppUrl | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+            
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Server isn't running the Web Application role"
+            }
+        }        
     }
 }
 

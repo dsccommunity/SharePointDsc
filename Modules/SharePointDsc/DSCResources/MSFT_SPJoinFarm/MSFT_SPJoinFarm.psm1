@@ -34,6 +34,10 @@ function Get-TargetResource
         $ServerRole
     )
 
+    Write-Verbose -Message ("WARNING! SPCreateFarm is deprecated and will be removed in " + `
+                            "SharePointDsc v2.0. Swap to use the new SPFarm resource as " + `
+                            "an alternative. See http://aka.ms/SPDsc-SPFarm for details.")
+
     Write-Verbose -Message "Getting local farm presence"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
@@ -59,13 +63,31 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
         
+        $getSPMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
+        $cfgDbRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$getSPMajorVersion.0\Secure\ConfigDB"
+        $configDbDsn = Get-SPDSCRegistryKey -Key $cfgDbRegKey -Value "dsn"
+        $serverIsJoined = $true
+
+        if ($null -eq $configDbDsn)
+        {
+            $serverIsJoined = $false
+        }
+        elseif (-NOT($configDbDsn.Contains($params.FarmConfigDatabaseName)))
+        {
+            $serverIsJoined = $false
+        } 
+
         try 
         {
-            $spFarm = Get-SPFarm -ErrorAction SilentlyContinue
+            $spFarm = Get-SPFarm
         } 
         catch 
         {
             Write-Verbose -Message "Unable to detect local farm."
+            if ($serverIsJoined)
+            {
+                throw 'Server already joined to farm but SPFarm not reachable'
+            }
         }
         
         if ($null -eq $spFarm) 
@@ -129,6 +151,10 @@ function Set-TargetResource
         $ServerRole
     )
 
+    Write-Verbose -Message ("WARNING! SPCreateFarm is deprecated and will be removed in " + `
+                            "SharePointDsc v2.0. Swap to use the new SPFarm resource as " + `
+                            "an alternative. See http://aka.ms/SPDsc-SPFarm for details.")
+
     Write-Verbose -Message "Setting local farm"
 
     if (($PSBoundParameters.ContainsKey("ServerRole") -eq $true) `
@@ -158,9 +184,32 @@ function Set-TargetResource
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+                                  -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                                  -ScriptBlock {
+                                      
         $params = $args[0]
+        $scriptRoot = $args[1]
+
+        $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+        $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                            -Database $params.FarmConfigDatabaseName
+
+        while ($dbStatus.Locked -eq $true)
+        {
+            Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
+                                    "database is currently being provisioned by a remote " + `
+                                    "server, this server will wait for this to complete")
+            Start-Sleep -Seconds 30
+            $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                -Database $params.FarmConfigDatabaseName
+        }
+
+        if ($dbStatus.ValidPermissions -eq $false)
+        {
+            throw "The current user does not have sufficient permissions to SQL Server"
+            return
+        }
         
         try {
             $joinFarmArgs = @{

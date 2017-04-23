@@ -161,6 +161,8 @@ function Test-TargetResource()
         $InstallAccount
     )
 
+    Write-Verbose -Message "Testing SPFarm property '$Name'"
+
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `

@@ -10,3 +10,6 @@ server. To allow successful provisioning the farm account must be in the local
 administrators group, however it is not best practice to leave this account in
 the Administrators group. Therefore this resource will add the FarmAccount
 credential to the local administrators group at the beginning of the set
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the user profile sync service is provisioned.

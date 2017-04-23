@@ -49,9 +49,13 @@ function Get-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -64,7 +68,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message "Getting web application '$Name' config"
-
+   
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments @($PSBoundParameters,$PSScriptRoot) `
                                   -ScriptBlock {
@@ -82,15 +86,24 @@ function Get-TargetResource
                 Ensure = "Absent"
             } 
         }
-
+        ### COMMENT: Are we making an assumption here, about Default Zone
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
-        if ($authProvider.DisableKerberos -eq $true) 
-        { 
-            $localAuthMode = "NTLM" 
-        } 
+        if($authProvider.DisplayName -eq "Windows Authentication") 
+        {
+            if ($authProvider.DisableKerberos -eq $true) 
+            { 
+                $localAuthMode = "NTLM" 
+            } 
+            else 
+            { 
+                $localAuthMode = "Kerberos" 
+            }
+              $authenticationProvider = "Windows Authentication"
+        }
         else 
-        { 
-            $localAuthMode = "Kerberos" 
+        {
+            $localAuthMode = "Claims"
+            $authenticationProvider = $authProvider.DisplayName
         }
 
         return @{
@@ -105,6 +118,7 @@ function Get-TargetResource
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
             AuthenticationMethod = $localAuthMode
+            AuthenticationProvider = $authenticationProvider
             UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -164,9 +178,13 @@ function Set-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -182,6 +200,12 @@ function Set-TargetResource
     
     if ($Ensure -eq "Present") 
     {
+
+        if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
+        {
+            throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+        }
+
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments @($PSBoundParameters,$PSScriptRoot) `
                             -ScriptBlock {
@@ -199,7 +223,7 @@ function Set-TargetResource
 
                 # Get a reference to the Administration WebService
                 $admService = Get-SPDSCContentService
-                $appPools = $admService.ApplicationPools | Where-Object -FIlterScript { 
+                $appPools = $admService.ApplicationPools | Where-Object -FilterScript { 
                     $_.Name -eq $params.ApplicationPool 
                 }
                 if ($null -eq $appPools) 
@@ -231,16 +255,17 @@ function Set-TargetResource
                 
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
                 {
-                    if ($params.AuthenticationMethod -eq "NTLM") 
+                    if($params.AuthenticationMethod -eq "Claims")
                     {
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                           -DisableKerberos:$true
-                    } 
+                        $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider
+                    }
                     else 
                     {
+                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
                         $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                           -DisableKerberos:$false
+                                                            -DisableKerberos:$disableKerberos
                     }
+                    
                     $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
                 
@@ -346,9 +371,13 @@ function Test-TargetResource
         $UseSSL,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos")]
+        [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
+
+        [parameter(Mandatory = $false)]
+        [System.String] 
+        $AuthenticationProvider,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]

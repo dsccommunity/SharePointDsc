@@ -9,3 +9,6 @@ When you specify Ensure=Present, the Application Pool and DatabaseName
 parameters are required. When you specify Ensure=Absent, no other parameters
 are allowed (with the exception of Name, InstallAccount or
 PsDscRunAsCredential).
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the service application is provisioned.
