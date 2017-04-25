@@ -84,11 +84,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Members and MembersToInclude parameters used simultaniously - ContentDatabase permissions" -Fixture {
+        Context -Name "Members and MembersToInclude parameters used simultaniously - Database permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                         MembersToInclude = "contoso\user1", "contoso\user2"
@@ -105,15 +105,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "ContentDatabases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
+                { Set-TargetResource @testParams } | Should throw "Databases: Cannot use the Members parameter together with the MembersToInclude or MembersToExclude parameters"
             }
         }
 
-        Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - ContentDatabase permissions" -Fixture {
+        Context -Name "None of the Members, MembersToInclude and MembersToExclude parameters are used - Database permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                     } -ClientOnly)
                 )
@@ -128,22 +128,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "ContentDatabases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
+                { Set-TargetResource @testParams } | Should throw "Databases: At least one of the following parameters must be specified: Members, MembersToInclude, MembersToExclude"
             }
         }
 
-        Context -Name "Specified content database does not exist - ContentDatabase permissions" -Fixture {
+        Context -Name "Specified content database does not exist - Database permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name    = "SharePoint_Content_Contoso3"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
                 )
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -169,11 +169,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "AllContentDatabases parameter is used and permissions do not match" -Fixture {
+        Context -Name "AllDatabases parameter is used and permissions do not match" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 Members          = "contoso\user1", "contoso\user2"
-                AllContentDatabases = $true
+                AllDatabases = $true
             }
 
             Mock -CommandName Get-SPShellAdmin -MockWith {
@@ -193,7 +193,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -221,11 +221,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "AllContentDatabases parameter is used and permissions do not match" -Fixture {
+        Context -Name "AllDatabases parameter is used and permissions do not match" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 Members          = "contoso\user1", "contoso\user2"
-                AllContentDatabases = $true
+                AllDatabases = $true
             }
 
             Mock -CommandName Get-SPShellAdmin -MockWith {
@@ -245,7 +245,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -331,15 +331,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Configured Members do not match the actual members - ContentDatabase permissions" -Fixture {
+        Context -Name "Configured Members do not match the actual members - Database permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso2"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -363,7 +363,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -391,15 +391,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Configured Members match the actual members - ContentDatabase permissions" -Fixture {
+        Context -Name "Configured Members match the actual members - Database permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso2"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -423,7 +423,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -510,15 +510,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Configured MembersToInclude do not match the actual members - ContentDatabase permissions" -Fixture {
+        Context -Name "Configured MembersToInclude do not match the actual members - Database permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -542,7 +542,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -569,15 +569,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Configured MembersToInclude match the actual members - ContentDatabase permissions" -Fixture {
+        Context -Name "Configured MembersToInclude match the actual members - Database permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToInclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -601,7 +601,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -688,15 +688,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Configured MembersToExclude do not match the actual members - ContentDatabase permissions" -Fixture {
+        Context -Name "Configured MembersToExclude do not match the actual members - Database permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToExclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToExclude = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
@@ -720,7 +720,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
@@ -747,15 +747,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Configured MembersToExclude match the actual members - ContentDatabase permissions" -Fixture {
+        Context -Name "Configured MembersToExclude match the actual members - Database permissions" -Fixture {
             $testParams = @{
                 Name         = "ShellAdmins"
-                ContentDatabases = @(
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                Databases = @(
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso1"
                         MembersToExclude = "contoso\user3", "contoso\user4"
                     } -ClientOnly)
-                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                    (New-CimInstance -ClassName MSFT_SPDatabasePermissions -Property @{
                         Name             = "SharePoint_Content_Contoso2"
                         MembersToExclude = "contoso\user5", "contoso\user6"
                     } -ClientOnly)
@@ -779,7 +779,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPContentDatabase -MockWith {
+            Mock -CommandName Get-SPDatabase -MockWith {
                 return @(
                     @{
                         Name = "SharePoint_Content_Contoso1"
