@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -154,9 +154,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw `
-                    "This resource must be run as the farm account (not a setup account). " + `
+                    ("This resource must be run as the farm account (not a setup account). " + `
                     "Please ensure either the PsDscRunAsCredential or InstallAccount " + `
-                    "credentials are set to the farm account and run this resource again"
+                    "credentials are set to the farm account and run this resource again")
             } 
         }
     }

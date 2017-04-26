@@ -64,7 +64,7 @@ function Get-TargetResource
             Name = $params.Name
             FeatureScope = $params.FeatureScope
             Url = $params.Url
-            InstalAcount = $params.InstallAccount
+            InstallAccount = $params.InstallAccount
             Ensure = $currentState
             Version = $featureAtScope.Version
         }

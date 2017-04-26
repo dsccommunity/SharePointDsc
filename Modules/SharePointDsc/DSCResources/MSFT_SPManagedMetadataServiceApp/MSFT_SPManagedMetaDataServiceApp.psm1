@@ -84,13 +84,38 @@ function Get-TargetResource
             {
                 $propertyFlags = [System.Reflection.BindingFlags]::Instance `
                                 -bor [System.Reflection.BindingFlags]::NonPublic
-
-                $propData = $serviceApp.GetType().GetMethods($propertyFlags)
-                $method = $propData | Where-Object -FilterScript {
-                    $_.Name -eq "GetContentTypeSyndicationHubLocal"
-                } 
                 $defaultPartitionId = [Guid]::Parse("0C37852B-34D0-418e-91C6-2AC25AF4BE5B")
-                $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri
+
+                $installedVersion = Get-SPDSCInstalledProductVersion
+                switch ($installedVersion.FileMajorPart)
+                {
+                    15 {
+                        $propData = $serviceApp.GetType().GetMethods($propertyFlags)
+                        $method = $propData | Where-Object -FilterScript {
+                            $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                        } 
+                        $hubUrl = $method.Invoke($serviceApp, $defaultPartitionId).AbsoluteUri                    }
+                    16 {
+                        $propData = $serviceApp.GetType().GetProperties($propertyFlags)
+                        $dbMapperProp = $propData | Where-Object -FilterScript {
+                            $_.Name -eq "DatabaseMapper"
+                        }
+
+                        $dbMapper = $dbMapperProp.GetValue($serviceApp)
+
+                        $propData2 = $dbMapper.GetType().GetMethods($propertyFlags)
+                        $cthubMethod = $propData2 | Where-Object -FilterScript {
+                            $_.Name -eq "GetContentTypeSyndicationHubLocal"
+                        }
+
+                        $hubUrl = $cthubMethod.Invoke($dbMapper, $defaultPartitionId).AbsoluteUri
+                    }
+                    default {
+                        throw ("Detected an unsupported major version of SharePoint. " + `
+                               "SharePointDsc only supports SharePoint 2013 or 2016.")
+                    }
+                }
+
                 if ($hubUrl)
                 {
                     $hubUrl = $hubUrl.TrimEnd('/')

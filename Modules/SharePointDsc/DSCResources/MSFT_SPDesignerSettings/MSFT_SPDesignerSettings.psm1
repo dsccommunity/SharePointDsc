@@ -121,7 +121,7 @@ function Get-TargetResource
 
                     # Check if site collections exists
                     $site = Get-SPSite | Where-Object -FilterScript { 
-                        $_.Url -eq $url 
+                        $_.Url -eq $params.Url 
                     }
                     if ($null -eq $site) 
                     {

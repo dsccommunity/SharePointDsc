@@ -1,5 +1,8 @@
 # Description
 
+WARNING: This resource is deprecated. Please use SPFarm instead as
+this resource will be removed from version 2.0 of SharePointDsc
+
 This resource will be responsible for joining a server to an existing
 SharePoint farm. To create a new farm use the SPCreateFarm resource on a
 different server to begin with, and then pass the same database server and

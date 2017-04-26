@@ -77,19 +77,28 @@ function Get-TargetResource
             {
                 $item = $results[0]
 
+                # Additional check for incorrect default value of the schedule for rule
+                # "One or more app domains for web applications aren't configured correctly."
+                $ruleschedule = $item["HealthRuleSchedule"]
+                if ($ruleschedule -eq "On Demand")
+                {
+                    $ruleschedule = "OnDemandOnly"
+                }
+
                 return @{
                     # Set the Health Analyzer Rule settings
                     Name = $params.Name
                     Enabled = $item["HealthRuleCheckEnabled"]
                     RuleScope = $item["HealthRuleScope"]
-                    Schedule = $item["HealthRuleSchedule"]
+                    Schedule = $ruleschedule
                     FixAutomatically = $item["HealthRuleAutoRepairEnabled"]
                     InstallAccount = $params.InstallAccount
                 }
             } 
             else 
             {
-                Write-Verbose -Message "Unable to find specified Health Analyzer Rule"
+                Write-Verbose -Message ("Unable to find specified Health Analyzer Rule. Make " + `
+                                        "sure any related service applications exists.")
                 return $null                
             }
         } 
@@ -201,7 +210,8 @@ function Set-TargetResource
             else 
             {
                 throw ("Could not find specified Health Analyzer Rule. Health Analyzer Rule " + `
-                       "settings will not be applied")
+                       "settings will not be applied. Make sure any related service " + `
+                       "applications exists")
                 return
             }
         } 
