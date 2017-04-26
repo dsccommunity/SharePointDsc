@@ -37,6 +37,7 @@ function Get-TargetResource
         $nullReturn = @{
             Name = $params.Name
             ApplicationPool = $params.ApplicationPool
+            DatabaseServer = $params.DatabaseServer
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         } 
@@ -54,8 +55,12 @@ function Get-TargetResource
         } 
         else 
         {
+            ### Find database server name
+            $context = [Microsoft.SharePoint.SPServiceContext]::GetContext($serviceApp.ServiceApplicationProxyGroup, [Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
+            $dbserver = (Get-SPAccessServicesDatabaseServer $context).ServerName
             return @{
                 Name = $serviceApp.DisplayName
+                DatabaseServer = $dbserver
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 Ensure = "Present"
             }
@@ -171,7 +176,17 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    if ($CurrentValues.DatabaseServer -ne $DatabaseServer)
+    {
+        Write-Verbose -Message ("Specified database server does not match the actual " + `
+                                "database server. This resource cannot move the database " + `
+                                "to a different SQL instance.")
+        return $false
+    }
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("Ensure")
 }

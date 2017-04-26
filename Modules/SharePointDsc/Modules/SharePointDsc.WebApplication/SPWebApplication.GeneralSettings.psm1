@@ -17,7 +17,7 @@ function Get-SPDSCWebApplicationGeneralConfig
         BrowserFileHandling = $WebApplication.BrowserFileHandling
         SecurityValidation = $WebApplication.FormDigestSettings.Enabled
         SecurityValidationExpires = $WebApplication.FormDigestSettings.Expires
-        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.timeout.minutes
+        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.Timeout.TotalMinutes
         RecycleBinEnabled = $WebApplication.RecycleBinEnabled
         RecycleBinCleanupEnabled = $WebApplication.RecycleBinCleanupEnabled
         RecycleBinRetentionPeriod = $WebApplication.RecycleBinRetentionPeriod

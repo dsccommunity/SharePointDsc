@@ -9,7 +9,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -24,16 +24,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockPassphraseCredential = New-Object -TypeName System.Management.Automation.PSCredential `
                                                -ArgumentList @("passphrase", $mockPassphrase)
 
+        $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.Farm\SPFarm.psm1"
+        Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
+
         # Mocks for all contexts   
         Mock Connect-SPConfigurationDatabase -MockWith {}
         Mock -CommandName Install-SPHelpCollection -MockWith {}
-        Mock Initialize-SPResourceSecurity -MockWith {}
+        Mock -CommandName Initialize-SPResourceSecurity -MockWith {}
         Mock -CommandName Install-SPService -MockWith {}
         Mock -CommandName Install-SPFeature -MockWith {}
         Mock -CommandName New-SPCentralAdministration -MockWith {}
         Mock -CommandName Install-SPApplicationContent -MockWith {}
         Mock -CommandName Start-Service -MockWith {}
         Mock -CommandName Start-Sleep -MockWith {}
+        Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+            return @{
+                Locked = $false
+                ValidPermissions = $true
+                DatabaseExists = $false
+            }
+        } -Verifiable
 
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" {
@@ -43,12 +53,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Passphrase = $mockPassphraseCredential
             }
 
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $null
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { 
                 throw "Unable to detect local farm" 
             }
 
-            It "Should return null from the get method when the farm is not configured" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+            It "Should return no database name from the get method when the farm is not configured" {
+                (Get-TargetResource @testParams).FarmConfigDatabaseName | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -134,6 +151,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ServerRole = "ApplicationWithSearch"
                 }
 
+                Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                    if ($Value -eq "dsn")
+                    {
+                        return $null
+                    }
+                }
+
                 Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
                     return @{
                         FileMajorPart = 16
@@ -178,6 +202,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Passphrase = $mockPassphraseCredential
             }
             
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+
             Mock -CommandName Get-SPFarm -MockWith { 
                 return @{ 
                     DefaultServiceAccount = @{ 
@@ -203,6 +234,63 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "a farm exists locally, is the correct farm but SPFarm is not reachable" -Fixture {
+            $testParams = @{
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "DatabaseServer\Instance"
+                FarmAccount = $mockFarmAccount
+                Passphrase =  $mockPassphrase
+                AdminContentDatabaseName = "Admin_Content"
+                CentralAdministrationAuth = "Kerberos"
+                CentralAdministrationPort = 1234
+            }
+
+            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
+                if ($Value -eq "dsn")
+                {
+                    return $testParams.FarmConfigDatabaseName
+                }
+            }
+            
+            Mock -CommandName Get-SPFarm -MockWith { return $null }
+            
+            Mock -CommandName Get-SPDatabase -MockWith { 
+                return @(@{ 
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    Server = @{ 
+                        Name = $testParams.DatabaseServer 
+                    }
+                })
+            } 
+            
+            Mock -CommandName Get-SPWebApplication -MockWith { 
+                return @(@{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    Url = "http://$($env:ComputerName):$($testParams.CentralAdministrationPort)"
+                })
+            }
+
+            Mock -CommandName Get-SPDSCConfigDBStatus -MockWith {
+                return @{
+                    Locked = $true
+                    ValidPermissions = $false
+                    DatabaseExists = $true
+                }
+            }
+
+            It "Should throw when server already joined to farm but SPFarm not reachable" {
+                { Get-TargetResource @testParams } | Should Throw
+            }
+
+            It "Should throw when the current user does not have sufficient permissions to SQL Server" {
+                { Set-TargetResource @testParams } | Should Throw
             }
         }
 

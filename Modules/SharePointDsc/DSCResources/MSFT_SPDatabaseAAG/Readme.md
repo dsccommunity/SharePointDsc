@@ -12,3 +12,6 @@ SP_Content* or *Content*
 Important:
 This resource requires the April 2014 CU to be installed. The required
 cmdlets have been added in this CU: http://support.microsoft.com/kb/2880551
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the content database is added to the AAG.

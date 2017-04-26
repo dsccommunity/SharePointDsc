@@ -9,7 +9,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -25,7 +25,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
                 public static class SearchContext {
-                    public static object GetContext(object site) {
+                    public static object GetContext(string serviceAppName) {
                         return null;
                     }
                 }
@@ -54,15 +54,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             return @{ 
                 Name = $testParams.ApplicationPool 
             } 
-        }
-        Mock -CommandName Get-SPWebapplication -MockWith { 
-            return @(@{
-                Url = "http://centraladmin.contoso.com"
-                IsAdministrationWebApplication = $true
-            }) 
-        }
-        Mock -CommandName Get-SPSite -MockWith { 
-            @{} 
         }
         Mock -CommandName New-Object -MockWith {
             return @{
@@ -330,15 +321,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } 
             }
             
-            Mock -CommandName Get-SPWebapplication -MockWith { 
-                return @(@{
-                    Url = "http://centraladmin.contoso.com"
-                    IsAdministrationWebApplication = $true
-                }) 
-            }
-
-            Mock -CommandName Get-SPSite -MockWith { @{} }
-            
             Mock -CommandName New-Object -MockWith {
                 return @{
                     DefaultGatheringAccount = "Domain\username"
@@ -387,17 +369,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
            
-            Mock -CommandName Get-SPWebapplication -MockWith { 
-                return @(@{
-                    Url = "http://centraladmin.contoso.com"
-                    IsAdministrationWebApplication = $true
-                }) 
-            }
-
-            Mock -CommandName Get-SPSite -MockWith { 
-                return @{} 
-            }
-            
             Mock -CommandName New-Object {
                 return @{
                     DefaultGatheringAccount = "Domain\username"

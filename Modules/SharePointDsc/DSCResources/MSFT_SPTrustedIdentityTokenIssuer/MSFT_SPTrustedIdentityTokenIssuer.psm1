@@ -28,9 +28,13 @@
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [String]
-        $SigningCertificateThumbPrint,
+        $SigningCertificateThumbprint,
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $SigningCertificateFilePath,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -66,7 +70,7 @@
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
             $identifierClaim = $spTrust.IdentityClaimTypeInformation.MappedClaimType
-            $signingCertificateThumbPrint = $spTrust.SigningCertificate.Thumbprint
+            $SigningCertificateThumbprint = $spTrust.SigningCertificate.Thumbprint
             $currentState = "Present"
             $claimProviderName = $sptrust.ClaimProviderName
             $providerSignOutUri = $sptrust.ProviderSignOutUri.OriginalString
@@ -84,7 +88,7 @@
             $realm = ""
             $signInUrl = ""
             $identifierClaim = ""
-            $signingCertificateThumbPrint = ""
+            $SigningCertificateThumbprint = ""
             $currentState = "Absent"
             $claimProviderName = ""
             $providerSignOutUri = ""
@@ -97,7 +101,8 @@
             SignInUrl                    = $signInUrl
             IdentifierClaim              = $identifierClaim
             ClaimsMappings               = $claimsMappings
-            SigningCertificateThumbPrint = $signingCertificateThumbPrint
+            SigningCertificateThumbprint = $SigningCertificateThumbprint
+            SigningCertificateFilePath   = ""
             Ensure                       = $currentState
             ClaimProviderName            = $claimProviderName
             ProviderSignOutUri           = $providerSignOutUri
@@ -135,9 +140,13 @@ function Set-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [String]
-        $SigningCertificateThumbPrint,
+        $SigningCertificateThumbprint,
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $SigningCertificateFilePath,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -165,27 +174,68 @@ function Set-TargetResource
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
+            if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
+                $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+            {
+                throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
+                return
+            }
+
+            if (!$PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
+                !$PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+            {
+                throw ("At least one of the following parameters must be specified: " + `
+                    "SigningCertificateThumbprint, SigningCertificateFilePath.")
+                return
+            }
+
             Write-Verbose -Message "Creating SPTrustedIdentityTokenIssuer '$Name'"
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
-
-                $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
-                    $_.Thumbprint -match $params.SigningCertificateThumbPrint
-                }
-
-                if (!$cert) 
+                if ($params.SigningCertificateThumbprint)
                 {
-                    throw ("The certificate thumbprint does not match a certificate in " + `
-                           "certificate store LocalMachine\My.")
-                    return
-                }
+                    Write-Verbose -Message ("Getting signing certificate with thumbprint " + `
+                        "$($params.SigningCertificateThumbprint) from the certificate store 'LocalMachine\My'")
 
-                if ($cert.HasPrivateKey) 
+                    if ($params.SigningCertificateThumbprint -notmatch "^[A-Fa-f0-9]{40}$")
+                    {
+                        throw ("Parameter SigningCertificateThumbprint does not match valid format '^[A-Fa-f0-9]{40}$'.")
+                        return
+                    }
+
+                    $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript {
+                        $_.Thumbprint -match $params.SigningCertificateThumbprint
+                    }
+
+                    if (!$cert) 
+                    {
+                        throw ("Signing certificate with thumbprint $($params.SigningCertificateThumbprint) " + `
+                            "was not found in certificate store 'LocalMachine\My'.")
+                        return
+                    }
+
+                    if ($cert.HasPrivateKey) 
+                    {
+                        throw ("SharePoint requires that the private key of the signing certificate" + `
+                            " is not installed in the certificate store.")
+                        return
+                    }
+                }
+                else
                 {
-                    throw ("SharePoint requires that the private key of the signing " + `
-                           "certificate is not installed in the certificate store.")
+                    Write-Verbose -Message "Getting signing certificate from file system path '$($params.SigningCertificateFilePath)'"
+                    try
+                    {
+                        $cert = New-Object -TypeName "System.Security.Cryptography.X509Certificates.X509Certificate2" `
+                            -ArgumentList @($params.SigningCertificateFilePath)
+                    }
+                    catch
+                    {
+                        throw ("Signing certificate was not found in path '$($params.SigningCertificateFilePath)'.")
+                        return
+                    }
                 }
                 
                 $claimsMappingsArray = @()
@@ -210,8 +260,7 @@ function Set-TargetResource
                         $_.MappedClaimType -like $params.IdentifierClaim
                     })) 
                 {
-                    throw ("IdentifierClaim does not match any claim type specified in " + `
-                           "ClaimsMappings.")
+                    throw ("IdentifierClaim does not match any claim type specified in ClaimsMappings.")
                     return
                 }
 
@@ -327,9 +376,13 @@ function Test-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $true)]
+        [parameter(Mandatory = $false)]
         [String]
-        $SigningCertificateThumbPrint,
+        $SigningCertificateThumbprint,
+
+        [parameter(Mandatory = $false)]
+        [String]
+        $SigningCertificateFilePath,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
@@ -350,6 +403,21 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Testing SPTrustedIdentityTokenIssuer '$Name' settings"
+
+    if ($PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
+        $PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+    {
+        throw ("Cannot use both parameters SigningCertificateThumbprint and SigningCertificateFilePath at the same time.")
+        return
+    }
+
+    if (!$PSBoundParameters.ContainsKey("SigningCertificateThumbprint") -and `
+        !$PSBoundParameters.ContainsKey("SigningCertificateFilePath"))
+    {
+        throw ("At least one of the following parameters must be specified: " + `
+            "SigningCertificateThumbprint, SigningCertificateFilePath.")
+        return
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

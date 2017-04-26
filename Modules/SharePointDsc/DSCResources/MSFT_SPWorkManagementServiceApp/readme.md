@@ -12,3 +12,6 @@ Remarks
 - Parameters MinimumTimeBetweenEwsSyncSubscriptionSearches,
   MinimumTimeBetweenProviderRefreshes, MinimumTimeBetweenSearchQueries are in
   minutes.
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the service application is provisioned.

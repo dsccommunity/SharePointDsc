@@ -62,8 +62,8 @@ function Compare-SPDSCWebAppPolicy()
 
                 if ($null -ne $polbinddiff) 
                 {
-                    Write-Verbose -Message "Permission level different for " + `
-                                           "$($policy.IdentityType) user '$($policy.Username)'"
+                    Write-Verbose -Message ("Permission level different for " + `
+                                            "$($policy.IdentityType) user '$($policy.Username)'")
 
                     if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                                      -UsernameToCheck $policy.Username.ToLower())) 

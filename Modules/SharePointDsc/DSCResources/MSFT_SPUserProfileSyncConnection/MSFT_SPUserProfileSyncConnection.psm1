@@ -245,10 +245,11 @@ function Set-TargetResource
                     $listExcludedOUs.Add($_) 
                 }
             }
-            $list = New-SPDSCDirectoryServiceNamingContextList
+            $list = New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
             
             $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://" +("DC=" + $params.Forest.Replace(".", ",DC=")))
-            $list.Add((New-SPDSCDirectoryServiceNamingContext -ArgumentList @(
+            $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
+                                  -ArgumentList @(
                                             $partition.distinguishedName,
                                             $params.Forest, 
                                             $false, 
@@ -259,7 +260,8 @@ function Set-TargetResource
                                             $null , 
                                             $false)))
             $partition = Get-SPDSCADSIObject -LdapPath ("LDAP://CN=Configuration," + ("DC=" + $params.Forest.Replace(".", ",DC=")))
-            $list.Add((New-SPDSCDirectoryServiceNamingContext -ArgumentList @(
+            $list.Add((New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
+                                  -ArgumentList @(
                                             $partition.distinguishedName,
                                             $params.Forest, 
                                             $true, 
@@ -364,6 +366,11 @@ function Test-TargetResource
                                                      "ExcludedOUs")
 }
 
+<#
+.DESCRIPTION
+
+This method is not intensed for public use, and was created to facilitate unit testing
+#>
 function Get-SPDSCADSIObject 
 {
     param(
@@ -372,19 +379,5 @@ function Get-SPDSCADSIObject
     return [ADSI]($LdapPath)
 }
 
-function New-SPDSCDirectoryServiceNamingContext 
-{
-    param(
-        $ArgumentList
-    )
-    return New-Object -TypeName "Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext" `
-                      -ArgumentList $ArgumentList
-}
-
-function New-SPDSCDirectoryServiceNamingContextList 
-{
-    param ()
-    return New-Object -TypeName System.Collections.Generic.List[[Microsoft.Office.Server.UserProfiles.DirectoryServiceNamingContext]]
-}
             
-Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject, New-SPDSCDirectoryServiceNamingContext, New-SPDSCDirectoryServiceNamingContextList
+Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject

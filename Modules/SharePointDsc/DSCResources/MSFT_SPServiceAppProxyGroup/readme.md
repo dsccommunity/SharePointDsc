@@ -16,3 +16,6 @@ Requirements:
 At least one of the ServiceAppProxies, ServiceAppProxiesToInclude or
 ServiceAppProxiesToExclude properties needs to be specified. Do not combine
 the ServiceAppProxies property with the ServiceAppProxiesToInclude and
+
+The default value for the Ensure parameter is Present. When not specifying this
+parameter, the proxy group is created.
