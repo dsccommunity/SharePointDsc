@@ -10582,7 +10582,7 @@ param(
 
     [Parameter(ParameterSetName='ManualUpdateCertificateParameterSet', Mandatory=$true)]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet', Mandatory=$true)]
@@ -18711,7 +18711,7 @@ param(
 
     [Parameter(ParameterSetName='ManualUpdateCertificateParameterSet')]
     [ValidateNotNull()]
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]
+    [object]
     ${Certificate},
 
     [Parameter(ParameterSetName='MetadataEndPointParameterSet')]
@@ -19839,21 +19839,6 @@ param(
 
     [switch]
     ${ExtendedCheck},
-
-    [Parameter(ValueFromPipeline=$true)]
-    [object]
-    ${AssignmentCollection})
-
- 
- } 
-
-
-function Test-SPInfoPathFormTemplate { 
-  [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [string]
-    ${Path},
 
     [Parameter(ValueFromPipeline=$true)]
     [object]
