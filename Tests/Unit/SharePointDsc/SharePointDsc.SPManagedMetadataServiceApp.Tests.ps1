@@ -26,6 +26,53 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName New-SPMetadataServiceApplicationProxy -MockWith { return @{} }
         Mock -CommandName Set-SPMetadataServiceApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }   
+        Mock -CommandName Get-SPWebApplication -MockWith {
+            return @(
+                @{
+                    Url = "http://FakeCentralAdmin.Url"
+                    IsAdministrationWebApplication = $true
+                }
+            )
+        }
+        Mock -CommandName Get-SPTaxonomySession -MockWith {
+            return @{
+                TermStores = @(
+                    @{
+                        TermStoreAdministrators = @(
+                            New-Object -TypeName PSObject -Property @{
+                                PrincipalName = "Contoso\User1"
+                                IsWindowsAuthenticationMode = $true
+                            }
+                        )
+                    } | Add-Member -MemberType ScriptMethod `
+                                   -Name AddTermStoreAdministrator `
+                                   -Value { $Global:SPDscAddUserCalled = $true }  `
+                                   -PassThru -Force `
+                      | Add-Member -MemberType ScriptMethod `
+                                   -Name DeleteTermStoreAdministrator `
+                                   -Value { $Global:SPDscDeleteUserCalled = $true }  `
+                                   -PassThru -Force `
+                      | Add-Member -MemberType ScriptMethod `
+                                   -Name CommitAll `
+                                   -Value { }  `
+                                   -PassThru -Force 
+                )
+            }
+        }
+        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
+            return @{
+                Value = $Identity -replace "i:0#.w\|"
+            }
+        } -ParameterFilter { $IdentityType -eq "EncodedClaim" }
+
+        Mock -CommandName New-SPClaimsPrincipal -MockWith { 
+            $Global:SPDscClaimsPrincipalUser = $Identity
+            return (
+                New-Object -TypeName "Object" | Add-Member -MemberType ScriptMethod ToEncodedString { 
+                    return "i:0#.w|$($Global:SPDscClaimsPrincipalUser)" 
+                } -PassThru
+            )
+        } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
 
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
@@ -316,6 +363,201 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "A service app exists and has a correct list of term store administrators" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+                TermStoreAdministrators = @(
+                    "CONTOSO\User1"
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                    TypeName = "Managed Metadata Service"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
+                return $spServiceApp
+            }
+
+            It "Should return the current users from the get method" {
+                (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should be $true
+            }
+        }
+
+        Context -Name "A service app exists and is missing a user from the term store administrators list" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+                TermStoreAdministrators = @(
+                    "CONTOSO\User1",
+                    "CONTOSO\User2"
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                    TypeName = "Managed Metadata Service"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
+                return $spServiceApp
+            }
+
+            It "Should return the current users from the get method" {
+                (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "Should call the add method from the set method" {
+                $Global:SPDscAddUserCalled = $false
+                $Global:SPDscDeleteUserCalled = $false
+                Set-TargetResource @testParams
+
+                $Global:SPDscAddUserCalled | Should Be $true
+            }
+        }
+
+        Context -Name "A service app exists and has an extra user on the term store administrators list" -Fixture {
+            $testParams = @{
+                Name = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer = "databaseserver\instance"
+                DatabaseName = "SP_MMS"
+                Ensure = "Present"
+                TermStoreAdministrators = @(
+                    "CONTOSO\User1"
+                )
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{ 
+                    TypeName = "Managed Metadata Service"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ 
+                        Name = $testParams.ApplicationPool 
+                    }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        return (@{ 
+                            FullName = $getTypeFullName 
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = ""
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force 
+                    } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPTaxonomySession -MockWith {
+                $users = @(
+                    New-Object -TypeName PSObject -Property @{
+                        PrincipalName = "Contoso\User1"
+                        IsWindowsAuthenticationMode = $true
+                    }
+                    New-Object -TypeName PSObject -Property @{
+                        PrincipalName = "Contoso\User2"
+                        IsWindowsAuthenticationMode = $true
+                    }
+                )
+                return @{
+                    TermStores = @(
+                        @{
+                            TermStoreAdministrators = $users
+                        } | Add-Member -MemberType ScriptMethod `
+                                       -Name AddTermStoreAdministrator `
+                                       -Value { $Global:SPDscAddUserCalled = $true }  `
+                                       -PassThru -Force `
+                        | Add-Member -MemberType ScriptMethod `
+                                     -Name DeleteTermStoreAdministrator `
+                                     -Value { $Global:SPDscDeleteUserCalled = $true }  `
+                                     -PassThru -Force `
+                        | Add-Member -MemberType ScriptMethod `
+                                     -Name CommitAll `
+                                     -Value { }  `
+                                     -PassThru -Force 
+                    )
+                }
+            }
+
+            It "Should return the current users from the get method" {
+                (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+            }
+
+            It "Should return true from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "Should call the delete method from the set method" {
+                $Global:SPDscAddUserCalled = $false
+                $Global:SPDscDeleteUserCalled = $false
+                Set-TargetResource @testParams
+
+                $Global:SPDscDeleteUserCalled | Should Be $true
             }
         }
     }

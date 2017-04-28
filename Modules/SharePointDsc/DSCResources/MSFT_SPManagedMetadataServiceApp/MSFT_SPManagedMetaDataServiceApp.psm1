@@ -24,6 +24,10 @@ function Get-TargetResource
         [System.String] 
         $DatabaseName,
 
+        [parameter(Mandatory = $false)]
+        [System.String[]]
+        $TermStoreAdministrators,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -48,9 +52,10 @@ function Get-TargetResource
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                 -ErrorAction SilentlyContinue
         $nullReturn = @{
-            Name            = $params.Name
-            Ensure          = "Absent"
-            ApplicationPool = $params.ApplicationPool
+            Name                    = $params.Name
+            Ensure                  = "Absent"
+            ApplicationPool         = $params.ApplicationPool
+            TermStoreAdministrators = @()
         } 
         if ($null -eq $serviceApps) 
         { 
@@ -101,15 +106,41 @@ function Get-TargetResource
                 $hubUrl = ""
             }
 
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                | Where-Object -FilterScript { 
+                $_.IsAdministrationWebApplication -eq $true 
+            }
+            $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
+
+            $currentAdmins = @()
+            
+            $session.TermStores[0].TermStoreAdministrators | ForEach-Object -Process {
+                $name = [string]::Empty
+                if ($_.IsWindowsAuthenticationMode -eq $true)
+                {
+                    $name = $_.PrincipalName
+                }
+                else 
+                {
+                    $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
+                    if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+") 
+                    {
+                        $name = Resolve-SPDscSecurityIdentifier -SID $name
+                    }
+                }
+                $currentAdmins += $name
+            }
+
             return @{
-                Name              = $serviceApp.DisplayName
-                ProxyName         = $proxyName
-                Ensure            = "Present"
-                ApplicationPool   = $serviceApp.ApplicationPool.Name
-                DatabaseName      = $serviceApp.Database.Name
-                DatabaseServer    = $serviceApp.Database.Server.Name
-                ContentTypeHubUrl = $hubUrl
-                InstallAccount    = $params.InstallAccount
+                Name                    = $serviceApp.DisplayName
+                ProxyName               = $proxyName
+                Ensure                  = "Present"
+                ApplicationPool         = $serviceApp.ApplicationPool.Name
+                DatabaseName            = $serviceApp.Database.Name
+                DatabaseServer          = $serviceApp.Database.Server.Name
+                TermStoreAdministrators = $currentAdmins
+                ContentTypeHubUrl       = $hubUrl
+                InstallAccount          = $params.InstallAccount
             }
         }
     }
@@ -140,6 +171,10 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] 
         [System.String] 
         $DatabaseName,
+
+        [parameter(Mandatory = $false)]
+        [System.String[]]
+        $TermStoreAdministrators,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
@@ -239,6 +274,58 @@ function Set-TargetResource
             }
         }
     }
+
+    if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("TermStoreAdministrators") -eq $true)
+    {
+        # Update the term store administrators
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments @($PSBoundParameters, $result) `
+                            -ScriptBlock {
+
+            Write-Verbose -Message "Setting term store administrators"
+            $params = $args[0]
+            $currentValues = $args[1]
+
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                | Where-Object -FilterScript { 
+                $_.IsAdministrationWebApplication -eq $true 
+            }
+            $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
+            $termStore = $session.TermStores[0]
+
+            $changesToMake = Compare-Object -ReferenceObject $currentValues.TermStoreAdministrators `
+                                            -DifferenceObject $params.TermStoreAdministrators
+            
+            $changesToMake | ForEach-Object -Process {
+                $change = $_
+                switch($change.SideIndicator)
+                {
+                    "<=" {
+                        # remove an existing user
+                        if ($termStore.TermStoreAdministrators.PrincipalName -contains $change.InputObject)
+                        {
+                            $termStore.DeleteTermStoreAdministrator($change.InputObject)
+                        }
+                        else 
+                        {
+                            $claimsToken = New-SPClaimsPrincipal -Identity $change.InputObject `
+                                                                 -IdentityType WindowsSamAccountName
+                            $termStore.DeleteTermStoreAdministrator($claimsToken.ToEncodedString())
+                        }
+                    }
+                    "=>" {
+                        # add a new user
+                        $termStore.AddTermStoreAdministrator($change.InputObject)
+                    }
+                    default {
+                        throw "An unknown side indicator was found."
+                    }
+                }
+            }
+
+            $termStore.CommitAll();
+        }
+    }
     
     if ($Ensure -eq "Absent") 
     {
@@ -294,6 +381,10 @@ function Test-TargetResource
         [System.String] 
         $DatabaseName,
 
+        [parameter(Mandatory = $false)]
+        [System.String[]]
+        $TermStoreAdministrators,
+
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
@@ -322,6 +413,7 @@ function Test-TargetResource
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("ApplicationPool", 
                                                      "ContentTypeHubUrl", 
+                                                     "TermStoreAdministrators",
                                                      "Ensure")
 }
 
