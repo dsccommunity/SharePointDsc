@@ -338,7 +338,16 @@ function Set-TargetResource
         $osearchStopped = $false
         $hostControllerStopped = $false
 
-        $osearchSvc        = Get-Service -Name "OSearch15" 
+        if ((Get-SPDSCInstalledProductVersion) -eq 15)
+        {
+            $searchServiceName = "OSearch15"
+        }
+        else
+        {
+            $searchServiceName = "OSearch16"
+        }
+
+        $osearchSvc        = Get-Service -Name $searchServiceName 
         $hostControllerSvc = Get-Service -Name "SPSearchHostController" 
 
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -354,7 +363,7 @@ function Set-TargetResource
         if($osearchSvc.Status -eq "Running") 
         { 
             $osearchStopped = $true
-            Set-Service -Name "OSearch15" -StartupType Disabled
+            Set-Service -Name $searchServiceName -StartupType Disabled
             $osearchSvc.Stop() 
         } 
 
@@ -432,13 +441,13 @@ function Set-TargetResource
                                   -Wait `
                                   -PassThru
 
-        $osearchSvc        = Get-Service -Name "OSearch15" 
+        $osearchSvc        = Get-Service -Name $searchServiceName 
         $hostControllerSvc = Get-Service -Name "SPSearchHostController" 
 
         # Ensuring Search Services were stopped by script before Starting" 
         if($osearchStopped -eq $true) 
         {
-            Set-Service -Name "OSearch15" -StartupType Manual
+            Set-Service -Name $searchServiceName -StartupType Manual
             $osearchSvc.Start()
         }
 
