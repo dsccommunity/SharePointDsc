@@ -43,6 +43,7 @@
 * Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
 * Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
 * Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
+* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
 
 ## 1.6
 
