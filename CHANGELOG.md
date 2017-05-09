@@ -44,6 +44,8 @@
 * Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
 * Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
 * Added TermStoreAdministrators property to SPManagedMetadataServiceApp
+* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
+  place if a server was removed and re-added to a farm
 
 ## 1.6
 
