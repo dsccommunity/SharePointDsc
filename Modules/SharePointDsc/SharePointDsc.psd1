@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.6.0.0'
+ModuleVersion = '1.7.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -24,7 +24,7 @@ Author = 'Microsoft Corporation'
 CompanyName = 'Microsoft Corporation'
 
 # Copyright statement for this module
-Copyright = '(c) 2015-2016 Microsoft Corporation. All rights reserved.'
+Copyright = '(c) 2015-2017 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'This DSC module is used to deploy and configure SharePoint Server 2013 and 2016, and covers a wide range of areas including web apps, service apps and farm configuration.'
@@ -125,42 +125,54 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '
- * Set-TargetResource of Service Application now also removes all associated proxies
- * Fixed issue with all SPServiceApplication for OS not in En-Us language, add GetType().FullName method in:
-  - SPAccessServiceApp
-  - SPAppManagementServiceApp
-  - SPBCSServiceApp
-  - SPExcelServiceApp
-  - SPManagedMetaDataServiceApp
-  - SPPerformancePointServiceApp
-  - SPSearchServiceApp
-  - SPSearchCrawlRule
-  - SPSecureStoreServiceApp
-  - SPSubscriptionSettingsServiceApp
-  - SPUsageApplication
-  - SPUserProfileServiceApp
-  - SPVisioServiceApp
-  - SPWordAutomationServiceApp
-  - SPWorkManagementServiceApp
- * Fixed issue with SPServiceInstance for OS not in En-Us language, add GetType().Name method in:
-  - SPDistributedCacheService
-  - SPUserProfileSyncService
- * Fixed issue with SPInstallLanguagePack to install before farm creation
- * Fixed issue with mounting SPContentDatabase
- * Fixed issue with SPShellAdmin and Content Database method
- * Fixed issue with SPServiceInstance (Set-TargetResource) for OS not in En-Us language
- * Added .Net 4.6 support check to SPInstall and SPInstallPrereqs
- * Improved code styling
- * SPVisioServiceapplication now creates proxy and lets you specify a name for it
- * New resources: SPAppStoreSettings
- * Fixed bug with SPInstallPrereqs to allow minor version changes to prereqs for SP2016
- * Refactored unit tests to consolidate and streamline test approaches
- * Updated SPExcelServiceApp resource to add support for trusted file locations and most other properties of the service app
- * Added support to SPMetadataServiceApp to allow changing content type hub URL on existing service apps
- * Fixed a bug that would cause SPSearchResultSource to throw exceptions when the enterprise search centre URL has not been set
- * Updated documentation of SPProductUpdate to reflect the required install order of product updates
-'
+        ReleaseNotes = "
+* Update SPSearchIndexPartition made ServiceAppName as a Key
+* New resouce: SPTrustedRootAuthority
+* Update SPFarmSolution to eject from loop after 30m.
+* New resource: SPMachineTranslationServiceApp
+* New resource: SPPowerPointAutomationServiceApp
+* Bugfix in SPSearchFileType  made ServiceAppName a key property.
+* New resource: SPWebApplicationExtension
+* Added new resource SPAccessServices2010
+* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
+  Search Service Application
+* Added new resource SPSearchAuthoritativePage
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+* Fix typo in method Get-TargetResource of SPFeature
+* Fix bug in SPManagedAccount not returning the correct account name value
+* Fix typo in method Get-TargetResource of SPSearchIndexPartition
+* Update documentation of SPInstallLanguagePack to add guidance on package
+  change in SP2016
+* Added returning the required RunCentralAdmin parameter to
+  Get-TargetResource in SPFarm
+* Added web role check for SPBlobCacheSettings
+* Improved error message when rule could not be found in
+  SPHealthAnalyzerRuleState
+* Extended the documentation to specify that the default value of Ensure
+  is Present
+* Added documentation about the user of Host Header Site Collections and
+  the HostHeader parameter in SPWebApplication
+* Fixed missing brackets in SPWebAppPolicy module file
+* Fixed issue with SPSecureStoreServiceApp not returning database information
+* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl
+  in SP2016
+* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing
+  certificate from file path as an alternative to the certificate store
+* New resource: SPSearchCrawlerImpactRule
+* Fixed issue in SPSite where the used template wasn't returned properly
+* Fixed issue in SPWebApplicationGeneralSettings which didn't return the
+  security validation timeout properly
+* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
+  joined to a farm
+* Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
+* Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
+* Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
+* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
+* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
+  place if a server was removed and re-added to a farm
+* Fixed bug in SPFarm that caused issues with database names that have dashes
+  in the names
+"
 
     } # End of PSData hashtable
 

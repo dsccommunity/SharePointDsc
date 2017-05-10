@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 1.7.0.0
 
 * Update SPSearchIndexPartition made ServiceAppName as a Key
 * New resouce: SPTrustedRootAuthority
