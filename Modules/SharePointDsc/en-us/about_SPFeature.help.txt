@@ -8,6 +8,9 @@
     feature should be on or off. The name property is the name of the feature
     based on its folder name in the FEATURES folder in the SharePoint hive
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the feature is enabled.
+    
 .PARAMETER Name
     Key - string
     The name of the feature

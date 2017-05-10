@@ -8,6 +8,9 @@
     specifics) are validated and set when the resource is run, the database values
     are only used in provisioning of the service application.
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the service application is provisioned.
+    
 .PARAMETER Name
     Key - string
     The name of the secure store service app

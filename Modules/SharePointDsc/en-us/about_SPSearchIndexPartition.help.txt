@@ -32,7 +32,7 @@
     The directory that the index should use locally on each server to store data
 
 .PARAMETER ServiceAppName
-    Required - String
+    Key - String
     The name of the search service application
 
 .PARAMETER InstallAccount

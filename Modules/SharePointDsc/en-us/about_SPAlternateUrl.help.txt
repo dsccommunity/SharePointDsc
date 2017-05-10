@@ -8,6 +8,9 @@
     application. Alternatively a URL can be removed from a zone to ensure that it
     will remain empty and have no alternate URL.
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the setting is configured.
+    
 .PARAMETER WebAppUrl
     Key - String
     The URL of the web application to apply the alternate URL to
