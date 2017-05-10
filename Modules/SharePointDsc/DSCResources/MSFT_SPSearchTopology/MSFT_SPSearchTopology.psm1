@@ -397,6 +397,21 @@ function Set-TargetResource
             }
         }
 
+        # Look for components that have no server name and remove them
+        $idsWithNoName = (Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
+                            Where-Object -FilterScript {
+                                $null -eq $_.ServerName
+                            }).ComponentId
+        $idsWithNoName | ForEach-Object -Process {
+            $id = $_
+            Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
+                Where-Object -FilterScript {
+                    $_.ComponentId -eq $id
+                } | `
+                Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
+                                                   -confirm:$false
+        }
+
         # Apply the new topology to the farm
         Set-SPEnterpriseSearchTopology -Identity $newTopology
     }
