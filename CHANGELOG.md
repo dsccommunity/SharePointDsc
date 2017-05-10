@@ -46,6 +46,8 @@
 * Added TermStoreAdministrators property to SPManagedMetadataServiceApp
 * Fixed an issue in SPSearchTopology that would leave a corrupt topology in
   place if a server was removed and re-added to a farm
+* Fixed bug in SPFarm that caused issues with database names that have dashes
+  in the names
 
 ## 1.6
 
