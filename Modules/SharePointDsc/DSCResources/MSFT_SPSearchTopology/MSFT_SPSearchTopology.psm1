@@ -403,7 +403,11 @@ function Set-TargetResource
                                 $null -eq $_.ServerName
                             }).ComponentId
         $idsWithNoName | ForEach-Object -Process {
-            Get-SPEnterpriseSearchComponent -SearchTopology $newTopology -Identity $_ | `
+            $id = $_
+            Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
+                Where-Object -FilterScript {
+                    $_.ComponentId -eq $id
+                } | `
                 Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
                                                    -confirm:$false
         }
