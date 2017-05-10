@@ -1,0 +1,73 @@
+﻿.NAME
+    SPSearchResultSource
+
+# Description
+    
+    This resource is used to configure search result sources in the SharePoint
+    search service application. Result sources can be configured to be of the
+    following provider types:
+    
+    * Exchange Search Provider
+    * Local People Provider
+    * Local SharePoint Provider
+    * OpenSearch Provider
+    * Remote People Provider
+    * Remote SharePoint Provider
+    
+.PARAMETER Name
+    Key - String
+    The name of the result source
+
+.PARAMETER SearchServiceAppName
+    Required - String
+    The name of the search service application to associate this result source with
+
+.PARAMETER Query
+    Required - String
+    The query to pass to the provider source
+
+.PARAMETER ProviderType
+    Required - String
+    Allowed values: Exchange Search Provider, Local People Provider, Local SharePoint Provider, OpenSearch Provider, Remote People Provider, Remote SharePoint Provider
+    The provider type to use for the result source
+
+.PARAMETER ConnectionUrl
+    Write - String
+    The URI to connect to the remote location
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the result source should exist, absent if it should not
+
+.PARAMETER InstallAccount
+    Write - String
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to create a remote sharepoint search result source
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+    
+        node localhost {
+            SPSearchResultSource RemoteSharePointFarm
+            {
+                Name = "External SharePoint results"
+                SearchServiceAppName = "Search Service Application"
+                Query = "{searchTerms}"
+                ProviderType = "Remote SharePoint Provider"
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
