@@ -130,7 +130,7 @@ function Add-SPDSCConfigDBLock
         $connection.Open()
         $command.Connection = $connection
 
-        $command.CommandText = "CREATE DATABASE $($Database)_Lock"
+        $command.CommandText = "CREATE DATABASE [$($Database)_Lock]"
         $command.ExecuteNonQuery()
     }
     finally
@@ -191,7 +191,7 @@ function Remove-SPDSCConfigDBLock
         $connection.Open()
         $command.Connection = $connection
 
-        $command.CommandText = "DROP DATABASE $($Database)_Lock"
+        $command.CommandText = "DROP DATABASE [$($Database)_Lock]"
         $command.ExecuteNonQuery()
     }
     finally

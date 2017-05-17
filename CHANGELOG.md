@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+* Updated Readme of SPInstall to include SharePoint Foundation is not supported (580)
+* Added TLS and SMTP port support for SharePoint 2016 (540)
+* Fixed missing brackets in error message in SPExcelServiceApp (589)
+* Removed the requirement for the ConfigWizard in SPInstallLanguagePack (594)
+* Fixed LP detection issue in SPInstallLanguagePack (596)
+* ISSUE 551 - ADImport rework
+
+## 1.7.0.0
+
 * Update SPSearchIndexPartition made ServiceAppName as a Key
 * New resouce: SPTrustedRootAuthority
 * Update SPFarmSolution to eject from loop after 30m.
@@ -47,12 +56,10 @@
   web applications properly
 * Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
 * Added TermStoreAdministrators property to SPManagedMetadataServiceApp
-* Updated Readme of SPInstall to include SharePoint Foundation is not supported (580)
-* Added TLS and SMTP port support for SharePoint 2016 (540)
-* Fixed missing brackets in error message in SPExcelServiceApp (589)
-* Removed the requirement for the ConfigWizard in SPInstallLanguagePack (594)
-* Fixed LP detection issue in SPInstallLanguagePack (596)
-* ISSUE 551 - ADImport rework
+* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
+  place if a server was removed and re-added to a farm
+* Fixed bug in SPFarm that caused issues with database names that have dashes
+  in the names
 
 ## 1.6
 
