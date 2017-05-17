@@ -31,18 +31,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-            if ($Value -eq "SetupType")
-            {
-                return "CLEAN_INSTALL"
-            }
-
-            if ($Value -eq "LanguagePackInstalled")
-            {
-                return 0
-            }
-        }
-
         Mock -CommandName Start-Process -MockWith {
             return @{
                 ExitCode = 0
@@ -89,18 +77,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
@@ -109,6 +85,88 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     16 {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.zh-tw"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (Taiwan)/中文 (繁體)')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (Taiwan)/中文 (繁體)')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.pt-br"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português (Brasil)')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português (Brasil)')
                     }
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
@@ -144,18 +202,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
-                }
-            }
-
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
                 }
             }
             
@@ -209,18 +255,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
-                }
-            }
-
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
                 }
             }
             
@@ -277,18 +311,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -348,18 +370,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -403,18 +413,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -435,18 +433,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
-            }
-            
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 1
-                }
             }
 
             It "Should return null from  the set method" {

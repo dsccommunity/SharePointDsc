@@ -73,8 +73,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Ensure=Present and the parameter AuthenticationMethod is not specified" -Fixture {
+            $testParams = @{
+                Name = "SharePoint Sites"
+                ApplicationPool = "SharePoint Web Apps"
+                ApplicationPoolAccount = "DEMO\ServiceAccount"
+                Url = "http://sites.sharepoint.com"
+                Ensure = "Present"              
+            }
 
+            It "throws exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "When Ensure is Present, the AuthenticationMethod parameter is required."
+            }
 
+            It "throws exception in the test method" {
+                { Test-TargetResource @testParams } | Should Throw "When Ensure is Present, the AuthenticationMethod parameter is required."
+            }
+        }
 
         Context -Name "The web application that uses NTLM doesn't exist but should" -Fixture {
             $testParams = @{

@@ -6,6 +6,9 @@ itself). The ProductKey parameter is used to inject in to the configuration
 file and validate the license key during the installation process. This module
 depends on the prerequisites already being installed, which can be done
 
+NOTE: This resource only supports SharePoint Server. SharePoint Foundation
+is not supported.
+
 ## Installing from network locations
 
 If you wish to install SharePoint from a network location this can

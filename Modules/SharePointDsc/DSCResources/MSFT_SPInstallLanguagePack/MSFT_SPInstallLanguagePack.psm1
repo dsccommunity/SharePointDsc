@@ -43,13 +43,10 @@ function Get-TargetResource
         throw "Unknown folder structure"
     }
 
-    $products = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                    -ScriptBlock {
-        return Get-SPDscRegProductsInfo 
-    }
+    $products = Get-SPDscRegProductsInfo
 
     # Extract language from filename
-    if ($osrvFolder.Name -match "\w*.(\w{2}-\w{2})")
+    if ($osrvFolder.Name -match "\w*.(\w{2,3}-\w*-?\w*)")
     {
         $language = $matches[1]
     }
@@ -75,9 +72,11 @@ function Get-TargetResource
     }
             
     # Extract English name of the language code
-    if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \(\w*\)")
+    $updateLanguage = ""
+    if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
     {
         $languageEnglish = $matches[1]
+        $updateLanguage  = $matches[0]
         if ($languageEnglish.contains(","))
         {
             $languages = $languageEnglish.Split(",")
@@ -86,7 +85,7 @@ function Get-TargetResource
     }
 
     # Extract Native name of the language code
-    if ($cultureInfo.NativeName -match "(\w*,*\s*\w*) \(\w*\)")
+    if ($cultureInfo.NativeName -match "(\w*,*\s*\w*) ?\([^)]*\)")
     {
         $languageNative = $matches[1]
         if ($languageNative.contains(","))
@@ -97,35 +96,77 @@ function Get-TargetResource
     }
 
     # Build language string used in Language Pack names
-    $languageString = "$languageEnglish/$languageNative"
+    $languageString = $("$languageEnglish/$languageNative").Trim()
+    $languageString2 = $("$languageEnglish $languageNative").Trim()
+    
+    switch ($updateLanguage) {
+        "Azerbaijani (Latin, Azerbaijan)" {
+            $languageString = "Azerbaijani/Azərbaycan­ılı"
+            $languageString2 = "NO MATCH"
+        }
+        "English (United States)" {
+            $languageString = "English"
+            $languageString2 = "NO MATCH"
+        }
+        "Portuguese (Brazil)" {
+            $languageString = "Portuguese/Português \(Brasil\)"
+            $languageString2 = "NO MATCH"
+        }
+        "Dari (Afghanistan)" {
+            $languageString = "درى Dari"
+            $languageString2 = "NO MATCH"
+        }        
+        "Latvian (Latvia)" {
+            $languageString = "Latvian/latviski"
+            $languageString2 = "NO MATCH"
+        }
+        "Malay (Malaysia)" {
+            $languageString = "Malay/Bahasa Malaysia"
+            $languageString2 = "NO MATCH"
+        }
+        "Vietnamese (Vietnam)" {
+            $languageString = "Vietnamese/Tiếng Việt"
+            $languageString2 = "NO MATCH"
+        }
+        "Chinese (Simplified, China)" {
+            $languageString = 'Chinese \(PRC\)/中文\(简体\)'
+            $languageString2 = "NO MATCH"
+        }
+        "Chinese (Traditional, Taiwan)" {
+            $languageString = 'Chinese \(Taiwan\)/中文 \(繁體\)'
+            $languageString2 = "NO MATCH"
+        }
+    }
     Write-Verbose -Message "Update is for the $languageEnglish language"
 
     # Find the product name for the specific language pack
-    $productName = ""
+    $productFound = $false
     foreach ($product in $products)
     {
-        if ($product -match $languageString)
+        if ($product -match $languageString -or $product -match $languageString2)
         {
-            $productName = $product
+            $productFound = $true
         }
     }
 
-    if ($productName -eq "")
+    if ($productFound -eq $true)
     {
-        return @{
-            BinaryDir         = $BinaryDir
-            BinaryInstallDays = $BinaryInstallDays
-            BinaryInstallTime = $BinaryInstallTime
-            Ensure            = "Absent"
-        }
-    }
-    else
-    {
+        Write-Verbose -Message "Language Pack $languageEnglish is found"
         return @{
             BinaryDir         = $BinaryDir
             BinaryInstallDays = $BinaryInstallDays
             BinaryInstallTime = $BinaryInstallTime
             Ensure            = "Present"
+        }
+    }
+    else
+    {
+        Write-Verbose -Message "Language Pack $languageEnglish is NOT found"
+        return @{
+            BinaryDir         = $BinaryDir
+            BinaryInstallDays = $BinaryInstallDays
+            BinaryInstallTime = $BinaryInstallTime
+            Ensure            = "Absent"
         }
     }
 }
@@ -256,19 +297,6 @@ function Set-TargetResource
     {
         $wssRegKey ="hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\16.0\WSS"
     }
-
-    # Read LanguagePackInstalled and SetupType registry keys
-    $languagePackInstalled = Get-SPDSCRegistryKey -Key $wssRegKey -Value "LanguagePackInstalled"
-    $setupType = Get-SPDSCRegistryKey -Key $wssRegKey -Value "SetupType"
-
-    # Determine if LanguagePackInstalled=1 or SetupType=B2B_Upgrade.
-    # If so, the Config Wizard is required, so the installation will be skipped.
-    if (($languagePackInstalled -eq 1) -or ($setupType -eq "B2B_UPGRADE"))
-    {
-        Write-Verbose -Message ("An upgrade is pending. " + `
-                                "To prevent a possible loop, the install will be skipped")
-        return
-    }    
 
     Write-Verbose -Message "Writing install config file"
 

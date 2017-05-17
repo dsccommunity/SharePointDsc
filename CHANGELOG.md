@@ -42,6 +42,15 @@
   joined to a farm
 * Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
 * Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
+* Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
+* Fixed issue in SPWebApplication where the Get method didn't return Classic
+  web applications properly
+* Updated Readme of SPInstall to include SharePoint Foundation is not supported (580)
+* Added TLS and SMTP port support for SharePoint 2016 (540)
+* Fixed missing brackets in error message in SPExcelServiceApp (589)
+* Removed the requirement for the ConfigWizard in SPInstallLanguagePack (594)
+* Fixed LP detection issue in SPInstallLanguagePack (596)
+* ISSUE 551 - ADImport rework
 
 ## 1.6
 

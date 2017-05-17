@@ -25,11 +25,32 @@ function Get-TargetResource
         $CharacterSet,
 
         [parameter(Mandatory = $false)] 
+        [System.Boolean]  
+        $UseTLS,
+        
+        [parameter(Mandatory = $false)] 
+        [System.UInt32]  
+        $SMTPPort,
+        
+        [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting outgoing email settings configuration for $WebAppUrl"
+
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
+        -and $installedVersion.FileMajorPart -ne 16) 
+    {
+        throw [Exception] "UseTLS is only supported in SharePoint 2016."
+    }
+
+    if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
+        -and $installedVersion.FileMajorPart -ne 16) 
+    {
+        throw [Exception] "SMTPPort is only supported in SharePoint 2016."
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -56,6 +77,8 @@ function Get-TargetResource
             FromAddress= $webApp.OutboundMailSenderAddress
             ReplyToAddress= $webApp.OutboundMailReplyToAddress
             CharacterSet = $webApp.OutboundMailCodePage
+            UseTLS = $webApp.OutboundMailEnableSsl
+            SMTPPort = $webApp.OutboundMailPort
         }
     }
     return $result
@@ -87,15 +110,36 @@ function Set-TargetResource
         $CharacterSet,
 
         [parameter(Mandatory = $false)] 
+        [System.Boolean]  
+        $UseTLS,
+        
+        [parameter(Mandatory = $false)] 
+        [System.UInt32]  
+        $SMTPPort,
+        
+        [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting outgoing email settings configuration for $WebAppUrl"
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments $PSBoundParameters `
-                        -ScriptBlock {
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
+        -and $installedVersion.FileMajorPart -ne 16) 
+    {
+        throw [Exception] "UseTLS is only supported in SharePoint 2016."
+    }
+
+    if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
+        -and $installedVersion.FileMajorPart -ne 16) 
+    {
+        throw [Exception] "SMTPPort is only supported in SharePoint 2016."
+    }
+    
+    $null = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
         $params = $args[0]
         $webApp = $null
 
@@ -106,10 +150,47 @@ function Set-TargetResource
         {
             throw "Web Application $webAppUrl not found"
         }
-        $webApp.UpdateMailSettings($params.SMTPServer, `
-                                   $params.FromAddress, `
-                                   $params.ReplyToAddress, `
-                                   $params.CharacterSet) 
+
+        $installedVersion = Get-SPDSCInstalledProductVersion
+        switch ($installedVersion.FileMajorPart)
+        {
+            15 {
+                $webApp.UpdateMailSettings($params.SMTPServer, `
+                                           $params.FromAddress, `
+                                           $params.ReplyToAddress, `
+                                           $params.CharacterSet) 
+            }
+            16 {
+                if ($params.ContainsKey("UseTLS") -eq $false)
+                {
+                    $UseTLS = $false
+                }
+                else
+                {
+                    $UseTLS = $params.UseTLS                    
+                }
+
+                if ($params.ContainsKey("SMTPPort") -eq $false)
+                {
+                    $SMTPPort = 25
+                }
+                else
+                {
+                    $SMTPPort = $params.SMTPPort                    
+                }
+
+                $webApp.UpdateMailSettings($params.SMTPServer, `
+                                           $params.FromAddress, `
+                                           $params.ReplyToAddress, `
+                                           $params.CharacterSet, `
+                                           $UseTLS, `
+                                           $SMTPPort) 
+            }
+            default {
+                throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
+                       "supports SharePoint 2013 or 2016.")
+            }
+        }
     }
 }
 
@@ -140,6 +221,14 @@ function Test-TargetResource
         $CharacterSet,
 
         [parameter(Mandatory = $false)] 
+        [System.Boolean]  
+        $UseTLS,
+        
+        [parameter(Mandatory = $false)] 
+        [System.UInt32]  
+        $SMTPPort,
+        
+        [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -158,7 +247,9 @@ function Test-TargetResource
                                     -ValuesToCheck @("SMTPServer",
                                                      "FromAddress",
                                                      "ReplyToAddress",
-                                                     "CharacterSet") 
+                                                     "CharacterSet",
+                                                     "UseTLS",
+                                                     "SMTPPort")
 }
 
 Export-ModuleMember -Function *-TargetResource
