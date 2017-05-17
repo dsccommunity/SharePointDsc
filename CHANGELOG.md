@@ -45,6 +45,8 @@
 * Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
 * Fixed issue in SPWebApplication where the Get method didn't return Classic
   web applications properly
+* Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
+* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
 * Updated Readme of SPInstall to include SharePoint Foundation is not supported (580)
 * Added TLS and SMTP port support for SharePoint 2016 (540)
 * Fixed missing brackets in error message in SPExcelServiceApp (589)
