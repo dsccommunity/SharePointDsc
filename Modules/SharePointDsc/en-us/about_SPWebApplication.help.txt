@@ -1,0 +1,179 @@
+﻿.NAME
+    SPWebApplication
+
+# Description
+    
+    This resource is responsible for creating a web application within the local
+    SharePoint farm. The resource will provision the web application with all of
+    the current settings, and then ensure that it stays part of the correct
+    application pool beyond that (additional checking and setting of properties
+    
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the web application is provisioned.
+    
+    Note: When using Host Header Site Collections, do not use the HostHeader
+    parameter in SPWebApplication. This will set the specified host header on your
+    IIS site and prevent the site from listening for the URL of the Host Header
+    Site Collection.
+    If you want to change the IIS website binding settings, please use the xWebsite
+    resource in the xWebAdministration module.
+    
+.PARAMETER Name
+    Key - string
+    The name of the web application
+
+.PARAMETER ApplicationPool
+    Required - string
+    The name of the application pool to run this site in
+
+.PARAMETER ApplicationPoolAccount
+    Required - string
+    The name of the managed account to run the app pool with
+
+.PARAMETER Url
+    Required - string
+    The URL of the web application
+
+.PARAMETER AllowAnonymous
+    Write - boolean
+    Should anonymous access be enabled for this web app
+
+.PARAMETER AuthenticationMethod
+    Write - string
+    Allowed values: NTLM, Kerberos, Claims
+    What authentication mode should be used for the web app
+
+.PARAMETER AuthenticationProvider
+    Write - string
+    What authentication provider should be used for the web app. This value is required when AuthenticationMethod is set to Claims
+
+.PARAMETER DatabaseName
+    Write - string
+    The name of the first content database to be created with this web app
+
+.PARAMETER DatabaseServer
+    Write - string
+    The name of the database server to host the default content DB
+
+.PARAMETER HostHeader
+    Write - string
+    The host header to use for the web app
+
+.PARAMETER Path
+    Write - string
+    The path on the local servers to host the IIS web site from
+
+.PARAMETER Port
+    Write - string
+    The port to run the site on
+
+.PARAMETER UseSSL
+    Write - boolean
+    Should this web app use SSL
+
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present, Absent
+    Present if the web app should exist, absent if it should not
+
+.PARAMETER InstallAccount
+    Write - string
+    POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
+
+
+.EXAMPLE
+    This example shows how to create a new web application in the local farm
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWebApplication HostNameSiteCollectionWebApp
+            {
+                Name                   = "SharePoint Sites"
+                ApplicationPool        = "SharePoint Sites"
+                ApplicationPoolAccount = "CONTOSO\svcSPWebApp"
+                AllowAnonymous         = $false
+                AuthenticationMethod   = "NTLM"
+                DatabaseName           = "SP_Content_01"
+                DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
+                Url                    = "http://example.contoso.local"
+                Port                   = 80
+                Ensure                 = "Present"
+                PsDscRunAsCredential   = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to create a new web application in the local farm using a custom claim provider.
+    A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer is referenced
+    by the SPWebApplication as the AuthenticationProvider and the AuthenticationMethod is set to "Claims" value.
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+
+          
+             SPTrustedIdentityTokenIssuer SampleSPTrust
+            {
+                Name                         = "Contoso"
+                Description                  = "Contoso"
+                Realm                        = "https://sharepoint.contoso.com"
+                SignInUrl                    = "https://adfs.contoso.com/adfs/ls/"
+                IdentifierClaim              = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                ClaimsMappings               = @(
+                    MSFT_SPClaimTypeMapping{
+                        Name = "Email"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                    }
+                    MSFT_SPClaimTypeMapping{
+                        Name = "Role"
+                        IncomingClaimType = "http://schemas.xmlsoap.org/ExternalSTSGroupType"
+                        LocalClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    }
+                )
+                SigningCertificateThumbPrint = "F3229E7CCA1DA812E29284B0ED75A9A019A83B08"
+                ClaimProviderName            = "LDAPCP"
+                ProviderSignOutUri           = "https://adfs.contoso.com/adfs/ls/"
+                Ensure                       = "Present"
+                PsDscRunAsCredential         = $SetupAccount
+            }
+            
+            
+            SPWebApplication HostNameSiteCollectionWebApp
+            {
+                Name                   = "SharePoint Sites"
+                ApplicationPool        = "SharePoint Sites"
+                ApplicationPoolAccount = "CONTOSO\svcSPWebApp"
+                AllowAnonymous         = $false
+                AuthenticationMethod   = "Claims"
+                AuthenticationProvider = "Contoso"
+                DatabaseName           = "SP_Content_01"
+                DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
+                Url                    = "http://example.contoso.local"
+                Port                   = 80
+                Ensure                 = "Present"
+                PsDscRunAsCredential   = $SetupAccount
+                DependsOn = "[SPTrustedIdentityTokenIssuer]SampleSPTrust"
+            }
+        }
+    }
+
+
