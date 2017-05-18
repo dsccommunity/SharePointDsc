@@ -235,6 +235,10 @@ function Set-TargetResource
             { 
                 $params.Remove("InstallAccount") | Out-Null 
             }
+            if ($params.ContainsKey("TermStoreAdministrators")) 
+            { 
+                $params.Remove("TermStoreAdministrators") | Out-Null 
+            }
             if ($params.ContainsKey("ContentTypeHubUrl")) 
             {
                 $params.Add("HubUri", $params.ContentTypeHubUrl)
