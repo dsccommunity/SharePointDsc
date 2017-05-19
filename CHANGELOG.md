@@ -2,13 +2,15 @@
 
 ## Unreleased
 
-* Updated Readme of SPInstall to include SharePoint Foundation is not supported (580)
-* Added TLS and SMTP port support for SharePoint 2016 (540)
-* Fixed missing brackets in error message in SPExcelServiceApp (589)
-* Removed the requirement for the ConfigWizard in SPInstallLanguagePack (594)
-* Fixed LP detection issue in SPInstallLanguagePack (596)
-* Fixed issue with Access Denied in SPDesignerSettings (587)
-* ISSUE 551 - ADImport rework
+* Added TLS and SMTP port support for SharePoint 2016
+* Fixed issue in SPWebApplication where the Get method didn't return Classic
+  web applications properly
+* Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
+* Updated Readme of SPInstall to include SharePoint Foundation is not supported
+* Fixed issue with Access Denied in SPDesignerSettings
+* Fixed missing brackets in error message in SPExcelServiceApp
+* Removed the requirement for the ConfigWizard in SPInstallLanguagePack
+* Fixed LP detection issue in SPInstallLanguagePack
 
 ## 1.7.0.0
 
@@ -52,9 +54,6 @@
   joined to a farm
 * Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
 * Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
-* Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
-* Fixed issue in SPWebApplication where the Get method didn't return Classic
-  web applications properly
 * Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
 * Added TermStoreAdministrators property to SPManagedMetadataServiceApp
 * Fixed an issue in SPSearchTopology that would leave a corrupt topology in
