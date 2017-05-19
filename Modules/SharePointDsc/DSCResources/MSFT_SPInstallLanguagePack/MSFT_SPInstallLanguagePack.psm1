@@ -45,6 +45,37 @@ function Get-TargetResource
 
     $products = Get-SPDscRegProductsInfo
 
+    $englishProducts = @()
+    foreach ($product in $products)
+    {
+        $parsedProduct = $product -split " - "
+        switch -Regex ($parsedProduct)
+        {
+            "Dari"    { $languageEN = "Dari"}
+            "Serbian" { $languageEN = $parsedProduct[1] }
+            "Chinese" {
+                $parsedENProduct = $parsedProduct[1] -split "/"
+                $languageEN = $parsedENProduct[0]
+            }
+            "Portuguese" {
+                if ($parsedProduct[1] -match "\(Brasil\)")
+                {
+                    $languageEN = "Portuguese (Brasil)"
+                }
+                else
+                {
+                    $languageEN = "Portuguese (Portugal)"
+                }
+            }
+            Default {
+                $parsedENProduct = $parsedProduct[1] -split "/"
+                $parsedENProduct = $parsedENProduct[0] -split " "
+                $languageEN = $parsedENProduct[0]
+            }
+        }
+        $englishProducts += $languageEN
+    }
+
     # Extract language from filename
     if ($osrvFolder.Name -match "\w*.(\w{2,3}-\w*-?\w*)")
     {
@@ -72,84 +103,33 @@ function Get-TargetResource
     }
             
     # Extract English name of the language code
-    $updateLanguage = ""
-    if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
+    $updateLanguage = $cultureInfo.EnglishName
+    switch ($cultureInfo.EnglishName)
     {
-        $languageEnglish = $matches[1]
-        $updateLanguage  = $matches[0]
-        if ($languageEnglish.contains(","))
-        {
-            $languages = $languageEnglish.Split(",")
-            $languageEnglish = $languages[0]
+        "Dari (Afghanistan)" { $languageEnglish = "Dari" }
+        "Chinese (Simplified, China)" { $languageEnglish = "Chinese (PRC)" }
+        "Chinese (Traditional, Taiwan)" { $languageEnglish = "Chinese (Taiwan)" }
+        "Portuguese (Brazil)" { $languageEnglish = "Portuguese (Brasil)" }
+        "Portuguese (Portugal)" { $languageEnglish = "Portuguese (Portugal)" }
+        "Serbian (Cyrillic, Serbia)" { $languageEnglish = "Serbian/српски" }
+        "Serbian (Latin, Serbia)" { $languageEnglish = "Serbian/srpski" }
+        Default {
+            if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
+            {
+                $languageEnglish = $matches[1]
+                $updateLanguage  = $matches[0]
+                if ($languageEnglish.contains(","))
+                {
+                    $languages = $languageEnglish.Split(",")
+                    $languageEnglish = $languages[0]
+                }
+            }  
         }
     }
-
-    # Extract Native name of the language code
-    if ($cultureInfo.NativeName -match "(\w*,*\s*\w*) ?\([^)]*\)")
-    {
-        $languageNative = $matches[1]
-        if ($languageNative.contains(","))
-        {
-            $languages = $languageNative.Split(",")
-            $languageNative = $languages[0]
-        }
-    }
-
-    # Build language string used in Language Pack names
-    $languageString = $("$languageEnglish/$languageNative").Trim()
-    $languageString2 = $("$languageEnglish $languageNative").Trim()
     
-    switch ($updateLanguage) {
-        "Azerbaijani (Latin, Azerbaijan)" {
-            $languageString = "Azerbaijani/Azərbaycan­ılı"
-            $languageString2 = "NO MATCH"
-        }
-        "English (United States)" {
-            $languageString = "English"
-            $languageString2 = "NO MATCH"
-        }
-        "Portuguese (Brazil)" {
-            $languageString = "Portuguese/Português \(Brasil\)"
-            $languageString2 = "NO MATCH"
-        }
-        "Dari (Afghanistan)" {
-            $languageString = "درى Dari"
-            $languageString2 = "NO MATCH"
-        }        
-        "Latvian (Latvia)" {
-            $languageString = "Latvian/latviski"
-            $languageString2 = "NO MATCH"
-        }
-        "Malay (Malaysia)" {
-            $languageString = "Malay/Bahasa Malaysia"
-            $languageString2 = "NO MATCH"
-        }
-        "Vietnamese (Vietnam)" {
-            $languageString = "Vietnamese/Tiếng Việt"
-            $languageString2 = "NO MATCH"
-        }
-        "Chinese (Simplified, China)" {
-            $languageString = 'Chinese \(PRC\)/中文\(简体\)'
-            $languageString2 = "NO MATCH"
-        }
-        "Chinese (Traditional, Taiwan)" {
-            $languageString = 'Chinese \(Taiwan\)/中文 \(繁體\)'
-            $languageString2 = "NO MATCH"
-        }
-    }
     Write-Verbose -Message "Update is for the $languageEnglish language"
 
-    # Find the product name for the specific language pack
-    $productFound = $false
-    foreach ($product in $products)
-    {
-        if ($product -match $languageString -or $product -match $languageString2)
-        {
-            $productFound = $true
-        }
-    }
-
-    if ($productFound -eq $true)
+    if ($englishProducts -contains $languageEnglish -eq $true)
     {
         Write-Verbose -Message "Language Pack $languageEnglish is found"
         return @{

@@ -120,9 +120,7 @@ function Get-TargetResource
                     }
 
                     # Check if site collections exists
-                    $site = Get-SPSite | Where-Object -FilterScript { 
-                        $_.Url -eq $params.Url 
-                    }
+                    $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
                     if ($null -eq $site) 
                     {
                         Write-Verbose -Message ("Site collection not found. SharePoint " + `
@@ -301,9 +299,7 @@ function Set-TargetResource
                     Write-Verbose -Message "Start update SPD site collection settings"
 
                     # Check if site collection exists
-                    $site = Get-SPSite | Where-Object -FilterScript { 
-                        $_.Url -eq $url 
-                    }
+                    $site = Get-SPSite $params.Url -ErrorAction SilentlyContinue
                     if ($null -eq $site) 
                     {
                         throw ("Site collection not found. SharePoint Designer settings " + `

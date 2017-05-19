@@ -102,7 +102,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+        Context -Name "Chinese Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
             $testParams = @{
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
@@ -143,7 +143,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+        Context -Name "Portuguese Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
             $testParams = @{
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
@@ -167,6 +167,47 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     16 {
                         return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português (Brasil)')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Arabic Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.ar-SA"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Arabic/LOCAL ARABIC')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Arabic/LOCAL ARABIC')
                     }
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"

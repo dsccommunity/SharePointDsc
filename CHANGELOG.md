@@ -7,6 +7,7 @@
 * Fixed missing brackets in error message in SPExcelServiceApp (589)
 * Removed the requirement for the ConfigWizard in SPInstallLanguagePack (594)
 * Fixed LP detection issue in SPInstallLanguagePack (596)
+* Fixed issue with Access Denied in SPDesignerSettings (587)
 * ISSUE 551 - ADImport rework
 
 ## 1.7.0.0
