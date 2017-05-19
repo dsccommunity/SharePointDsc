@@ -52,7 +52,16 @@ function Get-TargetResource
         switch -Regex ($parsedProduct)
         {
             "Dari"    { $languageEN = "Dari"}
-            "Serbian" { $languageEN = $parsedProduct[1] }
+            "Serbian" {
+                if ($parsedProduct[1] -match "srpski")
+                {
+                    $languageEN = "Serbian (Latin)"
+                }
+                else
+                {
+                    $languageEN = "Serbian (Cyrillic)"
+                }
+            }
             "Chinese" {
                 $parsedENProduct = $parsedProduct[1] -split "/"
                 $languageEN = $parsedENProduct[0]
@@ -111,8 +120,8 @@ function Get-TargetResource
         "Chinese (Traditional, Taiwan)" { $languageEnglish = "Chinese (Taiwan)" }
         "Portuguese (Brazil)" { $languageEnglish = "Portuguese (Brasil)" }
         "Portuguese (Portugal)" { $languageEnglish = "Portuguese (Portugal)" }
-        "Serbian (Cyrillic, Serbia)" { $languageEnglish = "Serbian/српски" }
-        "Serbian (Latin, Serbia)" { $languageEnglish = "Serbian/srpski" }
+        "Serbian (Cyrillic, Serbia)" { $languageEnglish = "Serbian (Cyrillic)" }
+        "Serbian (Latin, Serbia)" { $languageEnglish = "Serbian (Latin)" }
         Default {
             if ($cultureInfo.EnglishName -match "(\w*,*\s*\w*) \([^)]*\)")
             {
