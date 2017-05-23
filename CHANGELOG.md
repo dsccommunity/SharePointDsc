@@ -7,6 +7,8 @@
 
 ## Unreleased
 
+## 1.7.0.0
+
 * Update SPSearchIndexPartition made ServiceAppName as a Key
 * New resouce: SPTrustedRootAuthority
 * Update SPFarmSolution to eject from loop after 30m.
@@ -47,6 +49,12 @@
   joined to a farm
 * Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
 * Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
+* Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
+* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
+* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
+  place if a server was removed and re-added to a farm
+* Fixed bug in SPFarm that caused issues with database names that have dashes
+  in the names
 
 ## 1.6
 
