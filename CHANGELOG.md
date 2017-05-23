@@ -1,5 +1,10 @@
 # Change log for SharePointDsc
 
+## Unreleased v2.0
+
+* Updated SPShellAdmin so it also works for non-content databases (572)
+* Updated SPWebApplication so it infers the UseSSL value from the URL (424)
+
 ## Unreleased
 
 * Update SPSearchIndexPartition made ServiceAppName as a Key
