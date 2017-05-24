@@ -246,7 +246,7 @@ function Set-TargetResource
                     # ApplicationPoolAccount parameter to create the application pool
                     try 
                     {
-                        $null = Get-SPManagedAccount $params.ApplicationPoolAccount -ErrorAction Stop
+                        Get-SPManagedAccount $params.ApplicationPoolAccount -ErrorAction Stop | Out-Null
                         $newWebAppParams.Add("ApplicationPoolAccount", $params.ApplicationPoolAccount)
                     }
                     catch 

@@ -126,13 +126,13 @@ function Set-TargetResource
 
     $installedVersion = Get-SPDSCInstalledProductVersion
     if (($PSBoundParameters.ContainsKey("UseTLS") -eq $true) `
-        -and $installedVersion.FileMajorPart -ne 16) 
+        -and $installedVersion.FileMajorPart -lt 16) 
     {
         throw [Exception] "UseTLS is only supported in SharePoint 2016."
     }
 
     if (($PSBoundParameters.ContainsKey("SMTPPort") -eq $true) `
-        -and $installedVersion.FileMajorPart -ne 16) 
+        -and $installedVersion.FileMajorPart -lt 16) 
     {
         throw [Exception] "SMTPPort is only supported in SharePoint 2016."
     }

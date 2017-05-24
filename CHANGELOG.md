@@ -10,7 +10,7 @@
 * Fixed issue with Access Denied in SPDesignerSettings
 * Fixed missing brackets in error message in SPExcelServiceApp
 * Removed the requirement for the ConfigWizard in SPInstallLanguagePack
-* Fixed LP detection issue in SPInstallLanguagePack
+* Fixed Language Pack detection issue in SPInstallLanguagePack
 
 ## 1.7.0.0
 
