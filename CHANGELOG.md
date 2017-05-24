@@ -1,5 +1,17 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Added TLS and SMTP port support for SharePoint 2016
+* Fixed issue in SPWebApplication where the Get method didn't return Classic
+  web applications properly
+* Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
+* Updated Readme of SPInstall to include SharePoint Foundation is not supported
+* Fixed issue with Access Denied in SPDesignerSettings
+* Fixed missing brackets in error message in SPExcelServiceApp
+* Removed the requirement for the ConfigWizard in SPInstallLanguagePack
+* Fixed Language Pack detection issue in SPInstallLanguagePack
+
 ## 1.7.0.0
 
 * Update SPSearchIndexPartition made ServiceAppName as a Key
