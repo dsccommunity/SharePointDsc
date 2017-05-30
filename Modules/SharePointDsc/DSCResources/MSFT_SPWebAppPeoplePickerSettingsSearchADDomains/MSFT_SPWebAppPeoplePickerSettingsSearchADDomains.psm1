@@ -28,7 +28,7 @@ function Get-TargetResource()
         $InstallAccount
     )
 
-    Write-Verbose -Message ("Looking for web application $WebApplicationURL " + `
+    Write-Verbose -Message ("Looking for web application $Url " + `
                             "SearchActiveDirectoryDomain $DomainName")
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -44,7 +44,7 @@ function Get-TargetResource()
             InstallAccount  = $params.InstallAccount
         }
 
-        $spWebApplication = Get-SPWebApplication -Identity $params.WebApplicationURL `
+        $spWebApplication = Get-SPWebApplication -Identity $params.Url `
                                                  -ErrorAction SilentlyContinue
 
         if ($null -eq $spWebApplication)
@@ -98,7 +98,7 @@ function Set-TargetResource()
     )
 
     Write-Verbose -Message ("Setting SearchActiveDirectoryDomain $DomainName " + `
-                            "for the web application $WebApplicationURL ")
+                            "for the web application $Url ")
     
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -107,14 +107,14 @@ function Set-TargetResource()
         
         try
         {
-            $spWebApplication = Get-SPWebApplication -Identity $params.WebApplicationURL `
+            $spWebApplication = Get-SPWebApplication -Identity $params.Url `
                                                         -ErrorAction SilentlyContinue
             switch ($params.Ensure)
             {
                 'Present'
                 {
                     Write-Verbose -Message ("Adding SearchActiveDirectoryDomain $DomainName " + `
-                                            "to web application $WebApplicationURL")
+                                            "to web application $Url")
                     $newSearchADDomain = New-Object -TypeName Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain
                     if ($params.LoginName)
                     {
@@ -128,7 +128,7 @@ function Set-TargetResource()
                 'Absent'
                 {
                     Write-Verbose -Message ("Removing SearchActiveDirectoryDomain $DomainName " + `
-                                            "to web application $WebApplicationURL")
+                                            "to web application $Url")
                     $searchADDomainToRemove = $spWebApplication.PeoplePickerSettings.SearchActiveDirectoryDomains | Where-Object -FilterScript { 
                         $_.DomainName -eq $params.DomainName
                     }
