@@ -14,6 +14,9 @@
     the Administrators group. Therefore this resource will add the FarmAccount
     credential to the local administrators group at the beginning of the set
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the user profile sync service is provisioned.
+    
 .PARAMETER UserProfileServiceAppName
     Key - string
     The name of the user profile service for this sync instance

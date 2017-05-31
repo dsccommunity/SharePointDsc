@@ -16,6 +16,9 @@
     
     This Resource doesn't currently support removing existing user profile
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the user profile property is created.
+    
 .PARAMETER Name
     Key - string
     The internal name of the user profile property

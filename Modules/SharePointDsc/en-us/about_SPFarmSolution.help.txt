@@ -10,6 +10,9 @@
     are specified, the solution will be deployed to all web applications. If the
     solution does not contain resources scoped for web applications the property
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the solution is deployed.
+    
 .PARAMETER Name
     Key - string
     The filename of the WSP package

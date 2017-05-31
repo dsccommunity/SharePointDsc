@@ -7,12 +7,15 @@
     service application. You can create new file types, change existing types and
     remove existing file types.
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the file type is added.
+    
 .PARAMETER FileType
     Key - string
     The name of the file type
 
 .PARAMETER ServiceAppName
-    Required - string
+    Key - string
     The name of the search service application
 
 .PARAMETER Description
@@ -30,7 +33,7 @@
 .PARAMETER Ensure
     Write - string
     Allowed values: Present, Absent
-    Present if the service app should exist, absent if it should not
+    Present if the file type should exist, absent if it should not
 
 .PARAMETER InstallAccount
     Write - String

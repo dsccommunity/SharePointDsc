@@ -11,6 +11,9 @@
     host named site collections set HostHeader to true and the path will be
     created as a host header path to be applied for host named site collections.
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the managed path is created.
+    
 .PARAMETER WebAppUrl
     Key - string
     The URL of the web application to apply the managed path to - this is ignored for host header web applications

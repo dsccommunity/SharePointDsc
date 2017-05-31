@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.6.0.0'
+ModuleVersion = '1.7.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -24,7 +24,7 @@ Author = 'Microsoft Corporation'
 CompanyName = 'Microsoft Corporation'
 
 # Copyright statement for this module
-Copyright = '(c) 2015-2016 Microsoft Corporation. All rights reserved.'
+Copyright = '(c) 2015-2017 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'This DSC module is used to deploy and configure SharePoint Server 2013 and 2016, and covers a wide range of areas including web apps, service apps and farm configuration.'
@@ -125,32 +125,54 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '
-* Updated SPWebApplication to allow Claims Authentication configuration
-* Updated documentation in regards to guidance on installing binaries from
-  network locations instead of locally
-* New resources: SPFarmPropertyBag
-* Bugfix in SPSite, which wasnt returing the quota template name in a correct way
-* Bugfix in SPAppManagementServiceApp which wasnt returning the correct database
-  name
-* Bugfix in SPAccessServiceApp which did not return the database server
-* Bugfix in SPDesignerSettings which filtered site collections with an incorrect
-  parameter
-* Updated the parameters in SPFarmSolution to use the full namespace
-* Bugfix in SPFarmsolution where it returned non declared parameters
-* Corrected typo in parameter name in Get method of SPFeature
-* Added check in SPHealAnalyzerRuleState for incorrect default rule schedule of
-  one rule
-* Improved check for CloudSSA in SPSearchServiceApp
-* Bugfix in SPSearchServiceApp in which the database and dbserver were not
-  returned correctly
-* Improved runtime of SPSearchTopology by streamlining wait processes
-* Fixed bug with SPSearchServiceApp that would throw an error about SDDL string
-* Improved output of test results for AppVeyor and VS Code based test runs
-* Fixed issue with SPWebAppPolicy if OS language is not En-Us
-* Added SPFarm resource, set SPCreateFarm and SPJoinFarm as deprecated to be
-  removed in version 2.0
-'
+        ReleaseNotes = "
+* Update SPSearchIndexPartition made ServiceAppName as a Key
+* New resouce: SPTrustedRootAuthority
+* Update SPFarmSolution to eject from loop after 30m.
+* New resource: SPMachineTranslationServiceApp
+* New resource: SPPowerPointAutomationServiceApp
+* Bugfix in SPSearchFileType  made ServiceAppName a key property.
+* New resource: SPWebApplicationExtension
+* Added new resource SPAccessServices2010
+* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
+  Search Service Application
+* Added new resource SPSearchAuthoritativePage
+* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
+* Fix typo in method Get-TargetResource of SPFeature
+* Fix bug in SPManagedAccount not returning the correct account name value
+* Fix typo in method Get-TargetResource of SPSearchIndexPartition
+* Update documentation of SPInstallLanguagePack to add guidance on package
+  change in SP2016
+* Added returning the required RunCentralAdmin parameter to
+  Get-TargetResource in SPFarm
+* Added web role check for SPBlobCacheSettings
+* Improved error message when rule could not be found in
+  SPHealthAnalyzerRuleState
+* Extended the documentation to specify that the default value of Ensure
+  is Present
+* Added documentation about the user of Host Header Site Collections and
+  the HostHeader parameter in SPWebApplication
+* Fixed missing brackets in SPWebAppPolicy module file
+* Fixed issue with SPSecureStoreServiceApp not returning database information
+* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl
+  in SP2016
+* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing
+  certificate from file path as an alternative to the certificate store
+* New resource: SPSearchCrawlerImpactRule
+* Fixed issue in SPSite where the used template wasn't returned properly
+* Fixed issue in SPWebApplicationGeneralSettings which didn't return the
+  security validation timeout properly
+* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
+  joined to a farm
+* Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
+* Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
+* Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
+* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
+* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
+  place if a server was removed and re-added to a farm
+* Fixed bug in SPFarm that caused issues with database names that have dashes
+  in the names
+"
 
     } # End of PSData hashtable
 

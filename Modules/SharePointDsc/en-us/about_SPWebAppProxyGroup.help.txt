@@ -19,7 +19,7 @@
 
 .PARAMETER ServiceAppProxyGroup
     Required - string
-    Name of the Service Applicaiton Proxy Group
+    Name of the Service Application Proxy Group
 
 .PARAMETER InstallAccount
     Write - String

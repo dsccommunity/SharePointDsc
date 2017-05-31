@@ -23,6 +23,9 @@
     a server check the others for distributed cache, it does not provision the
     cache automatically on all servers. If a previous server in the sequence does
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the distributed cache is provisioned.
+    
 .PARAMETER Name
     Key - String
     A name to assign to this resource - not really used. For example - AppFabricCachingService

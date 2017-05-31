@@ -7,6 +7,9 @@
     the name of the database server and database name to provision the app with,
     and optionally include the session timeout value. If session timeout is not
     
+    The default value for the Ensure parameter is Present. When not specifying this
+    parameter, the service application is provisioned.
+    
 .PARAMETER DatabaseName
     Key - string
     The name of the database for the service

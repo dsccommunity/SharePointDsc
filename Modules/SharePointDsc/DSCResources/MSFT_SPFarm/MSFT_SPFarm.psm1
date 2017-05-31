@@ -75,7 +75,7 @@ function Get-TargetResource
             Write-Verbose -Message "Detected installation of SharePoint 2013"
         }
         16 {
-            Write-Verbose -Message "Detected installation of SharePoint 2013"
+            Write-Verbose -Message "Detected installation of SharePoint 2016"
         }
         default {
             throw ("Detected an unsupported major version of SharePoint. SharePointDsc only " + `
@@ -148,6 +148,21 @@ function Get-TargetResource
                 $farmAccount = $spFarm.DefaultServiceAccount.Name
             }
 
+            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                                | Where-Object -FilterScript { 
+                                    $_.IsAdministrationWebApplication -eq $true 
+                                }
+
+            $centralAdminProvisioned = $false
+            $ca = Get-SPServiceInstance -Server $env:ComputerName `
+                  | Where-Object -Filterscript {
+                        $_.TypeName -eq "Central Administration" -and $_.Status -eq "Online"
+                    }
+            if ($null -ne $ca)
+            {
+                $centralAdminProvisioned = $true
+            }
+
             $returnValue = @{
                 FarmConfigDatabaseName = $spFarm.Name
                 DatabaseServer = $configDb.Server.Name
@@ -155,6 +170,7 @@ function Get-TargetResource
                 InstallAccount = $null
                 Passphrase = $null 
                 AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
+                RunCentralAdmin = $centralAdminProvisioned
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $params.CentralAdministrationAuth #TODO: Need to return this as the current value
             }
@@ -177,6 +193,7 @@ function Get-TargetResource
                 InstallAccount = $null
                 Passphrase = $null 
                 AdminContentDatabaseName = $null
+                RunCentralAdmin = $null
                 CentralAdministrationPort = $null
                 CentralAdministrationAuth = $null
                 Ensure = "Present"
@@ -198,6 +215,7 @@ function Get-TargetResource
             InstallAccount = $null
             Passphrase = $null 
             AdminContentDatabaseName = $null
+            RunCentralAdmin = $null
             CentralAdministrationPort = $null
             CentralAdministrationAuth = $null
             Ensure = "Absent"
