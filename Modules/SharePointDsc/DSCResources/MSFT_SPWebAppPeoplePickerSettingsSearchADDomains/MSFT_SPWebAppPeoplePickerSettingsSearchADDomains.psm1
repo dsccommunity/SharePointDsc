@@ -104,11 +104,18 @@ function Set-TargetResource()
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
         $params = $args[0]
+
+        $spWebApplication = Get-SPWebApplication -Identity $params.Url `
+                                                 -ErrorAction SilentlyContinue
+        if ($null -eq $spWebApplication) 
+        {
+            throw "Web Application with URL $($params.Url) does not exist"
+        }
         
         try
         {
             $spWebApplication = Get-SPWebApplication -Identity $params.Url `
-                                                        -ErrorAction SilentlyContinue
+                                                     -ErrorAction SilentlyContinue
             switch ($params.Ensure)
             {
                 'Present'
@@ -132,6 +139,7 @@ function Set-TargetResource()
                     $searchADDomainToRemove = $spWebApplication.PeoplePickerSettings.SearchActiveDirectoryDomains | Where-Object -FilterScript { 
                         $_.DomainName -eq $params.DomainName
                     }
+                    
                     $spWebApplication.PeoplePickerSettings.SearchActiveDirectoryDomains.Remove($searchADDomainToRemove)
                 }
             }
@@ -174,6 +182,9 @@ function Test-TargetResource()
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
+
+    Write-Verbose -Message ("Testing SearchActiveDirectoryDomain $DomainName " + `
+                            "for the web application $Url ")
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
