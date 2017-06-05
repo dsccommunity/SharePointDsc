@@ -70,7 +70,7 @@ function Get-TargetResource
                 $Ensure = "Absent"    
             }
             
-            $ServiceAppProxies = $ProxyGroup.Proxies.Name
+            $ServiceAppProxies = $ProxyGroup.Proxies.DisplayName
             
             return @{
                 Name = $params.name
@@ -159,13 +159,12 @@ function Set-TargetResource
                 Write-Verbose -Message "Creating new Service Application Proxy Group $($params.Name)"
                 $ProxyGroup = New-SPServiceApplicationProxyGroup -Name $params.Name
             }
-                
             #Explicit Service Applications
             if ($params.ServiceAppProxies) 
             {
-                if ($ProxyGroup.Proxies.Name) 
+                if ($ProxyGroup.Proxies.DisplayName) 
                 {
-                    $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name `
+                    $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.DisplayName `
                                                   -DifferenceObject $params.ServiceAppProxies
                 
                     if ($null -eq $Differences) 
@@ -234,9 +233,9 @@ function Set-TargetResource
             
             if ($params.ServiceAppProxiesToInclude) 
             {
-                if ($ProxyGroup.Proxies.name) 
+                if ($ProxyGroup.Proxies.DisplayName) 
                 {
-                    $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name `
+                    $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.DisplayName `
                                                   -DifferenceObject $params.ServiceAppProxiesToInclude 
                     
                     if ($null -eq $Differences) 
@@ -289,9 +288,9 @@ function Set-TargetResource
             
             if ($params.ServiceAppProxiesToExclude) 
             {
-                if ($ProxyGroup.Proxies.name) 
+                if ($ProxyGroup.Proxies.Displayname) 
                 {
-                    $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.Name `
+                    $differences = Compare-Object -ReferenceObject $ProxyGroup.Proxies.DisplayName `
                                                   -DifferenceObject $params.ServiceAppProxiesToExclude `
                                                   -IncludeEqual
                     

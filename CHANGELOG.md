@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
 * Added TLS and SMTP port support for SharePoint 2016
 * Fixed issue in SPWebApplication where the Get method didn't return Classic
   web applications properly
