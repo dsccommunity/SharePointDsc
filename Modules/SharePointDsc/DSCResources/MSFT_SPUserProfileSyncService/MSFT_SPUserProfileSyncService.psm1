@@ -12,10 +12,6 @@ function Get-TargetResource
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
-        [parameter(Mandatory = $true)]  
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
-
         [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
@@ -31,6 +27,43 @@ function Get-TargetResource
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
+    }
+
+    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                       -Arguments $PSBoundParameters `
+                                       -ScriptBlock {
+        $spFarm = Get-SPFarm
+        return $spFarm.DefaultServiceAccount.Name 
+    }
+
+    if ($null -ne $farmAccount)
+    {
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        {
+            # InstallAccount used
+            if ($InstallAccount -ne $farmAccount)
+            {
+                throw ("Specified Install Account isn't the Farm Account. Make sure " + `
+                       "the specified Install Account is the FarmAccount and try again")
+            }
+        }
+        else {
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
+            {
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -ne $farmAccount)
+                {
+                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
+                           "the specified Install Account is the FarmAccount and try again")
+                }
+            }
+        }
+    }
+    else
+    {
+        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -92,21 +125,9 @@ function Get-TargetResource
             $localEnsure = "Absent" 
         }
 
-        $spFarm = Get-SPFarm
-
-        if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) 
-        {
-            $farmAccount = $params.FarmAccount
-        } 
-        else 
-        {
-            $farmAccount = $spFarm.DefaultServiceAccount.Name
-        }
-
         return @{
             UserProfileServiceAppName = $upa.Name
             Ensure = $localEnsure
-            FarmAccount = $farmAccount
             RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
             InstallAccount = $params.InstallAccount
         }
@@ -128,10 +149,6 @@ function Set-TargetResource
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
-        [parameter(Mandatory = $true)]  
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
-
         [parameter(Mandatory = $false)]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
@@ -149,6 +166,43 @@ function Set-TargetResource
     {
         throw [Exception] ("Only SharePoint 2013 is supported to deploy the user profile sync " + `
                            "service via DSC, as 2016 does not use the FIM based sync service.")
+    }
+
+    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
+        $spFarm = Get-SPFarm
+        return $spFarm.DefaultServiceAccount.Name 
+    }
+
+    if ($null -ne $farmAccount)
+    {
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        {
+            # InstallAccount used
+            if ($InstallAccount -ne $farmAccount)
+            {
+                throw ("Specified Install Account isn't the Farm Account. Make sure " + `
+                       "the specified Install Account is the FarmAccount and try again")
+            }
+        }
+        else {
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
+            {
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -ne $farmAccount)
+                {
+                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
+                           "the specified Install Account is the FarmAccount and try again")
+                }
+            }
+        }
+    }
+    else
+    {
+        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
     }
 
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
@@ -170,11 +224,11 @@ function Set-TargetResource
     }
 
     # Add the FarmAccount to the local Admins group, if it's not already there
-    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
+    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount
 
     if (!$isLocalAdmin)
     {
-        Add-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+        Add-SPDSCUserToLocalAdmin -UserName $farmAccount
 
         # Cycle the Timer Service so that it picks up the local Admin token
         Restart-Service -Name "SPTimerV4"
@@ -182,7 +236,7 @@ function Set-TargetResource
 
     try 
     {
-        Invoke-SPDSCCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
             
             $currentServer = $env:COMPUTERNAME
@@ -258,7 +312,7 @@ function Set-TargetResource
         # Remove the FarmAccount from the local Admins group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount
         }
     }
 }
@@ -276,10 +330,6 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
-
-        [parameter(Mandatory = $true)]  
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
 
         [parameter(Mandatory = $false)]
         [System.Boolean] 

@@ -17,10 +17,6 @@ function Get-TargetResource
         $ApplicationPool,
 
         [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)] 
         [System.String] 
         $MySiteHostLocation,
 
@@ -63,6 +59,43 @@ function Get-TargetResource
     )
        
     Write-Verbose -Message "Getting user profile service application $Name"
+
+    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                       -Arguments $PSBoundParameters `
+                                       -ScriptBlock {
+        $spFarm = Get-SPFarm
+        return $spFarm.DefaultServiceAccount.Name 
+    }
+
+    if ($null -ne $farmAccount)
+    {
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        {
+            # InstallAccount used
+            if ($InstallAccount -ne $farmAccount)
+            {
+                throw ("Specified Install Account isn't the Farm Account. Make sure " + `
+                       "the specified Install Account is the FarmAccount and try again")
+            }
+        }
+        else {
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
+            {
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -ne $farmAccount)
+                {
+                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
+                           "the specified Install Account is the FarmAccount and try again")
+                }
+            }
+        }
+    }
+    else
+    {
+        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -109,16 +142,6 @@ function Get-TargetResource
             }
             $databases.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
 
-            $spFarm = Get-SPFarm
-
-            if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) 
-            {
-                $farmAccount = $params.FarmAccount
-            } 
-            else 
-            {
-                $farmAccount = $spFarm.DefaultServiceAccount.Name
-            }
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
@@ -134,7 +157,6 @@ function Get-TargetResource
                 Name               = $serviceApp.DisplayName
                 ProxyName          = $proxyName
                 ApplicationPool    = $serviceApp.ApplicationPool.Name
-                FarmAccount        = $farmAccount
                 MySiteHostLocation = $params.MySiteHostLocation
                 ProfileDBName      = $databases.ProfileDatabase.Name
                 ProfileDBServer    = $databases.ProfileDatabase.Server.Name
@@ -167,10 +189,6 @@ function Set-TargetResource
         [parameter(Mandatory = $true)] 
         [System.String] 
         $ApplicationPool,
-
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
 
         [parameter(Mandatory = $false)] 
         [System.String] 
@@ -218,24 +236,57 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present") 
     {    
-        if ($PSBoundParameters.ContainsKey("FarmAccount") -eq $false) 
+        $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
+            $spFarm = Get-SPFarm
+            return $spFarm.DefaultServiceAccount.Name 
+        }
+
+        if ($null -ne $farmAccount)
         {
-            throw ("Unable to provision the user profile service without the Farm Account. " + `
-                   "Please specify the FarmAccount parameter and try again")
-            return
+            if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+            {
+                # InstallAccount used
+                if ($InstallAccount -ne $farmAccount)
+                {
+                    throw ("Specified Install Account isn't the Farm Account. Make sure " + `
+                           "the specified Install Account is the FarmAccount and try again")
+                }
+            }
+            else {
+                # PSDSCRunAsCredential or System
+                if (-not $Env:USERNAME.Contains("$"))
+                {
+                    # PSDSCRunAsCredential used
+                    $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                    if ($localaccount -ne $farmAccount)
+                    {
+                        throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
+                               "the specified Install Account is the FarmAccount and try again")
+                    }
+                }
+            }
+        }
+        else
+        {
+            throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
         }
         
         Write-Verbose -Message "Creating user profile service application $Name"
         
-        # Add the FarmAccount to the local Administrators group, if it's not already there
-        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
+        # Add the InstallAccount to the local Administrators group, if it's not already there
+        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount
 
         if (!$isLocalAdmin)
         {
-            Add-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+            Add-SPDSCUserToLocalAdmin -UserName $farmAccount
+
+            # Cycle the Timer Service so that it picks up the local Admin token
+            Restart-Service -Name "SPTimerV4"
         }
 
-        $result = Invoke-SPDSCCommand -Credential $FarmAccount `
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -255,7 +306,6 @@ function Set-TargetResource
             { 
                 $params.Remove("Ensure") | Out-Null 
             }
-            $params.Remove("FarmAccount") | Out-Null
 
             $params = Rename-SPDSCParamValue -params $params `
                                              -oldName "SyncDBName" `
@@ -294,14 +344,12 @@ function Set-TargetResource
                 $app.NetBIOSDomainNamesEnabled = $enableNetBIOS
                 $app.Update()
             }
-
-            
         }
 
-        # Remove the FarmAccount from the local Administrators group, if it was added above
+        # Remove the InstallAccount from the local Administrators group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount
         }
     }
     
@@ -350,10 +398,6 @@ function Test-TargetResource
         [parameter(Mandatory = $true)] 
         [System.String] 
         $ApplicationPool,
-
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
 
         [parameter(Mandatory = $false)] 
         [System.String] 
