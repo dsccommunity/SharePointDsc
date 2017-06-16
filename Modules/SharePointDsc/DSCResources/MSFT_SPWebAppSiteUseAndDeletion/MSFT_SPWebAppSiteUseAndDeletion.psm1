@@ -21,7 +21,7 @@ function Get-TargetResource
         $AutomaticallyDeleteUnusedSiteCollections,
 
         [parameter(Mandatory = $false)] 
-        [ValidateRange(28,168)]  
+        [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
@@ -91,7 +91,7 @@ function Set-TargetResource
         $AutomaticallyDeleteUnusedSiteCollections,
 
         [parameter(Mandatory = $false)] 
-        [ValidateRange(28,168)]  
+        [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
@@ -115,15 +115,51 @@ function Set-TargetResource
         {
             throw ("No local SharePoint farm was detected. Site Use and Deletion settings " + `
                    "will not be applied")
-            return
         }
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
         if ($null -eq $wa) 
         { 
             throw "Configured web application could not be found"
-            return
         }
+
+        # Check if the specified value is in the range for the configured schedule
+        $job = Get-SPTimerJob -Identity job-dead-site-delete -WebApplication $params.Url
+        if ($null -eq $job) 
+        { 
+            throw "Dead Site Delete timer job for web application $($params.Url) could not be found"
+        }
+        else
+        {
+            # Check schedule value     
+            switch ($job.Schedule.Description)
+            {
+                "Daily"   { 
+                    if (($params.UnusedSiteNotificationsBeforeDeletion -lt 28) -or
+                        ($params.UnusedSiteNotificationsBeforeDeletion -gt 168))
+                    {
+                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and " + `
+                               "<168 when the schedule is set to daily")
+                    }
+                }
+                "Weekly"  {
+                    if (($params.UnusedSiteNotificationsBeforeDeletion -lt 4) -or
+                        ($params.UnusedSiteNotificationsBeforeDeletion -gt 24))
+                    {
+                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >24 and " + `
+                               "<24 when the schedule is set to weekly")
+                    }
+                }
+                "Monthly" {
+                    if (($params.UnusedSiteNotificationsBeforeDeletion -lt 2) -or
+                        ($params.UnusedSiteNotificationsBeforeDeletion -gt 6))
+                    {
+                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and " + `
+                               "<6 when the schedule is set to monthly")
+                    }
+                }
+            }
+        }        
 
         Write-Verbose -Message "Start update"
 
@@ -175,7 +211,7 @@ function Test-TargetResource
         $AutomaticallyDeleteUnusedSiteCollections,
 
         [parameter(Mandatory = $false)] 
-        [ValidateRange(28,168)]  
+        [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 

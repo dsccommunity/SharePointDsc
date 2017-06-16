@@ -338,7 +338,7 @@ function Set-TargetResource
         $osearchStopped = $false
         $hostControllerStopped = $false
 
-        if ((Get-SPDSCInstalledProductVersion) -eq 15)
+        if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
         {
             $searchServiceName = "OSearch15"
         }

@@ -11,6 +11,15 @@
 * Fixed missing brackets in error message in SPExcelServiceApp
 * Removed the requirement for the ConfigWizard in SPInstallLanguagePack
 * Fixed Language Pack detection issue in SPInstallLanguagePack
+* Fixed issue in SPCreateFarm and SPJoinFarm where an exception was not handled
+  correctly (issue 621)
+* Fixed issue in SPSessionStateService not returning correct database server
+  and name (issue 618)
+* Fixed missing Ensure property default in SPRemoteFarmTrust (issue 614)
+* Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone (issue 610)
+* Fixed incorrect UsagePoint check in SPQuotaTemplate (issue 605)
+* Fixed issue in SPWebAppPolicy module where verbose messages are causing errors (issue 602)
+* Fixed incorrect parameter naming in Get method of SPUserProfilePropery (issue 611)    
 
 ## 1.7.0.0
 

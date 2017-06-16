@@ -43,7 +43,8 @@ function Get-TargetResource
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
     {
-        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+        Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+               "WarningUsagePointsSolutions.")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -144,7 +145,8 @@ function Set-TargetResource
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
     {
-        Throw "MaximumUsagePointsSolutions must be larger than WarningUsagePointsSolutions."
+        Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
+               "WarningUsagePointsSolutions.")
     }
 
     switch ($Ensure) 
@@ -304,7 +306,7 @@ function Test-TargetResource
         Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
-    if ($MaximumUsagePointsSolutions -le $WarningUsagePointsSolutions) 
+    if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
     {
         Throw ("MaximumUsagePointsSolutions must be equal to or larger than " + `
                "WarningUsagePointsSolutions.")

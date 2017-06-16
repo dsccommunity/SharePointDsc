@@ -196,7 +196,7 @@ function Get-TargetResource
         
         return @{
             Name = $userProfileProperty.Name 
-            UserProfileServiceAppName = $params.UserProfileService
+            UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             Type = $userProfileProperty.CoreProperty.Type
             Description = $userProfileProperty.Description 
