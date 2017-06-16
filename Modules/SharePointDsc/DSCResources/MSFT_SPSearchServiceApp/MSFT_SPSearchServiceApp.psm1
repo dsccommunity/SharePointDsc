@@ -43,6 +43,10 @@ function Get-TargetResource
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $DefaultContentAccessAccount,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $WindowsServiceAccount,
         
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -112,7 +116,12 @@ function Get-TargetResource
                 { 
                     $proxyName = $serviceAppProxy.Name
                 }
-            }          
+            }    
+
+            $searchService = Get-SPEnterpriseSearchService
+            $windowsAccount = New-Object -TypeName System.Management.Automation.PSCredential `
+                                         -ArgumentList @($searchService.ProcessIdentity, $dummyPassword)
+
             $returnVal =  @{
                 Name                        = $serviceApp.DisplayName
                 ProxyName                   = $proxyName
@@ -123,6 +132,7 @@ function Get-TargetResource
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
                 CloudIndex                  = $cloudIndex
+                WindowsServiceAccount       = $windowsAccount
                 InstallAccount              = $params.InstallAccount
             }
             return $returnVal
@@ -172,6 +182,10 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $DefaultContentAccessAccount,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $WindowsServiceAccount,
         
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -256,6 +270,12 @@ function Set-TargetResource
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                     $serviceApp.Update()
                 }
+
+                if ($params.ContainsKey("WindowsServiceAccount") -eq $true)
+                {
+                    Set-SPEnterpriseSearchService -ServiceAccount $WindowsServiceAccount.UserName `
+                                                  -ServicePassword $WindowsServiceAccount.Password 
+                }
             }
         }
     }
@@ -265,9 +285,10 @@ function Set-TargetResource
         # Update the service app that already exists
         Write-Verbose -Message "Updating Search Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
+                            -Arguments @($PSBoundParameters, $result) `
                             -ScriptBlock {
             $params = $args[0]
+            $result = $args[1]
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
                 Where-Object -FilterScript { 
@@ -294,6 +315,13 @@ function Set-TargetResource
                     }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
                 $serviceApp.Update()
+            }
+
+            if ($params.ContainsKey("WindowsServiceAccount") -eq $true -and `
+                $result.WindowsServiceAccount.UserName -ne $params.WindowsServiceAccount.UserName)
+            {
+                Set-SPEnterpriseSearchService -ServiceAccount $params.WindowsServiceAccount.UserName `
+                                                -ServicePassword $params.WindowsServiceAccount.Password 
             }
         }
     }
@@ -368,6 +396,10 @@ function Test-TargetResource
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $DefaultContentAccessAccount,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $WindowsServiceAccount,
         
         [parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -386,6 +418,18 @@ function Test-TargetResource
         if ($DefaultContentAccessAccount.UserName `
             -ne $CurrentValues.DefaultContentAccessAccount.UserName) 
         {
+            Write-Verbose -Message "Default content access account is different, returning false"
+            return $false
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("WindowsServiceAccount") `
+        -and $Ensure -eq "Present") 
+    {
+        if ($WindowsServiceAccount.UserName `
+            -ne $CurrentValues.WindowsServiceAccount.UserName) 
+        {
+            Write-Verbose -Message "Windows service account is different, returning false"
             return $false
         }
     }
