@@ -12,6 +12,7 @@
 * Fixed missing brackets in error message in SPExcelServiceApp
 * Removed the requirement for the ConfigWizard in SPInstallLanguagePack
 * Fixed Language Pack detection issue in SPInstallLanguagePack
+* New resource: SPWebAppPeoplePickerSettingsSearchADDomains
 
 ## 1.7.0.0
 
