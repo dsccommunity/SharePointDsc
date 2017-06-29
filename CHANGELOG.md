@@ -19,7 +19,14 @@
 * Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone (issue 610)
 * Fixed incorrect UsagePoint check in SPQuotaTemplate (issue 605)
 * Fixed issue in SPWebAppPolicy module where verbose messages are causing errors (issue 602)
-* Fixed incorrect parameter naming in Get method of SPUserProfilePropery (issue 611)    
+* Fixed incorrect parameter naming in Get method of SPUserProfilePropery (issue 611)
+* Fixed issue in SPBlobCacheSettings when trying to declare same URL with
+  different zone (issue 609)
+* Improve documentation on SPProductUpdate to specify the need to unblock downloaded
+  files (issue 464)
+* Added check if file is blocked in SPProductUpdate to prevent endless wait (issue 464)
+* Enhance SPUserProfileServiceApp to allow for NoILM to be enabled (issue 622)
+* Fixed issue in SPUserProfileProperty where PropertyMapping was Null (issue 613)
 
 ## 1.7.0.0
 
