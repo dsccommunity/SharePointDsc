@@ -49,6 +49,15 @@ function Get-TargetResource
         throw "Setup file cannot be found."
     }
 
+    Write-Verbose -Message "Checking file status of $SetupFile"
+    $zone = Get-Item $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
+    }
+
     $setupFileInfo = Get-ItemProperty $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
@@ -236,6 +245,15 @@ function Set-TargetResource
         throw "Setup file cannot be found."
     }
 
+    Write-Verbose -Message "Checking file status of $SetupFile"
+    $zone = Get-Item $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
+    }
+    
     $now = Get-Date
     if ($BinaryInstallDays)
     {

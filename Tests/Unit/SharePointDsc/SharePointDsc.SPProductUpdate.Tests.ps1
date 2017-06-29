@@ -98,6 +98,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "Specified update file is blocked" -Fixture {
+            $testParams = @{
+                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices     = $true
+                Ensure               = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith { 
+                return $true
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return "Zone data"
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+            }
+        }
+
         Context -Name "Ensure is set to Absent" -Fixture {
             $testParams = @{
                 SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
