@@ -15,21 +15,21 @@
 * Added support to set Windows service accounts for search related services to
   SPSearchServiceApp resource
 * Fixed issue in SPCreateFarm and SPJoinFarm where an exception was not handled
-  correctly (issue 621)
+  correctly
 * Fixed issue in SPSessionStateService not returning correct database server
-  and name (issue 618)
-* Fixed missing Ensure property default in SPRemoteFarmTrust (issue 614)
-* Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone (issue 610)
-* Fixed incorrect UsagePoint check in SPQuotaTemplate (issue 605)
-* Fixed issue in SPWebAppPolicy module where verbose messages are causing errors (issue 602)
-* Fixed incorrect parameter naming in Get method of SPUserProfilePropery (issue 611)
+  and name
+* Fixed missing Ensure property default in SPRemoteFarmTrust
+* Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone
+* Fixed incorrect UsagePoint check in SPQuotaTemplate
+* Fixed issue in SPWebAppPolicy module where verbose messages are causing errors
+* Fixed incorrect parameter naming in Get method of SPUserProfilePropery
 * Fixed issue in SPBlobCacheSettings when trying to declare same URL with
-  different zone (issue 609)
+  different zone
 * Improve documentation on SPProductUpdate to specify the need to unblock downloaded
-  files (issue 464)
-* Added check if file is blocked in SPProductUpdate to prevent endless wait (issue 464)
-* Enhance SPUserProfileServiceApp to allow for NoILM to be enabled (issue 622)
-* Fixed issue in SPUserProfileProperty where PropertyMapping was Null (issue 613)
+  files
+* Added check if file is blocked in SPProductUpdate to prevent endless wait
+* Enhance SPUserProfileServiceApp to allow for NoILM to be enabled
+* Fixed issue in SPUserProfileProperty where PropertyMapping was Null
 
 ## 1.7.0.0
 
