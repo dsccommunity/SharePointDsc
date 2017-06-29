@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
 * Added TLS and SMTP port support for SharePoint 2016
 * Fixed issue in SPWebApplication where the Get method didn't return Classic
   web applications properly
@@ -11,6 +12,8 @@
 * Fixed missing brackets in error message in SPExcelServiceApp
 * Removed the requirement for the ConfigWizard in SPInstallLanguagePack
 * Fixed Language Pack detection issue in SPInstallLanguagePack
+* Added support to set Windows service accounts for search related services to
+  SPSearchServiceApp resource
 * Fixed issue in SPCreateFarm and SPJoinFarm where an exception was not handled
   correctly (issue 621)
 * Fixed issue in SPSessionStateService not returning correct database server
