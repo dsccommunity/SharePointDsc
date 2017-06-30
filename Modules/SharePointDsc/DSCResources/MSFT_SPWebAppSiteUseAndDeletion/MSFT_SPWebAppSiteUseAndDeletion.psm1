@@ -146,7 +146,7 @@ function Set-TargetResource
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 4) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 24))
                     {
-                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >24 and " + `
+                        throw ("Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and " + `
                                "<24 when the schedule is set to weekly")
                     }
                 }

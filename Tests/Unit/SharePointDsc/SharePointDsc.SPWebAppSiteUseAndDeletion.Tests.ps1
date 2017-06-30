@@ -73,6 +73,68 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "UnusedSiteNotificationsBeforeDeletion is out of range" -Fixture {
+            $testParams = @{
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 24
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith  {
+                $returnVal = @{
+                        SendUnusedSiteCollectionNotifications    = $false
+                        UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
+                        AutomaticallyDeleteUnusedSiteCollections = $false
+                        UnusedSiteNotificationsBeforeDeletion    = 28
+                }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { $Global:SPDscSiteUseUpdated = $true } -PassThru
+                return $returnVal
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+
+            It "Should throw an exception - Daily schedule" {
+                Mock -CommandName Get-SPTimerJob -MockWith {
+                    return @{
+                        Schedule = @{
+                            Description = "Daily"
+                        }
+                    } 
+                }
+                $testParams.UnusedSiteNotificationsBeforeDeletion = 24
+
+                { Set-TargetResource @testParams } | Should throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >28 and"
+            }
+
+            It "Should throw an exception - Weekly schedule" {
+                Mock -CommandName Get-SPTimerJob -MockWith {
+                    return @{
+                        Schedule = @{
+                            Description = "Weekly"
+                        }
+                    } 
+                }
+                $testParams.UnusedSiteNotificationsBeforeDeletion = 28
+
+                { Set-TargetResource @testParams } | Should throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >4 and"
+            }
+
+            It "Should throw an exception - Weekly schedule" {
+                Mock -CommandName Get-SPTimerJob -MockWith {
+                    return @{
+                        Schedule = @{
+                            Description = "Monthly"
+                        }
+                    } 
+                }
+                $testParams.UnusedSiteNotificationsBeforeDeletion = 12
+
+                { Set-TargetResource @testParams } | Should throw "Value of UnusedSiteNotificationsBeforeDeletion has to be >2 and"
+            }
+        }
+
         Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
             $testParams = @{
                 Url                                      = "http://example.contoso.local"
@@ -94,6 +156,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPTimerJob -MockWith {
+                return @{
+                    Schedule = @{
+                        Description = "Daily"
+                    }
+                } 
+            }
 
             It "Should return values from the get method" {
                 Get-TargetResource @testParams | Should Not BeNullOrEmpty

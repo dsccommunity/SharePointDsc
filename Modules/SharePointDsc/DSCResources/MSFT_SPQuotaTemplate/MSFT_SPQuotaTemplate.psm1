@@ -38,7 +38,7 @@ function Get-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
-        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+        Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
@@ -140,7 +140,7 @@ function Set-TargetResource
 
     if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
-        Throw "StorageMaxInMB must be larger than StorageWarningInMB."
+        Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }
 
     if ($MaximumUsagePointsSolutions -lt $WarningUsagePointsSolutions) 
@@ -301,7 +301,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing Quota Template settings for quota $Name"
 
-    if ($StorageMaxInMB -le $StorageWarningInMB) 
+    if ($StorageMaxInMB -lt $StorageWarningInMB) 
     {
         Throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
     }

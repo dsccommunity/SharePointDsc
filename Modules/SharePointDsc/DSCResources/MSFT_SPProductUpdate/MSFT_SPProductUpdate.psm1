@@ -50,7 +50,7 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message "Checking file status of $SetupFile"
-    $zone = Get-Item $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
 
     if ($null -ne $zone)
     {
@@ -58,7 +58,7 @@ function Get-TargetResource
                "before continuing.")
     }
 
-    $setupFileInfo = Get-ItemProperty $SetupFile
+    $setupFileInfo = Get-ItemProperty -Path $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
 

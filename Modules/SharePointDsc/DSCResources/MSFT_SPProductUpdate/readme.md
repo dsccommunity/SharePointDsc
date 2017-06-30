@@ -13,8 +13,7 @@ through the use of SPConfigWizard.
 NOTE:
 When files are downloaded from the Internet, a Zone.Identifier alternate data
 stream is added to indicate that the file is potentially from an unsafe source.
-To use these files, make sure you first unblock them using Unblock-File:
-https://msdn.microsoft.com/en-us/powershell/reference/5.1/microsoft.powershell.utility/unblock-file  
+To use these files, make sure you first unblock them using Unblock-File.
 SPProductUpdate will throw an error when it detects the file is blocked.
 
 IMPORTANT:
