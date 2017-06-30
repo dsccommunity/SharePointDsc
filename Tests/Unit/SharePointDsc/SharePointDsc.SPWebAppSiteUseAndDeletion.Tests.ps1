@@ -135,6 +135,33 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "The Dead Site Delete timer job does not exist" -Fixture {
+            $testParams = @{
+                Url                                      = "http://example.contoso.local"
+                SendUnusedSiteCollectionNotifications    = $true
+                UnusedSiteNotificationPeriod             = 90
+                AutomaticallyDeleteUnusedSiteCollections = $true
+                UnusedSiteNotificationsBeforeDeletion    = 30
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith  {
+                $returnVal = @{
+                        SendUnusedSiteCollectionNotifications    = $false
+                        UnusedSiteNotificationPeriod             = @{ TotalDays = 45; }
+                        AutomaticallyDeleteUnusedSiteCollections = $false
+                        UnusedSiteNotificationsBeforeDeletion    = 28
+                } 
+                return $returnVal
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith { return @{} }
+            Mock -CommandName Get-SPTimerJob -MockWith { return $null }
+
+            It "Should update the Site Use and Deletion settings" {
+                { Set-TargetResource @testParams } | Should throw "Dead Site Delete timer job for web application"
+            }
+        }
+
         Context -Name "The server is in a farm and the incorrect settings have been applied" -Fixture {
             $testParams = @{
                 Url                                      = "http://example.contoso.local"
