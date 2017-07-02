@@ -82,7 +82,14 @@ function Get-TargetResource
 
         $getSPMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
         $cfgDbRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$getSPMajorVersion.0\Secure\ConfigDB"
-        $configDbDsn = Get-SPDSCRegistryKey -Key $cfgDbRegKey -Value "dsn"
+        try
+        {
+            $configDbDsn = Get-SPDSCRegistryKey -Key $cfgDbRegKey -Value "dsn"
+        }
+        catch
+        {
+            Write-Verbose -Message "SharePoint registry key cannot be found."
+        }
         $serverIsJoined = $true
 
         if ($null -eq $configDbDsn)

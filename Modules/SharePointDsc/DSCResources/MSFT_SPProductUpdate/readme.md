@@ -10,6 +10,12 @@ the update can be installed. This module requires the Configuration Wizard
 resource to fully complete the installation of the update, which can be done
 through the use of SPConfigWizard.
 
+NOTE:
+When files are downloaded from the Internet, a Zone.Identifier alternate data
+stream is added to indicate that the file is potentially from an unsafe source.
+To use these files, make sure you first unblock them using Unblock-File.
+SPProductUpdate will throw an error when it detects the file is blocked.
+
 IMPORTANT:
 This resource retrieves build information from the Configuration Database.
 Therefore it requires SharePoint to be installed and a farm created. If you
@@ -19,6 +25,6 @@ implement the following order:
 1. Install the SharePoint Binaries (SPInstall)
 2. (Optional) Install SharePoint Language Pack(s) Binaries
    (SPInstallLanguagePack)
-3. Create SPFarm (SPCreateFarm)
+3. Create SPFarm (SPFarm)
 4. Install Cumulative Updates (SPProductUpdate)
 5. Run the Configuration Wizard (SPConfigWizard)

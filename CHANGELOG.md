@@ -14,6 +14,22 @@
 * Fixed Language Pack detection issue in SPInstallLanguagePack
 * Added support to set Windows service accounts for search related services to
   SPSearchServiceApp resource
+* Fixed issue in SPCreateFarm and SPJoinFarm where an exception was not handled
+  correctly
+* Fixed issue in SPSessionStateService not returning correct database server
+  and name
+* Fixed missing Ensure property default in SPRemoteFarmTrust
+* Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone
+* Fixed incorrect UsagePoint check in SPQuotaTemplate
+* Fixed issue in SPWebAppPolicy module where verbose messages are causing errors
+* Fixed incorrect parameter naming in Get method of SPUserProfilePropery
+* Fixed issue in SPBlobCacheSettings when trying to declare same URL with
+  different zone
+* Improve documentation on SPProductUpdate to specify the need to unblock downloaded
+  files
+* Added check if file is blocked in SPProductUpdate to prevent endless wait
+* Enhance SPUserProfileServiceApp to allow for NoILM to be enabled
+* Fixed issue in SPUserProfileProperty where PropertyMapping was Null
 
 ## 1.7.0.0
 
