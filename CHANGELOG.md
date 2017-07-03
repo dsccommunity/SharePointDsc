@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 1.8
 
 * Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
 * Added TLS and SMTP port support for SharePoint 2016
@@ -31,7 +31,7 @@
 * Enhance SPUserProfileServiceApp to allow for NoILM to be enabled
 * Fixed issue in SPUserProfileProperty where PropertyMapping was Null
 
-## 1.7.0.0
+## 1.7
 
 * Update SPSearchIndexPartition made ServiceAppName as a Key
 * New resouce: SPTrustedRootAuthority
