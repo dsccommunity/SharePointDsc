@@ -27,7 +27,7 @@
     The URL of the web application
 
 .PARAMETER Zone
-    Required - string
+    Key - string
     Allowed values: Default, Intranet, Internet, Custom, Extranet
     The zone of the web application for which blob cache has to be configured
 

@@ -26,7 +26,7 @@
 
 .PARAMETER IncludedOUs
     Required - string
-    A listo f the OUs to import users from
+    A list of the OUs to import users from
 
 .PARAMETER ExcludedOUs
     Write - string

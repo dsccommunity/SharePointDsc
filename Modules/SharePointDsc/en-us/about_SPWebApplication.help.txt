@@ -40,7 +40,7 @@
 
 .PARAMETER AuthenticationMethod
     Write - string
-    Allowed values: NTLM, Kerberos, Claims
+    Allowed values: NTLM, Kerberos, Claims, Classic
     What authentication mode should be used for the web app
 
 .PARAMETER AuthenticationProvider
