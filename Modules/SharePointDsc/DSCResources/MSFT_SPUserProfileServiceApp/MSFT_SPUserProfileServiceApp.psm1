@@ -72,10 +72,10 @@ function Get-TargetResource
         if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
         {
             # InstallAccount used
-            if ($InstallAccount -ne $farmAccount)
+            if ($InstallAccount.UserName -ne $farmAccount)
             {
-                throw ("Specified Install Account isn't the Farm Account. Make sure " + `
-                       "the specified Install Account is the FarmAccount and try again")
+                throw ("Specified InstallAccount isn't the Farm Account. Make sure " + `
+                       "the specified InstallAccount is the Farm Account and try again")
             }
         }
         else {
@@ -87,7 +87,7 @@ function Get-TargetResource
                 if ($localaccount -ne $farmAccount)
                 {
                     throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
-                           "the specified Install Account is the FarmAccount and try again")
+                           "the specified PSDSCRunAsCredential is the Farm Account and try again")
                 }
             }
         }
@@ -248,10 +248,10 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
             {
                 # InstallAccount used
-                if ($InstallAccount -ne $farmAccount)
+                if ($InstallAccount.UserName -ne $farmAccount)
                 {
-                    throw ("Specified Install Account isn't the Farm Account. Make sure " + `
-                           "the specified Install Account is the FarmAccount and try again")
+                    throw ("Specified InstallAccount isn't the Farm Account. Make sure " + `
+                           "the specified InstallAccount is the Farm Account and try again")
                 }
             }
             else {
@@ -263,7 +263,7 @@ function Set-TargetResource
                     if ($localaccount -ne $farmAccount)
                     {
                         throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
-                               "the specified Install Account is the FarmAccount and try again")
+                               "the specified PSDSCRunAsCredential is the Farm Account and try again")
                     }
                 }
             }
