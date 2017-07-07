@@ -7,8 +7,17 @@ function Get-SPDSCWebApplicationGeneralConfig
         $WebApplication
     )
     
+    if ($WebApplication.DefaultTimeZone -eq -1)
+    {
+        $timezone = $null
+    }
+    else
+    {
+        $timezone = $WebApplication.DefaultTimeZone
+    }
+
     return @{
-        TimeZone = $WebApplication.DefaultTimeZone
+        TimeZone = $timezone
         Alerts = $WebApplication.AlertsEnabled
         AlertsLimit = $WebApplication.AlertsMaximum
         RSS = $WebApplication.SyndicationEnabled

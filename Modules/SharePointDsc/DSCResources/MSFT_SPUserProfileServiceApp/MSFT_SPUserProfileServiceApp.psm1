@@ -49,6 +49,10 @@ function Get-TargetResource
         $EnableNetBIOS = $false,
 
         [parameter(Mandatory = $false)] 
+        [System.Boolean] 
+        $NoILMUsed = $false,
+
+        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -166,6 +170,7 @@ function Get-TargetResource
                 SyncDBServer       = $databases.SynchronizationDatabase.Server.Name
                 InstallAccount     = $params.InstallAccount
                 EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
+                NoILMUsed          = $serviceApp.NoILMUsed
                 Ensure             = "Present"
             }
         }
@@ -221,6 +226,10 @@ function Set-TargetResource
         [parameter(Mandatory = $false)] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
+
+        [parameter(Mandatory = $false)] 
+        [System.Boolean] 
+        $NoILMUsed = $false,
 
         [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
@@ -291,11 +300,20 @@ function Set-TargetResource
                                       -ScriptBlock {
             $params = $args[0]
             
-            $enableNetBIOS = $false
+            $updateEnableNetBIOS = $false
             if ($params.ContainsKey("EnableNetBIOS")) 
-            { 
-                $enableNetBIOS =$params.EnableNetBIOS
+            {
+                $updateEnableNetBIOS = $true
+                $enableNetBIOS = $params.EnableNetBIOS
                 $params.Remove("EnableNetBIOS") | Out-Null 
+            }
+
+            $updateNoILMUsed = $false
+            if ($params.ContainsKey("NoILMUsed")) 
+            { 
+                $updateNoILMUsed = $true
+                $NoILMUsed = $params.NoILMUsed
+                $params.Remove("NoILMUsed") | Out-Null 
             }
 
             if ($params.ContainsKey("InstallAccount")) 
@@ -327,7 +345,7 @@ function Set-TargetResource
 
             $serviceApps = Get-SPServiceApplication -Name $params.Name `
                                                     -ErrorAction SilentlyContinue 
-            $app =$serviceApps | Select-Object -First 1
+            $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps) 
             { 
                 $app = New-SPProfileServiceApplication @params
@@ -339,9 +357,19 @@ function Set-TargetResource
                 }
             }
 
-            if ($app.NetBIOSDomainNamesEnabled -ne $enableNetBIOS)
+            if (($updateEnableNetBIOS -eq $true) -or ($updateNoILMUsed -eq $true))
             {
-                $app.NetBIOSDomainNamesEnabled = $enableNetBIOS
+                if (($updateEnableNetBIOS -eq $true) -and `
+                    ($app.NetBIOSDomainNamesEnabled -ne $enableNetBIOS))
+                {
+                    $app.NetBIOSDomainNamesEnabled = $enableNetBIOS
+                }
+
+                if (($updateNoILMUsed -eq $true) -and `
+                    ($app.NoILMUsed -ne $NoILMUsed))
+                {
+                    $app.NoILMUsed = $NoILMUsed
+                }                
                 $app.Update()
             }
         }
@@ -432,6 +460,10 @@ function Test-TargetResource
         $EnableNetBIOS = $false,
 
         [parameter(Mandatory = $false)] 
+        [System.Boolean] 
+        $NoILMUsed = $false,
+
+        [parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -451,7 +483,10 @@ function Test-TargetResource
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                             -DesiredValues $PSBoundParameters `
-                                            -ValuesToCheck @("Name","EnableNetBIOS", "Ensure")
+                                            -ValuesToCheck @("Name",
+                                                             "EnableNetBIOS",
+                                                             "NoILMUsed", 
+                                                             "Ensure")
     }
     else
     {

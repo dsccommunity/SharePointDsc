@@ -176,7 +176,7 @@ function Get-TargetResource
                                                 -ArgumentList $context
         $syncConnection  = $userProfileConfigManager.ConnectionManager | `
             Where-Object -FilterScript { 
-                $null -ne $_.PropertyMapping.Item($params.Name) 
+                $null -ne  $_.PropertyMapping -and $null -ne $_.PropertyMapping.Item($params.Name) 
             }
 
         if($null -ne $syncConnection) 
@@ -196,7 +196,7 @@ function Get-TargetResource
         
         return @{
             Name = $userProfileProperty.Name 
-            UserProfileServiceAppName = $params.UserProfileService
+            UserProfileService = $params.UserProfileService
             DisplayName = $userProfileProperty.DisplayName
             Type = $userProfileProperty.CoreProperty.Type
             Description = $userProfileProperty.Description 

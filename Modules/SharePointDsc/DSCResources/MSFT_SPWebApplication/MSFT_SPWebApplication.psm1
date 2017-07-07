@@ -45,7 +45,7 @@ function Get-TargetResource
         $Port,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos","Claims")]
+        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
 
@@ -66,10 +66,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application '$Name' config"
    
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                                  -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        $ScriptRoot = $args[1]
         
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
         if ($null -eq $wa) 
@@ -82,24 +81,33 @@ function Get-TargetResource
                 Ensure = "Absent"
             } 
         }
+
         ### COMMENT: Are we making an assumption here, about Default Zone
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
-        if($authProvider.DisplayName -eq "Windows Authentication") 
+        if ($null -eq $authProvider)
         {
-            if ($authProvider.DisableKerberos -eq $true) 
-            { 
-                $localAuthMode = "NTLM" 
-            } 
-            else 
-            { 
-                $localAuthMode = "Kerberos" 
-            }
-              $authenticationProvider = "Windows Authentication"
+            $authenticationProvider = ""
+            $localAuthMode = "Classic" 
         }
-        else 
+        else
         {
-            $localAuthMode = "Claims"
-            $authenticationProvider = $authProvider.DisplayName
+            if ($authProvider.DisplayName -eq "Windows Authentication") 
+            {
+                if ($authProvider.DisableKerberos -eq $true) 
+                { 
+                    $localAuthMode = "NTLM" 
+                } 
+                else 
+                { 
+                    $localAuthMode = "Kerberos" 
+                }
+                $authenticationProvider = "Windows Authentication"
+            }
+            else 
+            {
+                $localAuthMode = "Claims"
+                $authenticationProvider = $authProvider.DisplayName
+            }
         }
 
         return @{
@@ -170,7 +178,7 @@ function Set-TargetResource
         $Port,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos","Claims")]
+        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
 
@@ -190,19 +198,24 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$Name' config"
     
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
+        if ($PSBoundParameters.ContainsKey("AuthenticationMethod") -eq $false)
+        {
+            throw [Exception] ("When Ensure is Present, the AuthenticationMethod " + `
+                               "parameter is required.")
+        }
 
         if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
         {
-            throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
+            throw [Exception] ("When configuring SPWebApplication to use Claims the " + `
+                               "AuthenticationProvider value must be specified.")
         }
 
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                            -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            $ScriptRoot = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -eq $wa) 
@@ -225,7 +238,7 @@ function Set-TargetResource
                     # ApplicationPoolAccount parameter to create the application pool
                     try 
                     {
-                        Get-SPManagedAccount $params.ApplicationPoolAccount -ErrorAction Stop
+                        Get-SPManagedAccount $params.ApplicationPoolAccount -ErrorAction Stop | Out-Null
                         $newWebAppParams.Add("ApplicationPoolAccount", $params.ApplicationPoolAccount)
                     }
                     catch 
@@ -247,18 +260,21 @@ function Set-TargetResource
                 
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
                 {
-                    if($params.AuthenticationMethod -eq "Claims")
+                    if ($params.AuthenticationMethod -ne "Classic")
                     {
-                        $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider
+                        if ($params.AuthenticationMethod -eq "Claims")
+                        {
+                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider
+                        }
+                        else 
+                        {
+                            $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
+                            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
+                                                                -DisableKerberos:$disableKerberos
+                        }
+                        
+                        $newWebAppParams.Add("AuthenticationProvider", $ap)
                     }
-                    else 
-                    {
-                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                            -DisableKerberos:$disableKerberos
-                    }
-                    
-                    $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
                 
                 if ($params.ContainsKey("AllowAnonymous") -eq $true) 
@@ -298,10 +314,9 @@ function Set-TargetResource
     if ($Ensure -eq "Absent") 
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                            -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            $ScriptRoot = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
             if ($null -ne $wa) 
@@ -359,7 +374,7 @@ function Test-TargetResource
         $Port,
 
         [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos","Claims")]
+        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
 
@@ -380,6 +395,13 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$Name' config"
 
     $PSBoundParameters.Ensure = $Ensure
+
+    if ($Ensure -eq "Present" -and
+        $PSBoundParameters.ContainsKey("AuthenticationMethod") -eq $false)
+    {
+        throw [Exception] ("When Ensure is Present, the AuthenticationMethod " + `
+                            "parameter is required.")
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

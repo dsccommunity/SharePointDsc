@@ -86,7 +86,7 @@ function Get-SPDscFarmVersionInfo
                 ($patchableUnit -notmatch "OMUI") -and
                 ($patchableUnit -notmatch "XMUI") -and
                 ($patchableUnit -notmatch "Project Server") -and
-                ($patchableUnit -notmatch "Microsoft SharePoint Server 2013"))
+                ($patchableUnit -notmatch "Microsoft SharePoint Server (2013|2016)"))
             {
                 $patchableUnitsInfo = $singleProductInfo.GetPatchableUnitInfoByDisplayName($patchableUnit)
                 $currentVersion = ""
