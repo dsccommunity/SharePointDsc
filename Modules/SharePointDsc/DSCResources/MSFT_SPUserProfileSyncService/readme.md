@@ -2,7 +2,7 @@
 
 This resource is responsible for ensuring that the user profile sync service
 has been provisioned (Ensure = "Present") or is not running (Ensure =
-"Absent") on the current server. 
+"Absent") on the current server.
 
 This resource requires that the FarmAccount is specified as the InstallAccount
 parameter. It will throw an exception if this is not the case.
