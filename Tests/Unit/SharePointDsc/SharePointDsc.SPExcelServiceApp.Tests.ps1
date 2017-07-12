@@ -148,7 +148,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                 }
                 
-                Context -Name "When the serivce application doesn't exist and it shouldn't" -Fixture {
+                Context -Name "When the service application doesn't exist and it shouldn't" -Fixture {
                     $testParams = @{
                         Name = "Test App"
                         ApplicationPool = "-"

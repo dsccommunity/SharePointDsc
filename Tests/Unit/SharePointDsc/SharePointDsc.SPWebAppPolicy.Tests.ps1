@@ -190,6 +190,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -264,6 +265,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -338,6 +340,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -408,6 +411,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -566,6 +570,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Claims"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -654,6 +659,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\sp_psr"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -745,11 +751,13 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -818,6 +826,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Claims"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -882,11 +891,13 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -955,6 +966,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Claims"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -1072,6 +1084,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -1143,6 +1156,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -1214,6 +1228,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $true
                     } -ClientOnly)
                 )
@@ -1285,6 +1300,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $true
                     } -ClientOnly)
                 )

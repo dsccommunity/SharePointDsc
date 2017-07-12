@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.7.0.0'
+ModuleVersion = '1.8.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -126,52 +126,34 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-* Update SPSearchIndexPartition made ServiceAppName as a Key
-* New resouce: SPTrustedRootAuthority
-* Update SPFarmSolution to eject from loop after 30m.
-* New resource: SPMachineTranslationServiceApp
-* New resource: SPPowerPointAutomationServiceApp
-* Bugfix in SPSearchFileType  made ServiceAppName a key property.
-* New resource: SPWebApplicationExtension
-* Added new resource SPAccessServices2010
-* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
-  Search Service Application
-* Added new resource SPSearchAuthoritativePage
-* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
-* Fix typo in method Get-TargetResource of SPFeature
-* Fix bug in SPManagedAccount not returning the correct account name value
-* Fix typo in method Get-TargetResource of SPSearchIndexPartition
-* Update documentation of SPInstallLanguagePack to add guidance on package
-  change in SP2016
-* Added returning the required RunCentralAdmin parameter to
-  Get-TargetResource in SPFarm
-* Added web role check for SPBlobCacheSettings
-* Improved error message when rule could not be found in
-  SPHealthAnalyzerRuleState
-* Extended the documentation to specify that the default value of Ensure
-  is Present
-* Added documentation about the user of Host Header Site Collections and
-  the HostHeader parameter in SPWebApplication
-* Fixed missing brackets in SPWebAppPolicy module file
-* Fixed issue with SPSecureStoreServiceApp not returning database information
-* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl
-  in SP2016
-* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing
-  certificate from file path as an alternative to the certificate store
-* New resource: SPSearchCrawlerImpactRule
-* Fixed issue in SPSite where the used template wasn't returned properly
-* Fixed issue in SPWebApplicationGeneralSettings which didn't return the
-  security validation timeout properly
-* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
-  joined to a farm
-* Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
-* Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
-* Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
-* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
-* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
-  place if a server was removed and re-added to a farm
-* Fixed bug in SPFarm that caused issues with database names that have dashes
-  in the names
+* Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
+* Added TLS and SMTP port support for SharePoint 2016
+* Fixed issue in SPWebApplication where the Get method didn't return Classic
+  web applications properly
+* Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
+* Updated Readme of SPInstall to include SharePoint Foundation is not supported
+* Fixed issue with Access Denied in SPDesignerSettings
+* Fixed missing brackets in error message in SPExcelServiceApp
+* Removed the requirement for the ConfigWizard in SPInstallLanguagePack
+* Fixed Language Pack detection issue in SPInstallLanguagePack
+* Added support to set Windows service accounts for search related services to
+  SPSearchServiceApp resource
+* Fixed issue in SPCreateFarm and SPJoinFarm where an exception was not handled
+  correctly
+* Fixed issue in SPSessionStateService not returning correct database server
+  and name
+* Fixed missing Ensure property default in SPRemoteFarmTrust
+* Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone
+* Fixed incorrect UsagePoint check in SPQuotaTemplate
+* Fixed issue in SPWebAppPolicy module where verbose messages are causing errors
+* Fixed incorrect parameter naming in Get method of SPUserProfilePropery
+* Fixed issue in SPBlobCacheSettings when trying to declare same URL with
+  different zone
+* Improve documentation on SPProductUpdate to specify the need to unblock downloaded
+  files
+* Added check if file is blocked in SPProductUpdate to prevent endless wait
+* Enhance SPUserProfileServiceApp to allow for NoILM to be enabled
+* Fixed issue in SPUserProfileProperty where PropertyMapping was Null
 "
 
     } # End of PSData hashtable

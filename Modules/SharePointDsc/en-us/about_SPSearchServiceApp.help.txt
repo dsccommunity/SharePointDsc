@@ -51,6 +51,10 @@
     Allowed values: Present, Absent
     Present if the service app should exist, absent if it should not
 
+.PARAMETER WindowsServiceAccount
+    Write - string
+    Sets the windows services for search to run as this account
+
 .PARAMETER InstallAccount
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5

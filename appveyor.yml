@@ -1,4 +1,4 @@
-version: 1.7.0.{build}
+version: 1.8.0.{build}
 image: WMF 5
 
 install:

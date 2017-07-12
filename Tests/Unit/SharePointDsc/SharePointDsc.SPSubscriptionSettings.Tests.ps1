@@ -112,14 +112,44 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ 
                         Name = $testParams.ApplicationPool 
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
-                    }
                 }
+
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru | 
+                            Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "Database" `
+                                                                -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                    param($x)
+                                                                    return (@{ 
+                                                                        FullName = $getTypeFullName
+                                                                        Name = "Test_DB"
+                                                                        Server = @{
+                                                                            Name = "TestServer\Instance"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
+                                                                        }
+                                                                    })
+                                                                } -PassThru
+                                                )
+                                            )
+                                        } -PassThru
                 } -PassThru -Force
+
                 return $spServiceApp
             }
 
@@ -146,25 +176,49 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     TypeName = "Microsoft SharePoint Foundation Subscription Settings Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
-                    Database = @{
-                        Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
-                    }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
                                     -Name Update `
                                     -Value {
                                             $Global:SPDscSubscriptionServiceUpdateCalled = $true
                                     } -PassThru 
-                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
-                                    -Name GetType `
-                                    -Value { 
-                                        New-Object -TypeName "Object" |
-                                            Add-Member -MemberType NoteProperty `
-                                                       -Name FullName `
-                                                       -Value $getTypeFullName `
-                                                       -PassThru
-                                    } -PassThru -Force
+
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru | 
+                            Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "Database" `
+                                                                -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                    param($x)
+                                                                    return (@{ 
+                                                                        FullName = $getTypeFullName
+                                                                        Name = "Test_DB"
+                                                                        Server = @{
+                                                                            Name = "TestServer\Instance"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
+                                                                        }
+                                                                    })
+                                                                } -PassThru
+                                                )
+                                            )
+                                        } -PassThru
+                } -PassThru -Force
+
                 return $spServiceApp
             }
 
@@ -218,13 +272,41 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ 
                         Name = $testParams.ApplicationPool 
                     }
-                    Database = @{
-                        Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
-                    }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                                        -Name FullName `
+                                        -Value $getTypeFullName `
+                                        -PassThru | 
+                            Add-Member -MemberType ScriptMethod `
+                                        -Name GetProperties `
+                                        -Value {
+                                            param($x)
+                                            return @(
+                                                (New-Object -TypeName "Object" |
+                                                    Add-Member -MemberType NoteProperty `
+                                                                -Name Name `
+                                                                -Value "Database" `
+                                                                -PassThru |
+                                                    Add-Member -MemberType ScriptMethod `
+                                                                -Name GetValue `
+                                                                -Value {
+                                                                    param($x)
+                                                                    return (@{ 
+                                                                        FullName = $getTypeFullName
+                                                                        Name = "Test_DB"
+                                                                        Server = @{
+                                                                            Name = "TestServer\Instance"
+                                                                        }
+                                                                        FailoverServer = @{
+                                                                            Name = "DBServer_Failover"
+                                                                        }
+                                                                    })
+                                                                } -PassThru
+                                                )
+                                            )
+                                        } -PassThru
                 } -PassThru -Force
                 return $spServiceApp
             }

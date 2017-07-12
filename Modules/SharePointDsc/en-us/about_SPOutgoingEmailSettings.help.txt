@@ -30,6 +30,14 @@
     Required - string
     The character set to use on messages
 
+.PARAMETER UseTLS
+    Write - boolean
+    Use TLS when connecting to the SMTP server (SharePoint 2016 only)
+
+.PARAMETER SMTPPort
+    Write - uint32
+    The port which is used to connect to the SMTP server (SharePoint 2016 only)
+
 .PARAMETER InstallAccount
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
