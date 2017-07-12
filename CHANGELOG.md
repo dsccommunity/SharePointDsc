@@ -3,10 +3,10 @@
 ## Unreleased v2.0
 
 The following changes will break 1.x configurations the use these resources:
-* Updated SPShellAdmin so it also works for non-content databases (572)
-* Updated SPWebApplication so it infers the UseSSL value from the URL (424)
+* Updated SPShellAdmin so it also works for non-content databases
+* Updated SPWebApplication so it infers the UseSSL value from the URL
 * Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
-  the requirement for CredSSP (389)
+  the requirement for CredSSP
 
 ## Unreleased
 
