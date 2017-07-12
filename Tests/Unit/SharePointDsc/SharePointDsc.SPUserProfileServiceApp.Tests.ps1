@@ -303,10 +303,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 NoILMUsed = $true
-                FarmAccount = $mockCredential
                 Ensure = "Present"
+                InstallAccount = $mockCredential
             }
             
+            Mock -CommandName Restart-Service -MockWith {}
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
                     New-Object -TypeName "Object" |            

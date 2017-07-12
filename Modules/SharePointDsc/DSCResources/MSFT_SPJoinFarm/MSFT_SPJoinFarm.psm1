@@ -263,7 +263,7 @@ function Set-TargetResource
     if ($null -ne $result)
     {
         Write-Verbose -Message "An error occured joining the farm"
-        throw $_
+        throw $result
     }
 
     Write-Verbose -Message "Starting timer service"

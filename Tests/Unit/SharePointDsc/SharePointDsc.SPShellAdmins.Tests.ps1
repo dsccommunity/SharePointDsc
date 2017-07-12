@@ -50,13 +50,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"
                 Members          = "contoso\user1", "contoso\user2"
-                ContentDatabases = @(
+                Databases = @(
                     (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
                         Name = "SharePoint_Content_Contoso1"
                         Members = "contoso\user1", "contoso\user2"
                     } -ClientOnly)
                 )
-                AllContentDatabases = $true
+                AllDatabases = $true
             }
 
             It "Should return null from the get method" {
@@ -68,7 +68,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
+                { Set-TargetResource @testParams } | Should throw "Cannot use the Databases parameter together with the AllDatabases parameter"
             }
         }
         

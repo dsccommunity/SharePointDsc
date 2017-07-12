@@ -28,7 +28,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
         # Mocks for all contexts   
-        Mock Connect-SPConfigurationDatabase -MockWith {}
+        Mock -CommandName Connect-SPConfigurationDatabase -MockWith {}
         Mock -CommandName Install-SPHelpCollection -MockWith {}
         Mock -CommandName Initialize-SPResourceSecurity -MockWith {}
         Mock -CommandName Install-SPService -MockWith {}
@@ -63,7 +63,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPFarm -MockWith { 
                 throw "Unable to detect local farm" 
             }
-
+            
             It "Should return no database name from the get method when the farm is not configured" {
                 (Get-TargetResource @testParams).FarmConfigDatabaseName | Should BeNullOrEmpty
             }
@@ -191,7 +191,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw when an unsupported version is installed and set is called" {
-                { Set-TargetResource @testParams } | Should throw
+                { Set-TargetResource @testParams } | Should throw "An unknown version of SharePoint (Major version 14) was detected."
             }
         }
 
