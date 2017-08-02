@@ -20,7 +20,7 @@ Configuration Example
             {  
                 Name           = "Microsoft SharePoint Foundation Sandboxed Code Service"
                 ManagedAccount = "CONTOSO\SPUserCode"
-                InstallAccount = $InstallAccount
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }
