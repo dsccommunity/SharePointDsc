@@ -34,7 +34,7 @@ A valid product key for the version of SharePoint you wish to install
 
 .PARAMETER PublicDNSLabel
 The name of the public DNS label to assign to the public IP address of the SharePoint server.
-This will automatically be suffixed with the auzre location name and azure DNS suffix 
+This will automatically be suffixed with the Azure location name and azure DNS suffix 
 
 .PARAMETER AdminCredential
 The username and password to use as the local administrator on all machines. The password
