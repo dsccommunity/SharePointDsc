@@ -28,6 +28,12 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Project Server service app '$Name'"
 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    {
+        throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
+                           "SharePoint 2016.")
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -108,6 +114,12 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message "Setting Project Server service app '$Name'"
+
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    {
+        throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
+                           "SharePoint 2016.")
+    }
 
     $result = Get-TargetResource @PSBoundParameters
 
