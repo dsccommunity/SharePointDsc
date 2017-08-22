@@ -26,12 +26,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
         # Mocks for all contexts   
-        Mock -CommandName Get-SPFarm -MockWith { 
-            return @{
-                DefaultServiceAccount = @{ 
-                    Name = $mockCredential.Username 
-                }
-            }
+        Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+            return $mockCredential.Username
         }
         Mock -CommandName New-SPProfileServiceApplication -MockWith { 
             return (@{
@@ -54,12 +50,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             } 
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                return @{
-                    DefaultServiceAccount = @{ 
-                        Name = "DOMAIN\sp_farm"
-                    }
-                }
+            Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                return "DOMAIN\sp_farm"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -69,15 +61,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Restart-Service {}
 
             It "Should throw exception in the Get method" {
-                { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential isn't the Farm Account."  
+                { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
             }
 
             It "Should throw exception in the Test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential isn't the Farm Account."  
+                { Test-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential isn't the Farm Account."  
+                { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
             }
         }
 
@@ -89,12 +81,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 InstallAccount = $mockCredential
             } 
 
-            Mock -CommandName Get-SPFarm -MockWith { 
-                return @{
-                    DefaultServiceAccount = @{ 
-                        Name = "DOMAIN\sp_farm"
-                    }
-                }
+            Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                return "DOMAIN\sp_farm"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -104,15 +92,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Restart-Service {}
 
             It "Should throw exception in the Get method" {
-                { Get-TargetResource @testParams } | Should throw "Specified InstallAccount isn't the Farm Account."  
+                { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "  
             }
 
             It "Should throw exception in the Test method" {
-                { Test-TargetResource @testParams } | Should throw "Specified InstallAccount isn't the Farm Account."  
+                { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "  
             }
 
             It "Should throw exception in the set method" {
-                { Set-TargetResource @testParams } | Should throw "Specified InstallAccount isn't the Farm Account."  
+                { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "  
             }
         }
 

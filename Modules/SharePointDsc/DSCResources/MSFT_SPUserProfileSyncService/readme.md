@@ -5,7 +5,8 @@ has been provisioned (Ensure = "Present") or is not running (Ensure =
 "Absent") on the current server.
 
 This resource requires that the FarmAccount is specified as the InstallAccount
-parameter. It will throw an exception if this is not the case.
+or PsDscRunAsCredential parameter. It will throw an exception if this is not
+the case.
 
 To allow successful provisioning the farm account must be in the local
 administrators group, however it is not best practice to leave this account in

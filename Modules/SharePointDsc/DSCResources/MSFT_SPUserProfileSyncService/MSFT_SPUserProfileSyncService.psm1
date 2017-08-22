@@ -36,8 +36,7 @@ function Get-TargetResource
     $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
                                        -Arguments $PSBoundParameters `
                                        -ScriptBlock {
-        $spFarm = Get-SPFarm
-        return $spFarm.DefaultServiceAccount.Name 
+        return Get-SPDSCFarmAccountName
     }
 
     if ($null -ne $farmAccountName)
@@ -177,8 +176,7 @@ function Set-TargetResource
     $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
-        $spFarm = Get-SPFarm
-        return $spFarm.DefaultServiceAccount.Name 
+        return Get-SPDSCFarmAccountName
     }
 
     if ($null -ne $farmAccountName)

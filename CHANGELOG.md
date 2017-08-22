@@ -1,15 +1,13 @@
 # Change log for SharePointDsc
 
-## Unreleased v2.0
+## 2.0
 
-The following changes will break 1.x configurations the use these resources:
+The following changes will break 1.x configurations that use these resources:
 
 * Updated SPShellAdmin so it also works for non-content databases
 * Updated SPWebApplication so it infers the UseSSL value from the URL
 * Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
   the requirement for CredSSP
-
-## Unreleased
 
 ## 1.8
 
