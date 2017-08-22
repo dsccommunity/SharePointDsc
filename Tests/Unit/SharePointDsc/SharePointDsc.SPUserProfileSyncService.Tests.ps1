@@ -26,11 +26,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
         # Mocks for all contexts   
-        Mock -CommandName Get-SPFarm -MockWith { return @{
-            DefaultServiceAccount = @{ 
-                Name = $mockCredential.UserName
-            }
-        }}
+        Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+            return $mockCredential.Username
+        }
         Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Stop-SPServiceInstance -MockWith { }
         Mock -CommandName Restart-Service -MockWith { }
@@ -135,12 +133,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Ensure = "Present"
                     }
 
-                    Mock -CommandName Get-SPFarm -MockWith {
-                        return @{
-                            DefaultServiceAccount = @{ 
-                                Name = "DOMAIN\sp_farm"
-                            }
-                        }
+                    Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                        return "DOMAIN\sp_farm"
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -168,12 +162,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         InstallAccount = $mockCredential
                     }
 
-                    Mock -CommandName Get-SPFarm -MockWith {
-                        return @{
-                            DefaultServiceAccount = @{ 
-                                Name = "DOMAIN\sp_farm"
-                            }
-                        }
+                    Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                        return "DOMAIN\sp_farm"
                     }
         
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
