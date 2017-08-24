@@ -39,6 +39,17 @@ function Get-SPDSCAssemblyVersion
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+
+function Get-SPDSCFarmAccountName
+{
+    [CmdletBinding()]
+    param
+    ()
+    $spFarm = Get-SPFarm
+    return $spFarm.DefaultServiceAccount.Name 
+}
+
+
 function Get-SPDscFarmVersionInfo
 {
     param

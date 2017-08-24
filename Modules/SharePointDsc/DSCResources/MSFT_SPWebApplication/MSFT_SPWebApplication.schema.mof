@@ -13,7 +13,6 @@ class MSFT_SPWebApplication : OMI_BaseResource
     [Write, Description("The host header to use for the web app")] string HostHeader;
     [Write, Description("The path on the local servers to host the IIS web site from")] string Path;
     [Write, Description("The port to run the site on")] string Port;
-    [Write, Description("Should this web app use SSL")] boolean UseSSL;
     [Write, Description("Present if the web app should exist, absent if it should not"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] string InstallAccount;
 };

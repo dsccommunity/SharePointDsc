@@ -33,6 +33,42 @@ function Get-TargetResource
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
+    $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                       -Arguments $PSBoundParameters `
+                                       -ScriptBlock {
+        return Get-SPDSCFarmAccountName
+    }
+
+    if ($null -ne $farmAccountName)
+    {
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        {
+            # InstallAccount used
+            if ($InstallAccount.UserName -ne $farmAccountName)
+            {
+                throw ("Specified InstallAccount isn't the Farm Account. Make sure " + `
+                       "the specified InstallAccount is the Farm Account and try again")
+            }
+        }
+        else {
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
+            {
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -ne $farmAccountName)
+                {
+                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
+                           "the specified Install Account is the Farm Account and try again")
+                }
+            }
+        }
+    }
+    else
+    {
+        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -46,7 +82,6 @@ function Get-TargetResource
             return @{
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
                 Ensure = "Absent"
-                FarmAccount = $params.FarmAccount
                 RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
                 InstallAccount = $params.InstallAccount
             }
@@ -72,7 +107,6 @@ function Get-TargetResource
             return @{
                 UserProfileServiceAppName = $params.UserProfileServiceAppName
                 Ensure = "Absent"
-                FarmAccount = $params.FarmAccount
                 RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
                 InstallAccount = $params.InstallAccount
             } 
@@ -92,21 +126,9 @@ function Get-TargetResource
             $localEnsure = "Absent" 
         }
 
-        $spFarm = Get-SPFarm
-
-        if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) 
-        {
-            $farmAccount = $params.FarmAccount
-        } 
-        else 
-        {
-            $farmAccount = $spFarm.DefaultServiceAccount.Name
-        }
-
         return @{
             UserProfileServiceAppName = $upa.Name
             Ensure = $localEnsure
-            FarmAccount = $farmAccount
             RunOnlyWhenWriteable = $params.RunOnlyWhenWriteable
             InstallAccount = $params.InstallAccount
         }
@@ -151,6 +173,42 @@ function Set-TargetResource
                            "service via DSC, as 2016 does not use the FIM based sync service.")
     }
 
+    $farmAccountName = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                  -Arguments $PSBoundParameters `
+                                  -ScriptBlock {
+        return Get-SPDSCFarmAccountName
+    }
+
+    if ($null -ne $farmAccountName)
+    {
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        {
+            # InstallAccount used
+            if ($InstallAccount.UserName -ne $farmAccountName)
+            {
+                throw ("Specified InstallAccount isn't the Farm Account. Make sure " + `
+                       "the specified InstallAccount is the Farm Account and try again")
+            }
+        }
+        else {
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
+            {
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -ne $farmAccountName)
+                {
+                    throw ("Specified PSDSCRunAsCredential isn't the Farm Account. Make sure " + `
+                           "the specified Install Account is the Farm Account and try again")
+                }
+            }
+        }
+    }
+    else
+    {
+        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+    }
+
     if ($PSBoundParameters.ContainsKey("RunOnlyWhenWriteable") -eq $true)
     {
         $databaseReadOnly = Test-SPDscUserProfileDBReadOnly `
@@ -169,12 +227,12 @@ function Set-TargetResource
         }
     }
 
-    # Add the FarmAccount to the local Admins group, if it's not already there
-    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
+    # Add the Farm Account to the local Admins group, if it's not already there
+    $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccountName
 
     if (!$isLocalAdmin)
     {
-        Add-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+        Add-SPDSCUserToLocalAdmin -UserName $farmAccountName
 
         # Cycle the Timer Service so that it picks up the local Admin token
         Restart-Service -Name "SPTimerV4"
@@ -182,9 +240,10 @@ function Set-TargetResource
 
     try 
     {
-        Invoke-SPDSCCommand -Credential $FarmAccount -Arguments $PSBoundParameters -ScriptBlock {
+        Invoke-SPDSCCommand -Credential $InstallAccount -Arguments ($PSBoundParameters,$farmAccountName) -ScriptBlock {
             $params = $args[0]
-            
+            $farmAccountName = $args[1]
+
             $currentServer = $env:COMPUTERNAME
 
             $syncServices = Get-SPServiceInstance -Server $currentServer `
@@ -218,7 +277,7 @@ function Set-TargetResource
                     $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication" 
                 }
 
-                $userName = $params.FarmAccount.UserName
+                $userName = $farmAccountName
                 $password = $params.FarmAccount.GetNetworkCredential().Password
                 $ups.SetSynchronizationMachine($currentServer, $syncService.ID, $userName, $password)
 
@@ -255,10 +314,10 @@ function Set-TargetResource
     }
     finally 
     {
-        # Remove the FarmAccount from the local Admins group, if it was added above
+        # Remove the Farm Account from the local Admins group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+            Remove-SPDSCUserToLocalAdmin -UserName $farmAccountName
         }
     }
 }

@@ -26,11 +26,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
         # Mocks for all contexts   
-        Mock -CommandName Get-SPFarm -MockWith { return @{
-            DefaultServiceAccount = @{ 
-                Name = $mockCredential.UserName
-            }
-        }}
+        Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+            return $mockCredential.Username
+        }
         Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Stop-SPServiceInstance -MockWith { }
         Mock -CommandName Restart-Service -MockWith { }
@@ -128,11 +126,69 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major) 
         {
             15 {
+                Context -Name "When PSDSCRunAsCredential is not the Farm Account" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                    }
+
+                    Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                        return "DOMAIN\sp_farm"
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith { 
+                        return $null 
+                    }
+
+                    It "Should throw exception in the get method" {
+                        { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential isn't the Farm Account."
+                    }
+
+                    It "Should throw exception in the test method" {
+                        { Test-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential isn't the Farm Account."
+                    }
+
+                    It "Should throw exception in the set method" {
+                        { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential isn't the Farm Account."
+                    }
+                }
+                
+                Context -Name "When InstallAccount is not the Farm Account" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        InstallAccount = $mockCredential
+                    }
+
+                    Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                        return "DOMAIN\sp_farm"
+                    }
+        
+                    Mock -CommandName Get-SPServiceInstance -MockWith { 
+                        return $null 
+                    }
+
+                    It "Should throw exception in the get method" {
+                        { Get-TargetResource @testParams } | Should throw "Specified InstallAccount isn't the Farm Account."
+                    }
+
+                    It "Should throw exception in the test method" {
+                        { Test-TargetResource @testParams } | Should throw "Specified InstallAccount isn't the Farm Account."
+                    }
+
+                    It "Should throw exception in the set method" {
+                        { Set-TargetResource @testParams } | Should throw "Specified InstallAccount isn't the Farm Account."
+                    }
+                }
+
                 Context -Name "User profile sync service is not found locally" -Fixture {
                     $testParams = @{
                         UserProfileServiceAppName = "User Profile Service Service App"
                         FarmAccount = $mockCredential
                         Ensure = "Present"
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -150,6 +206,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         UserProfileServiceAppName = "User Profile Service Service App"
                         FarmAccount = $mockCredential
                         Ensure = "Present"
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith {
@@ -220,16 +277,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Assert-MockCalled Start-SPServiceInstance
                     }
 
-                    Mock -CommandName Get-SPFarm -MockWith { 
-                        return @{
-                            DefaultServiceAccount = @{ Name = "WRONG\account" }
-                        }
-                    }
-
-                    It "Should return values from the get method where the farm account doesn't match" {
-                        Get-TargetResource @testParams | Should Not BeNullOrEmpty
-                    }
-
                     $Global:SPDscUPACheck = $false
                     Mock -CommandName Get-SPServiceApplication -MockWith { 
                         return $null 
@@ -245,6 +292,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         UserProfileServiceAppName = "User Profile Service Service App"
                         FarmAccount = $mockCredential
                         Ensure = "Present"
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -273,6 +321,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         UserProfileServiceAppName = "User Profile Service Service App"
                         FarmAccount = $mockCredential
                         Ensure = "Absent"
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -319,6 +368,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         UserProfileServiceAppName = "User Profile Service Service App"
                         FarmAccount = $mockCredential
                         Ensure = "Absent"
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -348,6 +398,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         FarmAccount = $mockCredential
                         Ensure = "Present"
                         RunOnlyWhenWriteable = $true
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -386,6 +437,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         FarmAccount = $mockCredential
                         Ensure = "Present"
                         RunOnlyWhenWriteable = $true
+                        InstallAccount = $mockCredential
                     }
 
                     Mock -CommandName Get-SPServiceInstance -MockWith { 
@@ -430,6 +482,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $testParams = @{
                         UserProfileServiceAppName = "User Profile Service Service App"
                         FarmAccount = $mockCredential
+                        InstallAccount = $mockCredential
                     }
 
                     It "Should throw on the get method" {

@@ -481,7 +481,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 HostHeader = "sites.sharepoint.com"
                 Path = "C:\inetpub\wwwroot\something"
                 Port = 80
-                UseSSL = $true
             }
   
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
@@ -742,7 +741,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 HostHeader = "sites.sharepoint.com"
                 Path = "C:\inetpub\wwwroot\something"
                 Port = 80
-                UseSSL = $true
             }
 
             

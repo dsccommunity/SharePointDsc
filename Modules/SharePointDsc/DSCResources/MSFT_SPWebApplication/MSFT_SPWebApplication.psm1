@@ -45,10 +45,6 @@ function Get-TargetResource
         $Port,
 
         [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
-
-        [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
@@ -182,10 +178,6 @@ function Set-TargetResource
         $Port,
 
         [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
-
-        [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
@@ -309,11 +301,11 @@ function Set-TargetResource
                 { 
                     $newWebAppParams.Add("Port", $params.Port) 
                 } 
-                if ($params.ContainsKey("UseSSL") -eq $true) 
-                { 
-                    $newWebAppParams.Add("SecureSocketsLayer", $params.UseSSL) 
-                } 
-            
+                if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
+                {
+                    $newWebAppParams.Add("SecureSocketsLayer", $true)
+                }
+
                 New-SPWebApplication @newWebAppParams | Out-Null
             }
         }
@@ -380,10 +372,6 @@ function Test-TargetResource
         [parameter(Mandatory = $false)]
         [System.String] 
         $Port,
-
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
 
         [parameter(Mandatory = $false)]
         [ValidateSet("NTLM","Kerberos","Claims","Classic")]

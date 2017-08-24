@@ -30,7 +30,6 @@
                 SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
                 EnableNetBIOS        = $false
                 NoILMUsed            = $true
-                FarmAccount          = $FarmAccount
                 PsDscRunAsCredential = $SetupAccount
             }
         }

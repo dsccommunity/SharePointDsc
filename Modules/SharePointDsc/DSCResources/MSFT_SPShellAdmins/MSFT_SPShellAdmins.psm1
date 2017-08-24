@@ -22,11 +22,11 @@ function Get-TargetResource
 
         [parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
-        $ContentDatabases,
+        $Databases,
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $AllContentDatabases,
+        $AllDatabases,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
@@ -42,24 +42,24 @@ function Get-TargetResource
         return $null
     }
 
-    if ($ContentDatabases) 
+    if ($Databases) 
     {
-        foreach ($contentDatabase in $ContentDatabases) 
+        foreach ($database in $Databases) 
         {
-            if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) `
-                -or ($contentDatabase.MembersToExclude))) 
+            if ($database.Members -and (($database.MembersToInclude) `
+                -or ($database.MembersToExclude))) 
             {
-                Write-Verbose -Message ("ContentDatabases: Cannot use the Members parameter " + `
+                Write-Verbose -Message ("Databases: Cannot use the Members parameter " + `
                                         "together with the MembersToInclude or " + `
                                         "MembersToExclude parameters")
                 return $null
             }
 
-            if (!$contentDatabase.Members `
-                -and !$contentDatabase.MembersToInclude `
-                -and !$contentDatabase.MembersToExclude) 
+            if (!$database.Members `
+                -and !$database.MembersToInclude `
+                -and !$database.MembersToExclude) 
             {
-                Write-Verbose -Message ("ContentDatabases: At least one of the following " + `
+                Write-Verbose -Message ("Databases: At least one of the following " + `
                                         "parameters must be specified: Members, " + `
                                         "MembersToInclude, MembersToExclude")
                 return $null
@@ -76,10 +76,10 @@ function Get-TargetResource
         }
     }
 
-    if ($ContentDatabases -and $AllContentDatabases) 
+    if ($Databases -and $AllDatabases) 
     {
-        Write-Verbose -Message ("Cannot use the ContentDatabases parameter together with the " + `
-                                "AllContentDatabases parameter")
+        Write-Verbose -Message ("Cannot use the Databases parameter together with the " + `
+                                "AllDatabases parameter")
         return $null
     }
 
@@ -103,16 +103,15 @@ function Get-TargetResource
         }
 
         $shellAdmins = Get-SPShellAdmin
-        $allContentDatabases = $true
 
         $cdbPermissions = @()
-        $databases = Get-SPContentDatabase
-        foreach ($contentDatabase in $databases) 
+        $databases = Get-SPDatabase
+        foreach ($database in $databases) 
         {
             $cdbPermission = @{}
             
-            $cdbPermission.Name = $contentDatabase.Name
-            $dbShellAdmins = Get-SPShellAdmin -Database $contentDatabase.Id
+            $cdbPermission.Name = $database.Name
+            $dbShellAdmins = Get-SPShellAdmin -Database $database.Id
             $cdbPermission.Members = $dbShellAdmins.UserName
             
             $cdbPermissions += $cdbPermission            
@@ -123,8 +122,8 @@ function Get-TargetResource
             Members = $shellAdmins.UserName
             MembersToInclude = $params.MembersToInclude
             MembersToExclude = $params.MembersToExclude
-            ContentDatabases = $cdbPermissions
-            AllContentDatabases = $params.AllContentDatabases
+            Databases = $cdbPermissions
+            AllDatabases = $params.AllDatabases
             InstallAccount = $params.InstallAccount
         }
     }
@@ -155,11 +154,11 @@ function Set-TargetResource
 
         [parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
-        $ContentDatabases,
+        $Databases,
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $AllContentDatabases,
+        $AllDatabases,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
@@ -174,23 +173,23 @@ function Set-TargetResource
                "MembersToInclude or MembersToExclude parameters")
     }
 
-    if ($ContentDatabases) 
+    if ($Databases) 
     {
-        foreach ($contentDatabase in $ContentDatabases) 
+        foreach ($database in $Databases) 
         {
-            if ($contentDatabase.Members -and (($contentDatabase.MembersToInclude) `
-                -or ($contentDatabase.MembersToExclude))) 
+            if ($database.Members -and (($database.MembersToInclude) `
+                -or ($database.MembersToExclude))) 
             {
-                throw ("ContentDatabases: Cannot use the Members parameter " + `
+                throw ("Databases: Cannot use the Members parameter " + `
                        "together with the MembersToInclude or " + `
                        "MembersToExclude parameters")
             }
 
-            if (!$contentDatabase.Members `
-                -and !$contentDatabase.MembersToInclude `
-                -and !$contentDatabase.MembersToExclude) 
+            if (!$database.Members `
+                -and !$database.MembersToInclude `
+                -and !$database.MembersToExclude) 
             {
-                throw ("ContentDatabases: At least one of the following " + `
+                throw ("Databases: At least one of the following " + `
                        "parameters must be specified: Members, " + `
                        "MembersToInclude, MembersToExclude")
             }
@@ -205,10 +204,10 @@ function Set-TargetResource
         }
     }
 
-    if ($ContentDatabases -and $AllContentDatabases) 
+    if ($Databases -and $AllDatabases) 
     {
-        throw ("Cannot use the ContentDatabases parameter together with the " + `
-               "AllContentDatabases parameter")
+        throw ("Cannot use the Databases parameter together with the " + `
+               "AllDatabases parameter")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -369,30 +368,30 @@ function Set-TargetResource
             }
         }
 
-        if ($params.ContentDatabases) 
+        if ($params.Databases) 
         {
-            Write-Verbose -Message "Processing ContentDatabases parameter"
-            # The ContentDatabases parameter is set
+            Write-Verbose -Message "Processing Databases parameter"
+            # The Databases parameter is set
             # Compare the configuration against the actual set and correct any issues
 
-            foreach ($contentDatabase in $params.ContentDatabases) 
+            foreach ($database in $params.Databases) 
             {
                 # Check if configured database exists, throw error if not
-                Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
+                Write-Verbose -Message "Processing Database: $($database.Name)"
 
-                $currentCDB = Get-SPContentDatabase | Where-Object -FilterScript { 
-                    $_.Name -eq $contentDatabase.Name 
+                $currentCDB = Get-SPDatabase | Where-Object -FilterScript { 
+                    $_.Name -eq $database.Name 
                 }
                 if ($null -ne $currentCDB) 
                 {
                     $dbShellAdmins = Get-SPShellAdmin -database $currentCDB.Id
 
-                    if ($contentDatabase.Members) 
+                    if ($database.Members) 
                     {
                         Write-Verbose -Message "Processing Members"
                         if ($dbShellAdmins) 
                         {
-                            $differences = Compare-Object -ReferenceObject $contentDatabase.Members `
+                            $differences = Compare-Object -ReferenceObject $database.Members `
                                                           -DifferenceObject $dbShellAdmins.UserName
                             foreach ($difference in $differences) 
                             {
@@ -432,7 +431,7 @@ function Set-TargetResource
                         } 
                         else 
                         {
-                            foreach ($member in $contentDatabase.Members) 
+                            foreach ($member in $database.Members) 
                             {
                                 try 
                                 {
@@ -449,12 +448,12 @@ function Set-TargetResource
                         }
                     }
 
-                    if ($contentDatabase.MembersToInclude) 
+                    if ($database.MembersToInclude) 
                     {
                         Write-Verbose -Message "Processing MembersToInclude"
                         if ($dbShellAdmins) 
                         {
-                            foreach ($member in $contentDatabase.MembersToInclude) 
+                            foreach ($member in $database.MembersToInclude) 
                             {
                                 if (-not $dbShellAdmins.UserName.Contains($member)) 
                                 {
@@ -474,7 +473,7 @@ function Set-TargetResource
                         } 
                         else 
                         {
-                            foreach ($member in $contentDatabase.MembersToInclude) 
+                            foreach ($member in $database.MembersToInclude) 
                             {
                                 try 
                                 {
@@ -491,12 +490,12 @@ function Set-TargetResource
                         }
                     }
 
-                    if ($contentDatabase.MembersToExclude) 
+                    if ($database.MembersToExclude) 
                     {
                         Write-Verbose -Message "Processing MembersToExclude"
                         if ($dbShellAdmins) 
                         {
-                            foreach ($member in $contentDatabase.MembersToExclude) 
+                            foreach ($member in $database.MembersToExclude) 
                             {
                                 if ($dbShellAdmins.UserName.Contains($member)) 
                                 {
@@ -520,21 +519,21 @@ function Set-TargetResource
                 } 
                 else 
                 {
-                    throw "Specified database does not exist: $($contentDatabase.Name)"
+                    throw "Specified database does not exist: $($database.Name)"
                 }
             }
         }
 
-        if ($params.AllContentDatabases) 
+        if ($params.AllDatabases) 
         {
-            Write-Verbose -Message "Processing AllContentDatabases parameter"
+            Write-Verbose -Message "Processing AllDatabases parameter"
 
-            foreach ($contentDatabase in (Get-SPContentDatabase)) 
+            foreach ($database in (Get-SPDatabase)) 
             {
-                $dbShellAdmins = Get-SPShellAdmin -database $contentDatabase.Id
+                $dbShellAdmins = Get-SPShellAdmin -database $database.Id
                 if ($params.Members) 
                 {
-                    Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
+                    Write-Verbose -Message "Processing Database: $($database.Name)"
                     if ($dbShellAdmins) 
                     {
                         $differences = Compare-Object -ReferenceObject $dbShellAdmins.UserName `
@@ -558,7 +557,7 @@ function Set-TargetResource
                                     $user = $difference.InputObject
                                     try 
                                     {
-                                        Add-SPShellAdmin -database $contentDatabase.Id -UserName $user
+                                        Add-SPShellAdmin -database $database.Id -UserName $user
                                     } 
                                     catch 
                                     {
@@ -573,7 +572,7 @@ function Set-TargetResource
                                     $user = $difference.InputObject
                                     try 
                                     {
-                                        Remove-SPShellAdmin -Database $contentDatabase.Id `
+                                        Remove-SPShellAdmin -Database $database.Id `
                                                             -UserName $user `
                                                             -Confirm:$false
                                     }
@@ -594,7 +593,7 @@ function Set-TargetResource
                         {
                             try 
                             {
-                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                                Add-SPShellAdmin -database $database.Id -UserName $member
                             } 
                             catch 
                             {
@@ -617,7 +616,7 @@ function Set-TargetResource
                             {
                                 try 
                                 {
-                                    Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                                    Add-SPShellAdmin -database $database.Id -UserName $member
                                 } 
                                 catch 
                                 {
@@ -635,7 +634,7 @@ function Set-TargetResource
                         {
                             try 
                             {
-                                Add-SPShellAdmin -database $contentDatabase.Id -UserName $member
+                                Add-SPShellAdmin -database $database.Id -UserName $member
                             } 
                             catch 
                             {
@@ -659,7 +658,7 @@ function Set-TargetResource
                             {
                                 try 
                                 {
-                                    Remove-SPShellAdmin -Database $contentDatabase.Id `
+                                    Remove-SPShellAdmin -Database $database.Id `
                                                         -UserName $member `
                                                         -Confirm:$false
                                 } 
@@ -703,11 +702,11 @@ function Test-TargetResource
 
         [parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
-        $ContentDatabases,
+        $Databases,
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $AllContentDatabases,
+        $AllDatabases,
 
         [parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential] 
@@ -788,25 +787,25 @@ function Test-TargetResource
         }
     }
     
-    if ($AllContentDatabases) 
+    if ($AllDatabases) 
     {
-        # The AllContentDatabases parameter is set
+        # The AllDatabases parameter is set
         # Check the Members group against all databases
-        Write-Verbose -Message "Processing AllContentDatabases parameter"
+        Write-Verbose -Message "Processing AllDatabases parameter"
 
-        foreach ($contentDatabase in $CurrentValues.ContentDatabases) 
+        foreach ($database in $CurrentValues.Databases) 
         {
             # Check if configured database exists, throw error if not
-            Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
+            Write-Verbose -Message "Processing Database: $($database.Name)"
 
             if ($Members) 
             {
-                if (-not $contentDatabase.Members) 
+                if (-not $database.Members) 
                 { 
                     return $false 
                 }
 
-                $differences = Compare-Object -ReferenceObject $contentDatabase.Members `
+                $differences = Compare-Object -ReferenceObject $database.Members `
                                               -DifferenceObject $Members
 
                 if ($null -eq $differences) 
@@ -822,14 +821,14 @@ function Test-TargetResource
 
             if ($MembersToInclude) 
             {
-                if (-not $contentDatabase.Members)
+                if (-not $database.Members)
                 { 
                     return $false 
                 }
 
                 foreach ($member in $MembersToInclude) 
                 {
-                    if (-not($contentDatabase.Members.Contains($member))) 
+                    if (-not($database.Members.Contains($member))) 
                     {
                         Write-Verbose -Message "$member is not a Shell Admin. Set result to false"
                         return $false
@@ -843,11 +842,11 @@ function Test-TargetResource
 
             if ($MembersToExclude) 
             {
-                if ($contentDatabase.Members) 
+                if ($database.Members) 
                 {
                     foreach ($member in $MembersToExclude) 
                     {
-                        if ($contentDatabase.Members.Contains($member)) 
+                        if ($database.Members.Contains($member)) 
                         {
                             Write-Verbose -Message "$member is a Shell Admin. Set result to false"
                             return $false
@@ -862,24 +861,24 @@ function Test-TargetResource
         }
     }
 
-    if ($ContentDatabases) 
+    if ($Databases) 
     {
-        # The ContentDatabases parameter is set
+        # The Databases parameter is set
         # Compare the configuration against the actual set
-        Write-Verbose -Message "Processing ContentDatabases parameter"
+        Write-Verbose -Message "Processing Databases parameter"
 
-        foreach ($contentDatabase in $ContentDatabases) 
+        foreach ($database in $Databases) 
         {
             # Check if configured database exists, throw error if not
-            Write-Verbose -Message "Processing Content Database: $($contentDatabase.Name)"
+            Write-Verbose -Message "Processing Database: $($database.Name)"
 
-            $currentCDB = $CurrentValues.ContentDatabases | Where-Object -FilterScript { 
-                $_.Name -eq $contentDatabase.Name 
+            $currentCDB = $CurrentValues.Databases | Where-Object -FilterScript { 
+                $_.Name -eq $database.Name 
             }
             
             if ($null -ne $currentCDB) 
             {
-                if ($contentDatabase.Members) 
+                if ($database.Members) 
                 {
                     Write-Verbose -Message "Processing Members parameter"
                     if (-not $currentCDB.Members) 
@@ -888,7 +887,7 @@ function Test-TargetResource
                     }
 
                     $differences = Compare-Object -ReferenceObject $currentCDB.Members `
-                                                  -DifferenceObject $contentDatabase.Members
+                                                  -DifferenceObject $database.Members
 
                     if ($null -eq $differences) 
                     {
@@ -901,7 +900,7 @@ function Test-TargetResource
                     }
                 }
 
-                if ($contentDatabase.MembersToInclude) 
+                if ($database.MembersToInclude) 
                 {
                     Write-Verbose -Message "Processing MembersToInclude parameter"
                     if (-not $currentCDB.Members) 
@@ -909,7 +908,7 @@ function Test-TargetResource
                         return $false 
                     }
 
-                    foreach ($member in $contentDatabase.MembersToInclude) 
+                    foreach ($member in $database.MembersToInclude) 
                     {
                         if (-not($currentCDB.Members.Contains($member))) 
                         {
@@ -923,12 +922,12 @@ function Test-TargetResource
                     }
                 }
 
-                if ($contentDatabase.MembersToExclude) 
+                if ($database.MembersToExclude) 
                 {
                     Write-Verbose -Message "Processing MembersToExclude parameter"
                     if ($currentCDB.Members) 
                     {
-                        foreach ($member in $contentDatabase.MembersToExclude) 
+                        foreach ($member in $database.MembersToExclude) 
                         {
                             if ($currentCDB.Members.Contains($member)) 
                             {
@@ -945,7 +944,7 @@ function Test-TargetResource
             } 
             else 
             {
-                throw "Specified database does not exist: $($contentDatabase.Name)"
+                throw "Specified database does not exist: $($database.Name)"
             }
         }
     }
