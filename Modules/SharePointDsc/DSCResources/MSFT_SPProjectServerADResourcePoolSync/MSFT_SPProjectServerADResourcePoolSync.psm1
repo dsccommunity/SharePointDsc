@@ -22,7 +22,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting license status for Project Server"
+    Write-Verbose -Message "Getting AD Resource Pool Sync settings for $Url"
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
     {
@@ -135,7 +135,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting Project Server License status"
+    Write-Verbose -Message "Setting AD Resource Pool Sync settings for $Url"
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
     {
@@ -206,7 +206,7 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing Project Server License status"
+    Write-Verbose -Message "Testing AD Resource Pool Sync settings for $Url"
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
