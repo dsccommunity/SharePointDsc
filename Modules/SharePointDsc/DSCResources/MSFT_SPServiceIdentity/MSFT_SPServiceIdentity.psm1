@@ -4,9 +4,17 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $ManagedAccount
+        [parameter(Mandatory = $true)]  
+        [System.String]
+        $Name,
+
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount,
+
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $ManagedAccount
     )
 
     Write-Verbose -Message "Getting identity for service instance '$Name'"
@@ -16,12 +24,17 @@ function Get-TargetResource
         
 
         $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object { $_.TypeName -eq $params.Name }
+        
+        if ($null -eq $serviceInstance.service.processidentity) 
+        {
+            Write-Verbose "WARNING: Service $($params.name) does not support setting the process identity"
+        }
+        
         $ManagedAccount = $serviceInstance.service.processidentity.username
         
         return @{
             Name = $params.Name
             ManagedAccount = $ManagedAccount
-            InstallAccount = $params.InstallAccount
         }     
         
     }
@@ -35,9 +48,17 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $ManagedAccount
+        [parameter(Mandatory = $true)]  
+        [System.String] 
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount,
+
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $ManagedAccount
     )
 
     Write-Verbose -Message "Setting service instance '$Name' to '$ManagedAccount'"
@@ -48,14 +69,17 @@ function Set-TargetResource
 
         $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME| Where-Object { $_.TypeName -eq $params.Name }
         $managedAccount = Get-SPManagedAccount $params.ManagedAccount
-        if ($null -eq $serviceInstance) {
+        if ($null -eq $serviceInstance) 
+        {
             throw [System.Exception] "Unable to locate service $($params.Name)"
         }
-        if ($null -eq $managedAccount) {
+        if ($null -eq $managedAccount) 
+        {
             throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"
         }
         
-       if ($null -eq $serviceInstance.service.processidentity) {
+       if ($null -eq $serviceInstance.service.processidentity) 
+       {
            throw [System.Exception] "Service $($params.name) does not support setting the process identity"
        }
        
@@ -76,9 +100,17 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  [System.String] $Name,
-        [parameter(Mandatory = $false)] [System.Management.Automation.PSCredential] $InstallAccount,
-        [parameter(Mandatory = $false)] [System.String] $ManagedAccount
+        [parameter(Mandatory = $true)]  
+        [System.String]
+        $Name,
+
+        [parameter(Mandatory = $false)] 
+        [System.Management.Automation.PSCredential] 
+        $InstallAccount,
+
+        [parameter(Mandatory = $true)] 
+        [System.String] 
+        $ManagedAccount
     )
 
   $CurrentValues = Get-TargetResource @PSBoundParameters

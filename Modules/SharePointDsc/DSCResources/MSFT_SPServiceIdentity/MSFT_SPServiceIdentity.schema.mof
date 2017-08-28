@@ -2,6 +2,6 @@
 class MSFT_SPServiceIdentity : OMI_BaseResource
 {
     [Key, Description("The name of the service instance to manage")] string Name;
-    [Write, Description("The user name of a managed account that will be used to run the service") ] string ManagedAccount;
+    [Required, Description("The user name of a managed account that will be used to run the service") ] string ManagedAccount;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsAccount if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
