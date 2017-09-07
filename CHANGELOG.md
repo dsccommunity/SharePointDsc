@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## Unreleased
+## 1.9
 
 * New resource: SPServiceIdentity
 
