@@ -4,29 +4,29 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Farm","WebApplication","Site","Web")] 
         [System.String] 
         $FeatureScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String] 
         $Version
     )
@@ -78,29 +78,29 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Farm","WebApplication","Site","Web")] 
         [System.String] 
         $FeatureScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String] 
         $Version
     )
@@ -176,29 +176,29 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Farm","WebApplication","Site","Web")] 
         [System.String] 
         $FeatureScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String] 
         $Version
     )

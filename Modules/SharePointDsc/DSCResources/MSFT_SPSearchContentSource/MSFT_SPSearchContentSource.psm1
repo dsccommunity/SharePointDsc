@@ -4,63 +4,63 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint","Website","FileShare")]
         [System.String]
         $ContentSourceType,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Addresses,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String] 
         $CrawlSetting,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $LimitServerHops,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Boolean]
         $Force,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -192,63 +192,63 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint","Website","FileShare")]
         [System.String]
         $ContentSourceType,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Addresses,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String] 
         $CrawlSetting,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $LimitServerHops,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Boolean]
         $Force,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -600,63 +600,63 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint","Website","FileShare")]
         [System.String]
         $ContentSourceType,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Addresses,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String] 
         $CrawlSetting,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $LimitServerHops,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Boolean]
         $Force,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

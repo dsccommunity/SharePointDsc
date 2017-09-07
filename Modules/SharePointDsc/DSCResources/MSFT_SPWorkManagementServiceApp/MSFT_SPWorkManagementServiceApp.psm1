@@ -4,48 +4,48 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $ProxyName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenProviderRefreshes, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenSearchQueries, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfSubscriptionSyncsPerEwsSyncRun, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfUsersEwsSyncWillProcessAtOnce, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -113,48 +113,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $ProxyName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenProviderRefreshes, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenSearchQueries, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfSubscriptionSyncsPerEwsSyncRun, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfUsersEwsSyncWillProcessAtOnce, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -318,48 +318,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $ProxyName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenProviderRefreshes, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $MinimumTimeBetweenSearchQueries, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfSubscriptionSyncsPerEwsSyncRun, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfUsersEwsSyncWillProcessAtOnce, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

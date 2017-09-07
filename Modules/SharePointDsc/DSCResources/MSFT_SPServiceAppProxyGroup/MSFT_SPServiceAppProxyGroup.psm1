@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Present","Absent")] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxies,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxiesToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxiesToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -90,28 +90,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Present","Absent")] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxies,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxiesToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxiesToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -336,28 +336,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         [ValidateSet("Present","Absent")] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxies,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxiesToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.String[]] 
         $ServiceAppProxiesToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

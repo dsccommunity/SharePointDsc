@@ -4,26 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $false)]
         [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Authoratative","Demoted")]
         [System.String]
         $Action,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -110,26 +114,30 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $false)]
         [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Authoratative","Demoted")]
         [System.String]
         $Action,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -231,26 +239,30 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Path,
         
+        [Parameter(Mandatory = $false)]
         [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Authoratative","Demoted")]
         [System.String]
         $Action,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

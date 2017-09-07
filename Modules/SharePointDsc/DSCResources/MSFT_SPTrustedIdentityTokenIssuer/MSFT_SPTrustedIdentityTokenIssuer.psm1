@@ -4,52 +4,52 @@
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Description,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Realm,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $IdentifierClaim,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $SigningCertificateThumbprint,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $SigningCertificateFilePath,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $ClaimProviderName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $ProviderSignOutUri,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -116,52 +116,52 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Description,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Realm,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String]
         $IdentifierClaim,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $SigningCertificateThumbprint,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $SigningCertificateFilePath,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $ClaimProviderName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $ProviderSignOutUri,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -352,52 +352,52 @@ function Test-TargetResource
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Description,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Realm,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String]
         $IdentifierClaim,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $SigningCertificateThumbprint,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $SigningCertificateFilePath,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $ClaimProviderName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [String]
         $ProviderSignOutUri,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

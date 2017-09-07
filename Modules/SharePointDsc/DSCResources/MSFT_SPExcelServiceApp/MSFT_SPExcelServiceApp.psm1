@@ -29,91 +29,91 @@ function Get-TargetResource
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $TrustedFileLocations,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $CachingOfUnusedFilesEnable,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $CrossDomainAccessAllowed,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("None","Connection")] 
         [System.String] 
         $EncryptedUserConnectionRequired,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $ExternalDataConnectionLifetime,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
         [System.String] 
         $FileAccessMethod,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("RoundRobin","Local","WorkbookURL")] 
         [System.String] 
         $LoadBalancingScheme,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $MemoryCacheThreshold,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $PrivateBytesMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $SessionsPerUserMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $SiteCollectionAnonymousSessionsMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $TerminateProcessOnAccessViolation,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $ThrottleAccessViolationsPerSiteCollection,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.String] 
         $UnattendedAccountApplicationId,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $UnusedObjectAgeMax,
 
-        [parameter(Mandatory = $false)]   
+        [Parameter(Mandatory = $false)]   
         [System.String] 
         $WorkbookCache,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $WorkbookCacheSizeMax,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -220,91 +220,91 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $TrustedFileLocations,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $CachingOfUnusedFilesEnable,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $CrossDomainAccessAllowed,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("None","Connection")] 
         [System.String] 
         $EncryptedUserConnectionRequired,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $ExternalDataConnectionLifetime,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
         [System.String] 
         $FileAccessMethod,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("RoundRobin","Local","WorkbookURL")] 
         [System.String] 
         $LoadBalancingScheme,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $MemoryCacheThreshold,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $PrivateBytesMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $SessionsPerUserMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $SiteCollectionAnonymousSessionsMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $TerminateProcessOnAccessViolation,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $ThrottleAccessViolationsPerSiteCollection,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.String] 
         $UnattendedAccountApplicationId,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $UnusedObjectAgeMax,
 
-        [parameter(Mandatory = $false)]   
+        [Parameter(Mandatory = $false)]   
         [System.String] 
         $WorkbookCache,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $WorkbookCacheSizeMax,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -476,91 +476,91 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $TrustedFileLocations,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $CachingOfUnusedFilesEnable,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $CrossDomainAccessAllowed,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("None","Connection")] 
         [System.String] 
         $EncryptedUserConnectionRequired,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $ExternalDataConnectionLifetime,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("UseImpersonation","UseFileAccessAccount")] 
         [System.String] 
         $FileAccessMethod,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [ValidateSet("RoundRobin","Local","WorkbookURL")] 
         [System.String] 
         $LoadBalancingScheme,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $MemoryCacheThreshold,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $PrivateBytesMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $SessionsPerUserMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $SiteCollectionAnonymousSessionsMax,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.Boolean] 
         $TerminateProcessOnAccessViolation,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $ThrottleAccessViolationsPerSiteCollection,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.String] 
         $UnattendedAccountApplicationId,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $UnusedObjectAgeMax,
 
-        [parameter(Mandatory = $false)]   
+        [Parameter(Mandatory = $false)]   
         [System.String] 
         $WorkbookCache,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.UInt32] 
         $WorkbookCacheSizeMax,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Name,
+        $TypeName,
 
-        [parameter(Mandatory = $false)]
-        [System.String]
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
         $WebApplication,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Boolean]
         $Enabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $Schedule,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -43,48 +43,91 @@ function Get-TargetResource
             return $null
         }
 
-        # Get a reference to the timer job
-        if ($params.ContainsKey("WebApplication")) 
-        {
-            $timerjob = Get-SPTimerJob -Identity $params.Name `
-                                       -WebApplication $params.WebApplication
-        } 
-        else 
-        {
-            $timerjob = Get-SPTimerJob $params.Name
+        $returnval = @{
+            TypeName = $params.TypeName
+            WebApplication = @()
         }
 
-        # Check if timer job if found
-        if ($null -eq $timerjob) 
-        { 
-            return $null 
-        }
-        
-        $schedule = $null
-        if ($null -ne $timerjob.Schedule) 
+        if ($params.WebApplication -ne "N/A")
         {
-            $schedule = $timerjob.Schedule.ToString()
-        }
-        
-        if ($null -eq $timerjob.WebApplication) 
-        {
-            # Timer job is not associated to web application
-            return @{
-                Name = $params.Name
-                Enabled = -not $timerjob.IsDisabled
-                Schedule = $schedule
-                InstallAccount = $params.InstallAccount
+            $enabled = ""
+            $schedule = ""
+            foreach ($webapp in $params.WebApplication)
+            {
+                $timerjobs = Get-SPTimerJob -Type $params.TypeName `
+                                            -WebApplication $webapp
+                
+                if ($timerjobs.Count -eq 0)
+                {
+                    Write-Verbose -Message ("No timer jobs found. Please check the input values")
+                    return $null
+                }
+
+                $returnval.WebApplication += $webapp
+                
+                if ($enabled -eq "")
+                {
+                    $enabled = -not $timerjob.IsDisabled
+                }
+                else
+                {
+                    if ($enabled -ne (-not $timerjob.IsDisabled))
+                    {
+                        $enabled = "multiple"
+                    }
+                }
+
+                $jobSchedule = $timerjob.Schedule.ToString()
+                if ($schedule -eq "")
+                {
+                    $schedule = $jobSchedule
+                }
+                else
+                {
+                    if ($schedule -ne $jobSchedule)
+                    {
+                        $schedule = "multiple"
+                    }
+                }
+
+            }
+
+            if ($enabled -eq "multiple")
+            {
+                $returnval.Enabled = $null
+            }
+            else
+            {
+                $returnval.Enabled = $enabled
+            }
+            
+            if ($schedule -eq "multiple")
+            {
+                $returnval.Schedule = $null
+            }
+            else
+            {
+                $returnval.Schedule = $schedule
             }
         } 
         else 
         {
-            # Timer job is associated to web application
-            return @{
-                Name = $params.Name
-                WebApplication = $timerjob.WebApplication.Url
-                Enabled = -not $timerjob.IsDisabled
-                Schedule = $schedule
-                InstallAccount = $params.InstallAccount
+            $timerjob = Get-SPTimerJob -Type $params.TypeName
+            if ($timerjob.Count -eq 1)
+            {
+                $returnval.WebApplication = "N/A"
+                $returnval.Enabled        = -not $timerjob.IsDisabled
+                $returnval.Schedule       = $null
+                if ($null -ne $timerjob.Schedule) 
+                {
+                    $returnval.Schedule = $timerjob.Schedule.ToString()
+                }
+            }
+            else
+            {
+                Write-Verbose -Message ("$($timerjob.Count) timer jobs found. Check input " + `
+                               "values or use the WebApplication parameter.")
+                return $null
             }
         }
     }
@@ -96,23 +139,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Name,
+        $TypeName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebApplication,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Boolean]
         $Enabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $Schedule,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -221,23 +264,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Name,
+        $TypeName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebApplication,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Boolean]
         $Enabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.String]
         $Schedule,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
