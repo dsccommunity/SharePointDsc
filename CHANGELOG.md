@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Added resource: SPMinRoleCompliance
+
 ## 1.9
 
 * New resource: SPServiceIdentity
