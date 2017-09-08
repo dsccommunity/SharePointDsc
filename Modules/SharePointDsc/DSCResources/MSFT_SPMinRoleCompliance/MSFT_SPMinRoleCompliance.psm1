@@ -48,6 +48,14 @@ function Get-TargetResource
     return $result
 }
 
+function Get-SPDscRoleTestMethod
+{
+    $assembly = [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
+    $type = $assembly.GetType("Microsoft.SharePoint.Administration.SPServerRoleManager")
+    $flags = [Reflection.BindingFlags] "NonPublic,Static"
+    return $type.GetMethod("IsCompliantWithMinRole",$flags)
+}
+
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -81,10 +89,7 @@ function Set-TargetResource
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
 
-        $assembly = [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint")
-        $type = $assembly.GetType("Microsoft.SharePoint.Administration.SPServerRoleManager")
-        $flags = [Reflection.BindingFlags] "NonPublic,Static"
-        $method = $type.GetMethod("IsCompliantWithMinRole",$flags)
+        $method = Get-SPDscRoleTestMethod
 
         Get-SPService | Where-Object -FilterScript { 
             $_.CompliantWithMinRole -eq $false 
