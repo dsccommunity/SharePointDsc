@@ -1,5 +1,9 @@
 # Change log for SharePointDsc
 
+## 1.9
+
+* New resource: SPServiceIdentity
+
 ## 1.8
 
 * Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
