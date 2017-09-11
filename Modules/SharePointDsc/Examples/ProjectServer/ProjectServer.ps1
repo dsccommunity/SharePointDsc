@@ -332,6 +332,15 @@ Configuration Example
             DependsOn            = "[SPFeature]PWASiteFeature"
         }
 
+        SPTimerJobState RunProjectSeverADImport
+        {
+            Name                    = "ActiveDirectorySync"
+            Enabled                 = $true
+            Schedule                = "daily between 03:00:00 and 03:00:00"
+            PsDscRunAsCredential    = $SetupAccount
+            DependsOn               = "[SPProjectServerADResourcePoolSync]PWAUserSync"
+        }
+
         #**********************************************************
         # Local configuration manager settings
         #
