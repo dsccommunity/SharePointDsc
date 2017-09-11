@@ -303,7 +303,7 @@ Configuration Example
             OwnerAlias               = "CONTOSO\ExampleUser"
             Name                     = "PWA Site"
             Template                 = "PWA#0"
-            PsDscRunAsCredential     = $SetupAccount
+            PsDscRunAsCredential     = $SPSetupAccount
             DependsOn                = @("[SPManagedPath]PWAPath", "[SPProjectServerServiceApp]PWAServiceApp")
         }
     
@@ -312,7 +312,7 @@ Configuration Example
             Name                 = "PWASITE"
             Url                  = "http://sites.contoso.com/pwa"
             FeatureScope         = "Site"
-            PsDscRunAsCredential = $SetupAccount
+            PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPSite]PWASite"
         }
 
@@ -320,7 +320,7 @@ Configuration Example
         {
             Url                  = "http://sites.contoso.com/pwa"
             PermissionMode       = "ProjectServer"
-            PsDscRunAsCredential = $SetupAccount
+            PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPFeature]PWASiteFeature"
         }
 
@@ -329,7 +329,7 @@ Configuration Example
             Url                  = "http://sites.contoso.com/pwa"
             GroupNames           = @("CONTOSO\Project Managers", "CONTOSO\Project Members")
             AutoReactivateUsers  = $true
-            PsDscRunAsCredential = $SetupAccount
+            PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPFeature]PWASiteFeature"
         }
 
@@ -338,7 +338,7 @@ Configuration Example
             Name                    = "ActiveDirectorySync"
             Enabled                 = $true
             Schedule                = "daily between 03:00:00 and 03:00:00"
-            PsDscRunAsCredential    = $SetupAccount
+            PsDscRunAsCredential    = $SPSetupAccount
             DependsOn               = "[SPProjectServerADResourcePoolSync]PWAUserSync"
         }
 
