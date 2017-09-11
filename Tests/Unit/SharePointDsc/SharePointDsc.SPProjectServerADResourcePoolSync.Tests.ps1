@@ -129,7 +129,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             return @{
                                                                 ADGroupGuids = ([Guid[]]::new(0))
                                                             }
-                                                         } -PassThru -Force
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $false
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {} -PassThru -Force
                         return $service
                     }
 
@@ -168,7 +178,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             return @{
                                                                 ADGroupGuids = ([Guid[]](New-Guid))
                                                             }
-                                                         } -PassThru -Force
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $false
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {} -PassThru -Force
                         return $service
                     }
 
@@ -207,7 +227,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             return @{
                                                                 ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
                                                             }
-                                                         } -PassThru -Force
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $false
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {} -PassThru -Force
                         return $service
                     }
 
@@ -239,7 +269,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             return @{
                                                                 ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
                                                             }
-                                                         } -PassThru -Force
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $false
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {} -PassThru -Force
                         return $service
                     }
 
@@ -277,7 +317,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             return @{
                                                                 ADGroupGuids = $null
                                                             }
-                                                         } -PassThru -Force
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $false
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {} -PassThru -Force
                         return $service
                     }
 
@@ -287,6 +337,105 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     It "should return absent from the get method" {
                         $global:SPDscSidCount = 0
                         (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
+
+                    It "should return true from the test method" {
+                        $global:SPDscSidCount = 0
+                        Test-TargetResource @testParams | Should Be $true
+                    }
+                }
+
+                Context -Name "AD groups are set correctly, but AutoReactivateUsers property doesn't match" -Fixture {
+                    $testParams = @{
+                        Url = "http://server/pwa"
+                        GroupNames = @("DOMAIN\Group 1", "DOMAIN\Group 2")
+                        Ensure = "Present"
+                        AutoReactivateUsers = $true
+                    }
+
+                    Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
+                        $service = [SPDscTests.DummyWebService]::new()
+                        $service = $service | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings2 `
+                                                         -Value {
+                                                            return @{
+                                                                ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $false
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                             $global:SPDscAutoReactivateUsersCalled = $true
+                                                         } -PassThru -Force
+                        return $service
+                    }
+
+                    $global:SPDscGroupsToReturn = @("DOMAIN\Group 1", "DOMAIN\Group 2")
+                    $global:SPDscSidsToReturn = @("example SID", "example SID")
+
+                    It "should return present from the get method" {
+                        $global:SPDscSidCount = 0
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
+                    }
+
+                    It "should return true from the test method" {
+                        $global:SPDscSidCount = 0
+                        Test-TargetResource @testParams | Should Be $false
+                    }
+
+                    It "should update the AutoReactivateUsers property during the set method" {
+                        $global:SPDscAutoReactivateUsersCalled = $false
+                        $global:SPDscSidCount = 0
+                        Set-TargetResource @testParams
+                        $global:SPDscAutoReactivateUsersCalled | Should Be $true
+                    }
+                }
+
+                Context -Name "AD groups are set correctly, and AutoReactivateUsers property matches" -Fixture {
+                    $testParams = @{
+                        Url = "http://server/pwa"
+                        GroupNames = @("DOMAIN\Group 1", "DOMAIN\Group 2")
+                        Ensure = "Present"
+                        AutoReactivateUsers = $true
+                    }
+
+                    Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
+                        $service = [SPDscTests.DummyWebService]::new()
+                        $service = $service | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings2 `
+                                                         -Value {
+                                                            return @{
+                                                                ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                            return @{
+                                                                AutoReactivateInactiveUsers = $true
+                                                            }
+                                                         } -PassThru -Force `
+                                            | Add-Member -MemberType ScriptMethod `
+                                                         -Name SetActiveDirectorySyncEnterpriseResourcePoolSettings `
+                                                         -Value {
+                                                             $global:SPDscAutoReactivateUsersCalled = $true
+                                                         } -PassThru -Force
+                        return $service
+                    }
+
+                    $global:SPDscGroupsToReturn = @("DOMAIN\Group 1", "DOMAIN\Group 2")
+                    $global:SPDscSidsToReturn = @("example SID", "example SID")
+
+                    It "should return present from the get method" {
+                        $global:SPDscSidCount = 0
+                        (Get-TargetResource @testParams).Ensure | Should Be "Present"
                     }
 
                     It "should return true from the test method" {

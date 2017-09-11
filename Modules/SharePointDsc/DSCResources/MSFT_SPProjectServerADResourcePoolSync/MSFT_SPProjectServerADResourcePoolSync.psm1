@@ -4,20 +4,24 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.String[]] 
         $GroupNames,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $AutoReactivateUsers = $false,
+
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -42,8 +46,11 @@ function Get-TargetResource
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
 
         $script:currentSettings = $null
+        $script:reactivateUsers = $false
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
             $script:currentSettings = $adminService.GetActiveDirectorySyncEnterpriseResourcePoolSettings2()
+            $secondSettings = $adminService.GetActiveDirectorySyncEnterpriseResourcePoolSettings()
+            $script:reactivateUsers = $secondSettings.AutoReactivateInactiveUsers
         }
 
         if ($null -eq $script:currentSettings)
@@ -52,6 +59,7 @@ function Get-TargetResource
                 Url = $params.Url
                 GroupNames = @()
                 Ensure = "Absent"
+                AutoReactivateUsers = $false
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -63,6 +71,7 @@ function Get-TargetResource
                     Url = $params.Url
                     GroupNames = @()
                     Ensure = "Absent"
+                    AutoReactivateUsers = $script:reactivateUsers
                     InstallAccount = $params.InstallAccount
                 }
             }
@@ -103,6 +112,7 @@ function Get-TargetResource
                     Url = $params.Url
                     GroupNames = $adGroups
                     Ensure = "Present"
+                    AutoReactivateUsers = $script:reactivateUsers
                     InstallAccount = $params.InstallAccount
                 }
             }
@@ -117,20 +127,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.String[]] 
         $GroupNames,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $AutoReactivateUsers = $false,
+
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -166,6 +180,17 @@ function Set-TargetResource
             
             Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync -Url $params.Url `
                                                                       -GroupUids $groupIDs.ToArray()
+
+            if ($params.ContainsKey("AutoReactivateUsers") -eq $true)
+            {
+                $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
+
+                Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
+                    $settings = $adminService.GetActiveDirectorySyncEnterpriseResourcePoolSettings()
+                    $settings.AutoReactivateInactiveUsers  = $params.AutoReactivateUsers
+                    $adminService.SetActiveDirectorySyncEnterpriseResourcePoolSettings($settings)
+                }
+            }
         }
     }
     else
@@ -188,20 +213,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter(Mandatory = $false)]  
         [System.String[]] 
         $GroupNames,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)]  
+        [System.Boolean] 
+        $AutoReactivateUsers = $false,
+
+        [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -211,19 +240,21 @@ function Test-TargetResource
     $currentValues = Get-TargetResource @PSBoundParameters
 
     $PSBoundParameters.Ensure = $Ensure
+
+    $paramsToCheck = @("Ensure")
     
     if ($Ensure -eq "Present")
     {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure", "GroupNames")
+        $paramsToCheck += "GroupNames"
+        if ($PSBoundParameters.ContainsKey("AutoReactivateUsers") -eq $true)
+        {
+            $paramsToCheck += "AutoReactivateUsers"
+        }
     }
-    else 
-    {
-        return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                        -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("Ensure")
-    }
+
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                    -DesiredValues $PSBoundParameters `
+                                    -ValuesToCheck $paramsToCheck
 }
 
 Export-ModuleMember -Function *-TargetResource
