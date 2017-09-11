@@ -284,6 +284,7 @@ Configuration Example
             WebAppUrl            = "http://sites.contoso.com"
             RelativeUrl          = "PWA"
             Explicit             = $true
+            HostHeader           = $false
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPWebApplication]SharePointSites"
         }
