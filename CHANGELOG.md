@@ -9,6 +9,10 @@ The following changes will break 1.x configurations that use these resources:
 * Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
   the requirement for CredSSP
 
+## 1.9
+
+* New resource: SPServiceIdentity
+
 ## 1.8
 
 * Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
