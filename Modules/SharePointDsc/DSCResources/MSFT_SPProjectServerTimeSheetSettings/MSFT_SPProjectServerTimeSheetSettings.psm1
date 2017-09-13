@@ -27,23 +27,23 @@ function Get-TargetResource
         [System.String] 
         $DefaultReportingUnit,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $HoursInStandardDay,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $HoursInStandardWeek,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MaxHoursPerTimesheet,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MinHoursPerTimesheet,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MaxHoursPerDay,
 
@@ -93,7 +93,7 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting AD Resource Pool Sync settings for $Url"
+    Write-Verbose -Message "Getting Timesheet settings for $Url"
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
     {
@@ -182,7 +182,7 @@ function Get-TargetResource
             }
 
             $currentDefaultTrackingMode = "Unknown"
-            switch ($script:currentSettings.WADMIN_TS_REPORT_UNIT_ENUM)
+            switch ($script:currentSettings.WADMIN_DEFAULT_TRACKING_METHOD)
             {
                 3 {
                     $currentDefaultTrackingMode = "ActualDoneAndRemaining"
@@ -266,23 +266,23 @@ function Set-TargetResource
         [System.String] 
         $DefaultReportingUnit,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $HoursInStandardDay,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $HoursInStandardWeek,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MaxHoursPerTimesheet,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MinHoursPerTimesheet,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MaxHoursPerDay,
 
@@ -332,7 +332,7 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting AD Resource Pool Sync settings for $Url"
+    Write-Verbose -Message "Setting Timesheet settings for $Url"
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
     {
@@ -340,51 +340,144 @@ function Set-TargetResource
                            "SharePoint 2016.")
     }
 
-    if ($Ensure -eq "Present")
-    {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+    Invoke-SPDSCCommand -Credential $InstallAccount `
+                        -Arguments $PSBoundParameters `
+                        -ScriptBlock {
 
-            $params = $args[0]
+        $params = $args[0]
 
-            $groupIDs = New-Object -TypeName "System.Collections.Generic.List[System.Guid]"
+        $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
 
-            $params.GroupNames | ForEach-Object -Process {
-                $groupName = $_
-                $groupNTaccount = New-Object -TypeName "System.Security.Principal.NTAccount" `
-                                             -ArgumentList $groupName
-                $groupSid = $groupNTaccount.Translate([System.Security.Principal.SecurityIdentifier])
+        Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
+            $settings = $adminService.ReadTimeSheetSettings()
 
-                $result = New-Object -TypeName "System.DirectoryServices.DirectoryEntry" `
-                                     -ArgumentList "LDAP://<SID=$($groupSid.ToString())>"
-                $groupIDs.Add(([Guid]::new($result.objectGUID.Value)))
-            }
-            
-            Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync -Url $params.Url `
-                                                                      -GroupUids $groupIDs.ToArray()
-
-            if ($params.ContainsKey("AutoReactivateUsers") -eq $true)
+            if ($params.ContainsKey("EnableOvertimeAndNonBillableTracking") -eq $true)
             {
-                $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
-
-                Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
-                    $settings = $adminService.GetActiveDirectorySyncEnterpriseResourcePoolSettings()
-                    $settings.AutoReactivateInactiveUsers  = $params.AutoReactivateUsers
-                    $adminService.SetActiveDirectorySyncEnterpriseResourcePoolSettings($settings)
+                switch ($params.EnableOvertimeAndNonBillableTracking)
+                {
+                    $true {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_DISPLAY_ENUM"] = 7
+                    }
+                    $false {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_DISPLAY_ENUM"] = 0
+                    }
                 }
             }
-        }
-    }
-    else
-    {
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments $PSBoundParameters `
-                            -ScriptBlock {
+            if ($params.ContainsKey("DefaultTimesheetCreationMode") -eq $true)
+            {
+                switch ($params.DefaultTimesheetCreationMode)
+                {
+                    "CurrentTaskAssignments" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_CREATE_MODE_ENUM"] = 1
+                    }
+                    "CurrentProjects" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_CREATE_MODE_ENUM"] = 2
+                    }
+                    "NoPrepopulation" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_CREATE_MODE_ENUM"] = 0
+                    }
+                }
+            }
+            if ($params.ContainsKey("DefaultTrackingUnit") -eq $true)
+            {
+                switch ($params.DefaultTrackingUnit)
+                {
+                    "Weeks" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_ENTRY_MODE_ENUM"] = 1
+                    }
+                    "Days" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_DEF_ENTRY_MODE_ENUM"] = 0
+                    }
+                }
+            }
+            if ($params.ContainsKey("DefaultReportingUnit") -eq $true)
+            {
+                switch ($params.DefaultReportingUnit)
+                {
+                    "Days" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_REPORT_UNIT_ENUM"] = 1
+                    }
+                    "Hours" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_REPORT_UNIT_ENUM"] = 0
+                    }
+                }
+            }
+            if ($params.ContainsKey("HoursInStandardDay") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_HOURS_PER_DAY"] = $params.HoursInStandardDay * 60000
+            }
+            if ($params.ContainsKey("HoursInStandardWeek") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_HOURS_PER_WEEK"] = $params.HoursInStandardWeek * 60000
+            }
+            if ($params.ContainsKey("MaxHoursPerTimesheet") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_MAX_HR_PER_TS"] = $params.MaxHoursPerTimesheet * 60000
+            }
+            if ($params.ContainsKey("MinHoursPerTimesheet") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_MIN_HR_PER_TS"] = $params.MinHoursPerTimesheet * 60000
+            }
+            if ($params.ContainsKey("MaxHoursPerDay") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_MAX_HR_PER_DAY"] = $params.MaxHoursPerDay * 60000
+            }
+            if ($params.ContainsKey("AllowFutureTimeReporting") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_IS_FUTURE_REP_ALLOWED"] = $params.AllowFutureTimeReporting
+            }
+            if ($params.ContainsKey("AllowNewPersonalTasks") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_IS_UNVERS_TASK_ALLOWED"] = $params.AllowNewPersonalTasks
+            }
+            if ($params.ContainsKey("AllowTopLevelTimeReporting") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_ALLOW_PROJECT_LEVEL"] = $params.AllowTopLevelTimeReporting
+            }
+            if ($params.ContainsKey("RequireTaskStatusManagerApproval") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_PROJECT_MANAGER_COORDINATION"] = $params.RequireTaskStatusManagerApproval
+            }
+            if ($params.ContainsKey("RequireLineApprovalBeforeTimesheetApproval") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_PROJECT_MANAGER_APPROVAL"] = $params.RequireLineApprovalBeforeTimesheetApproval
+            }
+            if ($params.ContainsKey("EnableTimesheetAuditing") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_IS_AUDIT_ENABLED"] = $params.EnableTimesheetAuditing
+            }
+            if ($params.ContainsKey("FixedApprovalRouting") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_FIXED_APPROVAL_ROUTING"] = $params.FixedApprovalRouting
+            }
+            if ($params.ContainsKey("SingleEntryMode") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_TS_TIED_MODE"] = $params.SingleEntryMode
+            }
+            if ($params.ContainsKey("DefaultTrackingMode") -eq $true)
+            {
+                switch ($params.DefaultTrackingMode)
+                {
+                    "ActualDoneAndRemaining" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 3
+                    }
+                    "PercentComplete" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 2
+                    }
+                    "HoursPerPeriod" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 1
+                    }
+                    "FreeForm" {
+                        $settings.TimeSheetSettings.Rows[0]["WADMIN_DEFAULT_TRACKING_METHOD"] = 0
+                    }
+                }
+            }
+            if ($params.ContainsKey("ForceTrackingModeForAllProjects") -eq $true)
+            {
+                $settings.TimeSheetSettings.Rows[0]["WADMIN_IS_TRACKING_METHOD_LOCKED"] = $params.ForceTrackingModeForAllProjects
+            }
 
-            $params = $args[0]
-
-            Disable-SPProjectActiveDirectoryEnterpriseResourcePoolSync -Url $params.Url
+            $adminService.UpdateTimeSheetSettings($settings)
         }
     }
 }
@@ -419,23 +512,23 @@ function Test-TargetResource
         [System.String] 
         $DefaultReportingUnit,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $HoursInStandardDay,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $HoursInStandardWeek,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MaxHoursPerTimesheet,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MinHoursPerTimesheet,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.Single] 
         $MaxHoursPerDay,
 
@@ -485,26 +578,12 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing AD Resource Pool Sync settings for $Url"
+    Write-Verbose -Message "Testing Timesheet settings for $Url"
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
-    $PSBoundParameters.Ensure = $Ensure
-
-    $paramsToCheck = @("Ensure")
-    
-    if ($Ensure -eq "Present")
-    {
-        $paramsToCheck += "GroupNames"
-        if ($PSBoundParameters.ContainsKey("AutoReactivateUsers") -eq $true)
-        {
-            $paramsToCheck += "AutoReactivateUsers"
-        }
-    }
-
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
-                                    -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck $paramsToCheck
+                                    -DesiredValues $PSBoundParameters
 }
 
 Export-ModuleMember -Function *-TargetResource
