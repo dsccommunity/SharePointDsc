@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("SPProjectServerADResourcePoolSync")]
-class MSFT_SPProjectServerADResourcePoolSync : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPProjectServerTimeSheetSettings")]
+class MSFT_SPProjectServerTimeSheetSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the Project site to set timesheet settings for")] string Url;
     [Write, Description("Should timesheets allow tracking of overtime and non-billable work types")] boolean EnableOvertimeAndNonBillableTracking;
