@@ -46,7 +46,11 @@ function Get-TargetResource
 
         $script:currentValue = $null
         Use-SPDscProjectServerWebService -Service $wssService -ScriptBlock {
-            $script:currentValue = $wssService.ReadWssSettings().WssAdmin.WADMIN_USER_SYNC_SETTING
+            $settings = $wssService.ReadWssSettings()
+            if ($null -ne $settings)
+            {
+                $script:currentValue = $settings.WssAdmin.WADMIN_USER_SYNC_SETTING
+            }
         }
 
         if ($null -eq $script:currentValue)
