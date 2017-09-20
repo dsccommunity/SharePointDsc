@@ -49,7 +49,7 @@ function Get-TargetResource
         $script:groupDataSet = $null
         Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
             $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
-                $_.WSEC_GRP_NAME -eq $groupName
+                $_.WSEC_GRP_NAME -eq $params.Name
             }
 
             if ($null -ne $groupInfo)
