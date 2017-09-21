@@ -20,6 +20,18 @@ function Get-TargetResource
         [System.String]
         $ADGroup,
 
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $Members,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $MembersToInclude,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $MembersToExclude,
+
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
@@ -31,6 +43,23 @@ function Get-TargetResource
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016.")
+    }
+
+    if ($PSBoundParameters.ContainsKey("ADGroup") -eq $true -and `
+        ($PSBoundParameters.ContainsKey("Members") -eq $true -or `
+         $PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
+         $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
+    {
+        throw ("Property ADGroup can not be used at the same time as Members, " + `
+               "MembersToInclude or MembersToExclude")
+    }
+
+    if ($PSBoundParameters.ContainsKey("Members") -eq $true -and `
+        ($PSBoundParameters.ContainsKey("MembersToInclude") -eq $true -or `
+         $PSBoundParameters.ContainsKey("MembersToExclude") -eq $true))
+    {
+        throw ("Property Members can not be used at the same time as " + `
+               "MembersToInclude or MembersToExclude")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -69,6 +98,9 @@ function Get-TargetResource
                 Name = ""
                 Description = ""
                 ADGroup = ""
+                Members = $null
+                MembersToInclude = $null
+                MembersToExclude = $null
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -79,6 +111,31 @@ function Get-TargetResource
             {
                 $adGroup = Convert-SPDscADGroupIDToName -GroupId $script:groupDataSet.SecurityGroups.WSEC_GRP_AD_GUID
             }
+
+            if ($adGroup -eq "")
+            {
+                # No AD group is set, check for individual members
+                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Resource
+
+                $script:groupMembers = @()
+                Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
+                    $script:groupDataSet.GroupMembers.RES_UID | ForEach-Object -Process {
+                        $userName = $resourceService.ReadResource($_).Resources.WRES_ACCOUNT
+
+                        if ($userName.Contains("") -eq $true)
+                        {
+                            $realUserName = New-SPClaimsPrincipal -Identity $userName `
+                                                                  -IdentityType EncodedClaim
+                            $script:groupMembers += $realUserName.Value
+                        }
+                        else 
+                        {
+                            $script:groupMembers += $userName
+                        }
+                    }
+                }
+            }
+
             return @{
                 Url = $params.Url
                 Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
@@ -112,6 +169,18 @@ function Set-TargetResource
         [Parameter(Mandatory = $false)]  
         [System.String]
         $ADGroup,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $Members,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $MembersToInclude,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $MembersToExclude,
 
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -196,6 +265,18 @@ function Test-TargetResource
         [Parameter(Mandatory = $false)]  
         [System.String]
         $ADGroup,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $Members,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $MembersToInclude,
+
+        [Parameter(Mandatory = $false)]
+        [System.String[]]
+        $MembersToExclude,
 
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
