@@ -12,9 +12,13 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.String] 
         $Description,
+
+        [Parameter(Mandatory = $false)]  
+        [System.String]
+        $ADGroup,
 
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -64,15 +68,22 @@ function Get-TargetResource
                 Url = $params.Url
                 Name = ""
                 Description = ""
+                ADGroup = ""
                 InstallAccount = $params.InstallAccount
             }
         }
         else
         {
+            $adGroup = ""
+            if ($script:groupDataSet.SecurityGroups.WSEC_GRP_AD_GUID.GetType() -ne [System.DBNull])
+            {
+                $adGroup = Convert-SPDscADGroupIDToName -GroupId $script:groupDataSet.SecurityGroups.WSEC_GRP_AD_GUID
+            }
             return @{
                 Url = $params.Url
                 Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
                 Description = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
+                ADGroup = $adGroup
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -94,9 +105,13 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.String] 
         $Description,
+
+        [Parameter(Mandatory = $false)]  
+        [System.String]
+        $ADGroup,
 
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -144,7 +159,15 @@ function Set-TargetResource
             $group = $groupDS.SecurityGroups.FindByWSEC_GRP_UID($groupInfo.WSEC_GRP_UID)
 
             $group.WSEC_GRP_NAME = $params.Name
-            $group.WSEC_GRP_DESC = $params.Description
+            if ($params.ContainsKey("Description") -eq $true)
+            {
+                $group.WSEC_GRP_DESC = $params.Description
+            }
+            if ($params.ContainsKey("ADGroup") -eq $true)
+            {
+                $group.WSEC_GRP_AD_GUID = (Convert-SPDscADGroupNameToID -GroupName $params.ADGroup)
+                $group.WSEC_GRP_AD_GROUP = $params.ADGroup.Split('\')[1]
+            }
 
             $securityService.SetGroups($groupDS)
         }
@@ -166,9 +189,13 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $false)]  
         [System.String] 
         $Description,
+
+        [Parameter(Mandatory = $false)]  
+        [System.String]
+        $ADGroup,
 
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
@@ -183,7 +210,8 @@ function Test-TargetResource
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @(
                                         "Name",
-                                        "Description"
+                                        "Description",
+                                        "ADGroup"
                                     )
 }
 

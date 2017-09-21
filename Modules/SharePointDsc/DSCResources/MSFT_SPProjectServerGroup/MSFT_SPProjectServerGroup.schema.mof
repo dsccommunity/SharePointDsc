@@ -4,5 +4,6 @@ class MSFT_SPProjectServerGroup : OMI_BaseResource
     [Key, Description("The URL of the Project site to manage the group at")] string Url;
     [Key, Description("The name of the group")] string Name;
     [Write, Description("The description of the group")] string Description;
+    [Write, Description("What AD group should be used to synchronise membership to this Project Server group")] string ADGroup;
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };
