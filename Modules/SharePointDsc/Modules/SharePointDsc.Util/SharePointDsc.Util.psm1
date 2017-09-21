@@ -20,6 +20,59 @@ function Add-SPDSCUserToLocalAdmin
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Add("WinNT://$domainName/$accountName") | Out-Null
 }
 
+function Convert-SPDscADGroupIDToName
+{
+    param(
+        [Parameter(Mandatory=$true)]
+        [System.Guid]
+        $GroupId
+    )
+
+    $bytes = $GroupId.ToByteArray()
+    $queryGuid = ""
+    $bytes | ForEach-Object -Process { 
+        $queryGuid += "\" + $_.ToString("x2") 
+    }
+    
+    $domain = New-Object -TypeName "System.DirectoryServices.DirectoryEntry"
+    $search = New-Object -TypeName "System.DirectoryServices.DirectorySearcher"
+    $search.SearchRoot = $domain
+    $search.PageSize = 1
+    $search.Filter = "(&(objectGuid=$queryGuid))"
+    $search.SearchScope = "Subtree"
+    $search.PropertiesToLoad.Add("name") | Out-Null
+    $result = $search.FindOne() 
+
+    if ($null -ne $result)
+    {
+        $sid = New-Object -TypeName "System.Security.Principal.SecurityIdentifier" `
+                          -ArgumentList @($result.GetDirectoryEntry().objectsid[0], 0)
+
+        return $sid.Translate([System.Security.Principal.NTAccount]).ToString()
+    }
+    else 
+    {
+        throw "Unable to locate group with id $GroupId"
+    }
+}
+
+function Convert-SPDscADGroupNameToID
+{
+    param(
+        [Parameter(Mandatory=$true)]
+        [System.String]
+        $GroupName
+    )
+
+    $groupNTaccount = New-Object -TypeName "System.Security.Principal.NTAccount" `
+                                 -ArgumentList $groupName
+    $groupSid = $groupNTaccount.Translate([System.Security.Principal.SecurityIdentifier])
+
+    $result = New-Object -TypeName "System.DirectoryServices.DirectoryEntry" `
+                         -ArgumentList "LDAP://<SID=$($groupSid.ToString())>"
+    return ([Guid]::new($result.objectGUID.Value))
+}
+
 function Get-SPDscOSVersion
 {
     [CmdletBinding()]

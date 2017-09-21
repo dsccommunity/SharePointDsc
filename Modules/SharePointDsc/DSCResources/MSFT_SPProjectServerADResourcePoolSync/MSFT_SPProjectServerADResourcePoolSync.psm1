@@ -79,33 +79,8 @@ function Get-TargetResource
             {
                 $adGroups = @()
                 $script:currentSettings.ADGroupGuids | ForEach-Object -Process {
-                    $guid = $_
-                    $bytes = $guid.ToByteArray()
-                    $queryGuid = ""
-                    $bytes | ForEach-Object -Process { 
-                        $queryGuid += "\" + $_.ToString("x2") 
-                    }
-                    
-                    $domain = New-Object -TypeName "System.DirectoryServices.DirectoryEntry"
-                    $search = New-Object -TypeName "System.DirectoryServices.DirectorySearcher"
-                    $search.SearchRoot = $domain
-                    $search.PageSize = 1
-                    $search.Filter = "(&(objectGuid=$queryGuid))"
-                    $search.SearchScope = "Subtree"
-                    $search.PropertiesToLoad.Add("name") | Out-Null
-                    $result = $search.FindOne() 
-
-                    if ($null -ne $result)
-                    {
-                        $sid = New-Object -TypeName "System.Security.Principal.SecurityIdentifier" `
-                                          -ArgumentList @($result.GetDirectoryEntry().objectsid[0], 0)
-
-                        $adGroups += $sid.Translate([System.Security.Principal.NTAccount]).ToString()
-                    }
-                    else 
-                    {
-                        $adGroups += $guid.ToString()
-                    }
+                    $groupName = Convert-SPDscADGroupIDToName -GroupID $_
+                    $adGroups += $groupName
                 }
 
                 return @{
@@ -168,14 +143,8 @@ function Set-TargetResource
             $groupIDs = New-Object -TypeName "System.Collections.Generic.List[System.Guid]"
 
             $params.GroupNames | ForEach-Object -Process {
-                $groupName = $_
-                $groupNTaccount = New-Object -TypeName "System.Security.Principal.NTAccount" `
-                                             -ArgumentList $groupName
-                $groupSid = $groupNTaccount.Translate([System.Security.Principal.SecurityIdentifier])
-
-                $result = New-Object -TypeName "System.DirectoryServices.DirectoryEntry" `
-                                     -ArgumentList "LDAP://<SID=$($groupSid.ToString())>"
-                $groupIDs.Add(([Guid]::new($result.objectGUID.Value)))
+                $groupName = Convert-SPDscADGroupNameToID -GroupName $_
+                $groupIDs.Add($groupName)
             }
             
             Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync -Url $params.Url `

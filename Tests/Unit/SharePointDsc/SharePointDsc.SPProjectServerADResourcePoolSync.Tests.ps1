@@ -54,65 +54,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Mock -CommandName "Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync" -MockWith {}
                 Mock -CommandName "Disable-SPProjectActiveDirectoryEnterpriseResourcePoolSync" -MockWith {}
                 Mock -CommandName "Import-Module" -MockWith {}
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectoryEntry"
-                } -MockWith { return @{
-                    objectGUID = @{
-                        Value = (New-Guid)
-                    }
-                } }
-
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.DirectoryServices.DirectorySearcher"
-                } -MockWith { 
-                    $searcher = @{
-                        SearchRoot = $null
-                        PageSize = $null
-                        Filter = $null
-                        SearchScope = $null
-                        PropertiesToLoad = (New-Object -TypeName "System.Collections.Generic.List[System.String]")
-                    }
-                    $searcher = $searcher | Add-Member -MemberType ScriptMethod `
-                                                       -Name FindOne `
-                                                       -Value {
-                                                           $result = @{}
-                                                           $result = $result | Add-Member -MemberType ScriptMethod `
-                                                                                          -Name GetDirectoryEntry `
-                                                                                          -Value {
-                                                                                              return @{
-                                                                                                objectsid = @("item")
-                                                                                              }
-                                                                                          } -PassThru -Force
-                                                            return $result
-                                                       } -PassThru -Force
-                    return $searcher
+                
+                Mock -CommandName "Convert-SPDscADGroupIDToName" -MockWith {
+                    $global:SPDscSidCount++
+                    return $global:SPDscGroupsToReturn[$global:SPDscSidCount - 1]
                 }
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.Security.Principal.SecurityIdentifier"
-                } -MockWith {
-                    $sid = @{}
-                    $sid = $sid | Add-Member -MemberType ScriptMethod `
-                                             -Name Translate `
-                                             -Value {
-                                                 $returnVal = $global:SPDscGroupsToReturn[$global:SPDscSidCount]
-                                                 $global:SPDscSidCount++
-                                                 return $returnVal
-                                             } -PassThru -Force
-                    return $sid
-                }
-                Mock -CommandName "New-Object" -ParameterFilter {
-                    $TypeName -eq "System.Security.Principal.NTAccount"
-                } -MockWith {
-                    $sid = @{}
-                    $sid = $sid | Add-Member -MemberType ScriptMethod `
-                                             -Name Translate `
-                                             -Value {
-                                                 $returnVal = $global:SPDscSidsToReturn[$global:SPDscSidCount]
-                                                 $global:SPDscSidCount++
-                                                 return $returnVal
-                                             } -PassThru -Force
-                    return $sid
-                }
+                Mock -CommandName "Convert-SPDscADGroupNameToID" -MockWith { return New-Guid }
 
                 Context -Name "No AD groups are set but there should be" -Fixture { 
                     $testParams = @{
@@ -225,7 +172,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                          -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings2 `
                                                          -Value {
                                                             return @{
-                                                                ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
+                                                                ADGroupGuids = ([Guid[]]((New-Guid),(New-Guid)))
                                                             }
                                                          } -PassThru -Force `
                                             | Add-Member -MemberType ScriptMethod `
@@ -242,7 +189,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1", "DOMAIN\Group 2")
-                    $global:SPDscSidsToReturn = @("example SID", "example SID")
 
                     It "should return present from the get method" {
                         $global:SPDscSidCount = 0
@@ -267,7 +213,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                          -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings2 `
                                                          -Value {
                                                             return @{
-                                                                ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
+                                                                ADGroupGuids = ([Guid[]]((New-Guid),(New-Guid)))
                                                             }
                                                          } -PassThru -Force `
                                             | Add-Member -MemberType ScriptMethod `
@@ -284,7 +230,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1", "DOMAIN\Group 2")
-                    $global:SPDscSidsToReturn = @()
 
                     It "should return present from the get method" {
                         $global:SPDscSidCount = 0
@@ -332,7 +277,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     $global:SPDscGroupsToReturn = @()
-                    $global:SPDscSidsToReturn = @()
 
                     It "should return absent from the get method" {
                         $global:SPDscSidCount = 0
@@ -359,7 +303,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                          -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings2 `
                                                          -Value {
                                                             return @{
-                                                                ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
+                                                                ADGroupGuids = ([Guid[]]((New-Guid),(New-Guid)))
                                                             }
                                                          } -PassThru -Force `
                                             | Add-Member -MemberType ScriptMethod `
@@ -378,7 +322,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1", "DOMAIN\Group 2")
-                    $global:SPDscSidsToReturn = @("example SID", "example SID")
 
                     It "should return present from the get method" {
                         $global:SPDscSidCount = 0
@@ -412,7 +355,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                          -Name GetActiveDirectorySyncEnterpriseResourcePoolSettings2 `
                                                          -Value {
                                                             return @{
-                                                                ADGroupGuids = ([Guid[]](New-Guid),(New-Guid))
+                                                                ADGroupGuids = ([Guid[]]((New-Guid),(New-Guid)))
                                                             }
                                                          } -PassThru -Force `
                                             | Add-Member -MemberType ScriptMethod `
@@ -431,7 +374,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
 
                     $global:SPDscGroupsToReturn = @("DOMAIN\Group 1", "DOMAIN\Group 2")
-                    $global:SPDscSidsToReturn = @("example SID", "example SID")
 
                     It "should return present from the get method" {
                         $global:SPDscSidCount = 0
