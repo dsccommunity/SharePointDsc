@@ -121,24 +121,9 @@ function Get-TargetResource
             if ($adGroup -eq "")
             {
                 # No AD group is set, check for individual members
-                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Resource
-
-                $script:groupMembers = @()
-                Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
-                    $script:groupDataSet.GroupMembers.RES_UID | ForEach-Object -Process {
-                        $userName = $resourceService.ReadResource($_).Resources.WRES_ACCOUNT
-
-                        if ($userName.Contains(":0") -eq $true)
-                        {
-                            $realUserName = New-SPClaimsPrincipal -Identity $userName `
-                                                                  -IdentityType EncodedClaim
-                            $script:groupMembers += $realUserName.Value
-                        }
-                        else 
-                        {
-                            $script:groupMembers += $userName
-                        }
-                    }
+                $groupMembers = @()
+                $script:groupDataSet.GroupMembers.Rows | ForEach-Object -Process {
+                    $groupMembers += Get-SPDscProjectServerResourceName -ResourceId $_["RES_UID"] -PwaUrl $params.Url 
                 }
             }
 
@@ -147,7 +132,7 @@ function Get-TargetResource
                 Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
                 Description = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
                 ADGroup = $adGroup
-                Members = $script:groupMembers
+                Members = $groupMembers
                 MembersToInclude = $null
                 MembersToExclude = $null
                 Ensure = "Present"
@@ -209,11 +194,12 @@ function Set-TargetResource
     if ($Ensure -eq "Present")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                            -Arguments @($PSBoundParameters, $PSScriptRoot, $currentSettings) `
                             -ScriptBlock {
 
             $params = $args[0]
             $scriptRoot = $args[1]
+            $currentSettings = $args[2]
 
             $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
@@ -253,6 +239,52 @@ function Set-TargetResource
                 {
                     $group.WSEC_GRP_AD_GUID = (Convert-SPDscADGroupNameToID -GroupName $params.ADGroup)
                     $group.WSEC_GRP_AD_GROUP = $params.ADGroup.Split('\')[1]
+                }
+                if ($PSBoundParameters.ContainsKey("Members") -eq $true)
+                {
+                    $currentSettings.Members | ForEach-Object -Process {
+                        if ($params.Members -notcontains $_)
+                        {
+                            $resourceId = Get-SPDscProjectServerResourceId -ResourceName $_ -PWaUrl $params.Url
+                            $rowToDrop = $groupDS.GroupMembers.FindByRES_UIDWSEC_GRP_UID($resourceId, $groupInfo.WSEC_GRP_UID)
+                            $rowToDrop.Delete()
+                        }
+                    }
+                    $params.Members | ForEach-Object -Process {
+                        if ($currentSettings.Members -notcontains $_)
+                        {
+                            $resourceId = Get-SPDscProjectServerResourceId -ResourceName $_ -PWaUrl $params.Url
+                            $row = $groupDS.GroupMembers.NewGroupMembersRow()
+                            $row.WSEC_GRP_UID = $groupInfo.WSEC_GRP_UID
+                            $row.RES_UID = $resourceId
+                            $groupDS.GroupMembers.AddGroupMembersRow($row)
+                        }
+                    }
+                }
+                if ($PSBoundParameters.ContainsKey("MembersToInclude") -eq $true)
+                {
+                    $params.MembersToInclude | ForEach-Object -Process {
+                        if ($currentSettings.Members -notcontains $_)
+                        {
+                            $resourceId = Get-SPDscProjectServerResourceId -ResourceName $_ -PWaUrl $params.Url
+                            $row = $groupDS.GroupMembers.NewGroupMembersRow()
+                            $row.WSEC_GRP_UID = $groupInfo.WSEC_GRP_UID
+                            $row.RES_UID = $resourceId
+                            $groupDS.GroupMembers.AddGroupMembersRow($row)
+                        }
+                    }
+                }
+            
+                if ($PSBoundParameters.ContainsKey("MembersToExclude") -eq $true)
+                {
+                    $currentSettings.MembersToExclude | ForEach-Object -Process {
+                        if ($currentSettings.Members -contains $_)
+                        {
+                            $resourceId = Get-SPDscProjectServerResourceId -ResourceName $_ -PWaUrl $params.Url
+                            $rowToDrop = $groupDS.GroupMembers.FindByRES_UIDWSEC_GRP_UID($resourceId, $groupInfo.WSEC_GRP_UID)
+                            $rowToDrop.Delete()
+                        }
+                    }
                 }
 
                 $securityService.SetGroups($groupDS)
