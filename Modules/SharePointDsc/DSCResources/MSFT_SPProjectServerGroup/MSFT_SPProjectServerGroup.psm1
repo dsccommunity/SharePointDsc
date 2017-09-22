@@ -122,7 +122,7 @@ function Get-TargetResource
                     $script:groupDataSet.GroupMembers.RES_UID | ForEach-Object -Process {
                         $userName = $resourceService.ReadResource($_).Resources.WRES_ACCOUNT
 
-                        if ($userName.Contains("") -eq $true)
+                        if ($userName.Contains(":0") -eq $true)
                         {
                             $realUserName = New-SPClaimsPrincipal -Identity $userName `
                                                                   -IdentityType EncodedClaim
@@ -141,6 +141,9 @@ function Get-TargetResource
                 Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
                 Description = $script:groupDataSet.SecurityGroups.WSEC_GRP_DESC
                 ADGroup = $adGroup
+                Members = $script:groupMembers
+                MembersToInclude = $null
+                MembersToExclude = $null
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -286,6 +289,51 @@ function Test-TargetResource
     Write-Verbose -Message "Testing group settings for '$Name' at '$Url'"
 
     $currentValues = Get-TargetResource @PSBoundParameters
+
+    if ($PSBoundParameters.ContainsKey("Members") -eq $true)
+    {
+        $membersMatch = Test-SPDscParameterState -CurrentValues $CurrentValues `
+                                                 -DesiredValues $PSBoundParameters `
+                                                 -ValuesToCheck @("Members")
+        if ($membersMatch -eq $false)
+        {
+            return $false
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("MembersToInclude") -eq $true)
+    {
+        $missingMembers = $false
+        $MembersToInclude | ForEach-Object -Process {
+            if ($currentValues.Members -notcontains $_)
+            {
+                Write-Verbose -Message "'$_' is not in the members list, but should be"
+                $missingMembers = $true
+            }
+        }
+        if ($missingMembers -eq $true)
+        {
+            Write-Verbose -Message "Users from the MembersToInclude property are not included, returning false"
+            return $false
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("MembersToExclude") -eq $true)
+    {
+        $extraMembers = $false
+        $MembersToExclude | ForEach-Object -Process {
+            if ($currentValues.Members -contains $_)
+            {
+                Write-Verbose -Message "'$_' is in the members list, but should not be"
+                $extraMembers = $true
+            }
+        }
+        if ($extraMembers -eq $true)
+        {
+            Write-Verbose -Message "Users from the MembersToExclude property are included, returning false"
+            return $false
+        }
+    }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
