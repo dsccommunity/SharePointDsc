@@ -32,6 +32,11 @@ function Get-TargetResource
         [System.String[]]
         $MembersToExclude,
 
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
@@ -95,12 +100,13 @@ function Get-TargetResource
         {
             return @{
                 Url = $params.Url
-                Name = ""
+                Name = $params.Name
                 Description = ""
                 ADGroup = ""
                 Members = $null
                 MembersToInclude = $null
                 MembersToExclude = $null
+                Ensure = "Absent"
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -144,6 +150,7 @@ function Get-TargetResource
                 Members = $script:groupMembers
                 MembersToInclude = $null
                 MembersToExclude = $null
+                Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }
         }
@@ -185,6 +192,11 @@ function Set-TargetResource
         [System.String[]]
         $MembersToExclude,
 
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
@@ -194,56 +206,86 @@ function Set-TargetResource
 
     $currentSettings = Get-TargetResource @PSBoundParameters
 
-    Invoke-SPDSCCommand -Credential $InstallAccount `
-                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
-                        -ScriptBlock {
+    if ($Ensure -eq "Present")
+    {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                            -ScriptBlock {
 
-        $params = $args[0]
-        $scriptRoot = $args[1]
+            $params = $args[0]
+            $scriptRoot = $args[1]
 
-        $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
-        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+            $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+            Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-        $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+            $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
 
-        Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-            $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
-                $_.WSEC_GRP_NAME -eq $params.Name
-            }
-
-            if ($null -eq $groupInfo)
-            {
-                # Create a new group with jsut a name so it can be updated with the properties later
-                $newGroupDS = [SvcSecurity.SecurityGroupsDataSet]::new()
-                $newGroup = $newGroupDS.SecurityGroups.NewSecurityGroupsRow()
-                $newGroup.WSEC_GRP_NAME = $params.Name
-                $newGroup.WSEC_GRP_UID = New-Guid
-                $newGroupDS.SecurityGroups.AddSecurityGroupsRow($newGroup)
-                $securityService.CreateGroups($newGroupDS)
-
+            Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
                 $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
                     $_.WSEC_GRP_NAME -eq $params.Name
                 }
-            }
-            
-            # Update the existing group
-            $groupDS = $securityService.ReadGroup($groupInfo.WSEC_GRP_UID)
-            $group = $groupDS.SecurityGroups.FindByWSEC_GRP_UID($groupInfo.WSEC_GRP_UID)
 
-            $group.WSEC_GRP_NAME = $params.Name
-            if ($params.ContainsKey("Description") -eq $true)
-            {
-                $group.WSEC_GRP_DESC = $params.Description
-            }
-            if ($params.ContainsKey("ADGroup") -eq $true)
-            {
-                $group.WSEC_GRP_AD_GUID = (Convert-SPDscADGroupNameToID -GroupName $params.ADGroup)
-                $group.WSEC_GRP_AD_GROUP = $params.ADGroup.Split('\')[1]
-            }
+                if ($null -eq $groupInfo)
+                {
+                    # Create a new group with jsut a name so it can be updated with the properties later
+                    $newGroupDS = [SvcSecurity.SecurityGroupsDataSet]::new()
+                    $newGroup = $newGroupDS.SecurityGroups.NewSecurityGroupsRow()
+                    $newGroup.WSEC_GRP_NAME = $params.Name
+                    $newGroup.WSEC_GRP_UID = New-Guid
+                    $newGroupDS.SecurityGroups.AddSecurityGroupsRow($newGroup)
+                    $securityService.CreateGroups($newGroupDS)
 
-            $securityService.SetGroups($groupDS)
+                    $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                        $_.WSEC_GRP_NAME -eq $params.Name
+                    }
+                }
+                
+                # Update the existing group
+                $groupDS = $securityService.ReadGroup($groupInfo.WSEC_GRP_UID)
+                $group = $groupDS.SecurityGroups.FindByWSEC_GRP_UID($groupInfo.WSEC_GRP_UID)
+
+                $group.WSEC_GRP_NAME = $params.Name
+                if ($params.ContainsKey("Description") -eq $true)
+                {
+                    $group.WSEC_GRP_DESC = $params.Description
+                }
+                if ($params.ContainsKey("ADGroup") -eq $true)
+                {
+                    $group.WSEC_GRP_AD_GUID = (Convert-SPDscADGroupNameToID -GroupName $params.ADGroup)
+                    $group.WSEC_GRP_AD_GROUP = $params.ADGroup.Split('\')[1]
+                }
+
+                $securityService.SetGroups($groupDS)
+            }
         }
     }
+    else
+    {
+        Invoke-SPDSCCommand -Credential $InstallAccount `
+                            -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                            -ScriptBlock {
+
+            $params = $args[0]
+            $scriptRoot = $args[1]
+
+            $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
+            Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+
+            $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+
+            Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
+                $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                    $_.WSEC_GRP_NAME -eq $params.Name
+                }
+
+                if ($null -ne $groupInfo)
+                {
+                    # Remove the group
+                    $securityService.DeleteGroups($groupInfo.WSEC_GRP_UID)
+                }
+            }
+        }
+    }   
 }
 
 
@@ -281,6 +323,11 @@ function Test-TargetResource
         [System.String[]]
         $MembersToExclude,
 
+        [parameter(Mandatory = $false)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure = "Present",
+
         [Parameter(Mandatory = $false)] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
@@ -288,6 +335,7 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing group settings for '$Name' at '$Url'"
 
+    $PSBoundParameters.Ensure = $Ensure
     $currentValues = Get-TargetResource @PSBoundParameters
 
     if ($PSBoundParameters.ContainsKey("Members") -eq $true)
@@ -340,7 +388,8 @@ function Test-TargetResource
                                     -ValuesToCheck @(
                                         "Name",
                                         "Description",
-                                        "ADGroup"
+                                        "ADGroup",
+                                        "Ensure"
                                     )
 }
 
