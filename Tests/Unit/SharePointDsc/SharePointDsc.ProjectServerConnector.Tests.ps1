@@ -72,5 +72,165 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { $mockService.Read() } | Should Throw "Cannot read from a closed TextReader"
             }
         }
+
+        Mock -CommandName "Import-Module" -MockWith {}
+
+        Add-Type -TypeDefinition @"
+            namespace SPDscTests
+            {
+                public class DummyWebService : System.IDisposable
+                {
+                    public void Dispose()
+                    {
+
+                    } 
+                } 
+            }
+"@
+
+        Context -Name "Get-SPDscProjectServerResourceName" -Fixture {
+
+            Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
+                $service = [SPDscTests.DummyWebService]::new()
+                $service = $service | Add-Member -MemberType ScriptMethod `
+                                                 -Name ReadResource `
+                                                 -Value {
+                                                     return @{
+                                                        Resources = @{
+                                                            WRES_ACCOUNT = "DEMO\user"
+                                                        }
+                                                     }
+                                                 } -PassThru -Force 
+                return $service
+            }            
+
+            It "Should return the name of a resource based on its ID" {
+                Get-SPDscProjectServerResourceName -ResourceId (New-Guid) -PwaUrl "http://server/pwa" | Should Be "DEMO\user"
+            }
+        }
+
+        Context -Name "Get-SPDscProjectServerResourceId" -Fixture {
+
+            Add-Type -TypeDefinition @"
+
+            namespace Microsoft.Office.Project.Server.Library
+            {
+                public class Filter
+                {
+                    public Filter()
+                    {
+                        Fields = new System.Collections.Generic.List<Microsoft.Office.Project.Server.Library.Filter.Field>();
+                    }
+
+                    public System.String FilterTableName { get; set; }
+
+                    public System.Collections.Generic.List<Microsoft.Office.Project.Server.Library.Filter.Field> Fields { get; set; }
+
+                    public Microsoft.Office.Project.Server.Library.Filter.FieldOperator Criteria { get; set; }
+
+                    public System.String GetXml()
+                    {
+                        return "<query></query>";
+                    }
+
+                    public class Field
+                    {
+                        public Field(System.Object v1, System.Object v2, System.Object v3) {}
+                    }
+
+                    public class FieldOperator
+                    {
+                        public FieldOperator(System.Object v1, System.Object v2, System.Object v3) {}
+                    }
+
+                    public enum SortOrderTypeEnum
+                    {
+                        None
+                    }
+
+                    public enum FieldOperationType
+                    {
+                        Contain
+                    }                    
+                }
+            }
+
+"@
+
+            Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
+                $service = [SPDscTests.DummyWebService]::new()
+                $service = $service | Add-Member -MemberType ScriptMethod `
+                                                 -Name ReadResources `
+                                                 -Value {
+                                                     return @{
+                                                        Resources = @{
+                                                            Count = 2
+                                                            Rows = @(
+                                                                @{
+                                                                    WRES_Account = "DEMO\user1"
+                                                                    RES_UID = (New-Guid)
+                                                                }
+                                                                @{
+                                                                    WRES_Account = "DEMO\user2"
+                                                                    RES_UID = (New-Guid)
+                                                                }
+                                                            )
+                                                        }
+                                                     }
+                                                 } -PassThru -Force 
+                return $service
+            } 
+
+            It "should return the ID of a specified user" {
+                Get-SPDscProjectServerResourceId -ResourceName "demo\user1" -PwaUrl "http://server/pwa" | Should Not BeNullOrEmpty
+            }
+
+            Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
+                $service = [SPDscTests.DummyWebService]::new()
+                $service = $service | Add-Member -MemberType ScriptMethod `
+                                                 -Name ReadResources `
+                                                 -Value {
+                                                     return @{
+                                                        Resources = @{
+                                                            Count = 2
+                                                            Rows = @(
+                                                                @{
+                                                                    WRES_Account = "DEMO\user1"
+                                                                    RES_UID = (New-Guid)
+                                                                }
+                                                                @{
+                                                                    WRES_Account = "DEMO\user2"
+                                                                    RES_UID = (New-Guid)
+                                                                }
+                                                            )
+                                                        }
+                                                     }
+                                                 } -PassThru -Force 
+                return $service
+            } 
+
+            It "should throw when a user isn't in the returned data set" {
+                { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
+            }
+
+            Mock -CommandName "New-SPDscProjectServerWebService" -MockWith {
+                $service = [SPDscTests.DummyWebService]::new()
+                $service = $service | Add-Member -MemberType ScriptMethod `
+                                                 -Name ReadResources `
+                                                 -Value {
+                                                     return @{
+                                                        Resources = @{
+                                                            Count = 0
+                                                            Rows = @()
+                                                        }
+                                                     }
+                                                 } -PassThru -Force 
+                return $service
+            } 
+
+            It "should throw when no users are in the returned data set" {
+                { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
+            }
+        }
     }
 }
