@@ -13,7 +13,7 @@ function Get-SPDscProjectServerResourceId
 
     $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl -EndpointName Resource
 
-    $returnVal = $null
+    $script:SPDscReturnVal = $null
     Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
         [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Office.Project.Server.Library") | Out-Null
         $ds = [SvcResource.ResourceDataSet]::new()
@@ -29,10 +29,18 @@ function Get-SPDscProjectServerResourceId
                                )
         $filter.Fields.Add($idColumn)
 
+        $nameColumn = New-Object -TypeName "Microsoft.Office.Project.Server.Library.Filter+Field" `
+                                 -ArgumentList @(
+                                   $ds.Resources.TableName,
+                                   $ds.Resources.WRES_AccountColumn.ColumnName,
+                                   [Microsoft.Office.Project.Server.Library.Filter+SortOrderTypeEnum]::None
+                                 )
+        $filter.Fields.Add($nameColumn)
+
         $nameFieldFilter = New-Object -TypeName "Microsoft.Office.Project.Server.Library.Filter+FieldOperator" `
                                       -ArgumentList @(
-                                        [Microsoft.Office.Project.Server.Library.Filter+FieldOperationType]::Equal,
-                                        $ds.Resources.RES_NAMEColumn.ColumnName,
+                                        [Microsoft.Office.Project.Server.Library.Filter+FieldOperationType]::Contain,
+                                        $ds.Resources.WRES_AccountColumn.ColumnName,
                                         $ResourceName
                                       )
         $filter.Criteria = $nameFieldFilter
@@ -42,14 +50,23 @@ function Get-SPDscProjectServerResourceId
         $resourceDs = $resourceService.ReadResources($filterXml, $false)
         if ($resourceDs.Resources.Count -ge 1)
         {
-            $returnVal = $resourceDs.Resources[0].RES_UID
+            $resourceDs.Resources.Rows | ForEach-Object -Process {
+                if ($_.WRES_Account -eq $ResourceName -or ($_.WRES_Account.Contains("0#") -and $_.WRES_Account.Contains($ResourceName)))
+                {
+                    $script:SPDscReturnVal = $_.RES_UID
+                }
+            }
+            if ($null -eq $script:SPDscReturnVal)
+            {
+                throw "Resource '$ResourceName' not found"    
+            }
         }
         else
         {
-            throw "Resource '$ResoruceName' not found"
+            throw "Resource '$ResourceName' not found"
         }
     }
-    return $returnVal
+    return $script:SPDscReturnVal
 }
 
 function Get-SPDscProjectServerResourceName
@@ -67,21 +84,11 @@ function Get-SPDscProjectServerResourceName
 
     $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl -EndpointName Resource
 
-    $returnVal = ""
+    $script:SPDscReturnVal = ""
     Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
-        $userName = $resourceService.ReadResource($ResourceId).Resources.WRES_ACCOUNT
-        if ($userName.Contains(":0") -eq $true)
-        {
-            $realUserName = New-SPClaimsPrincipal -Identity $userName `
-                                                  -IdentityType EncodedClaim
-            $returnVal = $realUserName.Value
-        }
-        else 
-        {
-            $returnVal = $userName
-        }
+        $script:SPDscReturnVal = $resourceService.ReadResource($ResourceId).Resources.WRES_ACCOUNT
     }
-    return $returnVal
+    return $script:SPDscReturnVal
 }
 
 function New-SPDscProjectServerWebService
@@ -154,7 +161,7 @@ function Use-SPDscProjectServerWebService
  
     try
     {
-        & $ScriptBlock
+        Invoke-Command -ScriptBlock $ScriptBlock
     }
     finally
     {

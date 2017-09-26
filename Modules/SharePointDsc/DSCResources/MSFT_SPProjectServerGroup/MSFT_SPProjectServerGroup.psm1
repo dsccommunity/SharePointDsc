@@ -127,6 +127,16 @@ function Get-TargetResource
                 }
             }
 
+            for($i = 0; $i -lt $groupMembers.Count; $i++)
+            {
+                if ($groupMembers[$i].Contains(":0") -eq $true)
+                {
+                    $realUserName = New-SPClaimsPrincipal -Identity $groupMembers[$i] `
+                                                          -IdentityType EncodedClaim
+                    $groupMembers[$i] = $realUserName.Value
+                }
+            }
+
             return @{
                 Url = $params.Url
                 Name = $script:groupDataSet.SecurityGroups.WSEC_GRP_NAME
@@ -240,7 +250,7 @@ function Set-TargetResource
                     $group.WSEC_GRP_AD_GUID = (Convert-SPDscADGroupNameToID -GroupName $params.ADGroup)
                     $group.WSEC_GRP_AD_GROUP = $params.ADGroup.Split('\')[1]
                 }
-                if ($PSBoundParameters.ContainsKey("Members") -eq $true)
+                if ($params.ContainsKey("Members") -eq $true)
                 {
                     $currentSettings.Members | ForEach-Object -Process {
                         if ($params.Members -notcontains $_)
@@ -261,7 +271,7 @@ function Set-TargetResource
                         }
                     }
                 }
-                if ($PSBoundParameters.ContainsKey("MembersToInclude") -eq $true)
+                if ($params.ContainsKey("MembersToInclude") -eq $true)
                 {
                     $params.MembersToInclude | ForEach-Object -Process {
                         if ($currentSettings.Members -notcontains $_)
@@ -275,9 +285,9 @@ function Set-TargetResource
                     }
                 }
             
-                if ($PSBoundParameters.ContainsKey("MembersToExclude") -eq $true)
+                if ($params.ContainsKey("MembersToExclude") -eq $true)
                 {
-                    $currentSettings.MembersToExclude | ForEach-Object -Process {
+                    $params.MembersToExclude | ForEach-Object -Process {
                         if ($currentSettings.Members -contains $_)
                         {
                             $resourceId = Get-SPDscProjectServerResourceId -ResourceName $_ -PWaUrl $params.Url
