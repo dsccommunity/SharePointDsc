@@ -39,18 +39,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
                 Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
-                Add-Type -TypeDefinition @"
-                    namespace SPDscTests
-                    {
-                        public class DummyWebService : System.IDisposable
+                try 
+                {
+                    [SPDscTests.DummyWebService] | Out-Null
+                }
+                catch 
+                {
+                    Add-Type -TypeDefinition @"
+                        namespace SPDscTests
                         {
-                            public void Dispose()
+                            public class DummyWebService : System.IDisposable
                             {
-
+                                public void Dispose()
+                                {
+        
+                                } 
                             } 
-                        } 
-                    }
+                        }
 "@
+                }
+
                 Mock -CommandName "Enable-SPProjectActiveDirectoryEnterpriseResourcePoolSync" -MockWith {}
                 Mock -CommandName "Disable-SPProjectActiveDirectoryEnterpriseResourcePoolSync" -MockWith {}
                 Mock -CommandName "Import-Module" -MockWith {}

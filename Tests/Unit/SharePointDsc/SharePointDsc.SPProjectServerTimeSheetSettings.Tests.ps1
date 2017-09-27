@@ -41,18 +41,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Mock -CommandName "Import-Module" -MockWith {}
 
-                Add-Type -TypeDefinition @"
-                    namespace SPDscTests
-                    {
-                        public class DummyWebService : System.IDisposable
+                try 
+                {
+                    [SPDscTests.DummyWebService] | Out-Null
+                }
+                catch 
+                {
+                    Add-Type -TypeDefinition @"
+                        namespace SPDscTests
                         {
-                            public void Dispose()
+                            public class DummyWebService : System.IDisposable
                             {
-
+                                public void Dispose()
+                                {
+        
+                                } 
                             } 
-                        } 
-                    }
+                        }
 "@
+                }
+                
                 function New-SPDscTimeSheetSettingsTable
                 {
                     param(
