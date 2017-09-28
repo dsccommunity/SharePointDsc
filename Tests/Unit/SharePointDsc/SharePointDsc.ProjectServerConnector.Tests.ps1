@@ -269,7 +269,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "should return null when a permission that doesn't exist is requested" {
-                Get-SPDscProjectServerGlobalPermission -Permission "DoesntExist" | Should BeNullOrEmpty
+                { Get-SPDscProjectServerGlobalPermission -Permission "DoesntExist" } | Should Throw
             }
         }
     }

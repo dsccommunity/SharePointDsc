@@ -8,13 +8,31 @@ function Get-SPDscProjectServerGlobalPermission
 
     $result = $null
     [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
-      | Get-Member -Static | ForEach-Object -Process {
+      | Get-Member -Static -MemberType Property | ForEach-Object -Process {
         
         if ($Permission -eq $_.Name)
         {
             $result = [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission]::($_.Name)
         }
     }
+
+    if ($null -eq $result)
+    {
+        $errorString = ""
+        [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
+          | Get-Member -Static -MemberType Property | ForEach-Object -Process { 
+                if ($errorString -eq "")
+                {
+                    $errorString += "$($_.Name)"
+                }
+                else
+                {
+                    $errorString += ", $($_.Name)"
+                }
+        }
+        throw "Unable to find permission '$Permission' - acceptable values are: $errorString"
+    }
+    
     return $result
 }
 
