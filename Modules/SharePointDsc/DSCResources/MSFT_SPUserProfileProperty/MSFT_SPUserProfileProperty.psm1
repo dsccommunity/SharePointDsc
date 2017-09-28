@@ -21,24 +21,24 @@ function Get-TargetResource
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)] 
-        [ValidateSet("BigInteger", 
-                     "Binary", 
-                     "Boolean", 
-                     "Date", 
-                     "DateNoYear", 
-                     "DateTime", 
-                     "Email", 
-                     "Float", 
-                     "Guid", 
-                     "HTML", 
-                     "Integer", 
-                     "Person", 
-                     "String",  
-                     "StringMultiValue", 
-                     "TimeZone", 
-                     "URL")] 
-        [System.string] 
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Big Integer",
+                     "Binary",
+                     "Boolean",
+                     "Date",
+                     "DateNoYear",
+                     "Date Time",
+                     "Email",
+                     "Float",
+                     "HTML",
+                     "Integer",
+                     "Person",
+                     "String (Single Value)",  
+                     "String (Multi Value)",
+                     "TimeZone",
+                     "Unique Identifier",
+                     "URL")]
+        [System.string]
         $Type,
 
         [Parameter(Mandatory = $false)] 
@@ -174,6 +174,12 @@ function Get-TargetResource
 
         $userProfileConfigManager  = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                                 -ArgumentList $context
+        
+        if ($null -eq $userProfileConfigManager.ConnectionManager)
+        {
+            return $nullReturn 
+        }
+
         $syncConnection  = $userProfileConfigManager.ConnectionManager | `
             Where-Object -FilterScript { 
                 $null -ne  $_.PropertyMapping -and $null -ne $_.PropertyMapping.Item($params.Name) 
@@ -246,24 +252,24 @@ function Set-TargetResource
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)] 
-        [ValidateSet("BigInteger", 
-                     "Binary", 
-                     "Boolean", 
-                     "Date", 
-                     "DateNoYear", 
-                     "DateTime", 
-                     "Email", 
-                     "Float", 
-                     "Guid", 
-                     "HTML", 
-                     "Integer", 
-                     "Person", 
-                     "String",  
-                     "StringMultiValue", 
-                     "TimeZone", 
-                     "URL")] 
-        [System.string] 
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Big Integer",
+                     "Binary",
+                     "Boolean",
+                     "Date",
+                     "DateNoYear",
+                     "Date Time",
+                     "Email",
+                     "Float",
+                     "HTML",
+                     "Integer",
+                     "Person",
+                     "String (Single Value)",  
+                     "String (Multi Value)",
+                     "TimeZone",
+                     "Unique Identifier",
+                     "URL")]
+        [System.string]
         $Type,
 
         [Parameter(Mandatory = $false)] 
@@ -372,9 +378,9 @@ function Set-TargetResource
         }
 
         if ($params.ContainsKey("TermSet") `
-            -and (@("string","stringmultivalue").Contains($params.Type.ToLower()) -eq $false))
+            -and (@("string (single value)","string (multi value)").Contains($params.Type.ToLower()) -eq $false))
         {
-            throw "Only String and String Maultivalue can use Termsets"
+            throw "Only String and String Multivalue can use Termsets"
         }
 
         $ups = Get-SPServiceApplication -Name $params.UserProfileService `
@@ -465,7 +471,7 @@ function Set-TargetResource
                                                   -ParamsValue $params `
                                                   -ParamKey "Length"                                                
     
-            if($params.Type -eq "stringmultivalue")
+            if($params.Type -eq "String (Multi Value)")
             {
                 $coreProperty.IsMultivalued = $true
             }
@@ -583,7 +589,7 @@ function Set-TargetResource
                 }
 
                 $export = $params.ContainsKey("MappingDirection") -and $params.MappingDirection -eq "Export"
-                if ($Connection.Type -eq "ActiveDirectoryImport") 
+                if ($syncConnection.Type -eq "ActiveDirectoryImport") 
                 {  
                     if ($export) 
                     {
@@ -591,8 +597,8 @@ function Set-TargetResource
                     } 
                     else 
                     {
-                        $Connection.AddPropertyMapping($params.MappingPropertyName,$params.Name)  
-                        $Connection.Update()  
+                        $syncConnection.AddPropertyMapping($params.MappingPropertyName,$params.Name)  
+                        $syncConnection.Update()  
                     }
                 } 
                 else
@@ -638,24 +644,24 @@ function Test-TargetResource
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)] 
-        [ValidateSet("BigInteger", 
-                     "Binary", 
-                     "Boolean", 
-                     "Date", 
-                     "DateNoYear", 
-                     "DateTime", 
-                     "Email", 
-                     "Float", 
-                     "Guid", 
-                     "HTML", 
-                     "Integer", 
-                     "Person", 
-                     "String",  
-                     "StringMultiValue", 
-                     "TimeZone", 
-                     "URL")] 
-        [System.string] 
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Big Integer",
+                     "Binary",
+                     "Boolean",
+                     "Date",
+                     "DateNoYear",
+                     "Date Time",
+                     "Email",
+                     "Float",
+                     "HTML",
+                     "Integer",
+                     "Person",
+                     "String (Single Value)",  
+                     "String (Multi Value)",
+                     "TimeZone",
+                     "Unique Identifier",
+                     "URL")]
+        [System.string]
         $Type,
 
         [Parameter(Mandatory = $false)] 

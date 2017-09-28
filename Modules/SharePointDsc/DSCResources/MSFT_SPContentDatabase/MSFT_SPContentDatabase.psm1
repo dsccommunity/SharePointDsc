@@ -46,7 +46,8 @@ function Get-TargetResource
         $params = $args[0]
         
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
-            $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPContentDatabase" -and `
+            $_.Name -eq $params.Name
         }
 
         if ($null -eq $cdb)

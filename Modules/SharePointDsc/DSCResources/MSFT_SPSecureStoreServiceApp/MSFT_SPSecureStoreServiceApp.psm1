@@ -120,7 +120,7 @@ function Get-TargetResource
                 ProxyName       = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $db.Name
-                DatabaseServer = $db.Server.Name
+                DatabaseServer = $db.NormalizedDataSource
                 FailoverDatabaseServer = $db.FailoverServer
                 InstallAccount = $params.InstallAccount
                 Ensure = "Present"

@@ -53,7 +53,7 @@ namespace Microsoft.SharePoint.Administration {
             }
             
             Mock -CommandName Get-SPDatabase -MockWith { 
-                return @{
+                $returnval = @{
                     Name = "SharePoint_Content_01"
                     Type = "Content Database"
                     Server = "WrongSQLSrv"
@@ -64,6 +64,12 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
+                    }
+                } -PassThru -Force
+                return $returnval
             }
             Mock -CommandName Get-SPWebApplication -MockWith { 
                 return @{ 
@@ -96,7 +102,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             Mock -CommandName Get-SPDatabase -MockWith { 
-                return @{
+                $returnval = @{
                     Name = "SharePoint_Content_01"
                     Type = "Content Database"
                     Server = "SQLSrv"
@@ -107,6 +113,12 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
+                    }
+                } -PassThru -Force
+                return $returnval
             }
             Mock -CommandName Get-SPWebApplication -MockWith { 
                 return @() 
@@ -227,6 +239,12 @@ namespace Microsoft.SharePoint.Administration {
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
                     $Global:SPDscContentDatabaseUpdated = $true 
                 } -PassThru
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
+                    }
+                } -PassThru -Force
+                
                 return $returnVal
             }
 
@@ -269,6 +287,11 @@ namespace Microsoft.SharePoint.Administration {
                 $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name Update -Value { 
                     $Global:SPDscContentDatabaseUpdated = $true 
                 } -PassThru
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
+                    }
+                } -PassThru -Force
                 return $returnVal
             }
             
@@ -307,6 +330,11 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
+                    }
+                } -PassThru -Force
                 return $returnVal
             }
 
@@ -363,6 +391,11 @@ namespace Microsoft.SharePoint.Administration {
                     WarningSiteCount = 2000
                     MaximumSiteCount = 5000
                 }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{
+                        FullName = "Microsoft.SharePoint.Administration.SPContentDatabase"
+                    }
+                } -PassThru -Force
                 return $returnVal
             }
                         

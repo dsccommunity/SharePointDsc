@@ -25,7 +25,13 @@ function Get-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting timer job settings for job '$Name'"
+    Write-Verbose -Message "Getting timer job settings for job '$TypeName'"
+
+    if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+    {
+        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+               "health analyzer timer jobs.")
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -124,7 +130,13 @@ function Set-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting timer job settings for job '$Name'"
+    Write-Verbose -Message "Setting timer job settings for job '$TypeName'"
+
+    if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+    {
+        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+               "health analyzer timer jobs.")
+    }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
@@ -318,7 +330,13 @@ function Test-TargetResource
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing timer job settings for job '$Name'"
+    Write-Verbose -Message "Testing timer job settings for job '$TypeName'"
+
+    if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+    {
+        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+               "health analyzer timer jobs.")
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

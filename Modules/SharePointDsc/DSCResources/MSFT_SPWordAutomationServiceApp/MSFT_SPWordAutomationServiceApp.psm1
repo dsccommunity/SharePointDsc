@@ -173,11 +173,11 @@ function Get-TargetResource
         }
 
         $returnVal =  @{ 
-            Name = $serviceApp.DisplayName 
+            Name = $serviceApp.DisplayName
             Ensure = "Present"
-            ApplicationPool = $serviceApp.ApplicationPool.Name 
-            DatabaseName = $serviceApp.Database.Name 
-            DatabaseServer = $serviceApp.Database.Server.Name 
+            ApplicationPool = $serviceApp.ApplicationPool.Name
+            DatabaseName = $serviceApp.Database.Name
+            DatabaseServer = $serviceApp.Database.NormalizedDataSource
             SupportedFileFormats = $supportedFileFormats
             DisableEmbeddedFonts = $serviceApp.DisableEmbeddedFonts
             MaximumMemoryUsage = $serviceApp.MaximumMemoryUsage
@@ -384,7 +384,7 @@ function Set-TargetResource
             {
                 if ($params.DatabaseServer) 
                 {
-                    if ($serviceApp.Database.Server.Name -ne $params.DatabaseServer) 
+                    if ($serviceApp.Database.NormalizedDataSource -ne $params.DatabaseServer) 
                     { 
                         Set-SPWordConversionServiceApplication -Identity $serviceApp `
                                                                -DatabaseServer $params.DatabaseServer `

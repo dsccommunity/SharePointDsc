@@ -134,6 +134,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Database"
+                                                                        NormalizedDataSource = "DBServer"
                                                                         Server = @{
                                                                             Name = "DBServer"
                                                                         }
@@ -198,6 +199,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Database"
+                                                                        NormalizedDataSource = "DBServer"
                                                                         Server = @{
                                                                             Name = "DBServer"
                                                                         }
@@ -333,6 +335,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Database"
+                                                                        NormalizedDataSource = "DBServer"
                                                                         Server = @{
                                                                             Name = "DBServer"
                                                                         }
@@ -403,6 +406,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Wrong Database"
+                                                                        NormalizedDataSource = "DBServer"
                                                                         Server = @{
                                                                             Name = "DBServer"
                                                                         }
@@ -476,6 +480,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "SecureStoreDB"
+                                                                        NormalizedDataSource = "Wrong DBServer"
                                                                         Server = @{
                                                                             Name = "Wrong DBServer"
                                                                         }

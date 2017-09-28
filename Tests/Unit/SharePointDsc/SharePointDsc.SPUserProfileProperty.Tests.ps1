@@ -32,7 +32,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            Name = "WorkEmailNew"
            UserProfileService = "User Profile Service Application"
            DisplayName = "WorkEmailNew"
-           Type = "String"
+           Type = "String (Single Value)"
            Description = "" 
            PolicySetting = "Mandatory"
            PrivacySetting = "Public"
@@ -57,7 +57,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            Name = "WorkEmailUpdate"
            UserProfileService = "User Profile Service Application"
            DisplayName = "WorkEmailUpdate"
-           Type = "String"
+           Type = "String (Single Value)"
            Description = ""
            PolicySetting = "Optin"
            PrivacySetting = "Private"
@@ -93,7 +93,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             DisplayName = "WorkEmailUpdate" 
                             Name = "WorkEmailUpdate"
                             IsMultiValued=$false
-                            Type = "String"
+                            Type = "String (Single Value)"
                             TermSet = @{Name=       $testParamsUpdateProperty.TermSet
                                         Group=      @{Name =$testParamsUpdateProperty.TermGroup}
                                         TermStore = @{Name =$testParamsUpdateProperty.TermStore} }
@@ -155,7 +155,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $coreProperty = @{ 
                             DisplayName = $testParamsNewProperty.DisplayName
                             Name = $testParamsNewProperty.Name
-                            IsMultiValued=$testParamsNewProperty.Type -eq "stringmultivalue"
+                            IsMultiValued=$testParamsNewProperty.Type -eq "String (Multi Value)"
                             Type = $testParamsNewProperty.Type
                             TermSet = @{Name=       $testParamsNewProperty.TermSet
                                         Group=      @{Name =$testParamsNewProperty.TermGroup}
@@ -587,7 +587,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "When property exists and type is different - throws exception" {
             $currentType = $testParamsUpdateProperty.Type
-            $testParamsUpdateProperty.Type = "StringMultiValue"
+            $testParamsUpdateProperty.Type = "String (Multi Value)"
             Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
                                 $Global:SPUPGetProfileSubtypeCalled = $true

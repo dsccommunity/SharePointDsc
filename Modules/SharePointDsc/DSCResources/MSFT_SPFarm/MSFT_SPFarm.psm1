@@ -163,6 +163,15 @@ function Get-TargetResource
                 $centralAdminProvisioned = $true
             }
 
+            if ($centralAdminSite.IisSettings[0].DisableKerberos -eq $false)
+            {
+                $centralAdminAuth = "Kerberos"
+            }
+            else
+            {
+                $centralAdminAuth = "NTLM"
+            }
+
             $returnValue = @{
                 FarmConfigDatabaseName = $spFarm.Name
                 DatabaseServer = $configDb.Server.Name
@@ -172,7 +181,7 @@ function Get-TargetResource
                 AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
                 RunCentralAdmin = $centralAdminProvisioned
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
-                CentralAdministrationAuth = $params.CentralAdministrationAuth #TODO: Need to return this as the current value
+                CentralAdministrationAuth = $centralAdminAuth
             }
             return $returnValue
         }   

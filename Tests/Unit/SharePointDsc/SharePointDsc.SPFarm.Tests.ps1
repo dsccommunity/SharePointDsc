@@ -364,6 +364,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ContentDatabases = @(@{ 
                         Name = $testParams.AdminContentDatabaseName 
                     })
+                    IISSettings = @(@{ 
+                        DisableKerberos = $true 
+                    })
                     Url = "http://localhost:9999"
                 }
             }

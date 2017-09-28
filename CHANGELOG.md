@@ -2,12 +2,32 @@
 
 ## 2.0
 
+* Corrected comment in CodeCov.yml (648)
+* Fixed localized issue in SPContentDatabase (646)
+* Fixed issue with NullException in SPServiceAppSecurity when no accounts
+  are configured in SharePoint (634)
+* Fixed two NullException issues in SPUserProfileProperty (639)
+* Fixed issue in SPWebAppPolicy where the SPWebPolicyPermissions couldn't be used
+  twice with the exact same values (620)
+* Implemented ToDo in SPFarm to return Central Admin Auth mode (603)
+* Corrected SPSearchContentSource examples (571)
+* Fixed issue in SPManagedMetadataServiceApp where the termstore could not be
+  retrieved if the MMS service instance was stopped (597)
+* Fixed an issue where the instance name wasn't detected correctly (638)
+  * SPAppManagementServiceApp
+  * SPSecureStoreServiceApp
+  * SPWordAutomationServiceApp
+
 The following changes will break 1.x configurations that use these resources:
 
 * Updated SPShellAdmin so it also works for non-content databases
 * Updated SPWebApplication so it infers the UseSSL value from the URL
 * Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
   the requirement for CredSSP
+* Updated the SPTimerJobState to make the WebAppUrl parameter a key parameter.
+  The resource can now be used to configure the same job for multiple
+  web applications. Also changed the Name parameter to TypeName, due to a limitation
+  with the SPTimerJob cmdlets. (644)
 
 ## 1.9
 

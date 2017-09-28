@@ -138,22 +138,30 @@ function Get-TargetResource
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
 
             $currentAdmins = @()
-            
-            $session.TermStores[0].TermStoreAdministrators | ForEach-Object -Process {
-                $name = [string]::Empty
-                if ($_.IsWindowsAuthenticationMode -eq $true)
-                {
-                    $name = $_.PrincipalName
-                }
-                else 
-                {
-                    $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
-                    if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+") 
+
+            if ($null -ne $session.TermStores[0])
+            {
+                $session.TermStores[0].TermStoreAdministrators | ForEach-Object -Process {
+                    $name = [string]::Empty
+                    if ($_.IsWindowsAuthenticationMode -eq $true)
                     {
-                        $name = Resolve-SPDscSecurityIdentifier -SID $name
+                        $name = $_.PrincipalName
                     }
+                    else 
+                    {
+                        $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
+                        if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+") 
+                        {
+                            $name = Resolve-SPDscSecurityIdentifier -SID $name
+                        }
+                    }
+                    $currentAdmins += $name
                 }
-                $currentAdmins += $name
+            }
+            else
+            {
+                Write-Verbose -Message ("TermStore could not be found. Please check if the " + `
+                                        "MMS service instance is started.")                
             }
 
             return @{
@@ -321,6 +329,12 @@ function Set-TargetResource
             }
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
             $termStore = $session.TermStores[0]
+
+            if ($null -eq $termStore)
+            {
+                throw ("Cannot retrieve TermStore. Please check if the Managed Metadata " + `
+                       "service instance is running.")
+            }
 
             $changesToMake = Compare-Object -ReferenceObject $currentValues.TermStoreAdministrators `
                                             -DifferenceObject $params.TermStoreAdministrators

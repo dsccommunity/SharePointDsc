@@ -346,6 +346,13 @@ function Test-TargetResource
     if ($Members) 
     {
         Write-Verbose -Message "Processing Members parameter"
+        
+        if ($null -eq $CurrentValues.Members)
+        {
+            Write-Verbose -Message "Security list does not match"
+            return $false
+        }
+
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members.Username `
                                       -DifferenceObject $Members.Username
 

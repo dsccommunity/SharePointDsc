@@ -77,7 +77,7 @@ function Get-TargetResource
                 ProxyName = $proxyName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $serviceApp.Databases.Name
-                DatabaseServer = $serviceApp.Databases.Server.Name
+                DatabaseServer = $serviceApp.Databases.NormalizedDataSource
                 Ensure = "Present"
                 InstallAccount = $params.InstallAccount
             }
