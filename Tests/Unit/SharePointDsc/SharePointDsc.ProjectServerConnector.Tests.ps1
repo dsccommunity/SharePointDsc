@@ -240,5 +240,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
             }
         }
+
+        Context -Name "Get-SPDscProjectServerGlobalPermission" -Fixture {
+
+            try
+            {
+                [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] | Out-Null
+            }
+            catch
+            {
+                Add-Type -TypeDefinition @"
+                    namespace Microsoft.Office.Project.Server.Library
+                    {
+                        public class PSSecurityGlobalPermission
+                        {
+                            public static System.Guid ExamplePermission {
+                                get {
+                                    return System.Guid.NewGuid();
+                                }
+                            }
+                        }
+                    }
+"@
+            }
+
+            It "should return a value when an exiting permission is requested" {
+                Get-SPDscProjectServerGlobalPermission -Permission "ExamplePermission" | Should Not BeNullOrEmpty
+            }
+
+            It "should return null when a permission that doesn't exist is requested" {
+                Get-SPDscProjectServerGlobalPermission -Permission "DoesntExist" | Should BeNullOrEmpty
+            }
+        }
     }
 }

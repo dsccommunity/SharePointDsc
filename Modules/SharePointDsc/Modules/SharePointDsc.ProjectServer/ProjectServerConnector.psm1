@@ -1,3 +1,23 @@
+function Get-SPDscProjectServerGlobalPermission
+{
+    param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $Permission
+    )
+
+    $result = $null
+    [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
+      | Get-Member -Static | ForEach-Object -Process {
+        
+        if ($Permission -eq $_.Name)
+        {
+            $result = [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission]::($_.Name)
+        }
+    }
+    return $result
+}
+
 function Get-SPDscProjectServerResourceId
 {
     [OutputType([System.Guid])]
