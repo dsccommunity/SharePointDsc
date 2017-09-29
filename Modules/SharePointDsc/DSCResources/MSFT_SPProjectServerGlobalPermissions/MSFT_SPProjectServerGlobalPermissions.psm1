@@ -13,7 +13,7 @@ function Get-TargetResource
         $EntityName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("USer", "Group")]  
+        [ValidateSet("User", "Group")]  
         [System.String] 
         $EntityType,
 
@@ -46,21 +46,58 @@ function Get-TargetResource
 
         if ((Get-SPProjectPermissionMode -Url $params.Url) -ne "ProjectServer")
         {
-            throw [Exception] ("SPProjectServerGroup is design for Project Server permissions " + `
-                               "mode only, and this site is set to SharePoint mode")
+            throw [Exception] ("SPProjectServerGlobalPermissions is design for Project Server " + `
+                               "permissions mode only, and this site is set to SharePoint mode")
         }
         
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-        $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+        $allowPermissions = @()
+        $denyPermissions = @()
+        $script:resultDataSet = $null
 
-        $script:groupDataSet = $null
-        Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
-            
+        switch($params.EntityType)
+        {
+            "User" {
+                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Resource
+                
+                $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
+                Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
+                    $script:resultDataSet = $resourceService.ReadResourceAuthorization($userId)
+                }
+            }
+            "Group" {
+                $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+
+                Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
+                    $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
+                        $_.WSEC_GRP_NAME -eq $params.EntityName
+                    }
+                    $script:resultDataSet = $securityService.ReadGroup($groupInfo.WSEC_GRP_UID)
+                }
+            }
         }
 
-        
+        $script:resultDataSet.GlobalPermissions.Rows | ForEach-Object -Process {
+            $permissionName = Get-SPDscProjectServerPermissionName -PermissionId $_.WSEC_FEA_ACT_UID
+            if ($_.WSEC_ALLOW -eq $true)
+            {
+                $allowPermissions += $permissionName
+            }
+            if ($_.WSEC_DENY -eq $true)
+            {
+                $denyPermissions += $permissionName
+            }
+        }
+
+        return @{
+            Url = $params.Url
+            EntityName = $params.EntityName
+            EntityType = $params.EntityType
+            AllowPermissions = $allowPermissions
+            DenyPermissions = $denyPermissions
+        }
     }
     return $result
 }
@@ -80,7 +117,7 @@ function Set-TargetResource
         $EntityName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("USer", "Group")]  
+        [ValidateSet("User", "Group")]  
         [System.String] 
         $EntityType,
 
@@ -118,7 +155,7 @@ function Test-TargetResource
         $EntityName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("USer", "Group")]  
+        [ValidateSet("User", "Group")]  
         [System.String] 
         $EntityType,
 

@@ -241,7 +241,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Get-SPDscProjectServerGlobalPermission" -Fixture {
+        Context -Name "Get-SPDscProjectServerGlobalPermissionId" -Fixture {
 
             try
             {
@@ -265,11 +265,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "should return a value when an exiting permission is requested" {
-                Get-SPDscProjectServerGlobalPermission -Permission "ExamplePermission" | Should Not BeNullOrEmpty
+                Get-SPDscProjectServerGlobalPermissionId -PermissionName "ExamplePermission" | Should Not BeNullOrEmpty
             }
 
             It "should return null when a permission that doesn't exist is requested" {
-                { Get-SPDscProjectServerGlobalPermission -Permission "DoesntExist" } | Should Throw
+                { Get-SPDscProjectServerGlobalPermissionId -PermissionName "DoesntExist" } | Should Throw
             }
         }
     }
