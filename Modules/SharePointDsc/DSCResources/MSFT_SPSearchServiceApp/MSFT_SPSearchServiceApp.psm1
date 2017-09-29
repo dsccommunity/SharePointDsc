@@ -127,7 +127,7 @@ function Get-TargetResource
                 ProxyName                   = $proxyName
                 ApplicationPool             = $serviceApp.ApplicationPool.Name
                 DatabaseName                = $serviceApp.SearchAdminDatabase.Name
-                DatabaseServer              = $serviceApp.SearchAdminDatabase.Server.Name
+                DatabaseServer              = $serviceApp.SearchAdminDatabase.NormalizedDataSource
                 Ensure                      = "Present"
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount

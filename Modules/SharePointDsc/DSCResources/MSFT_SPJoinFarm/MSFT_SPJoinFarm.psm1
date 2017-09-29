@@ -113,7 +113,7 @@ function Get-TargetResource
 
         return @{
             FarmConfigDatabaseName = $spFarm.Name
-            DatabaseServer = $configDb.Server.Name
+            DatabaseServer = $configDb.NormalizedDataSource
             InstallAccount = $params.InstallAccount
             Passphrase = $params.Passphrase.password 
         }

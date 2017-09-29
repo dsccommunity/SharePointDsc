@@ -174,7 +174,7 @@ function Get-TargetResource
 
             $returnValue = @{
                 FarmConfigDatabaseName = $spFarm.Name
-                DatabaseServer = $configDb.Server.Name
+                DatabaseServer = $configDb.NormalizedDataSource
                 FarmAccount = $farmAccount # Need to return this as a credential to match the type expected
                 InstallAccount = $null
                 Passphrase = $null 

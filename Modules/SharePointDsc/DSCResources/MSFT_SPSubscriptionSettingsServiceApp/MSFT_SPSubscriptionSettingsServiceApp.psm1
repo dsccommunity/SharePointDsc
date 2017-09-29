@@ -74,7 +74,7 @@ function Get-TargetResource
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $db.Name
-                DatabaseServer = $db.Server.Name
+                DatabaseServer = $db.NormalizedDataSource
                 InstallAccount = $params.InstallAccount
                 Ensure = "Present"
             }

@@ -222,7 +222,7 @@ function Get-TargetResource
             TermStore = $termSet.TermStore
             TermGroup = $termSet.TermGroup
             TermSet = $termSet.TermSet
-            UserOverridePrivacy = $userProfileProperty.AllowPolicyOverride
+            UserOverridePrivacy = $userProfileProperty.UserOverridePrivacy
             Ensure = "Present"
         }
 
@@ -522,6 +522,11 @@ function Set-TargetResource
                                               -PropertyToSet "IsEventLog" `
                                               -ParamsValue $params `
                                               -ParamKey "IsEventLog"
+
+        Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $coreProperty `
+                                              -PropertyToSet "IsSearchable" `
+                                              -ParamsValue $params `
+                                              -ParamKey "IsSearchable"
 
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $userProfileProperty `
                                               -PropertyToSet "DefaultPrivacy" `

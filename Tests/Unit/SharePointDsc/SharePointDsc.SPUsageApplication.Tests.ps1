@@ -144,7 +144,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -181,7 +181,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -228,7 +228,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -268,9 +268,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = "db"
-                        Server = @{ 
-                            Name = "server" 
-                        }
+                        NormalizedDataSource = "server"
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -324,9 +322,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DisplayName = $testParams.Name
                     UsageDatabase = @{
                         Name = "db"
-                        Server = @{ 
-                            Name = "server" 
-                        }
+                        NormalizedDataSource = "server"
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 

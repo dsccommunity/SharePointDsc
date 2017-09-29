@@ -222,9 +222,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -238,9 +236,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -254,9 +250,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -345,9 +339,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -361,9 +353,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -377,9 +367,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -466,9 +454,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -482,9 +468,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -498,9 +482,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -576,9 +558,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -592,9 +572,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -608,9 +586,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )

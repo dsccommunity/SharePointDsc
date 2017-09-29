@@ -353,9 +353,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {

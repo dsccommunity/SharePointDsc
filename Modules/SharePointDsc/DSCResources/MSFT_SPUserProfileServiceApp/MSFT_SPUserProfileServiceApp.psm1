@@ -164,11 +164,11 @@ function Get-TargetResource
                 ApplicationPool    = $serviceApp.ApplicationPool.Name
                 MySiteHostLocation = $params.MySiteHostLocation
                 ProfileDBName      = $databases.ProfileDatabase.Name
-                ProfileDBServer    = $databases.ProfileDatabase.Server.Name
+                ProfileDBServer    = $databases.ProfileDatabase.NormalizedDataSource
                 SocialDBName       = $databases.SocialDatabase.Name
-                SocialDBServer     = $databases.SocialDatabase.Server.Name
+                SocialDBServer     = $databases.SocialDatabase.NormalizedDataSource
                 SyncDBName         = $databases.SynchronizationDatabase.Name
-                SyncDBServer       = $databases.SynchronizationDatabase.Server.Name
+                SyncDBServer       = $databases.SynchronizationDatabase.NormalizedDataSource
                 InstallAccount     = $params.InstallAccount
                 EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
                 NoILMUsed          = $serviceApp.NoILMUsed

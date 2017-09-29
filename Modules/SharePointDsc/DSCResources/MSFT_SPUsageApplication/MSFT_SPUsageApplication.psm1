@@ -93,7 +93,7 @@ function Get-TargetResource
                 Name = $serviceApp.DisplayName
                 InstallAccount = $params.InstallAccount
                 DatabaseName = $serviceApp.UsageDatabase.Name
-                DatabaseServer = $serviceApp.UsageDatabase.Server.Name
+                DatabaseServer = $serviceApp.UsageDatabase.NormalizedDataSource
                 DatabaseCredentials = $params.DatabaseCredentials
                 FailoverDatabaseServer = $serviceApp.UsageDatabase.FailoverServer
                 UsageLogCutTime = $service.UsageLogCutTime

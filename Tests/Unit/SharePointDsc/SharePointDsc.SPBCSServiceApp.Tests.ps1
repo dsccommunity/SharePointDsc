@@ -97,7 +97,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -132,7 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -169,7 +169,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 

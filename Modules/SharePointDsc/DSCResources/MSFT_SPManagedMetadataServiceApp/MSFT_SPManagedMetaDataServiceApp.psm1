@@ -170,7 +170,7 @@ function Get-TargetResource
                 Ensure                  = "Present"
                 ApplicationPool         = $serviceApp.ApplicationPool.Name
                 DatabaseName            = $serviceApp.Database.Name
-                DatabaseServer          = $serviceApp.Database.Server.Name
+                DatabaseServer          = $serviceApp.Database.NormalizedDataSource
                 TermStoreAdministrators = $currentAdmins
                 ContentTypeHubUrl       = $hubUrl
                 InstallAccount          = $params.InstallAccount

@@ -146,7 +146,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             IsAlias =  $true
                             CoreProperty = $corePropertyUpdate
                             TypeProperty = $typePropertyUpdate
-                            AllowPolicyOverride=$false;
+                            UserOverridePrivacy=$false;
                         }| Add-Member ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru 

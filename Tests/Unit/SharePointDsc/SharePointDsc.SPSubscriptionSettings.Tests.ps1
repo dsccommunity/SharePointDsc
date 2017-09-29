@@ -137,9 +137,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Test_DB"
-                                                                        Server = @{
-                                                                            Name = "TestServer\Instance"
-                                                                        }
+                                                                        NormalizedDataSource = "TestServer\Instance"
                                                                         FailoverServer = @{
                                                                             Name = "DBServer_Failover"
                                                                         }
@@ -206,9 +204,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Test_DB"
-                                                                        Server = @{
-                                                                            Name = "TestServer\Instance"
-                                                                        }
+                                                                        NormalizedDataSource = "TestServer\Instance"
                                                                         FailoverServer = @{
                                                                             Name = "DBServer_Failover"
                                                                         }
@@ -296,9 +292,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Test_DB"
-                                                                        Server = @{
-                                                                            Name = "TestServer\Instance"
-                                                                        }
+                                                                        NormalizedDataSource = "TestServer\Instance"
                                                                         FailoverServer = @{
                                                                             Name = "DBServer_Failover"
                                                                         }

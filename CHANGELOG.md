@@ -15,6 +15,18 @@
   retrieved if the MMS service instance was stopped (597)
 * Fixed an issue where the instance name wasn't detected correctly (638)
   * SPAppManagementServiceApp
+  * SPBCSServiceApp
+  * SPCreateFarm
+  * SPFarm
+  * SPJoinFarm
+  * SPMachineTranslationServiceApp
+  * SPManagedMetaDataServiceApp
+  * SPPerformancePointServiceApp
+  * SPSearchServiceApp
+  * SPStateServiceApp
+  * SPSubscriptionSettings
+  * SPUsageApplication
+  * SPUserProfileServiceApp
   * SPSecureStoreServiceApp
   * SPWordAutomationServiceApp
 
@@ -28,6 +40,8 @@ The following changes will break 1.x configurations that use these resources:
   The resource can now be used to configure the same job for multiple
   web applications. Also changed the Name parameter to TypeName, due to a limitation
   with the SPTimerJob cmdlets. (644)
+* Fixed an issue in SPUserProfileProperty where string properties were not
+  created properly (550)
 
 ## 1.9
 

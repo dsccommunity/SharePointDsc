@@ -252,9 +252,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer 
                 })
             } 
             
@@ -301,9 +299,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer 
                 })
             } 
             
@@ -363,9 +359,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = "WrongDBName"
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer 
                 })
             } 
             
@@ -413,7 +407,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ Name = $testParams.DatabaseServer }
+                    NormalizedDataSource = $testParams.DatabaseServer
                 })
             } 
             

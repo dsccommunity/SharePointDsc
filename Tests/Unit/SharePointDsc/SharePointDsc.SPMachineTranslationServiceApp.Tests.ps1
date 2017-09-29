@@ -102,7 +102,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -141,9 +141,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ 
-                            Name = $testParams.DatabaseServer 
-                        }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -198,9 +196,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ 
-                            Name = $testParams.DatabaseServer 
-                        }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 

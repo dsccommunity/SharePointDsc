@@ -52,7 +52,7 @@ function Get-TargetResource
         return @{
             Name = $serviceApp.DisplayName
             DatabaseName = $serviceApp.Databases.Name
-            DatabaseServer = $serviceApp.Databases.Server.Name
+            DatabaseServer = $serviceApp.Databases.NormalizedDataSource
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
         }
