@@ -174,6 +174,15 @@ function Get-TargetResource
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
                 CentralAdministrationAuth = $params.CentralAdministrationAuth #TODO: Need to return this as the current value
             }
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            if($installedVersion.FileMajorPart -eq 16)
+            {
+                $server = Get-SPServer -Identity $env:COMPUTERNAME
+                if($null -ne $server -and $null -ne $server.Role)
+                {
+                    $returnValue.Add("ServerRole", $server.Role)
+                }
+            }
             return $returnValue
         }   
 
