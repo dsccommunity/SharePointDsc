@@ -139,6 +139,22 @@ function Get-TargetResource
         
         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
         
+        $firstPartition = $null
+        if($IndexComponents.Length -gt 0)
+        {
+            $firstIndexPartition = ($allComponents | Where-Object -FilterScript { 
+                ($_.GetType().Name -eq "IndexComponent") -and ($_.IndexPartitionOrdinal -eq 0) -and ($null -ne $_.RootDirectory -and $_.RootDirectory.Length -gt 0)
+            })
+            if($firstIndexPartition.Length -gt 1)
+            {
+                $firstIndexPartition = $firstIndexPartition[0]
+            }
+            if($null -ne $firstIndexPartition)
+            {
+                $firstPartition = $firstIndexPartition.RootDirectory
+            }
+        }
+
         return @{
             ServiceAppName = $params.ServiceAppName
             Admin = $AdminComponents -replace ".$domain"
@@ -147,7 +163,7 @@ function Get-TargetResource
             AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
             QueryProcessing = $QueryProcessingComponents -replace ".$domain"
             InstallAccount = $params.InstallAccount
-            FirstPartitionDirectory = $params.FirstPartitionDirectory
+            FirstPartitionDirectory = $firstPartition
             IndexPartition = $IndexComponents -replace ".$domain"
         }
     }
