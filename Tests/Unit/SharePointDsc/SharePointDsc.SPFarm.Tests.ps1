@@ -447,6 +447,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     RunCentralAdmin = $false
                 }
 
+                Mock -CommandName Get-SPServer -MockWith{
+                    return @{
+                        Name = "spwfe"
+                        Role = "WebFrontEnd"
+                    }
+                }
+
                 Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
                     return @{
                         FileMajorPart = 16
