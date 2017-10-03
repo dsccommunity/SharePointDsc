@@ -333,6 +333,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { 
                 return "Connection string example" 
             }
+            
+            Mock -CommandName Get-SPServer -MockWith{
+                return @{
+                    Name = "spwfe"
+                    Role = "WebFrontEnd"
+                }
+            }
+
             Mock -CommandName "Get-SPFarm" -MockWith { 
                 return @{
                     Name = $testParams.FarmConfigDatabaseName
@@ -445,14 +453,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     CentralAdministrationPort = 1234
                     ServerRole = "ApplicationWithSearch"
                     RunCentralAdmin = $false
-                }
-
-                Mock -CommandName Get-SPServer -MockWith{
-                    return @{
-                        Name = "spwfe"
-                        Role = "WebFrontEnd"
-                    }
-                }
+                }                
 
                 Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
                     return @{
