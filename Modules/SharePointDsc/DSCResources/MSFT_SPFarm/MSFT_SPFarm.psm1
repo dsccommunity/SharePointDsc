@@ -183,6 +183,10 @@ function Get-TargetResource
                     $returnValue.Add("ServerRole", $server.Role)
                 }
             }
+            elseif($installedVersion.FileMajorPart -eq 15)
+            {
+                $returnValue.Add("ServerRole", $null)
+            }
             return $returnValue
         }   
 

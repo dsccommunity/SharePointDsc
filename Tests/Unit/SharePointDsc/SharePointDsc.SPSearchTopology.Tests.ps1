@@ -315,12 +315,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Server = @{
                         Address = $env:COMPUTERNAME
                     }
+                    Components = @{
+                        IndexLocation = "D:\Index"
+                    }
                     Status = "Online"
+
                 }
             }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+
+            It "Should return the FirstIndexPartition location" {
+                (Get-TargetResource @testParams).FirstIndexPartition | Should Be "D:\Index"
             }
         }
 
