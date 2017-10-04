@@ -333,13 +333,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { 
                 return "Connection string example" 
             }
-            
-            Mock -CommandName Get-SPServer -MockWith{
-                return @{
-                    Name = "spwfe"
-                    Role = "WebFrontEnd"
-                }
-            }
 
             Mock -CommandName "Get-SPFarm" -MockWith { 
                 return @{
@@ -382,7 +375,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should be $true
-            }
+            }            
         }
 
         Context -Name "Absent is specified for the ensure property" -Fixture {
@@ -521,6 +514,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 It "Should throw if an invalid server role is used in the set method" {
                     { Set-TargetResource @testParams } | Should Not Throw
                 }
+            }
+        }
+
+        Context -Name "o ServerRole is specified but Get-Targetresource needs to identify and return it" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+
+            Mock -CommandName Get-SPServer -MockWith{
+                return @{
+                    Name = "spwfe"
+                    Role = "WebFrontEnd"
+                }
+            }
+
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 16 } }
+
+            It "Should return WebFrontEnd from the get method"{
+                (Get-TargetResource @testParams).ServerRole | Should Be "WebFrontEnd"
             }
         }
 
