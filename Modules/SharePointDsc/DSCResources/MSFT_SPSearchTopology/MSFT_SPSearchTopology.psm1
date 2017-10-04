@@ -140,18 +140,17 @@ function Get-TargetResource
         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
         
         $firstPartition = $null
-        if($IndexComponents.Length -gt 0)
+        $enterpriseSearchServiceInstance = Get-SPEnterpriseSearchServiceInstance
+        if($null -ne $enterpriseSearchServiceInstance)
         {
-            $firstIndexPartition = ($allComponents | Where-Object -FilterScript { 
-                ($_.GetType().Name -eq "IndexComponent") -and ($_.IndexPartitionOrdinal -eq 0) -and ($null -ne $_.RootDirectory -and $_.RootDirectory.Length -gt 0)
-            })
-            if($firstIndexPartition.Length -gt 1)
+            $ssiComponents = $enterpriseSearchServiceInstance.Components
+            if($null -ne $ssiComponents)
             {
-                $firstIndexPartition = $firstIndexPartition[0]
-            }
-            if($null -ne $firstIndexPartition)
-            {
-                $firstPartition = $firstIndexPartition.RootDirectory
+                if($ssiComponents.Length -gt 1)
+                {
+                    $ssiComponents = $ssiComponents[0]
+                }   
+                $firstPartition = $ssiComponents.IndexLocation
             }
         }
 
