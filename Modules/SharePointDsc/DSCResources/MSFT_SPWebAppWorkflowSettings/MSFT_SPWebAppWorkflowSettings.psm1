@@ -34,8 +34,8 @@ function Get-TargetResource
         
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             return $null 
         }
 
@@ -84,7 +84,8 @@ function Set-TargetResource
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) {
+        if ($null -eq $wa)
+        {
             throw "Web application $($params.Url) was not found"
             return
         }

@@ -143,16 +143,16 @@ function Get-TargetResource
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         }  
-        if ($null -eq $serviceApps) 
-        { 
+        if ($null -eq $serviceApps)
+        {
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
             $_.GetType().FullName -eq $serviceAppObjectType    
         }
 
-        if ($null -eq $serviceApp) 
-        { 
+        if ($null -eq $serviceApp)
+        {
             return $nullReturn
         } 
         else 
@@ -321,8 +321,8 @@ function Set-TargetResource
     }
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
+    {
         Write-Verbose -Message "Creating Excel Services Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `

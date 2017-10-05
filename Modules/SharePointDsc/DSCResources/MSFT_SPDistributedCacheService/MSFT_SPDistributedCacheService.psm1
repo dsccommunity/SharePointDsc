@@ -51,8 +51,8 @@ function Get-TargetResource
             Use-CacheCluster -ErrorAction SilentlyContinue
             $cacheHost = Get-CacheHost -ErrorAction SilentlyContinue
 
-            if ($null -eq $cacheHost) 
-            { 
+            if ($null -eq $cacheHost)
+            {
                 return $nullReturnValue 
             }
             $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
@@ -174,8 +174,8 @@ function Set-TargetResource
                                 -ScriptBlock {
                 $params = $args[0]
 
-                if ($params.ContainsKey("ServerProvisionOrder")) 
-                {    
+                if ($params.ContainsKey("ServerProvisionOrder"))
+                {
                     $serverCount = 0
                     $currentServer = $params.ServerProvisionOrder[$serverCount]
                     
@@ -191,8 +191,8 @@ function Set-TargetResource
                                 $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
                         }
 
-                        if ($null -eq $si) 
-                        { 
+                        if ($null -eq $si)
+                        {
                             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                             $currentServer = "$currentServer.$domain"
                         }
@@ -321,8 +321,8 @@ function Set-TargetResource
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
             }
             
-            if ($null -eq $serviceInstance) 
-            { 
+            if ($null -eq $serviceInstance)
+            {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$($env:computername).$domain"
                 $serviceInstance = Get-SPServiceInstance -Server $currentServer `

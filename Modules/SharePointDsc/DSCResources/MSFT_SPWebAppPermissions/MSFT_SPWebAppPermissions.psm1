@@ -52,8 +52,8 @@ function Get-TargetResource
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             throw "The specified web application could not be found." 
         }
 
@@ -239,7 +239,8 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
     
-    if ($AllPermissions) {
+    if ($AllPermissions)
+    {
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
@@ -248,8 +249,8 @@ function Set-TargetResource
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                        -ErrorAction SilentlyContinue
             
-            if ($null -eq $wa) 
-            { 
+            if ($null -eq $wa)
+            {
                 throw "The specified web application could not be found."
             }
 
@@ -267,8 +268,8 @@ function Set-TargetResource
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                        -ErrorAction SilentlyContinue
             
-            if ($null -eq $wa) 
-            { 
+            if ($null -eq $wa)
+            {
                 throw "The specified web application could not be found." 
             }
 

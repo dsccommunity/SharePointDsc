@@ -89,7 +89,8 @@ function Get-TargetResource
         $params = $args[0]
         
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
-        if ($null -eq $dc) { 
+        if ($null -eq $dc)
+        {
             return $null 
         }
         
@@ -209,8 +210,8 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
         
-        if ($params.ContainsKey("InstallAccount")) 
-        { 
+        if ($params.ContainsKey("InstallAccount"))
+        {
             $params.Remove("InstallAccount") | Out-Null 
         } 
         $params = $params | Rename-SPDSCParamValue -oldName "LogPath" `
@@ -309,8 +310,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 

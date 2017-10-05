@@ -133,28 +133,28 @@ function Set-TargetResource
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected")) 
-        { 
+        {
             Write-Verbose -Message "Setting Allow Download"
             $admService.AntivirusSettings.AllowDownload = $params.AllowDownloadInfected
         }
         if ($params.ContainsKey("ScanOnDownload")) 
-        { 
+        {
             $admService.AntivirusSettings.DownloadScanEnabled = $params.ScanOnDownload 
         }
         if ($params.ContainsKey("ScanOnUpload")) 
-        { 
+        {
             $admService.AntivirusSettings.UploadScanEnabled = $params.ScanOnUpload 
         }
         if ($params.ContainsKey("AttemptToClean")) 
-        { 
+        {
             $admService.AntivirusSettings.CleaningEnabled = $params.AttemptToClean 
         }
         if ($params.ContainsKey("NumberOfThreads")) 
-        { 
+        {
             $admService.AntivirusSettings.NumberOfThreads = $params.NumberOfThreads 
         }
         if ($params.ContainsKey("TimeoutDuration")) 
-        { 
+        {
             $timespan = New-TimeSpan -Seconds $params.TimeoutDuration
             $admService.AntivirusSettings.Timeout = $timespan
         }

@@ -59,14 +59,14 @@ function Get-TargetResource
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($web) 
-        { 
+        if ($web)
+        {
             $ensureResult   = "Present" 
             $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
             $parentTopNav   = $web.Navigation.UseShared
         } 
         else 
-        { 
+        {
             $ensureResult = "Absent" 
         }
         
@@ -145,22 +145,22 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
         
-        if ($null -eq $params.InstallAccount) 
-        {    
+        if ($null -eq $params.InstallAccount)
+        {
             $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
         } 
         else
-        {    
+        {
             $currentUserName = $params.InstallAccount.UserName
         }
         
         Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."
         $site = New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url  
-        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName) 
+        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName)
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($null -eq $web) 
+        if ($null -eq $web)
         {
             $params.Remove("InstallAccount") | Out-Null
             $params.Remove("Ensure") | Out-Null
@@ -169,39 +169,39 @@ function Set-TargetResource
         }
         else
         {
-            if ($params.Ensure -eq "Absent") 
+            if ($params.Ensure -eq "Absent")
             {
                 Remove-SPweb $params.Url -confirm:$false
             }
             else
-            {    
+            {
                 $changedWeb = $false
                 
-                if ($web.Title -ne $params.Name) 
+                if ($web.Title -ne $params.Name)
                 {
                     $web.Title = $params.Name
                     $changedWeb = $true
                 }
 
-                if ($web.Description -ne $params.Description) 
+                if ($web.Description -ne $params.Description)
                 {
                     $web.Description = $params.Description
                     $changedWeb = $true
                 }
 
-                if ($web.Navigation.UseShared -ne $params.UseParentTopNav) 
+                if ($web.Navigation.UseShared -ne $params.UseParentTopNav)
                 {
                     $web.Navigation.UseShared = $params.UseParentTopNav
                     $changedWeb = $true
                 }
 
-                if ($web.HasUniquePerm -ne $params.UniquePermissions) 
+                if ($web.HasUniquePerm -ne $params.UniquePermissions)
                 {
                     $web.HasUniquePerm = $params.UniquePermissions
                     $changedWeb = $true
                 }
                 
-                if ($changedWeb) 
+                if ($changedWeb)
                 {
                     $web.Update()
                 }

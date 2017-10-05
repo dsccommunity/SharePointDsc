@@ -190,7 +190,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("EnableCache")) 
     {
         if ($CurrentValues.EnableCache -ne $EnableCache) 
-        { 
+        {
             $changes.EnableCache = $EnableCache 
         }
     }
@@ -198,7 +198,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("Location")) 
     {
         if ($CurrentValues.Location -ne $Location) 
-        { 
+        {
             $changes.Location = $Location 
         }
     }
@@ -206,7 +206,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("MaxSizeInGB")) 
     {
         if ($CurrentValues.MaxSizeInGB -ne $MaxSizeInGB) 
-        { 
+        {
             $changes.MaxSizeInGB = $MaxSizeInGB 
         }
     }
@@ -214,7 +214,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("MaxAgeInSeconds")) 
     {
         if ($CurrentValues.MaxAgeInSeconds -ne $MaxAgeInSeconds) 
-        { 
+        {
             $changes.MaxAgeInSeconds = $MaxAgeInSeconds 
         }
     }
@@ -222,7 +222,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("FileTypes")) 
     {
         if ($CurrentValues.FileTypes -ne $FileTypes) 
-        { 
+        {
             $changes.FileTypes = $FileTypes 
         }
     }

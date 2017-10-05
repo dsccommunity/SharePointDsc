@@ -70,8 +70,8 @@ function Get-TargetResource
         
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             Write-Verbose -Message "WebApplication $($params.WebAppUrl) does not exist"
             return @{
                 WebAppUrl = $params.WebAppUrl
@@ -85,8 +85,8 @@ function Get-TargetResource
         $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
         $waExt = $wa.IisSettings[$zone]
 
-        if ($null -eq $waExt) 
-        { 
+        if ($null -eq $waExt)
+        {
             return @{
                 WebAppUrl = $params.WebAppUrl
                 Name = $params.Name
@@ -114,8 +114,8 @@ function Get-TargetResource
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone $params.zone 
         if($authProvider.DisplayName -eq "Windows Authentication") 
         {
-            if ($authProvider.DisableKerberos -eq $true) 
-            { 
+            if ($authProvider.DisableKerberos -eq $true)
+            {
                 $localAuthMode = "NTLM" 
             } 
             else 
@@ -245,8 +245,8 @@ function Set-TargetResource
                 }
 
                               
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
-                {   
+                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
+                {
                     if($params.AuthenticationMethod -eq "Claims")
                     {
                         try 
@@ -268,24 +268,24 @@ function Set-TargetResource
                     $newWebAppExtParams.Add("AuthenticationProvider", $ap)
                 }
                     
-                if ($params.ContainsKey("AllowAnonymous") -eq $true) 
+                if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
                     $newWebAppExtParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) 
                 }
-                if ($params.ContainsKey("HostHeader") -eq $true) 
-                { 
+                if ($params.ContainsKey("HostHeader") -eq $true)
+                {
                     $newWebAppExtParams.Add("HostHeader", $params.HostHeader) 
                 }
-                if ($params.ContainsKey("Path") -eq $true) 
-                { 
+                if ($params.ContainsKey("Path") -eq $true)
+                {
                     $newWebAppExtParams.Add("Path", $params.Path) 
                 }
-                if ($params.ContainsKey("Port") -eq $true) 
-                { 
+                if ($params.ContainsKey("Port") -eq $true)
+                {
                     $newWebAppExtParams.Add("Port", $params.Port) 
                 } 
-                if ($params.ContainsKey("UseSSL") -eq $true) 
-                { 
+                if ($params.ContainsKey("UseSSL") -eq $true)
+                {
                     $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL) 
                 } 
                 
@@ -300,7 +300,7 @@ function Set-TargetResource
                 }
 
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true)
-                { 
+                {
                     if($params.AuthenticationMethod -eq "Claims")
                     {
                         try 

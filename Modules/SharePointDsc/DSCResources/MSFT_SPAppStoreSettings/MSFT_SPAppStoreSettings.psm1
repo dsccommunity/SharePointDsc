@@ -140,7 +140,8 @@ function Test-TargetResource
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $currentValues.WebAppUrl) {
+    if ($null -eq $currentValues.WebAppUrl)
+    {
         Write-Verbose -Message "Specified web application does not exist."
         return $false
     }

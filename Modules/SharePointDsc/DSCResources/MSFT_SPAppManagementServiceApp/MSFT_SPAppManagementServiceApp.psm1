@@ -48,7 +48,8 @@ function Get-TargetResource
             Ensure = "Absent"
             InstallAccount = $params.InstallAccount
         } 
-        if ($null -eq $serviceApps) { 
+        if ($null -eq $serviceApps)
+        {
             return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
@@ -56,7 +57,7 @@ function Get-TargetResource
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return  $nullReturn
         } 
         else 
@@ -68,7 +69,7 @@ function Get-TargetResource
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -127,7 +128,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         # The service app doesn't exist but should
         
         Write-Verbose -Message "Creating App management Service Application $Name"
@@ -141,11 +142,11 @@ function Set-TargetResource
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
 

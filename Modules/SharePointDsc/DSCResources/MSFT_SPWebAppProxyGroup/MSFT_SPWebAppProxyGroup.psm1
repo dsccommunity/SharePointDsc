@@ -111,8 +111,8 @@ function Test-TargetResource
     
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup)) 
-    { 
+    if (($null -eq $CurrentValues.WebAppUrl) -or ($null -eq $CurrentValues.ServiceAppProxyGroup))
+    {
         return $false 
     }
     

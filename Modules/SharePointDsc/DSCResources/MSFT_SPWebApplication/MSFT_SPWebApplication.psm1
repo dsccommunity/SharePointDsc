@@ -71,8 +71,8 @@ function Get-TargetResource
         $params = $args[0]
         
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             return @{
                 Name = $params.Name
                 ApplicationPool = $params.ApplicationPool
@@ -91,14 +91,14 @@ function Get-TargetResource
         }
         else
         {
-            if ($authProvider.DisplayName -eq "Windows Authentication") 
+            if ($authProvider.DisplayName -eq "Windows Authentication")
             {
-                if ($authProvider.DisableKerberos -eq $true) 
-                { 
+                if ($authProvider.DisableKerberos -eq $true)
+                {
                     $localAuthMode = "NTLM" 
                 } 
                 else 
-                { 
+                {
                     $localAuthMode = "Kerberos" 
                 }
                 $authenticationProvider = "Windows Authentication"
@@ -218,7 +218,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
-            if ($null -eq $wa) 
+            if ($null -eq $wa)
             {
                 $newWebAppParams = @{
                     Name = $params.Name
@@ -228,10 +228,10 @@ function Set-TargetResource
 
                 # Get a reference to the Administration WebService
                 $admService = Get-SPDSCContentService
-                $appPools = $admService.ApplicationPools | Where-Object -FilterScript { 
+                $appPools = $admService.ApplicationPools | Where-Object -FilterScript {
                     $_.Name -eq $params.ApplicationPool 
                 }
-                if ($null -eq $appPools) 
+                if ($null -eq $appPools)
                 {
                     # Application pool does not exist, create a new one.
                     # Test if the specified managed account exists. If so, add 
@@ -243,7 +243,7 @@ function Set-TargetResource
                     }
                     catch 
                     {
-                        if ($_.Exception.Message -like "*No matching accounts were found*") 
+                        if ($_.Exception.Message -like "*No matching accounts were found*")
                         {
                             throw ("The specified managed account was not found. Please make " + `
                                    "sure the managed account exists before continuing.")
@@ -258,7 +258,7 @@ function Set-TargetResource
                     }
                 }
                 
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
+                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
                 {
                     if ($params.AuthenticationMethod -ne "Classic")
                     {
@@ -277,29 +277,29 @@ function Set-TargetResource
                     }
                 }
                 
-                if ($params.ContainsKey("AllowAnonymous") -eq $true) 
+                if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
-                    $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) 
+                    $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
                 }
-                if ($params.ContainsKey("DatabaseName") -eq $true) 
-                { 
-                    $newWebAppParams.Add("DatabaseName", $params.DatabaseName) 
+                if ($params.ContainsKey("DatabaseName") -eq $true)
+                {
+                    $newWebAppParams.Add("DatabaseName", $params.DatabaseName)
                 }
-                if ($params.ContainsKey("DatabaseServer") -eq $true) 
-                { 
-                    $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer) 
+                if ($params.ContainsKey("DatabaseServer") -eq $true)
+                {
+                    $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer)
                 }
-                if ($params.ContainsKey("HostHeader") -eq $true) 
-                { 
-                    $newWebAppParams.Add("HostHeader", $params.HostHeader) 
+                if ($params.ContainsKey("HostHeader") -eq $true)
+                {
+                    $newWebAppParams.Add("HostHeader", $params.HostHeader)
                 }
-                if ($params.ContainsKey("Path") -eq $true) 
-                { 
-                    $newWebAppParams.Add("Path", $params.Path) 
+                if ($params.ContainsKey("Path") -eq $true)
+                {
+                    $newWebAppParams.Add("Path", $params.Path)
                 }
-                if ($params.ContainsKey("Port") -eq $true) 
-                { 
-                    $newWebAppParams.Add("Port", $params.Port) 
+                if ($params.ContainsKey("Port") -eq $true)
+                {
+                    $newWebAppParams.Add("Port", $params.Port)
                 } 
                 if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
                 {
@@ -311,7 +311,7 @@ function Set-TargetResource
         }
     }
     
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -319,7 +319,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
-            if ($null -ne $wa) 
+            if ($null -ne $wa)
             {
                 $wa | Remove-SPWebApplication -Confirm:$false -DeleteIISSite
             }

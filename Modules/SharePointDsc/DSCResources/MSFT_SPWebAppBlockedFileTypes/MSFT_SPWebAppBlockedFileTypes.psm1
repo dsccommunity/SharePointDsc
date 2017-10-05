@@ -34,7 +34,10 @@ function Get-TargetResource
         $ScriptRoot = $args[1]
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) { return $null }
+        if ($null -eq $wa)
+        {
+            return $null
+        }
 
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)

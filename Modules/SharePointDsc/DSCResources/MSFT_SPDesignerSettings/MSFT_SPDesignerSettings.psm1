@@ -233,25 +233,25 @@ function Set-TargetResource
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript { 
                     ($_.Url).StartsWith($params.Url) 
                 }
-                if ($null -eq $webapp) 
+                if ($null -eq $webapp)
                 {
                     throw ("Web application not found. SharePoint Designer settings " + `
                            "will not be applied")
                     return
                 } 
-                else 
+                else
                 {
                     # Set the SharePoint Designer settings
                     if ($params.ContainsKey("AllowSharePointDesigner")) 
-                    { 
+                    {
                         $webapp.AllowDesigner = $params.AllowSharePointDesigner 
                     }
                     if ($params.ContainsKey("AllowDetachPagesFromDefinition")) 
-                    { 
+                    {
                         $webapp.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition 
                     }
                     if ($params.ContainsKey("AllowCustomiseMasterPage")) 
-                    { 
+                    {
                         $webapp.AllowMasterPageEditing = $params.AllowCustomiseMasterPage 
                     }
                     if ($params.ContainsKey("AllowManageSiteURLStructure")) 
@@ -259,17 +259,17 @@ function Set-TargetResource
                         $webapp.ShowURLStructure = $params.AllowManageSiteURLStructure 
                     }
                     if ($params.ContainsKey("AllowCreateDeclarativeWorkflow")) 
-                    { 
+                    {
                         $webapp.AllowCreateDeclarativeWorkflow = `
                             $params.AllowCreateDeclarativeWorkflow 
                     }
                     if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow")) 
-                    { 
+                    {
                         $webapp.AllowSavePublishDeclarativeWorkflow = `
                             $params.AllowSavePublishDeclarativeWorkflow 
                     }
                     if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate")) 
-                    { 
+                    {
                         $webapp.AllowSaveDeclarativeWorkflowAsTemplate = `
                             $params.AllowSaveDeclarativeWorkflowAsTemplate 
                     }
@@ -310,15 +310,15 @@ function Set-TargetResource
                     {
                         # Set the SharePoint Designer settings
                         if ($params.ContainsKey("AllowSharePointDesigner")) 
-                        { 
+                        {
                             $site.AllowDesigner = $params.AllowSharePointDesigner 
                         }
                         if ($params.ContainsKey("AllowDetachPagesFromDefinition")) 
-                        { 
+                        {
                             $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition 
                         }
                         if ($params.ContainsKey("AllowCustomiseMasterPage")) 
-                        { 
+                        {
                             $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage 
                         }
                         if ($params.ContainsKey("AllowManageSiteURLStructure")) 
@@ -326,17 +326,17 @@ function Set-TargetResource
                             $site.ShowURLStructure = $params.AllowManageSiteURLStructure 
                         }
                         if ($params.ContainsKey("AllowCreateDeclarativeWorkflow")) 
-                        { 
+                        {
                             $site.AllowCreateDeclarativeWorkflow = `
                                 $params.AllowCreateDeclarativeWorkflow 
                         }
                         if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow")) 
-                        { 
+                        {
                             $site.AllowSavePublishDeclarativeWorkflow = `
                                 $params.AllowSavePublishDeclarativeWorkflow 
                         }
                         if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate")) 
-                        { 
+                        {
                             $site.AllowSaveDeclarativeWorkflowAsTemplate = `
                             $params.AllowSaveDeclarativeWorkflowAsTemplate 
                         }

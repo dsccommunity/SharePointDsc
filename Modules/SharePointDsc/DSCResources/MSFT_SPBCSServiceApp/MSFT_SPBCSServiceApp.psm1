@@ -47,7 +47,7 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript { 
@@ -55,7 +55,7 @@ function Get-TargetResource
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn
         } 
         else 

@@ -111,12 +111,12 @@ function Set-TargetResource
             WebApplication = $params.WebApplication 
             Zone = $params.Zone
         }
-        if ($params.ContainsKey("Port") -eq $true) 
-        { 
+        if ($params.ContainsKey("Port") -eq $true)
+        {
             $newParams.Add("Port", $params.Port) 
         }
-        if ($params.ContainsKey("SSL") -eq $true) 
-        { 
+        if ($params.ContainsKey("SSL") -eq $true)
+        {
             $newParams.Add("SecureSocketsLayer", $params.SSL)
         }
 
@@ -160,8 +160,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 

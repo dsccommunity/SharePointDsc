@@ -108,12 +108,12 @@ function Set-TargetResource
              $apps = Get-SPServiceApplication -Name $params.Name `
                                               -ErrorAction SilentlyContinue
              if($null -ne $apps)
-             { 
+             {
                 $app = $apps | Where-Object -FilterScript { 
                         $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
                 }
                 if($null -ne $app)
-                {        
+                {
                     $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool   
                     if($null -ne $appPool)
                     {
@@ -148,7 +148,7 @@ function Set-TargetResource
             }
         
             if($null -ne $app)
-            {        
+            {
                 Remove-SPServiceApplication -Identity $app -Confirm:$false
             }
         }

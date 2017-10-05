@@ -99,8 +99,8 @@ function Get-TargetResource
         $ScriptRoot = $args[1]
                 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             return $null 
         }
 
@@ -215,7 +215,7 @@ function Set-TargetResource
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
             throw "Web application $($params.Url) was not found"
             return
@@ -325,8 +325,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 
