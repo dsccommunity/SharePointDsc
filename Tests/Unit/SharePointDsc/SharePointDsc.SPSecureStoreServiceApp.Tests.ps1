@@ -143,7 +143,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         }
                                                                     })
                                                                 } -PassThru
-                                                )
+                                                ),
+                                                (New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "AuditEnabled" `
+                                                            -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                                param($x)
+                                                                return $params.AuditEnabled
+                                                            } -PassThru
+                                            )
                                             )
                                         } -PassThru
                 } -PassThru -Force
@@ -208,6 +220,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         }
                                                                     })
                                                                 } -PassThru
+                                                ),
+                                                (New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "AuditEnabled" `
+                                                            -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                                param($x)
+                                                                return $params.AuditEnabled
+                                                            } -PassThru
                                                 )
                                             )
                                         } -PassThru
@@ -344,6 +368,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         }
                                                                     })
                                                                 } -PassThru
+                                                ),
+                                                (New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "AuditEnabled" `
+                                                            -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                                param($x)
+                                                                return $params.AuditEnabled
+                                                            } -PassThru
                                                 )
                                             )
                                         } -PassThru
@@ -415,6 +451,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         }
                                                                     })
                                                                 } -PassThru
+                                                ),
+                                                (New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "AuditEnabled" `
+                                                            -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                                param($x)
+                                                                return $params.AuditEnabled
+                                                            } -PassThru
                                                 )
                                             )
                                         } -PassThru
@@ -489,6 +537,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                         }
                                                                     })
                                                                 } -PassThru
+                                                ),
+                                                (New-Object -TypeName "Object" |
+                                                Add-Member -MemberType NoteProperty `
+                                                            -Name Name `
+                                                            -Value "AuditEnabled" `
+                                                            -PassThru |
+                                                Add-Member -MemberType ScriptMethod `
+                                                            -Name GetValue `
+                                                            -Value {
+                                                                param($x)
+                                                                return $params.AuditEnabled
+                                                            } -PassThru
                                                 )
                                             )
                                         } -PassThru

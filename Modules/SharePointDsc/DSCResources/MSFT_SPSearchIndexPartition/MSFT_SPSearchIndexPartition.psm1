@@ -36,16 +36,26 @@ function Get-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName      
         $currentTopology = $ssa.ActiveTopology
         
-        $IndexComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
+        $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
                                 Where-Object -FilterScript { 
                                     ($_.GetType().Name -eq "IndexComponent") `
                                     -and ($_.IndexPartitionOrdinal -eq $params.Index) 
-                                }).ServerName
+                                }
+        
+        $IndexComponents = $searchComponent.ServerName
+        $rootDirectory = $searchComponent.RootDirectory
+
+        if ($rootDirectory -eq "")
+        {
+            $ssi = Get-SPEnterpriseSearchServiceInstance
+            $component = $ssi.Components | Select-Object -First 1
+            $rootDirectory = $component.IndexLocation
+        }
 
         return @{
             Index = $params.Index
             Servers = $IndexComponents
-            RootDirectory = $params.RootDirectory
+            RootDirectory = $rootDirectory
             ServiceAppName = $params.ServiceAppName
             InstallAccount = $params.InstallAccount
         }

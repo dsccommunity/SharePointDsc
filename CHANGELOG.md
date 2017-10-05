@@ -29,6 +29,8 @@
   * SPUserProfileServiceApp
   * SPSecureStoreServiceApp
   * SPWordAutomationServiceApp
+* Updated SPSearchIndexPartition to return the RootFolder parameter (496)
+* Updated SPSecureStoreServiceApp to return the AuditEnabled parameter (324)
 
 The following changes will break 1.x configurations that use these resources:
 
@@ -42,6 +44,8 @@ The following changes will break 1.x configurations that use these resources:
   with the SPTimerJob cmdlets. (644)
 * Fixed an issue in SPUserProfileProperty where string properties were not
   created properly (550)
+* Added the Internal parameter to the SPAlternateUrl resource, which implied a
+  change to the key parameters (423)
 
 ## 1.9
 

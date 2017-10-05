@@ -114,16 +114,23 @@ function Get-TargetResource
             }
 
             $db = $dbProp.GetValue($serviceApp)
+
+            $auditProp = $propData | Where-Object -FilterScript {
+                $_.Name -eq "AuditEnabled"
+            }
             
+            $auditEnabled = $auditProp.GetValue($serviceApp)
+
             return  @{
-                Name = $serviceApp.DisplayName
-                ProxyName       = $proxyName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $db.Name
-                DatabaseServer = $db.NormalizedDataSource
+                Name                   = $serviceApp.DisplayName
+                ProxyName              = $proxyName
+                AuditEnabled           = $auditEnabled
+                ApplicationPool        = $serviceApp.ApplicationPool.Name
+                DatabaseName           = $db.Name
+                DatabaseServer         = $db.NormalizedDataSource
                 FailoverDatabaseServer = $db.FailoverServer
-                InstallAccount = $params.InstallAccount
-                Ensure = "Present"
+                InstallAccount         = $params.InstallAccount
+                Ensure                 = "Present"
             }
         }
     }
