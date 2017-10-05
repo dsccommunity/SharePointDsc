@@ -328,7 +328,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return the FirstIndexPartition location" {
-                (Get-TargetResource @testParams).FirstIndexPartition | Should Be "D:\Index"
+                (Get-TargetResource @testParams).FirstPartitionDirectory | Should Be "D:\Index"
             }
         }
 
