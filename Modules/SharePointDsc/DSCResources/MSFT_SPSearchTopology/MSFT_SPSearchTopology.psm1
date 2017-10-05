@@ -57,7 +57,7 @@ function Get-TargetResource
         }    
         $currentTopology = $ssa.ActiveTopology
 
-        $allServers = Get-SPServer | ForEach-Object -Process { 
+        $allServers = Get-SPServer | ForEach-Object -Process {
                         return New-Object -TypeName System.Object | `
                                 Add-Member -MemberType NoteProperty `
                                            -Name Name `
@@ -72,7 +72,7 @@ function Get-TargetResource
         $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology
 
         $AdminComponents = @()
-        $AdminComponents += ($allComponents | Where-Object -FilterScript { 
+        $AdminComponents += ($allComponents | Where-Object -FilterScript {
                                 ($_.GetType().Name -eq "AdminComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -83,7 +83,7 @@ function Get-TargetResource
                             }
 
         $CrawlComponents = @()
-        $CrawlComponents += ($allComponents | Where-Object -FilterScript { 
+        $CrawlComponents += ($allComponents | Where-Object -FilterScript {
                                 ($_.GetType().Name -eq "CrawlComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -94,7 +94,7 @@ function Get-TargetResource
                             }
 
         $ContentProcessingComponents = @()
-        $ContentProcessingComponents += ($allComponents | Where-Object -FilterScript { 
+        $ContentProcessingComponents += ($allComponents | Where-Object -FilterScript {
                                             ($_.GetType().Name -eq "ContentProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -105,7 +105,7 @@ function Get-TargetResource
                                         }
 
         $AnalyticsProcessingComponents = @()
-        $AnalyticsProcessingComponents += ($allComponents | Where-Object -FilterScript { 
+        $AnalyticsProcessingComponents += ($allComponents | Where-Object -FilterScript {
                                             ($_.GetType().Name -eq "AnalyticsProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -116,7 +116,7 @@ function Get-TargetResource
                                         }
 
         $QueryProcessingComponents = @()
-        $QueryProcessingComponents += ($allComponents | Where-Object -FilterScript { 
+        $QueryProcessingComponents += ($allComponents | Where-Object -FilterScript {
                                             ($_.GetType().Name -eq "QueryProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -127,7 +127,7 @@ function Get-TargetResource
                                         }
 
         $IndexComponents = @()
-        $IndexComponents += ($allComponents | Where-Object -FilterScript { 
+        $IndexComponents += ($allComponents | Where-Object -FilterScript {
                                 ($_.GetType().Name -eq "IndexComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -209,22 +209,22 @@ function Set-TargetResource
         $ConfirmPreference = 'None'
 
         $AllSearchServers = @()
-        $AllSearchServers += ($params.Admin | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.Admin | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.Crawler | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.Crawler | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.ContentProcessing | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.ContentProcessing | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.AnalyticsProcessing | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.AnalyticsProcessing | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.QueryProcessing | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.QueryProcessing | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.IndexPartition | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.IndexPartition | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
 
@@ -317,7 +317,7 @@ function Set-TargetResource
           "ContentProcessing", 
           "AnalyticsProcessing", 
           "QueryProcessing", 
-          "IndexPartition")  | ForEach-Object -Process { 
+          "IndexPartition")  | ForEach-Object -Process {
               
             $CurrentSearchProperty = $_
             Write-Verbose "Setting components for '$CurrentSearchProperty' property"
@@ -328,11 +328,11 @@ function Set-TargetResource
             } 
             else 
             {
-                $ComponentsToAdd = $params.$CurrentSearchProperty | Where-Object -FilterScript { 
+                $ComponentsToAdd = $params.$CurrentSearchProperty | Where-Object -FilterScript {
                     $CurrentValues.$CurrentSearchProperty -contains $_ -eq $false 
                 }
 
-                $ComponentsToRemove = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript { 
+                $ComponentsToRemove = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
                     $params.$CurrentSearchProperty -contains $_ -eq $false 
                 }
             }

@@ -50,7 +50,7 @@ function Get-TargetResource
         }
         $path = Get-SPManagedPath @getParams -ErrorAction SilentlyContinue
         if ($null -eq $path) 
-        { 
+        {
             return @{
                 WebAppUrl      = $params.WebAppUrl
                 RelativeUrl    = $params.RelativeUrl
@@ -109,7 +109,7 @@ function Set-TargetResource
     $CurrentResults = Get-TargetResource @PSBoundParameters
 
     if ($CurrentResults.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating the managed path $RelativeUrl in $WebAppUrl"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `

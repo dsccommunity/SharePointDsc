@@ -14,7 +14,7 @@
 
         node localhost {
             SPOutgoingEmailSettings FarmWideEmailSettings
-            {  
+            {
                 WebAppUrl             = "http://site.contoso.com"
                 SMTPServer            = "smtp.contoso.com"
                 FromAddress           = "sharepoint`@contoso.com"

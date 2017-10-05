@@ -147,7 +147,7 @@ function Get-TargetResource
         {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq $serviceAppObjectType    
         }
 

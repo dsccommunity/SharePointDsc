@@ -322,7 +322,7 @@ function Set-TargetResource
 
     switch ($setup.ExitCode) 
     {
-        0 {  
+        0 {
             Write-Verbose -Message "SharePoint Language Pack binary installation complete"
         }
         17022 {

@@ -65,10 +65,10 @@ function Get-TargetResource
         } 
 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
         }
 
@@ -78,7 +78,7 @@ function Get-TargetResource
         }
         else
         {
-            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
+            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
@@ -172,7 +172,7 @@ function Set-TargetResource
             $newParams = @{}
             $newParams.Add("Name", $params.Name)
             if ($params.ContainsKey("DatabaseName")) 
-            { 
+            {
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             if ($params.ContainsKey("DatabaseCredentials")) 
@@ -181,11 +181,11 @@ function Set-TargetResource
                 $params.Add("DatabasePassword", $params.DatabaseCredentials.Password)
             }
             if ($params.ContainsKey("DatabaseServer")) 
-            { 
+            {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
             if ($params.ContainsKey("FailoverDatabaseServer")) 
-            { 
+            {
                 $newParams.Add("FailoverDatabaseServer", $params.FailoverDatabaseServer) 
             }
 
@@ -201,7 +201,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript { 
+            $spUsageApplicationProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplicationProxy"
             }
             
@@ -213,19 +213,19 @@ function Set-TargetResource
             $setParams = @{}
             $setParams.Add("LoggingEnabled", $true)
             if ($params.ContainsKey("UsageLogCutTime")) 
-            { 
+            {
                 $setParams.Add("UsageLogCutTime", $params.UsageLogCutTime) 
             }
             if ($params.ContainsKey("UsageLogLocation")) 
-            { 
+            {
                 $setParams.Add("UsageLogLocation", $params.UsageLogLocation) 
             }
             if ($params.ContainsKey("UsageLogMaxFileSizeKB")) 
-            { 
+            {
                 $setParams.Add("UsageLogMaxFileSizeKB", $params.UsageLogMaxFileSizeKB) 
             }
             if ($params.ContainsKey("UsageLogMaxSpaceGB")) 
-            { 
+            {
                 $setParams.Add("UsageLogMaxSpaceGB", $params.UsageLogMaxSpaceGB) 
             }
             Set-SPUsageService @setParams
@@ -241,7 +241,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPUsageApplication"
                     }
             Remove-SPServiceApplication $service -Confirm:$false

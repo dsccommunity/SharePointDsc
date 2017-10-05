@@ -15,7 +15,7 @@
 
         node localhost {
             SPPublishServiceApplication UnpublishSecureStoreServiceApp
-            {  
+            {
                 Name           = "Secure Store Service Application"
                 Ensure         = "Absent"
                 InstallAccount = $SetupAccount

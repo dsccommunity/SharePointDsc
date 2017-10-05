@@ -41,7 +41,7 @@ function Get-TargetResource
             }
         }    
         else 
-        {    
+        {
             $ensure = "Present"
             
             return @{

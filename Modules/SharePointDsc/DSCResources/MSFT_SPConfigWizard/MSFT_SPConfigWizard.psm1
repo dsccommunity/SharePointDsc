@@ -192,7 +192,7 @@ function Set-TargetResource
     # Error codes: https://aka.ms/installerrorcodes
     switch ($result)
     {
-        0 {  
+        0 {
             Write-Verbose -Message "SharePoint Post Setup Configuration Wizard ran successfully"
         }
         Default {

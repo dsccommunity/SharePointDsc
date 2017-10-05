@@ -379,7 +379,7 @@ function Set-TargetResource
         }
         
         if($osearchSvc.Status -eq "Running") 
-        { 
+        {
             $osearchStopped = $true
             Set-Service -Name $searchServiceName -StartupType Disabled
             $osearchSvc.Stop() 
@@ -428,7 +428,7 @@ function Set-TargetResource
         # Error codes: https://aka.ms/installerrorcodes
         switch ($setup.ExitCode) {
             0
-            {  
+            {
                 Write-Verbose -Message "SharePoint update binary installation complete."
             }
             17022
@@ -470,7 +470,7 @@ function Set-TargetResource
         }
 
         if($hostControllerStopped -eq $true)
-        { 
+        {
             Set-Service "SPSearchHostController" -StartupType Automatic 
             $hostControllerSvc.Start() 
         } 

@@ -25,7 +25,7 @@ Configuration Example
     Import-DscResource -ModuleName SharePointDsc
 
     node "Server1"
-    {        
+    {
         #**********************************************************
         # Install Binaries
         #
@@ -180,7 +180,7 @@ Configuration Example
         #**********************************************************
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
-        {  
+        {
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
@@ -188,7 +188,7 @@ Configuration Example
         }   
 
         SPServiceInstance SecureStoreServiceInstance
-        {  
+        {
             Name                 = "Secure Store Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
@@ -196,7 +196,7 @@ Configuration Example
         }
         
         SPServiceInstance SearchServiceInstance
-        {  
+        {
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
@@ -231,7 +231,7 @@ Configuration Example
         }
         
         SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-        {  
+        {
             Name                 = "Managed Metadata Service Application"
             PsDscRunAsCredential = $SPSetupAccount
             ApplicationPool      = $serviceAppPoolName
@@ -249,7 +249,7 @@ Configuration Example
         }
 
         SPSearchServiceApp SearchServiceApp
-        {  
+        {
             Name                  = "Search Service Application"
             DatabaseName          = "SP_Search"
             ApplicationPool       = $serviceAppPoolName
@@ -270,7 +270,7 @@ Configuration Example
     }
 
     node "Server2"
-    {        
+    {
         #**********************************************************
         # Install Binaries
         #
@@ -329,7 +329,7 @@ Configuration Example
         #**********************************************************
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
-        {  
+        {
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
@@ -337,7 +337,7 @@ Configuration Example
         }   
 
         SPServiceInstance ManagedMetadataServiceInstance
-        {  
+        {
             Name                 = "Managed Metadata Web Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
@@ -345,7 +345,7 @@ Configuration Example
         }
 
         SPServiceInstance BCSServiceInstance
-        {  
+        {
             Name                 = "Business Data Connectivity Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount

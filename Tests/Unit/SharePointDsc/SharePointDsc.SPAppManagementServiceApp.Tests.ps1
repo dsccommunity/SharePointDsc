@@ -22,7 +22,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.SharePoint.AppManagement.AppManagementServiceApplication" 
 
         # Mocks for all contexts
-        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+        Mock -CommandName Remove-SPServiceApplication -MockWith {}
 
         # Test contexts 
         Context -Name "When no service applications exist in the current farm but it should" -Fixture {

@@ -56,7 +56,7 @@ function Get-TargetResource
                 return $nullReturnValue 
             }
             $computerName = ([System.Net.Dns]::GetHostByName($env:computerName)).HostName
-            $cachePort = ($cacheHost | Where-Object -FilterScript { 
+            $cachePort = ($cacheHost | Where-Object -FilterScript {
                 $_.HostName -eq $computerName 
             }).PortNo
             $cacheHostConfig = Get-AFCacheHostConfiguration -ComputerName $computerName `
@@ -187,7 +187,7 @@ function Set-TargetResource
                         # Attempt to see if we can find the service with just the computer 
                         # name, or if we need to use the FQDN
                         $si = Get-SPServiceInstance -Server $currentServer `
-                            | Where-Object -FilterScript { 
+                            | Where-Object -FilterScript {
                                 $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
                         }
 
@@ -199,7 +199,7 @@ function Set-TargetResource
                         
                         Write-Verbose "Waiting for cache on $currentServer"
                         $serviceCheck = Get-SPServiceInstance -Server $currentServer `
-                            | Where-Object -FilterScript { 
+                            | Where-Object -FilterScript {
                                 $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                                 $_.Status -eq "Online" 
                         }
@@ -211,7 +211,7 @@ function Set-TargetResource
                                                     "$maxCount minutes)")
                             Start-Sleep -Seconds 60
                             $serviceCheck = Get-SPServiceInstance -Server $currentServer `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                                     $_.Status -eq "Online" 
                             }
@@ -219,7 +219,7 @@ function Set-TargetResource
                         }
 
                         $serviceCheck = Get-SPServiceInstance -Server $currentServer `
-                                            | Where-Object -FilterScript { 
+                                            | Where-Object -FilterScript {
                                                 $_.GetType().Name -eq "SPDistributedCacheServiceInstance" `
                                                 -and $_.Status -eq "Online" 
                                             }
@@ -246,14 +246,14 @@ function Set-TargetResource
 
                 Add-SPDistributedCacheServiceInstance
 
-                Get-SPServiceInstance | Where-Object -FilterScript { 
+                Get-SPServiceInstance | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
                 } | Stop-SPServiceInstance -Confirm:$false
 
                 $count = 0
                 $maxCount = 30
 
-                $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript { 
+                $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                     $_.Status -ne "Disabled" 
                 }
@@ -263,7 +263,7 @@ function Set-TargetResource
                                             "for distributed cache to stop on all servers " + `
                                             "(waited $count of $maxCount minutes)")
                     Start-Sleep -Seconds 60
-                    $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript { 
+                    $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                         $_.Status -ne "Disabled" 
                     }
@@ -272,14 +272,14 @@ function Set-TargetResource
 
                 Update-SPDistributedCacheSize -CacheSizeInMB $params.CacheSizeInMB
 
-                Get-SPServiceInstance | Where-Object -FilterScript { 
+                Get-SPServiceInstance | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
                 } | Start-SPServiceInstance 
 
                 $count = 0
                 $maxCount = 30
 
-                $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript { 
+                $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                     $_.Status -ne "Online" 
                 }
@@ -289,7 +289,7 @@ function Set-TargetResource
                                             "for distributed cache to start on all servers " + `
                                             "(waited $count of $maxCount minutes)")
                     Start-Sleep -Seconds 60
-                    $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript { 
+                    $serviceCheck = Get-SPServiceInstance | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" -and `
                         $_.Status -ne "Online" 
                     }
@@ -297,7 +297,7 @@ function Set-TargetResource
                 }
 
                 $farm = Get-SPFarm
-                $cacheService = $farm.Services | Where-Object -FilterScript { 
+                $cacheService = $farm.Services | Where-Object -FilterScript {
                     $_.Name -eq "AppFabricCachingService" 
                 }
 
@@ -317,7 +317,7 @@ function Set-TargetResource
         Write-Verbose -Message "Removing distributed cache to the server"
         Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
             $serviceInstance = Get-SPServiceInstance -Server $env:computername `
-                | Where-Object -FilterScript { 
+                | Where-Object -FilterScript {
                     $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
             }
             
@@ -326,7 +326,7 @@ function Set-TargetResource
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$($env:computername).$domain"
                 $serviceInstance = Get-SPServiceInstance -Server $currentServer `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().Name -eq "SPDistributedCacheServiceInstance" 
                 }
             }

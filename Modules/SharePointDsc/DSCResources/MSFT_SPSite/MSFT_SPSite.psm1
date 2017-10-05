@@ -72,13 +72,13 @@ function Get-TargetResource
                            -ErrorAction SilentlyContinue
         
         if ($null -eq $site) 
-        { 
+        {
             return $null 
         } 
         else 
         {
             if ($site.HostHeaderIsSiteName) 
-            { 
+            {
                 $HostHeaderWebApplication = $site.WebApplication.Url 
             } 
 
@@ -291,7 +291,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
     return Test-SPDscParameterState -CurrentValues $CurrentValues `

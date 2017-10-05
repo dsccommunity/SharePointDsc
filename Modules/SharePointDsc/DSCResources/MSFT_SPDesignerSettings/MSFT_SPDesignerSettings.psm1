@@ -67,7 +67,7 @@ function Get-TargetResource
                 }
 
                 # Check if web application exists
-                $webapp = Get-SPWebApplication | Where-Object -FilterScript { 
+                $webapp = Get-SPWebApplication | Where-Object -FilterScript {
                     ($_.Url).StartsWith($params.Url) 
                 }
                 if ($null -eq $webapp) 
@@ -230,7 +230,7 @@ function Set-TargetResource
                 Write-Verbose -Message "Start update SPD web application settings"
 
                 # Check if web application exists
-                $webapp = Get-SPWebApplication | Where-Object -FilterScript { 
+                $webapp = Get-SPWebApplication | Where-Object -FilterScript {
                     ($_.Url).StartsWith($params.Url) 
                 }
                 if ($null -eq $webapp)

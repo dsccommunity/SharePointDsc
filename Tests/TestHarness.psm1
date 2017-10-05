@@ -31,7 +31,7 @@ function Invoke-TestHarness
         }
     }
 
-    $testResultSettings = @{ }
+    $testResultSettings = @{}
     if ([String]::IsNullOrEmpty($TestResultsFile) -eq $false) 
     {
         $testResultSettings.Add('OutputFormat', 'NUnitXml' )
@@ -55,7 +55,7 @@ function Invoke-TestHarness
                               -ChildPath "\Tests\Unit\Stubs\SharePoint\$_\Microsoft.SharePoint.PowerShell.psm1"
         $testsToRun += @(@{
             'Path' = (Join-Path -Path $repoDir -ChildPath "\Tests\Unit")
-            'Parameters' = @{ 
+            'Parameters' = @{
                 'SharePointCmdletModule' = $stubPath
             }
         })

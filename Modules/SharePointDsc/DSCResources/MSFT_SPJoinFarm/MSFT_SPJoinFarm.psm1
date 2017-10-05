@@ -107,7 +107,7 @@ function Get-TargetResource
             }
         }
 
-        $configDb = Get-SPDatabase | Where-Object -FilterScript { 
+        $configDb = Get-SPDatabase | Where-Object -FilterScript {
             $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
         }
 

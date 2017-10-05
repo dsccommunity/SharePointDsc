@@ -50,7 +50,7 @@ function Get-TargetResource
         {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"    
         }
 
@@ -141,7 +141,7 @@ function Set-TargetResource
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"  
                     } `
                     | Set-SPBusinessDataCatalogServiceApplication -ApplicationPool $appPool
@@ -158,7 +158,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.SharePoint.BusinessData.SharedService.BdcServiceApplication"  
             }
 

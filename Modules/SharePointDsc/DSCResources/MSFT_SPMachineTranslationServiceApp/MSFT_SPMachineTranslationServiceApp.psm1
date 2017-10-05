@@ -115,7 +115,7 @@ function Set-TargetResource
             $params = $args[0]
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
             
-            $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $serviceApp = $serviceApps | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
             }
            
@@ -149,7 +149,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
-            $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $serviceApp = $serviceApps | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
             }
             $serviceApp | Remove-SPServiceApplication  

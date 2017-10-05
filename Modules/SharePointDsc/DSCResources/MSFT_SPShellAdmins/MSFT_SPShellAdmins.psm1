@@ -379,7 +379,7 @@ function Set-TargetResource
                 # Check if configured database exists, throw error if not
                 Write-Verbose -Message "Processing Database: $($database.Name)"
 
-                $currentCDB = Get-SPDatabase | Where-Object -FilterScript { 
+                $currentCDB = Get-SPDatabase | Where-Object -FilterScript {
                     $_.Name -eq $database.Name 
                 }
                 if ($null -ne $currentCDB) 
@@ -719,7 +719,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 
@@ -727,7 +727,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing Members parameter"
         if (-not $CurrentValues.Members) 
-        { 
+        {
             return $false 
         }
 
@@ -749,7 +749,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing MembersToInclude parameter"
         if (-not $CurrentValues.Members) 
-        { 
+        {
             return $false 
         }
 
@@ -801,7 +801,7 @@ function Test-TargetResource
             if ($Members) 
             {
                 if (-not $database.Members) 
-                { 
+                {
                     return $false 
                 }
 
@@ -822,7 +822,7 @@ function Test-TargetResource
             if ($MembersToInclude) 
             {
                 if (-not $database.Members)
-                { 
+                {
                     return $false 
                 }
 
@@ -872,7 +872,7 @@ function Test-TargetResource
             # Check if configured database exists, throw error if not
             Write-Verbose -Message "Processing Database: $($database.Name)"
 
-            $currentCDB = $CurrentValues.Databases | Where-Object -FilterScript { 
+            $currentCDB = $CurrentValues.Databases | Where-Object -FilterScript {
                 $_.Name -eq $database.Name 
             }
             
@@ -882,7 +882,7 @@ function Test-TargetResource
                 {
                     Write-Verbose -Message "Processing Members parameter"
                     if (-not $currentCDB.Members) 
-                    { 
+                    {
                         return $false 
                     }
 
@@ -904,7 +904,7 @@ function Test-TargetResource
                 {
                     Write-Verbose -Message "Processing MembersToInclude parameter"
                     if (-not $currentCDB.Members) 
-                    { 
+                    {
                         return $false 
                     }
 

@@ -46,15 +46,15 @@ function Get-TargetResource
         }
 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn
         } 
         else 
@@ -131,11 +131,11 @@ function Set-TargetResource
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
             $serviceApp = New-SPSubscriptionSettingsServiceApplication @newParams
@@ -154,7 +154,7 @@ function Set-TargetResource
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication" 
                     } 
                 $service.ApplicationPool = $appPool
@@ -171,7 +171,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication" 
                     }
             Remove-SPServiceApplication $service -Confirm:$false

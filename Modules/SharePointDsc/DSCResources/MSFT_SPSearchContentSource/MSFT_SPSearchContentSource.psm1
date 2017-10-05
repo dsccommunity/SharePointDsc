@@ -97,7 +97,7 @@ function Get-TargetResource
             "SharePoint" {
                 $crawlSetting = "CrawlEverything"
                 if ($source.SharePointCrawlBehavior -eq "CrawlSites") 
-                { 
+                {
                     $crawlSetting = "CrawlFirstOnly" 
                 }
                 
@@ -123,11 +123,11 @@ function Get-TargetResource
             "Web" {
                 $crawlSetting = "Custom"
                 if ($source.MaxPageEnumerationDepth -eq [System.Int32]::MaxValue) 
-                { 
+                {
                     $crawlSetting = "CrawlEverything" 
                 }
                 if ($source.MaxPageEnumerationDepth -eq 0) 
-                { 
+                {
                     $crawlSetting = "CrawlFirstOnly" 
                 }
 
@@ -153,7 +153,7 @@ function Get-TargetResource
             "File" {
                 $crawlSetting = "CrawlFirstOnly"
                 if ($source.FollowDirectories -eq $true) 
-                { 
+                {
                     $crawlSetting = "CrawlEverything" 
                 }
                 
@@ -259,46 +259,46 @@ function Set-TargetResource
     {
         "SharePoint" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for SharePoint content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources" 
             }
             if ($ContinuousCrawl -eq $true -and `
                 $PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) 
-            { 
+            {
                 throw ("You can not specify an incremental crawl schedule on a content source " + `
                        "that will use continous crawl") 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
                        "sources") 
             }
         }
         "Website" {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) 
-            { 
+            {
                 throw "Parameter ContinuousCrawl is not valid for website content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for website content sources" 
             }
         }
         "FileShare" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for file share content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for file share content sources" 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" 
             }
         }
@@ -348,13 +348,13 @@ function Set-TargetResource
             if ($null -eq $source) 
             {
                 switch ($params.ContentSourceType) {
-                    "SharePoint" { 
+                    "SharePoint" {
                         $newType = "SharePoint" 
                     }
-                    "Website" { 
+                    "Website" {
                         $newType = "Web"
                     }
-                    "FileShare" { 
+                    "FileShare" {
                         $newType = "File" 
                     }
                 }
@@ -424,10 +424,10 @@ function Set-TargetResource
             {
                 switch ($params.Priority) 
                 {
-                    "High" { 
+                    "High" {
                         $primarySetArgs.Add("CrawlPriority", "2") 
                     }
-                    "Normal" { 
+                    "Normal" {
                         $primarySetArgs.Add("CrawlPriority", "1") 
                     }
                 }
@@ -444,13 +444,13 @@ function Set-TargetResource
                 }
                 switch ($params.IncrementalSchedule.ScheduleType) 
                 {
-                    "None" { 
+                    "None" {
                         $incrementalSetArgs.Add("RemoveCrawlSchedule", $true)
                     }
-                    "Daily" { 
+                    "Daily" {
                         $incrementalSetArgs.Add("DailyCrawlSchedule", $true)
                     }
-                    "Weekly" { 
+                    "Weekly" {
                         $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
@@ -466,7 +466,7 @@ function Set-TargetResource
                             $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", $enumValue)                            
                         }
                     }
-                    "Monthly" { 
+                    "Monthly" {
                         $incrementalSetArgs.Add("MonthlyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
@@ -525,13 +525,13 @@ function Set-TargetResource
                 }
                 switch ($params.FullSchedule.ScheduleType) 
                 {
-                    "None" { 
+                    "None" {
                         $fullSetArgs.Add("RemoveCrawlSchedule", $true)
                     }
-                    "Daily" { 
+                    "Daily" {
                         $fullSetArgs.Add("DailyCrawlSchedule", $true)
                     }
-                    "Weekly" { 
+                    "Weekly" {
                         $fullSetArgs.Add("WeeklyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleDaysOfWeek"
@@ -543,7 +543,7 @@ function Set-TargetResource
                             $fullSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
                         }
                     }
-                    "Monthly" { 
+                    "Monthly" {
                         $fullSetArgs.Add("MonthlyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleDaysOfMonth"
@@ -669,46 +669,46 @@ function Test-TargetResource
     {
         "SharePoint" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for SharePoint content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources" 
             }
             if ($ContinuousCrawl -eq $true -and `
                 $PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) 
-            { 
+            {
                 throw ("You can not specify an incremental crawl schedule on a content source " + `
                        "that will use continous crawl") 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
                        "sources") 
             }
         }
         "Website" {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) 
-            { 
+            {
                 throw "Parameter ContinuousCrawl is not valid for website content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for website content sources" 
             }
         }
         "FileShare" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for file share content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for file share content sources" 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" 
             }
         }
@@ -751,12 +751,12 @@ function Test-TargetResource
     # Compare the addresses as Uri objects to handle things like trailing /'s on URLs
     $currentAddresses = @()
     foreach ($address in $CurrentValues.Addresses) 
-    { 
+    {
         $currentAddresses += New-Object -TypeName System.Uri -ArgumentList $address 
     }
     $desiredAddresses = @()
     foreach ($address in $Addresses) 
-    { 
+    {
         $desiredAddresses += New-Object -TypeName System.Uri -ArgumentList $address 
     }
     

@@ -46,7 +46,7 @@ function Get-TargetResource
             $params = $args[0]
 
             $Ensure = "Present"
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName 
             }
 
@@ -93,7 +93,7 @@ function Get-TargetResource
             $params = $args[0]
             
             $Ensure = "Absent"
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 
@@ -173,7 +173,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
 
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 
@@ -232,7 +232,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
 
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 

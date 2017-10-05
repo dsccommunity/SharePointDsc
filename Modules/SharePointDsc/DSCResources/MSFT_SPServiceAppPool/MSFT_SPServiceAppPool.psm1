@@ -32,7 +32,7 @@ function Get-TargetResource
         $sap = Get-SPServiceApplicationPool -Identity $params.Name `
                                             -ErrorAction SilentlyContinue
         if ($null -eq $sap) 
-        { 
+        {
             return @{
                 Name = $params.Name
                 ServiceAccount = $params.ProcessAccountName
@@ -93,7 +93,7 @@ function Set-TargetResource
             if ($null -ne $sap) 
             {
                 if ($sap.ProcessAccountName -ne $params.ServiceAccount) 
-                {  
+                {
                     Set-SPServiceApplicationPool -Identity $params.Name `
                                                  -Account $params.ServiceAccount
                 }
@@ -111,7 +111,7 @@ function Set-TargetResource
             $sap = Get-SPServiceApplicationPool -Identity $params.Name `
                                                 -ErrorAction SilentlyContinue
             if ($sap.ProcessAccountName -ne $params.ServiceAccount) 
-            {  
+            {
                 Set-SPServiceApplicationPool -Identity $params.Name `
                                              -Account $params.ServiceAccount
             }

@@ -49,7 +49,7 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
@@ -57,7 +57,7 @@ function Get-TargetResource
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn 
         } 
         else 
@@ -65,11 +65,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
-                if ($null -ne $serviceAppProxy) 
-                { 
+                if ($null -ne $serviceAppProxy)
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -126,7 +126,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating PerformancePoint Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -174,7 +174,7 @@ function Set-TargetResource
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.PerformancePoint.Scorecards.BIMonitoringServiceApplication"
                     } | Set-SPPerformancePointServiceApplication -ApplicationPool $appPool
             }

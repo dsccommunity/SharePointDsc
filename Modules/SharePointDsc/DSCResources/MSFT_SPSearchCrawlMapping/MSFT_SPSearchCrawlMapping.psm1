@@ -1,5 +1,5 @@
 function Get-TargetResource
-{    
+{
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param

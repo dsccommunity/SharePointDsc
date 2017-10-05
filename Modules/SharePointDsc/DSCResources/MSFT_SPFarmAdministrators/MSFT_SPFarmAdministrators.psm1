@@ -45,7 +45,7 @@ function Get-TargetResource
         $params = $args[0]
 
         $webApps = Get-SPwebapplication -IncludeCentralAdministration
-        $caWebapp = $webApps | Where-Object -FilterScript { 
+        $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication 
         }
         
@@ -110,7 +110,8 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($null -eq $CurrentValues) { 
+    if ($null -eq $CurrentValues)
+    {
         throw "Unable to locate central administration website"
     }
 
@@ -151,14 +152,14 @@ function Set-TargetResource
             }
 
             if($addUsers.count -gt 0) 
-            { 
+            {
                 Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
                 $changeUsers.Add = $addUsers
                 $runChange = $true
             }
 
             if($removeUsers.count -gt 0) 
-            { 
+            {
                 Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
                 $changeUsers.Remove = $removeUsers
                 $runChange = $true
@@ -185,7 +186,7 @@ function Set-TargetResource
         }
 
         if($addUsers.count -gt 0) 
-        { 
+        {
             Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
             $changeUsers.Add = $addUsers
             $runChange = $true
@@ -211,7 +212,7 @@ function Set-TargetResource
         }
 
         if($removeUsers.count -gt 0) 
-        { 
+        {
             Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
             $changeUsers.Remove = $removeUsers
             $runChange = $true
@@ -270,7 +271,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
     
@@ -341,7 +342,7 @@ function Merge-SPDscFarmAdminList
         $changeUsers = $args[0]
 
         $webApps = Get-SPwebapplication -IncludeCentralAdministration
-        $caWebapp = $webApps | Where-Object -FilterScript { 
+        $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication 
         }
         if ($null -eq $caWebapp) {

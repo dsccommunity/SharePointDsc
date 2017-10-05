@@ -46,7 +46,7 @@ function Get-TargetResource
         } 
 
         if ($null -eq $upsa) 
-        { 
+        {
             return $nullReturn 
         }
 
@@ -126,7 +126,7 @@ function Set-TargetResource
             throw "Service application $($params.UserProfileService) not found"
         }
         
-        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript { 
+        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true 
         }).Url
         $context = Get-SPServiceContext  $caURL 
@@ -135,7 +135,8 @@ function Set-TargetResource
                                                 -ArgumentList $context
 
         if ($null -eq $userProfileConfigManager)
-        {   #if config manager returns null when ups is available then isuee is permissions
+        {
+            #if config manager returns null when ups is available then isuee is permissions
             throw "Account running process needs admin permission on user profile service application"
         }
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
@@ -216,7 +217,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false  
     }
 

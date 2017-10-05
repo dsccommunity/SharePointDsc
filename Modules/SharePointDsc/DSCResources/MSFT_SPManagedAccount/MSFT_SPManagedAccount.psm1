@@ -44,7 +44,7 @@ function Get-TargetResource
         $ma = Get-SPManagedAccount -Identity $params.AccountName `
                                    -ErrorAction SilentlyContinue
         if ($null -eq $ma) 
-        { 
+        {
             return @{
                 AccountName    = $params.AccountName
                 Account        = $params.Account
@@ -54,7 +54,7 @@ function Get-TargetResource
         }
         $schedule = $null
         if ($null -ne $ma.ChangeSchedule) 
-        { 
+        {
             $schedule = $ma.ChangeSchedule.ToString() 
         }
         return @{
@@ -135,19 +135,19 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $updateParams = @{ 
+            $updateParams = @{
                 Identity = $params.Account.UserName 
             }
             if ($params.ContainsKey("EmailNotification")) 
-            { 
+            {
                 $updateParams.Add("EmailNotification", $params.EmailNotification) 
             }
             if ($params.ContainsKey("PreExpireDays")) 
-            { 
+            {
                 $updateParams.Add("PreExpireDays", $params.PreExpireDays) 
             }
             if ($params.ContainsKey("Schedule")) 
-            { 
+            {
                 $updateParams.Add("Schedule", $params.Schedule) 
             }
             Set-SPManagedAccount @updateParams

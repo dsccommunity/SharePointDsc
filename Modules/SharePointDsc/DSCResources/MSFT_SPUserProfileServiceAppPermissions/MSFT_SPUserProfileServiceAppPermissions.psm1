@@ -87,15 +87,15 @@ function Get-TargetResource
         }
 
         if ($createPersonalSite.Length -eq 0) 
-        { 
+        {
             $createPersonalSite += "None" 
         }
         if ($followAndEditProfile.Length -eq 0) 
-        { 
+        {
             $followAndEditProfile += "None" 
         }
         if ($useTagsAndNotes.Length -eq 0) 
-        { 
+        {
             $useTagsAndNotes += "None" 
         }
 

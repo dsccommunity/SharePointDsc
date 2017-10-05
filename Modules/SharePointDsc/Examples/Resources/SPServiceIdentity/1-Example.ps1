@@ -17,7 +17,7 @@ Configuration Example
         node localhost {
  
             SPServiceIdentity SandBoxUserAccount
-            {  
+            {
                 Name           = "Microsoft SharePoint Foundation Sandboxed Code Service"
                 ManagedAccount = "CONTOSO\SPUserCode"
                 PsDscRunAsCredential = $SetupAccount

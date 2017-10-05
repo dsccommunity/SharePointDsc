@@ -221,7 +221,7 @@ function Set-TargetResource
                         switch ($params.Enabled)
                         {
                             $true
-                            { 
+                            {
                                 $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
                             }
                             $false
@@ -317,7 +317,7 @@ function Set-TargetResource
                     switch ($params.Enabled)
                     {
                         $true
-                        { 
+                        {
                             $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
                         }
                         $false

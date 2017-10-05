@@ -497,7 +497,8 @@ function Set-TargetResource
     
     # SXSstore for feature install specified, we will manually install features from the 
     # store, rather then relying on the prereq installer to download them
-    if ($SXSpath) { 
+    if ($SXSpath)
+    {
         Write-Verbose -Message "Getting installed windows features"
         foreach ($feature in $WindowsFeatures) 
         {
@@ -510,7 +511,7 @@ function Set-TargetResource
                     $global:DSCMachineStatus = 1
                 }
                 if ($installResult.Success -ne $true) 
-                { 
+                {
                     throw "Error installing $($feature.name)"
                 }
             }
@@ -742,7 +743,7 @@ function Test-SPDscPrereqInstallStatus
                 }
             }
             "Match" 
-            { 
+            {
                 if ($null -eq ($InstalledItems | Where-Object -FilterScript {
                     $null -ne $_.DisplayName -and $_.DisplayName.Trim() -match $itemToCheck.SearchValue
                 })) 
@@ -753,7 +754,7 @@ function Test-SPDscPrereqInstallStatus
                 }
             }
             "Like" 
-            { 
+            {
                 if ($null -eq ($InstalledItems | Where-Object -FilterScript {
                     $null -ne $_.DisplayName -and $_.DisplayName.Trim() -like $itemToCheck.SearchValue
                 })) 
@@ -764,7 +765,7 @@ function Test-SPDscPrereqInstallStatus
                 }
             }
             Default 
-            { 
+            {
                 throw ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
                        "please use either 'Equals', 'Like' or 'Match'")
             }

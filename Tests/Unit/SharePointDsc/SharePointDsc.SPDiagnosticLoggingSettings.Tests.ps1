@@ -45,7 +45,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionNotifyInterval = 5
             }
 
-            Mock -CommandName Get-SPDiagnosticConfig -MockWith { 
+            Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return $null 
             }
 
@@ -80,7 +80,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionNotifyInterval = 5
             }
             
-            Mock -CommandName Get-SPDiagnosticConfig -MockWith { 
+            Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
                     CustomerExperienceImprovementProgramEnabled = $testParams.CustomerExperienceImprovementProgramEnabled
@@ -134,7 +134,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionNotifyInterval = 5
             }
             
-            Mock -CommandName Get-SPDiagnosticConfig -MockWith { 
+            Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
                     CustomerExperienceImprovementProgramEnabled = $testParams.CustomerExperienceImprovementProgramEnabled
@@ -184,7 +184,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventLogFloodProtectionNotifyInterval = 5
             }
             
-            Mock -CommandName Get-SPDiagnosticConfig -MockWith { 
+            Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
                     CustomerExperienceImprovementProgramEnabled = $testParams.CustomerExperienceImprovementProgramEnabled
@@ -243,7 +243,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 InstallAccount = $mockAccount
             }
             
-            Mock -CommandName Get-SPDiagnosticConfig -MockWith { 
+            Mock -CommandName Get-SPDiagnosticConfig -MockWith {
                 return @{
                     AppAnalyticsAutomaticUploadEnabled = $testParams.AppAnalyticsAutomaticUploadEnabled
                     CustomerExperienceImprovementProgramEnabled = $testParams.CustomerExperienceImprovementProgramEnabled

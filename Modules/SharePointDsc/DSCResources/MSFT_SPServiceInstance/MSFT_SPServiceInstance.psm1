@@ -30,17 +30,17 @@ function Get-TargetResource
         $params = $args[0]
         $newName = $args[1]
         
-        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
+        $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript {
             $_.TypeName -eq $params.Name -or `
             $_.TypeName -eq $newName -or `
             $_.GetType().Name -eq $newName
         }
         
         if ($null -eq $si) 
-        { 
+        {
             $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
             $fqdn = "$($env:COMPUTERNAME).$domain"
-            $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript { 
+            $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                 $_.TypeName -eq $newName -or `
                 $_.GetType().Name -eq $newName
@@ -48,7 +48,7 @@ function Get-TargetResource
         }
         
         if ($null -eq $si) 
-        { 
+        {
             return @{
                 Name = $params.Name
                 Ensure = "Absent"
@@ -56,11 +56,11 @@ function Get-TargetResource
             } 
         }
         if ($si.Status -eq "Online") 
-        { 
+        {
             $localEnsure = "Present" 
         } 
         else 
-        { 
+        {
             $localEnsure = "Absent" 
         }
         
@@ -108,23 +108,23 @@ function Set-TargetResource
             $params = $args[0]
             $newName = $args[1]
             
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                 $_.TypeName -eq $newName -or `
                 $_.GetType().Name -eq $newName
             }
             
             if ($null -eq $si) 
-            { 
+            {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript { 
+                $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
                     $_.TypeName -eq $newName -or `
                     $_.GetType().Name -eq $newName
                 }
             }
-            if ($null -eq $si) { 
+            if ($null -eq $si) {
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
             Start-SPServiceInstance -Identity $si 
@@ -138,17 +138,17 @@ function Set-TargetResource
             $params = $args[0]
             $newName = $args[1]
             
-            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript { 
+            $si = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object -FilterScript {
                 $_.TypeName -eq $params.Name -or `
                 $_.TypeName -eq $newName -or `
                 $_.GetType().Name -eq $newName
             }
             
             if ($null -eq $si) 
-            { 
+            {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $fqdn = "$($env:COMPUTERNAME).$domain"
-                $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript { 
+                $si = Get-SPServiceInstance -Server $fqdn | Where-Object -FilterScript {
                     $_.TypeName -eq $params.Name -or `
                     $_.TypeName -eq $newName -or `
                     $_.GetType().Name -eq $newName

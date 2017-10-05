@@ -146,13 +146,16 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw ("Specified URL found on different WebApp/Zone: WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                    throw ("Specified URL found on different WebApp/Zone: WebApp " + `
+                           "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
                 }
             } 
             else 
             {
                 # WebApp has one or more AAMs, check for URL
-                $aamForUrl = $webAppAams | Where-Object -FilterScript { $_.IncomingUrl -eq $params.Url }
+                $aamForUrl = $webAppAams | Where-Object -FilterScript {
+                                                $_.IncomingUrl -eq $params.Url
+                                           }
 
                 if ($null -eq $aamForUrl)
                 {
@@ -173,7 +176,8 @@ function Set-TargetResource
                     }
                     else
                     {
-                        throw ("Specified URL ($($params.Url)) found on different WebApp/Zone: WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                        throw ("Specified URL ($($params.Url)) found on different WebApp/Zone: " + `
+                               "WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
                     }
                  }
                  else
@@ -187,7 +191,8 @@ function Set-TargetResource
                         }
                         else
                         {
-                            throw ("Specified URL found on different WebApp/Zone: WebApp $($urlAam.PublicUrl) in zone $($urlAam.Zone)")
+                            throw ("Specified URL found on different WebApp/Zone: WebApp " + `
+                                   "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
                         }
                     }
                     else

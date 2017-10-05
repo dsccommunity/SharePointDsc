@@ -37,7 +37,7 @@ function Get-TargetResource
         
         $farm = Get-SPFarm
         if ($null -eq $farm ) 
-        { 
+        {
             return $null 
         }
         return @{
@@ -88,7 +88,7 @@ function Set-TargetResource
         $farm = Get-SPFarm -ErrorAction Continue 
 
         if ($null -eq $farm ) 
-        { 
+        {
             return $null 
         }
         

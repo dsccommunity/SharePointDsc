@@ -45,7 +45,7 @@ function Get-TargetResource
         {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"            
         }
 
@@ -126,7 +126,7 @@ function Set-TargetResource
 
             $params = $args[0]
             
-            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
             }
 

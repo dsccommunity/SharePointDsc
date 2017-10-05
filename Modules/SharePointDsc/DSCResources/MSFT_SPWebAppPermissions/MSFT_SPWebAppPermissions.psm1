@@ -75,105 +75,105 @@ function Get-TargetResource
             {
                 switch ($rightmask) 
                 {
-                    "ManageLists" { 
+                    "ManageLists" {
                         $ListPermissions += "Manage Lists" 
                     }
-                    "CancelCheckout" { 
+                    "CancelCheckout" {
                         $ListPermissions += "Override List Behaviors" 
                     }
-                    "AddListItems" { 
+                    "AddListItems" {
                         $ListPermissions += "Add Items" 
                     }
                     "EditListItems" {
                         $ListPermissions += "Edit Items" 
                     }
-                    "DeleteListItems" { 
+                    "DeleteListItems" {
                         $ListPermissions += "Delete Items" 
                     }
-                    "ViewListItems" { 
+                    "ViewListItems" {
                         $ListPermissions += "View Items" 
                     }
-                    "ApproveItems" { 
+                    "ApproveItems" {
                         $ListPermissions += "Approve Items" 
                     }
-                    "OpenItems" { 
+                    "OpenItems" {
                         $ListPermissions += "Open Items" 
                     }
-                    "ViewVersions" { 
+                    "ViewVersions" {
                         $ListPermissions += "View Versions" 
                     }
-                    "DeleteVersions" { 
+                    "DeleteVersions" {
                         $ListPermissions += "Delete Versions" 
                     }
                     "CreateAlerts" {
                          $ListPermissions += "Create Alerts" 
                         }
-                    "ViewFormPages" { 
+                    "ViewFormPages" {
                         $ListPermissions += "View Application Pages" 
                     }
 
-                    "ManagePermissions" { 
+                    "ManagePermissions" {
                         $SitePermissions += "Manage Permissions" 
                     }
-                    "ViewUsageData" { 
+                    "ViewUsageData" {
                         $SitePermissions += "View Web Analytics Data" 
                     }
-                    "ManageSubwebs" { 
+                    "ManageSubwebs" {
                         $SitePermissions += "Create Subsites" 
                     }
-                    "ManageWeb" { 
+                    "ManageWeb" {
                         $SitePermissions += "Manage Web Site" 
                     }
-                    "AddAndCustomizePages" { 
+                    "AddAndCustomizePages" {
                         $SitePermissions += "Add and Customize Pages" 
                     }
-                    "ApplyThemeAndBorder" { 
+                    "ApplyThemeAndBorder" {
                         $SitePermissions += "Apply Themes and Borders" 
                     }
-                    "ApplyStyleSheets" { 
+                    "ApplyStyleSheets" {
                         $SitePermissions += "Apply Style Sheets" 
                     }
-                    "CreateGroups" { 
+                    "CreateGroups" {
                         $SitePermissions += "Create Groups" 
                     }
-                    "BrowseDirectories" { 
+                    "BrowseDirectories" {
                         $SitePermissions += "Browse Directories"
                      }
-                    "CreateSSCSite" { 
+                    "CreateSSCSite" {
                         $SitePermissions += "Use Self-Service Site Creation" 
                     }
-                    "ViewPages" { 
+                    "ViewPages" {
                         $SitePermissions += "View Pages" 
                     }
-                    "EnumeratePermissions" { 
+                    "EnumeratePermissions" {
                         $SitePermissions += "Enumerate Permissions" 
                     }
-                    "BrowseUserInfo" { 
+                    "BrowseUserInfo" {
                         $SitePermissions += "Browse User Information" 
                     }
-                    "ManageAlerts" { 
+                    "ManageAlerts" {
                         $SitePermissions += "Manage Alerts" 
                     }
-                    "UseRemoteAPIs" { 
+                    "UseRemoteAPIs" {
                         $SitePermissions += "Use Remote Interfaces" 
                     }
-                    "UseClientIntegration" { 
+                    "UseClientIntegration" {
                         $SitePermissions += "Use Client Integration Features" 
                     }
-                    "Open" { 
+                    "Open" {
                         $SitePermissions += "Open" 
                     }
-                    "EditMyUserInfo" { 
+                    "EditMyUserInfo" {
                         $SitePermissions += "Edit Personal User Information" 
                     }
 
-                    "ManagePersonalViews" { 
+                    "ManagePersonalViews" {
                         $PersonalPermissions += "Manage Personal Views" 
                     }
-                    "AddDelPrivateWebParts" { 
+                    "AddDelPrivateWebParts" {
                         $PersonalPermissions += "Add/Remove Personal Web Parts" 
                     }
-                    "UpdatePersonalWebParts" { 
+                    "UpdatePersonalWebParts" {
                         $PersonalPermissions += "Update Personal Web Parts" 
                     }
                 }
@@ -278,40 +278,40 @@ function Set-TargetResource
             {
                 switch ($lp) 
                 {
-                    "Manage Lists" { 
+                    "Manage Lists" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageLists
                     }
-                    "Override List Behaviors" { 
+                    "Override List Behaviors" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CancelCheckout
                     }
-                    "Add Items" { 
+                    "Add Items" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddListItems
                     }
-                    "Edit Items" { 
+                    "Edit Items" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::EditListItems
                     }
-                    "Delete Items" { 
+                    "Delete Items" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::DeleteListItems
                     }
-                    "View Items" { 
+                    "View Items" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewListItems
                     }
-                    "Approve Items" { 
+                    "Approve Items" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ApproveItems
                     }
-                    "Open Items" { 
+                    "Open Items" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::OpenItems
                     }
-                    "View Versions" { 
+                    "View Versions" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewVersions
                     }
-                    "Delete Versions" { 
+                    "Delete Versions" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::DeleteVersions
                     }
-                    "Create Alerts" { 
+                    "Create Alerts" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CreateAlerts
                     }
-                    "View Application Pages" { 
+                    "View Application Pages" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewFormPages
                     }
                 }
@@ -321,58 +321,58 @@ function Set-TargetResource
             {
                 switch ($sp) 
                 {
-                    "Manage Permissions" { 
+                    "Manage Permissions" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManagePermissions
                     }
-                    "View Web Analytics Data" { 
+                    "View Web Analytics Data" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewUsageData
                     }
-                    "Create Subsites" { 
+                    "Create Subsites" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageSubwebs
                     }
-                    "Manage Web Site" { 
+                    "Manage Web Site" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageWeb
                     }
-                    "Add and Customize Pages" { 
+                    "Add and Customize Pages" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddAndCustomizePages
                     }
-                    "Apply Themes and Borders" { 
+                    "Apply Themes and Borders" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ApplyThemeAndBorder
                     }
-                    "Apply Style Sheets" { 
+                    "Apply Style Sheets" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ApplyStyleSheets
                     }
-                    "Create Groups" { 
+                    "Create Groups" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CreateGroups
                     }
-                    "Browse Directories" { 
+                    "Browse Directories" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::BrowseDirectories
                     }
-                    "Use Self-Service Site Creation" { 
+                    "Use Self-Service Site Creation" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::CreateSSCSite
                     }
-                    "View Pages" { 
+                    "View Pages" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ViewPages
                     }
-                    "Enumerate Permissions" { 
+                    "Enumerate Permissions" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::EnumeratePermissions
                     }
-                    "Browse User Information" { 
+                    "Browse User Information" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::BrowseUserInfo
                     }
-                    "Manage Alerts" { 
+                    "Manage Alerts" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManageAlerts
                     }
-                    "Use Remote Interfaces" { 
+                    "Use Remote Interfaces" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::UseRemoteAPIs
                     }
-                    "Use Client Integration Features" { 
+                    "Use Client Integration Features" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::UseClientIntegration
                     }
-                    "Open" { 
+                    "Open" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::Open
                     }
-                    "Edit Personal User Information" { 
+                    "Edit Personal User Information" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::EditMyUserInfo
                     }
                 }
@@ -382,13 +382,13 @@ function Set-TargetResource
             {
                 switch ($pp) 
                 {
-                    "Manage Personal Views" { 
+                    "Manage Personal Views" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::ManagePersonalViews
                     }
-                    "Add/Remove Personal Web Parts" { 
+                    "Add/Remove Personal Web Parts" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::AddDelPrivateWebParts
                     }
-                    "Update Personal Web Parts" { 
+                    "Update Personal Web Parts" {
                         $newMask = $newMask -bor [Microsoft.SharePoint.SPBasePermissions]::UpdatePersonalWebParts
                     }
                 }
@@ -471,17 +471,17 @@ function Test-TargetResource
         {
             if ($null -ne (Compare-Object -ReferenceObject $ListPermissions `
                                           -DifferenceObject $CurrentValues.ListPermissions)) 
-            { 
+            {
                 return $false 
             }
             if ($null -ne (Compare-Object -ReferenceObject $SitePermissions `
                                           -DifferenceObject $CurrentValues.SitePermissions)) 
-            { 
+            {
                 return $false 
             }
             if ($null -ne (Compare-Object -ReferenceObject $PersonalPermissions `
                                           -DifferenceObject $CurrentValues.PersonalPermissions)) 
-            { 
+            {
                 return $false 
             }
             return $true

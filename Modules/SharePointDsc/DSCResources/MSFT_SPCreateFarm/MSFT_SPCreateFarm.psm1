@@ -119,11 +119,11 @@ function Get-TargetResource
             return $null
         }
 
-        $configDb = Get-SPDatabase | Where-Object -FilterScript { 
+        $configDb = Get-SPDatabase | Where-Object -FilterScript {
             $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
         }
         $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                            | Where-Object -FilterScript { 
+                            | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true 
         }
 
@@ -236,11 +236,11 @@ function Set-TargetResource
     }
 
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationPort", 9999) 
     }
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM") 
     }
     

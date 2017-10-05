@@ -50,7 +50,7 @@ function Get-TargetResource
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript { 
+            | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication 
         }
 
@@ -62,7 +62,7 @@ function Get-TargetResource
 
         # Get CA SPWeb
         $caWeb = Get-SPWeb($caWebapp.Url)
-        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { 
+        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript {
             $_.BaseTemplate -eq "HealthRules"
         }
 
@@ -163,7 +163,7 @@ function Set-TargetResource
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript { 
+            | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication 
         }
 
@@ -176,7 +176,7 @@ function Set-TargetResource
 
         # Get Central Admin SPWeb
         $caWeb = Get-SPWeb($caWebapp.Url)
-        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { 
+        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript {
             $_.BaseTemplate -eq "HealthRules"
         }
 
@@ -193,15 +193,15 @@ function Set-TargetResource
 
                 $item["HealthRuleCheckEnabled"] = $params.Enabled
                 if ($params.ContainsKey("RuleScope")) 
-                { 
+                {
                     $item["HealthRuleScope"] = $params.RuleScope 
                 }
                 if ($params.ContainsKey("Schedule")) 
-                { 
+                {
                     $item["HealthRuleSchedule"] = $params.Schedule 
                 }
                 if ($params.ContainsKey("FixAutomatically")) 
-                { 
+                {
                     $item["HealthRuleAutoRepairEnabled"] = $params.FixAutomatically 
                 }
 

@@ -17,7 +17,7 @@ Examples are:
 - Yearly at Jan 1 15:00:00
 
 NOTE: Make sure you use the typename timer job name, not the display name! Use
-"Get-SPTimerJob | Where-Object \{ $_.Title -eq "<Display Name>" \} | Select typename"
+"Get-SPTimerJob | Where-Object { $_.Title -eq "\<Display Name\>" } | Select typename"
 to find the typename for each Timer Job.
 
 NOTE2: You cannot use SPTimerJobState to change the Health Analyzer jobs, because

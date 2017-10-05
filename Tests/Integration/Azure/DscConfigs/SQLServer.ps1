@@ -38,13 +38,13 @@ Configuration SQLServer
         }
 
         xCredSSP CredSSPServer 
-        { 
+        {
             Ensure = "Present" 
             Role = "Server" 
         } 
 
         xCredSSP CredSSPClient 
-        { 
+        {
             Ensure = "Present" 
             Role = "Client" 
             DelegateComputers = "*.demo.lab"

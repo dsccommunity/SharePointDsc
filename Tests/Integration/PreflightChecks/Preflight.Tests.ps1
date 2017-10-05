@@ -37,7 +37,7 @@ Describe -Tags @("Preflight") "SharePointDsc Integration Tests - Preflight Check
 
     it "Can connect to SQL server using the setup credential" {
 
-        { 
+        {
             Invoke-Command -Credential $Global:SPDscIntegrationCredPool.Setup -ComputerName . {
                 $SqlConnection = New-Object -TypeName System.Data.SqlClient.SqlConnection
                 $SqlConnection.ConnectionString = "Server=$($Global:SPDscIntegrationGlobals.SQL.DatabaseServer);Database=master;Trusted_Connection=True;"

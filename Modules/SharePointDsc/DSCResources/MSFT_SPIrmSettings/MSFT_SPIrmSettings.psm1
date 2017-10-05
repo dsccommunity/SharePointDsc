@@ -37,7 +37,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. IRM settings " + `
                                     "will not be applied")
-            return @{ 
+            return @{
                     Ensure = "Absent" 
                     UseADRMS =  $UseADRMS
                     RMSserver = $RMSserver 
@@ -48,11 +48,11 @@ function Get-TargetResource
         $admService = Get-SPDSCContentService
         
         if ($admService.IrmSettings.IrmRMSEnabled)
-        { 
+        {
             $Ensure = "Present" 
         }
         else
-        { 
+        {
             $Ensure = "Absent"
         }
         
@@ -113,7 +113,7 @@ function Set-TargetResource
         }
         
         if ($params.UseADRMS -ne $true) 
-        { 
+        {
             $params.UseADRMS = $false 
         }
         
@@ -162,12 +162,12 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 
     if ($UseADRMS -ne $true) 
-    { 
+    {
         $PSBoundParameters.UseADRMS = $false 
     }
 

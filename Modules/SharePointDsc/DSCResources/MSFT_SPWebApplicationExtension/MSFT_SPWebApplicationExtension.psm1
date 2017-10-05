@@ -119,7 +119,7 @@ function Get-TargetResource
                 $localAuthMode = "NTLM" 
             } 
             else 
-            { 
+            {
                 $localAuthMode = "Kerberos" 
             }
         }

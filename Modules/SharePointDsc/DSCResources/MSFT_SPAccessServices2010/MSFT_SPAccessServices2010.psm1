@@ -109,7 +109,7 @@ function Set-TargetResource
                                               -ErrorAction SilentlyContinue
              if($null -ne $apps)
              {
-                $app = $apps | Where-Object -FilterScript { 
+                $app = $apps | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
                 }
                 if($null -ne $app)
@@ -143,7 +143,7 @@ function Set-TargetResource
                 return
             }
 
-            $app = $apps | Where-Object -FilterScript { 
+            $app = $apps | Where-Object -FilterScript {
                    $_.GetType().FullName -eq "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
             }
         

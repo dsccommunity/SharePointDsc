@@ -71,19 +71,19 @@ function Get-TargetResource
             return $nullReturn 
         }
         
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             Write-Verbose -Message "Service Application $($params.ServiceAppName) is not a search service application"
             return $nullReturn
         } 
         else 
         {
             $fileType = Get-SPEnterpriseSearchFileFormat `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript { 
+                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
                               $_.Identity -eq $params.FileType
                           }
 
@@ -173,12 +173,12 @@ function Set-TargetResource
             throw "Service Application $($params.ServiceAppName) is not found"
         }
         
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             throw  "Service Application $($params.ServiceAppName) is not a search service application"
         } 
     }
@@ -219,7 +219,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $fileType = Get-SPEnterpriseSearchFileFormat `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript { 
+                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
                               $_.Identity -eq $params.FileType
                           }
 

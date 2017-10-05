@@ -26,20 +26,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         New-Item -Path $Global:SPDscWebConfigPath -ItemType Directory
 
         try 
-        { 
+        {
             [Microsoft.SharePoint.Administration.SPUrlZone] 
         }
         catch 
         {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
-    public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
+    public enum SPUrlZone {Default, Intranet, Internet, Custom, Extranet };
 }        
 "@
         }
 
         # Mocks for all contexts
-        Mock -CommandName Get-SPWebApplication -MockWith { 
+        Mock -CommandName Get-SPWebApplication -MockWith {
             return @{
                 IISSettings =  @(@{
                     Path = $Global:SPDscWebConfigRealPath

@@ -127,15 +127,15 @@ function Get-TargetResource
             }
             
             if ($null -eq $spFarm) 
-            { 
+            {
                 return $null 
             }
 
-            $configDb = Get-SPDatabase | Where-Object -FilterScript { 
+            $configDb = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
             }
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true 
             }
 
@@ -149,7 +149,7 @@ function Get-TargetResource
             }
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                                     $_.IsAdministrationWebApplication -eq $true 
                                 }
 
@@ -314,11 +314,11 @@ function Set-TargetResource
 
     # Set default values to ensure they are passed to Invoke-SPDSCCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationPort", 9999) 
     }
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM") 
     }
     
@@ -407,7 +407,7 @@ function Set-TargetResource
 
         $farmAction = ""
         if ($createFarm -eq $false)
-        {            
+        {
             # The database exists, so attempt to join the farm to the server
             
 
@@ -485,7 +485,7 @@ function Set-TargetResource
         if ($params.RunCentralAdmin -eq $true)
         {
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                                     $_.IsAdministrationWebApplication -eq $true 
                                 }
 
@@ -508,7 +508,7 @@ function Set-TargetResource
                                             $_.TypeName -eq "Central Administration"
                                         }
                 if ($null -eq $serviceInstance) 
-                { 
+                {
                     $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                     $fqdn = "$($env:COMPUTERNAME).$domain"
                     $serviceInstance = Get-SPServiceInstance -Server $fqdn `
@@ -517,7 +517,7 @@ function Set-TargetResource
                                         }
                 }
                 if ($null -eq $serviceInstance) 
-                { 
+                {
                     throw [Exception] "Unable to locate Central Admin service instance on this server"
                 }
                 Start-SPServiceInstance -Identity $serviceInstance 

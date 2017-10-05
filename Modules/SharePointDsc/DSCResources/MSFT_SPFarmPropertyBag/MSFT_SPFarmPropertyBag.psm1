@@ -46,7 +46,7 @@ function Get-TargetResource()
         if ($null -ne $spFarm)
         {
             if ($spFarm.Properties)
-            {            
+            {
                 if ($spFarm.Properties.Contains($params.Key) -eq $true)
                 {
                     $localEnsure = "Present"

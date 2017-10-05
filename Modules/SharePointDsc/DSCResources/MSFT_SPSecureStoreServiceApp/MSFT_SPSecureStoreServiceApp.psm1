@@ -79,15 +79,15 @@ function Get-TargetResource
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn 
         } 
         else 
@@ -95,11 +95,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -217,7 +217,7 @@ function Set-TargetResource
     }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $params `
@@ -225,11 +225,11 @@ function Set-TargetResource
             $params = $args[0]
             
             if ($params.ContainsKey("Ensure")) 
-            { 
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
             if ($params.ContainsKey("InstallAccount")) 
-            { 
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
 
@@ -244,7 +244,7 @@ function Set-TargetResource
             }
 
             if ($params.ContainsKey("ProxyName")) 
-            { 
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
@@ -282,7 +282,7 @@ function Set-TargetResource
                                 -ScriptBlock {
                 $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
@@ -300,7 +300,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
             }
 

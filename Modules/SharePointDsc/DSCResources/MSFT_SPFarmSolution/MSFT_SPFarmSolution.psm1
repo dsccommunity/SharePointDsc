@@ -51,7 +51,7 @@ function Get-TargetResource
                                    -Verbose:$false
 
         if ($null -ne $solution) 
-        { 
+        {
             $currentState = "Present" 
             $deployed = $solution.Deployed
             $version = $Solution.Properties["Version"]
@@ -59,7 +59,7 @@ function Get-TargetResource
                                          | Select-Object -ExpandProperty Url)
         } 
         else 
-        { 
+        {
             $currentState = "Absent" 
             $deployed = $false
             $version = "0.0.0.0"
@@ -227,11 +227,11 @@ function Set-TargetResource
     }
 
     if ($Deployed -ne $CurrentValues.Deployed) 
-    { 
+    {
         Write-Verbose -Message ("The deploy state of $Name is " + `
                                 "'$($CurrentValues.Deployed)' but should be '$Deployed'.") 
         if ($CurrentValues.Deployed) 
-        { 
+        {
             # Retract Solution globally 
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
@@ -268,7 +268,7 @@ function Set-TargetResource
             }
         } 
         else 
-        { 
+        {
             # Deploy solution 
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
@@ -277,7 +277,7 @@ function Set-TargetResource
        
                 $solution = Get-SPSolution -Identity $params.Name -Verbose:$false
 
-                $runParams = @{ 
+                $runParams = @{
                     Identity = $solution
                     GACDeployment = $solution.ContainsGlobalAssembly
                     Local = $false
@@ -323,7 +323,7 @@ function Set-TargetResource
                                       -ScriptBlock {
             $params = $args[0]
         
-            $runParams = @{ 
+            $runParams = @{
                 Identity = $params.Name
                 Confirm = $false
                 Verbose = $false
@@ -438,9 +438,9 @@ function Wait-SPDSCSolutionJob
 
         }
         else
-        { 
+        {
             Write-Verbose -Message "Solution '$($params.Name)' has no job pending."
-            return @{ 
+            return @{
                 LastOperationResult = "DeploymentSucceeded"
                 LastOperationDetails = "Solution '$($params.Name)' has no job pending."
             }
@@ -448,7 +448,7 @@ function Wait-SPDSCSolutionJob
 
         Stop-SPAssignment $gc -Verbose:$false
 
-        return @{ 
+        return @{
             LastOperationResult = $solution.LastOperationResult
             LastOperationDetails = $solution.LastOperationDetails
         }

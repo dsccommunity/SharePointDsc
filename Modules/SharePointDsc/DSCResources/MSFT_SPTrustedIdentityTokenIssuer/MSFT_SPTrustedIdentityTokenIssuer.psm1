@@ -65,7 +65,7 @@
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.Name `
                                                     -ErrorAction SilentlyContinue
         if ($spTrust) 
-        { 
+        {
             $description = $spTrust.Description
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
@@ -83,7 +83,7 @@
             }
         } 
         else 
-        { 
+        {
             $description = ""
             $realm = ""
             $signInUrl = ""
@@ -287,7 +287,7 @@ function Set-TargetResource
                 }
 
                 if ($params.ProviderSignOutUri) 
-                { 
+                {
                     $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri) 
                 }
                 $trust.Update()
@@ -315,7 +315,7 @@ function Set-TargetResource
                                                               -Zone $zone `
                                                               -ErrorAction SilentlyContinue
                     if (!$providers)
-                    { 
+                    {
                         return
                     }
                     $trustedProviderToRemove = $providers | Where-Object -FilterScript {
@@ -337,7 +337,7 @@ function Set-TargetResource
                 }
             }
         
-            $runParams = @{ 
+            $runParams = @{
                 Identity = $params.Name
                 Confirm = $false
             }

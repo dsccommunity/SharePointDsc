@@ -85,7 +85,7 @@ function Get-TargetResource
         if ($null -ne $source)
         {
             $providers = $fedManager.ListProviders()
-            $provider = $providers.Values | Where-Object -FilterScript { 
+            $provider = $providers.Values | Where-Object -FilterScript {
                 $_.Id -eq $source.ProviderId 
             }
             return @{
@@ -190,7 +190,7 @@ function Set-TargetResource
             $resultSource = $fedManager.CreateSource($searchOwner)
             $resultSource.Name = $params.Name
             $providers = $fedManager.ListProviders()
-            $provider = $providers.Values | Where-Object -FilterScript { 
+            $provider = $providers.Values | Where-Object -FilterScript {
                 $_.Name -eq $params.ProviderType
             }
             $resultSource.ProviderId = $provider.Id

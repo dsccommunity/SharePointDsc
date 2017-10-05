@@ -113,10 +113,10 @@ function Get-TargetResource
             Ensure = "Absent"
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"            
         }
 
@@ -150,11 +150,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -245,7 +245,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting user profile service application $Name"
 
     if ($Ensure -eq "Present") 
-    {    
+    {
         $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
                                     -Arguments $PSBoundParameters `
                                     -ScriptBlock {
@@ -310,18 +310,18 @@ function Set-TargetResource
 
             $updateNoILMUsed = $false
             if ($params.ContainsKey("NoILMUsed")) 
-            { 
+            {
                 $updateNoILMUsed = $true
                 $NoILMUsed = $params.NoILMUsed
                 $params.Remove("NoILMUsed") | Out-Null 
             }
 
             if ($params.ContainsKey("InstallAccount")) 
-            { 
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
             if ($params.ContainsKey("Ensure")) 
-            { 
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
 
@@ -334,7 +334,7 @@ function Set-TargetResource
                                              -newName "ProfileSyncDBServer"
 
             if ($params.ContainsKey("ProxyName")) 
-            { 
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
@@ -347,7 +347,7 @@ function Set-TargetResource
                                                     -ErrorAction SilentlyContinue 
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps) 
-            { 
+            {
                 $app = New-SPProfileServiceApplication @params
                 if ($null -ne $app) 
                 {
@@ -391,7 +391,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"  
                     }
 

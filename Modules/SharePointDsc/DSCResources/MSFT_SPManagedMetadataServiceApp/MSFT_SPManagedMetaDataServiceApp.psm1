@@ -58,7 +58,7 @@ function Get-TargetResource
             TermStoreAdministrators = @()
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
@@ -74,11 +74,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -132,7 +132,7 @@ function Get-TargetResource
             }
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true 
             }
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
@@ -228,7 +228,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -236,15 +236,15 @@ function Set-TargetResource
             $params = $args[0]
             
             if ($params.ContainsKey("Ensure")) 
-            { 
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
             if ($params.ContainsKey("InstallAccount")) 
-            { 
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
             if ($params.ContainsKey("TermStoreAdministrators")) 
-            { 
+            {
                 $params.Remove("TermStoreAdministrators") | Out-Null 
             }
             if ($params.ContainsKey("ContentTypeHubUrl")) 
@@ -253,7 +253,7 @@ function Set-TargetResource
                 $params.Remove("ContentTypeHubUrl")
             }
             if ($params.ContainsKey("ProxyName")) 
-            { 
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
@@ -324,7 +324,7 @@ function Set-TargetResource
             $currentValues = $args[1]
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true 
             }
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url

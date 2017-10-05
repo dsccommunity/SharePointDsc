@@ -76,7 +76,7 @@ function Get-TargetResource
 
         $template = $admService.QuotaTemplates[$params.Name]
         if ($null -eq $template) 
-        { 
+        {
             return @{
                 Name = $params.Name
                 Ensure = "Absent"
@@ -176,24 +176,24 @@ function Set-TargetResource
                 $template = $admService.QuotaTemplates[$params.Name]
 
                 if ($null -eq $template) 
-                { 
+                {
                     #Template does not exist, create new template
                     $newTemplate = New-Object Microsoft.SharePoint.Administration.SPQuotaTemplate
                     $newTemplate.Name = $params.Name
                     if ($params.ContainsKey("StorageMaxInMB")) 
-                    { 
+                    {
                         $newTemplate.StorageMaximumLevel = ($params.StorageMaxInMB * 1MB) 
                     }
                     if ($params.ContainsKey("StorageWarningInMB")) 
-                    { 
+                    {
                         $newTemplate.StorageWarningLevel = ($params.StorageWarningInMB * 1MB) 
                     } 
                     if ($params.ContainsKey("MaximumUsagePointsSolutions")) 
-                    { 
+                    {
                         $newTemplate.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions 
                     } 
                     if ($params.ContainsKey("WarningUsagePointsSolutions")) 
-                    { 
+                    {
                         $newTemplate.UserCodeWarningLevel = $params.WarningUsagePointsSolutions 
                     } 
                     $admService.QuotaTemplates.Add($newTemplate)
@@ -203,19 +203,19 @@ function Set-TargetResource
                 {
                     #Template exists, update settings
                     if ($params.ContainsKey("StorageMaxInMB")) 
-                    { 
+                    {
                         $template.StorageMaximumLevel = ($params.StorageMaxInMB * 1MB) 
                     } 
                     if ($params.ContainsKey("StorageWarningInMB")) 
-                    { 
+                    {
                         $template.StorageWarningLevel = ($params.StorageWarningInMB * 1MB) 
                     } 
                     if ($params.ContainsKey("MaximumUsagePointsSolutions")) 
-                    { 
+                    {
                         $template.UserCodeMaximumLevel = $params.MaximumUsagePointsSolutions 
                     } 
                     if ($params.ContainsKey("WarningUsagePointsSolutions")) 
-                    { 
+                    {
                         $template.UserCodeWarningLevel = $params.WarningUsagePointsSolutions 
                     }
                     $admService.Update()
@@ -317,7 +317,7 @@ function Test-TargetResource
         "Present" {
             $CurrentValues = Get-TargetResource @PSBoundParameters
             if ($CurrentValues.Ensure -eq "Absent")
-            { 
+            {
                 return $false 
             }
             return Test-SPDscParameterState -CurrentValues $CurrentValues -DesiredValues $PSBoundParameters
@@ -335,12 +335,12 @@ function Test-TargetResource
 
             $CurrentValues = Get-TargetResource @PSBoundParameters
             if ($CurrentValues.Ensure -eq "Present") 
-            { 
+            {
                 # Error occured in Get method or template exists, which is not supposed to be. Return false
                 return $false
             } 
             else 
-            { 
+            {
                 # Template does not exists, which is supposed to be. Return true
                 return $true
             } 

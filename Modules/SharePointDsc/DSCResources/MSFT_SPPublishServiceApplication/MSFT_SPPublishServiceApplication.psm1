@@ -28,7 +28,7 @@ function Get-TargetResource
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
         
         if ($null -eq $serviceApp) 
-        { 
+        {
             Write-Verbose -Message "The service application $Name does not exist"
             $sharedEnsure = "Absent"
         }
@@ -89,7 +89,7 @@ function Set-TargetResource
         
         $serviceApp = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue    
         if ($null -eq $serviceApp) 
-        { 
+        {
             throw [Exception] ("The service application $Name does not exist")
         }
         
@@ -100,7 +100,7 @@ function Set-TargetResource
         }
 
         if ($Ensure -eq "Present") 
-        {        
+        {
             Write-Verbose -Message "Publishing Service Application $Name"
             Publish-SPServiceApplication -Identity $serviceApp            
         }

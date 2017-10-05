@@ -41,7 +41,7 @@ function Get-TargetResource
                                                     -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return @{
                 Name = $params.Name
                 Ensure = "Absent"
@@ -104,15 +104,15 @@ function Set-TargetResource
             
             $dbParams = @{}
             if ($params.ContainsKey("DatabaseName")) 
-            { 
+            {
                 $dbParams.Add("Name", $params.DatabaseName) 
             }
             if ($params.ContainsKey("DatabaseServer")) 
-            { 
+            {
                 $dbParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
             if ($params.ContainsKey("DatabaseCredentials")) 
-            { 
+            {
                 $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) 
             }
 

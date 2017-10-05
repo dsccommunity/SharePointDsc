@@ -125,7 +125,7 @@ function Get-TargetResource
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
-                                  -ScriptBlock 
+                                  -ScriptBlock {
         $params = $args[0]
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name `
@@ -197,7 +197,7 @@ function Get-TargetResource
     }
     
     return $result 
-} 
+}
 
 function Set-TargetResource 
 {

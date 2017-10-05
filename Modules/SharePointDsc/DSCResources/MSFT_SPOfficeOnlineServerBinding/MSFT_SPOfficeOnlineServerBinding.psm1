@@ -84,7 +84,7 @@ function Set-TargetResource
     $CurrentResults = Get-TargetResource @PSBoundParameters
 
     if ($Ensure -eq "Present") 
-    { 
+    {
         if ($DnsName -ne $CurrentResults.DnsName -or $Zone -ne $CurrentResults.Zone) 
         {
             if ([String]::IsNullOrEmpty($CurrentResults.DnsName) -eq $false `

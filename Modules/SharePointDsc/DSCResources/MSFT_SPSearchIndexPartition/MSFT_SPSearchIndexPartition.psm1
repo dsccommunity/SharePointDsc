@@ -37,7 +37,7 @@ function Get-TargetResource
         $currentTopology = $ssa.ActiveTopology
         
         $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
-                                Where-Object -FilterScript { 
+                                Where-Object -FilterScript {
                                     ($_.GetType().Name -eq "IndexComponent") `
                                     -and ($_.IndexPartitionOrdinal -eq $params.Index) 
                                 }
@@ -161,7 +161,7 @@ function Set-TargetResource
         }
 
         # Build up the topology changes for each object type
-        @("Servers") | ForEach-Object -Process { 
+        @("Servers") | ForEach-Object -Process {
             $CurrentSearchProperty = $_
             Write-Verbose -Message "Setting components for '$CurrentSearchProperty' property"
 
@@ -181,7 +181,7 @@ function Set-TargetResource
                 {
                     $ComponentsToAdd += $component
                 }
-                $components = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript { 
+                $components = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
                     $params.$CurrentSearchProperty.Contains($_) -eq $false 
                 }
                 foreach($component in $components) 

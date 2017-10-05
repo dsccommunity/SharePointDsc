@@ -70,7 +70,7 @@ function Get-TargetResource
             $upcm = New-Object -TypeName "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" `
                                -ArgumentList $context
 
-            $connection = $upcm.ConnectionManager | Where-Object -FilterScript { 
+            $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
                 $_.DisplayName -eq $params.Name
             }
             if ($null -eq $connection)
@@ -163,10 +163,14 @@ function Set-TargetResource
         
         Import-Module -Name (Join-Path $scriptRoot "MSFT_SPUserProfileSyncConnection.psm1")
         
-        if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
+        if ($params.ContainsKey("InstallAccount"))
+        {
+            $params.Remove("InstallAccount") | Out-Null
+        }
         $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
                 
-        if ($null -eq $ups) { 
+        if ($null -eq $ups)
+        {
             throw "User Profile Service Application $($params.UserProfileService) not found"
         }
         $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
@@ -180,7 +184,7 @@ function Set-TargetResource
             throw "Synchronization is in Progress."
         }
         
-        $connection = $upcm.ConnectionManager | Where-Object -FilterScript { 
+        $connection = $upcm.ConnectionManager | Where-Object -FilterScript {
             $_.DisplayName -eq $params.Name
         } | Select-Object -first 1
 
@@ -195,14 +199,14 @@ function Set-TargetResource
                 if ($params.ContainsKey("IncludedOUs"))
                 {
                     $namingContext.ContainersIncluded.Clear()
-                    $params.IncludedOUs| ForEach-Object -Process { 
+                    $params.IncludedOUs| ForEach-Object -Process {
                         $namingContext.ContainersIncluded.Add($_) 
                     }
                 }
                 $namingContext.ContainersExcluded.Clear()
                 if ($params.ContainsKey("ExcludedOUs"))
                 {
-                    $params.IncludedOUs| ForEach-Object -Process { 
+                    $params.IncludedOUs| ForEach-Object -Process {
                         $namingContext.ContainersExcluded.Add($_) 
                     }
                 }
@@ -234,14 +238,14 @@ function Set-TargetResource
                 $servers.add($params.Server) 
             }
             $listIncludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
-            $params.IncludedOUs | ForEach-Object -Process { 
+            $params.IncludedOUs | ForEach-Object -Process {
                 $listIncludedOUs.Add($_) 
             }
 
             $listExcludedOUs = New-Object -TypeName "System.Collections.Generic.List[[System.String]]"
             if ($params.ContainsKey("ExcludedOus"))
             {
-                $params.ExcludedOus | ForEach-Object -Process { 
+                $params.ExcludedOus | ForEach-Object -Process {
                     $listExcludedOUs.Add($_) 
                 }
             }
@@ -346,7 +350,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 

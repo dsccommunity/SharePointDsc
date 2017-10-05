@@ -62,7 +62,7 @@ function Get-TargetResource
         
         switch ($params.SecurityType) 
         {
-            "Administrators" { 
+            "Administrators" {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
              }
             "SharingPermissions" {
@@ -72,7 +72,7 @@ function Get-TargetResource
         
         $members = @()
         foreach ($securityEntry in $security.AccessRules) 
-        {    
+        {
             $user = $securityEntry.Name
             if ($user -like "i:*|*" -or $user -like "c:*|*") 
             {
@@ -152,7 +152,7 @@ function Set-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
     if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true) 
-    { 
+    {
         throw "Unable to locate service application $ServiceAppName"
     }
     
@@ -165,7 +165,7 @@ function Set-TargetResource
         $serviceApp = Get-SPServiceApplication -Name $params.ServiceAppName
         switch ($params.SecurityType) 
         {
-            "Administrators" { 
+            "Administrators" {
                 $security = $serviceApp | Get-SPServiceApplicationSecurity -Admin
              }
             "SharingPermissions" {
@@ -191,10 +191,10 @@ function Set-TargetResource
                                 
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username) 
                 {
-                    if (($CurrentValues.Members | Where-Object -FilterScript { 
+                    if (($CurrentValues.Members | Where-Object -FilterScript {
                             $_.Username -eq $desiredMember.Username 
                         } | Select-Object -First 1).AccessLevel -ne $desiredMember.AccessLevel) 
-                    {        
+                    {
                         Revoke-SPObjectSecurity -Identity $security `
                                                 -Principal $claim
 
@@ -246,7 +246,7 @@ function Set-TargetResource
                 }
                 if ($CurrentValues.Members.Username -contains $desiredMember.Username) 
                 {
-                    if (($CurrentValues.Members | Where-Object -FilterScript { 
+                    if (($CurrentValues.Members | Where-Object -FilterScript {
                             $_.Username -eq $desiredMember.Username 
                         } | Select-Object -First 1).AccessLevel -ne $desiredMember.AccessLevel) 
                     {
@@ -291,7 +291,7 @@ function Set-TargetResource
         
         switch ($params.SecurityType) 
         {
-            "Administrators" { 
+            "Administrators" {
                 $security = $serviceApp | Set-SPServiceApplicationSecurity -ObjectSecurity $security `
                                                                            -Admin
              }
@@ -339,7 +339,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ([System.String]::IsNullOrEmpty($CurrentValues.ServiceAppName) -eq $true) 
-    { 
+    {
         return $false 
     }
     
@@ -361,7 +361,7 @@ function Test-TargetResource
             Write-Verbose -Message "Security list matches - checking that permissions match on each object"
             foreach($currentMember in $CurrentValues.Members) 
             {
-                if ($currentMember.AccessLevel -ne ($Members | Where-Object -FilterScript { 
+                if ($currentMember.AccessLevel -ne ($Members | Where-Object -FilterScript {
                         $_.Username -eq $currentMember.Username 
                     } | Select-Object -First 1).AccessLevel) 
                 {
@@ -392,7 +392,7 @@ function Test-TargetResource
             else 
             {
                 Write-Verbose -Message "$($member.Username) already has access. Checking permission..."
-                if ($member.AccessLevel -ne ($CurrentValues.Members | Where-Object -FilterScript { 
+                if ($member.AccessLevel -ne ($CurrentValues.Members | Where-Object -FilterScript {
                         $_.Username -eq $member.Username 
                     } | Select-Object -First 1).AccessLevel) 
                 {

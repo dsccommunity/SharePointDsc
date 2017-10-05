@@ -36,7 +36,7 @@ function Get-TargetResource
 
     $installedItems = $installedItemsX86 + $installedItemsX64 
     $installedItems = $installedItems | Select-Object -Property DisplayName -Unique    
-    $spInstall = $installedItems | Where-Object -FilterScript { 
+    $spInstall = $installedItems | Where-Object -FilterScript {
         $_ -match "Microsoft SharePoint Server (2013|2016)" 
     }
 
@@ -191,7 +191,7 @@ function Set-TargetResource
 
     switch ($setup.ExitCode) 
     {
-        0 {  
+        0 {
             Write-Verbose -Message "SharePoint binary installation complete"
             $global:DSCMachineStatus = 1
         }

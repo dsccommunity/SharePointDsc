@@ -61,7 +61,7 @@ function Get-TargetResource
                                        -ErrorAction SilentlyContinue
 
         if ($null -eq $webApp) 
-        { 
+        {
             return $null
         }
         
