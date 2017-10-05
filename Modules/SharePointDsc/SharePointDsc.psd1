@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.8.0.0'
+ModuleVersion = '1.9.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -126,34 +126,7 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-* Fixed issue in SPServiceAppProxyGroup causing some service names to return as null
-* Added TLS and SMTP port support for SharePoint 2016
-* Fixed issue in SPWebApplication where the Get method didn't return Classic
-  web applications properly
-* Fixed issue in SPSubscriptionSettingsServiceApp not returning database values
-* Updated Readme of SPInstall to include SharePoint Foundation is not supported
-* Fixed issue with Access Denied in SPDesignerSettings
-* Fixed missing brackets in error message in SPExcelServiceApp
-* Removed the requirement for the ConfigWizard in SPInstallLanguagePack
-* Fixed Language Pack detection issue in SPInstallLanguagePack
-* Added support to set Windows service accounts for search related services to
-  SPSearchServiceApp resource
-* Fixed issue in SPCreateFarm and SPJoinFarm where an exception was not handled
-  correctly
-* Fixed issue in SPSessionStateService not returning correct database server
-  and name
-* Fixed missing Ensure property default in SPRemoteFarmTrust
-* Fixed issue in SPWebAppGeneralSettings where -1 was returned for the TimeZone
-* Fixed incorrect UsagePoint check in SPQuotaTemplate
-* Fixed issue in SPWebAppPolicy module where verbose messages are causing errors
-* Fixed incorrect parameter naming in Get method of SPUserProfilePropery
-* Fixed issue in SPBlobCacheSettings when trying to declare same URL with
-  different zone
-* Improve documentation on SPProductUpdate to specify the need to unblock downloaded
-  files
-* Added check if file is blocked in SPProductUpdate to prevent endless wait
-* Enhance SPUserProfileServiceApp to allow for NoILM to be enabled
-* Fixed issue in SPUserProfileProperty where PropertyMapping was Null
+* New resource: SPServiceIdentity
 "
 
     } # End of PSData hashtable
