@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.string] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -17,15 +17,15 @@ function Get-TargetResource
         [System.string] 
         $UserProfileService,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -85,7 +85,7 @@ function Set-TargetResource
         [System.string] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -94,15 +94,15 @@ function Set-TargetResource
         [System.string] 
         $UserProfileService,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -187,7 +187,7 @@ function Test-TargetResource
         [System.string] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -196,15 +196,15 @@ function Test-TargetResource
         [System.string] 
         $UserProfileService,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
 

@@ -8,27 +8,27 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Databases,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllDatabases,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -140,27 +140,27 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Databases,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllDatabases,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -553,7 +553,6 @@ function Set-TargetResource
                             {
                                 if ($difference.SideIndicator -eq "=>") 
                                 {
-
                                     $user = $difference.InputObject
                                     try 
                                     {
@@ -688,27 +687,27 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Databases,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllDatabases,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

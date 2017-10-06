@@ -8,28 +8,28 @@ function Get-TargetResource
         [System.String]  
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $StorageMaxInMB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $StorageWarningInMB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $MaximumUsagePointsSolutions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $WarningUsagePointsSolutions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -110,28 +110,28 @@ function Set-TargetResource
         [System.String]  
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $StorageMaxInMB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $StorageWarningInMB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $MaximumUsagePointsSolutions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $WarningUsagePointsSolutions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -273,28 +273,28 @@ function Test-TargetResource
         [System.String]  
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $StorageMaxInMB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $StorageWarningInMB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $MaximumUsagePointsSolutions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $WarningUsagePointsSolutions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

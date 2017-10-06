@@ -16,11 +16,11 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -140,11 +140,11 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -231,11 +231,14 @@ function Set-TargetResource
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
                 }
                 16 {
-                    if ($params.ContainsKey("ServerRole") -eq $true) {
+                    if ($params.ContainsKey("ServerRole") -eq $true)
+                    {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                                 "configuring server as $($params.ServerRole)")
                         $joinFarmArgs.Add("LocalServerRole", $params.ServerRole)
-                    } else {
+                    }
+                    else
+                    {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                                 "role provided, configuring server without a " + `
                                                 "specific role")
@@ -296,11 +299,11 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",

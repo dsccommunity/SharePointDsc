@@ -9,16 +9,16 @@ function Get-TargetResource
         [System.String]
         $Ensure,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -69,16 +69,16 @@ function Set-TargetResource
         [System.String]
         $Ensure,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -215,16 +215,16 @@ function Test-TargetResource
         [System.String]
         $Ensure,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

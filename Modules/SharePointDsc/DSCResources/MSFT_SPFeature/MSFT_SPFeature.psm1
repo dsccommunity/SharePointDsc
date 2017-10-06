@@ -17,16 +17,16 @@ function Get-TargetResource
         [System.String] 
         $FeatureScope,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Version
     )
@@ -91,16 +91,16 @@ function Set-TargetResource
         [System.String] 
         $FeatureScope,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Version
     )
@@ -189,16 +189,16 @@ function Test-TargetResource
         [System.String] 
         $FeatureScope,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Version
     )

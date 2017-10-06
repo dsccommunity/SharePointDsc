@@ -8,51 +8,51 @@ function Get-TargetResource
         [System.String]  
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowObjectModelOverride,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AdminThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewLookupThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $HappyHourEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance] 
         $HappyHour,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $UniquePermissionThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $RequestThrottling,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ChangeLogEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ChangeLogExpiryDays,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventHandlersEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -90,51 +90,51 @@ function Set-TargetResource
         [System.String]  
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowObjectModelOverride,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AdminThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewLookupThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $HappyHourEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance] 
         $HappyHour,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $UniquePermissionThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $RequestThrottling,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ChangeLogEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ChangeLogExpiryDays,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventHandlersEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -180,51 +180,51 @@ function Test-TargetResource
         [System.String]  
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowObjectModelOverride,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AdminThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewLookupThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $HappyHourEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance] 
         $HappyHour,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $UniquePermissionThreshold,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $RequestThrottling,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ChangeLogEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ChangeLogExpiryDays,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventHandlersEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

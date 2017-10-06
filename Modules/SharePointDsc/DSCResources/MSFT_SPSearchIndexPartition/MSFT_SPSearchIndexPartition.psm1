@@ -12,7 +12,7 @@ function Get-TargetResource
         [System.String[]]  
         $Servers,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]
         $RootDirectory,
         
@@ -20,7 +20,7 @@ function Get-TargetResource
         [System.String]
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -76,7 +76,7 @@ function Set-TargetResource
         [System.String[]]  
         $Servers,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]
         $RootDirectory,
         
@@ -84,7 +84,7 @@ function Set-TargetResource
         [System.String]
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -246,7 +246,7 @@ function Test-TargetResource
         [System.String[]]  
         $Servers,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]
         $RootDirectory,
         
@@ -254,7 +254,7 @@ function Test-TargetResource
         [System.String]
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

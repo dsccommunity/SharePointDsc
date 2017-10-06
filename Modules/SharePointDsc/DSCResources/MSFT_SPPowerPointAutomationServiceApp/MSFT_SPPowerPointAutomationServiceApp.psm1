@@ -8,40 +8,40 @@ function Get-TargetResource
         [System.String]
         $Name,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $CacheExpirationPeriodInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MaximumConversionsPerWorker,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerKeepAliveTimeoutInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerProcessCount,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerTimeoutInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -130,40 +130,40 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $CacheExpirationPeriodInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MaximumConversionsPerWorker,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerKeepAliveTimeoutInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerProcessCount,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerTimeoutInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -345,40 +345,40 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $CacheExpirationPeriodInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MaximumConversionsPerWorker,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerKeepAliveTimeoutInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerProcessCount,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $WorkerTimeoutInSeconds,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

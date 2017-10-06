@@ -21,7 +21,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
@@ -37,16 +37,16 @@ function Get-TargetResource
         [System.Boolean]
         $RunCentralAdmin,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -269,7 +269,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
@@ -285,16 +285,16 @@ function Set-TargetResource
         [System.Boolean]
         $RunCentralAdmin,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -580,7 +580,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
@@ -596,16 +596,16 @@ function Test-TargetResource
         [System.Boolean]
         $RunCentralAdmin,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",

@@ -21,41 +21,41 @@ function Get-TargetResource
         [System.String] 
         $Zone,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $UseSSL,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -171,41 +171,41 @@ function Set-TargetResource
         [System.String] 
         $Zone,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $UseSSL,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -369,41 +369,41 @@ function Test-TargetResource
         [System.String] 
         $Zone,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $UseSSL,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

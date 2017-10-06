@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String]
         $Name,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
         
@@ -16,24 +16,24 @@ function Get-TargetResource
         [System.String]
         $WebAppUrl,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -103,7 +103,7 @@ function Set-TargetResource
         [System.String]
         $Name,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
         
@@ -111,24 +111,24 @@ function Set-TargetResource
         [System.String]
         $WebAppUrl,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -351,7 +351,7 @@ function Test-TargetResource
         [System.String]
         $Name,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
         
@@ -359,24 +359,24 @@ function Test-TargetResource
         [System.String]
         $WebAppUrl,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

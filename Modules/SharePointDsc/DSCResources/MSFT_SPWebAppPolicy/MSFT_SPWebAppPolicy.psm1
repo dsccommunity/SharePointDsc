@@ -8,23 +8,23 @@ function Get-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SetCacheAccountsPolicy,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -189,23 +189,23 @@ function Set-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SetCacheAccountsPolicy,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -583,23 +583,23 @@ function Test-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SetCacheAccountsPolicy,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -751,7 +751,7 @@ function Get-SPDSCCacheAccountConfiguration()
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Object[]]  
         $InputParameters
     )

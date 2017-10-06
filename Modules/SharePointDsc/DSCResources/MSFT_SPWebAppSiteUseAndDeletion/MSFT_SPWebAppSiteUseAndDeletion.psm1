@@ -8,24 +8,24 @@ function Get-TargetResource
         [System.String] 
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SendUnusedSiteCollectionNotifications,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $UnusedSiteNotificationPeriod,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AutomaticallyDeleteUnusedSiteCollections,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -78,24 +78,24 @@ function Set-TargetResource
         [System.String] 
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SendUnusedSiteCollectionNotifications,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $UnusedSiteNotificationPeriod,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AutomaticallyDeleteUnusedSiteCollections,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -198,24 +198,24 @@ function Test-TargetResource
         [System.String] 
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SendUnusedSiteCollectionNotifications,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $UnusedSiteNotificationPeriod,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AutomaticallyDeleteUnusedSiteCollections,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

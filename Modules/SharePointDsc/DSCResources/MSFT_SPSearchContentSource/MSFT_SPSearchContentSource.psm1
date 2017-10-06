@@ -26,41 +26,41 @@ function Get-TargetResource
         [System.String] 
         $CrawlSetting,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $LimitServerHops,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Force,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -214,41 +214,41 @@ function Set-TargetResource
         [System.String] 
         $CrawlSetting,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $LimitServerHops,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Force,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -484,7 +484,8 @@ function Set-TargetResource
 
                         if ($propertyTest -eq $true) 
                         {
-                            foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear) {
+                            foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear)
+                            {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
                             $incrementalSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
@@ -510,7 +511,8 @@ function Set-TargetResource
 
                 $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
                                                             -PropertyName "CrawlScheduleRunEveryInterval"
-                if ($propertyTest -eq $true) {
+                if ($propertyTest -eq $true)
+                {
                     $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval", 
                         $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
@@ -537,7 +539,8 @@ function Set-TargetResource
                                                                     -PropertyName "CrawlScheduleDaysOfWeek"
                         if ($propertyTest -eq $true) 
                         {
-                            foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek) {
+                            foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek)
+                            {
                                 $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
                             }
                             $fullSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
@@ -557,7 +560,8 @@ function Set-TargetResource
                                                                     -PropertyName "CrawlScheduleMonthsOfYear"
                         if ($propertyTest -eq $true) 
                         {
-                            foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear) {
+                            foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear)
+                            {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
                             $fullSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
@@ -622,41 +626,41 @@ function Test-TargetResource
         [System.String] 
         $CrawlSetting,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $LimitServerHops,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Force,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

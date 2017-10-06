@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String] 
         $SiteUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -56,7 +56,7 @@ function Set-TargetResource
         [System.String] 
         $SiteUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -90,7 +90,7 @@ function Test-TargetResource
         [System.String] 
         $SiteUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

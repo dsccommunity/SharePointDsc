@@ -20,7 +20,7 @@ function Get-TargetResource
         [System.String[]] 
         $UseTagsAndNotes,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -131,7 +131,7 @@ function Set-TargetResource
         [System.String[]] 
         $UseTagsAndNotes,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -234,7 +234,8 @@ function Set-TargetResource
                     if ($user -ne "Everyone" -and $user -ne "None") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user
-                        if ($isUser -eq $true) {
+                        if ($isUser -eq $true)
+                        {
                             $claim = New-SPClaimsPrincipal -Identity $user `
                                                            -IdentityType WindowsSamAccountName    
                         } 
@@ -321,7 +322,7 @@ function Test-TargetResource
         [System.String[]] 
         $UseTagsAndNotes,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

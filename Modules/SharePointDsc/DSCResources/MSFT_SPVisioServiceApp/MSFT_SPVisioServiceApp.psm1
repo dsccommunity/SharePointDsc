@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $ProxyName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -78,16 +78,16 @@ function Set-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $ProxyName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -112,7 +112,8 @@ function Set-TargetResource
                 $params.Remove("ProxyName") | Out-Null 
             }
 
-            if ($null -eq $pName) {
+            if ($null -eq $pName)
+            {
                 $pName = "$($params.Name) Proxy"
             }
             if ($null -ne $visioApp)
@@ -182,16 +183,16 @@ function Test-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $ProxyName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

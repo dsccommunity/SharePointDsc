@@ -12,15 +12,15 @@ function Get-TargetResource
         [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Schedule,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -117,15 +117,15 @@ function Set-TargetResource
         [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Schedule,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -317,15 +317,15 @@ function Test-TargetResource
         [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Schedule,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

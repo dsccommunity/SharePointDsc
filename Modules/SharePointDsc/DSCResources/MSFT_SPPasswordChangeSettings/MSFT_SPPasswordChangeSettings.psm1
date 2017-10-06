@@ -8,22 +8,22 @@ function Get-TargetResource
         [System.String]
         $MailAddress,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -59,22 +59,22 @@ function Set-TargetResource
         [System.String]
         $MailAddress,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -119,22 +119,22 @@ function Test-TargetResource
         [System.String]
         $MailAddress,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

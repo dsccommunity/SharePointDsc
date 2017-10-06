@@ -36,7 +36,7 @@ function Get-TargetResource
         [System.String]   
         $FirstPartitionDirectory,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -206,7 +206,7 @@ function Set-TargetResource
         [System.String]   
         $FirstPartitionDirectory,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -244,7 +244,8 @@ function Set-TargetResource
                             })
 
         # Ensure the search service instance is running on all servers
-        foreach($searchServer in $AllSearchServers) {
+        foreach($searchServer in $AllSearchServers)
+        {
             
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer `
                                                                    -ErrorAction SilentlyContinue
@@ -255,7 +256,7 @@ function Set-TargetResource
                 $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer    
             }
             
-            if($searchService.Status -eq "Offline") 
+            if ($searchService.Status -eq "Offline") 
             {
                 Write-Verbose -Message "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchServer
@@ -276,7 +277,8 @@ function Set-TargetResource
         }
 
         # Create the index partition directory on each remote server
-        foreach($IndexPartitionServer in $params.IndexPartition) {
+        foreach($IndexPartitionServer in $params.IndexPartition)
+        {
             $networkPath = "\\$IndexPartitionServer\" + `
                            $params.FirstPartitionDirectory.Replace(":\", "$\")
             New-Item $networkPath -ItemType Directory -Force
@@ -290,11 +292,12 @@ function Set-TargetResource
         
         # Get all service service instances to assign topology components to
         $AllSearchServiceInstances = @{}
-        foreach ($server in $AllSearchServers) {
+        foreach ($server in $AllSearchServers)
+        {
             $serverName = $server
             $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server `
                                                                   -ErrorAction SilentlyContinue
-            if ($null -eq $serviceToAdd) 
+            if ($null -eq $serviceToAdd)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $server = "$server.$domain"
@@ -308,7 +311,8 @@ function Set-TargetResource
 
         # Get current topology and prepare a new one
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-        if ($null -eq $ssa) {
+        if ($null -eq $ssa)
+        {
             throw "Search service applications '$($params.ServiceAppName)' was not found"
             return
         }
@@ -351,7 +355,8 @@ function Set-TargetResource
                     $params.$CurrentSearchProperty -contains $_ -eq $false 
                 }
             }
-            foreach($ComponentToAdd in $ComponentsToAdd) {
+            foreach($ComponentToAdd in $ComponentsToAdd)
+            {
                 $NewComponentParams = @{
                     SearchTopology = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$ComponentToAdd
@@ -386,7 +391,8 @@ function Set-TargetResource
                     }
                 }
             }
-            foreach($ComponentToRemove in $ComponentsToRemove) {
+            foreach($ComponentToRemove in $ComponentsToRemove)
+            {
                 if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent") 
                 {
                     $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
@@ -470,7 +476,7 @@ function Test-TargetResource
         [System.String]   
         $FirstPartitionDirectory,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

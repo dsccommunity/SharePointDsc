@@ -24,28 +24,28 @@ function Get-TargetResource
         [System.String[]] 
         $IncludedOUs,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ExcludedOUs,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Server,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Force,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseSSL,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")] 
         [System.String] 
         $ConnectionType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -126,28 +126,28 @@ function Set-TargetResource
         [System.String[]] 
         $IncludedOUs,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ExcludedOUs,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Server,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Force,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseSSL,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")] 
         [System.String] 
         $ConnectionType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
    )
@@ -319,28 +319,28 @@ function Test-TargetResource
         [System.String[]] 
         $IncludedOUs,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ExcludedOUs,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Server,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Force,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseSSL,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")] 
         [System.String] 
         $ConnectionType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

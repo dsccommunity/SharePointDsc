@@ -12,7 +12,7 @@ function Get-TargetResource
         [System.String] 
         $Prefix,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -48,7 +48,7 @@ function Set-TargetResource
         [System.String] 
         $Prefix,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -79,7 +79,7 @@ function Test-TargetResource
         [System.String] 
         $Prefix,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

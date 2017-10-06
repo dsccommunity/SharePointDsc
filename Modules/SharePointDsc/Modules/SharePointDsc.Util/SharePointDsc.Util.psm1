@@ -54,7 +54,7 @@ function Get-SPDscFarmVersionInfo
 {
     param
     (
-        [parameter(Mandatory = $false)]
+        [parameter()]
         [System.String]
         $ProductToCheck
     )
@@ -218,11 +218,11 @@ function Invoke-SPDSCCommand
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $Credential,
         
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [Object[]]
         $Arguments,
         
@@ -425,7 +425,7 @@ function Test-SPDSCRunAsCredential
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $Credential
     )
@@ -445,7 +445,7 @@ function Test-SPDSCRunningAsFarmAccount
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param ( 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [pscredential] 
         $InstallAccount
     )
@@ -497,7 +497,7 @@ function Test-SPDscParameterState
         [Object]
         $DesiredValues,
 
-        [parameter(Mandatory = $false, Position=3)] 
+        [parameter(, Position=3)] 
         [Array]
         $ValuesToCheck
     )

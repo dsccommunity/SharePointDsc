@@ -16,11 +16,11 @@ function Get-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SetWebAppPolicy = $true,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -154,11 +154,11 @@ function Set-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SetWebAppPolicy = $true,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount    )
 
@@ -256,11 +256,11 @@ function Test-TargetResource
         [System.String]
         $SuperReaderAlias,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SetWebAppPolicy = $true,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount    )
 

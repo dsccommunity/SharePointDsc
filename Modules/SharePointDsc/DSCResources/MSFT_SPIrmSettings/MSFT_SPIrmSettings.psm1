@@ -9,15 +9,15 @@ function Get-TargetResource
         [ValidateSet("Present","Absent")] 
         $Ensure,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseADRMS,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $RMSserver,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -75,15 +75,15 @@ function Set-TargetResource
         [ValidateSet("Present","Absent")] 
         $Ensure,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseADRMS,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $RMSserver,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -144,15 +144,15 @@ function Test-TargetResource
         [ValidateSet("Present","Absent")] 
         $Ensure,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseADRMS,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $RMSserver,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

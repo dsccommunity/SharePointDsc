@@ -12,29 +12,29 @@ function Get-TargetResource
         [System.String]   
         $LiteralPath,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $WebApplications = @(),
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Version = "1.0.0.0",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $Deployed = $true,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("14","15","All")]
         [System.String]
         $SolutionLevel,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -92,29 +92,29 @@ function Set-TargetResource
         [System.String]   
         $LiteralPath,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $WebApplications = @(),
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Version = "1.0.0.0",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $Deployed = $true,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("14","15","All")]
         [System.String]
         $SolutionLevel,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -349,29 +349,29 @@ function Test-TargetResource
         [System.String]   
         $LiteralPath,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $WebApplications = @(),
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Version = "1.0.0.0",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $Deployed = $true,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("14","15","All")]
         [System.String]
         $SolutionLevel,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -402,7 +402,7 @@ function Wait-SPDSCSolutionJob
         [string]
         $SolutionName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

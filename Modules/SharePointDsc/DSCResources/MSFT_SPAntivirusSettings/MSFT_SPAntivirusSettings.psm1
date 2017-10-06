@@ -8,27 +8,27 @@ function Get-TargetResource
         [System.Boolean] 
         $ScanOnDownload,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScanOnUpload,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowDownloadInfected,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AttemptToClean,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $TimeoutDuration,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $NumberOfThreads,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -86,27 +86,27 @@ function Set-TargetResource
         [System.Boolean] 
         $ScanOnDownload,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScanOnUpload,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowDownloadInfected,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AttemptToClean,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $TimeoutDuration,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $NumberOfThreads,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -172,27 +172,27 @@ function Test-TargetResource
         [System.Boolean] 
         $ScanOnDownload,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScanOnUpload,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowDownloadInfected,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AttemptToClean,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $TimeoutDuration,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $NumberOfThreads,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

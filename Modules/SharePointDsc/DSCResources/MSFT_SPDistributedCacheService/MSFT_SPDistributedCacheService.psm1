@@ -20,16 +20,16 @@ function Get-TargetResource
         [System.Boolean] 
         $CreateFirewallRules,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]] 
         $ServerProvisionOrder,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -107,16 +107,16 @@ function Set-TargetResource
         [System.Boolean] 
         $CreateFirewallRules,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]] 
         $ServerProvisionOrder,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -204,7 +204,8 @@ function Set-TargetResource
                                 $_.Status -eq "Online" 
                         }
 
-                        while (($count -lt $maxCount) -and ($null -eq $serviceCheck)) {
+                        While (($count -lt $maxCount) -and ($null -eq $serviceCheck))
+                        {
                             Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - " + `
                                                     "Waiting for distributed cache to start " + `
                                                     "on $currentServer (waited $count of " + `
@@ -258,7 +259,8 @@ function Set-TargetResource
                     $_.Status -ne "Disabled" 
                 }
 
-                while (($count -lt $maxCount) -and ($null -ne $serviceCheck)) {
+                While (($count -lt $maxCount) -and ($null -ne $serviceCheck))
+                {
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
                                             "for distributed cache to stop on all servers " + `
                                             "(waited $count of $maxCount minutes)")
@@ -284,7 +286,8 @@ function Set-TargetResource
                     $_.Status -ne "Online" 
                 }
 
-                while (($count -lt $maxCount) -and ($null -ne $serviceCheck)) {
+                While (($count -lt $maxCount) -and ($null -ne $serviceCheck))
+                {
                     Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting " + `
                                             "for distributed cache to start on all servers " + `
                                             "(waited $count of $maxCount minutes)")
@@ -377,16 +380,16 @@ function Test-TargetResource
         [System.Boolean] 
         $CreateFirewallRules,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]] 
         $ServerProvisionOrder,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

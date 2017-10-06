@@ -24,15 +24,15 @@ function Get-TargetResource
         [System.String] 
         $CharacterSet,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]  
         $UseTLS,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $SMTPPort,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -109,15 +109,15 @@ function Set-TargetResource
         [System.String] 
         $CharacterSet,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]  
         $UseTLS,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $SMTPPort,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -220,15 +220,15 @@ function Test-TargetResource
         [System.String] 
         $CharacterSet,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]  
         $UseTLS,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $SMTPPort,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

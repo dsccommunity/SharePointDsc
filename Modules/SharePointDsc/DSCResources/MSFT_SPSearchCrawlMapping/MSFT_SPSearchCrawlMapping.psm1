@@ -16,12 +16,12 @@ function Get-TargetResource
         [System.String]
         $Target,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -114,12 +114,12 @@ function Set-TargetResource
         [System.String]
         $Target,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -162,7 +162,7 @@ function Set-TargetResource
             New-SPEnterpriseSearchCrawlMapping -SearchApplication $searchApp -Url $params.Url -Target $params.Target                            
         }
     }
-    if($result.Ensure -eq "Present" -and $Ensure -eq "Absent") 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Absent") 
     {
         
         Write-Verbose "Removing the Crawl Mapping '$Url'"
@@ -198,12 +198,12 @@ function Test-TargetResource
         [System.String]
         $Target,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

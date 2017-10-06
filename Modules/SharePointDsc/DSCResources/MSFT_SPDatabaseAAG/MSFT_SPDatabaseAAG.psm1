@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String] 
         $AGName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileShare,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -140,16 +140,16 @@ function Set-TargetResource
         [System.String] 
         $AGName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileShare,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -267,16 +267,16 @@ function Test-TargetResource
         [System.String] 
         $AGName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileShare,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

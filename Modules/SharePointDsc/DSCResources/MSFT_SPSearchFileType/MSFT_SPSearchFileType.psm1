@@ -12,24 +12,24 @@ function Get-TargetResource
         [System.String] 
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $MimeType,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $Enabled,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -124,24 +124,24 @@ function Set-TargetResource
         [System.String] 
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $MimeType,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $Enabled,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -288,24 +288,24 @@ function Test-TargetResource
         [System.String] 
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $MimeType,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $Enabled,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

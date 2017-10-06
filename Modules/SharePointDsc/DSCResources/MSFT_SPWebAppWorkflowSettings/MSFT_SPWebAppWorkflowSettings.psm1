@@ -8,19 +8,19 @@ function Get-TargetResource
         [System.String]  
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ExternalWorkflowParticipantsEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UserDefinedWorkflowsEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EmailToNoPermissionWorkflowParticipantsEnable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -59,19 +59,19 @@ function Set-TargetResource
         [System.String]  
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ExternalWorkflowParticipantsEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UserDefinedWorkflowsEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EmailToNoPermissionWorkflowParticipantsEnable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -106,19 +106,19 @@ function Test-TargetResource
         [System.String]  
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ExternalWorkflowParticipantsEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UserDefinedWorkflowsEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EmailToNoPermissionWorkflowParticipantsEnable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

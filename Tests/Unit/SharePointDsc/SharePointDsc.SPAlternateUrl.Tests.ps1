@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -99,6 +99,43 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "No internal alternate URL exists for the specified zone and web app, and there should be" -Fixture {
+            $testParams = @{
+                WebAppName = "SharePoint - www.domain.com80"
+                Zone = "Internet"
+                Url = "http://something.contoso.local"
+                Internal = $true
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @()
+            } -ParameterFilter { $Identity -eq $testParams.Url }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @()
+            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    Name = $testParams.WebAppName
+                }
+            }
+
+            It "Should return an empty URL in the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+            }
+
+            It "Should return false from the test method" {
+                Test-targetResource @testParams | Should Be $false
+            }
+
+            It "Should call the new function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPAlternateURL
+            }
+        }
+        
         Context -Name "The internal alternate URL exists for the specified zone and web app, and should be" -Fixture {
             $testParams = @{
                 WebAppName = "SharePoint - www.domain.com80"
@@ -327,6 +364,60 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should call the new function in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled New-SPAlternateURL
+            }
+        }
+
+        Context -Name "The URL for the specified zone and web app exists as internal url, this must be changed" -Fixture {
+            $testParams = @{
+                WebAppName = "SharePoint - www.domain.com80"
+                Zone = "Default"
+                Url = "http://www.newdomain.com"
+                Internal = $false
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @(
+                    @{
+                        PublicUrl = "http://www.domain.com"
+                        IncomingUrl = "http://www.newdomain.com"
+                        Zone = "Default"
+                    }                    
+                )
+            } -ParameterFilter { $Identity -eq $testParams.Url }
+
+            Mock -CommandName Get-SPAlternateUrl -MockWith {
+                return @(
+                    @{
+                        PublicUrl = "http://www.domain.com"
+                        IncomingUrl = "http://www.domain.com"
+                        Zone = "Default"
+                    },
+                    @{
+                        PublicUrl = "http://www.domain.com"
+                        IncomingUrl = "http://www.newdomain.com"
+                        Zone = "Default"
+                    }
+                )
+            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                return @{
+                    Name = $testParams.WebAppName
+                }
+            }
+
+            It "Should return an empty URL in the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
+
+            It "Should return false from the test method" {
+                Test-targetResource @testParams | Should Be $false
+            }
+
+            It "Should call the new function in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled Set-SPAlternateURL
             }
         }
 

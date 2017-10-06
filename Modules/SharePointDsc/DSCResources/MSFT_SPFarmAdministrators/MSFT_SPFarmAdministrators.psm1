@@ -8,19 +8,19 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -78,19 +78,19 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -118,7 +118,8 @@ function Set-TargetResource
     $changeUsers = @{}
     $runChange = $false
     
-    if ($Members) {
+    if ($Members)
+    {
         Write-Verbose "Processing Members parameter"
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
@@ -237,19 +238,19 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -345,7 +346,8 @@ function Merge-SPDscFarmAdminList
         $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication 
         }
-        if ($null -eq $caWebapp) {
+        if ($null -eq $caWebapp)
+        {
             throw "Unable to locate central administration website"
         }
         $caWeb = Get-SPweb($caWebapp.Url)

@@ -8,19 +8,19 @@ function Get-TargetResource
         [System.String]
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Blocked,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureBlocked,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureAllowed,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -60,19 +60,19 @@ function Set-TargetResource
         [System.String]
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Blocked,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureBlocked,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureAllowed,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -86,7 +86,8 @@ function Set-TargetResource
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) {
+        if ($null -eq $wa)
+        {
             throw "Web application $($params.Url) was not found"
             return
         }
@@ -109,19 +110,19 @@ function Test-TargetResource
         [System.String]
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Blocked,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureBlocked,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureAllowed,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

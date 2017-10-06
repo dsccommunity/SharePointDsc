@@ -8,86 +8,86 @@ function Get-TargetResource
         [System.String]
         $Name, 
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("docx","doc","mht","rtf","xml")]
         [System.String[]]
         $SupportedFileFormats,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $DisableEmbeddedFonts,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(10,100)]
         [System.UInt32]
         $MaximumMemoryUsage,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(1,1000)]
         [System.UInt32]
         $RecycleThreshold,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $DisableBinaryFileScan,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,1000)]
         [System.UInt32]
         $ConversionProcesses,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,59)]
         [System.UInt32]
         $JobConversionFrequency,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfConversionsPerProcess,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,60)]
         [System.UInt32]
         $TimeBeforeConversionIsMonitored,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,10)]
         [System.UInt32]
         $MaximumConversionAttempts,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(1,60)]
         [System.UInt32]
         $MaximumSyncConversionRequests,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(10,60)]
         [System.UInt32]
         $KeepAliveTimeout,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(60,3600)]
         [System.UInt32]
         $MaximumConversionTime,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential]
         $InstallAccount 
     )
@@ -208,86 +208,86 @@ function Set-TargetResource
         [System.String]
         $Name, 
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("docx","doc","mht","rtf","xml")]
         [System.String[]]
         $SupportedFileFormats,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $DisableEmbeddedFonts,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(10,100)]
         [System.UInt32]
         $MaximumMemoryUsage,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(1,1000)]
         [System.UInt32]
         $RecycleThreshold,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $DisableBinaryFileScan,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,1000)]
         [System.UInt32]
         $ConversionProcesses,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,59)]
         [System.UInt32]
         $JobConversionFrequency,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfConversionsPerProcess,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,60)]
         [System.UInt32]
         $TimeBeforeConversionIsMonitored,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,10)]
         [System.UInt32]
         $MaximumConversionAttempts,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(1,60)]
         [System.UInt32]
         $MaximumSyncConversionRequests,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(10,60)]
         [System.UInt32]
         $KeepAliveTimeout,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(60,3600)]
         [System.UInt32]
         $MaximumConversionTime,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential]
         $InstallAccount 
     )
@@ -548,86 +548,86 @@ function Test-TargetResource
         [System.String]
         $Name, 
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("docx","doc","mht","rtf","xml")]
         [System.String[]]
         $SupportedFileFormats,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $DisableEmbeddedFonts,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(10,100)]
         [System.UInt32]
         $MaximumMemoryUsage,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(1,1000)]
         [System.UInt32]
         $RecycleThreshold,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $DisableBinaryFileScan,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,1000)]
         [System.UInt32]
         $ConversionProcesses,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,59)]
         [System.UInt32]
         $JobConversionFrequency,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfConversionsPerProcess,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,60)]
         [System.UInt32]
         $TimeBeforeConversionIsMonitored,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(1,10)]
         [System.UInt32]
         $MaximumConversionAttempts,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(1,60)]
         [System.UInt32]
         $MaximumSyncConversionRequests,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(10,60)]
         [System.UInt32]
         $KeepAliveTimeout,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(60,3600)]
         [System.UInt32]
         $MaximumConversionTime,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential]
         $InstallAccount 
     )

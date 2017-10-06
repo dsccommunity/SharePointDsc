@@ -13,19 +13,19 @@ function Get-TargetResource
         [System.String] 
         $SecurityType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -118,19 +118,19 @@ function Set-TargetResource
         [System.String] 
         $SecurityType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -317,19 +317,19 @@ function Test-TargetResource
         [System.String] 
         $SecurityType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Members,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

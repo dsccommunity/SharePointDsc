@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
@@ -16,48 +16,48 @@ function Get-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $MySiteHostLocation,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $NoILMUsed = $false,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -188,7 +188,7 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
@@ -196,48 +196,48 @@ function Set-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $MySiteHostLocation,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $NoILMUsed = $false,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -419,7 +419,7 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
@@ -427,48 +427,48 @@ function Test-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $MySiteHostLocation,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $NoILMUsed = $false,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

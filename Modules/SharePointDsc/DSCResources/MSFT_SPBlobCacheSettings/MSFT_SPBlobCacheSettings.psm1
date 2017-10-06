@@ -17,23 +17,23 @@ function Get-TargetResource
         [System.Boolean] 
         $EnableCache,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Location,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $MaxSizeInGB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $MaxAgeInSeconds,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileTypes,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -160,23 +160,23 @@ function Set-TargetResource
         [System.Boolean] 
         $EnableCache,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Location,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $MaxSizeInGB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $MaxAgeInSeconds,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileTypes,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -340,23 +340,23 @@ function Test-TargetResource
         [System.Boolean] 
         $EnableCache,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Location,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $MaxSizeInGB,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $MaxAgeInSeconds,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileTypes,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

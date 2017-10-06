@@ -20,45 +20,45 @@ function Get-TargetResource
         [System.String] 
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -153,45 +153,45 @@ function Set-TargetResource
         [System.String] 
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -349,45 +349,45 @@ function Test-TargetResource
         [System.String] 
         $Url,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims","Classic")]
         [System.String] 
         $AuthenticationMethod,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

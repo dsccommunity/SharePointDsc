@@ -65,75 +65,75 @@ function Get-TargetResource
         [System.Boolean] 
         $OnlineMode,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SXSpath,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $SQLNCli,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $PowerShell,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $NETFX,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $Sync,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $AppFabric,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX11,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSIPCClient,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB2671763,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices56,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT11,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT14,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB3092423,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ODBC,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DotNetFx,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -340,75 +340,75 @@ function Set-TargetResource
         [System.Boolean] 
         $OnlineMode,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SXSpath,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $SQLNCli,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $PowerShell,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $NETFX,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $Sync,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $AppFabric,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX11,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSIPCClient,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB2671763,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices56,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT11,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT14,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB3092423,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ODBC,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DotNetFx,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -618,75 +618,75 @@ function Test-TargetResource
         [System.Boolean] 
         $OnlineMode,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SXSpath,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $SQLNCli,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $PowerShell,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $NETFX,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $Sync,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $AppFabric,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX11,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSIPCClient,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB2671763,        
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices56,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT11,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT14,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB3092423,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ODBC,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DotNetFx,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -713,7 +713,7 @@ function Test-SPDscPrereqInstallStatus
 {
     param
     (
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Object]
         $InstalledItems,
 
@@ -722,7 +722,8 @@ function Test-SPDscPrereqInstallStatus
         $PrereqsToCheck
     )
 
-    if ($null -eq $InstalledItems) {
+    if ($null -eq $InstalledItems)
+    {
         return $false
     }
 

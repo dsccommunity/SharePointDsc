@@ -12,7 +12,7 @@ function Get-TargetResource
         [System.String] 
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("DefaultRuleAccess", 
                      "BasicAccountRuleAccess", 
                      "CertificateRuleAccess", 
@@ -23,32 +23,32 @@ function Get-TargetResource
         [System.String] 
         $AuthenticationType,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("InclusionRule","ExclusionRule")] 
         [System.String] 
         $RuleType,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("FollowLinksNoPageCrawl",
                      "CrawlComplexUrls", 
                      "CrawlAsHTTP")] 
         [System.String[]] 
         $CrawlConfigurationRules,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $AuthenticationCredentials,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $CertificateName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -236,7 +236,7 @@ function Set-TargetResource
         [System.String] 
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("DefaultRuleAccess", 
                      "BasicAccountRuleAccess", 
                      "CertificateRuleAccess", 
@@ -247,32 +247,32 @@ function Set-TargetResource
         [System.String] 
         $AuthenticationType,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("InclusionRule","ExclusionRule")] 
         [System.String] 
         $RuleType,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("FollowLinksNoPageCrawl",
                      "CrawlComplexUrls", 
                      "CrawlAsHTTP")] 
         [System.String[]] 
         $CrawlConfigurationRules,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $AuthenticationCredentials,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $CertificateName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -464,7 +464,7 @@ function Test-TargetResource
         [System.String] 
         $ServiceAppName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("DefaultRuleAccess", 
                      "BasicAccountRuleAccess", 
                      "CertificateRuleAccess", 
@@ -475,32 +475,32 @@ function Test-TargetResource
         [System.String] 
         $AuthenticationType,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("InclusionRule","ExclusionRule")] 
         [System.String] 
         $RuleType,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("FollowLinksNoPageCrawl",
                      "CrawlComplexUrls", 
                      "CrawlAsHTTP")] 
         [System.String[]] 
         $CrawlConfigurationRules,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $AuthenticationCredentials,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $CertificateName,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

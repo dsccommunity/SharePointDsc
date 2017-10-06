@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String]  
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ProxyName,
 
@@ -20,45 +20,45 @@ function Get-TargetResource
         [System.Boolean] 
         $AuditingEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AuditlogMaxSize,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $FailoverDatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $PartitionMode,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Sharing,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Windows", "SQL")]   
         [System.String] 
         $DatabaseAuthenticationType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -146,7 +146,7 @@ function Set-TargetResource
         [System.String]  
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ProxyName,
 
@@ -158,45 +158,45 @@ function Set-TargetResource
         [System.Boolean] 
         $AuditingEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AuditlogMaxSize,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $FailoverDatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $PartitionMode,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Sharing,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Windows", "SQL")]   
         [System.String] 
         $DatabaseAuthenticationType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -329,7 +329,7 @@ function Test-TargetResource
         [System.String]  
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ProxyName,
 
@@ -341,45 +341,45 @@ function Test-TargetResource
         [System.Boolean] 
         $AuditingEnabled,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AuditlogMaxSize,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $FailoverDatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $PartitionMode,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Sharing,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Windows", "SQL")]   
         [System.String] 
         $DatabaseAuthenticationType,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

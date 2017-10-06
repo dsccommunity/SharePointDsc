@@ -3,7 +3,7 @@ function Get-SPDSCSearchCrawlSchedule
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         $Schedule
     )
     

@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -16,11 +16,11 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -146,7 +146,7 @@ function Set-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -154,11 +154,11 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -269,7 +269,8 @@ function Set-TargetResource
             {
                 $serviceApps = Get-SPServiceApplication -Name $params.UserProfileServiceAppName `
                                                         -ErrorAction SilentlyContinue 
-                if ($null -eq $serviceApps) {
+                if ($null -eq $serviceApps)
+                {
                     throw [Exception] ("No user profile service was found " + `
                                        "named $($params.UserProfileServiceAppName)")
                 }
@@ -332,7 +333,7 @@ function Test-TargetResource
         [System.String] 
         $UserProfileServiceAppName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] $Ensure = "Present",
 
@@ -340,11 +341,11 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $RunOnlyWhenWriteable,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -393,7 +394,7 @@ function Test-SPDscUserProfileDBReadOnly()
         [String]
         $UserProfileServiceAppName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

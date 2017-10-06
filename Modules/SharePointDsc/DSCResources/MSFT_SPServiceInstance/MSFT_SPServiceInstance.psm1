@@ -8,11 +8,11 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -82,11 +82,11 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -124,7 +124,8 @@ function Set-TargetResource
                     $_.GetType().Name -eq $newName
                 }
             }
-            if ($null -eq $si) {
+            if ($null -eq $si)
+            {
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
             Start-SPServiceInstance -Identity $si 
@@ -154,7 +155,8 @@ function Set-TargetResource
                     $_.GetType().Name -eq $newName
                 }
             }
-            if ($null -eq $si) {
+            if ($null -eq $si)
+            {
                 throw [Exception] "Unable to locate service application '$($params.Name)'"
             }
             Stop-SPServiceInstance -Identity $si
@@ -172,11 +174,11 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"

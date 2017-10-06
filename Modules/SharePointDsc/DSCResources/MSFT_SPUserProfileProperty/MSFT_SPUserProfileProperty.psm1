@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.string] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -17,11 +17,11 @@ function Get-TargetResource
         [System.string] 
         $UserProfileService,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Big Integer",
                      "Binary",
                      "Boolean",
@@ -41,81 +41,81 @@ function Get-TargetResource
         [System.string]
         $Type,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $Description,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] 
         [System.string] 
         $PolicySetting,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] 
         [System.string] 
         $PrivacySetting,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.string] 
         $MappingConnectionName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $MappingPropertyName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $MappingDirection,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32]
         $Length,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsEventLog,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsVisibleOnEditor,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsVisibleOnViewer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsUserEditable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsAlias,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsSearchable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UserOverridePrivacy,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermStore,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermGroup,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermSet,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -239,7 +239,7 @@ function Set-TargetResource
         [System.string] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -248,11 +248,11 @@ function Set-TargetResource
         [System.string] 
         $UserProfileService,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Big Integer",
                      "Binary",
                      "Boolean",
@@ -272,81 +272,81 @@ function Set-TargetResource
         [System.string]
         $Type,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $Description,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] 
         [System.string] 
         $PolicySetting,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] 
         [System.string] 
         $PrivacySetting,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.string] 
         $MappingConnectionName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $MappingPropertyName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $MappingDirection,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32]
         $Length,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsEventLog,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsVisibleOnEditor,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsVisibleOnViewer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsUserEditable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsAlias,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsSearchable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UserOverridePrivacy,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermStore,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermGroup,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermSet,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -637,7 +637,7 @@ function Test-TargetResource
         [System.string] 
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
@@ -646,11 +646,11 @@ function Test-TargetResource
         [System.string] 
         $UserProfileService,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Big Integer",
                      "Binary",
                      "Boolean",
@@ -670,81 +670,81 @@ function Test-TargetResource
         [System.string]
         $Type,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $Description,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Mandatory", "Optin","Optout", "Disabled")] 
         [System.string] 
         $PolicySetting,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Public", "Contacts", "Organization", "Manager", "Private")] 
         [System.string] 
         $PrivacySetting,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.string] 
         $MappingConnectionName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $MappingPropertyName,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $MappingDirection,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32]
         $Length,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsEventLog,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsVisibleOnEditor,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsVisibleOnViewer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsUserEditable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsAlias,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $IsSearchable,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UserOverridePrivacy,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermStore,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermGroup,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $TermSet,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
 

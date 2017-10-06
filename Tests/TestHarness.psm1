@@ -3,15 +3,15 @@ function Invoke-TestHarness
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $TestResultsFile,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DscTestsPath,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Switch]
         $IgnoreCodeCoverage
     )

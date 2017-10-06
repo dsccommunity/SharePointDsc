@@ -8,25 +8,25 @@ function Get-TargetResource
         [System.String]
         $SetupFile,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $ShutdownServices,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $BinaryInstallDays,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $BinaryInstallTime,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -208,25 +208,25 @@ function Set-TargetResource
         [System.String]
         $SetupFile,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $ShutdownServices,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $BinaryInstallDays,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $BinaryInstallTime,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -502,25 +502,25 @@ function Test-TargetResource
         [System.String]
         $SetupFile,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $ShutdownServices,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $BinaryInstallDays,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $BinaryInstallTime,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

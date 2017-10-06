@@ -8,16 +8,16 @@ function Get-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Value,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = 'Present',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -83,16 +83,16 @@ function Set-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Value,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = 'Present',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -147,16 +147,16 @@ function Test-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Value,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = 'Present',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

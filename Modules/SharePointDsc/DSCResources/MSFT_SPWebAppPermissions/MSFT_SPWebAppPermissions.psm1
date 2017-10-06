@@ -8,7 +8,7 @@ function Get-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
                      "Delete Items", "View Items", "Approve Items", "Open Items", 
                      "View Versions", "Delete Versions", "Create Alerts", 
@@ -16,7 +16,7 @@ function Get-TargetResource
         [System.String[]] 
         $ListPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
                      "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
                      "Apply Style Sheets", "Create Groups", "Browse Directories", 
@@ -26,17 +26,17 @@ function Get-TargetResource
         [System.String[]] 
         $SitePermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts", 
                      "Update Personal Web Parts")] 
         [System.String[]] 
         $PersonalPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllPermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -200,7 +200,7 @@ function Set-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
                      "Delete Items", "View Items", "Approve Items", "Open Items", 
                      "View Versions", "Delete Versions", "Create Alerts", 
@@ -208,7 +208,7 @@ function Set-TargetResource
         [System.String[]] 
         $ListPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
                      "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
                      "Apply Style Sheets", "Create Groups", "Browse Directories", 
@@ -218,17 +218,17 @@ function Set-TargetResource
         [System.String[]] 
         $SitePermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts", 
                      "Update Personal Web Parts")] 
         [System.String[]] 
         $PersonalPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllPermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -409,7 +409,7 @@ function Test-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
                      "Delete Items", "View Items", "Approve Items", "Open Items", 
                      "View Versions", "Delete Versions", "Create Alerts", 
@@ -417,7 +417,7 @@ function Test-TargetResource
         [System.String[]] 
         $ListPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
                      "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
                      "Apply Style Sheets", "Create Groups", "Browse Directories", 
@@ -427,17 +427,17 @@ function Test-TargetResource
         [System.String[]] 
         $SitePermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts", 
                      "Update Personal Web Parts")] 
         [System.String[]] 
         $PersonalPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllPermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -499,7 +499,7 @@ function Test-SPDSCInput()
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Lists", "Override List Behaviors", "Add Items", "Edit Items",
                      "Delete Items", "View Items", "Approve Items", "Open Items", 
                      "View Versions", "Delete Versions", "Create Alerts", 
@@ -507,7 +507,7 @@ function Test-SPDSCInput()
         [System.String[]] 
         $ListPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Manage Permissions", "View Web Analytics Data", "Create Subsites",
                      "Manage Web Site", "Add and Customize Pages", "Apply Themes and Borders",
                      "Apply Style Sheets", "Create Groups", "Browse Directories", 
@@ -517,17 +517,17 @@ function Test-SPDSCInput()
         [System.String[]] 
         $SitePermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Manage Personal Views", "Add/Remove Personal Web Parts", 
                      "Update Personal Web Parts")] 
         [System.String[]] 
         $PersonalPermissions,
         
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllPermissions,
         
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

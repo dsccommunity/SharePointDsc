@@ -28,28 +28,28 @@
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateThumbprint,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateFilePath,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ClaimProviderName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ProviderSignOutUri,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -140,28 +140,28 @@ function Set-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateThumbprint,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateFilePath,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ClaimProviderName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ProviderSignOutUri,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -376,28 +376,28 @@ function Test-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateThumbprint,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateFilePath,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ClaimProviderName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ProviderSignOutUri,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

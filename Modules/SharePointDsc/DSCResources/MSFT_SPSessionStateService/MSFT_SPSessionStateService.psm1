@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String] 
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $SessionTimeout,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -62,16 +62,16 @@ function Set-TargetResource
         [System.String] 
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $SessionTimeout,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -93,7 +93,8 @@ function Set-TargetResource
             $svc = Get-SPSessionStateService
             if($svc.SessionStateEnabled)
             {
-                if($svc.Timeout.TotalMinutes -ne $params.SessionTimeout){
+                if ($svc.Timeout.TotalMinutes -ne $params.SessionTimeout)
+                {
                     Write-Verbose -Message "Configuring SPSessionState timeout"
                     Set-SPSessionStateService -SessionTimeout $params.SessionTimeout
                 }
@@ -142,16 +143,16 @@ function Test-TargetResource
         [System.String] 
         $DatabaseServer,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $SessionTimeout,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

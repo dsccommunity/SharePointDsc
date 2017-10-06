@@ -8,15 +8,15 @@ function Get-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppPurchases,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppsForOffice,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -63,15 +63,15 @@ function Set-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppPurchases,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppsForOffice,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -123,15 +123,15 @@ function Test-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppPurchases,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppsForOffice,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

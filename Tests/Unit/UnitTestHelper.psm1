@@ -14,11 +14,11 @@ function New-SPDscUnitTestHelper
         [String]
         $SubModulePath,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Switch]
         $ExcludeInvokeHelper,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Switch]
         $IncludeDistributedCacheStubs
     )
