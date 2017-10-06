@@ -369,16 +369,20 @@ function Set-TargetResource
             SkipRegisterAsDistributedCacheHost = $true
         }
 
-        switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
+        switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+        {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
             16 {
-                if ($params.ContainsKey("ServerRole") -eq $true) {
+                if ($params.ContainsKey("ServerRole") -eq $true)
+                {
                     Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                             "configuring server as $($params.ServerRole)")
                     $executeArgs.Add("LocalServerRole", $params.ServerRole)
-                } else {
+                }
+                else
+                {
                     Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                             "role provided, configuring server without a " + `
                                             "specific role")

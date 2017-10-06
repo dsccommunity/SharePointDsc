@@ -426,7 +426,8 @@ function Set-TargetResource
                                -PassThru
 
         # Error codes: https://aka.ms/installerrorcodes
-        switch ($setup.ExitCode) {
+        switch ($setup.ExitCode)
+        {
             0
             {
                 Write-Verbose -Message "SharePoint update binary installation complete."

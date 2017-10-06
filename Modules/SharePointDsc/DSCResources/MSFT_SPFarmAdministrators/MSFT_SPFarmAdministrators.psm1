@@ -335,6 +335,7 @@ function Test-TargetResource
 function Merge-SPDscFarmAdminList 
 {
     param (
+        [Parameter()] 
         [Hashtable] 
         $changeUsers
     )

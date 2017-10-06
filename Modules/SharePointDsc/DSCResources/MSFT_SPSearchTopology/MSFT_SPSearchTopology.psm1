@@ -246,7 +246,6 @@ function Set-TargetResource
         # Ensure the search service instance is running on all servers
         foreach($searchServer in $AllSearchServers)
         {
-            
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer `
                                                                    -ErrorAction SilentlyContinue
             if ($null -eq $searchService) 
@@ -303,7 +302,8 @@ function Set-TargetResource
                 $server = "$server.$domain"
                 $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server    
             }
-            if ($null -eq $serviceToAdd) {
+            if ($null -eq $serviceToAdd)
+            {
                 throw "Unable to locate a search service instance on $serverName"
             }
             $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
@@ -361,7 +361,8 @@ function Set-TargetResource
                     SearchTopology = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$ComponentToAdd
                 }
-                switch($componentTypes.$CurrentSearchProperty) {
+                switch($componentTypes.$CurrentSearchProperty)
+                {
                     "AdminComponent" {
                         New-SPEnterpriseSearchAdminComponent @NewComponentParams
                     }

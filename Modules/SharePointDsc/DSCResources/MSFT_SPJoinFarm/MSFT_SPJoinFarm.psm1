@@ -218,7 +218,8 @@ function Set-TargetResource
             return
         }
         
-        try {
+        try
+        {
             $joinFarmArgs = @{
                 DatabaseServer = $params.DatabaseServer
                 DatabaseName = $params.FarmConfigDatabaseName
@@ -226,7 +227,8 @@ function Set-TargetResource
                 SkipRegisterAsDistributedCacheHost = $true
             }
             
-            switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
+            switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+            {
                 15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
                 }
@@ -258,7 +260,8 @@ function Set-TargetResource
             Install-SPFeature -AllExistingFeatures -Force  | out-null 
             Install-SPApplicationContent    
         }
-        catch [System.Exception] {
+        catch [System.Exception]
+        {
             return $_
         }
     }

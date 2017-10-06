@@ -347,7 +347,8 @@ function Set-TargetResource
 
             if ($null -eq $source) 
             {
-                switch ($params.ContentSourceType) {
+                switch ($params.ContentSourceType)
+                {
                     "SharePoint" {
                         $newType = "SharePoint" 
                     }

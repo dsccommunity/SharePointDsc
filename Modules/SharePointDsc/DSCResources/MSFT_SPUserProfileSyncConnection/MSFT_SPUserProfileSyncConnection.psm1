@@ -378,6 +378,7 @@ This method is not intensed for public use, and was created to facilitate unit t
 function Get-SPDSCADSIObject 
 {
     param(
+        [Parameter()] 
         [string] $LdapPath
     )
     return [ADSI]($LdapPath)

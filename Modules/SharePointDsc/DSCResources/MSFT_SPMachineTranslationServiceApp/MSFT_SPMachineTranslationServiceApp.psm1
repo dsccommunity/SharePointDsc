@@ -20,10 +20,12 @@ function Get-TargetResource
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -94,10 +96,12 @@ function Set-TargetResource
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -181,10 +185,12 @@ function Test-TargetResource
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
