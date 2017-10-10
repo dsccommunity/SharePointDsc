@@ -2,6 +2,7 @@
 
 ## 2.0
 
+* Added resource: SPMinRoleCompliance
 * Corrected comment in CodeCov.yml
 * Fixed localized issue in SPContentDatabase
 * Fixed issue with NullException in SPServiceAppSecurity when no accounts
