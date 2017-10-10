@@ -85,7 +85,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Absent in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
@@ -122,7 +122,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Absent in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
@@ -171,7 +171,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Present in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
@@ -209,7 +209,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Present in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
@@ -217,7 +217,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-targetResource @testParams | Should Be $false
             }
 
-            It "Should call the Remove function in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Specified URL found on different WebApp/Zone: WebApp"
             }
         }
@@ -257,7 +257,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Present in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
@@ -265,7 +265,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-targetResource @testParams | Should Be $false
             }
 
-            It "Should call the Remove function in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Specified URL"
             }
         }
@@ -353,7 +353,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Absent in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
             }
 
@@ -407,7 +407,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should return an empty URL in the get method" {
+            It "Should return Ensure=Present in the get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
@@ -415,7 +415,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Test-targetResource @testParams | Should Be $false
             }
 
-            It "Should call the new function in the set method" {
+            It "Should call the Set function in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Set-SPAlternateURL
             }
@@ -460,7 +460,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).Ensure | Should Be "Present" 
             }
 
-            It "Should return false from the test method" {
+            It "Should return true from the test method" {
                 Test-targetResource @testParams | Should Be $true
             }
         }

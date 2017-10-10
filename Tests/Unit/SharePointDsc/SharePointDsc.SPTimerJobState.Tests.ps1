@@ -48,11 +48,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                { Get-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+                { Test-TargetResource @testParams } | Should throw "No local SharePoint farm was detected"
             }
 
             It "Should throw an exception in the set method to say there is no local farm" {
@@ -73,11 +73,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                { Get-TargetResource @testParams } | Should throw "Specified web application not found!"
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+                { Test-TargetResource @testParams } | Should throw "Specified web application not found!"
             }
 
             It "Should throw an exception in the set method to say there is no local farm" {
@@ -98,11 +98,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should Be $null
+                { Get-TargetResource @testParams } | Should throw "No timer jobs found. Please check the input values"
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+                { Test-TargetResource @testParams } | Should throw "No timer jobs found. Please check the input values"
             }
 
             It "Should throw an exception in the set method to say there is no local farm" {

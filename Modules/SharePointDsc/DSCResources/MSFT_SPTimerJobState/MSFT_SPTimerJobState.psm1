@@ -44,9 +44,8 @@ function Get-TargetResource
         } 
         catch 
         {
-            Write-Verbose -Message ("No local SharePoint farm was detected. Timer job " + `
-                                    "settings will not be applied")
-            return $null
+            throw ("No local SharePoint farm was detected. Timer job " + `
+                   "settings will not be applied")
         }
 
         $returnval = @{
@@ -58,8 +57,7 @@ function Get-TargetResource
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa)
             {
-                Write-Verbose -Message "Specified web application not found!"
-                return $null
+                throw ("Specified web application not found!")
             }
     
             $timerjob = Get-SPTimerJob -Type $params.TypeName `
@@ -67,8 +65,7 @@ function Get-TargetResource
             
             if ($timerjob.Count -eq 0)
             {
-                Write-Verbose -Message ("No timer jobs found. Please check the input values")
-                return $null
+                throw ("No timer jobs found. Please check the input values")
             }
 
             $returnval.WebAppUrl = $params.WebAppUrl
@@ -94,9 +91,8 @@ function Get-TargetResource
             }
             else
             {
-                Write-Verbose -Message ("$($timerjob.Count) timer jobs found. Check input " + `
-                               "values or use the WebAppUrl parameter.")
-                return $null
+                throw ("$($timerjob.Count) timer jobs found. Check input " + `
+                       "values or use the WebAppUrl parameter.")
             }
         }
         return $returnval
@@ -177,7 +173,9 @@ function Set-TargetResource
                 {
                     try 
                     {
-                        Set-SPTimerJob $timerjob -Schedule $params.Schedule -ErrorAction Stop
+                        Set-SPTimerJob -Identity $timerjob `
+                                       -Schedule $params.Schedule `
+                                       -ErrorAction Stop
                     } 
                     catch 
                     {
@@ -205,7 +203,7 @@ function Set-TargetResource
                         Write-Verbose -Message "Enable timer job $($params.TypeName)"
                         try 
                         {
-                            Enable-SPTimerJob $timerjob
+                            Enable-SPTimerJob -Identity $timerjob
                         }
                         catch 
                         {
@@ -219,7 +217,7 @@ function Set-TargetResource
                         Write-Verbose -Message "Disable timer job $($params.Name)"
                         try 
                         {
-                            Disable-SPTimerJob $timerjob
+                            Disable-SPTimerJob -Identity $timerjob
                         } 
                         catch 
                         {
@@ -242,7 +240,9 @@ function Set-TargetResource
                     {
                         try 
                         {
-                            Set-SPTimerJob $timerjob -Schedule $params.Schedule -ErrorAction Stop
+                            Set-SPTimerJob -Identity $timerjob `
+                                           -Schedule $params.Schedule `
+                                           -ErrorAction Stop
                         } 
                         catch 
                         {
@@ -270,7 +270,7 @@ function Set-TargetResource
                             Write-Verbose -Message "Enable timer job $($params.TypeName)"
                             try 
                             {
-                                Enable-SPTimerJob $timerjob
+                                Enable-SPTimerJob -Identity $timerjob
                             }
                             catch 
                             {
@@ -283,7 +283,7 @@ function Set-TargetResource
                             Write-Verbose -Message "Disable timer job $($params.Name)"
                             try 
                             {
-                                Disable-SPTimerJob $timerjob
+                                Disable-SPTimerJob -Identity $timerjob
                             } 
                             catch 
                             {
