@@ -3,7 +3,7 @@ class MSFT_SPProjectServerGlobalPermissions : OMI_BaseResource
 {
     [Key, Description("The URL of the Project site to manage the group at")] string Url;
     [Key, Description("The name of the user or group")] string EntityName;
-    [Key, Description("What type of entity are you setting permissions for?"), ValueMap{"USer","Group"}, Values{"User","Group"}] string EntityType;
+    [Key, Description("What type of entity are you setting permissions for?"), ValueMap{"User","Group"}, Values{"User","Group"}] string EntityType;
     [Write, Description("What permissions should be allowed for this entity?")] string AllowPermissions[];
     [Write, Description("What permissions should be denied for this entity?")] string DenyPermissions[];
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
