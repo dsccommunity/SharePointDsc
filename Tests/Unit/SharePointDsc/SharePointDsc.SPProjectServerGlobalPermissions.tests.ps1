@@ -40,7 +40,8 @@ Describe -Name $global:SPDscHelper.DescribeHeader -Fixture {
                 Import-Module -Name (Join-Path -Path $global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
                 $psDllPath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerServices.dll"
-                Add-Type -Path (Join-Path -Path $global:SPDscHelper.RepoRoot -ChildPath $psDllPath -Resolve)
+                $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
+                [System.Reflection.Assembly]::Load($bytes)
 
                 Mock -CommandName "Import-Module" -MockWith {}
 
