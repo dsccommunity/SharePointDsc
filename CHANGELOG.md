@@ -1,5 +1,13 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* Added support for Project Server 2016 with the following new resources:
+  SPProjectServerLicense, SPProjectServerAdditionalSettings,
+  SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
+  SPProjectServerGroup, SPProjectServerTimeSheetSettings,
+  SPProjectServerUserSyncSettings, SPProjectServerWssSettings
+
 ## 1.9
 
 * New resource: SPServiceIdentity
