@@ -172,7 +172,10 @@ function New-SPDscProjectServerWebService
     )
 
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
-    Add-Type -Path $psDllPath
+    $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
+    [System.Reflection.Assembly]::Load($bytes)
+
+
     $maxSize = 500000000
     $svcRouter = "_vti_bin/PSI/ProjectServer.svc"
     $pwaUri = New-Object -TypeName "System.Uri" -ArgumentList $pwaUrl
