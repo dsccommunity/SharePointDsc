@@ -7,6 +7,7 @@
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
   SPProjectServerGroup, SPProjectServerTimeSheetSettings,
   SPProjectServerUserSyncSettings, SPProjectServerWssSettings
+* Added resource: SPMinRoleCompliance
 
 ## 1.9
 
