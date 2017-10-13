@@ -39,10 +39,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
                 Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
+                [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
                 $psDllPath = "Modules\SharePointDsc\Modules\SharePointDsc.ProjectServer\ProjectServerServices.dll"
                 $fullDllPath = Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $psDllPath -Resolve
                 $bytes = [System.IO.File]::ReadAllBytes($fullDllPath)
-                [System.Reflection.Assembly]::Load($bytes)
+                [System.Reflection.Assembly]::Load($bytes) | Out-Null
 
                 Mock -CommandName "Import-Module" -MockWith {}
 

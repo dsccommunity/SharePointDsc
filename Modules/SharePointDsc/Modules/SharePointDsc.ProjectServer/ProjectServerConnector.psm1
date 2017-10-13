@@ -171,9 +171,10 @@ function New-SPDscProjectServerWebService
         $EndpointName
     )
 
+    [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
-    [System.Reflection.Assembly]::Load($bytes)
+    [System.Reflection.Assembly]::Load($bytes) | Out-Null
 
 
     $maxSize = 500000000
