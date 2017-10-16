@@ -99,6 +99,7 @@ function Get-TargetResource
         }        
 
         $returnval = @{
+            WebAppUrl = $wa.Url
             SuiteNavBrandingLogoNavigationUrl = $null
             SuiteNavBrandingLogoTitle = $null
             SuiteNavBrandingLogoUrl = $null
@@ -257,7 +258,7 @@ function Test-TargetResource
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure,
-        
+
         [parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
