@@ -42,9 +42,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "return error that invalid sp2013 parameters were passed" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead," + `
-                    " only specify the SuiteBarBrandingElementHtml parameter"
+                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead, only specify the SuiteBarBrandingElementHtml parameter"
                 }
             }
 
@@ -63,9 +61,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "return error that invalid sp2013 parameters were passed" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead," + `
-                    " only specify the SuiteBarBrandingElementHtml parameter"
+                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead, only specify the SuiteBarBrandingElementHtml parameter"
                 }
             }
 
@@ -110,8 +106,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "return error that sp2013 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
-                    " SharePoint 2013"
+                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for the SuiteBarBrandingElementHtml parameter with SharePoint 2013"
                 }
             }
         }
@@ -200,9 +195,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "return error that sp2013 parameter was passed for a sp2016 environment" {
-                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead," + `
-                    " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                    "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters"
+                    { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead, use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters"
                 }
             }
 
@@ -222,9 +215,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 It "return error that sp2016 parameters are required" {
-                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl " + `
-                    ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                    "whith SharePoint 2016"
+                    { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText whith SharePoint 2016"
                 }
             }
         }
