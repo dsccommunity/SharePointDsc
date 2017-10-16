@@ -4,6 +4,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
+        [parameter(Mandatory = $true)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure,
+
         [parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
@@ -125,6 +130,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
+        [parameter(Mandatory = $true)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure,
+
         [parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
@@ -243,6 +253,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [parameter(Mandatory = $true)] 
+        [ValidateSet("Present","Absent")] 
+        [System.String] 
+        $Ensure,
+        
         [parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
