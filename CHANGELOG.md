@@ -4,6 +4,10 @@
 
 * Added resource: SPMinRoleCompliance
 
+## 2.0
+
+* Added SPWebAppSuiteBar resource to brand Suite Bar;
+
 ## 1.9
 
 * New resource: SPServiceIdentity

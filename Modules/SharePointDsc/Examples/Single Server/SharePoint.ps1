@@ -139,6 +139,13 @@ Configuration Example
             DependsOn              = "[SPManagedAccount]WebPoolManagedAccount"
         }
         
+        SPWebAppSuiteBar SuiteBarBranding
+        {
+            WebAppUrl              = "http://sites.contoso.com"
+            SuiteBarBrandingElementHtml = "<div>SharePointDSC</div>"
+            PsDscRunAsCredential   = $SPSetupAccount
+        }
+
         SPCacheAccounts WebAppCacheAccounts
         {
             WebAppUrl              = "http://sites.contoso.com"
