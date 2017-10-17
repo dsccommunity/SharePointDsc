@@ -46,8 +46,8 @@ function Get-TargetResource
     if($installedVersion.FileMajorPart -eq 15)
     {
         <# Exception: One of the SP2016 specific parameter was passed with SP2013 #>
-        if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
-        -or !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
+        if($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
         -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
         -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
@@ -82,8 +82,8 @@ function Get-TargetResource
         -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
         -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
-            Write-Verbose -Message ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl " + `
-                                    ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
+            Write-Verbose -Message ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
+                                    "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
                                     "whith SharePoint 2016")
             return $null
         }
@@ -321,11 +321,28 @@ function Test-TargetResource
         }
         elseif($installedVersion.FileMajorPart -ge 16)
         {
-            return ($wa.SuiteNavBrandingLogoNavigationUrl -eq $params.SuiteNavBrandingLogoNavigationUrl -and `
-            $wa.SuiteNavBrandingLogoTitle -eq $params.SuiteNavBrandingLogoTitle -and `
-            $wa.SuiteNavBrandingLogoUrl -eq $params.SuiteNavBrandingLogoUrl -and `
-            $wa.SuiteNavBrandingText -eq $params.SuiteNavBrandingText)
+            if($params.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+            -and $wa.SuiteNavBrandingLogoNavigationUrl -ne $params.SuiteNavBrandingLogoNavigationUrl)
+            {
+                return $false
+            }
+            if($params.ContainsKey("SuiteNavBrandingLogoTitle") `
+            -and $wa.SuiteNavBrandingLogoTitle -ne $params.SuiteNavBrandingLogoTitle)
+            {
+                return $false
+            }
+            if($params.ContainsKey("SuiteNavBrandingLogoUrl") `
+            -and $wa.SuiteNavBrandingLogoUrl -ne $params.SuiteNavBrandingLogoUrl)
+            {
+                return $false
+            }
+            if($params.ContainsKey("SuiteNavBrandingText") `
+            -and $wa.SuiteNavBrandingText -ne $params.SuiteNavBrandingText)
+            {
+                return $false
+            }
         }
+        return $true
     }    
 
     return $returnValue
