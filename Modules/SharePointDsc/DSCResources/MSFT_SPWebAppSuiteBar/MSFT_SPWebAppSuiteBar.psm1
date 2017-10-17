@@ -52,7 +52,7 @@ function Get-TargetResource
         -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
             Write-Verbose -Message ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead," + `
+                                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
                                     " only specify the SuiteBarBrandingElementHtml parameter")
             return $null
         }
@@ -70,7 +70,7 @@ function Get-TargetResource
         <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
         if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
         {
-            Write-Verbose -Message ("Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead," + `
+            Write-Verbose -Message ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016. Instead," + `
                                     " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                                     "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
             return $null
@@ -84,7 +84,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
                                     "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                                    "whith SharePoint 2016")
+                                    "with SharePoint 2016")
             return $null
         }
     }
@@ -183,7 +183,7 @@ function Set-TargetResource
         -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
             throw ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead," + `
+                                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
                                     " only specify the SuiteBarBrandingElementHtml parameter")
         }
 
@@ -199,7 +199,7 @@ function Set-TargetResource
         <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
         if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
         {
-            throw ("Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead," + `
+            throw ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016. Instead," + `
                                     " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                                     "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
         }
@@ -210,9 +210,9 @@ function Set-TargetResource
         -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
         -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
-            throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl " + `
+            throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl" + `
                                     ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                                    "whith SharePoint 2016")
+                                    "with SharePoint 2016")
         }
     }
 
