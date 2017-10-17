@@ -35,11 +35,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{ 
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
-                }
+                })}
 
                 It "return error that invalid sp2013 parameters were passed" {
                     { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead, only specify the SuiteBarBrandingElementHtml parameter"
@@ -54,11 +54,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{ 
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
-                }
+                })}
 
                 It "return error that invalid sp2013 parameters were passed" {
                     { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead, only specify the SuiteBarBrandingElementHtml parameter"
@@ -72,11 +72,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
-                }
+                })}
 
                 It "successfully returns the suite bar branding html" {
                     $result = Get-TargetResource @testParams
@@ -122,14 +122,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                }
+                    SuiteBarBrandingElementHtml = $null
+                })}
 
                 It "successfully returns the suite bar properties" {
                     $results = Get-TargetResource @testParams
@@ -153,14 +154,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                }
+                })}
 
                 It "successfully returns the suite bar properties" {
                     $results = Get-TargetResource @testParams
@@ -185,14 +186,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                }
+                })}
 
                 It "return error that sp2013 parameter was passed for a sp2016 environment" {
                     { Set-TargetResource @testParams } | Should Throw "Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead, use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters"
@@ -205,14 +206,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Ensure = "Present"              
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
                     DisplayName = "Test Web App"                
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                }
+                })}
 
                 It "return error that sp2016 parameters are required" {
                     { Set-TargetResource @testParams } | Should Throw "You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText whith SharePoint 2016"

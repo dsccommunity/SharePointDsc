@@ -46,8 +46,10 @@ function Get-TargetResource
     if($installedVersion.FileMajorPart -eq 15)
     {
         <# Exception: One of the SP2016 specific parameter was passed with SP2013 #>
-        if(($null -ne $SuiteNavBrandingLogoNavigationUrl -or $null -ne $SuiteNavBrandingLogoTitle -or `
-        $null -ne $SuiteNavBrandingLogoUrl -or $null -ne $SuiteNavBrandingText))
+        if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+        -or !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
+        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
+        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
             Write-Verbose -Message ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                                     "SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead," + `
@@ -56,7 +58,7 @@ function Get-TargetResource
         }
 
         <# Exception: The SP2013 optional parameter is null. #>
-        if($null -eq $SuiteBarBrandingElementHtml)
+        if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
         {
             Write-Verbose -Message ("You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
                                     " SharePoint 2013")
@@ -66,7 +68,7 @@ function Get-TargetResource
     elseif($installedVersion.FileMajorPart -ge 16)
     {
         <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
-        if($null -ne $SuiteBarBrandingElementHtml)
+        if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
         {
             Write-Verbose -Message ("Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead," + `
                                     " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
@@ -75,8 +77,10 @@ function Get-TargetResource
         }
 
         <# Exception: All the optional parameters are null for SP2016. #>
-        if($null -eq $SuiteNavBrandingLogoNavigationUrl -and $null -eq $SuiteNavBrandingLogoTitle -and `
-        $null -eq $SuiteNavBrandingLogoUrl -and $null -eq $SuiteNavBrandingText)
+        if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
+        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
+        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
             Write-Verbose -Message ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl " + `
                                     ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
@@ -99,7 +103,7 @@ function Get-TargetResource
         }        
 
         $returnval = @{
-            WebAppUrl = $wa.Url
+            WebAppUrl = $params.WebAppUrl
             SuiteNavBrandingLogoNavigationUrl = $null
             SuiteNavBrandingLogoTitle = $null
             SuiteNavBrandingLogoUrl = $null
@@ -173,8 +177,10 @@ function Set-TargetResource
     if($installedVersion.FileMajorPart -eq 15)
     {
         <# Exception: One of the SP2016 specific parameter was passed with SP2013 #>
-        if(($null -ne $SuiteNavBrandingLogoNavigationUrl -or $null -ne $SuiteNavBrandingLogoTitle -or `
-        $null -ne $SuiteNavBrandingLogoUrl -or $null -ne $SuiteNavBrandingText))
+        if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+        -or !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
+        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
+        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
             throw ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
                                     "SuiteNavBrandingLogoUrl or SuiteNavBrandingText whith SharePoint 2013. Instead," + `
@@ -182,7 +188,7 @@ function Set-TargetResource
         }
 
         <# Exception: The SP2013 optional parameter is null. #>
-        if($null -eq $SuiteBarBrandingElementHtml)
+        if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
         {
             throw ("You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
                                     " SharePoint 2013")
@@ -191,7 +197,7 @@ function Set-TargetResource
     elseif($installedVersion.FileMajorPart -ge 16)
     {
         <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
-        if($null -ne $SuiteBarBrandingElementHtml)
+        if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
         {
             throw ("Cannot specify SuiteBarBrandingElementHtml whith SharePoint 2016. Instead," + `
                                     " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
@@ -199,8 +205,10 @@ function Set-TargetResource
         }
 
         <# Exception: All the optional parameters are null for SP2016. #>
-        if($null -eq $SuiteNavBrandingLogoNavigationUrl -and $null -eq $SuiteNavBrandingLogoTitle -and `
-        $null -eq $SuiteNavBrandingLogoUrl -and $null -eq $SuiteNavBrandingText)
+        if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
+        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
+        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
+        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
         {
             throw ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl " + `
                                     ", SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
