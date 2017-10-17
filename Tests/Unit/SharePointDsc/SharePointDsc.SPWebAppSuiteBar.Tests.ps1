@@ -32,7 +32,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {return @(@{ 
@@ -51,7 +50,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WebAppUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingText = "Suite Bar Text"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {return @(@{ 
@@ -68,8 +66,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Context -Name "Only the SP2013 parameter passed for a SP2013 environment" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
-                    SuiteBarBrandingElementHtml = "<div>Test</div>"
-                    Ensure = "Present"              
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"        
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
@@ -96,7 +93,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Context -Name "None of the optional parameters passed" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith { 
@@ -119,7 +115,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingLogoTitle = "LogoTitle"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
@@ -151,7 +146,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WebAppUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingText = "Suite Bar Text"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
@@ -183,7 +177,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
                     SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
                     SuiteNavBrandingText = "Suite Bar Text"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
@@ -203,7 +196,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Context -Name "None of the optional parameters passed" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
-                    Ensure = "Present"              
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
