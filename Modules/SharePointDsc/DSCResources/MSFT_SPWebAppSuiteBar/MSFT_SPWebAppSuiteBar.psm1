@@ -35,54 +35,7 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting web app suite bar properties for $WebAppUrl"
 
-    $installedVersion = Get-SPDSCInstalledProductVersion
-
-    <# Handle SP2013 #>
-    if($installedVersion.FileMajorPart -eq 15)
-    {
-        <# Exception: One of the SP2016 specific parameter was passed with SP2013 #>
-        if($PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
-        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
-        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
-        -or $PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
-        {
-            Write-Verbose -Message ("Cannot specify SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                    "SuiteNavBrandingLogoUrl or SuiteNavBrandingText with SharePoint 2013. Instead," + `
-                                    " only specify the SuiteBarBrandingElementHtml parameter")
-            return $null
-        }
-
-        <# Exception: The SP2013 optional parameter is null. #>
-        if(!$PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
-        {
-            Write-Verbose -Message ("You need to specify a value for the SuiteBarBrandingElementHtml parameter with" + `
-                                    " SharePoint 2013")
-            return $null
-        }
-    }
-    elseif($installedVersion.FileMajorPart -ge 16)
-    {
-        <# Exception: The SP2013 specific SuiteBarBrandingElementHtml parameter was passed with SP2016. #>
-        if($PSBoundParameters.ContainsKey("SuiteBarBrandingElementHtml"))
-        {
-            Write-Verbose -Message ("Cannot specify SuiteBarBrandingElementHtml with SharePoint 2016. Instead," + `
-                                    " use the SuiteNavBrandingLogoNavigationUrl, SuiteNavBrandingLogoTitle, " + `
-                                    "SuiteNavBrandingLogoUrl and SuiteNavBrandingText parameters")
-            return $null
-        }
-
-        <# Exception: All the optional parameters are null for SP2016. #>
-        if(!$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoNavigationUrl") `
-        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoTitle") `
-        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingLogoUrl") `
-        -and !$PSBoundParameters.ContainsKey("SuiteNavBrandingText"))
-        {
-            Write-Verbose -Message ("You need to specify a value for either SuiteNavBrandingLogoNavigationUrl, " + `
-                                    "SuiteNavBrandingLogoTitle, SuiteNavBrandingLogoUrl and SuiteNavBrandingText " + `
-                                    "with SharePoint 2016")
-            return $null
-        }
-    }
+    $installedVersion = Get-SPDSCInstalledProductVersion    
     
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `

@@ -75,6 +75,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
                 })}
 
+                Mock -CommandName Update -MockWith {}
+
                 It "successfully returns the suite bar branding html" {
                     $result = Get-TargetResource @testParams
                     $result.WebAppUrl | should be "http://sites.sharepoint.com"
@@ -87,6 +89,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should Be $true
+                }
+
+                It "Should properly configure the suite bar for the Web Application" {
+                    Set-TargetResource @testParams
                 }
             }
 
@@ -117,15 +123,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
-                    DisplayName = "Test Web App"                
-                    Url = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoTitle = "LogoTitle"
-                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
-                    SuiteNavBrandingText = "Suite Bar Text"
-                    SuiteBarBrandingElementHtml = $null
-                })}
+                Mock -CommandName Get-SPWebApplication -MockWith { 
+                    $webApp = @{
+                        DisplayName = "Test Web App"                
+                        Url = "http://sites.sharepoint.com"
+                        SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
+                        SuiteNavBrandingLogoTitle = "LogoTitle"
+                        SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
+                        SuiteNavBrandingText = "Suite Bar Text"
+                        SuiteBarBrandingElementHtml = $null
+                    }
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
+                }
 
                 It "successfully returns the suite bar properties" {
                     $results = Get-TargetResource @testParams
@@ -152,14 +164,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
-                    DisplayName = "Test Web App"                
-                    Url = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
-                    SuiteNavBrandingLogoTitle = "LogoTitle"
-                    SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
-                    SuiteNavBrandingText = "Suite Bar Text"
-                })}
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    $webApp = @{
+                        DisplayName = "Test Web App"                
+                        Url = "http://sites.sharepoint.com"
+                        SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
+                        SuiteNavBrandingLogoTitle = "LogoTitle"
+                        SuiteNavBrandingLogoUrl = "http://sites.sharepoint.com/images/logo.gif"
+                        SuiteNavBrandingText = "Suite Bar Text"
+                        SuiteBarBrandingElementHtml = $null
+                    }
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
+                }
 
                 It "successfully returns the suite bar properties" {
                     $results = Get-TargetResource @testParams
