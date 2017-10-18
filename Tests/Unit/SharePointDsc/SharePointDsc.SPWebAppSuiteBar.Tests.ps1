@@ -69,13 +69,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteBarBrandingElementHtml = "<div>Test</div>"        
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
-                    DisplayName = "Test Web App"                
-                    Url = "http://sites.sharepoint.com"
-                    SuiteBarBrandingElementHtml = "<div>Test</div>"
-                })}
-
-                Mock -CommandName Update -MockWith {}
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    $webApp = @{
+                        DisplayName = "Test Web App"                
+                        Url = "http://sites.sharepoint.com"
+                        SuiteBarBrandingElementHtml = "<div>Test</div>"
+                    }
+                    $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                        $Global:SPDscWebApplicationUpdateCalled = $true
+                    } -PassThru
+                    return @($webApp)
+                }
 
                 It "successfully returns the suite bar branding html" {
                     $result = Get-TargetResource @testParams
