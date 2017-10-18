@@ -136,6 +136,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $results.SuiteNavBrandingText | Should be "Suite Bar Text"
                 }
 
+                It "Should properly configure the suite bar for the Web Application" {
+                    Set-TargetResource @testParams
+                }
+
                 It "Should return true from the test method" {
                     Test-TargetResource @testParams | Should Be $true
                 }
@@ -164,6 +168,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $results.SuiteNavBrandingLogoTitle | Should be "LogoTitle"
                     $results.SuiteNavBrandingLogoUrl | Should be "http://sites.sharepoint.com/images/logo.gif"
                     $results.SuiteNavBrandingText | Should be "Suite Bar Text"
+                }
+
+                It "Should properly configure the suite bar for the Web Application" {
+                    Set-TargetResource @testParams
                 }
 
                 It "Should return true from the test method" {
