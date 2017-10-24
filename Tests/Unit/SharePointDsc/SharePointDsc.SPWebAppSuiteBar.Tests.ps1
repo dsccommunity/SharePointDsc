@@ -85,10 +85,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $result = Get-TargetResource @testParams
                     $result.WebAppUrl | should be "http://sites.sharepoint.com"
                     $result.SuiteBarBrandingElementHtml | Should be "<div>Test</div>"
-                    $result.SuiteNavBrandingLogoNavigationUrl | Should be $null
-                    $result.SuiteNavBrandingLogoTitle | Should be $null
-                    $result.SuiteNavBrandingLogoUrl | Should be $null
-                    $result.SuiteNavBrandingText | Should be $null
                 }
 
                 It "Should return true from the test method" {
