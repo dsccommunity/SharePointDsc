@@ -21,6 +21,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "New-SPDscProjectServerWebService" -Fixture {
 
+            Mock -CommandName Get-SPSite -MockWith {
+                return @{
+                    WebApplication = @{
+                        Url = "http://server"
+                    }
+                }
+            }
+
+            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                return @{
+                    DisableKerberos = $true
+                }
+            }
+
             $serviceNames = @("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields", 
             "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider", 
             "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource", 

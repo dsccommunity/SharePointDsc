@@ -171,6 +171,8 @@ function New-SPDscProjectServerWebService
         $EndpointName
     )
 
+    $authMode = Get-SPAuthenticationProvider -WebApplication ((Get-SPSite $PwaUrl).WebApplication.Url) -Zone Default
+
     [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
@@ -196,7 +198,15 @@ function New-SPDscProjectServerWebService
     $binding.MaxReceivedMessageSize = $maxSize
     $binding.ReaderQuotas.MaxNameTableCharCount = $maxSize
     $binding.MessageEncoding = [System.ServiceModel.WSMessageEncoding]::Text
-    $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm
+
+    if ($authMode.DisableKerberos -eq $true) 
+    { 
+        $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm 
+    } 
+    else 
+    { 
+        $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Windows
+    }
     
     if ($pwaUrl.EndsWith('/') -eq $false)
     {
