@@ -74,6 +74,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         DisplayName = "Test Web App"                
                         Url = "http://sites.sharepoint.com"
                         SuiteBarBrandingElementHtml = "<div>Test</div>"
+                        SuiteNavBrandingLogoNavigationUrl = $null
+                        SuiteNavBrandingLogoTitle = $null
+                        SuiteNavBrandingLogoUrl = $null
+                        SuiteNavBrandingText = $null
                     }
                     $webApp = $webApp | Add-Member -MemberType ScriptMethod -Name Update -Value {
                         $Global:SPDscWebApplicationUpdateCalled = $true

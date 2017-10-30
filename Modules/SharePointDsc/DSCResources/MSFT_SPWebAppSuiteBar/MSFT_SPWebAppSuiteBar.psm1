@@ -243,19 +243,9 @@ function Test-TargetResource
         return $false 
     }
 
-    if($CurrentValues.WebAppUrl -eq $WebAppUrl -and `
-    $CurrentValues.SuiteBarBrandingElementHtml -eq $SuiteBarBrandingElementHtml -and `
-    $CurrentValues.SuiteNavBrandingLogoNavigationUrl -eq $SuiteNavBrandingLogoNavigationUrl -and  `
-    $CurrentValues.SuiteNavBrandingLogoTitle -eq $SuiteNavBrandingLogoTitle -and `
-    $CurrentValues.SuiteNavBrandingLogoUrl -eq $SuiteNavBrandingLogoUrl -and `
-    $CurrentValues.SuiteNavBrandingText -eq $SuiteNavBrandingText)
-    {
-        return $true
-    }
-    else 
-    {
-        return $false    
-    }
+    return Test-SPDscParameterState -CurrentValues $CurrentValues `
+    -DesiredValues $PSBoundParameters `
+    -ValuesToCheck @("Ensure")
 }
 
 Export-ModuleMember -Function *-TargetResource
