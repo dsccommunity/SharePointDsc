@@ -263,14 +263,48 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPWeb -MockWith { $web }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $false
+                Test-TargetResource @testParams | Should Be $true
             }
 
-            It "Should update the values in the set method" {
+            It "Should not update the values set method" {
                 
                 Set-TargetResource @testParams
 
-                $web.RequestAccessEmail | Should be ""
+                $web.RequestAccessEmail | Should be "valid@contoso.com"
+                $web.HasUniquePerm      | Should be $false
+
+                Assert-MockCalled New-Object
+            }
+        }
+
+        Context -Name "The SPWeb exists and does have unique permission and should not have unique permissions" -Fixture {
+            $testParams = @{
+                Url                = "http://site.sharepoint.com/sites/web"
+                RequestAccessEmail = ""
+                UniquePermissions  = $false
+            }
+
+            $web = [pscustomobject] @{
+                Url                = $testParams.Url
+                HasUniquePerm      = $true
+                RequestAccessEmail = "notvalid@contoso.com"
+            }
+
+            $web |  Add-Member -Name Update `
+                -MemberType ScriptMethod `
+                -Value { }
+
+            Mock -CommandName Get-SPWeb -MockWith { $web }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the value of unique permissions and not change the request access email in the set method" {
+                
+                Set-TargetResource @testParams
+
+                $web.RequestAccessEmail | Should be "notvalid@contoso.com"
                 $web.HasUniquePerm      | Should be $false
 
                 Assert-MockCalled New-Object
