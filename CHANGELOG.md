@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Added resource: SPMinRoleCompliance
+* Update SPWeb to allow the management of the access requests settings
 
 ## 1.9
 
