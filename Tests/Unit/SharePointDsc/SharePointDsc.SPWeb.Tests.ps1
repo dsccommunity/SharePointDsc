@@ -242,6 +242,40 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled New-Object
             }
         }
+
+        Context -Name "The SPWeb exists and does not have unique permission, when request access should be enabled" -Fixture {
+            $testParams = @{
+                Url                = "http://site.sharepoint.com/sites/web"
+                RequestAccessEmail = ""
+                UniquePermissions  = $false
+            }
+
+            $web = [pscustomobject] @{
+                Url                = $testParams.Url
+                HasUniquePerm      = $false
+                RequestAccessEmail = "valid@contoso.com"
+            }
+
+            $web |  Add-Member -Name Update `
+                -MemberType ScriptMethod `
+                -Value { }
+
+            Mock -CommandName Get-SPWeb -MockWith { $web }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should update the values in the set method" {
+                
+                Set-TargetResource @testParams
+
+                $web.RequestAccessEmail | Should be ""
+                $web.HasUniquePerm      | Should be $false
+
+                Assert-MockCalled New-Object
+            }
+        }
     }
 }
 
