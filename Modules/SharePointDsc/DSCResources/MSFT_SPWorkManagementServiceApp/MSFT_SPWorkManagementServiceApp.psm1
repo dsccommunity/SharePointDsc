@@ -162,7 +162,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Work management service app '$Name'"
     $PSBoundParameters.Ensure = $Ensure
 
-    if ($Ensure -ne "Absent" -and $null -eq $ApplicationPool)
+    if ($Ensure -ne "Absent" -and $PSBoundParameters.ContainsKey("ApplicationPool") -eq $false)
     {
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
     }
@@ -222,68 +222,66 @@ function Set-TargetResource
                 Set-SPWorkManagementServiceApplication -Identity $serviceApp -ApplicationPool $appPool
             }
         }
-        else
-        {
-            Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
-                Invoke-SPDSCCommand -Credential $InstallAccount `
-                                    -Arguments $PSBoundParameters `
-                                    -ScriptBlock {
-                $params = $args[0]
-                
-                $setParams = @{}
-                if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) 
-                { 
-                    $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", 
-                    $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) 
-                }
-                if ($params.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
-                { 
-                    $setParams.Add("MinimumTimeBetweenProviderRefreshes", 
-                    $params.MinimumTimeBetweenProviderRefreshes) 
-                }
-                if ($params.ContainsKey("MinimumTimeBetweenSearchQueries")) 
-                { 
-                    $setParams.Add("MinimumTimeBetweenSearchQueries", 
-                    $params.MinimumTimeBetweenSearchQueries) 
-                }
-                if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun")) 
-                { 
-                    $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", 
-                    $params.NumberOfSubscriptionSyncsPerEwsSyncRun) 
-                }
-                if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce")) 
-                { 
-                    $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce", 
-                    $params.NumberOfUsersEwsSyncWillProcessAtOnce) 
-                }
-                if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch")) 
-                { 
-                    $setParams.Add("NumberOfUsersPerEwsSyncBatch", 
-                    $params.NumberOfUsersPerEwsSyncBatch) 
-                }
 
-                $setParams.Add("Name", $params.Name) 
-                $setParams.Add("ApplicationPool", $params.ApplicationPool) 
-
-                if ($setParams.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
-                { 
-                    $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches = New-TimeSpan -Days $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches
-                }
-                if ($setParams.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
-                {
-                    $setParams.MinimumTimeBetweenProviderRefreshes = New-TimeSpan -Days $setParams.MinimumTimeBetweenProviderRefreshes
-                }
-                if ($setParams.ContainsKey("MinimumTimeBetweenSearchQueries"))
-                { 
-                    $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
-                }
-                $setParams.Add("Confirm", $false)
-                $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                    $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication" 
-                }
-
-                $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
+        Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                                -Arguments $PSBoundParameters `
+                                -ScriptBlock {
+            $params = $args[0]
+            
+            $setParams = @{}
+            if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) 
+            { 
+                $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", 
+                $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) 
             }
+            if ($params.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
+            { 
+                $setParams.Add("MinimumTimeBetweenProviderRefreshes", 
+                $params.MinimumTimeBetweenProviderRefreshes) 
+            }
+            if ($params.ContainsKey("MinimumTimeBetweenSearchQueries")) 
+            { 
+                $setParams.Add("MinimumTimeBetweenSearchQueries", 
+                $params.MinimumTimeBetweenSearchQueries) 
+            }
+            if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun")) 
+            { 
+                $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", 
+                $params.NumberOfSubscriptionSyncsPerEwsSyncRun) 
+            }
+            if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce")) 
+            { 
+                $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce", 
+                $params.NumberOfUsersEwsSyncWillProcessAtOnce) 
+            }
+            if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch")) 
+            { 
+                $setParams.Add("NumberOfUsersPerEwsSyncBatch", 
+                $params.NumberOfUsersPerEwsSyncBatch) 
+            }
+
+            $setParams.Add("Name", $params.Name) 
+            $setParams.Add("ApplicationPool", $params.ApplicationPool) 
+
+            if ($setParams.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
+            { 
+                $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches = New-TimeSpan -Days $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches
+            }
+            if ($setParams.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
+            {
+                $setParams.MinimumTimeBetweenProviderRefreshes = New-TimeSpan -Days $setParams.MinimumTimeBetweenProviderRefreshes
+            }
+            if ($setParams.ContainsKey("MinimumTimeBetweenSearchQueries"))
+            { 
+                $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
+            }
+            $setParams.Add("Confirm", $false)
+            $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
+                $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication" 
+            }
+
+            $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
         }
     }
 

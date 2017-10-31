@@ -49,7 +49,16 @@ function Get-TargetResource
         throw "Setup file cannot be found."
     }
 
-    $setupFileInfo = Get-ItemProperty $SetupFile
+    Write-Verbose -Message "Checking file status of $SetupFile"
+    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
+    }
+
+    $setupFileInfo = Get-ItemProperty -Path $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
 
@@ -236,6 +245,15 @@ function Set-TargetResource
         throw "Setup file cannot be found."
     }
 
+    Write-Verbose -Message "Checking file status of $SetupFile"
+    $zone = Get-Item $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
+    }
+    
     $now = Get-Date
     if ($BinaryInstallDays)
     {
@@ -338,7 +356,7 @@ function Set-TargetResource
         $osearchStopped = $false
         $hostControllerStopped = $false
 
-        if ((Get-SPDSCInstalledProductVersion) -eq 15)
+        if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
         {
             $searchServiceName = "OSearch15"
         }
