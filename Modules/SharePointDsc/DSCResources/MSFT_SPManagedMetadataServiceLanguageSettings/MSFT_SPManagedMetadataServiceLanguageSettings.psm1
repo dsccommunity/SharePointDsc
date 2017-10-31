@@ -144,33 +144,6 @@ function Set-TargetResource
             $termStore.CommitAll();
         }
     }
-    
-    # Reset to default values
-
-    # # The lanauge settings should be set to default
-    # Write-Verbose -Message "Removing language settings from Managed Metadata Service Application $Name"
-    # Invoke-SPDSCCommand -Credential $InstallAccount `
-    #                     -Arguments $PSBoundParameters `
-    #                     -ScriptBlock {
-    #     $params = $args[0] 
-
-    #     $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-    #                 | Where-Object -FilterScript { 
-    #         $_.IsAdministrationWebApplication -eq $true 
-    #     }
-    #     $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
-    #     $termStore = $session.TermStores[0]
-
-    #     # Delete all working languages prior to setting the default language.
-    #     # Setting the DefaultLanauge will add this language to the languages array.
-    #     $termStore.Languages | Foreach-Object -Process {
-    #         $termStore.DeleteLanguage($_)
-    #     }
-
-    #     # Setting to 1033 as SharePointDSC assumes an English ISO was used to install SharePoint
-    #     $termStore.DefaultLanguage = 1033                        
-    # }
-
 }
 
 function Test-TargetResource
