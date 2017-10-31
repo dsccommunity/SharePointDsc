@@ -44,6 +44,7 @@
 * Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
 * Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
 * Added TermStoreAdministrators property to SPManagedMetadataServiceApp
+* New resource: SPManagedMetadataServiceLanguageSettings
 
 ## 1.6
 
