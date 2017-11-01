@@ -1,14 +1,15 @@
-function Get-TargetResource {
+function Get-TargetResource
+{
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Present", "Absent")] 
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -20,7 +21,7 @@ function Get-TargetResource {
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $Language,
 
@@ -29,27 +30,27 @@ function Get-TargetResource {
         $Template,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $UniquePermissions,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $UseParentTopNav,
 
-        [Parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter(Mandatory = $false)]
+        [System.Boolean]
         $AddToQuickLaunch,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $AddToTopNav,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $RequestAccessEmail,
 
         [Parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -59,18 +60,20 @@ function Get-TargetResource {
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        
+
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($web) { 
-            $ensureResult = "Present" 
+        if ($web)
+        {
+            $ensureResult = "Present"
             $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
             $parentTopNav = $web.Navigation.UseShared
-        } 
-        else { 
-            $ensureResult = "Absent" 
         }
-        
+        else
+        {
+            $ensureResult = "Absent"
+        }
+
         return @{
             Url                = $web.Url
             Ensure             = $ensureResult
@@ -87,16 +90,17 @@ function Get-TargetResource {
     return $result
 }
 
-function Set-TargetResource {
+function Set-TargetResource
+{
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Present", "Absent")] 
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -108,7 +112,7 @@ function Set-TargetResource {
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $Language,
 
@@ -117,108 +121,124 @@ function Set-TargetResource {
         $Template,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $UniquePermissions,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $UseParentTopNav,
 
-        [Parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter(Mandatory = $false)]
+        [System.Boolean]
         $AddToQuickLaunch,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $AddToTopNav,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $RequestAccessEmail,
 
         [Parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting SPWeb '$Url'"
-    
+
     $PSBoundParameters.Ensure = $Ensure
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        
-        if ($null -eq $params.InstallAccount) {    
+
+        if ($null -eq $params.InstallAccount)
+        {
             $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
-        } 
-        else {    
+        }
+        else
+        {
             $currentUserName = $params.InstallAccount.UserName
         }
-        
+
         Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."
-        $site = New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url  
-        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName) 
-        
+        $site = New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url
+        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName)
+
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($null -eq $web) {
-            @("InstallAccount", "Ensure", "RequestAccessEmail") | 
+        if ($null -eq $web)
+        {
+            @("InstallAccount", "Ensure", "RequestAccessEmail") |
                 ForEach-Object -Process {
-                if ($params.ContainsKey($_) -eq $true) {
+                if ($params.ContainsKey($_) -eq $true)
+                {
                     $params.Remove($_) | Out-Null
                 }
             }
 
             New-SPWeb @params | Out-Null
         }
-        else {
-            if ($params.Ensure -eq "Absent") {
+        else
+        {
+            if ($params.Ensure -eq "Absent")
+            {
                 Remove-SPweb $params.Url -confirm:$false
             }
-            else {    
+            else
+            {
                 $changedWeb = $false
-                
+
                 if (($params.ContainsKey("Name") -eq $true) `
-                        -and $web.Title -ne $params.Name) {
+                        -and $web.Title -ne $params.Name)
+                {
                     $web.Title = $params.Name
                     $changedWeb = $true
                 }
 
                 if (($params.ContainsKey("Description") -eq $true) `
-                        -and $web.Description -ne $params.Description) {
+                        -and $web.Description -ne $params.Description)
+                {
                     $web.Description = $params.Description
                     $changedWeb = $true
                 }
 
                 if (($params.ContainsKey("UseParentTopNav") -eq $true) `
-                        -and $web.Navigation.UseShared -ne $params.UseParentTopNav) {
+                        -and $web.Navigation.UseShared -ne $params.UseParentTopNav)
+                {
                     $web.Navigation.UseShared = $params.UseParentTopNav
                     $changedWeb = $true
                 }
 
                 if (($params.ContainsKey("UniquePermissions") -eq $true) `
-                        -and $web.HasUniquePerm -ne $params.UniquePermissions) {
-                    $web.HasUniquePerm = $params.UniquePermissions                   
+                        -and $web.HasUniquePerm -ne $params.UniquePermissions)
+                {
+                    $web.HasUniquePerm = $params.UniquePermissions
                     $changedWeb = $true
                 }
 
-                if ($params.ContainsKey("RequestAccessEmail") -eq $true) {
-                    if ($web.RequestAccessEmail -ne $params.RequestAccessEmail -and $web.HasUniquePerm) {
-                        if ([Boolean]$params.RequestAccessEmail -as [System.Net.Mail.MailAddress]) {
+                if ($params.ContainsKey("RequestAccessEmail") -eq $true)
+                {
+                    if ($web.RequestAccessEmail -ne $params.RequestAccessEmail -and $web.HasUniquePerm)
+                    {
+                        if ([Boolean]$params.RequestAccessEmail -as [System.Net.Mail.MailAddress])
+                        {
                             Write-Verbose "The Request Access Email $($params.RequestAccessEmail) is not a valid mail address."
                         }
                         # Workaround to allow empty addresses to disable the access request as RequestAccessEnabled is read only
                         $web.RequestAccessEmail = $params.RequestAccessEmail
                         $changedWeb = $true
-                    }     
-                    else {
+                    }
+                    else
+                    {
                         Write-Verbose "The Request Access Email $($params.RequestAccessEmail) can only be set, if the web has unique permissions."
                     }
                 }
-                
-                if ($changedWeb) {
+
+                if ($changedWeb)
+                {
                     $web.Update()
                 }
             }
@@ -226,17 +246,18 @@ function Set-TargetResource {
     }
 }
 
-function Test-TargetResource {
+function Test-TargetResource
+{
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Present", "Absent")] 
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -248,7 +269,7 @@ function Test-TargetResource {
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter(Mandatory = $false)]
         [System.UInt32]
         $Language,
 
@@ -257,27 +278,27 @@ function Test-TargetResource {
         $Template,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $UniquePermissions,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $UseParentTopNav,
 
-        [Parameter(Mandatory = $false)] 
-        [System.Boolean] 
+        [Parameter(Mandatory = $false)]
+        [System.Boolean]
         $AddToQuickLaunch,
 
         [Parameter(Mandatory = $false)]
-        [System.Boolean] 
+        [System.Boolean]
         $AddToTopNav,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $RequestAccessEmail,
 
         [Parameter(Mandatory = $false)]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -287,23 +308,24 @@ function Test-TargetResource {
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    $valuesToCheck = @("Url", 
-        "Name", 
-        "Description", 
-        "UniquePermissions", 
+    $valuesToCheck = @("Url",
+        "Name",
+        "Description",
+        "UniquePermissions",
         "UseParentTopNav",
         "Ensure")
-        
-    if ($CurrentValues.UniquePermissions) {
-        $valuesToCheck = @("Url", 
-            "Name", 
-            "Description", 
-            "UniquePermissions", 
+
+    if ($CurrentValues.UniquePermissions)
+    {
+        $valuesToCheck = @("Url",
+            "Name",
+            "Description",
+            "UniquePermissions",
             "UseParentTopNav",
             "RequestAccessEmail",
             "Ensure")
     }
-        
+
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
         -ValuesToCheck $valuesToCheck
