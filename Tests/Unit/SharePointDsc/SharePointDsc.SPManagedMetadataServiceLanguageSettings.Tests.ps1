@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
             -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
             -Resolve)
@@ -28,12 +28,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         }
 
-        $termStores = @{ 
+        $termStores = @{
             "Managed Metadata Service Application Proxy" = @{
                 Name            = "Managed Metadata Service Application Proxy"
                 Languages       = @(1033)
                 DefaultLanguage = 1033
-                WorkingLanguage = 1033  
+                WorkingLanguage = 1033
             } | Add-Member -MemberType ScriptMethod `
                 -Name AddLanguage `
                 -Value { $Global:SPDscAddLanguageCalled = $true }  `
@@ -45,9 +45,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 | Add-Member -MemberType ScriptMethod `
                 -Name CommitAll `
                 -Value { }  `
-                -PassThru -Force 
+                -PassThru -Force
         }
-        
+
         Mock -CommandName Get-SPTaxonomySession -MockWith {
             return @{
                 TermStores = $termStores
@@ -71,7 +71,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     TermStores = @{
                         "Managed Metadata Service Application Proxy Wrong" = @{}
                     }
-                    
+
                 }
             }
 
@@ -106,8 +106,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Name            = "Managed Metadata Service Application Proxy"
                             Languages       = @(1031)
                             DefaultLanguage = 1031
-                            WorkingLanguage = 1033    
-                        } 
+                            WorkingLanguage = 1033
+                        }
                     }
                 }
             }
@@ -121,14 +121,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $result.DefaultLanguage | Should Be 1031
                 $result.Languages | Should Be @(1031)
             }
-        }        
+        }
 
         Context -Name "When the default language has to be set" -Fixture {
             $testParams = @{
                 ProxyName       = "Managed Metadata Service Application Proxy"
                 DefaultLanguage = 1031
             }
-            
+
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
@@ -144,7 +144,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ProxyName = "Managed Metadata Service Application Proxy"
                 Languages = @(1031)
             }
-            
+
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
             }
