@@ -3,7 +3,9 @@
 ## Unreleased
 
 * Added resource: SPMinRoleCompliance
-* Added resource: SPManagedMetadataServiceLanguageSettings
+* Update SPManagedMetadataServiceApp to allow the configuration of the default
+  and working language
+* Update SPWeb to allow the management of the access requests settings
 
 ## 1.9
 
