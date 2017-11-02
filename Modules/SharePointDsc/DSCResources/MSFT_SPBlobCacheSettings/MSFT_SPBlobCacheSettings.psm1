@@ -286,8 +286,7 @@ function Set-TargetResource
 
             if ($changes.ContainsKey("MaxAgeInSeconds")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache."max-age" `
-                    = $changes.MaxAgeInSeconds.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("max-age",$($changes.MaxAgeInSeconds.ToString()))
             }
             
             if ($changes.ContainsKey("FileTypes")) 
