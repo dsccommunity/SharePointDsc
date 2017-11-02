@@ -238,7 +238,7 @@ function Set-TargetResource
 
             $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                               -ErrorAction SilentlyContinue `
-                            | Where-Object -FilterScript {
+                           | Where-Object -FilterScript {
                                 $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
                               }
 
@@ -253,6 +253,7 @@ function Set-TargetResource
             {
                 throw "Specified web application could not be found."
             }
+
 
             Write-Verbose -Message "Processing changes"
 
@@ -286,8 +287,7 @@ function Set-TargetResource
 
             if ($changes.ContainsKey("MaxAgeInSeconds")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache."max-age" `
-                    = $changes.MaxAgeInSeconds.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("max-age",$($changes.MaxAgeInSeconds.ToString()))
             }
             
             if ($changes.ContainsKey("FileTypes")) 
