@@ -238,7 +238,7 @@ function Set-TargetResource
 
             $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
                                               -ErrorAction SilentlyContinue `
-                            | Where-Object -FilterScript {
+                           | Where-Object -FilterScript {
                                 $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
                               }
 
