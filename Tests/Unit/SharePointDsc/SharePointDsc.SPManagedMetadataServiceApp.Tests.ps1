@@ -96,11 +96,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
-                Name            = "Managed Metadata Service App"
-                ApplicationPool = "SharePoint Service Applications"
-                DatabaseServer  = "databaseserver\instance"
-                DatabaseName    = "SP_MMS"
-                Ensure          = "Present"
+                Name                    = "Managed Metadata Service App"
+                ApplicationPool         = "SharePoint Service Applications"
+                DatabaseServer          = "databaseserver\instance"
+                DatabaseName            = "SP_MMS"
+                TermStoreAdministrators = @()
+                ContentTypeHubUrl       = ""
+                ProxyName               = "Proxy Name"
+                DefaultLanguage         = 1033
+                Languages               = @()
+                Ensure                  = "Present"
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
@@ -842,7 +847,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
             }
 
-            It "Should return true from the test method" {
+            It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should be $false
             }
 
@@ -852,6 +857,393 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
 
                 $Global:SPDscDeleteUserCalled | Should Be $true
+            }
+        }
+
+        Context -Name "A service app exists and the proxy name has to be changed" -Fixture {
+            $testParams = @{
+                Name                    = "Managed Metadata Service App"
+                ProxyName               = "Managed Metadata Service App ProxyName"
+                ApplicationPool         = "SharePoint Service Applications"
+                DatabaseServer          = "databaseserver\instance"
+                DatabaseName            = "SP_MMS"
+                Ensure                  = "Present"
+                TermStoreAdministrators = @()
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName        = "Managed Metadata Service"
+                    DisplayName     = $testParams.Name
+                    ApplicationPool = @{
+                        Name = $testParams.ApplicationPool
+                    }
+                    Database        = @{
+                        Name   = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name GetType `
+                    -Value {
+                    return (@{
+                            FullName = $getTypeFullName
+                        })
+                } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return ($true)
+                } -PassThru -Force
+
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @(
+                    @{
+                        Name = "$($testParams.Name) Proxy Test"
+                    } | Add-Member -MemberType ScriptMethod `
+                        -Name Update `
+                        -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                        -PassThru -Force `
+                )
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "Should call the delete method from the set method" {
+                $Global:SPDscServiceProxyUpdateCalled = $false
+                Set-TargetResource @testParams
+
+                $Global:SPDscServiceProxyUpdateCalled | Should Be $true
+            }
+        }
+
+        Context -Name "A service app exists and has a non-windows term store administrator in the list" -Fixture {
+            $testParams = @{
+                Name                    = "Managed Metadata Service App"
+                ApplicationPool         = "SharePoint Service Applications"
+                DatabaseServer          = "databaseserver\instance"
+                DatabaseName            = "SP_MMS"
+                Ensure                  = "Present"
+                TermStoreAdministrators = @()
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName        = "Managed Metadata Service"
+                    DisplayName     = $testParams.Name
+                    ApplicationPool = @{
+                        Name = $testParams.ApplicationPool
+                    }
+                    Database        = @{
+                        Name   = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return (@{
+                            FullName = $getTypeFullName
+                        }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                        return (@(
+                                Name = "GetContentTypeSyndicationHubLocal"
+                            )) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                            return @{
+                                AbsoluteUri = ""
+                            }
+                        } -PassThru -Force
+                    } -PassThru -Force
+                } -PassThru -Force
+                return $spServiceApp
+            }
+
+            $termStores = @{
+                "Managed Metadata Service App Proxy" = @{
+                    Name                    = "Managed Metadata Service App Proxy"
+                    Languages               = @(1033)
+                    DefaultLanguage         = 1033
+                    WorkingLanguage         = 1033
+                    TermStoreAdministrators = @(
+                        New-Object -TypeName PSObject -Property @{
+                            PrincipalName               = "i:0#.w|Contoso\User2"
+                            IsWindowsAuthenticationMode = $false
+                        }
+                    )
+                } | Add-Member -MemberType ScriptMethod `
+                    -Name AddTermStoreAdministrator `
+                    -Value { $Global:SPDscAddUserCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name DeleteTermStoreAdministrator `
+                    -Value { $Global:SPDscDeleteUserCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name CommitAll `
+                    -Value { }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name AddLanguage `
+                    -Value { $Global:SPDscAddLanguageCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name DeleteLanguage `
+                    -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name CommitAll `
+                    -Value { }  `
+                    -PassThru -Force
+            }
+
+            Mock -CommandName Get-SPTaxonomySession -MockWith {
+                return @{
+                    TermStores = $termStores
+                }
+            }
+
+            It "Should return the current users from the get method" {
+                (Get-TargetResource @testParams).TermStoreAdministrators | Should Not BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should be $false
+            }
+
+            It "Should call the delete method from the set method" {
+                $Global:SPDscAddUserCalled = $false
+                $Global:SPDscDeleteUserCalled = $false
+                Set-TargetResource @testParams
+
+                $Global:SPDscDeleteUserCalled | Should Be $true
+            }
+        }
+
+        # New Test
+        Context -Name "When a service proxy exists, it should return the proxy name" -Fixture {
+            $testParams = @{
+                Name            = "Managed Metadata Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer  = "databaseserver\instance"
+                DatabaseName    = "SP_MMS"
+                Ensure          = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName        = "Managed Metadata Service"
+                    DisplayName     = $testParams.Name
+                    ApplicationPool = @{
+                        Name = $testParams.ApplicationPool
+                    }
+                    Database        = @{
+                        Name   = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name GetType `
+                    -Value {
+                    return (@{
+                            FullName = $getTypeFullName
+                        })
+                } -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return ($true)
+                } -PassThru -Force
+
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @(
+                    @{
+                        Name = "$($testParams.Name) Proxy Test"
+                    }
+                )
+            }
+
+            It "Should return the proxy name" {
+                (Get-TargetResource @testParams).ProxyName | Should Be "$($testParams.Name) Proxy Test"
+            }
+        }
+
+        Context -Name "When the termstore for the service application proxy exists in the current farm and is not configured correctly" -Fixture {
+            $testParams = @{
+                Name            = "Managed Metadata Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                DatabaseServer  = "databaseserver\instance"
+                DatabaseName    = "SP_MMS"
+                Ensure          = "Present"
+                DefaultLanguage = 1033
+                Languages       = @(1033)
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            {
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    $spServiceApp = [PSCustomObject]@{
+                        TypeName        = "Managed Metadata Service"
+                        DisplayName     = $testParams.Name
+                        ApplicationPool = @{
+                            Name = $testParams.ApplicationPool
+                        }
+                        Database        = @{
+                            Name   = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                        }
+                    }
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        return (@{
+                                FullName = $getTypeFullName
+                            }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@{
+                                    Name = "GetContentTypeSyndicationHubLocal"
+                                }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force
+                    } -PassThru -Force
+                    return $spServiceApp
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+            {
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    $spServiceApp = [PSCustomObject]@{
+                        TypeName        = "Managed Metadata Service"
+                        DisplayName     = $testParams.Name
+                        ApplicationPool = @{
+                            Name = $testParams.ApplicationPool
+                        }
+                        Database        = @{
+                            Name   = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                        }
+                    }
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                            -Name FullName `
+                            -Value $getTypeFullName `
+                            -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                            -Name GetProperties `
+                            -Value {
+                            param($x)
+                            return @(
+                                (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                        -Name Name `
+                                        -Value "DatabaseMapper" `
+                                        -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                        -Name GetValue `
+                                        -Value {
+                                        param($x)
+                                        return (@{
+                                                FullName = $getTypeFullName
+                                            }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                            return (@{
+                                                    FullName = $getTypeFullName
+                                                }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                return (@{
+                                                        Name = "GetContentTypeSyndicationHubLocal"
+                                                    }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                    return @{
+                                                        AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                                    }
+                                                } -PassThru -Force
+                                            } -PassThru -Force
+                                        } -PassThru -Force
+                                    } -PassThru
+                                )
+                            )
+                        } -PassThru
+                    } -PassThru -Force
+
+                    return $spServiceApp
+                }
+            }
+
+            $termStores = @{
+                "Managed Metadata Service Application Proxy" = @{
+                    Name                    = "Managed Metadata Service Application Proxy"
+                    Languages               = @(1031)
+                    DefaultLanguage         = 1031
+                    WorkingLanguage         = 1033
+                    TermStoreAdministrators = @(
+                        New-Object -TypeName PSObject -Property @{
+                            PrincipalName               = "Contoso\User1"
+                            IsWindowsAuthenticationMode = $true
+                        }
+                        New-Object -TypeName PSObject -Property @{
+                            PrincipalName               = "Contoso\User2"
+                            IsWindowsAuthenticationMode = $true
+                        }
+                    )
+                } | Add-Member -MemberType ScriptMethod `
+                    -Name AddTermStoreAdministrator `
+                    -Value { $Global:SPDscAddUserCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name DeleteTermStoreAdministrator `
+                    -Value { $Global:SPDscDeleteUserCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name CommitAll `
+                    -Value { }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name AddLanguage `
+                    -Value { $Global:SPDscAddLanguageCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name DeleteLanguage `
+                    -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name CommitAll `
+                    -Value { }  `
+                    -PassThru -Force
+            }
+
+            Mock -CommandName Get-SPTaxonomySession -MockWith {
+                return @{
+                    TermStores = $termStores
+                }
+            }
+
+            It "Should return false when the Test method is called" {
+                 Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should match the mocked values" {
+                $result = Get-TargetResource @testParams
+                $result.DefaultLanguage | Should Be 1031
+                $result.Languages | Should Be @(1031)
+            }
+
+            It "Should change the value for 'Default Language'" {
+                Set-TargetResource @testParams
+                $termStores["$($testParams.Name) Proxy"].DefaultLanguage | Should Be $testParams.DefaultLanguage
+            }
+
+            It "Should change the value for 'Languages'" {
+                $Global:SPDscAddLanguageCalled = $false
+                $Global:SPDscDeleteLanguageCalled = $false
+                Set-TargetResource @testParams
+                $Global:SPDscAddLanguageCalled | Should Be $true
+                $Global:SPDscDeleteLanguageCalled | Should Be $true
             }
         }
     }

@@ -161,32 +161,39 @@ function Get-TargetResource
             $termStoreDefaultLanguage = $null
             $termStoreLanguages = @()
 
-            $termStore = $session.TermStores[$proxyName]
-
-            if ($null -ne $termstore)
+            if ($null -ne $session)
             {
-                $termStore.TermStoreAdministrators | ForEach-Object -Process {
-                    $name = [string]::Empty
-                    if ($_.IsWindowsAuthenticationMode -eq $true)
-                    {
-                        $name = $_.PrincipalName
-                    }
-                    else
-                    {
-                        $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
-                        if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                $termStore = $session.TermStores[$proxyName]
+
+                if ($null -ne $termstore)
+                {
+                    $termStore.TermStoreAdministrators | ForEach-Object -Process {
+                        $name = [string]::Empty
+                        if ($_.IsWindowsAuthenticationMode -eq $true)
                         {
-                            $name = Resolve-SPDscSecurityIdentifier -SID $name
+                            $name = $_.PrincipalName
                         }
+                        else
+                        {
+                            $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
+                            if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+")
+                            {
+                                $name = Resolve-SPDscSecurityIdentifier -SID $name
+                            }
+                        }
+                        $currentAdmins += $name
                     }
-                    $currentAdmins += $name
+                    $termStoreDefaultLanguage = $termStore.DefaultLanguage
+                    $termStoreLanguages = $termStore.Languages
                 }
-                $termStoreDefaultLanguage = $termStore.DefaultLanguage
-                $termStoreLanguages = $termStore.Languages
+                else
+                {
+                    Write-Verbose "No termstore matching to the proxy name '$proxyName' was found"
+                }
             }
             else
             {
-                Write-Verbose "No termstore matching to the proxy name '$proxyName' was found"
+                Write-Verbose "Could not get taxonomy session. Please check if the managed metadata service is started."
             }
 
             return @{
@@ -280,26 +287,40 @@ function Set-TargetResource
             $params = $args[0]
             $pName = $args[1]
 
-            if ($params.ContainsKey("Ensure"))
+            if ($params.ContainsKey("Ensure") -eq $true)
             {
                 $params.Remove("Ensure") | Out-Null
             }
-            if ($params.ContainsKey("InstallAccount"))
+
+            if ($params.ContainsKey("InstallAccount") -eq $true)
             {
                 $params.Remove("InstallAccount") | Out-Null
             }
-            if ($params.ContainsKey("TermStoreAdministrators"))
+
+            if ($params.ContainsKey("TermStoreAdministrators") -eq $true)
             {
                 $params.Remove("TermStoreAdministrators") | Out-Null
             }
-            if ($params.ContainsKey("ContentTypeHubUrl"))
+
+            if ($params.ContainsKey("ContentTypeHubUrl") -eq $true)
             {
                 $params.Add("HubUri", $params.ContentTypeHubUrl)
-                $params.Remove("ContentTypeHubUrl")
+                $params.Remove("ContentTypeHubUrl") | Out-Null
             }
-            if ($params.ContainsKey("ProxyName"))
+
+            if ($params.ContainsKey("ProxyName") -eq $true)
             {
                 $params.Remove("ProxyName") | Out-Null
+            }
+
+            if ($params.ContainsKey("DefaultLanguage") -eq $true)
+            {
+                $params.Remove("DefaultLanguage") | Out-Null
+            }
+
+            if ($params.ContainsKey("Languages") -eq $true)
+            {
+                $params.Remove("Languages") | Out-Null
             }
 
             $app = New-SPMetadataServiceApplication @params
@@ -606,28 +627,37 @@ function Test-TargetResource
 
     Write-Verbose -Message "Testing managed metadata service application $Name"
 
+    $valuesToCheck = @("ApplicationPool",
+    "Ensure")
+
     $PSBoundParameters.Ensure = $Ensure
     if ($PSBoundParameters.ContainsKey("ContentTypeHubUrl") -eq $true)
     {
         $PSBoundParameters.ContentTypeHubUrl = $ContentTypeHubUrl.TrimEnd('/')
+        $valuesToCheck += "ContentTypeHubUrl"
     }
 
-    $CurrentValues = Get-TargetResource @PSBoundParameters
+    if ($PSBoundParameters.ContainsKey("ProxyName") -eq $true)
+    {
+        $valuesToCheck += "ProxyName"
+    }
 
-    $valuesToCheck = @("ApplicationPool",
-        "ContentTypeHubUrl",
-        "TermStoreAdministrators",
-        "Ensure")
+    if ($PSBoundParameters.ContainsKey("TermStoreAdministrators") -eq $true)
+    {
+        $valuesToCheck += "TermStoreAdministrators"
+    }
 
-    if ($PSBoundParameters.ContainsKey("DefaultLanguage"))
+    if ($PSBoundParameters.ContainsKey("DefaultLanguage") -eq $true)
     {
         $valuesToCheck += "DefaultLanguage"
     }
 
-    if ($PSBoundParameters.ContainsKey("Languages"))
+    if ($PSBoundParameters.ContainsKey("Languages") -eq $true)
     {
         $valuesToCheck += "Languages"
     }
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
         -DesiredValues $PSBoundParameters `
