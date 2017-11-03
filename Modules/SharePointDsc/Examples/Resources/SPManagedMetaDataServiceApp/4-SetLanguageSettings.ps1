@@ -17,7 +17,6 @@
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
             {
                 Name                    = "Managed Metadata Service Application"
-                InstallAccount          = $SetupAccount
                 ApplicationPool         = "SharePoint Service Applications"
                 DatabaseServer          = "SQL.contoso.local"
                 DatabaseName            = "SP_ManagedMetadata"
@@ -25,6 +24,9 @@
                     "CONTOSO\user1",
                     "CONTOSO\user2"
                 )
+                DefaultLanguage      = 1033
+                Languages            = @(1031, 1033)
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }
