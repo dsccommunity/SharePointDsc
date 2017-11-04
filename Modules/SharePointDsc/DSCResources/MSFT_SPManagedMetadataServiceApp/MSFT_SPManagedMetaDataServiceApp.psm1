@@ -336,7 +336,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message "Updating Managed Metadata Service Application Proxy Name from '$($result.ProxyName)' to '$pName'"
             Invoke-SPDSCCommand -Credential $InstallAccount `
-                -Arguments @($PSBoundParameter, $pName) `
+                -Arguments @($PSBoundParameters, $pName) `
                 -ScriptBlock {
                 $params = $args[0]
                 $pName = $args[1]
