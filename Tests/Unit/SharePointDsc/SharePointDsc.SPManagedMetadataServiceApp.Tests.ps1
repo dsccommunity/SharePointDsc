@@ -93,6 +93,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         } -ParameterFilter { $IdentityType -eq "WindowsSamAccountName" }
 
+        # Add Type Definitions
+        try
+        {
+            [Microsoft.SharePoint.Taxonomy.TaxonomyRights]
+        }
+        catch
+        {
+            Add-Type -TypeDefinition @"
+                namespace Microsoft.SharePoint.Taxonomy {
+                    public enum TaxonomyRights {
+                        None,
+                        ManageTermStore
+                    }
+                }
+"@
+        }
+
         # Test contexts
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
@@ -551,6 +568,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             } -PassThru -Force
                         } -PassThru -Force
                     } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
             }
@@ -609,9 +632,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             )
                         } -PassThru
                     } -PassThru -Force
-
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @(
+                    @{
+                        Name = "Managed Metadata Service App Proxy"
+                    } | Add-Member -MemberType ScriptMethod `
+                        -Name Update `
+                        -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                        -PassThru -Force `
+                        | Add-Member -MemberType ScriptMethod `
+                        -Name Delete `
+                        -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                        -PassThru -Force
+                )
             }
 
             It "Should return present from the Get method" {
@@ -623,8 +666,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should call the remove service application cmdlet in the set method" {
+                $Global:SPDscServiceProxyDeleteCalled = $false
+
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
+                $Global:SPDscServiceProxyDeleteCalled | Should be $true
             }
         }
 
@@ -894,7 +940,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     -Name IsConnected `
                     -Value {
                     param($x)
-                    return ($true)
+                    return $true
                 } -PassThru -Force
 
                 return $spServiceApp
@@ -908,6 +954,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         -Name Update `
                         -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
                         -PassThru -Force `
+                        | Add-Member -MemberType ScriptMethod `
+                        -Name Delete `
+                        -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                        -PassThru -Force
                 )
             }
 
@@ -1175,22 +1225,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
+            $termStoreAdmins = @(
+                New-Object -TypeName PSObject -Property @{
+                    PrincipalName               = "Contoso\User1"
+                    IsWindowsAuthenticationMode = $true
+                }
+                New-Object -TypeName PSObject -Property @{
+                    PrincipalName               = "Contoso\User2"
+                    IsWindowsAuthenticationMode = $true
+                }
+            )
+            $termStoreAdmins = $termStoreAdmins | Add-Member -MemberType ScriptMethod `
+                -Name DoesUserHavePermissions `
+                -Value {
+                param ($userName)
+                return $true
+            } -PassThru -Force
+
             $termStores = @{
                 "Managed Metadata Service Application Proxy" = @{
                     Name                    = "Managed Metadata Service Application Proxy"
                     Languages               = @(1031)
                     DefaultLanguage         = 1031
                     WorkingLanguage         = 1033
-                    TermStoreAdministrators = @(
-                        New-Object -TypeName PSObject -Property @{
-                            PrincipalName               = "Contoso\User1"
-                            IsWindowsAuthenticationMode = $true
-                        }
-                        New-Object -TypeName PSObject -Property @{
-                            PrincipalName               = "Contoso\User2"
-                            IsWindowsAuthenticationMode = $true
-                        }
-                    )
+                    TermStoreAdministrators = $termStoreAdmins
                 } | Add-Member -MemberType ScriptMethod `
                     -Name AddTermStoreAdministrator `
                     -Value { $Global:SPDscAddUserCalled = $true }  `
@@ -1224,7 +1282,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false when the Test method is called" {
-                 Test-TargetResource @testParams | Should Be $false
+                Test-TargetResource @testParams | Should Be $false
             }
 
             It "Should match the mocked values" {
@@ -1246,7 +1304,222 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPDscDeleteLanguageCalled | Should Be $true
             }
         }
+
+        Context -Name "When there is no Managed Metadata Service and everything should be created and configured correctly" -Fixture {
+            $testParams = @{
+                Name                    = "Managed Metadata Service Application"
+                ProxyName               = "Managed Metadata Service Application Proxy"
+                ApplicationPool         = "SharePoint Service Applications"
+                DatabaseServer          = "databaseserver\instance"
+                DatabaseName            = "SP_MMS"
+                Ensure                  = "Present"
+                DefaultLanguage         = 1031
+                Languages               = @(1031)
+                TermStoreAdministrators = @(
+                    "CONTOSO\User1",
+                    "CONTOSO\User2"
+                )
+                ContentTypeHubUrl       = "http://contoso.sharepoint.com/sites/ctnew"
+            }
+
+            # There is no service application
+            Mock -CommandName Get-SPServiceApplication -MockWith { return $null }
+
+            It "Should return absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should return false when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new service application and proxy in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPMetadataServiceApplication
+                Assert-MockCalled New-SPMetadataServiceApplicationProxy
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
+            {
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    $spServiceApp = [PSCustomObject]@{
+                        TypeName        = "Managed Metadata Service"
+                        DisplayName     = $testParams.Name
+                        ApplicationPool = @{
+                            Name = $testParams.ApplicationPool
+                        }
+                        Database        = @{
+                            Name   = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                        }
+                    }
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        return (@{
+                                FullName = $getTypeFullName
+                            }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                            return (@{
+                                    Name = "GetContentTypeSyndicationHubLocal"
+                                }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                return @{
+                                    AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                }
+                            } -PassThru -Force
+                        } -PassThru -Force
+                    } -PassThru -Force
+                    return $spServiceApp
+                }
+            }
+
+            if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
+            {
+                Mock -CommandName Get-SPServiceApplication -MockWith {
+                    $spServiceApp = [PSCustomObject]@{
+                        TypeName        = "Managed Metadata Service"
+                        DisplayName     = $testParams.Name
+                        ApplicationPool = @{
+                            Name = $testParams.ApplicationPool
+                        }
+                        Database        = @{
+                            Name   = $testParams.DatabaseName
+                            Server = @{ Name = $testParams.DatabaseServer }
+                        }
+                    }
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                        New-Object -TypeName "Object" |
+                            Add-Member -MemberType NoteProperty `
+                            -Name FullName `
+                            -Value $getTypeFullName `
+                            -PassThru |
+                            Add-Member -MemberType ScriptMethod `
+                            -Name GetProperties `
+                            -Value {
+                            param($x)
+                            return @(
+                                (New-Object -TypeName "Object" |
+                                        Add-Member -MemberType NoteProperty `
+                                        -Name Name `
+                                        -Value "DatabaseMapper" `
+                                        -PassThru |
+                                        Add-Member -MemberType ScriptMethod `
+                                        -Name GetValue `
+                                        -Value {
+                                        param($x)
+                                        return (@{
+                                                FullName = $getTypeFullName
+                                            }) | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                                            return (@{
+                                                    FullName = $getTypeFullName
+                                                }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                                                return (@{
+                                                        Name = "GetContentTypeSyndicationHubLocal"
+                                                    }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                                                    return @{
+                                                        AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                                                    }
+                                                } -PassThru -Force
+                                            } -PassThru -Force
+                                        } -PassThru -Force
+                                    } -PassThru
+                                )
+                            )
+                        } -PassThru
+                    } -PassThru -Force
+
+                    return $spServiceApp
+                }
+            }
+
+            $termStoreAdmins = @(
+                New-Object -TypeName PSObject -Property @{
+                    PrincipalName               = "Contoso\UserToGetAddMemberWorking"
+                    IsWindowsAuthenticationMode = $true
+                }
+            )
+            $termStoreAdmins = $termStoreAdmins | Add-Member -MemberType ScriptMethod `
+                -Name DoesUserHavePermissions `
+                -Value {
+                param ($userName)
+                return $false
+            } -PassThru -Force
+
+            $termStores = @{
+                "Managed Metadata Service Application Proxy" = @{
+                    Name                    = "Managed Metadata Service Application Proxy"
+                    Languages               = @(1033)
+                    DefaultLanguage         = 1033
+                    WorkingLanguage         = 1033
+                    TermStoreAdministrators = $termStoreAdmins
+                } | Add-Member -MemberType ScriptMethod `
+                    -Name AddTermStoreAdministrator `
+                    -Value { $Global:SPDscAddUserCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name DeleteTermStoreAdministrator `
+                    -Value { $Global:SPDscDeleteUserCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name CommitAll `
+                    -Value { }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name AddLanguage `
+                    -Value { $Global:SPDscAddLanguageCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name DeleteLanguage `
+                    -Value { $Global:SPDscDeleteLanguageCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name CommitAll `
+                    -Value { }  `
+                    -PassThru -Force
+            }
+
+            Mock -CommandName Get-SPTaxonomySession -MockWith {
+                return @{
+                    TermStores = $termStores
+                }
+            }
+
+            It "Should call the update service app cmdlet from the set method for 'Cotent Type Hub Url'" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled Set-SPMetadataServiceApplication
+            }
+
+            It "Should call the add method from the set method for 'Term Store Administrators'" {
+                $Global:SPDscAddUserCalled = $false
+
+                Set-TargetResource @testParams
+
+                $Global:SPDscAddUserCalled | Should Be $true
+            }
+
+            It "Should change the value for 'Default Language'" {
+                $Global:SPDscAddUserCalled = $false
+                $Global:SPDscDeleteUserCalled = $false
+
+                Set-TargetResource @testParams
+
+                $termStores["$($testParams.ProxyName)"].DefaultLanguage | Should Be $testParams.DefaultLanguage
+                $Global:SPDscAddUserCalled | Should Be $true
+                $Global:SPDscDeleteUserCalled | Should Be $true
+            }
+
+            It "Should change the value for 'Languages'" {
+                $Global:SPDscAddLanguageCalled = $false
+                $Global:SPDscDeleteLanguageCalled = $false
+                $Global:SPDscAddUserCalled = $false
+                $Global:SPDscDeleteUserCalled = $false
+
+                Set-TargetResource @testParams
+
+                $Global:SPDscAddLanguageCalled | Should Be $true
+                $Global:SPDscDeleteLanguageCalled | Should Be $true
+                $Global:SPDscAddUserCalled | Should Be $true
+                $Global:SPDscDeleteUserCalled | Should Be $true
+            }
+        }
     }
 }
-
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

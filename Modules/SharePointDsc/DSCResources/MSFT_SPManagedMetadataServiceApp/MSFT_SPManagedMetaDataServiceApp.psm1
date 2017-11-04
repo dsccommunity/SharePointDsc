@@ -269,13 +269,10 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
+    $pName = "$Name Proxy"
     if ($PSBoundParameters.ContainsKey("ProxyName"))
     {
-        $pName = $params.ProxyName
-    }
-    if ($null -eq $pName)
-    {
-        $pName = "$Name Proxy"
+        $pName = $ProxyName
     }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
@@ -287,43 +284,19 @@ function Set-TargetResource
             $params = $args[0]
             $pName = $args[1]
 
-            if ($params.ContainsKey("Ensure") -eq $true)
-            {
-                $params.Remove("Ensure") | Out-Null
-            }
-
-            if ($params.ContainsKey("InstallAccount") -eq $true)
-            {
-                $params.Remove("InstallAccount") | Out-Null
-            }
-
-            if ($params.ContainsKey("TermStoreAdministrators") -eq $true)
-            {
-                $params.Remove("TermStoreAdministrators") | Out-Null
+            $newParams = @{
+                Name            = $params.Name
+                ApplicationPool = $params.ApplicationPool
+                DatabaseServer  = $params.DatabaseServer
+                DatabaseName    = $params.DatabaseName
             }
 
             if ($params.ContainsKey("ContentTypeHubUrl") -eq $true)
             {
-                $params.Add("HubUri", $params.ContentTypeHubUrl)
-                $params.Remove("ContentTypeHubUrl") | Out-Null
+                $newParams.Add("HubUri", $params.ContentTypeHubUrl)
             }
 
-            if ($params.ContainsKey("ProxyName") -eq $true)
-            {
-                $params.Remove("ProxyName") | Out-Null
-            }
-
-            if ($params.ContainsKey("DefaultLanguage") -eq $true)
-            {
-                $params.Remove("DefaultLanguage") | Out-Null
-            }
-
-            if ($params.ContainsKey("Languages") -eq $true)
-            {
-                $params.Remove("Languages") | Out-Null
-            }
-
-            $app = New-SPMetadataServiceApplication @params
+            $app = New-SPMetadataServiceApplication @newParams
             if ($null -ne $app)
             {
                 New-SPMetadataServiceApplicationProxy -Name $pName `
@@ -334,6 +307,7 @@ function Set-TargetResource
                     -DefaultSiteCollectionTaxonomy
             }
         }
+        $result = Get-TargetResource @PSBoundParameters
     }
 
     if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
@@ -403,146 +377,179 @@ function Set-TargetResource
                 Set-SPMetadataServiceApplication -Identity $serviceApp -HubUri $params.ContentTypeHubUrl
             }
         }
-    }
 
-    if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("TermStoreAdministrators") -eq $true)
-    {
-        # Update the term store administrators
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $result, $pName) `
-            -ScriptBlock {
+        if (($PSBoundParameters.ContainsKey("TermStoreAdministrators") -eq $true) `
+                -and ($null -ne (Compare-Object -ReferenceObject $result.TermStoreAdministrators `
+                        -DifferenceObject $TermStoreAdministrators)))
+        {
+            Write-Verbose -Message "Updating the term store administrators"
+            # Update the term store administrators
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $result, $pName) `
+                -ScriptBlock {
 
-            Write-Verbose -Message "Setting term store administrators"
-            $params = $args[0]
-            $currentValues = $args[1]
-            $pName = $args[2]
+                $params = $args[0]
+                $currentValues = $args[1]
+                $pName = $args[2]
 
-            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                | Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication -eq $true
-            }
-            $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
-            $termStore = $session.TermStores[$pName]
+                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                    | Where-Object -FilterScript {
+                    $_.IsAdministrationWebApplication -eq $true
+                }
+                $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
+                $termStore = $session.TermStores[$pName]
 
-            if ($null -eq $termStore)
-            {
-                throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
-            }
-
-            $changesToMake = Compare-Object -ReferenceObject $currentValues.TermStoreAdministrators `
-                -DifferenceObject $params.TermStoreAdministrators
-
-            $changesToMake | ForEach-Object -Process {
-                $change = $_
-                switch ($change.SideIndicator)
+                if ($null -eq $termStore)
                 {
-                    "<="
+                    throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                }
+
+                $changesToMake = Compare-Object -ReferenceObject $currentValues.TermStoreAdministrators `
+                    -DifferenceObject $params.TermStoreAdministrators
+
+                $changesToMake | ForEach-Object -Process {
+                    $change = $_
+                    switch ($change.SideIndicator)
                     {
-                        # remove an existing user
-                        if ($termStore.TermStoreAdministrators.PrincipalName -contains $change.InputObject)
+                        "<="
                         {
-                            $termStore.DeleteTermStoreAdministrator($change.InputObject)
+                            # remove an existing user
+                            if ($termStore.TermStoreAdministrators.PrincipalName -contains $change.InputObject)
+                            {
+                                $termStore.DeleteTermStoreAdministrator($change.InputObject)
+                            }
+                            else
+                            {
+                                $claimsToken = New-SPClaimsPrincipal -Identity $change.InputObject `
+                                    -IdentityType WindowsSamAccountName
+                                $termStore.DeleteTermStoreAdministrator($claimsToken.ToEncodedString())
+                            }
                         }
-                        else
+                        "=>"
                         {
-                            $claimsToken = New-SPClaimsPrincipal -Identity $change.InputObject `
-                                -IdentityType WindowsSamAccountName
-                            $termStore.DeleteTermStoreAdministrator($claimsToken.ToEncodedString())
+                            # add a new user
+                            $termStore.AddTermStoreAdministrator($change.InputObject)
                         }
-                    }
-                    "=>"
-                    {
-                        # add a new user
-                        $termStore.AddTermStoreAdministrator($change.InputObject)
-                    }
-                    default
-                    {
-                        throw "An unknown side indicator was found."
+                        default
+                        {
+                            throw "An unknown side indicator was found."
+                        }
                     }
                 }
-            }
 
-            $termStore.CommitAll();
+                $termStore.CommitAll();
+            }
         }
-    }
 
-    if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("DefaultLanguage") -eq $true)
-    {
-        # The lanauge settings should be set to default
-        Write-Verbose -Message "Updating the default language for Managed Metadata Service Application Proxy '$pName'"
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $pName) `
-            -ScriptBlock {
+        if (($PSBoundParameters.ContainsKey("DefaultLanguage") -eq $true) `
+                -and ($DefaultLanguage -ne $result.DefaultLanguage))
+        {
+            # The lanauge settings should be set to default
+            Write-Verbose -Message "Updating the default language for Managed Metadata Service Application Proxy '$pName'"
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $pName) `
+                -ScriptBlock {
 
-            $params = $args[0]
-            $pName = $args[1]
+                $params = $args[0]
+                $pName = $args[1]
 
-            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                | Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication -eq $true
-            }
-            $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
-            $termStore = $session.TermStores[$pName]
+                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                    | Where-Object -FilterScript {
+                    $_.IsAdministrationWebApplication -eq $true
+                }
+                $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
+                $termStore = $session.TermStores[$pName]
 
-            if ($null -eq $termStore)
-            {
-                throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
-            }
-
-            $termStore.DefaultLanguage = $params.DefaultLanguage
-            $termStore.CommitAll()
-        }
-    }
-
-    if ($Ensure -eq "Present" -and $PSBoundParameters.ContainsKey("Languages") -eq $true)
-    {
-        Write-Verbose -Message "Updating working languages for Managed Metadata Service Application Proxy '$pName'"
-        # Update the term store working languages
-        Invoke-SPDSCCommand -Credential $InstallAccount `
-            -Arguments @($PSBoundParameters, $result, $pName) `
-            -ScriptBlock {
-
-            $params = $args[0]
-            $currentValues = $args[1]
-            $pName = $args[2]
-
-            $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                | Where-Object -FilterScript {
-                $_.IsAdministrationWebApplication -eq $true
-            }
-            $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
-            $termStore = $session.TermStores[$pName]
-
-            if ($null -eq $termStore)
-            {
-                throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
-            }
-
-            $changesToMake = Compare-Object -ReferenceObject $currentValues.Languages `
-                -DifferenceObject $params.Languages
-
-            $changesToMake | ForEach-Object -Process {
-                $change = $_
-                switch ($change.SideIndicator)
+                if ($null -eq $termStore)
                 {
-                    "<="
-                    {
-                        # delete a working language
-                        $termStore.DeleteLanguage($change.InputObject)
-                    }
-                    "=>"
-                    {
-                        # add a working language
-                        $termStore.AddLanguage($change.InputObject)
-                    }
-                    default
-                    {
-                        throw "An unknown side indicator was found."
-                    }
+                    throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                }
+
+                $permissionResult = $termStore.TermStoreAdministrators.DoesUserHavePermissions([Microsoft.SharePoint.Taxonomy.TaxonomyRights]::ManageTermStore)
+
+                if (-not($permissionResult))
+                {
+                    $termStore.AddTermStoreAdministrator([Security.Principal.WindowsIdentity]::GetCurrent().Name)
+                    $termStore.CommitAll()
+                }
+
+                $termStore.DefaultLanguage = $params.DefaultLanguage
+                $termStore.CommitAll()
+
+                if (-not ($permissionResult))
+                {
+                    $termStore.DeleteTermStoreAdministrator([Security.Principal.WindowsIdentity]::GetCurrent().Name)
+                    $termStore.CommitAll()
                 }
             }
+        }
 
-            $termStore.CommitAll();
+        if (($PSBoundParameters.ContainsKey("Languages") -eq $true) `
+                -and ($null -ne (Compare-Object -ReferenceObject $result.Languages `
+                        -DifferenceObject $Languages)))
+        {
+            Write-Verbose -Message "Updating working languages for Managed Metadata Service Application Proxy '$pName'"
+            # Update the term store working languages
+            Invoke-SPDSCCommand -Credential $InstallAccount `
+                -Arguments @($PSBoundParameters, $result, $pName) `
+                -ScriptBlock {
+
+                $params = $args[0]
+                $currentValues = $args[1]
+                $pName = $args[2]
+
+                $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
+                    | Where-Object -FilterScript {
+                    $_.IsAdministrationWebApplication -eq $true
+                }
+                $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
+                $termStore = $session.TermStores[$pName]
+
+                if ($null -eq $termStore)
+                {
+                    throw "The name of the Managed Metadata Service Application Proxy '$pName' did not return any termstore."
+                }
+
+                $permissionResult = $termStore.TermStoreAdministrators.DoesUserHavePermissions([Microsoft.SharePoint.Taxonomy.TaxonomyRights]::ManageTermStore)
+
+                if (-not($permissionResult))
+                {
+                    $termStore.AddTermStoreAdministrator([Security.Principal.WindowsIdentity]::GetCurrent().Name)
+                    $termStore.CommitAll()
+                }
+
+                $changesToMake = Compare-Object -ReferenceObject $currentValues.Languages `
+                    -DifferenceObject $params.Languages
+
+                $changesToMake | ForEach-Object -Process {
+                    $change = $_
+                    switch ($change.SideIndicator)
+                    {
+                        "<="
+                        {
+                            # delete a working language
+                            $termStore.DeleteLanguage($change.InputObject)
+                        }
+                        "=>"
+                        {
+                            # add a working language
+                            $termStore.AddLanguage($change.InputObject)
+                        }
+                        default
+                        {
+                            throw "An unknown side indicator was found."
+                        }
+                    }
+                }
+
+                $termStore.CommitAll();
+
+                if (-not ($permissionResult))
+                {
+                    $termStore.DeleteTermStoreAdministrator([Security.Principal.WindowsIdentity]::GetCurrent().Name)
+                    $termStore.CommitAll()
+                }
+            }
         }
     }
 
@@ -628,7 +635,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing managed metadata service application $Name"
 
     $valuesToCheck = @("ApplicationPool",
-    "Ensure")
+        "Ensure")
 
     $PSBoundParameters.Ensure = $Ensure
     if ($PSBoundParameters.ContainsKey("ContentTypeHubUrl") -eq $true)
