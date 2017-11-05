@@ -4,19 +4,19 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $SearchServiceAppName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Query,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Exchange Search Provider", 
                      "Local People Provider",  
                      "Local SharePoint Provider", 
@@ -26,16 +26,16 @@ function Get-TargetResource
         [System.String] 
         $ProviderType,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $ConnectionUrl,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -85,7 +85,7 @@ function Get-TargetResource
         if ($null -ne $source)
         {
             $providers = $fedManager.ListProviders()
-            $provider = $providers.Values | Where-Object -FilterScript { 
+            $provider = $providers.Values | Where-Object -FilterScript {
                 $_.Id -eq $source.ProviderId 
             }
             return @{
@@ -111,19 +111,19 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $SearchServiceAppName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Query,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Exchange Search Provider", 
                      "Local People Provider",  
                      "Local SharePoint Provider", 
@@ -133,16 +133,16 @@ function Set-TargetResource
         [System.String] 
         $ProviderType,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $ConnectionUrl,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -190,7 +190,7 @@ function Set-TargetResource
             $resultSource = $fedManager.CreateSource($searchOwner)
             $resultSource.Name = $params.Name
             $providers = $fedManager.ListProviders()
-            $provider = $providers.Values | Where-Object -FilterScript { 
+            $provider = $providers.Values | Where-Object -FilterScript {
                 $_.Name -eq $params.ProviderType
             }
             $resultSource.ProviderId = $provider.Id
@@ -242,19 +242,19 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $SearchServiceAppName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Query,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Exchange Search Provider", 
                      "Local People Provider",  
                      "Local SharePoint Provider", 
@@ -264,16 +264,16 @@ function Test-TargetResource
         [System.String] 
         $ProviderType,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $ConnectionUrl,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

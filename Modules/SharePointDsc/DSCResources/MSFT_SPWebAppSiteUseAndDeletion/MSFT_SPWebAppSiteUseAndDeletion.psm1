@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SendUnusedSiteCollectionNotifications,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $UnusedSiteNotificationPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AutomaticallyDeleteUnusedSiteCollections,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -50,8 +50,8 @@ function Get-TargetResource
 
         $wa = Get-SPWebApplication -Identity $params.Url `
                                    -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             return $null 
         }
 
@@ -74,28 +74,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SendUnusedSiteCollectionNotifications,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $UnusedSiteNotificationPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AutomaticallyDeleteUnusedSiteCollections,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -118,15 +118,15 @@ function Set-TargetResource
         }
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             throw "Configured web application could not be found"
         }
 
         # Check if the specified value is in the range for the configured schedule
         $job = Get-SPTimerJob -Identity job-dead-site-delete -WebApplication $params.Url
-        if ($null -eq $job) 
-        { 
+        if ($null -eq $job)
+        {
             throw "Dead Site Delete timer job for web application $($params.Url) could not be found"
         }
         else
@@ -134,7 +134,7 @@ function Set-TargetResource
             # Check schedule value     
             switch ($job.Schedule.Description)
             {
-                "Daily"   { 
+                "Daily"   {
                     if (($params.UnusedSiteNotificationsBeforeDeletion -lt 28) -or
                         ($params.UnusedSiteNotificationsBeforeDeletion -gt 168))
                     {
@@ -164,23 +164,23 @@ function Set-TargetResource
         Write-Verbose -Message "Start update"
 
         # Set the Site Use and Deletion settings
-        if ($params.ContainsKey("SendUnusedSiteCollectionNotifications")) 
-        { 
+        if ($params.ContainsKey("SendUnusedSiteCollectionNotifications"))
+        {
             $wa.SendUnusedSiteCollectionNotifications = `
                 $params.SendUnusedSiteCollectionNotifications
         }
-        if ($params.ContainsKey("UnusedSiteNotificationPeriod")) 
-        { 
+        if ($params.ContainsKey("UnusedSiteNotificationPeriod"))
+        {
             $timespan = New-TimeSpan -Days $params.UnusedSiteNotificationPeriod
             $wa.UnusedSiteNotificationPeriod = $timespan
         }
-        if ($params.ContainsKey("AutomaticallyDeleteUnusedSiteCollections")) 
-        { 
+        if ($params.ContainsKey("AutomaticallyDeleteUnusedSiteCollections"))
+        {
             $wa.AutomaticallyDeleteUnusedSiteCollections = `
                 $params.AutomaticallyDeleteUnusedSiteCollections
         }
-        if ($params.ContainsKey("UnusedSiteNotificationsBeforeDeletion")) 
-        { 
+        if ($params.ContainsKey("UnusedSiteNotificationsBeforeDeletion"))
+        {
             $wa.UnusedSiteNotificationsBeforeDeletion = `
                 $params.UnusedSiteNotificationsBeforeDeletion 
         }
@@ -194,28 +194,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SendUnusedSiteCollectionNotifications,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $UnusedSiteNotificationPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AutomaticallyDeleteUnusedSiteCollections,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(2,168)]  
         [System.UInt32] 
         $UnusedSiteNotificationsBeforeDeletion,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -224,8 +224,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
     
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 

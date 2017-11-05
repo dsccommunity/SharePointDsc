@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(    
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -22,9 +22,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.Office.Access.Server.MossHost.AccessServerWebServiceApplication"
         
         # Mocks for all contexts
-        Mock -CommandName Get-SPServiceApplication -MockWith { }
-        Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-        Mock -CommandName Remove-SPServiceApplication -MockWith { }
+        Mock -CommandName Get-SPServiceApplication -MockWith {}
+        Mock -CommandName New-SPAccessServiceApplication -MockWith {}
+        Mock -CommandName Remove-SPServiceApplication -MockWith {}
 
         # Test contexts
         Context -Name "When Access 2010 Services doesn't exists and should exist" -Fixture {
@@ -36,14 +36,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             
             Mock -CommandName Remove-SPServiceApplication -MockWith {}
             Mock -CommandName New-SPAccessServiceApplication -MockWith {}            
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                                     DisplayName = $testParams.Name 
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
+                                           -Value {
+                                                return @{
                                                     FullName = "$($getTypeFullName).other" 
                                                 }  
                                             } -PassThru -Force 
@@ -70,10 +70,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Remove-SPServiceApplication -MockWith {}
+            Mock -CommandName New-SPAccessServiceApplication -MockWith {}
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                                     DisplayName = $testParams.Name
                                     ApplicationPool = [PSCustomObject]@{
                                         Name = $testParams.ApplicationPool
@@ -81,8 +81,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
+                                           -Value {
+                                                return @{
                                                     FullName = "$($getTypeFullName)" 
                                                 }  
                                             } -PassThru -Force 
@@ -109,10 +109,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Absent"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
+            Mock -CommandName Remove-SPServiceApplication -MockWith {}
+            Mock -CommandName New-SPAccessServiceApplication -MockWith {}
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
                                     DisplayName = $testParams.Name 
                                     ApplicationPool = [PSCustomObject]@{
                                         Name = $testParams.ApplicationPool
@@ -120,8 +120,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 } 
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
+                                           -Value {
+                                                return @{
                                                     FullName = "$($getTypeFullName)" 
                                                 }  
                                             } -PassThru -Force 
@@ -148,9 +148,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Present"
             }
             
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+            Mock -CommandName Remove-SPServiceApplication -MockWith {}
+            Mock -CommandName New-SPAccessServiceApplication -MockWith {}
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 return $null
             }
             
@@ -173,9 +173,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Ensure = "Absent"
             }
                 
-            Mock -CommandName Remove-SPServiceApplication -MockWith { }
-            Mock -CommandName New-SPAccessServiceApplication -MockWith { }
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+            Mock -CommandName Remove-SPServiceApplication -MockWith {}
+            Mock -CommandName New-SPAccessServiceApplication -MockWith {}
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 return $null
             }
             

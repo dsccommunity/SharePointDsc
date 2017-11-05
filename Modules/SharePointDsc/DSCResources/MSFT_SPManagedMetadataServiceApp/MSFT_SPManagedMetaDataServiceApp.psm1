@@ -4,40 +4,40 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ContentTypeHubUrl,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -58,7 +58,7 @@ function Get-TargetResource
             TermStoreAdministrators = @()
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
@@ -74,11 +74,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -132,28 +132,36 @@ function Get-TargetResource
             }
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true 
             }
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
 
             $currentAdmins = @()
-            
-            $session.TermStores[0].TermStoreAdministrators | ForEach-Object -Process {
-                $name = [string]::Empty
-                if ($_.IsWindowsAuthenticationMode -eq $true)
-                {
-                    $name = $_.PrincipalName
-                }
-                else 
-                {
-                    $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
-                    if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+") 
+
+            if ($null -ne $session.TermStores[0])
+            {
+                $session.TermStores[0].TermStoreAdministrators | ForEach-Object -Process {
+                    $name = [string]::Empty
+                    if ($_.IsWindowsAuthenticationMode -eq $true)
                     {
-                        $name = Resolve-SPDscSecurityIdentifier -SID $name
+                        $name = $_.PrincipalName
                     }
+                    else 
+                    {
+                        $name = (New-SPClaimsPrincipal -Identity $_.PrincipalName -IdentityType EncodedClaim).Value
+                        if ($name -match "^s-1-[0-59]-\d+-\d+-\d+-\d+-\d+") 
+                        {
+                            $name = Resolve-SPDscSecurityIdentifier -SID $name
+                        }
+                    }
+                    $currentAdmins += $name
                 }
-                $currentAdmins += $name
+            }
+            else
+            {
+                Write-Verbose -Message ("TermStore could not be found. Please check if the " + `
+                                        "MMS service instance is started.")                
             }
 
             return @{
@@ -162,7 +170,7 @@ function Get-TargetResource
                 Ensure                  = "Present"
                 ApplicationPool         = $serviceApp.ApplicationPool.Name
                 DatabaseName            = $serviceApp.Database.Name
-                DatabaseServer          = $serviceApp.Database.Server.Name
+                DatabaseServer          = $serviceApp.Database.NormalizedDataSource
                 TermStoreAdministrators = $currentAdmins
                 ContentTypeHubUrl       = $hubUrl
                 InstallAccount          = $params.InstallAccount
@@ -177,40 +185,40 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ContentTypeHubUrl,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount    
     )
@@ -220,7 +228,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating Managed Metadata Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -228,15 +236,15 @@ function Set-TargetResource
             $params = $args[0]
             
             if ($params.ContainsKey("Ensure")) 
-            { 
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
             if ($params.ContainsKey("InstallAccount")) 
-            { 
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
             if ($params.ContainsKey("TermStoreAdministrators")) 
-            { 
+            {
                 $params.Remove("TermStoreAdministrators") | Out-Null 
             }
             if ($params.ContainsKey("ContentTypeHubUrl")) 
@@ -245,11 +253,12 @@ function Set-TargetResource
                 $params.Remove("ContentTypeHubUrl")
             }
             if ($params.ContainsKey("ProxyName")) 
-            { 
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
-            if ($null -eq $pName) {
+            if ($null -eq $pName)
+            {
                 $pName = "$($params.Name) Proxy"
             }
 
@@ -316,11 +325,17 @@ function Set-TargetResource
             $currentValues = $args[1]
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true 
             }
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
             $termStore = $session.TermStores[0]
+
+            if ($null -eq $termStore)
+            {
+                throw ("Cannot retrieve TermStore. Please check if the Managed Metadata " + `
+                       "service instance is running.")
+            }
 
             $changesToMake = Compare-Object -ReferenceObject $currentValues.TermStoreAdministrators `
                                             -DifferenceObject $params.TermStoreAdministrators
@@ -390,40 +405,40 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ContentTypeHubUrl,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount      
     )

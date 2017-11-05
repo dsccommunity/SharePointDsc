@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.string] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.string] 
         $UserProfileService,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -46,7 +46,7 @@ function Get-TargetResource
         } 
 
         if ($null -eq $upsa) 
-        { 
+        {
             return $nullReturn 
         }
 
@@ -81,28 +81,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.string] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.string] 
         $UserProfileService,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -126,7 +126,7 @@ function Set-TargetResource
             throw "Service application $($params.UserProfileService) not found"
         }
         
-        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript { 
+        $caURL = (Get-SpWebApplication  -IncludeCentralAdministration | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true 
         }).Url
         $context = Get-SPServiceContext  $caURL 
@@ -135,7 +135,8 @@ function Set-TargetResource
                                                 -ArgumentList $context
 
         if ($null -eq $userProfileConfigManager)
-        {   #if config manager returns null when ups is available then isuee is permissions
+        {
+            #if config manager returns null when ups is available then isuee is permissions
             throw "Account running process needs admin permission on user profile service application"
         }
         $properties = $userProfileConfigManager.GetPropertiesWithSection()
@@ -182,28 +183,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.string] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.string] 
         $UserProfileService,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.string] 
         $DisplayName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.uint32] 
         $DisplayOrder,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
 
@@ -216,7 +217,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false  
     }
 

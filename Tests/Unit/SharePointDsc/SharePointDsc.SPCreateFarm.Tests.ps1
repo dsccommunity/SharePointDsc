@@ -1,7 +1,7 @@
 [CmdletBinding()]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -252,9 +252,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer 
                 })
             } 
             
@@ -301,9 +299,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer 
                 })
             } 
             
@@ -363,9 +359,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = "WrongDBName"
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer 
                 })
             } 
             
@@ -413,7 +407,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ Name = $testParams.DatabaseServer }
+                    NormalizedDataSource = $testParams.DatabaseServer
                 })
             } 
             

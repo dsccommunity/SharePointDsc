@@ -4,39 +4,39 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $Admin,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $Crawler,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $ContentProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $AnalyticsProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $QueryProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $IndexPartition,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $FirstPartitionDirectory,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -57,7 +57,7 @@ function Get-TargetResource
         }    
         $currentTopology = $ssa.ActiveTopology
 
-        $allServers = Get-SPServer | ForEach-Object -Process { 
+        $allServers = Get-SPServer | ForEach-Object -Process {
                         return New-Object -TypeName System.Object | `
                                 Add-Member -MemberType NoteProperty `
                                            -Name Name `
@@ -72,7 +72,7 @@ function Get-TargetResource
         $allComponents = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology
 
         $AdminComponents = @()
-        $AdminComponents += ($allComponents | Where-Object -FilterScript { 
+        $AdminComponents += ($allComponents | Where-Object -FilterScript {
                                 ($_.GetType().Name -eq "AdminComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -83,7 +83,7 @@ function Get-TargetResource
                             }
 
         $CrawlComponents = @()
-        $CrawlComponents += ($allComponents | Where-Object -FilterScript { 
+        $CrawlComponents += ($allComponents | Where-Object -FilterScript {
                                 ($_.GetType().Name -eq "CrawlComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -94,7 +94,7 @@ function Get-TargetResource
                             }
 
         $ContentProcessingComponents = @()
-        $ContentProcessingComponents += ($allComponents | Where-Object -FilterScript { 
+        $ContentProcessingComponents += ($allComponents | Where-Object -FilterScript {
                                             ($_.GetType().Name -eq "ContentProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -105,7 +105,7 @@ function Get-TargetResource
                                         }
 
         $AnalyticsProcessingComponents = @()
-        $AnalyticsProcessingComponents += ($allComponents | Where-Object -FilterScript { 
+        $AnalyticsProcessingComponents += ($allComponents | Where-Object -FilterScript {
                                             ($_.GetType().Name -eq "AnalyticsProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -116,7 +116,7 @@ function Get-TargetResource
                                         }
 
         $QueryProcessingComponents = @()
-        $QueryProcessingComponents += ($allComponents | Where-Object -FilterScript { 
+        $QueryProcessingComponents += ($allComponents | Where-Object -FilterScript {
                                             ($_.GetType().Name -eq "QueryProcessingComponent") 
                                         }).ServerId | ForEach-Object -Process {
                                             $serverId = $_
@@ -127,7 +127,7 @@ function Get-TargetResource
                                         }
 
         $IndexComponents = @()
-        $IndexComponents += ($allComponents | Where-Object -FilterScript { 
+        $IndexComponents += ($allComponents | Where-Object -FilterScript {
                                 ($_.GetType().Name -eq "IndexComponent") 
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
@@ -139,6 +139,21 @@ function Get-TargetResource
         
         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
         
+        $firstPartition = $null
+        $enterpriseSearchServiceInstance = Get-SPEnterpriseSearchServiceInstance
+        if($null -ne $enterpriseSearchServiceInstance)
+        {
+            $ssiComponents = $enterpriseSearchServiceInstance.Components
+            if($null -ne $ssiComponents)
+            {
+                if($ssiComponents.Length -gt 1)
+                {
+                    $ssiComponents = $ssiComponents[0]
+                }   
+                $firstPartition = $ssiComponents.IndexLocation
+            }
+        }
+
         return @{
             ServiceAppName = $params.ServiceAppName
             Admin = $AdminComponents -replace ".$domain"
@@ -147,7 +162,7 @@ function Get-TargetResource
             AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
             QueryProcessing = $QueryProcessingComponents -replace ".$domain"
             InstallAccount = $params.InstallAccount
-            FirstPartitionDirectory = $params.FirstPartitionDirectory
+            FirstPartitionDirectory = $firstPartition
             IndexPartition = $IndexComponents -replace ".$domain"
         }
     }
@@ -159,39 +174,39 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $Admin,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $Crawler,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $ContentProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $AnalyticsProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $QueryProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $IndexPartition,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $FirstPartitionDirectory,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -209,28 +224,28 @@ function Set-TargetResource
         $ConfirmPreference = 'None'
 
         $AllSearchServers = @()
-        $AllSearchServers += ($params.Admin | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.Admin | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.Crawler | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.Crawler | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.ContentProcessing | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.ContentProcessing | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.AnalyticsProcessing | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.AnalyticsProcessing | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.QueryProcessing | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.QueryProcessing | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
-        $AllSearchServers += ($params.IndexPartition | Where-Object -FilterScript { 
+        $AllSearchServers += ($params.IndexPartition | Where-Object -FilterScript {
                                 ($AllSearchServers -contains $_) -eq $false 
                             })
 
         # Ensure the search service instance is running on all servers
-        foreach($searchServer in $AllSearchServers) {
-            
+        foreach($searchServer in $AllSearchServers)
+        {
             $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer `
                                                                    -ErrorAction SilentlyContinue
             if ($null -eq $searchService) 
@@ -240,7 +255,7 @@ function Set-TargetResource
                 $searchService = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer    
             }
             
-            if($searchService.Status -eq "Offline") 
+            if ($searchService.Status -eq "Offline") 
             {
                 Write-Verbose -Message "Start Search Service Instance"
                 Start-SPEnterpriseSearchServiceInstance -Identity $searchServer
@@ -261,7 +276,8 @@ function Set-TargetResource
         }
 
         # Create the index partition directory on each remote server
-        foreach($IndexPartitionServer in $params.IndexPartition) {
+        foreach($IndexPartitionServer in $params.IndexPartition)
+        {
             $networkPath = "\\$IndexPartitionServer\" + `
                            $params.FirstPartitionDirectory.Replace(":\", "$\")
             New-Item $networkPath -ItemType Directory -Force
@@ -275,17 +291,19 @@ function Set-TargetResource
         
         # Get all service service instances to assign topology components to
         $AllSearchServiceInstances = @{}
-        foreach ($server in $AllSearchServers) {
+        foreach ($server in $AllSearchServers)
+        {
             $serverName = $server
             $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server `
                                                                   -ErrorAction SilentlyContinue
-            if ($null -eq $serviceToAdd) 
+            if ($null -eq $serviceToAdd)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $server = "$server.$domain"
                 $serviceToAdd = Get-SPEnterpriseSearchServiceInstance -Identity $server    
             }
-            if ($null -eq $serviceToAdd) {
+            if ($null -eq $serviceToAdd)
+            {
                 throw "Unable to locate a search service instance on $serverName"
             }
             $AllSearchServiceInstances.Add($serverName, $serviceToAdd)
@@ -293,7 +311,8 @@ function Set-TargetResource
 
         # Get current topology and prepare a new one
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName
-        if ($null -eq $ssa) {
+        if ($null -eq $ssa)
+        {
             throw "Search service applications '$($params.ServiceAppName)' was not found"
             return
         }
@@ -317,7 +336,7 @@ function Set-TargetResource
           "ContentProcessing", 
           "AnalyticsProcessing", 
           "QueryProcessing", 
-          "IndexPartition")  | ForEach-Object -Process { 
+          "IndexPartition")  | ForEach-Object -Process {
               
             $CurrentSearchProperty = $_
             Write-Verbose "Setting components for '$CurrentSearchProperty' property"
@@ -328,20 +347,22 @@ function Set-TargetResource
             } 
             else 
             {
-                $ComponentsToAdd = $params.$CurrentSearchProperty | Where-Object -FilterScript { 
+                $ComponentsToAdd = $params.$CurrentSearchProperty | Where-Object -FilterScript {
                     $CurrentValues.$CurrentSearchProperty -contains $_ -eq $false 
                 }
 
-                $ComponentsToRemove = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript { 
+                $ComponentsToRemove = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
                     $params.$CurrentSearchProperty -contains $_ -eq $false 
                 }
             }
-            foreach($ComponentToAdd in $ComponentsToAdd) {
+            foreach($ComponentToAdd in $ComponentsToAdd)
+            {
                 $NewComponentParams = @{
                     SearchTopology = $newTopology
                     SearchServiceInstance = $AllSearchServiceInstances.$ComponentToAdd
                 }
-                switch($componentTypes.$CurrentSearchProperty) {
+                switch($componentTypes.$CurrentSearchProperty)
+                {
                     "AdminComponent" {
                         New-SPEnterpriseSearchAdminComponent @NewComponentParams
                     }
@@ -371,7 +392,8 @@ function Set-TargetResource
                     }
                 }
             }
-            foreach($ComponentToRemove in $ComponentsToRemove) {
+            foreach($ComponentToRemove in $ComponentsToRemove)
+            {
                 if ($componentTypes.$CurrentSearchProperty -eq "IndexComponent") 
                 {
                     $component = Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
@@ -423,39 +445,39 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $Admin,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $Crawler,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $ContentProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $AnalyticsProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $QueryProcessing,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $IndexPartition,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $FirstPartitionDirectory,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

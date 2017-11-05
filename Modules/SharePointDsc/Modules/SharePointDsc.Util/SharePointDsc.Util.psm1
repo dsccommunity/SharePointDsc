@@ -54,7 +54,7 @@ function Get-SPDscFarmVersionInfo
 {
     param
     (
-        [parameter(Mandatory = $false)]
+        [parameter()]
         [System.String]
         $ProductToCheck
     )
@@ -71,7 +71,7 @@ function Get-SPDscFarmVersionInfo
 
     if ($ProductToCheck)
     {
-        $products = $products | Where-Object -FilterScript { 
+        $products = $products | Where-Object -FilterScript {
             $_ -eq $ProductToCheck 
         }
         
@@ -145,7 +145,7 @@ function Get-SPDscRegProductsInfo
     $registryLocation = Get-ChildItem -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
     $sharePointPrograms = $registryLocation | Where-Object -FilterScript {
          $_.PsPath -like "*\Office*" 
-    } | ForEach-Object -Process { 
+    } | ForEach-Object -Process {
         Get-ItemProperty -Path $_.PsPath 
     }
     
@@ -218,11 +218,11 @@ function Invoke-SPDSCCommand
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $Credential,
         
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [Object[]]
         $Arguments,
         
@@ -281,7 +281,7 @@ function Invoke-SPDSCCommand
     else 
     {
         if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) 
-        { 
+        {
             if (-not $Env:USERNAME.Contains("$")) 
             {
                 throw [Exception] ("Unable to use both InstallAccount and " + `
@@ -305,7 +305,7 @@ function Invoke-SPDSCCommand
                                  -ErrorAction Continue
         
         if ($session) 
-        { 
+        {
             $invokeArgs.Add("Session", $session) 
         }
 
@@ -328,7 +328,7 @@ function Invoke-SPDSCCommand
         }
 
         if ($session) 
-        { 
+        {
             Remove-PSSession -Session $session 
         } 
         return $result
@@ -425,7 +425,7 @@ function Test-SPDSCRunAsCredential
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $Credential
     )
@@ -433,7 +433,7 @@ function Test-SPDSCRunAsCredential
     # If no specific credential is passed and it's not the machine account, it must be 
     # PsDscRunAsCredential
     if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false)) 
-    { 
+    {
         return $true 
     }
     # return false for all other scenarios
@@ -445,7 +445,7 @@ function Test-SPDSCRunningAsFarmAccount
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param ( 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [pscredential] 
         $InstallAccount
     )
@@ -497,7 +497,7 @@ function Test-SPDscParameterState
         [Object]
         $DesiredValues,
 
-        [parameter(Mandatory = $false, Position=3)] 
+        [parameter(, Position=3)] 
         [Array]
         $ValuesToCheck
     )
@@ -663,7 +663,7 @@ function Test-SPDSCUserIsLocalAdmin
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `
         ForEach-Object -Process {
             $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
-        } | Where-Object -FilterScript { 
+        } | Where-Object -FilterScript {
             $_ -eq $accountName 
         }
 }

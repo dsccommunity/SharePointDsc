@@ -4,48 +4,48 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]    
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Description,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $Language,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Template,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $UniquePermissions,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $UseParentTopNav,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AddToQuickLaunch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $AddToTopNav,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -59,14 +59,14 @@ function Get-TargetResource
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($web) 
-        { 
+        if ($web)
+        {
             $ensureResult   = "Present" 
             $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
             $parentTopNav   = $web.Navigation.UseShared
         } 
         else 
-        { 
+        {
             $ensureResult = "Absent" 
         }
         
@@ -90,48 +90,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]    
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Description,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $Language,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Template,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $UniquePermissions,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $UseParentTopNav,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AddToQuickLaunch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $AddToTopNav,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -145,22 +145,22 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
         
-        if ($null -eq $params.InstallAccount) 
-        {    
+        if ($null -eq $params.InstallAccount)
+        {
             $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
         } 
         else
-        {    
+        {
             $currentUserName = $params.InstallAccount.UserName
         }
         
         Write-Verbose "Grant user '$currentUserName' Access To Process Identity for '$($params.Url)'..."
         $site = New-Object -Type Microsoft.SharePoint.SPSite -ArgumentList $params.Url  
-        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName) 
+        $site.WebApplication.GrantAccessToProcessIdentity($currentUserName)
         
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
-        if ($null -eq $web) 
+        if ($null -eq $web)
         {
             $params.Remove("InstallAccount") | Out-Null
             $params.Remove("Ensure") | Out-Null
@@ -169,39 +169,39 @@ function Set-TargetResource
         }
         else
         {
-            if ($params.Ensure -eq "Absent") 
+            if ($params.Ensure -eq "Absent")
             {
                 Remove-SPweb $params.Url -confirm:$false
             }
             else
-            {    
+            {
                 $changedWeb = $false
                 
-                if ($web.Title -ne $params.Name) 
+                if ($web.Title -ne $params.Name)
                 {
                     $web.Title = $params.Name
                     $changedWeb = $true
                 }
 
-                if ($web.Description -ne $params.Description) 
+                if ($web.Description -ne $params.Description)
                 {
                     $web.Description = $params.Description
                     $changedWeb = $true
                 }
 
-                if ($web.Navigation.UseShared -ne $params.UseParentTopNav) 
+                if ($web.Navigation.UseShared -ne $params.UseParentTopNav)
                 {
                     $web.Navigation.UseShared = $params.UseParentTopNav
                     $changedWeb = $true
                 }
 
-                if ($web.HasUniquePerm -ne $params.UniquePermissions) 
+                if ($web.HasUniquePerm -ne $params.UniquePermissions)
                 {
                     $web.HasUniquePerm = $params.UniquePermissions
                     $changedWeb = $true
                 }
                 
-                if ($changedWeb) 
+                if ($changedWeb)
                 {
                     $web.Update()
                 }
@@ -216,48 +216,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]    
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Description,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $Language,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Template,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $UniquePermissions,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $UseParentTopNav,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AddToQuickLaunch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean] 
         $AddToTopNav,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

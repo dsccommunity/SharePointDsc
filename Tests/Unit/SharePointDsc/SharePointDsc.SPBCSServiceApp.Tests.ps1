@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -97,7 +97,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -132,7 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
@@ -169,7 +169,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                     Database = @{
                         Name = $testParams.DatabaseName
-                        Server = @{ Name = $testParams.DatabaseServer }
+                        NormalizedDataSource = $testParams.DatabaseServer
                     }
                 }
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 

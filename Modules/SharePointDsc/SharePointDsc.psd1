@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.8.0.0'
+ModuleVersion = '2.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -126,52 +126,52 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-* Update SPSearchIndexPartition made ServiceAppName as a Key
-* New resouce: SPTrustedRootAuthority
-* Update SPFarmSolution to eject from loop after 30m.
-* New resource: SPMachineTranslationServiceApp
-* New resource: SPPowerPointAutomationServiceApp
-* Bugfix in SPSearchFileType  made ServiceAppName a key property.
-* New resource: SPWebApplicationExtension
-* Added new resource SPAccessServices2010
-* Added MSFT_SPSearchCrawlMapping Resource to manage Crawl Mappings for
-  Search Service Application
-* Added new resource SPSearchAuthoritativePage
-* Bugfix in SPWebAppThrottlingSettings for setting large list window time.
-* Fix typo in method Get-TargetResource of SPFeature
-* Fix bug in SPManagedAccount not returning the correct account name value
-* Fix typo in method Get-TargetResource of SPSearchIndexPartition
-* Update documentation of SPInstallLanguagePack to add guidance on package
-  change in SP2016
-* Added returning the required RunCentralAdmin parameter to
-  Get-TargetResource in SPFarm
-* Added web role check for SPBlobCacheSettings
-* Improved error message when rule could not be found in
-  SPHealthAnalyzerRuleState
-* Extended the documentation to specify that the default value of Ensure
-  is Present
-* Added documentation about the user of Host Header Site Collections and
-  the HostHeader parameter in SPWebApplication
-* Fixed missing brackets in SPWebAppPolicy module file
-* Fixed issue with SPSecureStoreServiceApp not returning database information
-* Fixed issue with SPManagedMetadataServiceApp not returning ContentTypeHubUrl
-  in SP2016
-* Updated SPTrustedIdentityTokenIssuer to allow to specify the signing
-  certificate from file path as an alternative to the certificate store
-* New resource: SPSearchCrawlerImpactRule
-* Fixed issue in SPSite where the used template wasn't returned properly
-* Fixed issue in SPWebApplicationGeneralSettings which didn't return the
-  security validation timeout properly
-* Fixed bug in SPCreateFarm and SPJoinFarm when a SharePoint Server is already
-  joined to a farm
-* Bugfix in SPContentDatabase for setting WarningSiteCount as 0.
-* Fixing verbose message that identifies SP2016 as 2013 in MSFT_SPFarm
-* Fixed SPProductUpdate looking for OSearch15 in SP2016 when stopping services
-* Added TermStoreAdministrators property to SPManagedMetadataServiceApp
-* Fixed an issue in SPSearchTopology that would leave a corrupt topology in
-  place if a server was removed and re-added to a farm
-* Fixed bug in SPFarm that caused issues with database names that have dashes
-  in the names
+* Added resource: SPMinRoleCompliance
+* Corrected comment in CodeCov.yml
+* Fixed localized issue in SPContentDatabase
+* Fixed issue with NullException in SPServiceAppSecurity when no accounts
+    are configured in SharePoint
+* Fixed two NullException issues in SPUserProfileProperty
+* Fixed issue in SPWebAppPolicy where the SPWebPolicyPermissions couldn't be used
+    twice with the exact same values
+* Implemented ToDo in SPFarm to return Central Admin Auth mode
+* Corrected SPSearchContentSource examples
+* Fixed issue in SPManagedMetadataServiceApp where the termstore could not be
+    retrieved if the MMS service instance was stopped
+* Fixed an issue where the instance name wasn't detected correctly
+    * SPAppManagementServiceApp
+    * SPBCSServiceApp
+    * SPCreateFarm
+    * SPFarm
+    * SPJoinFarm
+    * SPMachineTranslationServiceApp
+    * SPManagedMetaDataServiceApp
+    * SPPerformancePointServiceApp
+    * SPSearchServiceApp
+    * SPStateServiceApp
+    * SPSubscriptionSettings
+    * SPUsageApplication
+    * SPUserProfileServiceApp
+    * SPSecureStoreServiceApp
+    * SPWordAutomationServiceApp
+* Updated SPSearchIndexPartition to return the RootFolder parameter
+* Updated SPSecureStoreServiceApp to return the AuditEnabled parameter
+* Fixed several PSScriptAnalyzer warnings
+
+The following changes will break 1.x configurations that use these resources:
+
+* Updated SPShellAdmin so it also works for non-content databases
+* Updated SPWebApplication so it infers the UseSSL value from the URL
+* Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
+    the requirement for CredSSP
+* Updated the SPTimerJobState to make the WebAppUrl parameter a key parameter.
+    The resource can now be used to configure the same job for multiple
+    web applications. Also changed the Name parameter to TypeName, due to a limitation
+    with the SPTimerJob cmdlets
+* Fixed an issue in SPUserProfileProperty where string properties were not
+    created properly
+* Added the Internal parameter to the SPAlternateUrl resource, which implied a
+    change to the key parameters
 "
 
     } # End of PSData hashtable

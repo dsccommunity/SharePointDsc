@@ -13,7 +13,7 @@ function Assert-SPDSCPolicyUser()
     foreach ($difference in $CurrentDifferences) 
     {
         if($difference.ContainsKey($UsernameToCheck)) 
-        { 
+        {
             return $true 
         }
     }
@@ -68,7 +68,7 @@ function Compare-SPDSCWebAppPolicy()
                     if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                                      -UsernameToCheck $policy.Username.ToLower())) 
                     {
-                        $diff += @{ 
+                        $diff += @{
                             Username = $policy.Username.ToLower()
                             Status = "Different"
                             IdentityType = $policy.IdentityType
@@ -88,7 +88,7 @@ function Compare-SPDSCWebAppPolicy()
                         if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                                          -UsernameToCheck $policy.Username.ToLower())) 
                         {
-                            $diff += @{ 
+                            $diff += @{
                                 Username = $policy.Username.ToLower()
                                 Status = "Different"
                                 IdentityType = $policy.IdentityType
@@ -106,7 +106,7 @@ function Compare-SPDSCWebAppPolicy()
             if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                              -UsernameToCheck $policy.Username.ToLower())) 
             {
-                $diff += @{ 
+                $diff += @{
                     Username = $policy.Username.ToLower()
                     Status = "Additional"
                     IdentityType = $policy.IdentityType
@@ -142,7 +142,7 @@ function Compare-SPDSCWebAppPolicy()
                     if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                                      -UsernameToCheck $policy.Username.ToLower())) 
                     {
-                        $diff += @{ 
+                        $diff += @{
                             Username = $setting.Username.ToLower()
                             Status = "Different"
                             IdentityType = $identityType
@@ -162,7 +162,7 @@ function Compare-SPDSCWebAppPolicy()
                         if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                                          -UsernameToCheck $policy.Username.ToLower())) 
                         {
-                            $diff += @{ 
+                            $diff += @{
                                 Username = $setting.Username.ToLower()
                                 Status = "Different"
                                 IdentityType = $identityType
@@ -180,7 +180,7 @@ function Compare-SPDSCWebAppPolicy()
             if (-not (Assert-SPDSCPolicyUser -CurrentDifferences $diff `
                                              -UsernameToCheck $setting.Username.ToLower())) 
             {
-                $diff += @{ 
+                $diff += @{
                     Username = $setting.Username.ToLower()
                     Status = "Missing"
                     IdentityType = $identityType

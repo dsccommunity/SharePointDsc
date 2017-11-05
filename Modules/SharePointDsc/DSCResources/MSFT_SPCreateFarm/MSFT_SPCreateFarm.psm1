@@ -4,40 +4,40 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -119,11 +119,11 @@ function Get-TargetResource
             return $null
         }
 
-        $configDb = Get-SPDatabase | Where-Object -FilterScript { 
+        $configDb = Get-SPDatabase | Where-Object -FilterScript {
             $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
         }
         $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                            | Where-Object -FilterScript { 
+                            | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication -eq $true 
         }
 
@@ -138,7 +138,7 @@ function Get-TargetResource
 
         $returnValue = @{
             FarmConfigDatabaseName      = $spFarm.Name
-            DatabaseServer              = $configDb.Server.Name
+            DatabaseServer              = $configDb.NormalizedDataSource
             FarmAccount                 = $farmAccount
             InstallAccount              = $params.InstallAccount
             Passphrase                  = $params.Passphrase.password 
@@ -156,40 +156,40 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -236,11 +236,11 @@ function Set-TargetResource
     }
 
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationPort", 9999) 
     }
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM") 
     }
     
@@ -325,40 +325,40 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",

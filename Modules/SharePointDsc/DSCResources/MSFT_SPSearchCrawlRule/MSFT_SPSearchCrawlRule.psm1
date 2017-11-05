@@ -4,15 +4,15 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Path,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("DefaultRuleAccess", 
                      "BasicAccountRuleAccess", 
                      "CertificateRuleAccess", 
@@ -23,32 +23,32 @@ function Get-TargetResource
         [System.String] 
         $AuthenticationType,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("InclusionRule","ExclusionRule")] 
         [System.String] 
         $RuleType,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("FollowLinksNoPageCrawl",
                      "CrawlComplexUrls", 
                      "CrawlAsHTTP")] 
         [System.String[]] 
         $CrawlConfigurationRules,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $AuthenticationCredentials,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $CertificateName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -128,19 +128,19 @@ function Get-TargetResource
             return $nullReturn 
         }
         
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             Write-Verbose -Message "Service Application $($params.ServiceAppName) not found"
             return $nullReturn
         } 
         else 
         {
             $crawlRule = Get-SPEnterpriseSearchCrawlRule `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript { 
+                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
                               $_.Path -eq $params.Path 
                           }
 
@@ -153,15 +153,15 @@ function Get-TargetResource
             {
                 $crawlConfigurationRules = @()
                 if ($crawlRule.SuppressIndexing) 
-                { 
+                {
                     $crawlConfigurationRules += "FollowLinksNoPageCrawl" 
                 }
                 if ($crawlRule.FollowComplexUrls) 
-                { 
+                {
                     $crawlConfigurationRules += "CrawlComplexUrls" 
                 }
                 if ($crawlRule.CrawlAsHttp) 
-                { 
+                {
                     $crawlConfigurationRules += "CrawlAsHTTP" 
                 }
 
@@ -228,15 +228,15 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Path,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("DefaultRuleAccess", 
                      "BasicAccountRuleAccess", 
                      "CertificateRuleAccess", 
@@ -247,32 +247,32 @@ function Set-TargetResource
         [System.String] 
         $AuthenticationType,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("InclusionRule","ExclusionRule")] 
         [System.String] 
         $RuleType,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("FollowLinksNoPageCrawl",
                      "CrawlComplexUrls", 
                      "CrawlAsHTTP")] 
         [System.String[]] 
         $CrawlConfigurationRules,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $AuthenticationCredentials,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $CertificateName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -346,25 +346,25 @@ function Set-TargetResource
                 SearchApplication = $params.ServiceAppName
             }
             if ($params.ContainsKey("AuthenticationType") -eq $true) 
-            { 
+            {
                 $newParams.Add("AuthenticationType", $params.AuthenticationType) 
             }
             if ($params.ContainsKey("RuleType") -eq $true) 
-            { 
+            {
                 $newParams.Add("Type", $params.RuleType) 
             }
             if ($params.ContainsKey("CrawlConfigurationRules") -eq $true) 
             {
                 if($params.CrawlConfigurationRules -contains "FollowLinksNoPageCrawl") 
-                { 
+                {
                     $newParams.Add("SuppressIndexing",1) 
                 }
                 if($params.CrawlConfigurationRules -contains "CrawlComplexUrls") 
-                { 
+                {
                     $newParams.Add("FollowComplexUrls",1) 
                 }
                 if($params.CrawlConfigurationRules -contains "CrawlAsHTTP") 
-                { 
+                {
                     $newParams.Add("CrawlAsHttp",1) 
                 }
             }
@@ -374,7 +374,7 @@ function Set-TargetResource
                 $newParams.Add("AccountPassword", $params.AuthenticationCredentials.Password)
             }
             if ($params.ContainsKey("CertificateName") -eq $true) 
-            { 
+            {
                 $newParams.Add("CertificateName", $params.CertificateName) 
             }
             
@@ -388,7 +388,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $crawlRule = Get-SPEnterpriseSearchCrawlRule `
-                            -SearchApplication $params.ServiceAppName | Where-Object -FilterScript { 
+                            -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
                                 $_.Path -eq $params.Path 
                             }
 
@@ -399,25 +399,25 @@ function Set-TargetResource
                     SearchApplication = $params.ServiceAppName
                 }
                 if ($params.ContainsKey("AuthenticationType") -eq $true) 
-                { 
+                {
                     $setParams.Add("AuthenticationType", $params.AuthenticationType) 
                 }
                 if ($params.ContainsKey("RuleType") -eq $true) 
-                { 
+                {
                     $setParams.Add("Type", $params.RuleType) 
                 }
                 if ($params.ContainsKey("CrawlConfigurationRules") -eq $true) 
                 {
                     if($params.CrawlConfigurationRules -contains "FollowLinksNoPageCrawl") 
-                    { 
+                    {
                         $setParams.Add("SuppressIndexing",1) 
                     }
                     if($params.CrawlConfigurationRules -contains "CrawlComplexUrls") 
-                    { 
+                    {
                         $setParams.Add("FollowComplexUrls",1) 
                     }
                     if($params.CrawlConfigurationRules -contains "CrawlAsHTTP") 
-                    { 
+                    {
                         $setParams.Add("CrawlAsHttp",1) 
                     }
                 }
@@ -427,7 +427,7 @@ function Set-TargetResource
                     $setParams.Add("AccountPassword", $params.AuthenticationCredentials.Password)
                 }
                 if ($params.ContainsKey("CertificateName") -eq $true) 
-                { 
+                {
                     $setParams.Add("AccountName", $params.CertificateName) 
                 }
                 Set-SPEnterpriseSearchCrawlRule @setParams 
@@ -456,15 +456,15 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Path,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("DefaultRuleAccess", 
                      "BasicAccountRuleAccess", 
                      "CertificateRuleAccess", 
@@ -475,32 +475,32 @@ function Test-TargetResource
         [System.String] 
         $AuthenticationType,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("InclusionRule","ExclusionRule")] 
         [System.String] 
         $RuleType,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("FollowLinksNoPageCrawl",
                      "CrawlComplexUrls", 
                      "CrawlAsHTTP")] 
         [System.String[]] 
         $CrawlConfigurationRules,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $AuthenticationCredentials,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $CertificateName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -521,20 +521,20 @@ function Test-TargetResource
                                     -ReferenceObject $CrawlConfigurationRules `
                                     -DifferenceObject $CurrentValues.CrawlConfigurationRules
                 if ($null -ne $compareObject)
-                { 
+                {
                     return $false 
                 }
             } 
             else 
-            { 
+            {
                 return $false 
             }
         }
 
         if ($CurrentValues.ContainsKey("AuthenticationCredentials") -and $AuthenticationCredentials) 
-        { 
+        {
             if ($AuthenticationCredentials.UserName -ne $CurrentValues.AuthenticationCredentials) 
-            { 
+            {
                 return $false 
             }
         }

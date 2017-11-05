@@ -51,7 +51,7 @@ function Set-SPDSCWebApplicationGeneralConfig
     )
 
     if ($Settings.SecurityValidationTimeoutMinutes)
-    {  
+    {
         Write-Verbose -Message "timeout minutes: $($Settings.SecurityValidationTimeOutMinutes)"
         $mins = New-TimeSpan -Minutes $Settings.SecurityValidationTimeoutMinutes
         $Settings.SecurityValidationTimeoutMinutes = $mins  

@@ -4,32 +4,32 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FileType,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $MimeType,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $Enabled,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -71,19 +71,19 @@ function Get-TargetResource
             return $nullReturn 
         }
         
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             Write-Verbose -Message "Service Application $($params.ServiceAppName) is not a search service application"
             return $nullReturn
         } 
         else 
         {
             $fileType = Get-SPEnterpriseSearchFileFormat `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript { 
+                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
                               $_.Identity -eq $params.FileType
                           }
 
@@ -116,32 +116,32 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FileType,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $MimeType,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $Enabled,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -173,12 +173,12 @@ function Set-TargetResource
             throw "Service Application $($params.ServiceAppName) is not found"
         }
         
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             throw  "Service Application $($params.ServiceAppName) is not a search service application"
         } 
     }
@@ -219,7 +219,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $fileType = Get-SPEnterpriseSearchFileFormat `
-                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript { 
+                          -SearchApplication $params.ServiceAppName | Where-Object -FilterScript {
                               $_.Identity -eq $params.FileType
                           }
 
@@ -280,32 +280,32 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FileType,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $MimeType,
         
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $Enabled,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

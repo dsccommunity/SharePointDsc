@@ -4,24 +4,24 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AGName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileShare,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -46,7 +46,7 @@ function Get-TargetResource
             $params = $args[0]
 
             $Ensure = "Present"
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName 
             }
 
@@ -93,7 +93,7 @@ function Get-TargetResource
             $params = $args[0]
             
             $Ensure = "Absent"
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 
@@ -132,24 +132,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AGName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileShare,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -173,7 +173,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
 
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 
@@ -232,7 +232,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
 
-            $databases = Get-SPDatabase | Where-Object -FilterScript { 
+            $databases = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -like $params.DatabaseName
             }
 
@@ -259,24 +259,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AGName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileShare,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

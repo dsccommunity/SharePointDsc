@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String] 
         $AppDomain,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $WebApplication,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] 
         $Zone,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SSL,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -63,28 +63,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String] 
         $AppDomain,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $WebApplication,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] 
         $Zone,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SSL,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -111,12 +111,12 @@ function Set-TargetResource
             WebApplication = $params.WebApplication 
             Zone = $params.Zone
         }
-        if ($params.ContainsKey("Port") -eq $true) 
-        { 
+        if ($params.ContainsKey("Port") -eq $true)
+        {
             $newParams.Add("Port", $params.Port) 
         }
-        if ($params.ContainsKey("SSL") -eq $true) 
-        { 
+        if ($params.ContainsKey("SSL") -eq $true)
+        {
             $newParams.Add("SecureSocketsLayer", $params.SSL)
         }
 
@@ -130,28 +130,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String] 
         $AppDomain,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $WebApplication,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         [ValidateSet("Default","Internet","Intranet","Extranet","Custom")] 
         $Zone,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $SSL,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -160,8 +160,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 

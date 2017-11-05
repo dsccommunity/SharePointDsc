@@ -4,58 +4,58 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
         [System.String] 
         $Zone,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $UseSSL,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -70,8 +70,8 @@ function Get-TargetResource
         
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             Write-Verbose -Message "WebApplication $($params.WebAppUrl) does not exist"
             return @{
                 WebAppUrl = $params.WebAppUrl
@@ -85,8 +85,8 @@ function Get-TargetResource
         $zone = [Microsoft.SharePoint.Administration.SPUrlZone]::$($params.Zone)
         $waExt = $wa.IisSettings[$zone]
 
-        if ($null -eq $waExt) 
-        { 
+        if ($null -eq $waExt)
+        {
             return @{
                 WebAppUrl = $params.WebAppUrl
                 Name = $params.Name
@@ -114,12 +114,12 @@ function Get-TargetResource
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone $params.zone 
         if($authProvider.DisplayName -eq "Windows Authentication") 
         {
-            if ($authProvider.DisableKerberos -eq $true) 
-            { 
+            if ($authProvider.DisableKerberos -eq $true)
+            {
                 $localAuthMode = "NTLM" 
             } 
             else 
-            { 
+            {
                 $localAuthMode = "Kerberos" 
             }
         }
@@ -154,58 +154,58 @@ function Set-TargetResource
     [CmdletBinding()]
     param
         (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
         [System.String] 
         $Zone,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $UseSSL,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -245,8 +245,8 @@ function Set-TargetResource
                 }
 
                               
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
-                {   
+                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
+                {
                     if($params.AuthenticationMethod -eq "Claims")
                     {
                         try 
@@ -268,24 +268,24 @@ function Set-TargetResource
                     $newWebAppExtParams.Add("AuthenticationProvider", $ap)
                 }
                     
-                if ($params.ContainsKey("AllowAnonymous") -eq $true) 
+                if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
                     $newWebAppExtParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) 
                 }
-                if ($params.ContainsKey("HostHeader") -eq $true) 
-                { 
+                if ($params.ContainsKey("HostHeader") -eq $true)
+                {
                     $newWebAppExtParams.Add("HostHeader", $params.HostHeader) 
                 }
-                if ($params.ContainsKey("Path") -eq $true) 
-                { 
+                if ($params.ContainsKey("Path") -eq $true)
+                {
                     $newWebAppExtParams.Add("Path", $params.Path) 
                 }
-                if ($params.ContainsKey("Port") -eq $true) 
-                { 
+                if ($params.ContainsKey("Port") -eq $true)
+                {
                     $newWebAppExtParams.Add("Port", $params.Port) 
                 } 
-                if ($params.ContainsKey("UseSSL") -eq $true) 
-                { 
+                if ($params.ContainsKey("UseSSL") -eq $true)
+                {
                     $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL) 
                 } 
                 
@@ -300,7 +300,7 @@ function Set-TargetResource
                 }
 
                 if ($params.ContainsKey("AuthenticationMethod") -eq $true)
-                { 
+                {
                     if($params.AuthenticationMethod -eq "Claims")
                     {
                         try 
@@ -352,58 +352,58 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
         (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Default","Intranet","Internet","Extranet","Custom")]
         [System.String] 
         $Zone,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $UseSSL,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("NTLM","Kerberos","Claims")]
         [System.String] 
         $AuthenticationMethod,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $AuthenticationProvider,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

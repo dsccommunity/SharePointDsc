@@ -4,26 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -61,7 +63,7 @@ function Get-TargetResource
             return @{
                 Name = $params.Name
                 DatabaseName = $($serviceApp.Database.Name)
-                DatabaseServer = $($serviceApp.Database.Server.Name)
+                DatabaseServer = $($serviceApp.Database.NormalizedDataSource)
                 ApplicationPool = $($serviceApp.ApplicationPool.Name)
                 Ensure = "Present"
             }
@@ -78,26 +80,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -115,7 +119,7 @@ function Set-TargetResource
             $params = $args[0]
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
             
-            $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $serviceApp = $serviceApps | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
             }
            
@@ -149,7 +153,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $serviceApps = Get-SPServiceApplication -Identity $params.Name
-            $serviceApp = $serviceApps | Where-Object -FilterScript { 
+            $serviceApp = $serviceApps | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.TranslationServices.TranslationServiceApplication"
             }
             $serviceApp | Remove-SPServiceApplication  
@@ -165,26 +169,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

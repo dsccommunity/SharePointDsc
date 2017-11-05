@@ -1,4 +1,4 @@
-function Invoke-SPDscIntegrationTest() { 
+function Invoke-SPDscIntegrationTest() {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
     param()

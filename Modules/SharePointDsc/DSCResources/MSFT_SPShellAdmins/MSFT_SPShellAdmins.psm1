@@ -4,31 +4,31 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Databases,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllDatabases,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -136,31 +136,31 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Databases,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllDatabases,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -379,7 +379,7 @@ function Set-TargetResource
                 # Check if configured database exists, throw error if not
                 Write-Verbose -Message "Processing Database: $($database.Name)"
 
-                $currentCDB = Get-SPDatabase | Where-Object -FilterScript { 
+                $currentCDB = Get-SPDatabase | Where-Object -FilterScript {
                     $_.Name -eq $database.Name 
                 }
                 if ($null -ne $currentCDB) 
@@ -553,7 +553,6 @@ function Set-TargetResource
                             {
                                 if ($difference.SideIndicator -eq "=>") 
                                 {
-
                                     $user = $difference.InputObject
                                     try 
                                     {
@@ -684,31 +683,31 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance[]] 
         $Databases,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllDatabases,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -719,7 +718,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 
@@ -727,7 +726,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing Members parameter"
         if (-not $CurrentValues.Members) 
-        { 
+        {
             return $false 
         }
 
@@ -749,7 +748,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Processing MembersToInclude parameter"
         if (-not $CurrentValues.Members) 
-        { 
+        {
             return $false 
         }
 
@@ -801,7 +800,7 @@ function Test-TargetResource
             if ($Members) 
             {
                 if (-not $database.Members) 
-                { 
+                {
                     return $false 
                 }
 
@@ -822,7 +821,7 @@ function Test-TargetResource
             if ($MembersToInclude) 
             {
                 if (-not $database.Members)
-                { 
+                {
                     return $false 
                 }
 
@@ -872,7 +871,7 @@ function Test-TargetResource
             # Check if configured database exists, throw error if not
             Write-Verbose -Message "Processing Database: $($database.Name)"
 
-            $currentCDB = $CurrentValues.Databases | Where-Object -FilterScript { 
+            $currentCDB = $CurrentValues.Databases | Where-Object -FilterScript {
                 $_.Name -eq $database.Name 
             }
             
@@ -882,7 +881,7 @@ function Test-TargetResource
                 {
                     Write-Verbose -Message "Processing Members parameter"
                     if (-not $currentCDB.Members) 
-                    { 
+                    {
                         return $false 
                     }
 
@@ -904,7 +903,7 @@ function Test-TargetResource
                 {
                     Write-Verbose -Message "Processing MembersToInclude parameter"
                     if (-not $currentCDB.Members) 
-                    { 
+                    {
                         return $false 
                     }
 

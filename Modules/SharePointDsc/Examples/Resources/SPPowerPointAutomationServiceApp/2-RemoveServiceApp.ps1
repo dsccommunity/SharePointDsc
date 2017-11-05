@@ -14,7 +14,7 @@
 
         node localhost {
             SPPowerPointAutomationServiceApp WordAutomation 
-            { 
+            {
                 Name = "PowerPoint Automation Service Application" 
                 Ensure = "Absent"
                 PsDscRunAsCredential = $SetupAccount 

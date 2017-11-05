@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -107,13 +107,13 @@ function Get-TargetResource
             }
         }
 
-        $configDb = Get-SPDatabase | Where-Object -FilterScript { 
+        $configDb = Get-SPDatabase | Where-Object -FilterScript {
             $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
         }
 
         return @{
             FarmConfigDatabaseName = $spFarm.Name
-            DatabaseServer = $configDb.Server.Name
+            DatabaseServer = $configDb.NormalizedDataSource
             InstallAccount = $params.InstallAccount
             Passphrase = $params.Passphrase.password 
         }
@@ -128,23 +128,23 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -218,7 +218,8 @@ function Set-TargetResource
             return
         }
         
-        try {
+        try
+        {
             $joinFarmArgs = @{
                 DatabaseServer = $params.DatabaseServer
                 DatabaseName = $params.FarmConfigDatabaseName
@@ -226,16 +227,20 @@ function Set-TargetResource
                 SkipRegisterAsDistributedCacheHost = $true
             }
             
-            switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
+            switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+            {
                 15 {
                     Write-Verbose -Message "Detected Version: SharePoint 2013"
                 }
                 16 {
-                    if ($params.ContainsKey("ServerRole") -eq $true) {
+                    if ($params.ContainsKey("ServerRole") -eq $true)
+                    {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                                 "configuring server as $($params.ServerRole)")
                         $joinFarmArgs.Add("LocalServerRole", $params.ServerRole)
-                    } else {
+                    }
+                    else
+                    {
                         Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                                 "role provided, configuring server without a " + `
                                                 "specific role")
@@ -255,7 +260,8 @@ function Set-TargetResource
             Install-SPFeature -AllExistingFeatures -Force  | out-null 
             Install-SPApplicationContent    
         }
-        catch [System.Exception] {
+        catch [System.Exception]
+        {
             return $_
         }
     }
@@ -284,23 +290,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",

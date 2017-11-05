@@ -4,20 +4,20 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -32,7 +32,7 @@ function Get-TargetResource
         $sap = Get-SPServiceApplicationPool -Identity $params.Name `
                                             -ErrorAction SilentlyContinue
         if ($null -eq $sap) 
-        { 
+        {
             return @{
                 Name = $params.Name
                 ServiceAccount = $params.ProcessAccountName
@@ -55,20 +55,20 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -93,7 +93,7 @@ function Set-TargetResource
             if ($null -ne $sap) 
             {
                 if ($sap.ProcessAccountName -ne $params.ServiceAccount) 
-                {  
+                {
                     Set-SPServiceApplicationPool -Identity $params.Name `
                                                  -Account $params.ServiceAccount
                 }
@@ -111,7 +111,7 @@ function Set-TargetResource
             $sap = Get-SPServiceApplicationPool -Identity $params.Name `
                                                 -ErrorAction SilentlyContinue
             if ($sap.ProcessAccountName -ne $params.ServiceAccount) 
-            {  
+            {
                 Set-SPServiceApplicationPool -Identity $params.Name `
                                              -Account $params.ServiceAccount
             }
@@ -135,20 +135,20 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ServiceAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

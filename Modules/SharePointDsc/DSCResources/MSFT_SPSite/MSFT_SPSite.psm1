@@ -4,59 +4,59 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $OwnerAlias,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CompatibilityLevel,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ContentDatabase,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $HostHeaderWebApplication,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $Language,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $OwnerEmail,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $QuotaTemplate,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SecondaryEmail,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SecondaryOwnerAlias,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Template,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -72,13 +72,13 @@ function Get-TargetResource
                            -ErrorAction SilentlyContinue
         
         if ($null -eq $site) 
-        { 
+        {
             return $null 
         } 
         else 
         {
             if ($site.HostHeaderIsSiteName) 
-            { 
+            {
                 $HostHeaderWebApplication = $site.WebApplication.Url 
             } 
 
@@ -148,59 +148,59 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $OwnerAlias,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CompatibilityLevel,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ContentDatabase,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $HostHeaderWebApplication,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $Language,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $OwnerEmail,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $QuotaTemplate,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SecondaryEmail,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SecondaryOwnerAlias,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Template,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -229,59 +229,59 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $OwnerAlias,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CompatibilityLevel,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ContentDatabase,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Description,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $HostHeaderWebApplication,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $Language,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $OwnerEmail,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $QuotaTemplate,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SecondaryEmail,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SecondaryOwnerAlias,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Template,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -291,7 +291,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
     return Test-SPDscParameterState -CurrentValues $CurrentValues `

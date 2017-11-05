@@ -4,55 +4,55 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowObjectModelOverride,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AdminThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewLookupThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $HappyHourEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance] 
         $HappyHour,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $UniquePermissionThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $RequestThrottling,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ChangeLogEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ChangeLogExpiryDays,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventHandlersEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -66,7 +66,7 @@ function Get-TargetResource
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
         if ($null -eq $wa) 
-        { 
+        {
             return $null 
         }
 
@@ -86,55 +86,55 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowObjectModelOverride,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AdminThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewLookupThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $HappyHourEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance] 
         $HappyHour,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $UniquePermissionThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $RequestThrottling,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ChangeLogEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ChangeLogExpiryDays,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventHandlersEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -148,7 +148,7 @@ function Set-TargetResource
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
             throw "Web application $($params.Url) was not found"
             return
@@ -176,55 +176,55 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowObjectModelOverride,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AdminThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ListViewLookupThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $HappyHourEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [Microsoft.Management.Infrastructure.CimInstance] 
         $HappyHour,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $UniquePermissionThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $RequestThrottling,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ChangeLogEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ChangeLogExpiryDays,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventHandlersEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -233,8 +233,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 

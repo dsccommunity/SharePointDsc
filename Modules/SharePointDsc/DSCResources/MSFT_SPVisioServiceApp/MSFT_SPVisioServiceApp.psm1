@@ -4,24 +4,24 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -41,15 +41,15 @@ function Get-TargetResource
             Ensure = "Absent"
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn
         } 
         else 
@@ -70,24 +70,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -97,7 +97,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating Visio Graphics Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -112,7 +112,8 @@ function Set-TargetResource
                 $params.Remove("ProxyName") | Out-Null 
             }
 
-            if ($null -eq $pName) {
+            if ($null -eq $pName)
+            {
                 $pName = "$($params.Name) Proxy"
             }
             if ($null -ne $visioApp)
@@ -134,7 +135,7 @@ function Set-TargetResource
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
 
                 Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     } | Set-SPVisioServiceApplication -ServiceApplicationPool $appPool
             }
@@ -150,7 +151,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
                     }
 
@@ -174,24 +175,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

@@ -4,36 +4,36 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] 
         [System.String] 
         $Zone,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $EnableCache,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Location,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $MaxSizeInGB,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $MaxAgeInSeconds,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileTypes,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -147,36 +147,36 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] 
         [System.String] 
         $Zone,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $EnableCache,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Location,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $MaxSizeInGB,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $MaxAgeInSeconds,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileTypes,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -190,7 +190,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("EnableCache")) 
     {
         if ($CurrentValues.EnableCache -ne $EnableCache) 
-        { 
+        {
             $changes.EnableCache = $EnableCache 
         }
     }
@@ -198,7 +198,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("Location")) 
     {
         if ($CurrentValues.Location -ne $Location) 
-        { 
+        {
             $changes.Location = $Location 
         }
     }
@@ -206,7 +206,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("MaxSizeInGB")) 
     {
         if ($CurrentValues.MaxSizeInGB -ne $MaxSizeInGB) 
-        { 
+        {
             $changes.MaxSizeInGB = $MaxSizeInGB 
         }
     }
@@ -214,7 +214,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("MaxAgeInSeconds")) 
     {
         if ($CurrentValues.MaxAgeInSeconds -ne $MaxAgeInSeconds) 
-        { 
+        {
             $changes.MaxAgeInSeconds = $MaxAgeInSeconds 
         }
     }
@@ -222,7 +222,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey("FileTypes")) 
     {
         if ($CurrentValues.FileTypes -ne $FileTypes) 
-        { 
+        {
             $changes.FileTypes = $FileTypes 
         }
     }
@@ -327,36 +327,36 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] 
         [System.String] 
         $Zone,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $EnableCache,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Location,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $MaxSizeInGB,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $MaxAgeInSeconds,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $FileTypes,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

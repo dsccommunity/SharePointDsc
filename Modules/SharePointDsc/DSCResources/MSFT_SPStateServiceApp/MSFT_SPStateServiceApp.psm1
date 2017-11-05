@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -41,7 +41,7 @@ function Get-TargetResource
                                                     -ErrorAction SilentlyContinue
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return @{
                 Name = $params.Name
                 Ensure = "Absent"
@@ -52,7 +52,7 @@ function Get-TargetResource
         return @{
             Name = $serviceApp.DisplayName
             DatabaseName = $serviceApp.Databases.Name
-            DatabaseServer = $serviceApp.Databases.Server.Name
+            DatabaseServer = $serviceApp.Databases.NormalizedDataSource
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
         }
@@ -65,28 +65,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -104,15 +104,15 @@ function Set-TargetResource
             
             $dbParams = @{}
             if ($params.ContainsKey("DatabaseName")) 
-            { 
+            {
                 $dbParams.Add("Name", $params.DatabaseName) 
             }
             if ($params.ContainsKey("DatabaseServer")) 
-            { 
+            {
                 $dbParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
             if ($params.ContainsKey("DatabaseCredentials")) 
-            { 
+            {
                 $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) 
             }
 
@@ -139,28 +139,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
