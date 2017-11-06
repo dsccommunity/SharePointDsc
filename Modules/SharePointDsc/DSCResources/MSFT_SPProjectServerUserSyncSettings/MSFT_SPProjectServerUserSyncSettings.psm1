@@ -132,7 +132,7 @@ function Set-TargetResource
         {
             $values += "Disabled"
         }
-        if ($values.Count -eq 0)
+        if ($values.Count -eq 3)
         {
             $values = "EnableAll"
         }
