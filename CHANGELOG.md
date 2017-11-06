@@ -4,6 +4,7 @@
 
 * Added resource: SPMinRoleCompliance
 * Added SPWebAppSuiteBar resource to brand Suite Bar;
+* Update SPWeb to allow the management of the access requests settings
 
 ## 1.9
 
