@@ -1,7 +1,7 @@
 <#
 .EXAMPLE
     This example shows how to remove a project server service app in the local farm.
-    The ApplicationPool property is still requried but is not used when removing, so
+    The ApplicationPool property is still required but is not used when removing, so
     the value used here doesn't matter.
 #>
 

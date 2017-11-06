@@ -8,87 +8,87 @@ function Get-TargetResource
         [System.String] 
         $Url,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnableOvertimeAndNonBillableTracking,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
         [System.String] 
         $DefaultTimesheetCreationMode,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Days","Weeks")]
         [System.String] 
         $DefaultTrackingUnit,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Hours","Days")]
         [System.String] 
         $DefaultReportingUnit,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $HoursInStandardDay,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $HoursInStandardWeek,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MaxHoursPerTimesheet,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MinHoursPerTimesheet,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MaxHoursPerDay,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowFutureTimeReporting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowNewPersonalTasks,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowTopLevelTimeReporting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $RequireTaskStatusManagerApproval,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $RequireLineApprovalBeforeTimesheetApproval,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnableTimesheetAuditing,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $FixedApprovalRouting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $SingleEntryMode,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
         [System.String] 
         $DefaultTrackingMode,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $ForceTrackingModeForAllProjects,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -247,87 +247,87 @@ function Set-TargetResource
         [System.String] 
         $Url,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnableOvertimeAndNonBillableTracking,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
         [System.String] 
         $DefaultTimesheetCreationMode,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Days","Weeks")]
         [System.String] 
         $DefaultTrackingUnit,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Hours","Days")]
         [System.String] 
         $DefaultReportingUnit,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $HoursInStandardDay,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $HoursInStandardWeek,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MaxHoursPerTimesheet,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MinHoursPerTimesheet,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MaxHoursPerDay,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowFutureTimeReporting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowNewPersonalTasks,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowTopLevelTimeReporting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $RequireTaskStatusManagerApproval,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $RequireLineApprovalBeforeTimesheetApproval,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnableTimesheetAuditing,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $FixedApprovalRouting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $SingleEntryMode,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
         [System.String] 
         $DefaultTrackingMode,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $ForceTrackingModeForAllProjects,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -493,87 +493,87 @@ function Test-TargetResource
         [System.String] 
         $Url,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnableOvertimeAndNonBillableTracking,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("CurrentTaskAssignments","CurrentProjects","NoPrepopulation")]
         [System.String] 
         $DefaultTimesheetCreationMode,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Days","Weeks")]
         [System.String] 
         $DefaultTrackingUnit,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Hours","Days")]
         [System.String] 
         $DefaultReportingUnit,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $HoursInStandardDay,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $HoursInStandardWeek,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MaxHoursPerTimesheet,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MinHoursPerTimesheet,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Single] 
         $MaxHoursPerDay,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowFutureTimeReporting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowNewPersonalTasks,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $AllowTopLevelTimeReporting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $RequireTaskStatusManagerApproval,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $RequireLineApprovalBeforeTimesheetApproval,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnableTimesheetAuditing,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $FixedApprovalRouting,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $SingleEntryMode,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("PercentComplete","ActualDoneAndRemaining","HoursPerPeriod","FreeForm")]
         [System.String] 
         $DefaultTrackingMode,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $ForceTrackingModeForAllProjects,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

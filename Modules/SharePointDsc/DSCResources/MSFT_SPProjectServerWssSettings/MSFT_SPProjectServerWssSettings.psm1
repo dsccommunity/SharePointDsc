@@ -13,7 +13,7 @@ function Get-TargetResource
         [System.String] 
         $CreateProjectSiteMode,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -87,7 +87,7 @@ function Set-TargetResource
         [System.String] 
         $CreateProjectSiteMode,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -141,7 +141,7 @@ function Test-TargetResource
         [System.String] 
         $CreateProjectSiteMode,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

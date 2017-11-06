@@ -12,32 +12,32 @@ function Get-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $Description,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
         $ADGroup,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -167,32 +167,32 @@ function Set-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $Description,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
         $ADGroup,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -345,32 +345,32 @@ function Test-TargetResource
         [System.String] 
         $Name,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String] 
         $Description,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
         $ADGroup,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $Members,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

@@ -3,7 +3,7 @@
 This resource is responsible for provisioning and managing the Project Server
 service application in SharePoint Server 2016.
 
-To create a Project Server Web Application the following DSC resources can
+To create a Project Server site the following DSC resources can
 be used to create the site and enable the feature.
 
     SPSite PWASite

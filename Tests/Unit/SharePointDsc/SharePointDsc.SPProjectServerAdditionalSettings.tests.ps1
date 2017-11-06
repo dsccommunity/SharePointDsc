@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -126,7 +126,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Context -Name "Has incorrect settings applied" -Fixture {
                     $testParams = @{
                         Url = "http://server/pwa"
-                        ProjectProfessionalMinBuilNumber = "1.0.0.0"
+                        ProjectProfessionalMinBuildNumber = "1.0.0.0"
                         ServerCurrency = "USD"
                         EnforceServerCurrency = $false
                     }
@@ -153,7 +153,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Context -Name "Has correct settings applied" -Fixture {
                     $testParams = @{
                         Url = "http://server/pwa"
-                        ProjectProfessionalMinBuilNumber = "2.0.0.0"
+                        ProjectProfessionalMinBuildNumber = "2.0.0.0"
                         ServerCurrency = "AUD"
                         EnforceServerCurrency = $true
                     }

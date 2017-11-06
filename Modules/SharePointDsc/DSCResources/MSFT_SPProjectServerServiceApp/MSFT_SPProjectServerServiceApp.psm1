@@ -12,16 +12,16 @@ function Get-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [parameter()]
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -99,16 +99,16 @@ function Set-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [parameter()]
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -209,16 +209,16 @@ function Test-TargetResource
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [parameter()]
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

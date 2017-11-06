@@ -17,7 +17,7 @@ Configuration Example
         SPProjectServerGroup Group
         {
             Url = "http://projects.contoso.com"
-            Name = "My groupo"
+            Name = "My group"
             ADGroup = "Domain\Group"
             PSDscRunAsCredential = $SetupAccount
         }

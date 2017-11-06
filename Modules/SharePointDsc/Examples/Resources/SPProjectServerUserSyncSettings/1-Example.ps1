@@ -17,7 +17,7 @@ Configuration Example
         SPProjectServerUserSyncSettings UserSyncSettings
         {
             Url                                 = "http://projects.contoso.com/pwa"
-            EnableProjectWebAppSync             =  $true
+            EnableProjectWebAppSync             = $true
             EnableProjectSiteSync               = $true
             EnableProjectSiteSyncForSPTaskLists = $true  
             PsDscRunAsCredential                = $SetupAccount

@@ -17,15 +17,15 @@ function Get-TargetResource
         [System.String] 
         $EntityType,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $AllowPermissions,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $DenyPermissions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -46,7 +46,7 @@ function Get-TargetResource
 
         if ((Get-SPProjectPermissionMode -Url $params.Url) -ne "ProjectServer")
         {
-            throw [Exception] ("SPProjectServerGlobalPermissions is design for Project Server " + `
+            throw [Exception] ("SPProjectServerGlobalPermissions is designed for Project Server " + `
                                "permissions mode only, and this site is set to SharePoint mode")
         }
         
@@ -121,15 +121,15 @@ function Set-TargetResource
         [System.String] 
         $EntityType,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $AllowPermissions,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $DenyPermissions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -304,15 +304,15 @@ function Test-TargetResource
         [System.String] 
         $EntityType,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $AllowPermissions,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $DenyPermissions,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

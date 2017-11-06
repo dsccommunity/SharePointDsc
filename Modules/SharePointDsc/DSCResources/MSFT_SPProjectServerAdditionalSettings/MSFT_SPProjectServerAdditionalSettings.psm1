@@ -8,19 +8,19 @@ function Get-TargetResource
         [System.String] 
         $Url,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
-        $ProjectProfessionalMinBuilNumber,
+        $ProjectProfessionalMinBuildNumber,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
         $ServerCurrency,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnforceServerCurrency,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -44,19 +44,19 @@ function Get-TargetResource
 
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
 
-        $script:ProjectProfessionalMinBuilNumberValue = $null
+        $script:ProjectProfessionalMinBuildNumberValue = $null
         $script:ServerCurrencyValue = $null
         $script:EnforceServerCurrencyValue = $false
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
             $buildInfo = $adminService.GetProjectProfessionalMinimumBuildNumbers().Versions
-            $script:ProjectProfessionalMinBuilNumberValue = "$($buildInfo.Major).$($buildInfo.Minor).$($buildInfo.Build).$($buildInfo.Revision)"
+            $script:ProjectProfessionalMinBuildNumberValue = "$($buildInfo.Major).$($buildInfo.Minor).$($buildInfo.Build).$($buildInfo.Revision)"
             $script:ServerCurrencyValue = $adminService.GetServerCurrency()
             $script:EnforceServerCurrencyValue = $adminService.GetSingleCurrencyEnforced()
         }
 
         return @{
             Url = $params.Url
-            ProjectProfessionalMinBuilNumber = $script:ProjectProfessionalMinBuilNumberValue
+            ProjectProfessionalMinBuildNumber = $script:ProjectProfessionalMinBuildNumberValue
             ServerCurrency = $script:ServerCurrencyValue
             EnforceServerCurrency = $script:EnforceServerCurrencyValue
             InstallAccount = $params.InstallAccount
@@ -75,19 +75,19 @@ function Set-TargetResource
         [System.String] 
         $Url,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
-        $ProjectProfessionalMinBuilNumber,
+        $ProjectProfessionalMinBuildNumber,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
         $ServerCurrency,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnforceServerCurrency,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -112,10 +112,10 @@ function Set-TargetResource
         $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
 
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
-            if ($params.ContainsKey("ProjectProfessionalMinBuilNumber") -eq $true)
+            if ($params.ContainsKey("ProjectProfessionalMinBuildNumber") -eq $true)
             {
                 $buildInfo = $adminService.GetProjectProfessionalMinimumBuildNumbers()
-                $versionInfo = [System.Version]::New($params.ProjectProfessionalMinBuilNumber)
+                $versionInfo = [System.Version]::New($params.ProjectProfessionalMinBuildNumber)
                 $buildInfo.Versions.Rows[0]["Major"] = $versionInfo.Major
                 $buildInfo.Versions.Rows[0]["Minor"] = $versionInfo.Minor
                 $buildInfo.Versions.Rows[0]["Build"] = $versionInfo.Build
@@ -147,19 +147,19 @@ function Test-TargetResource
         [System.String] 
         $Url,
         
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
-        $ProjectProfessionalMinBuilNumber,
+        $ProjectProfessionalMinBuildNumber,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.String]
         $ServerCurrency,
 
-        [Parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean]
         $EnforceServerCurrency,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -171,7 +171,7 @@ function Test-TargetResource
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @(
-                                        "ProjectProfessionalMinBuilNumber"
+                                        "ProjectProfessionalMinBuildNumber"
                                         "ServerCurrency",
                                         "EnforceServerCurrency"
                                     )

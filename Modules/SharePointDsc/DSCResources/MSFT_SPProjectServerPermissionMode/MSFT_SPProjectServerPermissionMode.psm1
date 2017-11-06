@@ -13,7 +13,7 @@ function Get-TargetResource
         [System.String] 
         $PermissionMode,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -63,7 +63,7 @@ function Set-TargetResource
         [System.String] 
         $PermissionMode,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -100,7 +100,7 @@ function Test-TargetResource
         [System.String] 
         $PermissionMode,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

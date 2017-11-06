@@ -9,7 +9,6 @@ function Get-SPDscProjectServerGlobalPermissionId
     $result = $null
     [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
       | Get-Member -Static -MemberType Property | ForEach-Object -Process {
-        
         if ($PermissionName -eq $_.Name)
         {
             $result = [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission]::($_.Name)
@@ -47,7 +46,6 @@ function Get-SPDscProjectServerPermissionName
     $result = $null
     [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission] `
       | Get-Member -Static -MemberType Property | ForEach-Object -Process {
-        
         if ($PermissionId -eq [Microsoft.Office.Project.Server.Library.PSSecurityGlobalPermission]::($_.Name))
         {
             $result = $_.Name
@@ -177,7 +175,6 @@ function New-SPDscProjectServerWebService
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
     [System.Reflection.Assembly]::Load($bytes) | Out-Null
-
 
     $maxSize = 500000000
     $svcRouter = "_vti_bin/PSI/ProjectServer.svc"
