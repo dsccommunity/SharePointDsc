@@ -22,10 +22,44 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $getTypeFullName = "Microsoft.SharePoint.Taxonomy.MetadataWebServiceApplication"
 
         # Mocks for all contexts
+        # SPMetadataServiceApplication Mocks
         Mock -CommandName New-SPMetadataServiceApplication -MockWith { return @{} }
-        Mock -CommandName New-SPMetadataServiceApplicationProxy -MockWith { return @{} }
         Mock -CommandName Set-SPMetadataServiceApplication -MockWith { }
+
+        # SPMetadataServiceApplicationProxy Mocks
+        Mock -CommandName New-SPMetadataServiceApplicationProxy -MockWith {
+            return @(
+                @{
+                    Name = "Managed Metadata Service App Proxy"
+                } | Add-Member -MemberType ScriptMethod `
+                    -Name Update `
+                    -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name Delete `
+                    -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                    -PassThru -Force
+            )
+        }
+
+        Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+            return @(
+                @{
+                    Name = "Managed Metadata Service App Proxy"
+                } | Add-Member -MemberType ScriptMethod `
+                    -Name Update `
+                    -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                    -PassThru -Force `
+                    | Add-Member -MemberType ScriptMethod `
+                    -Name Delete `
+                    -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                    -PassThru -Force
+            )
+        }
+
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
+
+        # SPWebApplication Mocks
         Mock -CommandName Get-SPWebApplication -MockWith {
             return @(
                 @{
@@ -35,6 +69,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         }
 
+        # SPTaxonomySession Mocks
         $termStores = @{
             "Managed Metadata Service App Proxy" = @{
                 Name                    = "Managed Metadata Service App Proxy"
@@ -78,6 +113,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 TermStores = $termStores
             }
         }
+
+        # SPClaimsPrincipal Mocks
         Mock -CommandName New-SPClaimsPrincipal -MockWith {
             return @{
                 Value = $Identity -replace "i:0#.w\|"
@@ -161,6 +198,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         FullName = "Microsoft.Office.UnKnownWebServiceApplication"
                     }
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -208,6 +251,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 }
                             } -PassThru -Force
                         } -PassThru -Force
+                    } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
                     } -PassThru -Force
                     return $spServiceApp
                 }
@@ -267,7 +316,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             )
                         } -PassThru
                     } -PassThru -Force
-
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
             }
@@ -321,6 +375,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 }
                             } -PassThru -Force
                         } -PassThru -Force
+                    } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
                     } -PassThru -Force
                     return $spServiceApp
                 }
@@ -380,6 +440,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             )
                         } -PassThru
                     } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
 
                     return $spServiceApp
                 }
@@ -426,7 +492,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         TypeName        = "Managed Metadata Service"
                         DisplayName     = $testParams.Name
                         ApplicationPool = @{
-                            Name = $testParams.AookucationPool
+                            Name = $testParams.ApplicationPool
                         }
                         Database        = @{
                             Name   = $testParams.DatabaseName
@@ -447,6 +513,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 }
                             } -PassThru -Force
                         } -PassThru -Force
+                    } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
                     } -PassThru -Force
                     return $spServiceApp
                 }
@@ -505,6 +577,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 )
                             )
                         } -PassThru
+                    } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
                     } -PassThru -Force
 
                     return $spServiceApp
@@ -731,6 +809,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         } -PassThru -Force
                     } -PassThru -Force
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -780,6 +864,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                         } -PassThru -Force
                     } -PassThru -Force
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return $true
                 } -PassThru -Force
                 return $spServiceApp
             }
@@ -837,6 +927,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             }
                         } -PassThru -Force
                     } -PassThru -Force
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return $true
                 } -PassThru -Force
                 return $spServiceApp
             }
@@ -1008,6 +1104,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         } -PassThru -Force
                     } -PassThru -Force
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                    -Name IsConnected `
+                    -Value {
+                    param($x)
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
             }
 
@@ -1162,6 +1264,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             } -PassThru -Force
                         } -PassThru -Force
                     } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
             }
@@ -1220,7 +1328,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             )
                         } -PassThru
                     } -PassThru -Force
-
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
             }
@@ -1243,8 +1356,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             } -PassThru -Force
 
             $termStores = @{
-                "Managed Metadata Service Application Proxy" = @{
-                    Name                    = "Managed Metadata Service Application Proxy"
+                "Managed Metadata Service App Proxy" = @{
+                    Name                    = "Managed Metadata Service App Proxy"
                     Languages               = @(1031)
                     DefaultLanguage         = 1031
                     WorkingLanguage         = 1033
@@ -1292,8 +1405,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should change the value for 'Default Language'" {
+                $result = Get-TargetResource @testParams
                 Set-TargetResource @testParams
-                $termStores["$($testParams.Name) Proxy"].DefaultLanguage | Should Be $testParams.DefaultLanguage
+                $termStores["$($result.ProxyName)"].DefaultLanguage | Should Be $testParams.DefaultLanguage
             }
 
             It "Should change the value for 'Languages'" {
@@ -1366,6 +1480,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             } -PassThru -Force
                         } -PassThru -Force
                     } -PassThru -Force
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
             }
@@ -1424,9 +1544,29 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             )
                         } -PassThru
                     } -PassThru -Force
-
+                    $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod `
+                        -Name IsConnected `
+                        -Value {
+                        param($x)
+                        return $true
+                    } -PassThru -Force
                     return $spServiceApp
                 }
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                return @(
+                    @{
+                        Name = "Managed Metadata Service Application Proxy"
+                    } | Add-Member -MemberType ScriptMethod `
+                        -Name Update `
+                        -Value { $Global:SPDscServiceProxyUpdateCalled = $true }  `
+                        -PassThru -Force `
+                        | Add-Member -MemberType ScriptMethod `
+                        -Name Delete `
+                        -Value {$Global:SPDscServiceProxyDeleteCalled = $true } `
+                        -PassThru -Force
+                )
             }
 
             $termStoreAdmins = @(
@@ -1481,7 +1621,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            It "Should call the update service app cmdlet from the set method for 'Cotent Type Hub Url'" {
+            It "Should call the update service app cmdlet from the set method for 'Content Type Hub Url'" {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled Set-SPMetadataServiceApplication
