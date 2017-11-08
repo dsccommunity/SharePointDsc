@@ -19,13 +19,15 @@ Configuration Example
         # This section installs SharePoint and its Prerequisites
         #**********************************************************
         
-        SPInstallPrereqs InstallPrereqs {
+        SPInstallPrereqs InstallPrereqs 
+        {
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
             OnlineMode        = $true
         }
 
-        SPInstall InstallSharePoint {
+        SPInstall InstallSharePoint 
+        {
             Ensure = "Present"
             BinaryDir = "C:\binaries\"
             ProductKey = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
@@ -51,6 +53,7 @@ Configuration Example
             RunCentralAdmin          = $true
             DependsOn                = "[SPInstall]InstallSharePoint"
         }
+
         SPManagedAccount ServicePoolManagedAccount
         {
             AccountName          = $ServicePoolManagedAccount.UserName
@@ -138,7 +141,7 @@ Configuration Example
             PsDscRunAsCredential   = $SPSetupAccount
             DependsOn              = "[SPManagedAccount]WebPoolManagedAccount"
         }
-
+        
         SPCacheAccounts WebAppCacheAccounts
         {
             WebAppUrl              = "http://sites.contoso.com"
@@ -259,7 +262,86 @@ Configuration Example
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
-        
+
+
+        #**********************************************************
+        # Project Server Configuration
+        #
+        # This section contains resoruces that are needed or can be
+        # used in the configuration of Project Server 2016
+        #**********************************************************
+
+        SPProjectServerLicense PWALicense 
+        {
+            Ensure               = "Present"
+            ProductKey           = "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPFarm]CreateSPFarm"
+        }
+
+        SPManagedPath PWAPath
+        {
+            WebAppUrl            = "http://sites.contoso.com"
+            RelativeUrl          = "PWA"
+            Explicit             = $true
+            HostHeader           = $false
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPWebApplication]SharePointSites"
+        }
+
+        SPProjectServerServiceApp PWAServiceApp
+        {
+            Name                 = "Project Server Service Application"
+            ApplicationPool      = $serviceAppPoolName
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPProjectServerLicense]PWALicense"
+        }
+
+        SPSite PWASite
+        {
+            Url                      = "http://sites.contoso.com/pwa"
+            OwnerAlias               = "CONTOSO\ExampleUser"
+            Name                     = "PWA Site"
+            Template                 = "PWA#0"
+            PsDscRunAsCredential     = $SPSetupAccount
+            DependsOn                = @("[SPManagedPath]PWAPath", "[SPProjectServerServiceApp]PWAServiceApp")
+        }
+    
+        SPFeature PWASiteFeature
+        {
+            Name                 = "PWASITE"
+            Url                  = "http://sites.contoso.com/pwa"
+            FeatureScope         = "Site"
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPSite]PWASite"
+        }
+
+        SPProjectServerPermissionMode PWAPermMode
+        {
+            Url                  = "http://sites.contoso.com/pwa"
+            PermissionMode       = "ProjectServer"
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPFeature]PWASiteFeature"
+        }
+
+        SPProjectServerADResourcePoolSync PWAUserSync
+        {
+            Url                  = "http://sites.contoso.com/pwa"
+            GroupNames           = @("CONTOSO\Project Managers", "CONTOSO\Project Members")
+            AutoReactivateUsers  = $true
+            PsDscRunAsCredential = $SPSetupAccount
+            DependsOn            = "[SPFeature]PWASiteFeature"
+        }
+
+        SPTimerJobState RunProjectSeverADImport
+        {
+            Name                    = "ActiveDirectorySync"
+            Enabled                 = $true
+            Schedule                = "daily between 03:00:00 and 03:00:00"
+            PsDscRunAsCredential    = $SPSetupAccount
+            DependsOn               = "[SPProjectServerADResourcePoolSync]PWAUserSync"
+        }
+
         #**********************************************************
         # Local configuration manager settings
         #
