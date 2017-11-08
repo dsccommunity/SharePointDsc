@@ -94,11 +94,6 @@ function Get-TargetResource
                 }
             }
 
-            if ($null -eq $proxyName)
-            {
-                $proxyName = "$($params.Name) Proxy"
-            }
-
             # Get the ContentTypeHubUrl value
             $hubUrl = ""
             try
