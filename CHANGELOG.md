@@ -10,6 +10,7 @@
 * Added resource: SPMinRoleCompliance
 * Added SPWebAppSuiteBar resource to brand Suite Bar;
 * Update SPWeb to allow the management of the access requests settings
+* Update SPWebApplicationExtension to fix how property AllowAnonymous is returned in the hashtable
 
 ## 1.9
 
