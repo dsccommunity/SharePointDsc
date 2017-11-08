@@ -8,6 +8,8 @@
   SPProjectServerGroup, SPProjectServerTimeSheetSettings,
   SPProjectServerUserSyncSettings, SPProjectServerWssSettings
 * Added resource: SPMinRoleCompliance
+* Update SPManagedMetadataServiceApp to allow the configuration of the default
+  and working language
 * Added SPWebAppSuiteBar resource to brand Suite Bar;
 * Update SPWeb to allow the management of the access requests settings
 
