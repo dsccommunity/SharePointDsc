@@ -2,7 +2,14 @@
 
 ## Unreleased
 
+* Added support for Project Server 2016 with the following new resources:
+  SPProjectServerLicense, SPProjectServerAdditionalSettings,
+  SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
+  SPProjectServerGroup, SPProjectServerTimeSheetSettings,
+  SPProjectServerUserSyncSettings, SPProjectServerWssSettings
 * Added resource: SPMinRoleCompliance
+* Added SPWebAppSuiteBar resource to brand Suite Bar;
+* Update SPWeb to allow the management of the access requests settings
 
 ## 1.9
 
