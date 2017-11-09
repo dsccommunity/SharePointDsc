@@ -3,6 +3,14 @@
 ## Unreleased
 
 * Added resource: SPMinRoleCompliance
+* Updated SPInstallPrereqs to document which parameter is required for which
+  version of SharePoint (issue 669)
+* Added SP2016 example for the SPInstallPrereqs resource (issue 669)
+* Fixed issue with SPWebApplication.Throttling where the RequestThrottling parameter
+  was not applied (issue 554)
+* Added DefaultQuotaTemplate parameter to SPWebAppGeneralSettings (issue 507)
+* Added VSCode workspace settings to meet coding guidelines (issue 668)
+* Added custom Proxy Name support to SPBCSServiceApp
 
 ## 1.9
 

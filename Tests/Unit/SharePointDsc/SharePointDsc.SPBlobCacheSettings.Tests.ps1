@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -25,26 +25,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $Global:SPDscWebConfigFile = Join-Path -Path $Global:SPDscWebConfigPath -ChildPath "web.config"
         New-Item -Path $Global:SPDscWebConfigPath -ItemType Directory
 
-        try 
-        { 
-            [Microsoft.SharePoint.Administration.SPUrlZone] 
+        try
+        {
+            [Microsoft.SharePoint.Administration.SPUrlZone]
         }
-        catch 
+        catch
         {
             Add-Type -TypeDefinition @"
 namespace Microsoft.SharePoint.Administration {
     public enum SPUrlZone { Default, Intranet, Internet, Custom, Extranet };
-}        
+}
 "@
         }
 
         # Mocks for all contexts
-        Mock -CommandName Get-SPWebApplication -MockWith { 
+        Mock -CommandName Get-SPWebApplication -MockWith {
             return @{
                 IISSettings =  @(@{
                     Path = $Global:SPDscWebConfigRealPath
                 })
-            } 
+            }
         }
 
         Mock -CommandName Get-SPServiceInstance -MockWith {
@@ -64,7 +64,7 @@ namespace Microsoft.SharePoint.Administration {
             Set-Content -Path $Global:SPDscWebConfigFile -Value $Content
         }
 
-        # Test contexts 
+        # Test contexts
         Context -Name "The web application doesn't exist" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -119,11 +119,11 @@ namespace Microsoft.SharePoint.Administration {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams  | Should Be $false
             }
-            
+
             It "Should return MaxSize 30 in web.config from the set method" {
                 Set-TargetResource @testParams
                 [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                $webcfg.configuration.SharePoint.BlobCache.maxsize | Should Be "30" 
+                $webcfg.configuration.SharePoint.BlobCache.maxsize | Should Be "30"
             }
         }
 
@@ -136,14 +136,14 @@ namespace Microsoft.SharePoint.Administration {
                 MaxSizeInGB     = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
-            
+
             Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration>
   <SharePoint>
     <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
   </SharePoint>
 </configuration>'
-            
+
             Mock -CommandName Test-Path -MockWith { return $false }
             Mock -CommandName New-Item -MockWith {}
 
@@ -156,7 +156,7 @@ namespace Microsoft.SharePoint.Administration {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should check if function is called in the set method" {
                 Set-TargetResource @testParams
             }
@@ -168,10 +168,11 @@ namespace Microsoft.SharePoint.Administration {
                 Zone        = "Default"
                 EnableCache = $true
                 Location    = "c:\BlobCache"
-                MaxSizeInGB     = 30
+                MaxSizeInGB = 30
+                MaxAge      = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
-            
+
 
             Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration>
@@ -179,7 +180,7 @@ namespace Microsoft.SharePoint.Administration {
     <BlobCache location="c:\BlobCache" path="\.(csv|gif|jpg|jpeg)$" maxSize="20" enabled="True" />
   </SharePoint>
 </configuration>'
-            
+
             Mock -CommandName Test-Path -MockWith { return $true }
 
             Mock -CommandName Copy-Item -MockWith {}
@@ -191,14 +192,15 @@ namespace Microsoft.SharePoint.Administration {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should return MaxSize 30 from the set method" {
                 Set-TargetResource @testParams
                 [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                $webcfg.configuration.SharePoint.BlobCache.maxsize | Should Be "30" 
+                $webcfg.configuration.SharePoint.BlobCache.maxsize | Should Be "30"
+                $webcfg.configuration.SharePoint.BlobCache."max-age" | Should Be "30"
             }
         }
-        
+
         Context -Name "BlobCache is disabled, but the parameters specify it to be enabled" {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -208,7 +210,7 @@ namespace Microsoft.SharePoint.Administration {
                 MaxSizeInGB     = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
-            
+
             Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration>
   <SharePoint>
@@ -216,20 +218,20 @@ namespace Microsoft.SharePoint.Administration {
   </SharePoint>
 </configuration>'
 
-            Mock -CommandName Get-SPWebApplication -MockWith { 
+            Mock -CommandName Get-SPWebApplication -MockWith {
                 $IISSettings = @(@{
                         Path = $Global:SPDscWebConfigRealPath
                     })
-                $iisSettingsCol = {$IISSettings}.Invoke() 
+                $iisSettingsCol = {$IISSettings}.Invoke()
 
-                
+
                 $webapp = @{
                     IISSettings = $iisSettingsCol
-                } 
+                }
 
                 return $webapp
             }
-            
+
             Mock -CommandName Test-Path -MockWith { return $true }
 
             Mock -CommandName Copy-Item -MockWith {}
@@ -241,11 +243,11 @@ namespace Microsoft.SharePoint.Administration {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should return Enabled False from the set method" {
                 Set-TargetResource @testParams
                 [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "True" 
+                $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "True"
             }
         }
 
@@ -258,14 +260,14 @@ namespace Microsoft.SharePoint.Administration {
                 MaxSizeInGB     = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
-            
+
             Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration>
   <SharePoint>
     <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
   </SharePoint>
 </configuration>'
-            
+
             Mock -CommandName Test-Path -MockWith { return $true }
 
             It "Should return values from the get method" {
@@ -290,7 +292,7 @@ namespace Microsoft.SharePoint.Administration {
     <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
   </SharePoint>
 </configuration>'
-                        
+
             Mock -CommandName Test-Path -MockWith { return $true }
 
             Mock -CommandName Copy-Item -MockWith {}
@@ -302,11 +304,11 @@ namespace Microsoft.SharePoint.Administration {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should return correct values in the config file after the set method" {
                 Set-TargetResource @testParams
                 [xml] $webcfg = Get-Content -Path $Global:SPDscWebConfigFile
-                $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "False" 
+                $webcfg.configuration.SharePoint.BlobCache.enabled | Should Be "False"
             }
         }
 
@@ -319,14 +321,14 @@ namespace Microsoft.SharePoint.Administration {
                 MaxSizeInGB     = 30
                 FileTypes   = "\.(gif|jpg|jpeg)$"
             }
-            
+
             Update-SPDscTestConfigFile -Content '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration>
   <SharePoint>
     <BlobCache location="c:\BlobCache" path="\.(gif|jpg|jpeg)$" maxSize="30" enabled="True" />
   </SharePoint>
 </configuration>'
-            
+
             Mock -CommandName Test-Path -MockWith { return $true }
             Mock -CommandName Get-SPServiceInstance -MockWith { return $null }
 
@@ -337,11 +339,11 @@ namespace Microsoft.SharePoint.Administration {
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should throw "Server isn't running the Web Application role"
             }
-        }        
+        }
     }
 }
 
