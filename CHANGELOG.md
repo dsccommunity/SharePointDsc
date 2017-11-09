@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-* Added resource: SPMinRoleCompliance, SPWebAppPeoplePickerSettings (issue 488)
+* Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings (issue 488)
+* Added support for Project Server 2016 with the following new resources:
+  SPProjectServerLicense, SPProjectServerAdditionalSettings,
+  SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
+  SPProjectServerGroup, SPProjectServerTimeSheetSettings,
+  SPProjectServerUserSyncSettings, SPProjectServerWssSettings
 * Updated SPInstallPrereqs to document which parameter is required for which
   version of SharePoint (issue 669)
 * Added SP2016 example for the SPInstallPrereqs resource (issue 669)
@@ -11,6 +16,8 @@
 * Added DefaultQuotaTemplate parameter to SPWebAppGeneralSettings (issue 507)
 * Added VSCode workspace settings to meet coding guidelines (issue 668)
 * Added custom Proxy Name support to SPBCSServiceApp
+* Update SPManagedMetadataServiceApp to allow the configuration of the default
+  and working language
 * Update SPWeb to allow the management of the access requests settings
 
 ## 1.9
