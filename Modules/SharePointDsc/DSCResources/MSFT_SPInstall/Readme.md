@@ -21,3 +21,9 @@ permissions as well as read access to the network location.
 It is *not recommended* to disable UAC for security reasons. The recommended
 approach is to copy the installation media to the local nodes first and
 then execute the installation from there.
+
+## Multilingual support
+Where possible, resources in SharePointDsc have been written in a way that
+they should support working with multiple language packs for multilingual
+deployments. However due to constraints in how we set up and install the
+product, only English ISOs are supported for installing SharePoint.

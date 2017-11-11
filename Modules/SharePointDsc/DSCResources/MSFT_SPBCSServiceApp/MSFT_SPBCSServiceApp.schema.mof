@@ -2,7 +2,7 @@
 class MSFT_SPBCSServiceApp : OMI_BaseResource
 {
     [Key, Description("The name of the BCS service app")] string Name;
-    [Write, Description("The name of the Visio Service Application Proxy")] string ProxyName;
+    [Write, Description("The name of the BCS service application proxy")] string ProxyName;
     [Required, Description("The application pool it should run in")] String ApplicationPool;
     [Write, Description("Name of the database to create for the service app")] string DatabaseName;
     [Write, Description("Name of the database server to host the database on")] String DatabaseServer;

@@ -51,6 +51,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
                 $proxiesToReturn = @()
                 $proxy = @{
+                    Name = $testParams.ProxyName
                     DisplayName = $testParams.ProxyName
                 }
                 $proxy = $proxy | Add-Member -MemberType ScriptMethod `

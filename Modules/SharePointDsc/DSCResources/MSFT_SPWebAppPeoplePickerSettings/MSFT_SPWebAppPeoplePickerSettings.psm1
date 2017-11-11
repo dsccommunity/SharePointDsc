@@ -61,7 +61,7 @@ function Get-TargetResource
             $searchADDomain = @{}
             $searchADDomain.FQDN = $searchDomain.DomainName
             $searchADDomain.IsForest = $searchDomain.IsForest
-            $searchADDomain.Account  = $searchDomain.LoginName
+            $searchADDomain.AccessAccount  = $searchDomain.LoginName
             $searchADDomains += $searchADDomain
         }
 
@@ -170,17 +170,26 @@ function Set-TargetResource
                 if ($null -eq $configuredDomain)
                 {
                     # Add domain
-                    $adsearchobj = New-Object Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain
+                    $adsearchobj = New-Object -TypeName Microsoft.SharePoint.Administration.SPPeoplePickerSearchActiveDirectoryDomain
                     $adsearchobj.DomainName = $searchADDomain.FQDN
-                    if ($searchADDomain.ContainsKey("NetBIOSName"))
+
+                    $prop = $searchADDomain.CimInstanceProperties | Where-Object -FilterScript {
+                        $_.Name -eq "NetBIOSName"
+                    }
+                    if ($null -ne $prop)
                     {
                         $adsearchobj.ShortDomainName = $searchADDomain.NetBIOSName
                     }
+
                     $adsearchobj.IsForest = $searchADDomain.IsForest
-                    if ($searchADDomain.ContainsKey("Account"))
+
+                    $prop = $searchADDomain.CimInstanceProperties | Where-Object -FilterScript {
+                        $_.Name -eq "AccessAccount"
+                    }
+                    if ($null -ne $prop)
                     {
-                        $adsearchobj.LoginName = $searchADDomain.Account.UserName
-                        $adsearchobj.SetPassword($searchADDomain.Account.Password)
+                        $adsearchobj.LoginName = $searchADDomain.AccessAccount.UserName
+                        $adsearchobj.SetPassword($searchADDomain.AccessAccount.Password)
                     }
                     $wa.PeoplePickerSettings.SearchActiveDirectoryDomains.Add($adsearchobj)
                 }
