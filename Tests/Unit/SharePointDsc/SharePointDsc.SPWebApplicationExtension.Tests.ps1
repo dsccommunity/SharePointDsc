@@ -262,7 +262,6 @@ namespace Microsoft.SharePoint.Administration {
                 return @{ 
                     DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
-                    AllowAnonymous = $false 
                 } 
             }
             
@@ -275,7 +274,8 @@ namespace Microsoft.SharePoint.Administration {
                              HostHeader = "intranet.sharepoint.com"
                              Port = 80
                          }
-                 })
+                         AllowAnonymous = $false 
+                        })
 
                  return (
                   @{ 
@@ -323,7 +323,6 @@ namespace Microsoft.SharePoint.Administration {
                 return @{ 
                     DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
-                    AllowAnonymous = $false 
                 } 
             }
             
@@ -336,7 +335,8 @@ namespace Microsoft.SharePoint.Administration {
                              Port = 443
                          }
                          ServerBindings = @{}
-                 })
+                         AllowAnonymous = $false 
+                        })
 
                  return (
                   @{ 
@@ -376,7 +376,6 @@ namespace Microsoft.SharePoint.Administration {
                 HostHeader = "intranet.sharepoint.com"
                 Zone = "Intranet"
                 AuthenticationMethod = "NTLM"
-                AllowAnonymous = $true 
                 Ensure = "Present"
             }
 
@@ -397,7 +396,8 @@ namespace Microsoft.SharePoint.Administration {
                              HostHeader = "intranet.sharepoint.com"
                              Port = 80
                          }
-                 })
+                    AllowAnonymous = $true 
+                })
 
                  return (
                   @{ 
@@ -444,7 +444,6 @@ namespace Microsoft.SharePoint.Administration {
                 return @{ 
                     DisplayName = "Windows Authentication"
                     DisableKerberos = $false 
-                    AllowAnonymous = $false 
                 } 
             }
             
@@ -457,7 +456,8 @@ namespace Microsoft.SharePoint.Administration {
                              HostHeader = "intranet.sharepoint.com"
                              Port = 80
                          }
-                 })
+                         AllowAnonymous = $false 
+                })
 
                  return (
                   @{ 
@@ -556,7 +556,6 @@ namespace Microsoft.SharePoint.Administration {
                 HostHeader = "intranet.sharepoint.com"
                 Zone = "Intranet"
                 AuthenticationMethod = "Kerberos"
-                AllowAnonymous = $true 
                 Ensure = "Present"
             }
 
@@ -577,7 +576,8 @@ namespace Microsoft.SharePoint.Administration {
                              HostHeader = "intranet.sharepoint.com"
                              Port = 80
                          }
-                 })
+                    AllowAnonymous = $true 
+            })
 
                  return (
                   @{ 
@@ -624,7 +624,6 @@ namespace Microsoft.SharePoint.Administration {
                 return @{ 
                     DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
-                    AllowAnonymous = $false 
                 } 
             }
             
@@ -637,7 +636,8 @@ namespace Microsoft.SharePoint.Administration {
                              HostHeader = "intranet.sharepoint.com"
                              Port = 80
                          }
-                 })
+                         AllowAnonymous = $false 
+                })
 
                  return (
                   @{ 
@@ -755,7 +755,6 @@ namespace Microsoft.SharePoint.Administration {
                 return @{ 
                     DisplayName = "Windows Authentication"
                     DisableKerberos = $true 
-                    AllowAnonymous = $false 
                 } 
             }
             
@@ -768,7 +767,8 @@ namespace Microsoft.SharePoint.Administration {
                              HostHeader = "intranet.sharepoint.com"
                              Port = 80
                          }
-                 })
+                         AllowAnonymous = $false 
+                })
 
                  return (
                   @{ 
