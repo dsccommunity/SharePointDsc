@@ -268,20 +268,17 @@ function Set-TargetResource
 
             if ($changes.ContainsKey("EnableCache")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.enabled `
-                    = $changes.EnableCache.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("enabled",$changes.EnableCache.ToString())
             }
 
             if ($changes.ContainsKey("Location")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.location `
-                    = $changes.Location
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("location",$changes.Location)
             }
 
             if ($changes.ContainsKey("MaxSizeInGB")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.maxSize `
-                    = $changes.MaxSizeInGB.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("maxSize",$changes.MaxSizeInGB.ToString())
             }
 
             if ($changes.ContainsKey("MaxAgeInSeconds")) 
@@ -291,8 +288,7 @@ function Set-TargetResource
             
             if ($changes.ContainsKey("FileTypes")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.path `
-                = $changes.FileTypes
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("path",$changes.FileTypes)
             }
             $webconfig.Save($webconfiglocation)
         }
