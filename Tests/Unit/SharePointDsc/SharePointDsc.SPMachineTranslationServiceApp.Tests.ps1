@@ -113,6 +113,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
                 Name = "Translation Service"
+                ProxyName = "Machine Translation Service App Proxy"
                 ApplicationPool = "SharePoint Service Applications"
                 DatabaseServer = "SPDB"
                 DatabaseName = "Translation"
@@ -136,8 +137,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             FullName = $getTypeFullName
                         })
                         } -PassThru -Force
-
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                    } -PassThru -Force
                 return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                $proxiesToReturn = @()
+                $proxy = @{
+                    Name = $testParams.ProxyName
+                    DisplayName = $testParams.ProxyName
+                }
+                $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value {} `
+                                                -PassThru
+                $proxiesToReturn +=  $proxy
+
+                return $proxiesToReturn
             }
 
             It "Should return present from the get method" {

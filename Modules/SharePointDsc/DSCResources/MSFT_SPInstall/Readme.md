@@ -23,6 +23,7 @@ approach is to copy the installation media to the local nodes first and
 then execute the installation from there.
 
 ## Multilingual support
+
 Where possible, resources in SharePointDsc have been written in a way that
 they should support working with multiple language packs for multilingual
 deployments. However due to constraints in how we set up and install the

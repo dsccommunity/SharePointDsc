@@ -35,6 +35,7 @@ approach is to copy the installation media to the local nodes first and
 then execute the installation from there.
 
 ## Downloading prerequisites
+
 The SharePoint prerequisites can be downloaded from the following locations:
 
 SharePoint 2013:

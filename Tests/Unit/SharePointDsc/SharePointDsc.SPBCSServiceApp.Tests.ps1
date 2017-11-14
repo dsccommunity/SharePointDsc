@@ -58,7 +58,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 -Name Delete `
                                                 -Value {} `
                                                 -PassThru
-                $proxiesToReturn +=  $proxy
+                $proxiesToReturn += $proxy
 
                 return $proxiesToReturn
             }
@@ -125,6 +125,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When a service application exists and it should, and is also configured correctly" -Fixture {
             $testParams = @{
                 Name = "Test App"
+                ProxyName = "TestApp Proxy"
                 ApplicationPool = "Test App Pool"
                 DatabaseName = "Test_DB"
                 DatabaseServer = "TestServer\Instance"
@@ -144,7 +145,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
                     return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
+                } -PassThru -Force
                 return $spServiceApp
+            }
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                $proxiesToReturn = @()
+                $proxy = @{
+                    Name = $testParams.ProxyName
+                    DisplayName = $testParams.ProxyName
+                }
+                $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value {} `
+                                                -PassThru
+                $proxiesToReturn += $proxy
+
+                return $proxiesToReturn
             }
 
             It "Should return values from the get method" {

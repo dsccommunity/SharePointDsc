@@ -5,8 +5,8 @@ Class MSFT_SPWebAppPPSearchDomain
     [Required, Description("Is the FQDN a forest?")] Boolean IsForest;
     [Write, Description("Specifies the credentials to use to connect to the specified domain or forest"), EmbeddedInstance("MSFT_Credential")] String AccessAccount;
 };
-[ClassVersion("1.0.0.0"), FriendlyName("SPWebAppPPS")]
-class MSFT_SPWebAppPPS : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPWebAppPeoplePickerSettings")]
+class MSFT_SPWebAppPeoplePickerSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string WebAppUrl;
     [Write, Description("Sets a customized query filter to send to Active Directory")] String ActiveDirectoryCustomFilter;
