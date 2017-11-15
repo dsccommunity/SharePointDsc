@@ -32,7 +32,7 @@ namespace Microsoft.SharePoint.Administration {
         public string ShortDomainName { get; set; }
         public bool IsForest { get; set; }
         public string LoginName { get; set; }
-        public void SetPassword()
+        public void SetPassword(string password)
         {
 
         }
@@ -68,6 +68,71 @@ namespace Microsoft.SharePoint.Administration {
             }
         }
 
+        Context -Name "Search domain settings do not match actual values" -Fixture {
+            $testParams = @{
+                WebAppUrl   = "http://sharepoint.contoso.com"
+                SearchActiveDirectoryDomains   = @(
+                    (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
+                        FQDN     = "contoso.intra"
+                        IsForest = $false
+                        AccessAccount  = (New-CimInstance -ClassName MSFT_Credential `
+                                                    -Property @{
+                                                        Username=[string]$mockAccount.UserName;
+                                                        Password=[string]$null
+                                                    } `
+                                                    -Namespace root/microsoft/windows/desiredstateconfiguration `
+                                                    -ClientOnly)
+                    } -ClientOnly)
+                )
+            }
+
+            Mock -CommandName Get-SPWebApplication -MockWith {
+                $searchADdom =  New-Object -TypeName "System.Collections.Generic.List[System.Object]"
+                $searchDom1 = New-Object -TypeName "Object" | `
+                                Add-Member -MemberType NoteProperty `
+                                           -Name DomainName `
+                                           -Value ( "contosonew.intra" ) -PassThru | `
+                                Add-Member -MemberType NoteProperty `
+                                           -Name IsForest `
+                                           -Value ( $false ) -PassThru | `
+                                Add-Member -MemberType NoteProperty `
+                                           -Name LoginName `
+                                           -Value ( $mockAccount.UserName ) -PassThru
+                $searchADdom.Add($searchDom1)
+
+                $returnval = @{
+                    PeoplePickerSettings = @{
+                        ActiveDirectoryCustomFilter    = "()"
+                        ActiveDirectoryCustomQuery     = "()"
+                        ActiveDirectorySearchTimeout   = @{
+                            TotalSeconds = 10
+                        }
+                        OnlySearchWithinSiteCollection = $true
+                        SearchActiveDirectoryDomains   = $searchADdom
+                    }
+                }
+                $returnval = $returnval | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    $Global:SPDscWebApplicationUpdateCalled = $true
+                } -PassThru
+
+                return $returnval
+            }
+
+            It "Should return SearchTimeOut=10 from the get method" {
+                (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should Be 10
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $True
+            }
+
+            $Global:SPDscWebApplicationUpdateCalled = $false
+            It "Should update the people picker settings" {
+                Set-TargetResource @testParams
+                $Global:SPDscWebApplicationUpdateCalled | Should Be $true
+            }
+        }
+
         Context -Name "Settings do not match actual values" -Fixture {
             $testParams = @{
                 WebAppUrl   = "http://sharepoint.contoso.com"
@@ -89,6 +154,7 @@ namespace Microsoft.SharePoint.Administration {
                                            Add-Member -MemberType NoteProperty `
                                            -Name LoginName `
                                            -Value ( $mockAccount.UserName ) -PassThru
+                $searchADdom.Add($searchDom1)
 
                 $returnval = @{
                     PeoplePickerSettings = @{
@@ -130,7 +196,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPPSearchDomain -Property @{
                         FQDN     = "contoso.intra"
                         IsForest = $false
-                        Account  = (New-CimInstance -ClassName MSFT_Credential `
+                        AccessAccount  = (New-CimInstance -ClassName MSFT_Credential `
                                                     -Property @{
                                                         Username=[string]$mockAccount.UserName;
                                                         Password=[string]$null
@@ -153,6 +219,7 @@ namespace Microsoft.SharePoint.Administration {
                                 Add-Member -MemberType NoteProperty `
                                            -Name LoginName `
                                            -Value ( $mockAccount.UserName ) -PassThru
+                $searchADdom.Add($searchDom1)
 
                 $returnval = @{
                     PeoplePickerSettings = @{

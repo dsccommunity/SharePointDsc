@@ -259,10 +259,10 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    # Testing SearchActiveDirectoryDomains
+    # Testing SearchActiveDirectoryDomains against configured values
     foreach ($searchADDomain in $params.SearchActiveDirectoryDomains)
     {
-        $configuredDomain = $returnval.SearchActiveDirectoryDomains | `
+        $configuredDomain = $CurrentValues.SearchActiveDirectoryDomains | `
                             Where-Object -FilterScript {
                                 $_.FQDN -eq $searchADDomain.FQDN -and `
                                 $_.IsForest -eq $searchADDomain.IsForest
@@ -273,7 +273,8 @@ function Test-TargetResource
         }
     }
 
-    foreach ($searchADDomain in $returnval.SearchActiveDirectoryDomains)
+    # Reverse: Testing configured values against SearchActiveDirectoryDomains
+    foreach ($searchADDomain in $CurrentValues.SearchActiveDirectoryDomains)
     {
         $specifiedDomain = $params.SearchActiveDirectoryDomains | Where-Object -FilterScript {
             $_.FQDN -eq $searchADDomain.FQDN -and `

@@ -93,9 +93,30 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             Mock -CommandName Get-SPStateServiceApplication -MockWith {
-                return @{
+                $returnVal = @{
                     DisplayName = $testParams.Name
+                    Name = $testParams.Name
                 }
+                $returnVal = $returnVal | Add-Member -MemberType ScriptMethod `
+                                                     -Name IsConnected -Value {
+                                                            return $true
+                                                        } -PassThru
+
+                return $returnVal
+            }
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                $proxiesToReturn = @()
+                $proxy = @{
+                    Name = $testParams.ProxyName
+                    DisplayName = $testParams.ProxyName
+                }
+                $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value {} `
+                                                -PassThru
+                $proxiesToReturn +=  $proxy
+
+                return $proxiesToReturn
             }
 
             It "Should return present from the get method" {
