@@ -4,6 +4,7 @@
 
 * Added resource: SPMinRoleCompliance
 * Update SPWeb to allow the management of the access requests settings
+* Update SPBlobCacheSettings to set non-default or missing blob cache properties
 
 ## 1.9
 
