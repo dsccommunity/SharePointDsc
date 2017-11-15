@@ -123,7 +123,7 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $True
+                Test-TargetResource @testParams | Should Be $false
             }
 
             $Global:SPDscWebApplicationUpdateCalled = $false
@@ -240,11 +240,12 @@ namespace Microsoft.SharePoint.Administration {
             }
 
             It "Should return SearchTimeOut=10 from the get method" {
-                (Get-TargetResource @testParams).ActiveDirectorySearchTimeout | Should Be 10
+                $result = Get-TargetResource @testParams
+                $result.ActiveDirectorySearchTimeout | Should Be 10
             }
 
             It "Should return false from the test method" {
-                Test-TargetResource @testParams | Should Be $True
+                Test-TargetResource @testParams | Should Be $true
             }
         }
 
