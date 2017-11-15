@@ -15,7 +15,7 @@
 * Update SPBlobCacheSettings to set non-default or missing blob cache properties
 * Update SPWebApplicationExtension to fix how property AllowAnonymous is
   returned in the hashtable
-  
+
 ## 1.9
 
 * New resource: SPServiceIdentity
