@@ -2,6 +2,11 @@
 
 ## 2.0
 
+* Added support for Project Server 2016 with the following new resources:
+  SPProjectServerLicense, SPProjectServerAdditionalSettings,
+  SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
+  SPProjectServerGroup, SPProjectServerTimeSheetSettings,
+  SPProjectServerUserSyncSettings, SPProjectServerWssSettings
 * Added resource: SPMinRoleCompliance
 * Corrected comment in CodeCov.yml
 * Fixed localized issue in SPContentDatabase
@@ -48,6 +53,12 @@ The following changes will break 1.x configurations that use these resources:
   created properly
 * Added the Internal parameter to the SPAlternateUrl resource, which implied a
   change to the key parameters
+* Update SPManagedMetadataServiceApp to allow the configuration of the default
+  and working language
+* Added SPWebAppSuiteBar resource to brand Suite Bar;
+* Update SPWeb to allow the management of the access requests settings
+* Update SPWebApplicationExtension to fix how property AllowAnonymous is
+  returned in the hashtable
 
 ## 1.9
 
