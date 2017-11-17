@@ -47,7 +47,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 "@
         }
 
-        # Mocks for all contexts   
+        # Mocks for all contexts        
+        Mock -CommandName Add-SPProfileSyncConnection -MockWith { $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $true }
+
         Mock -CommandName Get-SPDSCServiceContext -MockWith { 
             return @{} 
         }

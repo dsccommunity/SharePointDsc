@@ -5,6 +5,7 @@
 * Added resource: SPMinRoleCompliance
 * Added SPWebAppSuiteBar resource to brand Suite Bar;
 * Update SPWeb to allow the management of the access requests settings
+* Fix an issue with the SPUserProfileSynConnection class for ADImportConnection;
 
 ## 1.9
 

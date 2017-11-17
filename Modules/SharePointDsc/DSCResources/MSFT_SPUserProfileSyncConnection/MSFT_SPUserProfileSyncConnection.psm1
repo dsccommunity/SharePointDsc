@@ -322,7 +322,7 @@ function Set-TargetResource
                {
                    Add-SPProfileSyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
                        -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionUseSSL $params.UseSSL `
-                       -ConnectionSynchronizationOU $params.IncludedOUs
+                       -ConnectionSynchronizationOU $params.IncludedOUs.ToString()
                }
             }
         }
