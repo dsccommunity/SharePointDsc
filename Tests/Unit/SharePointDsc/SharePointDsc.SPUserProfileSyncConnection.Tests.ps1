@@ -46,6 +46,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 "@
         }
+        try { [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection] }
+        catch {
+            Add-Type -TypeDefinition @"
+                namespace Microsoft.Office.Server.UserProfiles{
+                    public class ActiveDirectoryImportConnection{
+                        public ActiveDirectoryImportConnection(){}
+                    }
+                }        
+"@ -ErrorAction SilentlyContinue 
+        }
 
         # Mocks for all contexts        
         Mock -CommandName Add-SPProfileSyncConnection -MockWith { $Global:SPDscUPSAddActiveDirectoryConnectionCalled = $true }
@@ -426,6 +436,37 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPDscUPSSyncConnectionSetCredentialsCalled  | Should be $true
                 $Global:SPDscUPSSyncConnectionRefreshSchemaCalled | Should be $true
             }
+        }
+
+        Context -Name "When naming context is null (ADImport for SP2016)" -Fixture {
+            $testParams = @{
+                UserProfileService = "User Profile Service Application"
+                Forest = "contoso.com"
+                Name = "Contoso"
+                ConnectionCredentials = $mockCredential
+                UseSSL = $false
+                IncludedOUs = @("OU=SharePoint Users,DC=Contoso,DC=com")
+                ConnectionType = "ActiveDirectory"
+            }
+
+            $userProfileServiceValidConnection =  @{
+                Name = "User Profile Service Application"
+                TypeName = "User Profile Service Application"
+                ApplicationPool = "SharePoint Service Applications"
+                FarmAccount = $mockCredential
+                ServiceApplicationProxyGroup = "Proxy Group"
+                ConnectionManager=  New-Object -TypeName System.Collections.ArrayList
+            }
+            $userProfileServiceValidConnection.ConnectionManager.Add($connection);
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $userProfileServiceValidConnection 
+            }
+
+            $connection.NamingContexts = $null
+            
+            It "Should return values from the get method" {
+                Get-TargetResource @testParams | Should Not BeNullOrEmpty
+            }            
         }
     }
 }

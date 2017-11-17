@@ -80,17 +80,16 @@ function Get-TargetResource
             $namingContext = $connection.NamingContexts | Select-Object -First 1
             if ($null -eq $namingContext)
             {
-                $conn = $connection.Parent.Item($params.Name)
                 $BINDING_FLAGS = ([System.Reflection.BindingFlags]::NonPublic -bOr [System.Reflection.BindingFlags]::Instance)
                 $METHOD_GET_NAMINGCONTEXTS = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_NamingContexts", $BINDING_FLAGS)
                 $METHOD_GET_ACCOUNTUSERNAME = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_AccountUsername", $BINDING_FLAGS)
                 $METHOD_GET_ACCOUNTDOMAIN = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_AccountDomain", $BINDING_FLAGS)
                 $METHOD_GET_USESSL = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_UseSSL", $BINDING_FLAGS)
-                $namingContexts = $METHOD_GET_NAMINGCONTEXTS.Invoke($conn, $null)
-                $accountName = $METHOD_GET_ACCOUNTUSERNAME.Invoke($conn, $null)
-                $accountDomain = $METHOD_GET_ACCOUNTDOMAIN.Invoke($conn, $null)
+                $namingContexts = $METHOD_GET_NAMINGCONTEXTS.Invoke($connection, $null)
+                $accountName = $METHOD_GET_ACCOUNTUSERNAME.Invoke($connection, $null)
+                $accountDomain = $METHOD_GET_ACCOUNTDOMAIN.Invoke($connection, $null)
                 $accountCredentials = $accountDomain + "\" + $accountName
-                $useSSL = $METHOD_GET_USESSL.Invoke($conn, $null)
+                $useSSL = $METHOD_GET_USESSL.Invoke($connection, $null)
 
                 if($null -eq $namingContexts)
                 {
