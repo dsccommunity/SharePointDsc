@@ -80,7 +80,34 @@ function Get-TargetResource
             $namingContext = $connection.NamingContexts | Select-Object -First 1
             if ($null -eq $namingContext)
             {
-                return $null
+                $conn = $connection.Parent.Item($params.Name)
+                $BINDING_FLAGS = ([System.Reflection.BindingFlags]::NonPublic -bOr [System.Reflection.BindingFlags]::Instance)
+                $METHOD_GET_NAMINGCONTEXTS = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_NamingContexts", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTUSERNAME = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_AccountUsername", $BINDING_FLAGS)
+                $METHOD_GET_ACCOUNTDOMAIN = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_AccountDomain", $BINDING_FLAGS)
+                $METHOD_GET_USESSL = [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection].GetMethod("get_UseSSL", $BINDING_FLAGS)
+                $namingContexts = $METHOD_GET_NAMINGCONTEXTS.Invoke($conn, $null)
+                $accountName = $METHOD_GET_ACCOUNTUSERNAME.Invoke($conn, $null)
+                $accountDomain = $METHOD_GET_ACCOUNTDOMAIN.Invoke($conn, $null)
+                $accountCredentials = $accountDomain + "\" + $accountName
+                $useSSL = $METHOD_GET_USESSL.Invoke($conn, $null)
+
+                if($null -eq $namingContexts)
+                {
+                    return $null
+                }
+
+                return @{
+                    UserprofileService = $UserProfileService
+                    Forest = $namingContexts.DistinguishedName
+                    Credentials = $accountCredentials
+                    IncludedOUs = $namingContext.ContainersIncluded
+                    ExcludedOUs = $namingContext.ContainersExcluded
+                    Server = $null
+                    UseSSL = $useSSL
+                    ConnectionType = $conn.Type
+                    Force = $params.Force
+                }
             }
             $accountCredentials = "$($connection.AccountDomain)\$($connection.AccountUsername)"
             $domainController = $namingContext.PreferredDomainControllers | Select-Object -First 1
@@ -275,7 +302,12 @@ function Set-TargetResource
             $userDomain = $params.ConnectionCredentials.UserName.Split("\")[0]
             $userName= $params.ConnectionCredentials.UserName.Split("\")[1]
             
-            $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            
+            switch($installedVersion.FileMajorPart)
+            {
+                15{
+                    $upcm.ConnectionManager.AddActiveDirectoryConnection( [Microsoft.Office.Server.UserProfiles.ConnectionType]::ActiveDirectory,  `
                                             $params.Name, `
                                             $params.Forest, `
                                             $params.UseSSL, `
@@ -285,6 +317,14 @@ function Set-TargetResource
                                             $list, `
                                             $null,`
                                             $null) | Out-Null
+               }
+               16
+               {
+                   Add-SPProfileSyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
+                       -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionUseSSL $params.UseSSL `
+                       -ConnectionSynchronizationOU $params.IncludedOUs
+               }
+            }
         }
     }
 }
