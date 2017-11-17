@@ -133,7 +133,7 @@ function Get-TargetResource
             WebAppUrl = $params.WebAppUrl
             Name = $waExt.ServerComment
             Url = $PublicURL
-            AllowAnonymous = $authProvider.AllowAnonymous
+            AllowAnonymous = $waExt.AllowAnonymous
             HostHeader = $HostHeader 
             Path = $waExt.Path
             Port = $Port
