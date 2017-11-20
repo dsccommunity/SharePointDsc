@@ -4,11 +4,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SPLogLevelSetting,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -155,11 +155,11 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SPLogLevelSetting,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -203,7 +203,6 @@ function Set-TargetResource
 
         foreach ($DesiredSetting in $params.SPLogLevelSetting)
         {
-
             Write-Verbose "Setting SP Log Level Settings for $($DesiredSetting.Area):$($DesiredSetting.Name)"
 
             $AllSettings = Get-SPLogLevel -Identity "$($DesiredSetting.Area):$($DesiredSetting.Name)"
@@ -264,11 +263,11 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SPLogLevelSetting,
 
-        [parameter(Mandatory = $false)]
+        [Parameter())]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
