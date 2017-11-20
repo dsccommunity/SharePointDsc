@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -95,6 +95,34 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw exception in the test method"  {
                 { Test-TargetResource @testParams } | Should Throw "Setup file cannot be found."
+            }
+        }
+
+        Context -Name "Specified update file is blocked" -Fixture {
+            $testParams = @{
+                SetupFile            = "C:\Install\CUMay2016\ubersrv2013-kb3115029-fullfile-x64-glb.exe"
+                ShutdownServices     = $true
+                Ensure               = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith { 
+                return $true
+            }
+
+            Mock -CommandName Get-Item -MockWith {
+                return "Zone data"
+            }
+
+            It "Should throw exception in the get method" {
+                { Get-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
+            }
+
+            It "Should throw exception in the test method"  {
+                { Test-TargetResource @testParams } | Should Throw "Setup file is blocked! Please use Unblock-File to unblock the file"
             }
         }
 

@@ -2,7 +2,7 @@
 class MSFT_SPBlobCacheSettings : OMI_BaseResource
 {
     [Key, Description("The URL of the web application")] string WebAppUrl;
-    [Required, Description("The zone of the web application for which blob cache has to be configured"), ValueMap{"Default","Intranet","Internet","Custom","Extranet"}, Values{"Default","Intranet","Internet","Custom","Extranet"}] string Zone;
+    [Key, Description("The zone of the web application for which blob cache has to be configured"), ValueMap{"Default","Intranet","Internet","Custom","Extranet"}, Values{"Default","Intranet","Internet","Custom","Extranet"}] string Zone;
     [Required, Description("Specify if the blob cache has to be enabled")] Boolean EnableCache;
     [Write, Description("The location where the blob cache has to store its files")] string Location;
     [Write, Description("The maximum size (in GB) of disk space the blob cache is allowed to use")] Uint16 MaxSizeInGB;

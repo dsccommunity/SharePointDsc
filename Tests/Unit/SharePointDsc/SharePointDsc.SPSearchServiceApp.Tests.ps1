@@ -9,7 +9,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -25,7 +25,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Add-Type -TypeDefinition @"
             namespace Microsoft.Office.Server.Search.Administration {
                 public static class SearchContext {
-                    public static object GetContext(object site) {
+                    public static object GetContext(string serviceAppName) {
                         return null;
                     }
                 }
@@ -43,6 +43,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith {} 
         Mock -CommandName New-SPBusinessDataCatalogServiceApplication -MockWith { }
         Mock -CommandName Set-SPEnterpriseSearchServiceApplication -MockWith { } 
+        Mock -CommandName Set-SPEnterpriseSearchService -MockWith {}
         
         Mock -CommandName Get-SPEnterpriseSearchServiceInstance -MockWith { 
             return @{} 
@@ -55,21 +56,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = $testParams.ApplicationPool 
             } 
         }
-        Mock -CommandName Get-SPWebapplication -MockWith { 
-            return @(@{
-                Url = "http://centraladmin.contoso.com"
-                IsAdministrationWebApplication = $true
-            }) 
-        }
-        Mock -CommandName Get-SPSite -MockWith { 
-            @{} 
-        }
         Mock -CommandName New-Object -MockWith {
             return @{
                 DefaultGatheringAccount = "Domain\username"
             }
         } -ParameterFilter { 
             $TypeName -eq "Microsoft.Office.Server.Search.Administration.Content" 
+        }
+        Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+            return @{
+                ProcessIdentity = "DOMAIN\username"
+            }
         }
         
         Mock Import-Module -MockWith {} -ParameterFilter { $_.Name -eq $ModuleName }
@@ -80,6 +77,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "Search Service Application"
                 ApplicationPool = "SharePoint Search Services"
                 Ensure = "Present"
+                WindowsServiceAccount = $mockCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -330,15 +328,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 } 
             }
             
-            Mock -CommandName Get-SPWebapplication -MockWith { 
-                return @(@{
-                    Url = "http://centraladmin.contoso.com"
-                    IsAdministrationWebApplication = $true
-                }) 
-            }
-
-            Mock -CommandName Get-SPSite -MockWith { @{} }
-            
             Mock -CommandName New-Object -MockWith {
                 return @{
                     DefaultGatheringAccount = "Domain\username"
@@ -387,17 +376,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
            
-            Mock -CommandName Get-SPWebapplication -MockWith { 
-                return @(@{
-                    Url = "http://centraladmin.contoso.com"
-                    IsAdministrationWebApplication = $true
-                }) 
-            }
-
-            Mock -CommandName Get-SPSite -MockWith { 
-                return @{} 
-            }
-            
             Mock -CommandName New-Object {
                 return @{
                     DefaultGatheringAccount = "Domain\username"
@@ -554,6 +532,85 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 { Set-TargetResource @testParams } | Should Throw
             }
         }
+
+        Context "A service app exists that has a correct windows service account in use" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                WindowsServiceAccount = $mockCredential
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
+
+            it "Should return the current value in the get method" {
+                (Get-TargetResource @testParams).WindowsServiceAccount | Should Not BeNullOrEmpty 
+            }
+
+            it "Should return true in the test method" {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context "A service app exists that has an incorrect windows service account in use" -Fixture {
+            $testParams = @{
+                Name = "Search Service Application"
+                ApplicationPool = "SharePoint Search Services"
+                Ensure = "Present"
+                WindowsServiceAccount = $mockCredential
+            }
+            
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                $spServiceApp = [PSCustomObject]@{
+                    TypeName = "Search Service Application"
+                    DisplayName = $testParams.Name
+                    ApplicationPool = @{ Name = $testParams.ApplicationPool }
+                    Database = @{
+                        Name = $testParams.DatabaseName
+                        Server = @{ Name = $testParams.DatabaseServer }
+                    }
+                }
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
+                    return @{ FullName = $getTypeFullName } 
+                } -PassThru -Force
+                return $spServiceApp
+            }
+
+            Mock -CommandName Get-SPEnterpriseSearchService -MockWith {
+                return @{
+                    ProcessIdentity = "WrongUserName"
+                }
+            }
+            
+            it "Should return the current value in the get method" {
+                (Get-TargetResource @testParams).WindowsServiceAccount | Should Not BeNullOrEmpty
+            }
+
+            it "Should return false in the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            it "Should update the account in the set method" {
+                Set-TargetResource @testParams
+
+                Assert-MockCalled -CommandName "Set-SPEnterpriseSearchService"
+            }
+        }
+
     }
 }
 

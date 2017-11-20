@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -46,6 +46,32 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "ContentDatabases and AllContentDatabases parameters used simultaniously" -Fixture {
+            $testParams = @{
+                Name             = "ShellAdmins"
+                Members          = "contoso\user1", "contoso\user2"
+                ContentDatabases = @(
+                    (New-CimInstance -ClassName MSFT_SPContentDatabasePermissions -Property @{
+                        Name = "SharePoint_Content_Contoso1"
+                        Members = "contoso\user1", "contoso\user2"
+                    } -ClientOnly)
+                )
+                AllContentDatabases = $true
+            }
+
+            It "Should return null from the get method" {
+                Get-TargetResource @testParams | Should BeNullOrEmpty
+            }
+
+            It "Should return false from the test method" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Cannot use the ContentDatabases parameter together with the AllContentDatabases parameter"
+            }
+        }
+        
         Context -Name "Members and MembersToInclude parameters used simultaniously - General permissions" -Fixture {
             $testParams = @{
                 Name             = "ShellAdmins"

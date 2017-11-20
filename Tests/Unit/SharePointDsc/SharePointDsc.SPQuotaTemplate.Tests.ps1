@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -39,6 +39,87 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         # Test contexts
+        Context -Name "WarningUsagePointsSolutions is lower than MaximumUsagePointsSolutions" -Fixture {
+            $testParams = @{
+                Name = "Test"
+                StorageMaxInMB = 1024
+                StorageWarningInMB = 512
+                MaximumUsagePointsSolutions = 1000
+                WarningUsagePointsSolutions = 1800
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith { 
+                throw "Unable to detect local farm" 
+            }
+
+            It "Should throw an exception in the get method to say MaxPoints need to be larger than WarningPoints" {
+                { Get-TargetResource @testParams } | Should throw "MaximumUsagePointsSolutions must be equal to or larger than"
+            }
+
+            It "Should throw an exception in the test method to say MaxPoints need to be larger than WarningPoints" {
+                { Test-TargetResource @testParams } | Should throw "MaximumUsagePointsSolutions must be equal to or larger than"
+            }
+
+            It "Should throw an exception in the set method to say MaxPoints need to be larger than WarningPoints" {
+                { Set-TargetResource @testParams } | Should throw "MaximumUsagePointsSolutions must be equal to or larger than"
+            }
+        }
+
+        Context -Name "StorageWarningInMB is lower than StorageMaxInMB" -Fixture {
+            $testParams = @{
+                Name = "Test"
+                StorageMaxInMB = 1024
+                StorageWarningInMB = 1512
+                MaximumUsagePointsSolutions = 1000
+                WarningUsagePointsSolutions = 800
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith { 
+                throw "Unable to detect local farm" 
+            }
+
+            It "Should throw an exception in the get method to say StorageMax need to be larger than StorageWarning" {
+                { Get-TargetResource @testParams } | Should throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+            }
+
+            It "Should throw an exception in the test method to say StorageMax need to be larger than StorageWarning" {
+                { Test-TargetResource @testParams } | Should throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+            }
+
+            It "Should throw an exception in the set method to say StorageMax need to be larger than StorageWarning" {
+                { Set-TargetResource @testParams } | Should throw "StorageMaxInMB must be equal to or larger than StorageWarningInMB."
+            }
+        }
+
+        Context -Name "Using Max or Warning parameters with Ensure=Absent" -Fixture {
+            $testParams = @{
+                Name = "Test"
+                StorageMaxInMB = 1024
+                StorageWarningInMB = 512
+                MaximumUsagePointsSolutions = 1000
+                WarningUsagePointsSolutions = 800
+                Ensure = "Absent"
+            }
+
+            Mock -CommandName Get-SPFarm -MockWith { 
+                throw "Unable to detect local farm" 
+            }
+
+            It "Should return Ensure=Absent" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+            }
+
+            It "Should throw an exception in the test method to say Max and Warning parameters should not be used" {
+                { Test-TargetResource @testParams } | Should throw "Do not use StorageMaxInMB, StorageWarningInMB"
+            }
+
+            It "Should throw an exception in the set method to say Max and Warning parameters should not be used" {
+                { Set-TargetResource @testParams } | Should throw "Do not use StorageMaxInMB, StorageWarningInMB"
+            }
+        }
+
         Context -Name "The server is not part of SharePoint farm" -Fixture {
             $testParams = @{
                 Name = "Test"

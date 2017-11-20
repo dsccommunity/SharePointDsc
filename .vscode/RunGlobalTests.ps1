@@ -1,5 +1,5 @@
 $harnessPath = Join-Path -Path $PSScriptRoot `
-                         -ChildPath "..\Tests\Unit\SharePointDsc.TestHarness.psm1"
+                         -ChildPath "..\Tests\TestHarness.psm1"
 Import-Module -Name $harnessPath
 
 $DscTestsPath = Join-Path -Path $PSScriptRoot `
@@ -19,4 +19,23 @@ $helperTestsPath = Join-Path -Path $PSScriptRoot `
                              -ChildPath "..\Modules\SharePointDsc\DscResource.Tests"
 Set-Location -Path $helperTestsPath
 
-Invoke-Pester 
+$result = Invoke-Pester -PassThru
+
+if ($result.FailedCount -gt 0) 
+{
+    Write-Output -InputObject "Failed test result summary:"
+    $result.TestResult | Where-Object -FilterScript { 
+        $_.Passed -eq $false 
+    } | ForEach-Object -Process {
+        Write-Output -InputObject "-----------------------------------------------------------"
+        $outputObject = @{
+            Context = $_.Context
+            Describe = $_.Describe
+            Name = $_.Name
+            FailureMessage = $_.FailureMessage
+        }
+        New-Object -TypeName PSObject -Property $outputObject | Format-List
+    }
+
+    throw "$($result.FailedCount) tests failed."
+}

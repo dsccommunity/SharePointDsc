@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -142,7 +142,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in $TestParams.ServiceAppProxies)
                 { 
                     $proxiesToReturn += @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -176,9 +176,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPServiceApplicationProxyGroup -MockWith { 
                 $proxiesToReturn = @()
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
-                { 
+                {  
                     $proxiesToReturn += @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -221,7 +221,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
                 { 
                     $proxiesToReturn += @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -257,7 +257,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
                 { 
                     $proxiesToReturn +=  @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -297,7 +297,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
                 { 
                     $proxiesToReturn += @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -332,7 +332,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in $serviceAppProxiesConfigured)
                 { 
                     $proxiesToReturn +=  @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -370,7 +370,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
                 { 
                     $proxiesToReturn +=  @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 
@@ -406,7 +406,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 foreach ($ServiceAppProxy in "Web 1 User Profile Service Application")
                 { 
                     $proxiesToReturn += @{ 
-                        Name = $ServiceAppProxy 
+                        DisplayName = $ServiceAppProxy 
                     }
                 }
                 return @{ 

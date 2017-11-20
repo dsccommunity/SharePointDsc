@@ -45,6 +45,27 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                          -ErrorAction SilentlyContinue `
+                        | Where-Object -FilterScript {
+                            $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
+                          }
+
+        if ($null -eq $webappsi) 
+        {
+            Write-Verbose -Message "Server isn't running the Web Application role"
+            return @{
+                WebAppUrl = $null
+                Zone = $null
+                EnableCache = $false
+                Location = $null
+                MaxSizeInGB = $null
+                MaxAgeInSeconds = $null
+                FileTypes = $null
+                InstallAccount = $params.InstallAccount
+            }
+        }
+
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
 
@@ -215,6 +236,17 @@ function Set-TargetResource
             $params  = $args[0]
             $changes = $args[1]
 
+            $webappsi = Get-SPServiceInstance -Server $env:COMPUTERNAME `
+                                              -ErrorAction SilentlyContinue `
+                            | Where-Object -FilterScript {
+                                $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
+                              }
+
+            if ($null -eq $webappsi) 
+            {
+                throw "Server isn't running the Web Application role"
+            }
+
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
             if ($null -eq $wa) 
@@ -236,32 +268,27 @@ function Set-TargetResource
 
             if ($changes.ContainsKey("EnableCache")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.enabled `
-                    = $changes.EnableCache.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("enabled",$changes.EnableCache.ToString())
             }
 
             if ($changes.ContainsKey("Location")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.location `
-                    = $changes.Location
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("location",$changes.Location)
             }
 
             if ($changes.ContainsKey("MaxSizeInGB")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.maxSize `
-                    = $changes.MaxSizeInGB.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("maxSize",$changes.MaxSizeInGB.ToString())
             }
 
             if ($changes.ContainsKey("MaxAgeInSeconds")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache."max-age" `
-                    = $changes.MaxAgeInSeconds.ToString()
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("max-age",$($changes.MaxAgeInSeconds.ToString()))
             }
             
             if ($changes.ContainsKey("FileTypes")) 
             {
-                $webconfig.configuration.SharePoint.BlobCache.path `
-                = $changes.FileTypes
+                $webconfig.configuration.SharePoint.BlobCache.SetAttribute("path",$changes.FileTypes)
             }
             $webconfig.Save($webconfiglocation)
         }

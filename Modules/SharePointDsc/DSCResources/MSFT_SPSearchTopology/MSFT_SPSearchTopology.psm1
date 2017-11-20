@@ -139,6 +139,21 @@ function Get-TargetResource
         
         $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
         
+        $firstPartition = $null
+        $enterpriseSearchServiceInstance = Get-SPEnterpriseSearchServiceInstance
+        if($null -ne $enterpriseSearchServiceInstance)
+        {
+            $ssiComponents = $enterpriseSearchServiceInstance.Components
+            if($null -ne $ssiComponents)
+            {
+                if($ssiComponents.Length -gt 1)
+                {
+                    $ssiComponents = $ssiComponents[0]
+                }   
+                $firstPartition = $ssiComponents.IndexLocation
+            }
+        }
+
         return @{
             ServiceAppName = $params.ServiceAppName
             Admin = $AdminComponents -replace ".$domain"
@@ -147,7 +162,7 @@ function Get-TargetResource
             AnalyticsProcessing = $AnalyticsProcessingComponents -replace ".$domain"
             QueryProcessing = $QueryProcessingComponents -replace ".$domain"
             InstallAccount = $params.InstallAccount
-            FirstPartitionDirectory = $params.FirstPartitionDirectory
+            FirstPartitionDirectory = $firstPartition
             IndexPartition = $IndexComponents -replace ".$domain"
         }
     }
@@ -249,7 +264,7 @@ function Set-TargetResource
             # Wait for Search Service Instance to come online
             $loopCount = 0
             $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer 
-            do 
+            while ($online.Status -ne "Online" -and $loopCount -lt 15) 
             {
                 $online = Get-SPEnterpriseSearchServiceInstance -Identity $searchServer
                 Write-Verbose -Message ("$([DateTime]::Now.ToShortTimeString()) - Waiting for " + `
@@ -258,7 +273,6 @@ function Set-TargetResource
                 $loopCount++
                 Start-Sleep -Seconds 60
             } 
-            until ($online.Status -eq "Online" -or $loopCount -eq 15)
         }
 
         # Create the index partition directory on each remote server
@@ -396,6 +410,21 @@ function Set-TargetResource
                                                                     -confirm:$false
                 }
             }
+        }
+
+        # Look for components that have no server name and remove them
+        $idsWithNoName = (Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
+                            Where-Object -FilterScript {
+                                $null -eq $_.ServerName
+                            }).ComponentId
+        $idsWithNoName | ForEach-Object -Process {
+            $id = $_
+            Get-SPEnterpriseSearchComponent -SearchTopology $newTopology | `
+                Where-Object -FilterScript {
+                    $_.ComponentId -eq $id
+                } | `
+                Remove-SPEnterpriseSearchComponent -SearchTopology $newTopology `
+                                                   -confirm:$false
         }
 
         # Apply the new topology to the farm

@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -28,18 +28,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Get-ChildItem -MockWith {
             return @{
                 Name = "C:\SPInstall\osmui.nl-nl"
-            }
-        }
-
-        Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-            if ($Value -eq "SetupType")
-            {
-                return "CLEAN_INSTALL"
-            }
-
-            if ($Value -eq "LanguagePackInstalled")
-            {
-                return 0
             }
         }
 
@@ -89,18 +77,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
                 {
@@ -109,6 +85,334 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
                     16 {
                         return @("Microsoft SharePoint Server 2016", "Language Pack for SharePoint and Project Server 2016  - Dutch/Nederlands")
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Chinese (Taiwan) Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.zh-tw"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (Taiwan)/中文 (繁體)')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (Taiwan)/中文 (繁體)')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Chinese (China) Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.zh-cn"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Chinese (PRC)/中文(简体)')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Chinese (PRC)/中文(简体)')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Dari Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.prs-AF"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - درى Dari')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - درى Dari')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Serbian (Latin) Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.sr-Latn-RS"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Serbian/srpski')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Serbian/srpski')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Serbian (Cyrillic) Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.sr-Cyrl-RS"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Serbian/српски')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Serbian/српски')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Portuguese (Brasil) Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.pt-br"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português (Brasil)')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português (Brasil)')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Portuguese (Portugal) Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.pt-pt"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Portuguese/Português')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Portuguese/Português')
+                    }
+                    Default {
+                        throw [Exception] "A supported version of SharePoint was not used in testing"
+                    }
+                }
+            }
+
+            It "Should return Ensure is Present from the get method" {
+                $result = Get-TargetResource @testParams
+                $result.Ensure | Should Be "Present"
+            }
+
+            It "Should return true from the test method"  {
+                Test-TargetResource @testParams | Should Be $true
+            }
+        }
+
+        Context -Name "Arabic Language Pack (naming not according naming standard) is installed, installation not required" -Fixture {
+            $testParams = @{
+                BinaryDir = "C:\SPInstall"
+                Ensure    = "Present"
+            }
+
+            Mock -CommandName Test-Path -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-ChildItem -MockWith {
+                return @{
+                    Name = "C:\SPInstall\osmui.ar-SA"
+                }
+            }
+
+            Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
+                switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
+                {
+                    15 {
+                        return @("Microsoft SharePoint Server 2013", 'Language Pack for SharePoint and Project Server 2013  - Arabic/LOCAL ARABIC')
+                    }
+                    16 {
+                        return @("Microsoft SharePoint Server 2016", 'Language Pack for SharePoint and Project Server 2016  - Arabic/LOCAL ARABIC')
                     }
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
@@ -144,18 +448,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
-                }
-            }
-
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
                 }
             }
             
@@ -209,18 +501,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Default {
                         throw [Exception] "A supported version of SharePoint was not used in testing"
                     }
-                }
-            }
-
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
                 }
             }
             
@@ -277,18 +557,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -348,18 +616,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -403,18 +659,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 0
-                }
-            }
-            
             Mock -CommandName Get-SPDscRegProductsInfo -MockWith {
                 if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq  15)
                 {
@@ -435,18 +679,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 BinaryDir = "C:\SPInstall"
                 Ensure    = "Present"
-            }
-            
-            Mock -CommandName Get-SPDSCRegistryKey -MockWith {
-                if ($Value -eq "SetupType")
-                {
-                    return "CLEAN_INSTALL"
-                }
-
-                if ($Value -eq "LanguagePackInstalled")
-                {
-                    return 1
-                }
             }
 
             It "Should return null from  the set method" {

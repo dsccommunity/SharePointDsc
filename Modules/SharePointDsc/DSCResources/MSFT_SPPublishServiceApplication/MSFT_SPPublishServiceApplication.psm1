@@ -80,6 +80,8 @@ function Set-TargetResource
         $Ensure = "Present"
     )
 
+    Write-Verbose -Message "Setting service application publish status '$Name'"
+
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {

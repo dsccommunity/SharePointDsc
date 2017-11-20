@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -54,10 +54,24 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        Context -Name "When Ensure=Present and ApplicationPool parameter is missing" -Fixture {
+            $testParams = @{
+                Name = "Test Work Management App"
+                Ensure = "Present"
+            }
+
+            Mock -CommandName Get-SPServiceApplication { return $null }
+
+            It "Should throw an exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
+            }
+        }
+
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
                 Name = "Test Work Management App"
                 ApplicationPool = "Test App Pool"
+                ProxyName = "Test Work Management App Proxy"
             }
 
             Mock -CommandName Get-SPServiceApplication { return $null }
@@ -98,6 +112,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new service application in the set method" {
+                Set-TargetResource @testParams
+                Assert-MockCalled New-SPWorkManagementServiceApplication 
             }
         }
 
@@ -145,12 +164,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name = "Test Work Management App"
                 ApplicationPool = "Test App Pool"
-                MinimumTimeBetweenEwsSyncSubscriptionSearches =10
-                MinimumTimeBetweenProviderRefreshes=10
-                MinimumTimeBetweenSearchQueries=10
-                NumberOfSubscriptionSyncsPerEwsSyncRun=10
-                NumberOfUsersEwsSyncWillProcessAtOnce=10
-                NumberOfUsersPerEwsSyncBatch=10
+                MinimumTimeBetweenEwsSyncSubscriptionSearches =20
+                MinimumTimeBetweenProviderRefreshes=20
+                MinimumTimeBetweenSearchQueries=20
+                NumberOfSubscriptionSyncsPerEwsSyncRun=20
+                NumberOfUsersEwsSyncWillProcessAtOnce=20
+                NumberOfUsersPerEwsSyncBatch=20
             }
             
             Mock -CommandName Get-SPServiceApplication {
@@ -172,6 +191,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return $spServiceApp
             }
             Mock -CommandName Set-SPWorkManagementServiceApplication { }
+
+            It "Should return values from the get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+            }
 
             It "Should return false when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $false

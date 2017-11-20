@@ -8,7 +8,7 @@ param(
 )
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                -ChildPath "..\SharePointDsc.TestHarness.psm1" `
+                                -ChildPath "..\UnitTestHelper.psm1" `
                                 -Resolve)
 
 $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointCmdletModule `
@@ -190,6 +190,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -199,6 +200,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -263,6 +265,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -272,6 +275,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -336,6 +340,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -345,6 +350,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -405,6 +411,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -414,6 +421,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -483,6 +491,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
+                        Type = 'FullRead'
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -492,6 +501,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -560,6 +570,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Claims"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -569,6 +580,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -578,6 +590,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -646,6 +659,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\sp_psr"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -654,6 +668,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFR = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindingsFR = $roleBindingsFR | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -663,6 +678,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindingsFC = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindingsFC = $roleBindingsFC | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -735,11 +751,13 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -748,6 +766,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -807,6 +826,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Claims"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -815,6 +835,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -870,11 +891,13 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user2"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -883,6 +906,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -942,6 +966,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Read"
+                        IdentityType       = "Claims"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -950,6 +975,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
 
@@ -1001,6 +1027,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1057,6 +1084,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -1065,6 +1093,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1127,6 +1156,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $false
                     } -ClientOnly)
                 )
@@ -1135,6 +1165,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Read"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullRead
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1197,6 +1228,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $true
                     } -ClientOnly)
                 )
@@ -1205,6 +1237,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1267,6 +1300,7 @@ namespace Microsoft.SharePoint.Administration {
                     (New-CimInstance -ClassName MSFT_SPWebAppPolicy -Property @{
                         Username           = "contoso\user1"
                         PermissionLevel    = "Full Control"
+                        IdentityType       = "Native"
                         ActAsSystemAccount = $true
                     } -ClientOnly)
                 )
@@ -1275,6 +1309,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
                 $roleBindings = $roleBindings | Add-Member -MemberType ScriptMethod -Name RemoveAll -Value {
@@ -1346,6 +1381,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1393,6 +1429,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1439,6 +1476,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1483,6 +1521,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 
@@ -1530,6 +1569,7 @@ namespace Microsoft.SharePoint.Administration {
                 $roleBindings = @(
                     @{
                         Name = "Full Control"
+                        Type = [Microsoft.SharePoint.Administration.SPPolicyRoleType]::FullControl
                     }
                 )
 

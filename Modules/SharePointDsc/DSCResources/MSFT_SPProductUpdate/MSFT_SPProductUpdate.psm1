@@ -49,7 +49,16 @@ function Get-TargetResource
         throw "Setup file cannot be found."
     }
 
-    $setupFileInfo = Get-ItemProperty $SetupFile
+    Write-Verbose -Message "Checking file status of $SetupFile"
+    $zone = Get-Item -Path $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
+    }
+
+    $setupFileInfo = Get-ItemProperty -Path $SetupFile
     $fileVersion = $setupFileInfo.VersionInfo.FileVersion
     Write-Verbose -Message "Update has version $fileVersion"
 
@@ -190,7 +199,9 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    # Supressing the global variable use to allow passing DSC the reboot message
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
         [parameter(Mandatory = $true)]
@@ -234,6 +245,15 @@ function Set-TargetResource
         throw "Setup file cannot be found."
     }
 
+    Write-Verbose -Message "Checking file status of $SetupFile"
+    $zone = Get-Item $SetupFile -Stream "Zone.Identifier" -EA SilentlyContinue
+
+    if ($null -ne $zone)
+    {
+        throw ("Setup file is blocked! Please use Unblock-File to unblock the file " + `
+               "before continuing.")
+    }
+    
     $now = Get-Date
     if ($BinaryInstallDays)
     {
@@ -336,7 +356,16 @@ function Set-TargetResource
         $osearchStopped = $false
         $hostControllerStopped = $false
 
-        $osearchSvc        = Get-Service -Name "OSearch15" 
+        if ((Get-SPDSCInstalledProductVersion).FileMajorPart -eq 15)
+        {
+            $searchServiceName = "OSearch15"
+        }
+        else
+        {
+            $searchServiceName = "OSearch16"
+        }
+
+        $osearchSvc        = Get-Service -Name $searchServiceName 
         $hostControllerSvc = Get-Service -Name "SPSearchHostController" 
 
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -352,7 +381,7 @@ function Set-TargetResource
         if($osearchSvc.Status -eq "Running") 
         { 
             $osearchStopped = $true
-            Set-Service -Name "OSearch15" -StartupType Disabled
+            Set-Service -Name $searchServiceName -StartupType Disabled
             $osearchSvc.Stop() 
         } 
 
@@ -430,13 +459,13 @@ function Set-TargetResource
                                   -Wait `
                                   -PassThru
 
-        $osearchSvc        = Get-Service -Name "OSearch15" 
+        $osearchSvc        = Get-Service -Name $searchServiceName 
         $hostControllerSvc = Get-Service -Name "SPSearchHostController" 
 
         # Ensuring Search Services were stopped by script before Starting" 
         if($osearchStopped -eq $true) 
         {
-            Set-Service -Name "OSearch15" -StartupType Manual
+            Set-Service -Name $searchServiceName -StartupType Manual
             $osearchSvc.Start()
         }
 
