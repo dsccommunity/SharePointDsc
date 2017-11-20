@@ -1,14 +1,15 @@
 [ClassVersion("1.0.0.0")]
 Class MSFT_SPLogLevelItem
 {
-    [Key, Description("Log Item Category")] String Category;
-    [Key, Description("Log Item SubCategory"), String SubCategory;
-    [Required, Description("Minimum severity to capture in the trace logs "), ValueMap{"None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","default"}, Values{"None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","default"}] String TraceLevel;
-    [Required, Description("Minimum severity to capture in the event logs"), ValueMap{"None","ErrorCritical","Error","Warning","Information","Verbose","default"}, Values{"None","ErrorCritical","Error","Warning","Information","Verbose","default"}] String EventLevel;
+    [Key, Description("Log Item Area")] String Area;
+    [Key, Description("Log Item Name"), String Name;
+    [Write, Description("Minimum severity to capture in the trace logs "), ValueMap{"None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","default"}, Values{"None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","default"}] String TraceLevel;
+    [Write, Description("Minimum severity to capture in the event logs"), ValueMap{"None","ErrorCritical","Error","Warning","Information","Verbose","default"}, Values{"None","ErrorCritical","Error","Warning","Information","Verbose","default"}] String EventLevel;
 };
+
 [ClassVersion("1.0.0.0"), FriendlyName("SPLogLevel")]
 class MSFT_SPLogLevel : OMI_BaseResource
 {
-    [Key, Description(".."), EmbeddedInstance("MSFT_SPLogLevelItem")] String LogLevels[];
+    [Key, Description(".."), EmbeddedInstance("MSFT_SPLogLevelItem")] String SPLogLevelSetting[];
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

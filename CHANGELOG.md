@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Added SPLogLevel resource to set Diagnostic and Eventlog category logging settings
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
