@@ -28,6 +28,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Multiple Log Category Areas were specified for one item" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server","Excel Services Application"
@@ -55,6 +56,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Multiple Log Category Names were specified for one item" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePointServer"
@@ -80,6 +82,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "No desired Trace and Event levels were specified" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePointServer"
@@ -103,6 +106,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "An invalid Trace level was specified" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePointServer"
@@ -128,6 +132,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "An invalid Event level was specified" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -153,6 +158,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for log level items is the default, and the current setting is the default" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -190,6 +196,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for a log level item is the default, and the current setting is not the default" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -231,6 +238,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for a log level item is a custom value, and the current setting matches" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -268,6 +276,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired setting for a log level item is a custom value, and the current settings do not match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -309,6 +318,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for an entire Area is a custom value, and all current settings match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -363,6 +373,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for an entire Area is a custom value, but one category within the area does not match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -423,6 +434,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for all areas is the default, and the current settings match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "*"
@@ -501,6 +513,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Desired settings for all areas is a custom value, and the current settings do not match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "*"
@@ -584,6 +597,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is a custom value, and the current settings do not match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -642,6 +656,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is a custom value, and the current settings match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -695,6 +710,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is default value, and the current settings match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
@@ -748,6 +764,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "Collection input, Desired settings for all is the default, and the current settings do not match" -Fixture {
             $testParams = @{
+                Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"

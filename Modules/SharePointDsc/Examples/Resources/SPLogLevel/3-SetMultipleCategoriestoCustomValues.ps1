@@ -14,6 +14,7 @@ Configuration Example
     node localhost {
         SPLogLevel SetCustomValues
         {
+            Name = "CustomLoggingSettings"
             SPLogLevelSetting = @(
                 MSFT_SPLogLevelItem {
                     Area           = "SharePoint Server"

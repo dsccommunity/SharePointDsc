@@ -5,6 +5,10 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SPLogLevelSetting,
 
@@ -140,7 +144,10 @@ function Get-TargetResource
 
         }
 
-        return @{SPLogLevelSetting = $CurrentLogLevelSettings}
+        return @{
+            Name = $params.Name
+            SPLogLevelSetting = $CurrentLogLevelSettings
+        }
 
     }
 
@@ -155,6 +162,10 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
         [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SPLogLevelSetting,
@@ -264,10 +275,14 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
+
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $SPLogLevelSetting,
 
-        [Parameter())]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

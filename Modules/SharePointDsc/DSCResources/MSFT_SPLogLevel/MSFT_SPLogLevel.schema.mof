@@ -10,6 +10,7 @@ Class MSFT_SPLogLevelItem
 [ClassVersion("1.0.0.0"), FriendlyName("SPLogLevel")]
 class MSFT_SPLogLevel : OMI_BaseResource
 {
-    [Key, Description("Collection of SPLogLevelItems to set"), EmbeddedInstance("MSFT_SPLogLevelItem")] String SPLogLevelSetting[];
+    [Key, Description("Friendly Name used to reference this collection of log level settings")] String Name;
+    [Required, Description("Collection of SPLogLevelItems to set"), EmbeddedInstance("MSFT_SPLogLevelItem")] String SPLogLevelSetting[];
     [Write, Description("POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5"), EmbeddedInstance("MSFT_Credential")] String InstallAccount;
 };

@@ -15,6 +15,7 @@ Configuration Example
         SPLogLevel SetUserProfileLogingtoVerbose
         {
             SPLogLevelSetting = @(
+                Name = "SP_Database-Verbose"
                 MSFT_SPLogLevelItem {
                     Area           = "SharePoint Server"
                     Name           = "Database"

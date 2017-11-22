@@ -15,6 +15,7 @@ Configuration Example
         SPLogLevel SetAllSPServerToDefault
         {
             SPLogLevelSetting = @(
+                Name = "SPServer_defaults"
                 MSFT_SPLogLevelItem {
                     Area           = "SharePoint Server"
                     Name           = "*"
