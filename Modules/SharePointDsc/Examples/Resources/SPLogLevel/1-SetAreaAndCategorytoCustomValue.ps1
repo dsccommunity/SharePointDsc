@@ -14,8 +14,8 @@ Configuration Example
     node localhost {
         SPLogLevel SetUserProfileLogingtoVerbose
         {
+            Name = "SP_Database-Verbose"
             SPLogLevelSetting = @(
-                Name = "SP_Database-Verbose"
                 MSFT_SPLogLevelItem {
                     Area           = "SharePoint Server"
                     Name           = "Database"

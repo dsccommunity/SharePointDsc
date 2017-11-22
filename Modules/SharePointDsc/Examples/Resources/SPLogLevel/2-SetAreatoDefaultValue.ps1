@@ -14,8 +14,8 @@ Configuration Example
     node localhost {
         SPLogLevel SetAllSPServerToDefault
         {
+            Name = "SPServer_defaults"
             SPLogLevelSetting = @(
-                Name = "SPServer_defaults"
                 MSFT_SPLogLevelItem {
                     Area           = "SharePoint Server"
                     Name           = "*"
