@@ -80,6 +80,27 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
+        $getSPMajorVersion = (Get-SPDSCInstalledProductVersion).FileMajorPart
+        $cfgDbRegKey = "hklm:SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\$getSPMajorVersion.0\Secure\ConfigDB"
+        try
+        {
+            $configDbDsn = Get-SPDSCRegistryKey -Key $cfgDbRegKey -Value "dsn"
+        }
+        catch
+        {
+            Write-Verbose -Message "SharePoint registry key cannot be found."
+        }
+        $serverIsJoined = $true
+
+        if ($null -eq $configDbDsn)
+        {
+            $serverIsJoined = $false
+        }
+        elseif (-NOT($configDbDsn.Contains($params.FarmConfigDatabaseName)))
+        {
+            $serverIsJoined = $false
+        } 
+
         try 
         {
             $spFarm = Get-SPFarm
@@ -89,7 +110,14 @@ function Get-TargetResource
             Write-Verbose -Message "Unable to detect local farm."
         }
         
-        if ($null -eq $spFarm) { return $null }
+        if ($null -eq $spFarm) 
+        {
+            if ($serverIsJoined)
+            {
+                throw 'Server already joined to farm but SPFarm not reachable'
+            }
+            return $null
+        }
 
         $configDb = Get-SPDatabase | Where-Object -FilterScript { 
             $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
@@ -109,14 +137,14 @@ function Get-TargetResource
         }
 
         $returnValue = @{
-            FarmConfigDatabaseName = $spFarm.Name
-            DatabaseServer = $configDb.Server.Name
-            FarmAccount = $farmAccount
-            InstallAccount = $params.InstallAccount
-            Passphrase = $params.Passphrase.password 
-            AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
-            CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
-            CentralAdministrationAuth = $params.CentralAdministrationAuth
+            FarmConfigDatabaseName      = $spFarm.Name
+            DatabaseServer              = $configDb.Server.Name
+            FarmAccount                 = $farmAccount
+            InstallAccount              = $params.InstallAccount
+            Passphrase                  = $params.Passphrase.password 
+            AdminContentDatabaseName    = $centralAdminSite.ContentDatabases[0].Name
+            CentralAdministrationPort   = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
+            CentralAdministrationAuth   = $params.CentralAdministrationAuth
         }
         return $returnValue
     }
@@ -217,10 +245,33 @@ function Set-TargetResource
     }
     
     Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments $PSBoundParameters `
-                                  -ScriptBlock {
+                        -Arguments @($PSBoundParameters, $PSScriptRoot) `
+                        -ScriptBlock {
+                            
         $params = $args[0]
+        $scriptRoot = $args[1]
 
+        $modulePath = "..\..\Modules\SharePointDsc.Farm\SPFarm.psm1"
+        Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
+        $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                            -Database $params.FarmConfigDatabaseName
+
+        while ($dbStatus.Locked -eq $true)
+        {
+            Write-Verbose -Message ("[$([DateTime]::Now.ToShortTimeString())] The configuration " + `
+                                    "database is currently being provisioned by a remote " + `
+                                    "server, this server will wait for this to complete")
+            Start-Sleep -Seconds 30
+            $dbStatus = Get-SPDSCConfigDBStatus -SQLServer $params.DatabaseServer `
+                                                -Database $params.FarmConfigDatabaseName
+        }
+
+        if ($dbStatus.ValidPermissions -eq $false)
+        {
+            throw "The current user does not have sufficient permissions to SQL Server"
+            return
+        }
+        
         $newFarmArgs = @{
             DatabaseServer = $params.DatabaseServer
             DatabaseName = $params.FarmConfigDatabaseName

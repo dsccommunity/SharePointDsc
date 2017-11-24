@@ -7,8 +7,17 @@ function Get-SPDSCWebApplicationGeneralConfig
         $WebApplication
     )
     
+    if ($WebApplication.DefaultTimeZone -eq -1)
+    {
+        $timezone = $null
+    }
+    else
+    {
+        $timezone = $WebApplication.DefaultTimeZone
+    }
+
     return @{
-        TimeZone = $WebApplication.DefaultTimeZone
+        TimeZone = $timezone
         Alerts = $WebApplication.AlertsEnabled
         AlertsLimit = $WebApplication.AlertsMaximum
         RSS = $WebApplication.SyndicationEnabled
@@ -17,7 +26,7 @@ function Get-SPDSCWebApplicationGeneralConfig
         BrowserFileHandling = $WebApplication.BrowserFileHandling
         SecurityValidation = $WebApplication.FormDigestSettings.Enabled
         SecurityValidationExpires = $WebApplication.FormDigestSettings.Expires
-        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.timeout.minutes
+        SecurityValidationTimeoutMinutes = $WebApplication.FormDigestSettings.Timeout.TotalMinutes
         RecycleBinEnabled = $WebApplication.RecycleBinEnabled
         RecycleBinCleanupEnabled = $WebApplication.RecycleBinCleanupEnabled
         RecycleBinRetentionPeriod = $WebApplication.RecycleBinRetentionPeriod

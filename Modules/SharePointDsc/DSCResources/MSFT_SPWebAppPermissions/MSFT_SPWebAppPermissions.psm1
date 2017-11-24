@@ -50,7 +50,7 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
-        $wa = Get-SPWebApplication $params.WebAppUrl -ErrorAction SilentlyContinue
+        $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
         if ($null -eq $wa) 
         { 
@@ -60,7 +60,7 @@ function Get-TargetResource
         if ($wa.RightsMask -eq [Microsoft.SharePoint.SPBasePermissions]::FullMask) 
         {
             $returnval = @{
-                WebAppUrl = "url"
+                WebAppUrl = $params.WebAppUrl
                 AllPermissions = $true
             }
         } 

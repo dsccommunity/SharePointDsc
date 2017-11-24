@@ -1,6 +1,29 @@
 {
     "version": "0.3.0",
     "configurations": [
+        
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Run current unit test (SP2013)",
+            "script": "${file}",
+            "args": [
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/15.0.4805.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "Run current unit test (SP2016)",
+            "script": "${file}",
+            "args": [
+                "${workspaceRoot}/Tests/Unit/Stubs/SharePoint/16.0.4456.1000/Microsoft.SharePoint.PowerShell.psm1"
+            ],
+            "cwd": "${file}",
+            "createTemporaryIntegratedConsole": true
+        },
         {
             "name": "Debug current file",
             "type": "PowerShell",

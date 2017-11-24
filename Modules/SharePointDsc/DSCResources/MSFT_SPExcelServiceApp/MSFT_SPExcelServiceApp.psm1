@@ -122,11 +122,11 @@ function Get-TargetResource
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
-        throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
-                          "service applicaions via DSC, as SharePoint 2016 deprecated " + `
-                          "this service. See " + `
-                          "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                          "for more info."
+        throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
+                           "service applications via DSC, as SharePoint 2016 deprecated " + `
+                           "this service. See " + `
+                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                           "for more info.")
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -313,11 +313,11 @@ function Set-TargetResource
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
-        throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
-                          "service applicaions via DSC, as SharePoint 2016 deprecated " + `
-                          "this service. See " + `
-                          "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                          "for more info."
+        throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
+                           "service applications via DSC, as SharePoint 2016 deprecated " + `
+                           "this service. See " + `
+                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                           "for more info.")
     }
     $result = Get-TargetResource @PSBoundParameters
 
@@ -571,11 +571,11 @@ function Test-TargetResource
 
     if ((Get-SPDSCInstalledProductVersion).FileMajorPart -ne 15) 
     {
-        throw [Exception] "Only SharePoint 2013 is supported to deploy Excel Services " + `
-                          "service applicaions via DSC, as SharePoint 2016 deprecated " + `
-                          "this service. See " + `
-                          "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
-                          "for more info."
+        throw [Exception] ("Only SharePoint 2013 is supported to deploy Excel Services " + `
+                           "service applications via DSC, as SharePoint 2016 deprecated " + `
+                           "this service. See " + `
+                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx " + `
+                           "for more info.")
     }
     
     $CurrentValues = Get-TargetResource @PSBoundParameters
