@@ -92,6 +92,14 @@ function Set-TargetResource
                 throw "Certificate not found in the local Certificate Store"
             }
 
+            if($cert.HasPrivateKey)
+            {
+                $pubKeyBytes = $cert.Export("cert")
+                $cert2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+                $cert2.Import($pubKeyBytes)
+                $cert = $cert2
+            }
+
             Set-SPTrustedRootAuthority -Identity $params.Name -Certificate $cert
         }
     }
@@ -109,7 +117,15 @@ function Set-TargetResource
             if($null -eq $cert)
             {
                 throw "Certificate not found in the local Certificate Store"
-            } 
+            }
+
+            if($cert.HasPrivateKey)
+            {
+                $pubKeyBytes = $cert.Export("cert")
+                $cert2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+                $cert2.Import($pubKeyBytes)
+                $cert = $cert2
+            }
             
             New-SPTrustedRootAuthority -Name $params.Name -Certificate $cert 
         }
