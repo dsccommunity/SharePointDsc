@@ -1,7 +1,8 @@
 # Change log for SharePointDsc
 
 ## Unreleased
-
+* Updated SPTrustedRootAuthority resource to enable using private key 
+  certificates.
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
