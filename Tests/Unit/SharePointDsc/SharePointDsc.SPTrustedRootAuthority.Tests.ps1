@@ -61,6 +61,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
+        
+
          Context -Name "When TrustedRootAuthority should exist and does exist in the farm, but has incorrect certificate." -Fixture {
           
             $testParams = @{
@@ -199,6 +201,143 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
         }
+
+        Context -Name "When TrustedRootAuthority should exist and doesn't exist in the farm, but specified cert contains a private key" -Fixture {
+          
+            $testParams = @{
+                Name = "CertIdentifier"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-Item `
+            -MockWith {
+                    $retVal = [pscustomobject]@{
+                        Subject = "CN=CertIdentifier"
+                        Thumbprint = $testParams.CertificateThumbprint
+                        HasPrivateKey = $true
+                    }
+
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Export {
+                        $bytes = [System.Byte[]]::CreateInstance([System.Byte],512)
+                        return $bytes
+                    }
+
+                    return $retVal
+            }
+
+            Mock -CommandName New-Object `
+            -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" } `
+            -MockWith {
+                    $retVal = [pscustomobject]@{}
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import {
+                        param([System.Byte[]]$bytes)
+                        return @{
+                                Subject = "CN=CertIdentifer"
+                                Thumbprint = $testParams.CertificateThumbprint
+                                HasPrivateKey = $false
+                        }
+                    }
+                    
+                    return $retVal
+
+
+            }
+
+        
+
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
+                return $null
+            }
+
+            It "Should return Absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
+            }
+
+            It "Should return true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new Trusted Root Authority in the set method" {
+                  Set-TargetResource @testParams
+                  Assert-MockCalled Get-Item -Times 1
+                  Assert-MockCalled New-SPTrustedRootAuthority -Times 1
+                  Assert-MockCalled New-Object -Times 1
+                     
+            }
+
+        }
+
+        Context -Name "When TrustedRootAuthority should exist and does exist but is incorrect certificate and specified cert contains a private key" -Fixture {
+          
+            $testParams = @{
+                Name = "CertIdentifier"
+                CertificateThumbprint = "770515261D1AB169057E246E0EE6431D557C3AFB"
+                Ensure = "Present"
+            }
+            
+            Mock -CommandName Get-Item `
+            -MockWith {
+                    $retVal = [pscustomobject]@{
+                        Subject = "CN=CertIdentifier"
+                        Thumbprint = $testParams.CertificateThumbprint
+                        HasPrivateKey = $true
+                    }
+
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Export {
+                        $bytes = [System.Byte[]]::CreateInstance([System.Byte],512)
+                        return $bytes
+                    }
+
+                    return $retVal
+            }
+
+            Mock -CommandName New-Object `
+            -ParameterFilter { $TypeName -eq "System.Security.Cryptography.X509Certificates.X509Certificate2" } `
+            -MockWith {
+                    $retVal = [pscustomobject]@{}
+                    Add-Member -InputObject $retVal -MemberType ScriptMethod Import {
+                        param([System.Byte[]]$bytes)
+                        return @{
+                                Subject = "CN=CertIdentifer"
+                                Thumbprint = $testParams.CertificateThumbprint
+                                HasPrivateKey = $false
+                        }
+                    }
+                    
+                    return $retVal
+
+
+            }
+
+            Mock -CommandName Get-SPTrustedRootAuthority -MockWith { 
+                return @{
+                    Name = $testParams.Name
+                    Certificate = @{
+                        Thumbprint = "770515261D1AB169057E246E0EE6431D557C3AFC"
+                    }
+                }
+            }
+
+            It "Should return Absent from the Get method" {
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
+            }
+
+            It "Should return true when the Test method is called" {
+                Test-TargetResource @testParams | Should Be $false
+            }
+
+            It "Should create a new Trusted Root Authority in the set method" {
+                  Set-TargetResource @testParams
+                  Assert-MockCalled Get-Item -Times 1
+                  Assert-MockCalled Set-SPTrustedRootAuthority -Times 1
+                  Assert-MockCalled New-Object -Times 1
+                     
+            }
+
+        }
+
+        
 
         Context -Name "When TrustedRootAuthority shouldn't exist and does exist in the farm." -Fixture {
           
