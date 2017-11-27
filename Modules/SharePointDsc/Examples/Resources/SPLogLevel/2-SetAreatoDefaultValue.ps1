@@ -19,8 +19,8 @@ Configuration Example
                 MSFT_SPLogLevelItem {
                     Area           = "SharePoint Server"
                     Name           = "*"
-                    TraceLevel     = "default"
-                    EventLevel     = "default"
+                    TraceLevel     = "Default"
+                    EventLevel     = "Default"
                 }
             )
             PsDscRunAsCredential = $SetupAccount

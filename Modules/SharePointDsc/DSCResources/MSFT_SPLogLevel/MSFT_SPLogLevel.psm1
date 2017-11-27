@@ -23,47 +23,60 @@ function Get-TargetResource
         if ((($DesiredSetting.Area) | Measure-Object).Count -ne 1 -or ($DesiredSetting.Area).contains(",") )
         {
             Write-Verbose -Message "Exactly one log area, or the wildcard character '*' must be provided for each log item area"
-            return $null
+            return @{
+                Name = $Name
+                SPLogLevelSetting = $null
+            }
         }
 
         if ((($DesiredSetting.Name) | Measure-Object).Count -ne 1 -or ($DesiredSetting.Name).contains(",") )
         {
             Write-Verbose -Message "Exactly one log name, or the wildcard character '*' must be provided for each log item name"
-            return $null
+            return @{
+                Name = $Name
+                SPLogLevelSetting = $null
+            }
         }
 
         if ($null -eq $DesiredSetting.TraceLevel -and $null -eq $DesiredSetting.EventLevel)
         {
             Write-Verbose -Message "TraceLevel and / or EventLevel must be provided for each Area"
-            return $null
+            return @{
+                Name = $Name
+                SPLogLevelSetting = $null
+            }
         }
 
-        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","default") -notcontains $DesiredSetting.TraceLevel)
+        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
         {
-            Write-Verbose -Message "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or default"
-            return $null
+            Write-Verbose -Message "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or Default"
+            return @{
+                Name = $Name
+                SPLogLevelSetting = $null
+            }
         }
 
-        if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","default") -notcontains $DesiredSetting.EventLevel)
+        if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","Default") -notcontains $DesiredSetting.EventLevel)
         {
-            Write-Verbose -Message "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Informational,Verbose, or default"
-            return $null
+            Write-Verbose -Message "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Informational,Verbose, or Default"
+            return @{
+                Name = $Name
+                SPLogLevelSetting = $null
+            }
         }
-
     }
 
-    Write-Verbose "Getting SP Log Level Settings for provided Areas"
+    Write-Verbose -Message "Getting SP Log Level Settings for provided Areas"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                  -Arguments $PSBoundParameters `
                                  -ScriptBlock {
-
          $params = $args[0]
 
          $CurrentLogLevelSettings = @()
          foreach ($DesiredSetting in $params.SPLogLevelSetting)
          {
-            Write-Verbose "Getting SP Log Level Settings for $($DesiredSetting.Area):$($DesiredSetting.Name)"
+            Write-Verbose -Message "Getting SP Log Level Settings for $($DesiredSetting.Area):$($DesiredSetting.Name)"
             $CurrentLogItemSettings = Get-SPLogLevel -Identity "$($DesiredSetting.Area):$($DesiredSetting.Name)"
 
             #Validate valid log area/name specified.
@@ -75,7 +88,7 @@ function Get-TargetResource
 
             #TraceLevels
             #if we desire defaults, we will check for default for each item and return as such
-            if ($DesiredSetting.TraceLevel -eq "default")
+            if ($DesiredSetting.TraceLevel -eq "Default")
             {
                 $SettingAtDefault = $true #assume they are all at default until we find otherwise
                 foreach ($setting in $CurrentLogItemSettings) #default values can vary for each area/name, need to check each one.
@@ -88,14 +101,13 @@ function Get-TargetResource
 
                 if ($SettingAtDefault)
                 {
-                    $Tracelevel = 'default'
+                    $Tracelevel = 'Default'
                 }
                 else
                 {
                     #return a csv list of current unique trace level settings for the provided Area/Name
                     $Tracelevel = [System.String]::Join(",",(($CurrentLogItemSettings.traceseverity) | Select-Object -Unique))
                 }
-
             }
             #default was not specified, so we return the unique current trace severity across all provided settings.
             else
@@ -105,7 +117,7 @@ function Get-TargetResource
 
             #EventLevels
             #if we desire defaults, we will check for default and return as such
-            if ($DesiredSetting.EventLevel -eq "default")
+            if ($DesiredSetting.EventLevel -eq "Default")
             {
                 $SettingAtDefault = $true #assume they are all at default until we find otherwise
                 foreach ($setting in $CurrentLogItemSettings) #default values can vary for each area/name, need to check each one.
@@ -118,14 +130,13 @@ function Get-TargetResource
 
                 if ($SettingAtDefault)
                 {
-                    $Eventlevel = 'default'
+                    $Eventlevel = 'Default'
                 }
                 else
                 {
                     #return a csv list of current unique Event level settings for the provided Area/Name
                     $Eventlevel = [System.String]::Join(",",(($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
                 }
-
             }
             #default was not specified, so we return the unique current Event severity across all provided settings.
             else
@@ -133,30 +144,21 @@ function Get-TargetResource
                $Eventlevel = [System.String]::Join(",",(($CurrentLogItemSettings.Eventseverity) | Select-Object -Unique))
             }
 
-
             $CurrentLogLevelSettings += New-Object -TypeName PSObject -Property @{
                 Area = $DesiredSetting.Area
                 Name = $DesiredSetting.Name
                 TraceLevel = $TraceLevel
                 EventLevel = $EventLevel
              }
-
-
         }
 
         return @{
             Name = $params.Name
             SPLogLevelSetting = $CurrentLogLevelSettings
         }
-
     }
-
     return $result
-
-
 }
-
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -192,16 +194,15 @@ function Set-TargetResource
             throw "TraceLevel and / or EventLevel must be provided for each Area"
         }
 
-        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","default") -notcontains $DesiredSetting.TraceLevel)
+        if ($null -ne $DesiredSetting.TraceLevel -and @("None","Unexpected","Monitorable","Medium","Verbose","VerboseEx","Default") -notcontains $DesiredSetting.TraceLevel)
         {
-            throw "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or default"
+            throw "TraceLevel $($DesiredSetting.TraceLevel) is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or Default"
         }
 
-        if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","default") -notcontains $DesiredSetting.EventLevel)
+        if ($null -ne $DesiredSetting.EventLevel -and @("None","ErrorCritical","Error","Warning","Information","Verbose","Default") -notcontains $DesiredSetting.EventLevel)
         {
-            throw "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or default"
+            throw "EventLevel $($DesiredSetting.EventLevel) is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
         }
-
     }
 
     Write-Verbose -Message "Setting SP Log Level settings for the provided areas"
@@ -209,12 +210,11 @@ function Set-TargetResource
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
-
         $params = $args[0]
 
         foreach ($DesiredSetting in $params.SPLogLevelSetting)
         {
-            Write-Verbose "Setting SP Log Level Settings for $($DesiredSetting.Area):$($DesiredSetting.Name)"
+            Write-Verbose -Message "Setting SP Log Level Settings for $($DesiredSetting.Area):$($DesiredSetting.Name)"
 
             $AllSettings = Get-SPLogLevel -Identity "$($DesiredSetting.Area):$($DesiredSetting.Name)"
 
@@ -226,7 +226,7 @@ function Set-TargetResource
 
             if ($null -ne $DesiredSetting.TraceLevel)
             {
-                if ($DesiredSetting.TraceLevel -eq 'default')
+                if ($DesiredSetting.TraceLevel -eq 'Default')
                 {
                     #default settings can vary, so we must loop through each one.
                     foreach ($setting in $AllSettings)
@@ -242,7 +242,7 @@ function Set-TargetResource
 
             if ($null -ne $DesiredSetting.EventLevel)
             {
-                if ($DesiredSetting.EventLevel -eq 'default')
+                if ($DesiredSetting.EventLevel -eq 'Default')
                 {
                     #default settings can vary, so we must loop through each one.
                     foreach ($setting in $AllSettings)
@@ -255,17 +255,8 @@ function Set-TargetResource
                     Set-SPLogLevel -Identity "$($DesiredSetting.Area):$($DesiredSetting.Name)" -EventSeverity $DesiredSetting.EventLevel
                 }
             }
-
-
-
         }
-
-
-
     }
-
-
-
 }
 
 function Test-TargetResource
@@ -290,7 +281,7 @@ function Test-TargetResource
     Write-Verbose -Message "Testing SP Log Level settings for the provided areas"
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues)
+    if ($null -eq $CurrentValues.SPLogLevelSetting)
     {
         return $false
     }
@@ -308,7 +299,6 @@ function Test-TargetResource
             Write-Verbose -Message "SP Log Level setting for $($DesiredSetting.Area):$($DesiredSetting.Name) is not in the desired state"
             $mismatchedSettingFound = $true
         }
-
     }
 
     if ($mismatchedSettingFound)
@@ -319,7 +309,4 @@ function Test-TargetResource
     {
         return $true
     }
-
-
-
 }

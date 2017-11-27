@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -17,10 +17,6 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-
-        # Initialize tests
-
-
 
         # Mocks for all contexts
         Mock -CommandName Set-SPLogLevel -MockWith { }
@@ -41,7 +37,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -51,7 +47,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should throw an error from the set method" {
                 { Set-TargetResource @testParams } | Should throw "Exactly one log area, or the wildcard character '*' must be provided for each log item"
             }
-
         }
 
         Context -Name "Multiple Log Category Names were specified for one item" -Fixture {
@@ -68,7 +63,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -92,7 +87,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -118,7 +113,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -126,7 +121,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error from the set method" {
-                { Set-TargetResource @testParams } | Should throw "TraceLevel detailed is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or default"
+                { Set-TargetResource @testParams } | Should throw "TraceLevel detailed is not valid, must specify exactly one of None,Unexpected,Monitorable,Medium,Verbose,VerboseEx, or Default"
             }
         }
 
@@ -144,7 +139,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return null from the get method" {
-                Get-TargetResource @testParams | Should BeNullOrEmpty
+                (Get-TargetResource @testParams).SPLogLevelSetting | Should BeNullOrEmpty
             }
 
             It "Should return false from the test method" {
@@ -152,19 +147,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should throw an error from the set method" {
-                { Set-TargetResource @testParams } | Should throw "EventLevel detailed is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or default"
+                { Set-TargetResource @testParams } | Should throw "EventLevel detailed is not valid, must specify exactly one of None,ErrorCritical,Error,Warning,Information,Verbose, or Default"
             }
         }
 
-        Context -Name "Desired setting for log level items is the default, and the current setting is the default" -Fixture {
+        Context -Name "Desired setting for log level items is the Default, and the current setting is the Default" -Fixture {
             $testParams = @{
                 Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
                         Name    = "Database"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
                 )
             }
@@ -180,12 +175,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     }
             }
 
-            It "Should return 'default' from the get method [TraceLevel]" {
-                (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "default"
+            It "Should return 'Default' from the get method [TraceLevel]" {
+                (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Default"
             }
 
-            It "Should return 'default' from the get method [EventLevel]" {
-                (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "default"
+            It "Should return 'Default' from the get method [EventLevel]" {
+                (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Default"
             }
 
             It "Should return true from the test method" {
@@ -194,15 +189,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context -Name "Desired setting for a log level item is the default, and the current setting is not the default" -Fixture {
+        Context -Name "Desired setting for a log level item is the Default, and the current setting is not the Default" -Fixture {
             $testParams = @{
                 Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
                         Name    = "Database"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
                 )
             }
@@ -432,15 +427,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         }
 
-        Context -Name "Desired settings for all areas is the default, and the current settings match" -Fixture {
+        Context -Name "Desired settings for all areas is the Default, and the current settings match" -Fixture {
             $testParams = @{
                 Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "*"
                         Name    = "*"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
                 )
             }
@@ -499,11 +494,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return values from the get method [TraceLevel]" {
-                (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "default"
+                (Get-TargetResource @testParams).SPLogLevelSetting.TraceLevel | Should Be "Default"
             }
 
             It "Should return values from the get method [EventLevel]" {
-                (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "default"
+                (Get-TargetResource @testParams).SPLogLevelSetting.EventLevel | Should Be "Default"
             }
 
             It "Should return true from the test method" {
@@ -708,21 +703,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Collection input, Desired settings for all is default value, and the current settings match" -Fixture {
+        Context -Name "Collection input, Desired settings for all is Default value, and the current settings match" -Fixture {
             $testParams = @{
                 Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
                         Name    = "Database"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
                         Name    = "User Profile"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
 
                 )
@@ -741,20 +736,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 )
             }
 
-            It "Should return default from the get method [TraceLevel, first item]" {
-                ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should Be "default"
+            It "Should return Default from the get method [TraceLevel, first item]" {
+                ((Get-TargetResource @testParams).SPLogLevelSetting)[0].TraceLevel | Should Be "Default"
             }
 
-            It "Should return default from the get method [EventLevel], first item" {
-                ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should Be "default"
+            It "Should return Default from the get method [EventLevel], first item" {
+                ((Get-TargetResource @testParams).SPLogLevelSetting)[0].EventLevel | Should Be "Default"
             }
 
-            It "Should return default from the get method [TraceLevel, second item]" {
-                ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should Be "default"
+            It "Should return Default from the get method [TraceLevel, second item]" {
+                ((Get-TargetResource @testParams).SPLogLevelSetting)[1].TraceLevel | Should Be "Default"
             }
 
-            It "Should return default from the get method [EventLevel], second item" {
-                ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should Be "default"
+            It "Should return Default from the get method [EventLevel], second item" {
+                ((Get-TargetResource @testParams).SPLogLevelSetting)[1].EventLevel | Should Be "Default"
             }
 
             It "Should return true from the test method" {
@@ -762,21 +757,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Collection input, Desired settings for all is the default, and the current settings do not match" -Fixture {
+        Context -Name "Collection input, Desired settings for all is the Default, and the current settings do not match" -Fixture {
             $testParams = @{
                 Name = "My LogLevel Settings"
                 SPLogLevelSetting = @(
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
                         Name    = "Database"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
                     (New-CimInstance -ClassName MSFT_SPLogLevelItem -Property @{
                         Area           = "SharePoint Server"
                         Name    = "User Profile"
-                        TraceLevel = "default"
-                        EventLevel = "default"
+                        TraceLevel = "Default"
+                        EventLevel = "Default"
                     } -ClientOnly)
 
                 )
