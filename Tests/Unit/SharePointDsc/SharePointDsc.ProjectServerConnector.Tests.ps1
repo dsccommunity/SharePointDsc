@@ -19,21 +19,21 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
+        Mock -CommandName Get-SPSite -MockWith {
+            return @{
+                WebApplication = @{
+                    Url = "http://server"
+                }
+            }
+        }
+
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+            return @{
+                DisableKerberos = $true
+            }
+        }
+        
         Context -Name "New-SPDscProjectServerWebService" -Fixture {
-
-            Mock -CommandName Get-SPSite -MockWith {
-                return @{
-                    WebApplication = @{
-                        Url = "http://server"
-                    }
-                }
-            }
-
-            Mock -CommandName Get-SPAuthenticationProvider -MockWith {
-                return @{
-                    DisableKerberos = $true
-                }
-            }
 
             $serviceNames = @("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields", 
             "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider", 

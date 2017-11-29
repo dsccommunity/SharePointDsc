@@ -82,7 +82,11 @@ function Get-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-        $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+        $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+        $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+        $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                            -EndpointName Security `
+                                                            -UseKerberos:$useKerberos
 
         $script:groupDataSet = $null
         Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
@@ -214,7 +218,11 @@ function Set-TargetResource
             $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-            $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+            $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+            $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+            $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                                -EndpointName Security `
+                                                                -UseKerberos:$useKerberos
 
             Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
                 $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
@@ -313,7 +321,11 @@ function Set-TargetResource
             $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
             Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-            $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+            $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+            $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+            $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                                -EndpointName Security `
+                                                                -UseKerberos:$useKerberos
 
             Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
                 $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {

@@ -66,6 +66,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
 "@
                 }
+
+                Mock -CommandName Get-SPSite -MockWith {
+                    return @{
+                        WebApplication = @{
+                            Url = "http://server"
+                        }
+                    }
+                }
+        
+                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                    return @{
+                        DisableKerberos = $true
+                    }
+                }
                 
                 Mock -CommandName "Get-SPProjectPermissionMode" -MockWith {
                     return "ProjectServer"
