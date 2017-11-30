@@ -181,8 +181,6 @@ function New-SPDscProjectServerWebService
         $UseKerberos
     )
 
-    $authMode = Get-SPAuthenticationProvider -WebApplication ((Get-SPSite $PwaUrl).WebApplication.Url) -Zone Default
-
     [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
     $bytes = [System.IO.File]::ReadAllBytes($psDllPath)
