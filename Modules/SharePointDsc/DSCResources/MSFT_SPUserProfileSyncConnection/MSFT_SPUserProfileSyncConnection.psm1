@@ -4,48 +4,48 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Forest,
 
-        [parameter(Mandatory = $true)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
         $ConnectionCredentials,
 
-        [parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $UserProfileService,
 
-        [parameter(Mandatory = $true)] 
-        [System.String[]] 
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
         $IncludedOUs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ExcludedOUs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Server,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Force,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseSSL,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")] 
         [System.String] 
         $ConnectionType,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -133,48 +133,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Forest,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.Management.Automation.PSCredential] 
         $ConnectionCredentials,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $UserProfileService,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String[]] 
         $IncludedOUs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ExcludedOUs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Server,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Force,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseSSL,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")] 
         [System.String] 
         $ConnectionType,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
    )
@@ -193,7 +193,8 @@ function Set-TargetResource
         if ($params.ContainsKey("InstallAccount")) { $params.Remove("InstallAccount") | Out-Null }
         $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
                 
-        if ($null -eq $ups) { 
+        if ($null -eq $ups) 
+        { 
             throw "User Profile Service Application $($params.UserProfileService) not found"
         }
         $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
@@ -335,48 +336,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Forest,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.Management.Automation.PSCredential] 
         $ConnectionCredentials,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $UserProfileService,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String[]] 
         $IncludedOUs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ExcludedOUs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Server,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Force,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseSSL,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("ActiveDirectory","BusinessDataCatalog")] 
         [System.String] 
         $ConnectionType,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -386,7 +387,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 
@@ -414,6 +415,7 @@ This method is not intensed for public use, and was created to facilitate unit t
 function Get-SPDSCADSIObject 
 {
     param(
+        [Parameter()]
         [string] $LdapPath
     )
     return [ADSI]($LdapPath)

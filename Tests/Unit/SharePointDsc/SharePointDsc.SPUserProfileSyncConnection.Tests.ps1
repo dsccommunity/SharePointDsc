@@ -47,20 +47,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 "@
         }  
 
-        try{ [System.Reflection.MethodInfo] }
-        catch {
-            Add-Type -TypeDefinition @"
-            namespace System.Reflection{
-                public class MethodInfo{
-                    public MethodInfo(){
-
-                    }
-                }
-            }
-"@ -ErrorAction SilentlyContinue
-        }
-
-
         try { [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection] }
         catch {
             Add-Type -TypeDefinition @"
