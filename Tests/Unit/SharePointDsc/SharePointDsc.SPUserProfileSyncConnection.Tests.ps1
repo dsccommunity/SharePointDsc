@@ -47,6 +47,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 "@
         }  
 
+        try{ [System.Reflection.MethodInfo] }
+        catch {
+            Add-Type -TypeDefinition @"
+            namespace System.Reflection{
+                public class MethodInfo{
+                    public MethodInfo(){
+
+                    }
+                }
+            }
+"@ -ErrorAction SilentlyContinue
+        }
+
 
         try { [Microsoft.Office.Server.UserProfiles.ActiveDirectoryImportConnection] }
         catch {
@@ -56,11 +69,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         public ActiveDirectoryImportConnection(){
                             
                         }
-                        public static System.String GetMethod(System.Object a, System.Object b){ return "string"; }
-                        public static void Invoke(System.Object a, System.Object b){}
+
+                        public static System.Object GetMethod(System.Object a, System.Object b)
+                        {return new ActiveDirectoryImportConnection();}             
+                        
+                        public System.Object Invoke(System.Object a, System.Object b)
+                        {return "";}
                     }
                 }        
-"@ -ErrorAction SilentlyContinue 
+"@ -ErrorAction SilentlyContinue        
         }
 
         # Mocks for all contexts        
@@ -404,7 +421,19 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 FarmAccount = $mockCredential
                 ServiceApplicationProxyGroup = "Proxy Group"
                 ConnectionManager=  New-Object -TypeName System.Collections.ArrayList
-            }
+            } | Add-Member -MemberType ScriptMethod -Name GetMethod -Value {
+            return (@{
+                    FullName = $getTypeFullName
+                }) | Add-Member -MemberType ScriptMethod -Name GetMethods -Value {
+                return (@{
+                        Name = "get_NamingContexts"
+                    }) | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
+                    return @{
+                        AbsoluteUri = "http://contoso.sharepoint.com/sites/ct"
+                    }
+                } -PassThru -Force
+                } -PassThru -Force
+            } -PassThru -Force
             $userProfileServiceValidConnection.ConnectionManager.Add($connection);
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return $userProfileServiceValidConnection 
