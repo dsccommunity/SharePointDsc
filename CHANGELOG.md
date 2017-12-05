@@ -13,6 +13,7 @@
   and working language
 * Added SPWebAppSuiteBar resource to brand Suite Bar;
 * Update SPWeb to allow the management of the access requests settings
+* Fix an issue with the SPUserProfileSynConnection class for ADImportConnection;
 * Update SPBlobCacheSettings to set non-default or missing blob cache properties
 * Update SPWebApplicationExtension to fix how property AllowAnonymous is
   returned in the hashtable
