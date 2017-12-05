@@ -4,29 +4,33 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter()]
+        [System.String]
+        $ProxyName,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [parameter(Mandatory = $false)]
+        [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -36,21 +40,35 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $serviceApp = Get-SPStateServiceApplication -Identity $params.Name `
                                                     -ErrorAction SilentlyContinue
 
-        if ($null -eq $serviceApp) 
-        { 
+        if ($null -eq $serviceApp)
+        {
             return @{
                 Name = $params.Name
+                DatabaseName = $params.DatabaseName
                 Ensure = "Absent"
                 InstallAccount = $params.InstallAccount
-            } 
+            }
         }
-        
+
+        $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
+        if ($null -ne $serviceAppProxies)
+        {
+            $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
+                $serviceApp.IsConnected($_)
+            }
+            if ($null -ne $serviceAppProxy)
+            {
+                $proxyName = $serviceAppProxy.Name
+            }
+        }
+
         return @{
             Name = $serviceApp.DisplayName
+            ProxyName = $proxyName
             DatabaseName = $serviceApp.Databases.Name
             DatabaseServer = $serviceApp.Databases.Server.Name
             InstallAccount = $params.InstallAccount
@@ -60,40 +78,45 @@ function Get-TargetResource
     return $result
 }
 
+
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter()]
+        [System.String]
+        $ProxyName,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [parameter(Mandatory = $false)]
+        [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting state service application '$Name'"
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating State Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -101,37 +124,60 @@ function Set-TargetResource
                             -ScriptBlock {
 
             $params = $args[0]
-            
+
             $dbParams = @{}
-            if ($params.ContainsKey("DatabaseName")) 
-            { 
-                $dbParams.Add("Name", $params.DatabaseName) 
+            if ($params.ContainsKey("DatabaseName"))
+            {
+                $dbParams.Add("Name", $params.DatabaseName)
             }
-            if ($params.ContainsKey("DatabaseServer")) 
-            { 
-                $dbParams.Add("DatabaseServer", $params.DatabaseServer) 
+            if ($params.ContainsKey("DatabaseServer"))
+            {
+                $dbParams.Add("DatabaseServer", $params.DatabaseServer)
             }
-            if ($params.ContainsKey("DatabaseCredentials")) 
-            { 
-                $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials) 
+            if ($params.ContainsKey("DatabaseCredentials"))
+            {
+                $dbParams.Add("DatabaseCredentials", $params.DatabaseCredentials)
+            }
+
+            if ($params.ContainsKey("ProxyName"))
+            {
+                $pName = $params.ProxyName
+            }
+            if ($null -eq $pName)
+            {
+                $pName = "$($params.Name) Proxy"
             }
 
             $database = New-SPStateServiceDatabase @dbParams
-            $app = New-SPStateServiceApplication -Name $params.Name -Database $database 
-            New-SPStateServiceApplicationProxy -ServiceApplication $app -DefaultProxyGroup | Out-Null
+            $app = New-SPStateServiceApplication -Name $params.Name -Database $database
+            New-SPStateServiceApplicationProxy -Name $pName `
+                                               -ServiceApplication $app `
+                                               -DefaultProxyGroup | Out-Null
         }
     }
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         Write-Verbose -Message "Removing State Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
             $params = $args[0]
-            
+
             $serviceApp =  Get-SPStateServiceApplication -Name $params.Name
+
+            # Remove the connected proxy(ies)
+            $proxies = Get-SPServiceApplicationProxy
+            foreach($proxyInstance in $proxies)
+            {
+                if($serviceApp.IsConnected($proxyInstance))
+                {
+                    $proxyInstance.Delete()
+                }
+            }
+
             Remove-SPServiceApplication $serviceApp -Confirm:$false
         }
     }
 }
+
 
 function Test-TargetResource
 {
@@ -139,29 +185,33 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [parameter()]
+        [System.String]
+        $ProxyName,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [parameter(Mandatory = $false)]
+        [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [parameter(Mandatory = $false)]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [parameter(Mandatory = $false)]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

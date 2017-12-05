@@ -2,16 +2,26 @@
 
 ## Unreleased
 
-* Added SPLogLevel resource to set Diagnostic and Eventlog category logging settings
+* Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings,
+  SPLogLevel
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
   SPProjectServerGroup, SPProjectServerTimeSheetSettings,
   SPProjectServerUserSyncSettings, SPProjectServerWssSettings
-* Added resource: SPMinRoleCompliance
+* Updated SPInstallPrereqs to document which parameter is required for which
+  version of SharePoint
+* Updated SPInstall to document the requirements for an English ISO
+* Updated SPSearchTopology to better document how the resource works
+* Added SP2016 example for the SPInstallPrereqs resource
+* Fixed issue with SPWebApplication.Throttling where the RequestThrottling parameter
+  was not applied
+* Added DefaultQuotaTemplate parameter to SPWebAppGeneralSettings
+* Added VSCode workspace settings to meet coding guidelines
+* Added custom Proxy Name support to SPBCSServiceApp, SPMachineTranslationServiceApp,
+  SPStateServiceApp
 * Update SPManagedMetadataServiceApp to allow the configuration of the default
   and working language
-* Added SPWebAppSuiteBar resource to brand Suite Bar;
 * Update SPWeb to allow the management of the access requests settings
 * Fix an issue with the SPUserProfileSynConnection class for ADImportConnection;
 * Update SPBlobCacheSettings to set non-default or missing blob cache properties
