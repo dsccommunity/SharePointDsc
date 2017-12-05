@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-* Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings
+* Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings,
+  SPLogLevel
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
@@ -22,6 +23,7 @@
 * Update SPManagedMetadataServiceApp to allow the configuration of the default
   and working language
 * Update SPWeb to allow the management of the access requests settings
+* Fix an issue with the SPUserProfileSynConnection class for ADImportConnection;
 * Update SPBlobCacheSettings to set non-default or missing blob cache properties
 * Update SPWebApplicationExtension to fix how property AllowAnonymous is
   returned in the hashtable
