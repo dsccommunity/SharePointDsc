@@ -6,8 +6,7 @@ class MSFT_SPWebApplication : OMI_BaseResource
     [Required, Description("The name of the managed account to run the app pool with")] string ApplicationPoolAccount;
     [Required, Description("The URL of the web application")] string Url;
     [Write, Description("Should anonymous access be enabled for this web app")] boolean AllowAnonymous;
-    [Write, Description("What authentication mode should be used for the web app"), ValueMap{"NTLM","Kerberos","Claims","Classic"}, Values{"NTLM","Kerberos","Claims","Classic"}] string AuthenticationMethod;
-    [Write, Description("What authentication provider should be used for the web app. This value is required when AuthenticationMethod is set to Claims")] string AuthenticationProvider;
+    [Write, Description("Create the web application with Classic authentication (only used during creation of a new web application)")] boolean UseClassic;
     [Write, Description("The name of the first content database to be created with this web app")] string DatabaseName;
     [Write, Description("The name of the database server to host the default content DB")] string DatabaseServer;
     [Write, Description("The host header to use for the web app")] string HostHeader;

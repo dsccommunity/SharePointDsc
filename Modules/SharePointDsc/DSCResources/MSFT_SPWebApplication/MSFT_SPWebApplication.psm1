@@ -45,13 +45,8 @@ function Get-TargetResource
         $Port,
 
         [Parameter()]
-        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [Parameter()]
-        [System.String] 
-        $AuthenticationProvider,
+        [System.Boolean] 
+        $UseClassic = $false,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -83,31 +78,11 @@ function Get-TargetResource
         }
 
         ### COMMENT: Are we making an assumption here, about Default Zone
+        $classicAuth = $false
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
         if ($null -eq $authProvider)
         {
-            $authenticationProvider = ""
-            $localAuthMode = "Classic" 
-        }
-        else
-        {
-            if ($authProvider.DisplayName -eq "Windows Authentication")
-            {
-                if ($authProvider.DisableKerberos -eq $true)
-                {
-                    $localAuthMode = "NTLM" 
-                } 
-                else 
-                {
-                    $localAuthMode = "Kerberos" 
-                }
-                $authenticationProvider = "Windows Authentication"
-            }
-            else 
-            {
-                $localAuthMode = "Claims"
-                $authenticationProvider = $authProvider.DisplayName
-            }
+            $classicAuth = $true
         }
 
         return @{
@@ -121,8 +96,7 @@ function Get-TargetResource
             HostHeader = (New-Object -TypeName System.Uri $wa.Url).Host
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
-            AuthenticationMethod = $localAuthMode
-            AuthenticationProvider = $authenticationProvider
+            UseClassic = $classicAuth    
             UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -178,13 +152,8 @@ function Set-TargetResource
         $Port,
 
         [Parameter()]
-        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [Parameter()]
-        [System.String] 
-        $AuthenticationProvider,
+        [System.Boolean] 
+        $UseClassic = $false,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -198,20 +167,10 @@ function Set-TargetResource
 
     Write-Verbose -Message "Setting web application '$Name' config"
     
+    $PSBoundParameters.UseClassic = $UseClassic
+
     if ($Ensure -eq "Present")
     {
-        if ($PSBoundParameters.ContainsKey("AuthenticationMethod") -eq $false)
-        {
-            throw [Exception] ("When Ensure is Present, the AuthenticationMethod " + `
-                               "parameter is required.")
-        }
-
-        if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
-        {
-            throw [Exception] ("When configuring SPWebApplication to use Claims the " + `
-                               "AuthenticationProvider value must be specified.")
-        }
-
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
@@ -258,23 +217,10 @@ function Set-TargetResource
                     }
                 }
                 
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
+                if ($params.UseClassic -eq $false)
                 {
-                    if ($params.AuthenticationMethod -ne "Classic")
-                    {
-                        if ($params.AuthenticationMethod -eq "Claims")
-                        {
-                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider
-                        }
-                        else 
-                        {
-                            $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                                -DisableKerberos:$disableKerberos
-                        }
-                        
-                        $newWebAppParams.Add("AuthenticationProvider", $ap)
-                    }
+                    $ap = New-SPAuthenticationProvider
+                    $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
                 
                 if ($params.ContainsKey("AllowAnonymous") -eq $true)
@@ -374,13 +320,8 @@ function Test-TargetResource
         $Port,
 
         [Parameter()]
-        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [Parameter()]
-        [System.String] 
-        $AuthenticationProvider,
+        [System.Boolean] 
+        $UseClassic = $false,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -395,13 +336,6 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$Name' config"
 
     $PSBoundParameters.Ensure = $Ensure
-
-    if ($Ensure -eq "Present" -and
-        $PSBoundParameters.ContainsKey("AuthenticationMethod") -eq $false)
-    {
-        throw [Exception] ("When Ensure is Present, the AuthenticationMethod " + `
-                            "parameter is required.")
-    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 

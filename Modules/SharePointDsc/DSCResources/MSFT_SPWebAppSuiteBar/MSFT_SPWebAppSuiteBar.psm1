@@ -8,27 +8,27 @@ function Get-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoNavigationUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoTitle,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingText,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteBarBrandingElementHtml,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -85,27 +85,27 @@ function Set-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoNavigationUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoTitle,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingText,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteBarBrandingElementHtml,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -209,27 +209,27 @@ function Test-TargetResource
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoNavigationUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoTitle,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingLogoUrl,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteNavBrandingText,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.String] 
         $SuiteBarBrandingElementHtml,
 
-        [parameter(Mandatory = $false)] 
+        [parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
