@@ -22,6 +22,7 @@
 * Update SPManagedMetadataServiceApp to allow the configuration of the default
   and working language
 * Update SPWeb to allow the management of the access requests settings
+* Update SPBlobCacheSettings to set non-default or missing blob cache properties
 * Update SPWebApplicationExtension to fix how property AllowAnonymous is
   returned in the hashtable
 
