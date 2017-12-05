@@ -194,7 +194,7 @@ function Set-TargetResource
         $ups = Get-SPServiceApplication -Name $params.UserProfileService -ErrorAction SilentlyContinue 
                 
         if ($null -eq $ups) 
-        { 
+        {
             throw "User Profile Service Application $($params.UserProfileService) not found"
         }
         $context = Get-SPDSCServiceContext -ProxyGroup $ups.ServiceApplicationProxyGroup
