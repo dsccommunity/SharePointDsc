@@ -4,20 +4,20 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [ValidateSet("Compliant","NonCompliant")] 
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Compliant","NonCompliant")]
+        [System.String]
         $State,
 
-        [parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting MinRole compliance for the current farm"
 
     $installedVersion = Get-SPDSCInstalledProductVersion
-    if ($installedVersion.FileMajorPart -ne 16) 
+    if ($installedVersion.FileMajorPart -ne 16)
     {
         throw [Exception] "MinRole is only supported in SharePoint 2016."
     }
@@ -25,8 +25,8 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
-        $nonCompliantServices = Get-SPService | Where-Object -FilterScript { 
-            $_.CompliantWithMinRole -eq $false 
+        $nonCompliantServices = Get-SPService | Where-Object -FilterScript {
+            $_.CompliantWithMinRole -eq $false
         }
 
         if ($null -eq $nonCompliantServices)
@@ -35,7 +35,7 @@ function Get-TargetResource
                 State          = "Compliant"
                 InstallAccount = $params.InstallAccount
             }
-        } 
+        }
         else
         {
             return @{
@@ -60,18 +60,18 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [ValidateSet("Compliant","NonCompliant")] 
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Compliant","NonCompliant")]
+        [System.String]
         $State,
 
-        [parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting MinRole compliance for the current farm"
-    
+
     $installedVersion = Get-SPDSCInstalledProductVersion
     if ($installedVersion.FileMajorPart -ne 16)
     {
@@ -89,8 +89,8 @@ function Set-TargetResource
                         -ScriptBlock {
         $method = Get-SPDscRoleTestMethod
 
-        Get-SPService | Where-Object -FilterScript { 
-            $_.CompliantWithMinRole -eq $false 
+        Get-SPService | Where-Object -FilterScript {
+            $_.CompliantWithMinRole -eq $false
         } | ForEach-Object -Process {
             $_.Instances | ForEach-Object -Process {
                 $isCompliant = $method.Invoke($null, $_)
@@ -120,13 +120,13 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [ValidateSet("Compliant","NonCompliant")] 
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Compliant","NonCompliant")]
+        [System.String]
         $State,
 
-        [parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

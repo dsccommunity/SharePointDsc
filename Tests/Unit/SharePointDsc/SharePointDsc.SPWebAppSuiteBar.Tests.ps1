@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,10 +20,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
 
         # Test contexts
-        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15) 
+        if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 15)
         {
             Context -Name "Only all SP2016 parameters passed for a SP2013 environment" -Fixture {
                 $testParams = @{
@@ -34,8 +34,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{ 
-                    DisplayName = "Test Web App"                
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
+                    DisplayName = "Test Web App"
                     Url = "http://sites.sharepoint.com"
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
                 })}
@@ -52,8 +52,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{ 
-                    DisplayName = "Test Web App"                
+                Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
+                    DisplayName = "Test Web App"
                     Url = "http://sites.sharepoint.com"
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
                 })}
@@ -66,12 +66,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Context -Name "Only the SP2013 parameter passed for a SP2013 environment" -Fixture {
                 $testParams = @{
                     WebAppUrl = "http://sites.sharepoint.com"
-                    SuiteBarBrandingElementHtml = "<div>Test</div>"        
+                    SuiteBarBrandingElementHtml = "<div>Test</div>"
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {
                     $webApp = @{
-                        DisplayName = "Test Web App"                
+                        DisplayName = "Test Web App"
                         Url = "http://sites.sharepoint.com"
                         SuiteBarBrandingElementHtml = "<div>Test</div>"
                         SuiteNavBrandingLogoNavigationUrl = $null
@@ -105,8 +105,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     WebAppUrl = "http://sites.sharepoint.com"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
-                    DisplayName = "Test Web App"                
+                Mock -CommandName Get-SPWebApplication -MockWith {
+                    DisplayName = "Test Web App"
                     Url = "http://sites.sharepoint.com"
                     SuiteBarBrandingElementHtml = "<div>Test</div>"
                 }
@@ -116,7 +116,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
         }
-        elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Major -ge 16) 
+        elseif ($Global:SPDscHelper.CurrentStubBuildNumber.Major -ge 16)
         {
             Context -Name "Only all SP2016 parameters passed for a SP2016 environment" -Fixture {
                 $testParams = @{
@@ -127,9 +127,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     SuiteNavBrandingText = "Suite Bar Text"
                 }
 
-                Mock -CommandName Get-SPWebApplication -MockWith { 
+                Mock -CommandName Get-SPWebApplication -MockWith {
                     $webApp = @{
-                        DisplayName = "Test Web App"                
+                        DisplayName = "Test Web App"
                         Url = "http://sites.sharepoint.com"
                         SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                         SuiteNavBrandingLogoTitle = "LogoTitle"
@@ -170,7 +170,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Mock -CommandName Get-SPWebApplication -MockWith {
                     $webApp = @{
-                        DisplayName = "Test Web App"                
+                        DisplayName = "Test Web App"
                         Url = "http://sites.sharepoint.com"
                         SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                         SuiteNavBrandingLogoTitle = "LogoTitle"
@@ -211,7 +211,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith {return @(@{
-                    DisplayName = "Test Web App"                
+                    DisplayName = "Test Web App"
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoTitle = "LogoTitle"
@@ -230,7 +230,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
 
                 Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
-                    DisplayName = "Test Web App"                
+                    DisplayName = "Test Web App"
                     Url = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoNavigationUrl = "http://sites.sharepoint.com"
                     SuiteNavBrandingLogoTitle = "LogoTitle"

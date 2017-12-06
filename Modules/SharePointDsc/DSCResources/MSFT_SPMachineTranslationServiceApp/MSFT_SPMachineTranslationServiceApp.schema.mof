@@ -3,6 +3,7 @@
 class MSFT_SPMachineTranslationServiceApp : OMI_BaseResource
 {
     [Key, Description("Specifies the name of the service application.")] String Name;
+    [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("Specifies the name of the database for the service application.")] String DatabaseName;
     [Required, Description("Specifies the name of the database server for the service application.")] String DatabaseServer;
     [Required, Description("Specifies the application pool to use with the service application.")] String ApplicationPool;

@@ -1,9 +1,9 @@
-function Get-SPDSCWebApplicationThrottlingConfig 
+function Get-SPDSCWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $WebApplication
     )
     return @{
@@ -25,14 +25,14 @@ function Get-SPDSCWebApplicationThrottlingConfig
     }
 }
 
-function Set-SPDSCWebApplicationThrottlingConfig 
+function Set-SPDSCWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $WebApplication,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $Settings
     )
 
@@ -46,7 +46,7 @@ function Set-SPDSCWebApplicationThrottlingConfig
         MaxUniquePermScopesPerList                  = "UniquePermissionThreshold"
         EventHandlersEnabled                        = "EventHandlersEnabled"
         ChangeLogExpirationEnabled                  = "ChangeLogEnabled"
-    } 
+    }
     $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
                                               -PropertyToSet $_ `
@@ -59,9 +59,9 @@ function Set-SPDSCWebApplicationThrottlingConfig
                                           -PropertyToSet "PerformThrottle" `
                                           -ParamsValue $Settings `
                                           -ParamKey "RequestThrottling"
-    
+
     # Create time span object separately
-    if ((Test-SPDSCObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true) 
+    if ((Test-SPDSCObjectHasProperty $Settings "ChangeLogExpiryDays") -eq $true)
     {
         $days = New-TimeSpan -Days $Settings.ChangeLogExpiryDays
         $WebApplication.ChangeLogRetentionPeriod = $days
@@ -69,34 +69,34 @@ function Set-SPDSCWebApplicationThrottlingConfig
 }
 
 
-function Set-SPDSCWebApplicationHappyHourConfig 
+function Set-SPDSCWebApplicationHappyHourConfig
 {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $WebApplication,
-        
-        [parameter(Mandatory = $true)] 
+
+        [Parameter(Mandatory = $true)]
         $Settings
     )
 
     if ((Test-SPDSCObjectHasProperty $Settings "Hour") -eq $false `
       -or (Test-SPDSCObjectHasProperty $Settings "Minute") -eq $false `
-      -or (Test-SPDSCObjectHasProperty $Settings "Duration") -eq $false) 
+      -or (Test-SPDSCObjectHasProperty $Settings "Duration") -eq $false)
     {
         throw "Happy hour settings must include 'hour', 'minute' and 'duration'"
-    } 
-    else 
+    }
+    else
     {
-        if ($Settings.Hour -lt 0 -or $Settings.Hour -gt 23) 
+        if ($Settings.Hour -lt 0 -or $Settings.Hour -gt 23)
         {
             throw "Happy hour setting 'hour' must be between 0 and 23"
         }
-        if ($Settings.Minute -lt 0 -or $Settings.Minute -gt 59) 
+        if ($Settings.Minute -lt 0 -or $Settings.Minute -gt 59)
         {
             throw "Happy hour setting 'minute' must be between 0 and 59"
         }
-        if ($Settings.Duration -lt 0 -or $Settings.Duration -gt 23) 
+        if ($Settings.Duration -lt 0 -or $Settings.Duration -gt 23)
         {
             throw "Happy hour setting 'hour' must be between 0 and 23"
         }
@@ -107,15 +107,15 @@ function Set-SPDSCWebApplicationHappyHourConfig
     }
 }
 
-function Test-SPDSCWebApplicationThrottlingConfig 
+function Test-SPDSCWebApplicationThrottlingConfig
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)]
         $CurrentSettings,
-        
-        [parameter(Mandatory = $true)] 
+
+        [Parameter(Mandatory = $true)]
         $DesiredSettings
     )
 
@@ -135,30 +135,30 @@ function Test-SPDSCWebApplicationThrottlingConfig
                                                          "ChangeLogExpiryDays",
                                                          "EventHandlersEnabled"
                                                      )
-    if ($testReturn -eq $true) 
+    if ($testReturn -eq $true)
     {
             if ($null -ne $DesiredSettings.HappyHour)
             {
                 $DesiredHappyHour = @{}
-                if ($null -ne $DesiredSettings.HappyHour.Hour) 
+                if ($null -ne $DesiredSettings.HappyHour.Hour)
                 {
                     $DesiredHappyHour.Add("Hour",[int32]$DesiredSettings.HappyHour.Hour)
-                } 
-                else 
+                }
+                else
                 {
                     $DesiredHappyHour.Add("Hour",$null)
                 }
-                if ($null -ne $DesiredSettings.HappyHour.Minute) 
+                if ($null -ne $DesiredSettings.HappyHour.Minute)
                 {
                     $DesiredHappyHour.Add("Minute",[int32]$DesiredSettings.HappyHour.Minute)
-                } else 
+                } else
                 {
                     $DesiredHappyHour.Add("Minute",$null)
                 }
-                if ($null -ne $DesiredSettings.HappyHour.Duration) 
+                if ($null -ne $DesiredSettings.HappyHour.Duration)
                 {
                     $DesiredHappyHour.Add("Duration",[int32]$DesiredSettings.HappyHour.Duration)
-                } else 
+                } else
                 {
                     $DesiredHappyHour.Add("Duration",$null)
                 }

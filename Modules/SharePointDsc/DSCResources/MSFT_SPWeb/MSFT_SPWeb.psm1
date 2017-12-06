@@ -4,12 +4,12 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -21,7 +21,7 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()] 
+        [Parameter()]
         [System.UInt32]
         $Language,
 
@@ -30,19 +30,19 @@ function Get-TargetResource
         $Template,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UniquePermissions,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UseParentTopNav,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AddToQuickLaunch,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $AddToTopNav,
 
         [Parameter()]
@@ -50,7 +50,7 @@ function Get-TargetResource
         $RequestAccessEmail,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -65,7 +65,6 @@ function Get-TargetResource
 
         if ($web)
         {
-
             $ensureResult = "Present"
             $templateResult = "$($web.WebTemplate)#$($web.WebTemplateId)"
             $parentTopNav = $web.Navigation.UseShared
@@ -96,12 +95,12 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -113,7 +112,7 @@ function Set-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()] 
+        [Parameter()]
         [System.UInt32]
         $Language,
 
@@ -122,19 +121,19 @@ function Set-TargetResource
         $Template,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UniquePermissions,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UseParentTopNav,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AddToQuickLaunch,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $AddToTopNav,
 
         [Parameter()]
@@ -142,7 +141,7 @@ function Set-TargetResource
         $RequestAccessEmail,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -154,7 +153,7 @@ function Set-TargetResource
         -Arguments $PSBoundParameters `
         -ScriptBlock {
         $params = $args[0]
-        
+
         if ($null -eq $params.InstallAccount)
         {
             $currentUserName = "$env:USERDOMAIN\$env:USERNAME"
@@ -171,11 +170,7 @@ function Set-TargetResource
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $web)
-        {
-            @("InstallAccount", "Ensure", "RequestAccessEmail") |
-                ForEach-Object -Process {
                 if ($params.ContainsKey($_) -eq $true)
-                {
                     $params.Remove($_) | Out-Null
                 }
             }
@@ -253,12 +248,12 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")] 
+        [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
@@ -270,7 +265,7 @@ function Test-TargetResource
         [System.String]
         $Name,
 
-        [Parameter()] 
+        [Parameter()]
         [System.UInt32]
         $Language,
 
@@ -279,19 +274,19 @@ function Test-TargetResource
         $Template,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UniquePermissions,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $UseParentTopNav,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AddToQuickLaunch,
 
         [Parameter()]
-        [System.Boolean] 
+        [System.Boolean]
         $AddToTopNav,
 
         [Parameter()]
@@ -299,7 +294,7 @@ function Test-TargetResource
         $RequestAccessEmail,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

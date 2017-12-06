@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -18,10 +18,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
 
-        # Initialize Tests 
+        # Initialize Tests
         $getTypeFullName = "Microsoft.Office.Visio.Server.Administration.VisioGraphicsServiceApplication"
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-SPVisioServiceApplication -MockWith { }
         Mock -CommandName Remove-SPServiceApplication -MockWith { }
         Mock -CommandName New-SPVisioServiceApplicationProxy -MockWith { }
@@ -30,14 +30,15 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
                 Name = "Test Visio App"
+                ProxyName = "Visio Proxy"
                 ApplicationPool = "Test App Pool"
                 Ensure = "Present"
             }
 
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
-            
+
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
@@ -57,43 +58,62 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "Test App Pool"
                 Ensure = "Present"
             }
-            
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                $spServiceApp = [PSCustomObject]@{ 
-                                    DisplayName = $testParams.Name 
-                                } 
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                $spServiceApp = [PSCustomObject]@{
+                                    DisplayName = $testParams.Name
+                                }
                 $spServiceApp | Add-Member -MemberType ScriptMethod `
                                            -Name GetType `
-                                           -Value {  
-                                                return @{ 
-                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication" 
-                                                }  
-                                            } -PassThru -Force 
-                return $spServiceApp 
+                                           -Value {
+                                                return @{
+                                                    FullName = "Microsoft.Office.UnKnownWebServiceApplication"
+                                                }
+                                            } -PassThru -Force
+
+                return $spServiceApp
             }
 
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
         }
 
         Context -Name "When a service application exists and is configured correctly" -Fixture {
             $testParams = @{
                 Name = "Test Visio App"
+                ProxyName = "Visio Proxy"
                 ApplicationPool = "Test App Pool"
                 Ensure = "Present"
             }
-            
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
-                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return @{ FullName = $getTypeFullName }
+                } -PassThru -Force
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name IsConnected -Value {
+                    return $true
                 } -PassThru -Force
                 return $spServiceApp
+            }
+            Mock -CommandName Get-SPServiceApplicationProxy -MockWith {
+                $proxiesToReturn = @()
+                $proxy = @{
+                    Name = $testParams.ProxyName
+                    DisplayName = $testParams.ProxyName
+                }
+                $proxy = $proxy | Add-Member -MemberType ScriptMethod `
+                                                -Name Delete `
+                                                -Value {} `
+                                                -PassThru
+                $proxiesToReturn +=  $proxy
+
+                return $proxiesToReturn
             }
 
             It "Should return present from the get method" {
@@ -111,22 +131,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "Test App Pool"
                 Ensure = "Present"
             }
-            
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = "Wrong App Pool Name" }
                 }
-                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
                 return $spServiceApp
             }
-            Mock -CommandName Get-SPServiceApplicationPool { 
-                return @{ 
-                    Name = $testParams.ApplicationPool 
-                } 
+            Mock -CommandName Get-SPServiceApplicationPool {
+                return @{
+                    Name = $testParams.ApplicationPool
+                }
             }
 
             It "Should return false when the Test method is called" {
@@ -139,55 +159,55 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Get-SPServiceApplicationPool
             }
         }
-              
+
         Context -Name "When the service app exists but it shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "-"
                 Ensure = "Absent"
             }
-        
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
                 $spServiceApp = [PSCustomObject]@{
                     TypeName = "Visio Graphics Service Application"
                     DisplayName = $testParams.Name
                     ApplicationPool = @{ Name = $testParams.ApplicationPool }
                 }
-                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value { 
-                    return @{ FullName = $getTypeFullName } 
+                $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
+                    return @{ FullName = $getTypeFullName }
                 } -PassThru -Force
                 return $spServiceApp
             }
-            
+
             It "Should return present from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $false
             }
-            
+
             It "Should remove the service application in the set method" {
                 Set-TargetResource @testParams
                 Assert-MockCalled Remove-SPServiceApplication
             }
         }
-        
+
         Context -Name "When the service app doesn't exist and shouldn't" -Fixture {
             $testParams = @{
                 Name = "Test App"
                 ApplicationPool = "-"
                 Ensure = "Absent"
             }
-        
-            Mock -CommandName Get-SPServiceApplication -MockWith { 
-                return $null 
+
+            Mock -CommandName Get-SPServiceApplication -MockWith {
+                return $null
             }
-            
+
             It "Should return absent from the Get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
-            
+
             It "Should return false from the test method" {
                 Test-TargetResource @testParams | Should Be $true
             }

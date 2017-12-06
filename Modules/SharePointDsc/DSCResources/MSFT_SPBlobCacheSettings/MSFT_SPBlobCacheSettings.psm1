@@ -4,40 +4,40 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")]
+        [System.String]
         $Zone,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableCache,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Location,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $MaxSizeInGB,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $MaxAgeInSeconds,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $FileTypes,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Getting blob cache settings for $WebAppUrl"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -51,7 +51,7 @@ function Get-TargetResource
                             $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
                           }
 
-        if ($null -eq $webappsi) 
+        if ($null -eq $webappsi)
         {
             Write-Verbose -Message "Server isn't running the Web Application role"
             return @{
@@ -69,7 +69,7 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl `
                                    -ErrorAction SilentlyContinue
 
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
             Write-Verbose -Message "Specified web application was not found."
             return @{
@@ -91,37 +91,37 @@ function Get-TargetResource
 
         [xml]$webConfig = Get-Content -Path $webConfigLocation
 
-        if ($webconfig.configuration.SharePoint.BlobCache.enabled -eq "true") 
+        if ($webconfig.configuration.SharePoint.BlobCache.enabled -eq "true")
         {
             $cacheEnabled = $true
-        } 
-        else 
+        }
+        else
         {
             $cacheEnabled = $false
         }
 
-        try 
+        try
         {
             $maxsize = [Convert]::ToUInt16($webconfig.configuration.SharePoint.BlobCache.maxSize)
         }
-        catch [FormatException] 
+        catch [FormatException]
         {
             $maxsize = 0
         }
-        catch 
+        catch
         {
             throw "Error: $($_.Exception.Message)"
         }
 
-        try 
+        try
         {
             $maxage = [Convert]::ToUInt32($webconfig.configuration.SharePoint.BlobCache."max-age")
         }
-        catch [FormatException] 
+        catch [FormatException]
         {
             $maxage = 0
         }
-        catch 
+        catch
         {
             throw "Error: $($_.Exception.Message)"
         }
@@ -136,7 +136,7 @@ function Get-TargetResource
             FileTypes = $webconfig.configuration.SharePoint.BlobCache.path
             InstallAccount = $params.InstallAccount
         }
-        
+
         return $returnval
     }
     return $result
@@ -147,87 +147,87 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")]
+        [System.String]
         $Zone,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableCache,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Location,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $MaxSizeInGB,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $MaxAgeInSeconds,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $FileTypes,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting blob cache settings for $WebAppUrl"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
+
     $changes = @{}
-    
-    if ($PSBoundParameters.ContainsKey("EnableCache")) 
+
+    if ($PSBoundParameters.ContainsKey("EnableCache"))
     {
-        if ($CurrentValues.EnableCache -ne $EnableCache) 
+        if ($CurrentValues.EnableCache -ne $EnableCache)
         {
-            $changes.EnableCache = $EnableCache 
-        }
-    }
-    
-    if ($PSBoundParameters.ContainsKey("Location")) 
-    {
-        if ($CurrentValues.Location -ne $Location) 
-        {
-            $changes.Location = $Location 
-        }
-    }
-    
-    if ($PSBoundParameters.ContainsKey("MaxSizeInGB")) 
-    {
-        if ($CurrentValues.MaxSizeInGB -ne $MaxSizeInGB) 
-        {
-            $changes.MaxSizeInGB = $MaxSizeInGB 
+            $changes.EnableCache = $EnableCache
         }
     }
 
-    if ($PSBoundParameters.ContainsKey("MaxAgeInSeconds")) 
+    if ($PSBoundParameters.ContainsKey("Location"))
     {
-        if ($CurrentValues.MaxAgeInSeconds -ne $MaxAgeInSeconds) 
+        if ($CurrentValues.Location -ne $Location)
         {
-            $changes.MaxAgeInSeconds = $MaxAgeInSeconds 
-        }
-    }
-    
-    if ($PSBoundParameters.ContainsKey("FileTypes")) 
-    {
-        if ($CurrentValues.FileTypes -ne $FileTypes) 
-        {
-            $changes.FileTypes = $FileTypes 
+            $changes.Location = $Location
         }
     }
 
-    if ($changes.Count -ne 0) 
+    if ($PSBoundParameters.ContainsKey("MaxSizeInGB"))
+    {
+        if ($CurrentValues.MaxSizeInGB -ne $MaxSizeInGB)
+        {
+            $changes.MaxSizeInGB = $MaxSizeInGB
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("MaxAgeInSeconds"))
+    {
+        if ($CurrentValues.MaxAgeInSeconds -ne $MaxAgeInSeconds)
+        {
+            $changes.MaxAgeInSeconds = $MaxAgeInSeconds
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("FileTypes"))
+    {
+        if ($CurrentValues.FileTypes -ne $FileTypes)
+        {
+            $changes.FileTypes = $FileTypes
+        }
+    }
+
+    if ($changes.Count -ne 0)
     {
         ## Perform changes
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -242,14 +242,14 @@ function Set-TargetResource
                                 $_.TypeName -eq "Microsoft SharePoint Foundation Web Application"
                               }
 
-            if ($null -eq $webappsi) 
+            if ($null -eq $webappsi)
             {
                 throw "Server isn't running the Web Application role"
             }
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
-            if ($null -eq $wa) 
+            if ($null -eq $wa)
             {
                 throw "Specified web application could not be found."
             }
@@ -266,54 +266,54 @@ function Set-TargetResource
 
             [xml]$webConfig = Get-Content -Path $webConfigLocation
 
-            if ($changes.ContainsKey("EnableCache")) 
+            if ($changes.ContainsKey("EnableCache"))
             {
                 $webconfig.configuration.SharePoint.BlobCache.SetAttribute("enabled",$changes.EnableCache.ToString())
             }
 
-            if ($changes.ContainsKey("Location")) 
+            if ($changes.ContainsKey("Location"))
             {
                 $webconfig.configuration.SharePoint.BlobCache.SetAttribute("location",$changes.Location)
             }
 
-            if ($changes.ContainsKey("MaxSizeInGB")) 
+            if ($changes.ContainsKey("MaxSizeInGB"))
             {
                 $webconfig.configuration.SharePoint.BlobCache.SetAttribute("maxSize",$changes.MaxSizeInGB.ToString())
             }
 
-            if ($changes.ContainsKey("MaxAgeInSeconds")) 
+            if ($changes.ContainsKey("MaxAgeInSeconds"))
             {
                 $webconfig.configuration.SharePoint.BlobCache.SetAttribute("max-age",$($changes.MaxAgeInSeconds.ToString()))
             }
-            
-            if ($changes.ContainsKey("FileTypes")) 
+
+            if ($changes.ContainsKey("FileTypes"))
             {
                 $webconfig.configuration.SharePoint.BlobCache.SetAttribute("path",$changes.FileTypes)
             }
             $webconfig.Save($webconfiglocation)
         }
-    }    
-    
+    }
+
     ## Check Blob Cache folder
-    if ($Location) 
+    if ($Location)
     {
-        if ( -not (Test-Path -Path $Location)) 
+        if ( -not (Test-Path -Path $Location))
         {
             Write-Verbose "Create Blob Cache Folder $Location"
-            try 
+            try
             {
                 New-Item -Path $Location -ItemType Directory | Out-Null
             }
-            catch [DriveNotFoundException] 
+            catch [DriveNotFoundException]
             {
                 throw "Specified drive does not exist"
             }
-            catch 
+            catch
             {
                 throw "Error creating Blob Cache folder: $($_.Exception.Message)"
             }
         }
-    }    
+    }
 }
 
 function Test-TargetResource
@@ -322,57 +322,57 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default", "Intranet", "Internet", "Custom", "Extranet")]
+        [System.String]
         $Zone,
 
-        [Parameter(Mandatory = $true)]  
-        [System.Boolean] 
+        [Parameter(Mandatory = $true)]
+        [System.Boolean]
         $EnableCache,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Location,
 
-        [Parameter()] 
-        [System.UInt16] 
+        [Parameter()]
+        [System.UInt16]
         $MaxSizeInGB,
 
-        [Parameter()] 
-        [System.UInt32] 
+        [Parameter()]
+        [System.UInt32]
         $MaxAgeInSeconds,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $FileTypes,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing blob cache settings for $WebAppUrl"
 
-    if ($Location) 
+    if ($Location)
     {
-        if ( -not (Test-Path -Path $Location)) 
+        if ( -not (Test-Path -Path $Location))
         {
             Write-Verbose "Blob Cache Folder $Location does not exist"
             return $false
         }
     }
-    
+
     return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("EnableCache", 
-                                                     "Location", 
-                                                     "MaxSizeInGB", 
-                                                     "FileType", 
+                                    -ValuesToCheck @("EnableCache",
+                                                     "Location",
+                                                     "MaxSizeInGB",
+                                                     "FileType",
                                                      "MaxAgeInSeconds")
 }
 

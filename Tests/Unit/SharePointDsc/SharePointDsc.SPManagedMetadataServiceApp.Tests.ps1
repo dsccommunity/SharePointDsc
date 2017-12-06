@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
             -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
             -Resolve)
@@ -358,7 +358,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         }
                         Database = @{
                             Name = $testParams.DatabaseName
-                            NormalizedDataSource = $testParams.DatabaseServer 
+                            NormalizedDataSource = $testParams.DatabaseServer
                         }
                     }
                     $spServiceApp = $spServiceApp | Add-Member -MemberType ScriptMethod -Name GetType -Value {
@@ -1656,4 +1656,5 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
     }
 }
+
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

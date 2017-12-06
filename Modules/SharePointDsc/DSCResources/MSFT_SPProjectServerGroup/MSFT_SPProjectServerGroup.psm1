@@ -4,19 +4,19 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()]  
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()]  
+        [Parameter()]
         [System.String]
         $ADGroup,
 
@@ -32,19 +32,19 @@ function Get-TargetResource
         [System.String[]]
         $MembersToExclude,
 
-        [parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting group settings for '$Name' at '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016.")
@@ -78,7 +78,7 @@ function Get-TargetResource
             throw [Exception] ("SPProjectServerGroup is design for Project Server permissions " + `
                                "mode only, and this site is set to SharePoint mode")
         }
-        
+
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
@@ -123,7 +123,7 @@ function Get-TargetResource
                 # No AD group is set, check for individual members
                 $groupMembers = @()
                 $script:groupDataSet.GroupMembers.Rows | ForEach-Object -Process {
-                    $groupMembers += Get-SPDscProjectServerResourceName -ResourceId $_["RES_UID"] -PwaUrl $params.Url 
+                    $groupMembers += Get-SPDscProjectServerResourceName -ResourceId $_["RES_UID"] -PwaUrl $params.Url
                 }
             }
 
@@ -159,19 +159,19 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()]  
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()]  
+        [Parameter()]
         [System.String]
         $ADGroup,
 
@@ -187,13 +187,13 @@ function Set-TargetResource
         [System.String[]]
         $MembersToExclude,
 
-        [parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -235,7 +235,7 @@ function Set-TargetResource
                         $_.WSEC_GRP_NAME -eq $params.Name
                     }
                 }
-                
+
                 # Update the existing group
                 $groupDS = $securityService.ReadGroup($groupInfo.WSEC_GRP_UID)
                 $group = $groupDS.SecurityGroups.FindByWSEC_GRP_UID($groupInfo.WSEC_GRP_UID)
@@ -284,7 +284,7 @@ function Set-TargetResource
                         }
                     }
                 }
-            
+
                 if ($params.ContainsKey("MembersToExclude") -eq $true)
                 {
                     $params.MembersToExclude | ForEach-Object -Process {
@@ -327,7 +327,7 @@ function Set-TargetResource
                 }
             }
         }
-    }   
+    }
 }
 
 
@@ -337,19 +337,19 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()]  
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [Parameter()]  
+        [Parameter()]
         [System.String]
         $ADGroup,
 
@@ -365,13 +365,13 @@ function Test-TargetResource
         [System.String[]]
         $MembersToExclude,
 
-        [parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

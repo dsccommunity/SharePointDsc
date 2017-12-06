@@ -4,37 +4,37 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
         [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentTypeHubUrl,
 
         [Parameter()]
@@ -45,8 +45,8 @@ function Get-TargetResource
         [System.UInt32[]]
         $Languages,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -153,7 +153,6 @@ function Get-TargetResource
             $session = Get-SPTaxonomySession -Site $centralAdminSite.Url
 
             $currentAdmins = @()
-
             $termStoreDefaultLanguage = $null
             $termStoreLanguages = @()
 
@@ -215,37 +214,37 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
         [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentTypeHubUrl,
 
         [Parameter()]
@@ -256,9 +255,9 @@ function Set-TargetResource
         [System.UInt32[]]
         $Languages,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
-        $InstallAccount    
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Setting managed metadata service application $Name"
@@ -586,37 +585,37 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ProxyName,
 
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ApplicationPool,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseServer,
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DatabaseName,
 
         [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present", "Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $ContentTypeHubUrl,
 
         [Parameter()]
@@ -627,9 +626,9 @@ function Test-TargetResource
         [System.UInt32[]]
         $Languages,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
-        $InstallAccount      
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $InstallAccount
     )
 
     Write-Verbose -Message "Testing managed metadata service application $Name"

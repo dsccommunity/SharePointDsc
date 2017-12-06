@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -35,9 +35,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 }
             }
 
-            $serviceNames = @("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields", 
-            "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider", 
-            "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource", 
+            $serviceNames = @("Admin", "Archive", "Calendar", "CubeAdmin", "CustomFields",
+            "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider",
+            "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource",
             "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")
 
             $serviceNames | ForEach-Object -Process {
@@ -58,7 +58,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "Use-SPDscProjectServerWebService" -Fixture {
-            
+
             It "disposes of a service when there is no exception" {
                 $mockService = New-Object -TypeName System.IO.StringReader -ArgumentList "Example"
 
@@ -82,18 +82,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 {
                     "Doing nothing with the actual exception so the test passes" | Out-Null
                 }
-                
+
                 { $mockService.Read() } | Should Throw "Cannot read from a closed TextReader"
             }
         }
 
         Mock -CommandName "Import-Module" -MockWith {}
 
-        try 
+        try
         {
             [SPDscTests.DummyWebService] | Out-Null
         }
-        catch 
+        catch
         {
             Add-Type -TypeDefinition @"
                 namespace SPDscTests
@@ -103,12 +103,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         public void Dispose()
                         {
 
-                        } 
-                    } 
+                        }
+                    }
                 }
 "@
         }
-        
+
 
         Context -Name "Get-SPDscProjectServerResourceName" -Fixture {
 
@@ -122,9 +122,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             WRES_ACCOUNT = "DEMO\user"
                                                         }
                                                      }
-                                                 } -PassThru -Force 
+                                                 } -PassThru -Force
                 return $service
-            }            
+            }
 
             It "Should return the name of a resource based on its ID" {
                 Get-SPDscProjectServerResourceName -ResourceId (New-Guid) -PwaUrl "http://server/pwa" | Should Be "DEMO\user"
@@ -173,7 +173,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     public enum FieldOperationType
                     {
                         Contain
-                    }                    
+                    }
                 }
             }
 
@@ -199,9 +199,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             )
                                                         }
                                                      }
-                                                 } -PassThru -Force 
+                                                 } -PassThru -Force
                 return $service
-            } 
+            }
 
             It "should return the ID of a specified user" {
                 Get-SPDscProjectServerResourceId -ResourceName "demo\user1" -PwaUrl "http://server/pwa" | Should Not BeNullOrEmpty
@@ -227,9 +227,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             )
                                                         }
                                                      }
-                                                 } -PassThru -Force 
+                                                 } -PassThru -Force
                 return $service
-            } 
+            }
 
             It "should throw when a user isn't in the returned data set" {
                 { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
@@ -246,9 +246,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                             Rows = @()
                                                         }
                                                      }
-                                                 } -PassThru -Force 
+                                                 } -PassThru -Force
                 return $service
-            } 
+            }
 
             It "should throw when no users are in the returned data set" {
                 { Get-SPDscProjectServerResourceId -ResourceName "demo\user3" -PwaUrl "http://server/pwa" } | Should Throw
