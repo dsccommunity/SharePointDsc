@@ -8,6 +8,6 @@ zone can have multiple authentication methods configured.
 NOTE: This resource cannot be used to convert a Classic web application
 to Claims mode. You have to run Convert-SPWebApplication manually for that.
 
-NOTE 2: Updating the configuration can take a long time. The
-Set-SPWebApplication sometimes requires a very long time to complete its
-action. This is not a SharePointDsc issue.
+NOTE 2: Updating the configuration can take a long time, up to five minutes.
+The Set-SPWebApplication cmdlet sometimes requires several minutes to
+complete its action. This is not a SharePointDsc issue.
