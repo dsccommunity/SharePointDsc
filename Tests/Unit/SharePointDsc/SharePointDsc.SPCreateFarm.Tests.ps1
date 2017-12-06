@@ -2,7 +2,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -24,12 +24,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         $mockFarmAccount = New-Object -TypeName "System.Management.Automation.PSCredential" `
                                       -ArgumentList @("username", $mockPassword)
         $mockPassphrase = New-Object -TypeName "System.Management.Automation.PSCredential" `
-                                     -ArgumentList @("PASSPHRASEUSER", $mockPassword)                                      
+                                     -ArgumentList @("PASSPHRASEUSER", $mockPassword)
 
         $modulePath = "Modules\SharePointDsc\Modules\SharePointDsc.Farm\SPFarm.psm1"
         Import-Module -Name (Join-Path -Path $Global:SPDscHelper.RepoRoot -ChildPath $modulePath -Resolve)
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
 
         # Test contexts
         Context -Name "no farm is configured locally and a supported version of SharePoint is installed" -Fixture {
@@ -41,17 +41,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 AdminContentDatabaseName = "Admin_Content"
                 CentralAdministrationAuth = "Kerberos"
                 CentralAdministrationPort = 1234
-            }            
+            }
 
-            It "the get method returns null when the farm is not configured" {
+            It "Should throw an exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "SPCreateFarm: This resource has been removed. Please update your configuration to use SPFarm instead."
             }
 
-            It "Should return false from the test method" {
+            It "Should throw an exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "SPCreateFarm: This resource has been removed. Please update your configuration to use SPFarm instead."
             }
 
-            It "Should call the new configuration database cmdlet in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SPCreateFarm: This resource has been removed. Please update your configuration to use SPFarm instead."
             }
         }

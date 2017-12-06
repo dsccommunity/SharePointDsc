@@ -170,10 +170,14 @@ function Set-TargetResource
         $web = Get-SPWeb -Identity $params.Url -ErrorAction SilentlyContinue
 
         if ($null -eq $web)
-                if ($params.ContainsKey($_) -eq $true)
-                    $params.Remove($_) | Out-Null
+        {
+            @("InstallAccount", "Ensure", "RequestAccessEmail") |
+                ForEach-Object -Process {
+                    if ($params.ContainsKey($_) -eq $true)
+                    {
+                        $params.Remove($_) | Out-Null
+                    }
                 }
-            }
 
             New-SPWeb @params | Out-Null
         }

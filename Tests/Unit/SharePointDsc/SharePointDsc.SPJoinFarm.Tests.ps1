@@ -2,7 +2,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -36,16 +36,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 DatabaseServer = "DatabaseServer\Instance"
                 Passphrase = $mockPassphraseCredential
             }
-            
-            It "the get method returns null when the farm is not configured" {
+
+            It "Should throw an exception in the get method" {
                 { Get-TargetResource @testParams } | Should Throw "SPCreateFarm: This resource has been removed. Please update your configuration to use SPFarm instead."
             }
 
-            It "Should return false from the test method" {
+            It "Should throw an exception in the test method" {
                 { Test-TargetResource @testParams } | Should Throw "SPCreateFarm: This resource has been removed. Please update your configuration to use SPFarm instead."
             }
 
-            It "Should call the new configuration database cmdlet in the set method" {
+            It "Should throw an exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "SPCreateFarm: This resource has been removed. Please update your configuration to use SPFarm instead."
             }
         }
