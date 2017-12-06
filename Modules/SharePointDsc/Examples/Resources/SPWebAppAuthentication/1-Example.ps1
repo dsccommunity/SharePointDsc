@@ -21,16 +21,16 @@
             {
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Default = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                    MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "NTLM"
-                    } -ClientOnly)
+                    }
                 )
                 Extranet = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                    MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "FBA"
                         MembershipProvider = "MemberPRovider"
                         RoleProvider = "RoleProvider"
-                    } -ClientOnly)
+                    }
                 )
             }
         }

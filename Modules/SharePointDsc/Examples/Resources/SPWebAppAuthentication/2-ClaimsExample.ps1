@@ -48,15 +48,15 @@
             {
                 WebAppUrl   = "http://sharepoint.contoso.com"
                 Default = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                    MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "NTLM"
-                    } -ClientOnly)
+                    }
                 )
                 Internet = @(
-                    (New-CimInstance -ClassName MSFT_SPWebAppAuthenticationMode -Property @{
+                    MSFT_SPWebAppAuthenticationMode {
                         AuthenticationMethod = "Federated"
                         AuthenticationProvider = "Contoso"
-                    } -ClientOnly)
+                    }
                 )
                 DependsOn = "[SPTrustedIdentityTokenIssuer]SampleSPTrust"
             }

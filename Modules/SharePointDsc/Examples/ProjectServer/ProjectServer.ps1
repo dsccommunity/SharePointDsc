@@ -335,6 +335,7 @@ Configuration Example
         SPTimerJobState RunProjectSeverADImport
         {
             TypeName                = "ActiveDirectorySync"
+            WebAppUrl               = "N/A"
             Enabled                 = $true
             Schedule                = "daily between 03:00:00 and 03:00:00"
             PsDscRunAsCredential    = $SPSetupAccount
