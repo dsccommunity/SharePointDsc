@@ -52,29 +52,29 @@ function New-SPDscUnitTestHelper
 
     Import-Module -Name $moduleToLoad -Global
 
-    
+
 
     $initScript = @"
             Remove-Module -Name "Microsoft.SharePoint.PowerShell" -Force -ErrorAction SilentlyContinue
             Import-Module -Name "$SharePointStubModule" -WarningAction SilentlyContinue
             Import-Module -Name "$moduleToLoad"
-            
-            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { 
-                return @{ 
-                    FileMajorPart = $majorBuildNumber 
-                } 
+
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
+                return @{
+                    FileMajorPart = $majorBuildNumber
+                }
             }
 
             Mock -CommandName Get-SPDSCAssemblyVersion -MockWith {
                 return $majorBuildNumber
             }
-            
+
 "@
 
-    if ($ExcludeInvokeHelper -eq $false) 
+    if ($ExcludeInvokeHelper -eq $false)
     {
         $initScript += @"
-            Mock Invoke-SPDSCCommand { 
+            Mock Invoke-SPDSCCommand {
                 return Invoke-Command -ScriptBlock `$ScriptBlock -ArgumentList `$Arguments -NoNewScope
             }
 "@
@@ -87,7 +87,7 @@ function New-SPDscUnitTestHelper
         $initScript += @"
 
             Import-Module -Name "$dcachePath" -WarningAction SilentlyContinue
-            
+
 "@
     }
 
@@ -102,7 +102,7 @@ function New-SPDscUnitTestHelper
 
             Get-Variable -Scope Global -Name "SPDsc*" | Remove-Variable -Force -Scope "Global"
             `$global:DSCMachineStatus = 0
-            
+
 "@)
     }
 }
@@ -110,21 +110,21 @@ function New-SPDscUnitTestHelper
 function Write-SPDSCStubFile() {
     param
     (
-        [parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $SharePointStubPath
     )
 
-    Add-PSSnapin Microsoft.SharePoint.PowerShell 
+    Add-PSSnapin Microsoft.SharePoint.PowerShell
 
-    $SPStubContent = ((Get-Command | Where-Object -FilterScript { 
-        $_.Source -eq "Microsoft.SharePoint.PowerShell" 
+    $SPStubContent = ((Get-Command | Where-Object -FilterScript {
+        $_.Source -eq "Microsoft.SharePoint.PowerShell"
     } )  |  ForEach-Object -Process {
        $signature = $null
        $command = $_
        $metadata = New-Object -TypeName System.Management.Automation.CommandMetaData `
                               -ArgumentList $command
-       $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)  
+       $definition = [System.Management.Automation.ProxyCommand]::Create($metadata)
        foreach ($line in $definition -split "`n")
        {
            if ($line.Trim() -eq 'begin')
@@ -136,13 +136,13 @@ function Write-SPDSCStubFile() {
        "function $($command.Name) { `n  $signature `n } `n"
     }) | Out-String
 
-    foreach ($line in $SPStubContent.Split([Environment]::NewLine)) 
+    foreach ($line in $SPStubContent.Split([Environment]::NewLine))
     {
         $line = $line.Replace("[System.Nullable``1[[Microsoft.Office.Server.Search.Cmdlet.ContentSourceCrawlScheduleType, Microsoft.Office.Server.Search.PowerShell, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]", "[object]")
         $line = $line.Replace("[System.Collections.Generic.List``1[[Microsoft.SharePoint.PowerShell.SPUserLicenseMapping, Microsoft.SharePoint.PowerShell, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]", "[object]")
         $line = $line -replace "\[System.Nullable\[Microsoft.*]]", "[System.Nullable[object]]"
         $line = $line -replace "\[Microsoft.*.\]", "[object]"
-        
+
         $line | Out-File -FilePath $SharePointStubPath -Encoding utf8 -Append
     }
 }
