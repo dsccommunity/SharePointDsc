@@ -4,56 +4,56 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ListViewThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowObjectModelOverride,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $AdminThreshold,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ListViewLookupThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $HappyHourEnabled,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance]
         $HappyHour,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $UniquePermissionThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RequestThrottling,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ChangeLogEnabled,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ChangeLogExpiryDays,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EventHandlersEnabled,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -63,11 +63,11 @@ function Get-TargetResource
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $paramArgs -ScriptBlock {
         $params = $args[0]
         $ScriptRoot = $args[1]
-        
+
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
-            return $null 
+            return $null
         }
 
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
@@ -86,56 +86,56 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ListViewThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowObjectModelOverride,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $AdminThreshold,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ListViewLookupThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $HappyHourEnabled,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance]
         $HappyHour,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $UniquePermissionThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RequestThrottling,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ChangeLogEnabled,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ChangeLogExpiryDays,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EventHandlersEnabled,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -157,10 +157,11 @@ function Set-TargetResource
         $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $relPath -Resolve)
         Set-SPDSCWebApplicationThrottlingConfig -WebApplication $wa -Settings $params
+        $wa.HttpThrottleSettings.Update()
         $wa.Update()
 
         # Happy hour settings
-        if ($params.ContainsKey("HappyHour") -eq $true) 
+        if ($params.ContainsKey("HappyHour") -eq $true)
         {
             # Happy hour settins use separate update method so use a fresh web app to update these
             $wa2 = Get-SPWebApplication -Identity $params.Url
@@ -176,56 +177,56 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String]  
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ListViewThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowObjectModelOverride,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $AdminThreshold,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ListViewLookupThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $HappyHourEnabled,
 
-        [Parameter()] 
-        [Microsoft.Management.Infrastructure.CimInstance] 
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance]
         $HappyHour,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $UniquePermissionThreshold,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $RequestThrottling,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $ChangeLogEnabled,
 
-        [Parameter()] 
-        [System.UInt32]  
+        [Parameter()]
+        [System.UInt32]
         $ChangeLogExpiryDays,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $EventHandlersEnabled,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -235,7 +236,7 @@ function Test-TargetResource
 
     if ($null -eq $CurrentValues)
     {
-        return $false 
+        return $false
     }
 
     $relPath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.Throttling.psm1"

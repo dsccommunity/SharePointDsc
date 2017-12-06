@@ -4,7 +4,7 @@
     and also include a specific list of users to be the term store administrators.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]

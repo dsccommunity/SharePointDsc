@@ -2,7 +2,32 @@
 
 ## 2.0
 
-* Added resource: SPMinRoleCompliance
+* Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings,
+  SPLogLevel
+* Added support for Project Server 2016 with the following new resources:
+  SPProjectServerLicense, SPProjectServerAdditionalSettings,
+  SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
+  SPProjectServerGroup, SPProjectServerTimeSheetSettings,
+  SPProjectServerUserSyncSettings, SPProjectServerWssSettings
+* Updated SPInstallPrereqs to document which parameter is required for which
+  version of SharePoint
+* Updated SPInstall to document the requirements for an English ISO
+* Updated SPSearchTopology to better document how the resource works
+* Added SP2016 example for the SPInstallPrereqs resource
+* Fixed issue with SPWebApplication.Throttling where the RequestThrottling parameter
+  was not applied
+* Added DefaultQuotaTemplate parameter to SPWebAppGeneralSettings
+* Added VSCode workspace settings to meet coding guidelines
+* Added custom Proxy Name support to SPBCSServiceApp, SPMachineTranslationServiceApp,
+  SPStateServiceApp
+* Update SPManagedMetadataServiceApp to allow the configuration of the default
+  and working language
+* Update SPWeb to allow the management of the access requests settings
+* Fix an issue with the SPUserProfileSynConnection class for ADImportConnection;
+* Update SPBlobCacheSettings to set non-default or missing blob cache properties
+* Update SPWebApplicationExtension to fix how property AllowAnonymous is
+  returned in the hashtable
+
 * Corrected comment in CodeCov.yml
 * Fixed localized issue in SPContentDatabase
 * Fixed issue with NullException in SPServiceAppSecurity when no accounts
@@ -11,7 +36,7 @@
 * Fixed issue in SPWebAppPolicy where the SPWebPolicyPermissions couldn't be used
   twice with the exact same values
 * Implemented ToDo in SPFarm to return Central Admin Auth mode
-* Corrected SPSearchContentSource examples
+* Fixed SPSearchContentSource examples
 * Fixed issue in SPManagedMetadataServiceApp where the termstore could not be
   retrieved if the MMS service instance was stopped
 * Fixed an issue where the instance name wasn't detected correctly
@@ -30,8 +55,8 @@
   * SPUserProfileServiceApp
   * SPSecureStoreServiceApp
   * SPWordAutomationServiceApp
-* Updated SPSearchIndexPartition to return the RootFolder parameter
-* Updated SPSecureStoreServiceApp to return the AuditEnabled parameter
+* Fixed SPSearchIndexPartition to return the RootFolder parameter
+* Fixed SPSecureStoreServiceApp to return the AuditEnabled parameter
 * Fixed several PSScriptAnalyzer warnings
 
 The following changes will break 1.x configurations that use these resources:

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -20,14 +20,14 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         # Initialize tests
 
-        # Mocks for all contexts   
+        # Mocks for all contexts
         Mock -CommandName New-SPAuthenticationProvider -MockWith { }
         Mock -CommandName New-SPWebApplication -MockWith { }
-        Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-            return @{ 
-                DisableKerberos = $true 
-                AllowAnonymous = $false 
-            } 
+        Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+            return @{
+                DisableKerberos = $true
+                AllowAnonymous = $false
+            }
         }
 
         # Test contexts
@@ -53,7 +53,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPWebapplication -MockWith { return @(@{
                 DisplayName = $testParams.Name
-                ApplicationPool = @{ 
+                ApplicationPool = @{
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
@@ -63,7 +63,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Server = "sql.domain.local"
                     }
                 )
-                IisSettings = @( 
+                IisSettings = @(
                     @{ Path = "C:\inetpub\wwwroot\something" }
                 )
                 Url = $testParams.Url
@@ -95,7 +95,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The web appliation exists and uses incorrect throttling settings" -Fixture {    
+        Context -Name "The web appliation exists and uses incorrect throttling settings" -Fixture {
             $testParams = @{
                 Url = "http://sites.sharepoint.com"
                 ListViewThreshold = 1000
@@ -115,10 +115,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 EventHandlersEnabled = $true
             }
 
-            Mock -CommandName Get-SPWebapplication -MockWith { 
+            Mock -CommandName Get-SPWebapplication -MockWith {
+                $httpThrottle = @{
+                    PerformThrottle = $testParams.RequestThrottling
+                }
+                $httpThrottle = $httpThrottle | Add-Member -MemberType ScriptMethod -Name Update -Value {
+                    return $null
+                } -PassThru
+
                 $webApp = @{
                     DisplayName = $testParams.Name
-                    ApplicationPool = @{ 
+                    ApplicationPool = @{
                         Name = $testParams.ApplicationPool
                         Username = $testParams.ApplicationPoolAccount
                     }
@@ -128,7 +135,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             Server = "sql.domain.local"
                         }
                     )
-                    IisSettings = @( 
+                    IisSettings = @(
                         @{ Path = "C:\inetpub\wwwroot\something" }
                     )
                     Url = $testParams.Url
@@ -141,9 +148,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     DailyStartUnthrottledPrivilegedOperationsMinute = $testParams.HappyHour.Minute
                     DailyUnthrottledPrivilegedOperationsDuration = $testParams.HappyHour.Duration
                     MaxUniquePermScopesPerList = $testParams.UniquePermissionThreshold
-                    HttpThrottleSettings = @{
-                        PerformThrottle = $testParams.RequestThrottling
-                    }
+                    HttpThrottleSettings = $httpThrottle
                     ChangeLogExpirationEnabled = $testParams.ChangeLogEnabled
                     ChangeLogRetentionPeriod = @{
                         Days = $testParams.ChangeLogExpiryDays

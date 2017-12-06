@@ -1,12 +1,12 @@
-function Get-SPDSCWebApplicationGeneralConfig 
+function Get-SPDSCWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true)]
         $WebApplication
     )
-    
+
     if ($WebApplication.DefaultTimeZone -eq -1)
     {
         $timezone = $null
@@ -36,17 +36,18 @@ function Get-SPDSCWebApplicationGeneralConfig
         PresenceEnabled = $WebApplication.PresenceEnabled
         AllowOnlineWebPartCatalog = $WebApplication.AllowAccessToWebPartCatalog
         SelfServiceSiteCreationEnabled = $WebApplication.SelfServiceSiteCreationEnabled
+        DefaultQuotaTemplate = $WebApplication.DefaultQuotaTemplate
     }
 }
 
-function Set-SPDSCWebApplicationGeneralConfig 
+function Set-SPDSCWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true)]
         $WebApplication,
 
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true)]
         $Settings
     )
 
@@ -54,7 +55,7 @@ function Set-SPDSCWebApplicationGeneralConfig
     {
         Write-Verbose -Message "timeout minutes: $($Settings.SecurityValidationTimeOutMinutes)"
         $mins = New-TimeSpan -Minutes $Settings.SecurityValidationTimeoutMinutes
-        $Settings.SecurityValidationTimeoutMinutes = $mins  
+        $Settings.SecurityValidationTimeoutMinutes = $mins
     }
 
     # Format here is SPWebApplication property = Custom settings property
@@ -75,7 +76,8 @@ function Set-SPDSCWebApplicationGeneralConfig
         PresenceEnabled = "Presence"
         AllowAccessToWebPartCatalog = "AllowOnlineWebPartCatalog"
         SelfServiceSiteCreationEnabled = "SelfServiceSiteCreationEnabled"
-    } 
+        DefaultQuotaTemplate = "DefaultQuotaTemplate"
+    }
     $mapping.Keys | ForEach-Object -Process {
         Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication `
                                                    -PropertyToSet $_ `
@@ -88,51 +90,52 @@ function Set-SPDSCWebApplicationGeneralConfig
                                           -PropertyToSet "Enabled" `
                                           -ParamsValue $settings `
                                           -ParamKey "SecurityValidation"
-   
+
    Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication.FormDigestSettings `
                                          -PropertyToSet "Expires" `
                                          -ParamsValue $settings `
                                          -ParamKey "SecurityValidationExpires"
- 
+
     Set-SPDscObjectPropertyIfValuePresent -ObjectToSet $WebApplication.FormDigestSettings `
                                           -PropertyToSet "Timeout" `
                                           -ParamsValue $settings `
-                                          -ParamKey "SecurityValidationTimeOutMinutes"            
+                                          -ParamKey "SecurityValidationTimeOutMinutes"
 }
 
-function Test-SPDSCWebApplicationGeneralConfig 
+function Test-SPDSCWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true)]
         $CurrentSettings,
 
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true)]
         $DesiredSettings
     )
 
     $relPath = "..\..\Modules\SharePointDsc.Util\SharePointDsc.Util.psm1"
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath $relPath -Resolve)
-    $valuesToCheck = @("TimeZone", 
-                       "Alerts", 
-                       "AlertsLimit", 
-                       "RSS", 
-                       "BlogAPI", 
-                       "BlogAPIAuthenticated", 
-                       "BrowserFileHandling", 
-                       "SecurityValidation", 
+    $valuesToCheck = @("TimeZone",
+                       "Alerts",
+                       "AlertsLimit",
+                       "RSS",
+                       "BlogAPI",
+                       "BlogAPIAuthenticated",
+                       "BrowserFileHandling",
+                       "SecurityValidation",
                        "SecurityValidationExpires",
-                       "SecurityValidationTimeoutMinutes", 
-                       "RecycleBinEnabled", 
-                       "RecycleBinCleanupEnabled", 
-                       "RecycleBinRetentionPeriod", 
-                       "SecondStageRecycleBinQuota", 
-                       "MaximumUploadSize", 
-                       "CustomerExperienceProgram", 
+                       "SecurityValidationTimeoutMinutes",
+                       "RecycleBinEnabled",
+                       "RecycleBinCleanupEnabled",
+                       "RecycleBinRetentionPeriod",
+                       "SecondStageRecycleBinQuota",
+                       "MaximumUploadSize",
+                       "CustomerExperienceProgram",
                        "PresenceEnabled",
                        "AllowOnlineWebPartCatalog",
-                       "SelfServiceSiteCreationEnabled"
+                       "SelfServiceSiteCreationEnabled",
+                       "DefaultQuotaTemplate"
                       )
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentSettings `
                                            -DesiredValues $DesiredSettings `

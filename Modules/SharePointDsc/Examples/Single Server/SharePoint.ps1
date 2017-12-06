@@ -138,7 +138,7 @@ Configuration Example
             PsDscRunAsCredential   = $SPSetupAccount
             DependsOn              = "[SPManagedAccount]WebPoolManagedAccount"
         }
-        
+
         SPCacheAccounts WebAppCacheAccounts
         {
             WebAppUrl              = "http://sites.contoso.com"
