@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPWorkflowService")]
-class MSFT_SPWebAppSuiteBar : OMI_BaseResource
+class MSFT_SPWorkflowService : OMI_BaseResource
 {
     [Key, Description("The URL of the Workflow Service")] string WorkflowHostUri;
     [Key, Description("The URL of the Site Collection to associate with the Workflow Service Proxy")] String SPSiteUrl;
