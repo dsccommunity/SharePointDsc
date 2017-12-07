@@ -4,32 +4,32 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $Account,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $EmailNotification,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $PreExpireDays,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Schedule,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AccountName
     )
@@ -44,7 +44,7 @@ function Get-TargetResource
         $ma = Get-SPManagedAccount -Identity $params.AccountName `
                                    -ErrorAction SilentlyContinue
         if ($null -eq $ma) 
-        { 
+        {
             return @{
                 AccountName    = $params.AccountName
                 Account        = $params.Account
@@ -54,7 +54,7 @@ function Get-TargetResource
         }
         $schedule = $null
         if ($null -ne $ma.ChangeSchedule) 
-        { 
+        {
             $schedule = $ma.ChangeSchedule.ToString() 
         }
         return @{
@@ -75,32 +75,32 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $Account,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $EmailNotification,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $PreExpireDays,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Schedule,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AccountName
     )
@@ -135,19 +135,19 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $updateParams = @{ 
+            $updateParams = @{
                 Identity = $params.Account.UserName 
             }
             if ($params.ContainsKey("EmailNotification")) 
-            { 
+            {
                 $updateParams.Add("EmailNotification", $params.EmailNotification) 
             }
             if ($params.ContainsKey("PreExpireDays")) 
-            { 
+            {
                 $updateParams.Add("PreExpireDays", $params.PreExpireDays) 
             }
             if ($params.ContainsKey("Schedule")) 
-            { 
+            {
                 $updateParams.Add("Schedule", $params.Schedule) 
             }
             Set-SPManagedAccount @updateParams
@@ -171,32 +171,32 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $Account,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $EmailNotification,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $PreExpireDays,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Schedule,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AccountName
     )

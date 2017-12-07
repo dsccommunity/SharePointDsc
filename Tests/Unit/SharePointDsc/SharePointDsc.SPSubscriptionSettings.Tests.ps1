@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -137,9 +137,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Test_DB"
-                                                                        Server = @{
-                                                                            Name = "TestServer\Instance"
-                                                                        }
+                                                                        NormalizedDataSource = "TestServer\Instance"
                                                                         FailoverServer = @{
                                                                             Name = "DBServer_Failover"
                                                                         }
@@ -206,9 +204,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Test_DB"
-                                                                        Server = @{
-                                                                            Name = "TestServer\Instance"
-                                                                        }
+                                                                        NormalizedDataSource = "TestServer\Instance"
                                                                         FailoverServer = @{
                                                                             Name = "DBServer_Failover"
                                                                         }
@@ -296,9 +292,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                     return (@{ 
                                                                         FullName = $getTypeFullName
                                                                         Name = "Test_DB"
-                                                                        Server = @{
-                                                                            Name = "TestServer\Instance"
-                                                                        }
+                                                                        NormalizedDataSource = "TestServer\Instance"
                                                                         FailoverServer = @{
                                                                             Name = "DBServer_Failover"
                                                                         }

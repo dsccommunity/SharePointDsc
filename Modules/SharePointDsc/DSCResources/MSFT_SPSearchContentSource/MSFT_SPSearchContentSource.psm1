@@ -4,63 +4,63 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint","Website","FileShare")]
         [System.String]
         $ContentSourceType,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Addresses,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String] 
         $CrawlSetting,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $LimitServerHops,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Force,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -97,7 +97,7 @@ function Get-TargetResource
             "SharePoint" {
                 $crawlSetting = "CrawlEverything"
                 if ($source.SharePointCrawlBehavior -eq "CrawlSites") 
-                { 
+                {
                     $crawlSetting = "CrawlFirstOnly" 
                 }
                 
@@ -123,11 +123,11 @@ function Get-TargetResource
             "Web" {
                 $crawlSetting = "Custom"
                 if ($source.MaxPageEnumerationDepth -eq [System.Int32]::MaxValue) 
-                { 
+                {
                     $crawlSetting = "CrawlEverything" 
                 }
                 if ($source.MaxPageEnumerationDepth -eq 0) 
-                { 
+                {
                     $crawlSetting = "CrawlFirstOnly" 
                 }
 
@@ -153,7 +153,7 @@ function Get-TargetResource
             "File" {
                 $crawlSetting = "CrawlFirstOnly"
                 if ($source.FollowDirectories -eq $true) 
-                { 
+                {
                     $crawlSetting = "CrawlEverything" 
                 }
                 
@@ -192,63 +192,63 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint","Website","FileShare")]
         [System.String]
         $ContentSourceType,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Addresses,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String] 
         $CrawlSetting,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $LimitServerHops,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Force,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -259,46 +259,46 @@ function Set-TargetResource
     {
         "SharePoint" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for SharePoint content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources" 
             }
             if ($ContinuousCrawl -eq $true -and `
                 $PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) 
-            { 
+            {
                 throw ("You can not specify an incremental crawl schedule on a content source " + `
                        "that will use continous crawl") 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
                        "sources") 
             }
         }
         "Website" {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) 
-            { 
+            {
                 throw "Parameter ContinuousCrawl is not valid for website content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for website content sources" 
             }
         }
         "FileShare" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for file share content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for file share content sources" 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" 
             }
         }
@@ -347,14 +347,15 @@ function Set-TargetResource
 
             if ($null -eq $source) 
             {
-                switch ($params.ContentSourceType) {
-                    "SharePoint" { 
+                switch ($params.ContentSourceType)
+                {
+                    "SharePoint" {
                         $newType = "SharePoint" 
                     }
-                    "Website" { 
+                    "Website" {
                         $newType = "Web"
                     }
-                    "FileShare" { 
+                    "FileShare" {
                         $newType = "File" 
                     }
                 }
@@ -424,10 +425,10 @@ function Set-TargetResource
             {
                 switch ($params.Priority) 
                 {
-                    "High" { 
+                    "High" {
                         $primarySetArgs.Add("CrawlPriority", "2") 
                     }
-                    "Normal" { 
+                    "Normal" {
                         $primarySetArgs.Add("CrawlPriority", "1") 
                     }
                 }
@@ -444,13 +445,13 @@ function Set-TargetResource
                 }
                 switch ($params.IncrementalSchedule.ScheduleType) 
                 {
-                    "None" { 
+                    "None" {
                         $incrementalSetArgs.Add("RemoveCrawlSchedule", $true)
                     }
-                    "Daily" { 
+                    "Daily" {
                         $incrementalSetArgs.Add("DailyCrawlSchedule", $true)
                     }
-                    "Weekly" { 
+                    "Weekly" {
                         $incrementalSetArgs.Add("WeeklyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
@@ -466,7 +467,7 @@ function Set-TargetResource
                             $incrementalSetArgs.Add("CrawlScheduleDaysOfWeek", $enumValue)                            
                         }
                     }
-                    "Monthly" { 
+                    "Monthly" {
                         $incrementalSetArgs.Add("MonthlyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty `
                                             -Object $params.IncrementalSchedule `
@@ -484,7 +485,8 @@ function Set-TargetResource
 
                         if ($propertyTest -eq $true) 
                         {
-                            foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear) {
+                            foreach ($month in $params.IncrementalSchedule.CrawlScheduleMonthsOfYear)
+                            {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
                             $incrementalSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
@@ -510,7 +512,8 @@ function Set-TargetResource
 
                 $propertyTest = Test-SPDSCObjectHasProperty -Object $params.IncrementalSchedule `
                                                             -PropertyName "CrawlScheduleRunEveryInterval"
-                if ($propertyTest -eq $true) {
+                if ($propertyTest -eq $true)
+                {
                     $incrementalSetArgs.Add("CrawlScheduleRunEveryInterval", 
                         $params.IncrementalSchedule.CrawlScheduleRunEveryInterval)
                 }
@@ -525,25 +528,26 @@ function Set-TargetResource
                 }
                 switch ($params.FullSchedule.ScheduleType) 
                 {
-                    "None" { 
+                    "None" {
                         $fullSetArgs.Add("RemoveCrawlSchedule", $true)
                     }
-                    "Daily" { 
+                    "Daily" {
                         $fullSetArgs.Add("DailyCrawlSchedule", $true)
                     }
-                    "Weekly" { 
+                    "Weekly" {
                         $fullSetArgs.Add("WeeklyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleDaysOfWeek"
                         if ($propertyTest -eq $true) 
                         {
-                            foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek) {
+                            foreach ($day in $params.FullSchedule.CrawlScheduleDaysOfWeek)
+                            {
                                 $daysOfweek += [Microsoft.Office.Server.Search.Administration.DaysOfWeek]::$day
                             }
                             $fullSetArgs.Add("CrawlScheduleDaysOfWeek", $daysOfweek)
                         }
                     }
-                    "Monthly" { 
+                    "Monthly" {
                         $fullSetArgs.Add("MonthlyCrawlSchedule", $true)
                         $propertyTest = Test-SPDSCObjectHasProperty -Object $params.FullSchedule `
                                                                     -PropertyName "CrawlScheduleDaysOfMonth"
@@ -557,7 +561,8 @@ function Set-TargetResource
                                                                     -PropertyName "CrawlScheduleMonthsOfYear"
                         if ($propertyTest -eq $true) 
                         {
-                            foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear) {
+                            foreach ($month in $params.FullSchedule.CrawlScheduleMonthsOfYear)
+                            {
                                 $months += [Microsoft.Office.Server.Search.Administration.MonthsOfYear]::$month
                             }
                             $fullSetArgs.Add("CrawlScheduleMonthsOfYear", $months)
@@ -600,63 +605,63 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("SharePoint","Website","FileShare")]
         [System.String]
         $ContentSourceType,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String[]]
         $Addresses,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("CrawlEverything","CrawlFirstOnly","Custom")]
         [System.String] 
         $CrawlSetting,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]
         $ContinuousCrawl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $IncrementalSchedule,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $FullSchedule,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Normal","High")] 
         [System.String] 
         $Priority,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]
         $LimitPageDepth,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $LimitServerHops,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Force,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -669,46 +674,46 @@ function Test-TargetResource
     {
         "SharePoint" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for SharePoint content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for SharePoint content sources" 
             }
             if ($ContinuousCrawl -eq $true -and `
                 $PSBoundParameters.ContainsKey("IncrementalSchedule") -eq $true) 
-            { 
+            {
                 throw ("You can not specify an incremental crawl schedule on a content source " + `
                        "that will use continous crawl") 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw ("Parameter 'CrawlSetting' can only be set to custom for website content " + `
                        "sources") 
             }
         }
         "Website" {
             if ($PSBoundParameters.ContainsKey("ContinuousCrawl") -eq $true) 
-            { 
+            {
                 throw "Parameter ContinuousCrawl is not valid for website content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for website content sources" 
             }
         }
         "FileShare" {
             if ($PSBoundParameters.ContainsKey("LimitPageDepth") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitPageDepth is not valid for file share content sources" 
             }
             if ($PSBoundParameters.ContainsKey("LimitServerHops") -eq $true) 
-            { 
+            {
                 throw "Parameter LimitServerHops is not valid for file share content sources" 
             }
             if ($CrawlSetting -eq "Custom") 
-            { 
+            {
                 throw "Parameter 'CrawlSetting' can only be set to custom for website content sources" 
             }
         }
@@ -751,12 +756,12 @@ function Test-TargetResource
     # Compare the addresses as Uri objects to handle things like trailing /'s on URLs
     $currentAddresses = @()
     foreach ($address in $CurrentValues.Addresses) 
-    { 
+    {
         $currentAddresses += New-Object -TypeName System.Uri -ArgumentList $address 
     }
     $desiredAddresses = @()
     foreach ($address in $Addresses) 
-    { 
+    {
         $desiredAddresses += New-Object -TypeName System.Uri -ArgumentList $address 
     }
     

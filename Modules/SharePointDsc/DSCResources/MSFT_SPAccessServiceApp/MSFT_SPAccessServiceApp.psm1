@@ -4,24 +4,24 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -42,15 +42,15 @@ function Get-TargetResource
             InstallAccount = $params.InstallAccount
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"            
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn 
         } 
         else 
@@ -74,24 +74,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -101,7 +101,7 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating Access Services Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -126,7 +126,7 @@ function Set-TargetResource
 
             $params = $args[0]
             
-            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+            $app = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Access.Services.MossHost.AccessServicesWebServiceApplication"
             }
 
@@ -150,24 +150,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

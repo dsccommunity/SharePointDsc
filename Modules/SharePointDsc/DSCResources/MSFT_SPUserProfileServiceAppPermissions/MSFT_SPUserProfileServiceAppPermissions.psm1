@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $CreatePersonalSite,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $FollowAndEditProfile,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $UseTagsAndNotes,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -87,15 +87,15 @@ function Get-TargetResource
         }
 
         if ($createPersonalSite.Length -eq 0) 
-        { 
+        {
             $createPersonalSite += "None" 
         }
         if ($followAndEditProfile.Length -eq 0) 
-        { 
+        {
             $followAndEditProfile += "None" 
         }
         if ($useTagsAndNotes.Length -eq 0) 
-        { 
+        {
             $useTagsAndNotes += "None" 
         }
 
@@ -115,23 +115,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $CreatePersonalSite,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $FollowAndEditProfile,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $UseTagsAndNotes,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -234,7 +234,8 @@ function Set-TargetResource
                     if ($user -ne "Everyone" -and $user -ne "None") 
                     {
                         $isUser = Test-SPDSCIsADUser -IdentityName $user
-                        if ($isUser -eq $true) {
+                        if ($isUser -eq $true)
+                        {
                             $claim = New-SPClaimsPrincipal -Identity $user `
                                                            -IdentityType WindowsSamAccountName    
                         } 
@@ -305,23 +306,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $CreatePersonalSite,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $FollowAndEditProfile,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]] 
         $UseTagsAndNotes,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -344,7 +345,7 @@ function Confirm-SPDscUpaPermissionsConfig()
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Object]
         $Parameters
     )

@@ -4,36 +4,36 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -46,7 +46,8 @@ function Get-TargetResource
         $params = $args[0]
         
         $cdb = Get-SPDatabase | Where-Object -FilterScript {
-            $_.Type -eq "Content Database" -and $_.Name -eq $params.Name
+            $_.GetType().FullName -eq "Microsoft.SharePoint.Administration.SPContentDatabase" -and `
+            $_.Name -eq $params.Name
         }
 
         if ($null -eq $cdb)
@@ -98,36 +99,36 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -220,7 +221,7 @@ function Set-TargetResource
                         switch ($params.Enabled)
                         {
                             $true
-                            { 
+                            {
                                 $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
                             }
                             $false
@@ -316,7 +317,7 @@ function Set-TargetResource
                     switch ($params.Enabled)
                     {
                         $true
-                        { 
+                        {
                             $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
                         }
                         $false
@@ -346,36 +347,36 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $WarningSiteCount,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt16]
         $MaximumSiteCount,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

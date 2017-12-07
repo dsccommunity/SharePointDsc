@@ -4,30 +4,32 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -78,7 +80,7 @@ function Get-TargetResource
                 Name = $params.Name
                 ProxyName = $proxyName
                 DatabaseName = $($serviceApp.Database.Name)
-                DatabaseServer = $($serviceApp.Database.Server.Name)
+                DatabaseServer = $($serviceApp.Database.NormalizedDataSource)
                 ApplicationPool = $($serviceApp.ApplicationPool.Name)
                 Ensure = "Present"
             }
@@ -94,30 +96,32 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -203,30 +207,32 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

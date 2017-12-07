@@ -4,92 +4,92 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $TimeZone,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Alerts,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $AlertsLimit,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RSS,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $BlogAPI,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $BlogAPIAuthenticated,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Strict","Permissive")]
         [System.String]
         $BrowserFileHandling,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SecurityValidation,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SecurityValidationExpires,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Uint32]
         $SecurityValidationTimeoutMinutes,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RecycleBinEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RecycleBinCleanupEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $RecycleBinRetentionPeriod,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $SecondStageRecycleBinQuota,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MaximumUploadSize,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $CustomerExperienceProgram,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $PresenceEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowOnlineWebPartCatalog,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SelfServiceSiteCreationEnabled,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $DefaultQuotaTemplate,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -146,92 +146,92 @@ function Set-TargetResource
     [CmdletBinding()]
     param
        (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $TimeZone,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Alerts,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $AlertsLimit,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RSS,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $BlogAPI,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $BlogAPIAuthenticated,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Strict","Permissive")]
         [System.String]
         $BrowserFileHandling,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SecurityValidation,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SecurityValidationExpires,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Uint32]
         $SecurityValidationTimeoutMinutes,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RecycleBinEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RecycleBinCleanupEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $RecycleBinRetentionPeriod,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $SecondStageRecycleBinQuota,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MaximumUploadSize,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $CustomerExperienceProgram,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $PresenceEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowOnlineWebPartCatalog,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SelfServiceSiteCreationEnabled,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $DefaultQuotaTemplate,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -275,92 +275,92 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
      (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $TimeZone,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Alerts,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $AlertsLimit,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RSS,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $BlogAPI,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $BlogAPIAuthenticated,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Strict","Permissive")]
         [System.String]
         $BrowserFileHandling,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SecurityValidation,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SecurityValidationExpires,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Uint32]
         $SecurityValidationTimeoutMinutes,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RecycleBinEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $RecycleBinCleanupEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $RecycleBinRetentionPeriod,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $SecondStageRecycleBinQuota,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MaximumUploadSize,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $CustomerExperienceProgram,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $PresenceEnabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowOnlineWebPartCatalog,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SelfServiceSiteCreationEnabled,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $DefaultQuotaTemplate,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

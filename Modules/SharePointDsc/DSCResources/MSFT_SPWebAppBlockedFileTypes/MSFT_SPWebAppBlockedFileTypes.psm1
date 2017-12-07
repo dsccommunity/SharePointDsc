@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Blocked,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureBlocked,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureAllowed,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -34,7 +34,10 @@ function Get-TargetResource
         $ScriptRoot = $args[1]
         
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) { return $null }
+        if ($null -eq $wa)
+        {
+            return $null
+        }
 
         $modulePath = "..\..\Modules\SharePointDsc.WebApplication\SPWebApplication.BlockedFileTypes.psm1"
         Import-Module -Name (Join-Path -Path $ScriptRoot -ChildPath $modulePath -Resolve)
@@ -53,23 +56,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Blocked,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureBlocked,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureAllowed,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -83,7 +86,8 @@ function Set-TargetResource
         $ScriptRoot = $args[1]
 
         $wa = Get-SPWebApplication -Identity $params.Url -ErrorAction SilentlyContinue
-        if ($null -eq $wa) {
+        if ($null -eq $wa)
+        {
             throw "Web application $($params.Url) was not found"
             return
         }
@@ -102,23 +106,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Blocked,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureBlocked,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $EnsureAllowed,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

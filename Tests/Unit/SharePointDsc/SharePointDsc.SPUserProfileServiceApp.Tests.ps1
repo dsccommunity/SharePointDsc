@@ -1,7 +1,7 @@
 [CmdletBinding()]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -26,12 +26,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                      -ArgumentList @("DOMAIN\username", $mockPassword)
 
         # Mocks for all contexts   
-        Mock -CommandName Get-SPFarm -MockWith { 
-            return @{
-                DefaultServiceAccount = @{ 
-                    Name = $mockCredential.Username 
-                }
-            }
+        Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+            return $mockCredential.Username
         }
         Mock -CommandName New-SPProfileServiceApplication -MockWith { 
             return (@{
@@ -47,17 +43,80 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName Remove-SPServiceApplication -MockWith { } 
 
         # Test contexts
+        Context -Name "When PSDSCRunAsCredential does not match the Farm Account" -Fixture {
+            $testParams = @{
+                Name = "User Profile Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                Ensure = "Present"
+            } 
+
+            Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                return "DOMAIN\sp_farm"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
+
+            Mock -CommandName Restart-Service {}
+
+            It "Should throw exception in the Get method" {
+                { Get-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+            }
+
+            It "Should throw exception in the Test method" {
+                { Test-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Specified PSDSCRunAsCredential "
+            }
+        }
+
+        Context -Name "When InstallAccount does not match the Farm Account" -Fixture {
+            $testParams = @{
+                Name = "User Profile Service App"
+                ApplicationPool = "SharePoint Service Applications"
+                Ensure = "Present"
+                InstallAccount = $mockCredential
+            } 
+
+            Mock -CommandName Get-SPDSCFarmAccountName -MockWith { 
+                return "DOMAIN\sp_farm"
+            }
+
+            Mock -CommandName Get-SPServiceApplication -MockWith { 
+                return $null 
+            }
+
+            Mock -CommandName Restart-Service {}
+
+            It "Should throw exception in the Get method" {
+                { Get-TargetResource @testParams } | Should throw "Specified InstallAccount "  
+            }
+
+            It "Should throw exception in the Test method" {
+                { Test-TargetResource @testParams } | Should throw "Specified InstallAccount "  
+            }
+
+            It "Should throw exception in the set method" {
+                { Set-TargetResource @testParams } | Should throw "Specified InstallAccount "  
+            }
+        }
+
         Context -Name "When no service applications exist in the current farm" -Fixture {
             $testParams = @{
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
-                FarmAccount = $mockCredential
                 Ensure = "Present"
+                InstallAccount = $mockCredential
             } 
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return $null 
             }
+
+            Mock -CommandName Restart-Service {}
 
             It "Should return absent from the Get method" {
                 (Get-TargetResource @testParams).Ensure | Should Be "Absent"  
@@ -77,8 +136,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
-                FarmAccount = $mockCredential
                 Ensure = "Present"
+                InstallAccount = $mockCredential
             } 
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -109,10 +168,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 EnableNetBIOS = $true
-                FarmAccount = $mockCredential
                 Ensure = "Present"
+                InstallAccount = $mockCredential
             }
             
+            Mock -CommandName Restart-Service -MockWith {}
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
                     New-Object -TypeName "Object" |            
@@ -162,9 +222,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -178,9 +236,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -194,9 +250,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -231,10 +285,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
                 NoILMUsed = $true
-                FarmAccount = $mockCredential
                 Ensure = "Present"
+                InstallAccount = $mockCredential
             }
             
+            Mock -CommandName Restart-Service -MockWith {}
             Mock -CommandName Get-SPServiceApplication -MockWith { 
                 return @(
                     New-Object -TypeName "Object" |            
@@ -284,9 +339,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -300,9 +353,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -316,9 +367,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -352,8 +401,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $testParams = @{
                 Name = "User Profile Service App"
                 ApplicationPool = "SharePoint Service Applications"
-                FarmAccount = $mockCredential
                 Ensure = "Present"
+                InstallAccount = $mockCredential
             } 
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -405,9 +454,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -421,9 +468,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -437,9 +482,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -456,14 +499,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             It "Should return true when the Test method is called" {
                 Test-TargetResource @testParams | Should Be $true
             }
-
-            Mock -CommandName Get-SPFarm -MockWith { return @{
-                DefaultServiceAccount = @{ Name = "WRONG\account" }
-            }}
-
-            It "Should return present from the get method where the farm account doesn't match" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"  
-            }
         }
         
         Context -Name "When the service app exists but it shouldn't" -Fixture {
@@ -471,6 +506,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "Test App"
                 ApplicationPool = "-"
                 Ensure = "Absent"
+                InstallAccount = $mockCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 
@@ -522,9 +558,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                     param($x)
                                                                                     return @{
                                                                                         Name = "SP_SocialDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -538,9 +572,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 ),
@@ -554,9 +586,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                                                -Value {
                                                                                     return @{
                                                                                         Name = "SP_ProfileSyncDB"
-                                                                                        Server = @{ 
-                                                                                            Name = "SQL.domain.local" 
-                                                                                        }
+                                                                                        NormalizedDataSource = "SQL.domain.local"
                                                                                     }
                                                                                 } -PassThru
                                                                 )
@@ -585,6 +615,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Name = "Test App"
                 ApplicationPool = "-"
                 Ensure = "Absent"
+                InstallAccount = $mockCredential
             }
 
             Mock -CommandName Get-SPServiceApplication -MockWith { 

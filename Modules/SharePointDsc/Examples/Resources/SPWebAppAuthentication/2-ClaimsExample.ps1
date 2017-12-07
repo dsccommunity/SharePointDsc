@@ -1,11 +1,12 @@
 <#
 .EXAMPLE
-    This example shows how to create a new web application in the local farm using a custom claim provider.
-    A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer is referenced
-    by the SPWebApplication as the AuthenticationProvider and the AuthenticationMethod is set to "Claims" value.
+    This example shows how to configure the authentication of a web application in the local farm using a custom
+    claim provider. A SPTrustedIdentityTokenIssuer is created named Contoso, then this SPTrustedIdentityTokenIssuer
+    is referenced by the SPWebAppAuthentication as the AuthenticationProvider and the AuthenticationMethod is set
+    to "Federated" value.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -16,8 +17,8 @@
 
         node localhost {
 
-          
-             SPTrustedIdentityTokenIssuer SampleSPTrust
+
+            SPTrustedIdentityTokenIssuer SampleSPTrust
             {
                 Name                         = "Contoso"
                 Description                  = "Contoso"
@@ -41,22 +42,22 @@
                 Ensure                       = "Present"
                 PsDscRunAsCredential         = $SetupAccount
             }
-            
-            
-            SPWebApplication HostNameSiteCollectionWebApp
+
+
+            SPWebAppAuthentication ContosoAuthentication
             {
-                Name                   = "SharePoint Sites"
-                ApplicationPool        = "SharePoint Sites"
-                ApplicationPoolAccount = "CONTOSO\svcSPWebApp"
-                AllowAnonymous         = $false
-                AuthenticationMethod   = "Claims"
-                AuthenticationProvider = "Contoso"
-                DatabaseName           = "SP_Content_01"
-                DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
-                Url                    = "http://example.contoso.local"
-                Port                   = 80
-                Ensure                 = "Present"
-                PsDscRunAsCredential   = $SetupAccount
+                WebAppUrl   = "http://sharepoint.contoso.com"
+                Default = @(
+                    MSFT_SPWebAppAuthenticationMode {
+                        AuthenticationMethod = "NTLM"
+                    }
+                )
+                Internet = @(
+                    MSFT_SPWebAppAuthenticationMode {
+                        AuthenticationMethod = "Federated"
+                        AuthenticationProvider = "Contoso"
+                    }
+                )
                 DependsOn = "[SPTrustedIdentityTokenIssuer]SampleSPTrust"
             }
         }

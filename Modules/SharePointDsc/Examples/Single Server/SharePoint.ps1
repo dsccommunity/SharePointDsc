@@ -12,13 +12,13 @@ Configuration Example
     Import-DscResource -ModuleName SharePointDsc
 
     node "localhost"
-    {        
+    {
         #**********************************************************
         # Install Binaries
         #
         # This section installs SharePoint and its Prerequisites
         #**********************************************************
-        
+
         SPInstallPrereqs InstallPrereqs {
             Ensure            = "Present"
             InstallerPath     = "C:\binaries\prerequisiteinstaller.exe"
@@ -88,7 +88,7 @@ Configuration Example
             ScriptErrorReportingRequireAuth             = $true
             DependsOn                                   = "[SPFarm]CreateSPFarm"
         }
-        SPUsageApplication UsageApplication 
+        SPUsageApplication UsageApplication
         {
             Name                  = "Usage Service Application"
             DatabaseName          = "SP_Usage"
@@ -119,7 +119,7 @@ Configuration Example
         #**********************************************************
         # Web applications
         #
-        # This section creates the web applications in the 
+        # This section creates the web applications in the
         # SharePoint farm, as well as managed paths and other web
         # application settings
         #**********************************************************
@@ -130,7 +130,6 @@ Configuration Example
             ApplicationPool        = "SharePoint Sites"
             ApplicationPoolAccount = $WebPoolManagedAccount.UserName
             AllowAnonymous         = $false
-            AuthenticationMethod   = "NTLM"
             DatabaseName           = "SP_Content"
             Url                    = "http://sites.contoso.com"
             HostHeader             = "sites.contoso.com"
@@ -167,23 +166,23 @@ Configuration Example
         #**********************************************************
 
         SPServiceInstance ClaimsToWindowsTokenServiceInstance
-        {  
+        {
             Name                 = "Claims to Windows Token Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPFarm]CreateSPFarm"
-        }   
+        }
 
         SPServiceInstance SecureStoreServiceInstance
-        {  
+        {
             Name                 = "Secure Store Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPFarm]CreateSPFarm"
         }
-        
+
         SPServiceInstance ManagedMetadataServiceInstance
-        {  
+        {
             Name                 = "Managed Metadata Web Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
@@ -191,21 +190,21 @@ Configuration Example
         }
 
         SPServiceInstance BCSServiceInstance
-        {  
+        {
             Name                 = "Business Data Connectivity Service"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPFarm]CreateSPFarm"
         }
-        
+
         SPServiceInstance SearchServiceInstance
-        {  
+        {
             Name                 = "SharePoint Server Search"
             Ensure               = "Present"
             PsDscRunAsCredential = $SPSetupAccount
             DependsOn            = "[SPFarm]CreateSPFarm"
         }
-        
+
         #**********************************************************
         # Service applications
         #
@@ -232,9 +231,9 @@ Configuration Example
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
-        
+
         SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-        {  
+        {
             Name                 = "Managed Metadata Service Application"
             PsDscRunAsCredential = $SPSetupAccount
             ApplicationPool      = $serviceAppPoolName
@@ -252,14 +251,14 @@ Configuration Example
         }
 
         SPSearchServiceApp SearchServiceApp
-        {  
+        {
             Name                  = "Search Service Application"
             DatabaseName          = "SP_Search"
             ApplicationPool       = $serviceAppPoolName
             PsDscRunAsCredential  = $SPSetupAccount
             DependsOn             = "[SPServiceAppPool]MainServiceAppPool"
         }
-        
+
         #**********************************************************
         # Local configuration manager settings
         #

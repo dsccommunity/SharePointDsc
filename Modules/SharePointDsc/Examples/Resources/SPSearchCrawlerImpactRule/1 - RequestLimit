@@ -14,7 +14,7 @@
 
         node localhost {
             SPSearchCrawlerImpactRule IntranetCrawlerImpactRequestLimitRule
-            { 
+            {
                 ServiceAppName = "Search Service Application"
                 Name = "https://intranet.sharepoint.contoso.com"
                 RequestLimit = 8

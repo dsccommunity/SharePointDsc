@@ -14,7 +14,7 @@ Configuration Example
 
     node localhost {
         SPMachineTranslationServiceApp MachineTranslationServiceApp
-        {  
+        {
             Name                   = "Translation Service Application"
             ApplicationPool        = "SharePoint Service Applications"
             DatabaseServer         = "SQL.contoso.local"

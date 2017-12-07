@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
-    [string] 
+    [Parameter()]
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -17,22 +17,22 @@ $Global:SPDscHelper = New-SPDscUnitTestHelper -SharePointStubModule $SharePointC
 Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
     InModuleScope -ModuleName $Global:SPDscHelper.ModuleName -ScriptBlock {
         Invoke-Command -ScriptBlock $Global:SPDscHelper.InitializeScript -NoNewScope
-        
-        # Mocks for all contexts   
+
+        # Mocks for all contexts
         Mock -CommandName Start-SPServiceInstance -MockWith { }
         Mock -CommandName Stop-SPServiceInstance -MockWith { }
-        Mock -CommandName Get-SPDscRoleTestMethod -MockWith { 
+        Mock -CommandName Get-SPDscRoleTestMethod -MockWith {
             $obj = New-Object -TypeName System.Object
             $obj = $obj | Add-Member -MemberType ScriptMethod `
                                      -Name Invoke `
-                                     -Value {  
+                                     -Value {
                                          return $global:SPDscIsRoleCompliant
                                      } -PassThru -Force
-            return $obj 
+            return $obj
         }
 
         # Test contexts
-        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major) 
+        switch ($Global:SPDscHelper.CurrentStubBuildNumber.Major)
         {
             15 {
                 Context -Name "All methods throw exceptions as MinRole doesn't exist in 2013" -Fixture {
@@ -107,7 +107,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $testParams = @{
                         State = "Compliant"
                     }
-                    
+
                     Mock -CommandName Get-SPService -MockWith {
                         return @(
                             @{
@@ -160,11 +160,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $testParams = @{
                         State = "Compliant"
                     }
-                    
+
                     $testParams = @{
                         State = "Compliant"
                     }
-                    
+
                     Mock -CommandName Get-SPService -MockWith {
                         return @(
                             @{
@@ -211,7 +211,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $testParams = @{
                         State = "NonCompliant"
                     }
-                    
+
                     It "Should throw on the test method" {
                         { Test-TargetResource @testParams } | Should Throw
                     }

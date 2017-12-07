@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)] 
-        [ValidateSet("SharePoint","ProjectServer")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("SharePoint","ProjectServer")]
+        [System.String]
         $PermissionMode,
 
-        [parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Project Server permission mode for site '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016.")
@@ -30,7 +30,7 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-    
+
         try
         {
             $mode = Get-SPProjectPermissionMode -Url $params.Url
@@ -54,23 +54,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)] 
-        [ValidateSet("SharePoint","ProjectServer")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("SharePoint","ProjectServer")]
+        [System.String]
         $PermissionMode,
 
-        [parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting Project Server permission mode for site '$Url'"
 
-    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16) 
+    if ((Get-SPDSCInstalledProductVersion).FileMajorPart -lt 16)
     {
         throw [Exception] ("Support for Project Server in SharePointDsc is only valid for " + `
                            "SharePoint 2016.")
@@ -91,20 +91,20 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)] 
-        [ValidateSet("SharePoint","ProjectServer")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("SharePoint","ProjectServer")]
+        [System.String]
         $PermissionMode,
 
-        [parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing Project Server permission mode for site '$Url'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
@@ -112,7 +112,7 @@ function Test-TargetResource
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
                                     -ValuesToCheck @("PermissionMode")
-    
+
 }
 
 Export-ModuleMember -Function *-TargetResource

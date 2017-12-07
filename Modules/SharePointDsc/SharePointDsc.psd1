@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.9.0.0'
+ModuleVersion = '2.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -128,7 +128,52 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-* New resource: SPServiceIdentity
+* Added resource: SPMinRoleCompliance
+* Corrected comment in CodeCov.yml
+* Fixed localized issue in SPContentDatabase
+* Fixed issue with NullException in SPServiceAppSecurity when no accounts
+    are configured in SharePoint
+* Fixed two NullException issues in SPUserProfileProperty
+* Fixed issue in SPWebAppPolicy where the SPWebPolicyPermissions couldn't be used
+    twice with the exact same values
+* Implemented ToDo in SPFarm to return Central Admin Auth mode
+* Corrected SPSearchContentSource examples
+* Fixed issue in SPManagedMetadataServiceApp where the termstore could not be
+    retrieved if the MMS service instance was stopped
+* Fixed an issue where the instance name wasn't detected correctly
+    * SPAppManagementServiceApp
+    * SPBCSServiceApp
+    * SPCreateFarm
+    * SPFarm
+    * SPJoinFarm
+    * SPMachineTranslationServiceApp
+    * SPManagedMetaDataServiceApp
+    * SPPerformancePointServiceApp
+    * SPSearchServiceApp
+    * SPStateServiceApp
+    * SPSubscriptionSettings
+    * SPUsageApplication
+    * SPUserProfileServiceApp
+    * SPSecureStoreServiceApp
+    * SPWordAutomationServiceApp
+* Updated SPSearchIndexPartition to return the RootFolder parameter
+* Updated SPSecureStoreServiceApp to return the AuditEnabled parameter
+* Fixed several PSScriptAnalyzer warnings
+
+The following changes will break 1.x configurations that use these resources:
+
+* Updated SPShellAdmin so it also works for non-content databases
+* Updated SPWebApplication so it infers the UseSSL value from the URL
+* Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
+    the requirement for CredSSP
+* Updated the SPTimerJobState to make the WebAppUrl parameter a key parameter.
+    The resource can now be used to configure the same job for multiple
+    web applications. Also changed the Name parameter to TypeName, due to a limitation
+    with the SPTimerJob cmdlets
+* Fixed an issue in SPUserProfileProperty where string properties were not
+    created properly
+* Added the Internal parameter to the SPAlternateUrl resource, which implied a
+    change to the key parameters
 "
 
     } # End of PSData hashtable

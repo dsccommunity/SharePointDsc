@@ -4,48 +4,48 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenProviderRefreshes, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenSearchQueries, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfSubscriptionSyncsPerEwsSyncRun, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfUsersEwsSyncWillProcessAtOnce, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -65,11 +65,11 @@ function Get-TargetResource
             ApplicationPool = $params.ApplicationPool
         } 
 
-        if ($null -eq $serviceApps) 
-        { 
+        if ($null -eq $serviceApps)
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
         }
 
@@ -82,11 +82,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
-                if ($null -ne $serviceAppProxy) 
-                { 
+                if ($null -ne $serviceAppProxy)
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -113,48 +113,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenProviderRefreshes, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenSearchQueries, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfSubscriptionSyncsPerEwsSyncRun, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfUsersEwsSyncWillProcessAtOnce, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -176,20 +176,21 @@ function Set-TargetResource
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            if ($params.ContainsKey("Ensure")) 
-            { 
+            if ($params.ContainsKey("Ensure"))
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
-            if ($params.ContainsKey("InstallAccount")) 
-            { 
+            if ($params.ContainsKey("InstallAccount"))
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
-            if ($params.ContainsKey("ProxyName")) 
-            { 
+            if ($params.ContainsKey("ProxyName"))
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
-            if ($null -eq $pName) {
+            if ($null -eq $pName)
+            {
                 $pName = "$($params.Name) Proxy"
             }
 
@@ -230,33 +231,33 @@ function Set-TargetResource
             $params = $args[0]
             
             $setParams = @{}
-            if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches")) 
-            { 
+            if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
+            {
                 $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", 
                 $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) 
             }
             if ($params.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
-            { 
+            {
                 $setParams.Add("MinimumTimeBetweenProviderRefreshes", 
                 $params.MinimumTimeBetweenProviderRefreshes) 
             }
-            if ($params.ContainsKey("MinimumTimeBetweenSearchQueries")) 
-            { 
+            if ($params.ContainsKey("MinimumTimeBetweenSearchQueries"))
+            {
                 $setParams.Add("MinimumTimeBetweenSearchQueries", 
                 $params.MinimumTimeBetweenSearchQueries) 
             }
-            if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun")) 
-            { 
+            if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun"))
+            {
                 $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", 
                 $params.NumberOfSubscriptionSyncsPerEwsSyncRun) 
             }
-            if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce")) 
-            { 
+            if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce"))
+            {
                 $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce", 
                 $params.NumberOfUsersEwsSyncWillProcessAtOnce) 
             }
-            if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch")) 
-            { 
+            if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch"))
+            {
                 $setParams.Add("NumberOfUsersPerEwsSyncBatch", 
                 $params.NumberOfUsersPerEwsSyncBatch) 
             }
@@ -265,7 +266,7 @@ function Set-TargetResource
             $setParams.Add("ApplicationPool", $params.ApplicationPool) 
 
             if ($setParams.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
-            { 
+            {
                 $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches = New-TimeSpan -Days $setParams.MinimumTimeBetweenEwsSyncSubscriptionSearches
             }
             if ($setParams.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
@@ -273,7 +274,7 @@ function Set-TargetResource
                 $setParams.MinimumTimeBetweenProviderRefreshes = New-TimeSpan -Days $setParams.MinimumTimeBetweenProviderRefreshes
             }
             if ($setParams.ContainsKey("MinimumTimeBetweenSearchQueries"))
-            { 
+            {
                 $setParams.MinimumTimeBetweenSearchQueries = New-TimeSpan -Days $setParams.MinimumTimeBetweenSearchQueries
             }
             $setParams.Add("Confirm", $false)
@@ -318,48 +319,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenProviderRefreshes, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $MinimumTimeBetweenSearchQueries, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfSubscriptionSyncsPerEwsSyncRun, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfUsersEwsSyncWillProcessAtOnce, 
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

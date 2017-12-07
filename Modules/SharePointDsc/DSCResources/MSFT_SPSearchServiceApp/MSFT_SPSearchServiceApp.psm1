@@ -7,48 +7,48 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])] 
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SearchCenterUrl,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $CloudIndex,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DefaultContentAccessAccount,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $WindowsServiceAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -78,15 +78,15 @@ function Get-TargetResource
         }
          
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn
         } 
         else 
@@ -109,11 +109,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }    
@@ -127,7 +127,7 @@ function Get-TargetResource
                 ProxyName                   = $proxyName
                 ApplicationPool             = $serviceApp.ApplicationPool.Name
                 DatabaseName                = $serviceApp.SearchAdminDatabase.Name
-                DatabaseServer              = $serviceApp.SearchAdminDatabase.Server.Name
+                DatabaseServer              = $serviceApp.SearchAdminDatabase.NormalizedDataSource
                 Ensure                      = "Present"
                 SearchCenterUrl             = $serviceApp.SearchCenterUrl
                 DefaultContentAccessAccount = $defaultAccount
@@ -146,48 +146,48 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SearchCenterUrl,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $CloudIndex,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DefaultContentAccessAccount,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $WindowsServiceAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -212,11 +212,11 @@ function Set-TargetResource
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
             if ($params.ContainsKey("DatabaseName") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             
@@ -264,7 +264,7 @@ function Set-TargetResource
                 if ($params.ContainsKey("SearchCenterUrl") -eq $true) 
                 {
                     $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                        Where-Object -FilterScript { 
+                        Where-Object -FilterScript {
                             $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                         }
                     $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
@@ -291,7 +291,7 @@ function Set-TargetResource
             $result = $args[1]
             
             $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                Where-Object -FilterScript { 
+                Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication"
                 }
             $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
@@ -310,7 +310,7 @@ function Set-TargetResource
             if ($params.ContainsKey("SearchCenterUrl") -eq $true) 
             {
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | `
-                    Where-Object -FilterScript { 
+                    Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Server.Search.Administration.SearchServiceApplication" 
                     }
                 $serviceApp.SearchCenterUrl = $params.SearchCenterUrl
@@ -360,48 +360,48 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseServer,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SearchCenterUrl,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $CloudIndex,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DefaultContentAccessAccount,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $WindowsServiceAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

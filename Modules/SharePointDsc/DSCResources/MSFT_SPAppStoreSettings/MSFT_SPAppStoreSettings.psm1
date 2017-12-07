@@ -4,19 +4,19 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppPurchases,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppsForOffice,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -59,19 +59,19 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppPurchases,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppsForOffice,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -119,19 +119,19 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppPurchases,
 
-        [parameter(Mandatory = $false)]  
+        [Parameter()]  
         [System.Boolean] 
         $AllowAppsForOffice,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -140,7 +140,8 @@ function Test-TargetResource
 
     $currentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $currentValues.WebAppUrl) {
+    if ($null -eq $currentValues.WebAppUrl)
+    {
         Write-Verbose -Message "Specified web application does not exist."
         return $false
     }

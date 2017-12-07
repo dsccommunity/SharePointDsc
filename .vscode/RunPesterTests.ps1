@@ -21,7 +21,7 @@ else
 if ($result.FailedCount -gt 0) 
 {
     Write-Output -InputObject "Failed test result summary:"
-    $result.TestResult | Where-Object -FilterScript { 
+    $result.TestResult | Where-Object -FilterScript {
         $_.Passed -eq $false 
     } | ForEach-Object -Process {
         Write-Output -InputObject "-----------------------------------------------------------"

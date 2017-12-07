@@ -4,69 +4,103 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $MySiteHostLocation,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $NoILMUsed = $false,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
        
     Write-Verbose -Message "Getting user profile service application $Name"
+
+    $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                       -Arguments $PSBoundParameters `
+                                       -ScriptBlock {
+        return Get-SPDSCFarmAccountName 
+    }
+
+    if ($null -ne $farmAccount)
+    {
+        if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+        {
+            # InstallAccount used
+            if ($InstallAccount.UserName -ne $farmAccount)
+            {
+                throw ("Specified InstallAccount ($($InstallAccount.UserName)) isn't the Farm " + `
+                       "Account. Make sure the specified InstallAccount is the Farm Account " + `
+                       "and try again")
+            }
+        }
+        else {
+            # PSDSCRunAsCredential or System
+            if (-not $Env:USERNAME.Contains("$"))
+            {
+                # PSDSCRunAsCredential used
+                $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                if ($localaccount -ne $farmAccount)
+                {
+                    throw ("Specified PSDSCRunAsCredential ($localaccount) isn't the Farm " + `
+                           "Account. Make sure the specified PSDSCRunAsCredential is the Farm " + `
+                           "Account and try again")
+                }
+            }
+        }
+    }
+    else
+    {
+        throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -79,10 +113,10 @@ function Get-TargetResource
             Ensure = "Absent"
         } 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"            
         }
 
@@ -113,24 +147,14 @@ function Get-TargetResource
             }
             $databases.Add("SynchronizationDatabase", $syncProp.GetValue($serviceApp))
 
-            $spFarm = Get-SPFarm
-
-            if ($params.FarmAccount.UserName -eq $spFarm.DefaultServiceAccount.Name) 
-            {
-                $farmAccount = $params.FarmAccount
-            } 
-            else 
-            {
-                $farmAccount = $spFarm.DefaultServiceAccount.Name
-            }
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -138,14 +162,13 @@ function Get-TargetResource
                 Name               = $serviceApp.DisplayName
                 ProxyName          = $proxyName
                 ApplicationPool    = $serviceApp.ApplicationPool.Name
-                FarmAccount        = $farmAccount
                 MySiteHostLocation = $params.MySiteHostLocation
                 ProfileDBName      = $databases.ProfileDatabase.Name
-                ProfileDBServer    = $databases.ProfileDatabase.Server.Name
+                ProfileDBServer    = $databases.ProfileDatabase.NormalizedDataSource
                 SocialDBName       = $databases.SocialDatabase.Name
-                SocialDBServer     = $databases.SocialDatabase.Server.Name
+                SocialDBServer     = $databases.SocialDatabase.NormalizedDataSource
                 SyncDBName         = $databases.SynchronizationDatabase.Name
-                SyncDBServer       = $databases.SynchronizationDatabase.Server.Name
+                SyncDBServer       = $databases.SynchronizationDatabase.NormalizedDataSource
                 InstallAccount     = $params.InstallAccount
                 EnableNetBIOS      = $serviceApp.NetBIOSDomainNamesEnabled
                 NoILMUsed          = $serviceApp.NoILMUsed
@@ -161,64 +184,60 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $MySiteHostLocation,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $NoILMUsed = $false,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -226,25 +245,57 @@ function Set-TargetResource
     Write-Verbose -Message "Setting user profile service application $Name"
 
     if ($Ensure -eq "Present") 
-    {    
-        if ($PSBoundParameters.ContainsKey("FarmAccount") -eq $false) 
+    {
+        $farmAccount = Invoke-SPDSCCommand -Credential $InstallAccount `
+                                    -Arguments $PSBoundParameters `
+                                    -ScriptBlock {
+            return Get-SPDSCFarmAccountName
+        }
+
+        if ($null -ne $farmAccount)
         {
-            throw ("Unable to provision the user profile service without the Farm Account. " + `
-                   "Please specify the FarmAccount parameter and try again")
-            return
+            if ($PSBoundParameters.ContainsKey("InstallAccount") -eq $true) 
+            {
+                # InstallAccount used
+                if ($InstallAccount.UserName -ne $farmAccount)
+                {
+                    throw ("Specified InstallAccount ($($InstallAccount.UserName)) isn't the Farm Account. Make sure " + `
+                           "the specified InstallAccount is the Farm Account and try again")
+                }
+            }
+            else {
+                # PSDSCRunAsCredential or System
+                if (-not $Env:USERNAME.Contains("$"))
+                {
+                    # PSDSCRunAsCredential used
+                    $localaccount = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
+                    if ($localaccount -ne $farmAccount)
+                    {
+                        throw ("Specified PSDSCRunAsCredential ($localaccount) isn't the Farm Account. Make sure " + `
+                               "the specified PSDSCRunAsCredential is the Farm Account and try again")
+                    }
+                }
+            }
+        }
+        else
+        {
+            throw ("Unable to retrieve the Farm Account. Check if the farm exists.")
         }
         
         Write-Verbose -Message "Creating user profile service application $Name"
         
-        # Add the FarmAccount to the local Administrators group, if it's not already there
-        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $FarmAccount.UserName
+        # Add the InstallAccount to the local Administrators group, if it's not already there
+        $isLocalAdmin = Test-SPDSCUserIsLocalAdmin -UserName $farmAccount
 
         if (!$isLocalAdmin)
         {
-            Add-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+            Add-SPDSCUserToLocalAdmin -UserName $farmAccount
+
+            # Cycle the Timer Service so that it picks up the local Admin token
+            Restart-Service -Name "SPTimerV4"
         }
 
-        $result = Invoke-SPDSCCommand -Credential $FarmAccount `
+        $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
@@ -259,21 +310,20 @@ function Set-TargetResource
 
             $updateNoILMUsed = $false
             if ($params.ContainsKey("NoILMUsed")) 
-            { 
+            {
                 $updateNoILMUsed = $true
                 $NoILMUsed = $params.NoILMUsed
                 $params.Remove("NoILMUsed") | Out-Null 
             }
 
             if ($params.ContainsKey("InstallAccount")) 
-            { 
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
             if ($params.ContainsKey("Ensure")) 
-            { 
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
-            $params.Remove("FarmAccount") | Out-Null
 
             $params = Rename-SPDSCParamValue -params $params `
                                              -oldName "SyncDBName" `
@@ -284,7 +334,7 @@ function Set-TargetResource
                                              -newName "ProfileSyncDBServer"
 
             if ($params.ContainsKey("ProxyName")) 
-            { 
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
@@ -297,7 +347,7 @@ function Set-TargetResource
                                                     -ErrorAction SilentlyContinue 
             $app = $serviceApps | Select-Object -First 1
             if ($null -eq $serviceApps) 
-            { 
+            {
                 $app = New-SPProfileServiceApplication @params
                 if ($null -ne $app) 
                 {
@@ -324,10 +374,10 @@ function Set-TargetResource
             }
         }
 
-        # Remove the FarmAccount from the local Administrators group, if it was added above
+        # Remove the InstallAccount from the local Administrators group, if it was added above
         if (!$isLocalAdmin)
         {
-            Remove-SPDSCUserToLocalAdmin -UserName $FarmAccount.UserName
+            Remove-SPDSCUserToLocalAdmin -UserName $farmAccount
         }
     }
     
@@ -341,7 +391,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $app = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.Office.Server.Administration.UserProfileApplication"  
                     }
 
@@ -365,64 +415,60 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProxyName,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
-        $FarmAccount,
-
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $MySiteHostLocation,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $ProfileDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SocialDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SyncDBServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EnableNetBIOS = $false,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $NoILMUsed = $false,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
