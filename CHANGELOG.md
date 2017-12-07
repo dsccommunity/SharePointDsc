@@ -27,7 +27,6 @@
 * Update SPBlobCacheSettings to set non-default or missing blob cache properties
 * Update SPWebApplicationExtension to fix how property AllowAnonymous is
   returned in the hashtable
-
 * Corrected comment in CodeCov.yml
 * Fixed localized issue in SPContentDatabase
 * Fixed issue with NullException in SPServiceAppSecurity when no accounts
@@ -61,6 +60,8 @@
 
 The following changes will break 1.x configurations that use these resources:
 
+* Removed resources SPCreateFarm and SPJoinFarm, please update your configurations
+  to use SPFarm. See http://aka.ms/SPDsc-SPFarm for details.
 * Updated SPShellAdmin so it also works for non-content databases
 * Updated SPWebApplication so it infers the UseSSL value from the URL
 * Updated SPUSerProfileServiceApp and SPUserProfileSyncService to remove
@@ -73,6 +74,9 @@ The following changes will break 1.x configurations that use these resources:
   created properly
 * Added the Internal parameter to the SPAlternateUrl resource, which implied a
   change to the key parameters
+* Changed implementation of the Web Application authentication configuration.
+  A new resource (SPWebAppAuthentication) has been added and existing properties
+  have been removed from SPWebApplication and SPWebApplicationExtension
 
 ## 1.9
 

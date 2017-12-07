@@ -42,15 +42,6 @@ function Get-TargetResource
         $UseSSL,
 
         [Parameter()]
-        [ValidateSet("NTLM","Kerberos","Claims")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [Parameter()]
-        [System.String] 
-        $AuthenticationProvider,
-
-        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -63,10 +54,9 @@ function Get-TargetResource
     Write-Verbose -Message "Getting web application extension '$Name' config"
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-                                  -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                                  -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        $ScriptRoot = $args[1]
         
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         
@@ -111,24 +101,6 @@ function Get-TargetResource
             $UseSSL = $false 
         }
 
-        $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone $params.zone 
-        if($authProvider.DisplayName -eq "Windows Authentication") 
-        {
-            if ($authProvider.DisableKerberos -eq $true)
-            {
-                $localAuthMode = "NTLM" 
-            } 
-            else 
-            {
-                $localAuthMode = "Kerberos" 
-            }
-        }
-        else 
-        {
-            $localAuthMode = "Claims"
-            $authenticationProvider = $authProvider.DisplayName
-        }
-
          return @{
             WebAppUrl = $params.WebAppUrl
             Name = $waExt.ServerComment
@@ -138,8 +110,6 @@ function Get-TargetResource
             Path = $waExt.Path
             Port = $Port
             Zone = $params.zone
-            AuthenticationMethod = $localAuthMode
-            AuthenticationProvider = $authenticationProvider
             UseSSL = $UseSSL
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -192,15 +162,6 @@ function Set-TargetResource
         $UseSSL,
 
         [Parameter()]
-        [ValidateSet("NTLM","Kerberos","Claims")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [Parameter()]
-        [System.String] 
-        $AuthenticationProvider,
-
-        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -214,17 +175,10 @@ function Set-TargetResource
     
     if ($Ensure -eq "Present") 
     {
-        if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
-        {
-            throw [Exception] "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
-        }
-
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                            -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            $ScriptRoot = $args[1]
-
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa) 
@@ -242,30 +196,6 @@ function Set-TargetResource
                     Name = $params.Name
                     Url = $params.Url
                     Zone = $params.zone 
-                }
-
-                              
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
-                {
-                    if($params.AuthenticationMethod -eq "Claims")
-                    {
-                        try 
-                        {
-                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
-                        } 
-                        catch
-                        {
-                            throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
-                        }
-                    }
-                    else 
-                    {
-                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                            -DisableKerberos:$disableKerberos
-                    }
-
-                    $newWebAppExtParams.Add("AuthenticationProvider", $ap)
                 }
                     
                 if ($params.ContainsKey("AllowAnonymous") -eq $true)
@@ -289,7 +219,7 @@ function Set-TargetResource
                     $newWebAppExtParams.Add("SecureSocketsLayer", $params.UseSSL) 
                 } 
                 
-                    $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
+                $wa | New-SPWebApplicationExtension @newWebAppExtParams | Out-Null
             }
             else 
             {
@@ -298,29 +228,6 @@ function Set-TargetResource
                     $waExt.AllowAnonymous = $params.AllowAnonymous
                     $wa.update()
                 }
-
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true)
-                {
-                    if($params.AuthenticationMethod -eq "Claims")
-                    {
-                        try 
-                        {
-                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider -ErrorAction Stop
-                        }
-                        catch
-                        {
-                            throw [Exception] "Cannot find Authentication Provider $($params.AuthenticationProvider)"
-                        }
-                    }
-                    else 
-                    {
-                        $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                        $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                            -DisableKerberos:$disableKerberos
-                    }
-
-                    Set-SPWebApplication -Identity $params.WebAppUrl -Zone $params.zone -AuthenticationProvider $ap 
-                }
             }
         }
     }
@@ -328,10 +235,9 @@ function Set-TargetResource
     if ($Ensure -eq "Absent") 
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
-                            -Arguments @($PSBoundParameters,$PSScriptRoot) `
+                            -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            $ScriptRoot = $args[1]
 
             $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
             if ($null -eq $wa) 
@@ -345,6 +251,7 @@ function Set-TargetResource
         }
     }
 }
+
 
 function Test-TargetResource
 {
@@ -390,15 +297,6 @@ function Test-TargetResource
         $UseSSL,
 
         [Parameter()]
-        [ValidateSet("NTLM","Kerberos","Claims")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [Parameter()]
-        [System.String] 
-        $AuthenticationProvider,
-
-        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
@@ -416,7 +314,7 @@ function Test-TargetResource
 
     $testReturn = Test-SPDscParameterState -CurrentValues $CurrentValues `
                                                      -DesiredValues $PSBoundParameters `
-                                                     -ValuesToCheck @("Ensure","AuthenticationMethod","AllowAnonymous")
+                                                     -ValuesToCheck @("Ensure","AllowAnonymous")
     return $testReturn
 }
 

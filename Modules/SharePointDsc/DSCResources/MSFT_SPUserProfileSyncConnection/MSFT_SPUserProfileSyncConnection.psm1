@@ -424,5 +424,4 @@ function Get-SPDSCADSIObject
     return [ADSI]($LdapPath)
 }
 
-
 Export-ModuleMember -Function *-TargetResource, Get-SPDSCADSIObject

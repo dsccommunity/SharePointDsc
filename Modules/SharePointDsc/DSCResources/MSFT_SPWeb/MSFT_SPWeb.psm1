@@ -173,11 +173,11 @@ function Set-TargetResource
         {
             @("InstallAccount", "Ensure", "RequestAccessEmail") |
                 ForEach-Object -Process {
-                if ($params.ContainsKey($_) -eq $true)
-                {
-                    $params.Remove($_) | Out-Null
+                    if ($params.ContainsKey($_) -eq $true)
+                    {
+                        $params.Remove($_) | Out-Null
+                    }
                 }
-            }
 
             New-SPWeb @params | Out-Null
         }
