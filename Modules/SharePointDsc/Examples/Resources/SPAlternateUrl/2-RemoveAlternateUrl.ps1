@@ -16,8 +16,10 @@
         node localhost {
             SPAlternateUrl CentralAdminAAM
             {
-                WebAppUrl            = "http://sharepoint1:9999"
+                WebAppName           = "SharePoint - www.domain.com80"
                 Zone                 = "Intranet"
+                Url                  = "http://www.externaldomain.com"
+                Internal             = $false
                 Ensure               = "Absent"
                 PsDscRunAsCredential = $SetupAccount
             }

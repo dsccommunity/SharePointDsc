@@ -7,7 +7,7 @@ gulp.task("test-mdsyntax", function task() {
   return gulp.src("Modules/SharePointDsc/DSCResources/**/*.md", { "read": false })
     .pipe(through2.obj(function obj(file, enc, next) {
       markdownlint(
-        { 
+        {
           "files": [ file.path ],
           "config": require("./.markdownlint.json")
         },

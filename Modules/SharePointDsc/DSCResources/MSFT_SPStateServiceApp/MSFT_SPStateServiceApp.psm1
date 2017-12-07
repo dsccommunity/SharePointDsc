@@ -4,32 +4,32 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -70,7 +70,7 @@ function Get-TargetResource
             Name = $serviceApp.DisplayName
             ProxyName = $proxyName
             DatabaseName = $serviceApp.Databases.Name
-            DatabaseServer = $serviceApp.Databases.Server.Name
+            DatabaseServer = $serviceApp.Databases.NormalizedDataSource
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
         }
@@ -84,34 +84,35 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
+
     )
 
     Write-Verbose -Message "Setting state service application '$Name'"
@@ -126,6 +127,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $dbParams = @{}
+
             if ($params.ContainsKey("DatabaseName"))
             {
                 $dbParams.Add("Name", $params.DatabaseName)
@@ -185,32 +187,32 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter()]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

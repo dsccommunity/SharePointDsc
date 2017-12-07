@@ -16,9 +16,9 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name                = "Shell Admins"
-                Members             = "CONTOSO\user1", "CONTOSO\user2"
-                AllContentDatabases = $true
+                Name         = "Shell Admins"
+                Members      = "CONTOSO\user1", "CONTOSO\user2"
+                AllDatabases = $true
             }
         }
     }

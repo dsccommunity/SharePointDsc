@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.UInt32]    
         $Index,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]]  
         $Servers,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]
         $RootDirectory,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -36,16 +36,26 @@ function Get-TargetResource
         $ssa = Get-SPEnterpriseSearchServiceApplication -Identity $params.ServiceAppName      
         $currentTopology = $ssa.ActiveTopology
         
-        $IndexComponents = (Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
-                                Where-Object -FilterScript { 
+        $searchComponent = Get-SPEnterpriseSearchComponent -SearchTopology $currentTopology | `
+                                Where-Object -FilterScript {
                                     ($_.GetType().Name -eq "IndexComponent") `
                                     -and ($_.IndexPartitionOrdinal -eq $params.Index) 
-                                }).ServerName
+                                }
+        
+        $IndexComponents = $searchComponent.ServerName
+        $rootDirectory = $searchComponent.RootDirectory
+
+        if ($rootDirectory -eq "")
+        {
+            $ssi = Get-SPEnterpriseSearchServiceInstance
+            $component = $ssi.Components | Select-Object -First 1
+            $rootDirectory = $component.IndexLocation
+        }
 
         return @{
             Index = $params.Index
             Servers = $IndexComponents
-            RootDirectory = $params.RootDirectory
+            RootDirectory = $rootDirectory
             ServiceAppName = $params.ServiceAppName
             InstallAccount = $params.InstallAccount
         }
@@ -58,23 +68,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.UInt32]    
         $Index,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]]  
         $Servers,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]
         $RootDirectory,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -151,7 +161,7 @@ function Set-TargetResource
         }
 
         # Build up the topology changes for each object type
-        @("Servers") | ForEach-Object -Process { 
+        @("Servers") | ForEach-Object -Process {
             $CurrentSearchProperty = $_
             Write-Verbose -Message "Setting components for '$CurrentSearchProperty' property"
 
@@ -171,7 +181,7 @@ function Set-TargetResource
                 {
                     $ComponentsToAdd += $component
                 }
-                $components = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript { 
+                $components = $CurrentValues.$CurrentSearchProperty | Where-Object -FilterScript {
                     $params.$CurrentSearchProperty.Contains($_) -eq $false 
                 }
                 foreach($component in $components) 
@@ -228,23 +238,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.UInt32]    
         $Index,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String[]]  
         $Servers,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]
         $RootDirectory,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

@@ -3,7 +3,7 @@ function Get-SPDSCWebApplicationGeneralConfig
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param(
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $WebApplication
     )
 
@@ -44,10 +44,10 @@ function Set-SPDSCWebApplicationGeneralConfig
 {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $WebApplication,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $Settings
     )
 
@@ -107,10 +107,10 @@ function Test-SPDSCWebApplicationGeneralConfig
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param(
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $CurrentSettings,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         $DesiredSettings
     )
 

@@ -4,37 +4,37 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoNavigationUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoTitle,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingText,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteBarBrandingElementHtml,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting web app suite bar properties for $WebAppUrl"
-    
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
@@ -52,11 +52,11 @@ function Get-TargetResource
             SuiteBarBrandingElementHtml = $null
         }
 
-        if ($null -eq $wa) 
-        { 
-            return $returnval 
-        }        
-        
+        if ($null -eq $wa)
+        {
+            return $returnval
+        }
+
         $installedVersion = Get-SPDSCInstalledProductVersion
 
         if($installedVersion.FileMajorPart -eq 15)
@@ -81,32 +81,32 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoNavigationUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoTitle,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingText,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteBarBrandingElementHtml,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -161,12 +161,12 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    if ($null -eq $CurrentValues.WebAppUrl) 
+
+    if ($null -eq $CurrentValues.WebAppUrl)
     {
         throw "Web application does not exist"
     }
-    
+
     ## Perform changes
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments @($PSBoundParameters) `
@@ -177,7 +177,7 @@ function Set-TargetResource
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
 
-        if ($null -eq $wa) 
+        if ($null -eq $wa)
         {
             throw "Specified web application could not be found."
         }
@@ -205,42 +205,42 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoNavigationUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoTitle,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingLogoUrl,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteNavBrandingText,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $SuiteBarBrandingElementHtml,
 
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Testing web app suite bar properties for $WebAppUrl"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    
-    if ($null -eq $CurrentValues.WebAppUrl) 
-    { 
-        return $false 
+
+    if ($null -eq $CurrentValues.WebAppUrl)
+    {
+        return $false
     }
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `

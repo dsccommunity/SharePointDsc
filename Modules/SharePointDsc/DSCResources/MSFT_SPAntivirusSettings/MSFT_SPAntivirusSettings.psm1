@@ -4,31 +4,31 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.Boolean] 
         $ScanOnDownload,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScanOnUpload,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowDownloadInfected,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AttemptToClean,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $TimeoutDuration,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $NumberOfThreads,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -82,31 +82,31 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.Boolean] 
         $ScanOnDownload,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScanOnUpload,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowDownloadInfected,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AttemptToClean,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $TimeoutDuration,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $NumberOfThreads,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -133,28 +133,28 @@ function Set-TargetResource
 
         # Set the antivirus settings
         if ($params.ContainsKey("AllowDownloadInfected")) 
-        { 
+        {
             Write-Verbose -Message "Setting Allow Download"
             $admService.AntivirusSettings.AllowDownload = $params.AllowDownloadInfected
         }
         if ($params.ContainsKey("ScanOnDownload")) 
-        { 
+        {
             $admService.AntivirusSettings.DownloadScanEnabled = $params.ScanOnDownload 
         }
         if ($params.ContainsKey("ScanOnUpload")) 
-        { 
+        {
             $admService.AntivirusSettings.UploadScanEnabled = $params.ScanOnUpload 
         }
         if ($params.ContainsKey("AttemptToClean")) 
-        { 
+        {
             $admService.AntivirusSettings.CleaningEnabled = $params.AttemptToClean 
         }
         if ($params.ContainsKey("NumberOfThreads")) 
-        { 
+        {
             $admService.AntivirusSettings.NumberOfThreads = $params.NumberOfThreads 
         }
         if ($params.ContainsKey("TimeoutDuration")) 
-        { 
+        {
             $timespan = New-TimeSpan -Seconds $params.TimeoutDuration
             $admService.AntivirusSettings.Timeout = $timespan
         }
@@ -168,31 +168,31 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.Boolean] 
         $ScanOnDownload,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScanOnUpload,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowDownloadInfected,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AttemptToClean,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $TimeoutDuration,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt16] 
         $NumberOfThreads,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

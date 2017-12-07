@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SuperUserAlias,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SetWebAppPolicy = $true,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -102,7 +102,7 @@ function Get-TargetResource
         else
         {
             if ($wa.Properties.ContainsKey("portalsuperuseraccount"))
-            { 
+            {
                 $returnVal.Add("SuperUserAlias", $wa.Properties["portalsuperuseraccount"])
             }
             else
@@ -111,7 +111,7 @@ function Get-TargetResource
             }
             
             if ($wa.Properties.ContainsKey("portalsuperreaderaccount"))
-            { 
+            {
                 $returnVal.Add("SuperReaderAlias", $wa.Properties["portalsuperreaderaccount"])
             }
             else
@@ -142,23 +142,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SuperUserAlias,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SetWebAppPolicy = $true,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount    )
 
@@ -171,7 +171,7 @@ function Set-TargetResource
 
         $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
         if ($null -eq $wa)
-        { 
+        {
             throw [Exception] "The web applications $($params.WebAppUrl) can not be found to set cache accounts"
         }
         
@@ -195,7 +195,7 @@ function Set-TargetResource
                 $claimsReader = (New-SPClaimsPrincipal -Identity $params.SuperReaderAlias `
                                                        -IdentityType WindowsSamAccountName).ToEncodedString()
                 if ($wa.Policies.UserName -contains $claimsReader)
-                { 
+                {
                     $wa.Policies.Remove($claimsReader)
                 }
                 $policy = $wa.Policies.Add($claimsReader, "Super Reader (Claims)")
@@ -205,7 +205,7 @@ function Set-TargetResource
                 $claimsSuper = (New-SPClaimsPrincipal -Identity $params.SuperUserAlias `
                                                       -IdentityType WindowsSamAccountName).ToEncodedString()
                 if ($wa.Policies.UserName -contains $claimsSuper)
-                { 
+                {
                     $wa.Policies.Remove($claimsSuper)
                 }
                 $policy = $wa.Policies.Add($claimsSuper, "Super User (Claims)")
@@ -215,7 +215,7 @@ function Set-TargetResource
             else
             {
                 if ($wa.Policies.UserName -contains $params.SuperReaderAlias)
-                { 
+                {
                     $wa.Policies.Remove($params.SuperReaderAlias)
                 }
 
@@ -224,7 +224,7 @@ function Set-TargetResource
                 $readPolicy.PolicyRoleBindings.Add($readPolicyRole)
                 
                 if ($wa.Policies.UserName -contains $params.SuperUserAlias)
-                { 
+                {
                     $wa.Policies.Remove($params.SuperUserAlias)
                 }
                 $policy = $wa.Policies.Add($params.SuperUserAlias, "Super User")
@@ -244,23 +244,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SuperUserAlias,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $SuperReaderAlias,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $SetWebAppPolicy = $true,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount    )
 

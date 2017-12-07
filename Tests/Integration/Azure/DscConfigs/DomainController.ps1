@@ -25,12 +25,12 @@ Configuration DomainController
         $domainName = "demo.lab"
 
         xCredSSP CredSSPServer 
-        { 
+        {
             Ensure = "Present" 
             Role = "Server" 
         } 
         xCredSSP CredSSPClient 
-        { 
+        {
             Ensure = "Present" 
             Role = "Client" 
             DelegateComputers = "*.$domainName"
@@ -44,14 +44,14 @@ Configuration DomainController
             "RSAT-AD-PowerShell" 
         ) | ForEach-Object -Process {
             WindowsFeature "Feature-$_"
-            { 
+            {
                 Ensure = "Present" 
                 Name = $_
             }
         }
         
         xADDomain CreateDomain 
-        { 
+        {
             DomainName = $domainName
 			DomainNetbiosName = $domainName.Substring(0, $domainName.IndexOf(".")).ToUpper()
             DomainAdministratorCredential = $DomainAdminCredential
@@ -81,7 +81,7 @@ Configuration DomainController
 
         $userAccounts | ForEach-Object -Process {
             xADUser "User-$_"
-            { 
+            {
                 DomainName = $domainName
                 DomainAdministratorCredential = $DomainAdminCredential 
                 UserName = $_ 

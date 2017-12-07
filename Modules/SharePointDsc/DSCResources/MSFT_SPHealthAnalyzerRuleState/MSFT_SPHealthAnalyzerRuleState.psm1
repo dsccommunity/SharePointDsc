@@ -4,29 +4,29 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $Enabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("All Servers","Any Server")] 
         [System.String] 
         $RuleScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] 
         [System.String] 
         $Schedule,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $FixAutomatically,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -50,7 +50,7 @@ function Get-TargetResource
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript { 
+            | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication 
         }
 
@@ -62,7 +62,7 @@ function Get-TargetResource
 
         # Get CA SPWeb
         $caWeb = Get-SPWeb($caWebapp.Url)
-        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { 
+        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript {
             $_.BaseTemplate -eq "HealthRules"
         }
 
@@ -117,29 +117,29 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $Enabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("All Servers","Any Server")] 
         [System.String] 
         $RuleScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] 
         [System.String] 
         $Schedule,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $FixAutomatically,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -163,7 +163,7 @@ function Set-TargetResource
         }
 
         $caWebapp = Get-SPwebapplication -IncludeCentralAdministration `
-            | Where-Object -FilterScript { 
+            | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication 
         }
 
@@ -176,7 +176,7 @@ function Set-TargetResource
 
         # Get Central Admin SPWeb
         $caWeb = Get-SPWeb($caWebapp.Url)
-        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript { 
+        $healthRulesList = $caWeb.Lists | Where-Object -FilterScript {
             $_.BaseTemplate -eq "HealthRules"
         }
 
@@ -193,15 +193,15 @@ function Set-TargetResource
 
                 $item["HealthRuleCheckEnabled"] = $params.Enabled
                 if ($params.ContainsKey("RuleScope")) 
-                { 
+                {
                     $item["HealthRuleScope"] = $params.RuleScope 
                 }
                 if ($params.ContainsKey("Schedule")) 
-                { 
+                {
                     $item["HealthRuleSchedule"] = $params.Schedule 
                 }
                 if ($params.ContainsKey("FixAutomatically")) 
-                { 
+                {
                     $item["HealthRuleAutoRepairEnabled"] = $params.FixAutomatically 
                 }
 
@@ -231,29 +231,29 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $Enabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("All Servers","Any Server")] 
         [System.String] 
         $RuleScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Hourly","Daily","Weekly","Monthly","OnDemandOnly")] 
         [System.String] 
         $Schedule,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $FixAutomatically,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

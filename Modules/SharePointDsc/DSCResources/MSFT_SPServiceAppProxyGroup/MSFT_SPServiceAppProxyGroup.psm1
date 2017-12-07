@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         [ValidateSet("Present","Absent")] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxies,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxiesToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxiesToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -57,16 +57,21 @@ function Get-TargetResource
             $params = $args[0]
     
             #Try to get the proxy group
-            if ($params.Name -eq "Default") {
+            if ($params.Name -eq "Default")
+            {
                 $ProxyGroup = Get-SPServiceApplicationProxyGroup -Default
-            } else {
+            }
+            else
+            {
                 $ProxyGroup = Get-SPServiceApplicationProxyGroup $params.name -ErrorAction SilentlyContinue 
             }
             
-            if ($ProxyGroup){ 
+            if ($ProxyGroup)
+            {
                 $Ensure = "Present"
             }
-            else {
+            else
+            {
                 $Ensure = "Absent"    
             }
             
@@ -90,28 +95,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         [ValidateSet("Present","Absent")] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxies,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxiesToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxiesToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -168,7 +173,7 @@ function Set-TargetResource
                                                   -DifferenceObject $params.ServiceAppProxies
                 
                     if ($null -eq $Differences) 
-                    { 
+                    {
                         Write-Verbose -Message ("Service Proxy Group $($params.name) " + `
                                                 "membership matches desired state")
                     }
@@ -177,7 +182,7 @@ function Set-TargetResource
                         foreach ($difference in $differences) 
                         {
                             if ($difference.SideIndicator -eq "=>") 
-                            { 
+                            {
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
                                     Where-Object -FilterScript {
@@ -239,7 +244,7 @@ function Set-TargetResource
                                                   -DifferenceObject $params.ServiceAppProxiesToInclude 
                     
                     if ($null -eq $Differences) 
-                    { 
+                    {
                         Write-Verbose -Message "Service Proxy Group $($params.name) Membership matches desired state"
                     }
                     else 
@@ -247,7 +252,7 @@ function Set-TargetResource
                         foreach ($difference in $differences) 
                         {
                             if ($difference.SideIndicator -eq "=>") 
-                            { 
+                            {
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | `
                                     Where-Object -FilterScript {
@@ -295,7 +300,7 @@ function Set-TargetResource
                                                   -IncludeEqual
                     
                     if ($null -eq $Differences) 
-                    { 
+                    {
                         throw "Error comparing ServiceAppProxiesToExclude for Service Proxy Group $($params.name)"
                     }
                     else 
@@ -303,7 +308,7 @@ function Set-TargetResource
                         foreach ($difference in $differences) 
                         {
                             if ($difference.SideIndicator -eq "==") 
-                            { 
+                            {
                                 $ServiceProxyName = $difference.InputObject
                                 $ServiceProxy = Get-SPServiceApplicationProxy | Where-Object -FilterScript {
                                     $_.DisplayName -eq $ServiceProxyName
@@ -336,28 +341,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]   
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         [ValidateSet("Present","Absent")] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxies,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxiesToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $ServiceAppProxiesToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -367,7 +372,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
     
@@ -381,7 +386,7 @@ function Test-TargetResource
         Write-Verbose -Message "Testing ServiceAppProxies property for $Name Proxy Group"
         
         if (-not $CurrentValues.ServiceAppProxies) 
-        { 
+        {
             return $false 
         }
         
@@ -399,11 +404,12 @@ function Test-TargetResource
         }   
     }
     
-    if ($ServiceAppProxiesToInclude){
+    if ($ServiceAppProxiesToInclude)
+    {
         Write-Verbose -Message "Testing ServiceAppProxiesToInclude property for $Name Proxy Group"
         
         if (-not $CurrentValues.ServiceAppProxies) 
-        { 
+        {
             return $false 
         }
         
@@ -426,7 +432,7 @@ function Test-TargetResource
         Write-Verbose -Message "Testing ServiceAppProxiesToExclude property for $Name Proxy Group"
         
         if (-not $CurrentValues.ServiceAppProxies) 
-        { 
+        {
             return $true 
         }
         

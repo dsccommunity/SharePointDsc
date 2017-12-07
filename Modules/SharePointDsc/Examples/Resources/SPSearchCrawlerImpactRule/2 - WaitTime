@@ -14,7 +14,7 @@
 
         node localhost {
             SPSearchCrawlerImpactRule IntranetCrawlerImpactWaitTimeRule
-            { 
+            {
                 ServiceAppName = "Search Service Application"
                 Name = "https://intranet.sharepoint.contoso.com"
                 WaitTime = 60

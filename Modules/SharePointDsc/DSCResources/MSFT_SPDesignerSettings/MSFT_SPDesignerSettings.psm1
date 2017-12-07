@@ -4,44 +4,44 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("WebApplication","SiteCollection")]
         [System.String]
         $SettingsScope,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSharePointDesigner,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowDetachPagesFromDefinition,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowCustomiseMasterPage,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowManageSiteURLStructure,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowCreateDeclarativeWorkflow,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSavePublishDeclarativeWorkflow,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSaveDeclarativeWorkflowAsTemplate,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -164,44 +164,44 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("WebApplication","SiteCollection")]
         [System.String]
         $SettingsScope,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSharePointDesigner,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowDetachPagesFromDefinition,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowCustomiseMasterPage,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowManageSiteURLStructure,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowCreateDeclarativeWorkflow,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSavePublishDeclarativeWorkflow,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSaveDeclarativeWorkflowAsTemplate,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -285,15 +285,7 @@ function Set-TargetResource
                                     -ScriptBlock {
                     $params = $args[0]
 
-                    try
                     {
-                        $spFarm = Get-SPFarm
-                    }
-                    catch
-                    {
-                        throw ("No local SharePoint farm was detected. SharePoint Designer " + `
-                               "settings will not be applied")
-                        return
                     }
 
                     Write-Verbose -Message "Start update SPD site collection settings"
@@ -360,44 +352,44 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Url,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("WebApplication","SiteCollection")]
         [System.String]
         $SettingsScope,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSharePointDesigner,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowDetachPagesFromDefinition,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowCustomiseMasterPage,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowManageSiteURLStructure,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowCreateDeclarativeWorkflow,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSavePublishDeclarativeWorkflow,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $AllowSaveDeclarativeWorkflowAsTemplate,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

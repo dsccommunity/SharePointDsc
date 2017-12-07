@@ -4,21 +4,21 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -64,21 +64,21 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -192,7 +192,7 @@ function Set-TargetResource
     # Error codes: https://aka.ms/installerrorcodes
     switch ($result)
     {
-        0 {  
+        0 {
             Write-Verbose -Message "SharePoint Post Setup Configuration Wizard ran successfully"
         }
         Default {
@@ -210,21 +210,21 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("mon","tue","wed","thu","fri","sat","sun")]
         [System.String[]]
         $DatabaseUpgradeDays,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseUpgradeTime,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

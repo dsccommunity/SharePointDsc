@@ -18,7 +18,7 @@
 
         node localhost {
             SPUserProfileSyncService UserProfileSyncService
-            {  
+            {
                 UserProfileServiceAppName   = "User Profile Service Application"
                 Ensure                      = "Present"
                 FarmAccount                 = $FarmAccount

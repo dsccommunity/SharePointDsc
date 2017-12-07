@@ -4,52 +4,52 @@
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Description,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Realm,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $IdentifierClaim,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateThumbprint,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateFilePath,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ClaimProviderName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ProviderSignOutUri,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -65,7 +65,7 @@
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.Name `
                                                     -ErrorAction SilentlyContinue
         if ($spTrust) 
-        { 
+        {
             $description = $spTrust.Description
             $realm = $spTrust.DefaultProviderRealm
             $signInUrl = $spTrust.ProviderUri.OriginalString
@@ -83,7 +83,7 @@
             }
         } 
         else 
-        { 
+        {
             $description = ""
             $realm = ""
             $signInUrl = ""
@@ -116,52 +116,52 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Description,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Realm,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String]
         $IdentifierClaim,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateThumbprint,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateFilePath,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ClaimProviderName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ProviderSignOutUri,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -287,7 +287,7 @@ function Set-TargetResource
                 }
 
                 if ($params.ProviderSignOutUri) 
-                { 
+                {
                     $trust.ProviderSignOutUri = New-Object -TypeName System.Uri ($params.ProviderSignOutUri) 
                 }
                 $trust.Update()
@@ -315,7 +315,7 @@ function Set-TargetResource
                                                               -Zone $zone `
                                                               -ErrorAction SilentlyContinue
                     if (!$providers)
-                    { 
+                    {
                         return
                     }
                     $trustedProviderToRemove = $providers | Where-Object -FilterScript {
@@ -337,7 +337,7 @@ function Set-TargetResource
                 }
             }
         
-            $runParams = @{ 
+            $runParams = @{
                 Identity = $params.Name
                 Confirm = $false
             }
@@ -352,52 +352,52 @@ function Test-TargetResource
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Description,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $Realm,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [String]
         $SignInUrl,
 
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String]
         $IdentifierClaim,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ClaimsMappings,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateThumbprint,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $SigningCertificateFilePath,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ClaimProviderName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [String]
         $ProviderSignOutUri,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

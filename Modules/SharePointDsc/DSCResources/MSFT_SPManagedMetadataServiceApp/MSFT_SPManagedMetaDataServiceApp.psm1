@@ -4,36 +4,36 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ContentTypeHubUrl,
 
@@ -45,7 +45,7 @@ function Get-TargetResource
         [System.UInt32[]]
         $Languages,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -197,7 +197,7 @@ function Get-TargetResource
                 Ensure                  = "Present"
                 ApplicationPool         = $serviceApp.ApplicationPool.Name
                 DatabaseName            = $serviceApp.Database.Name
-                DatabaseServer          = $serviceApp.Database.Server.Name
+                DatabaseServer          = $serviceApp.Database.NormalizedDataSource
                 TermStoreAdministrators = $currentAdmins
                 ContentTypeHubUrl       = $hubUrl
                 DefaultLanguage         = $termStoreDefaultLanguage
@@ -214,36 +214,36 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ContentTypeHubUrl,
 
@@ -255,7 +255,7 @@ function Set-TargetResource
         [System.UInt32[]]
         $Languages,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -585,36 +585,36 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProxyName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String[]]
         $TermStoreAdministrators,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ContentTypeHubUrl,
 
@@ -626,7 +626,7 @@ function Test-TargetResource
         [System.UInt32[]]
         $Languages,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

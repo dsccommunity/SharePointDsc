@@ -4,65 +4,56 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $ApplicationPoolAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
+        [Parameter()]
+        [System.Boolean] 
+        $UseClassic = $false,
 
-        [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [parameter(Mandatory = $false)]
-        [System.String] 
-        $AuthenticationProvider,
-
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -75,8 +66,8 @@ function Get-TargetResource
         $params = $args[0]
         
         $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
-        if ($null -eq $wa) 
-        { 
+        if ($null -eq $wa)
+        {
             return @{
                 Name = $params.Name
                 ApplicationPool = $params.ApplicationPool
@@ -87,31 +78,11 @@ function Get-TargetResource
         }
 
         ### COMMENT: Are we making an assumption here, about Default Zone
+        $classicAuth = $false
         $authProvider = Get-SPAuthenticationProvider -WebApplication $wa.Url -Zone "Default" 
         if ($null -eq $authProvider)
         {
-            $authenticationProvider = ""
-            $localAuthMode = "Classic" 
-        }
-        else
-        {
-            if ($authProvider.DisplayName -eq "Windows Authentication") 
-            {
-                if ($authProvider.DisableKerberos -eq $true) 
-                { 
-                    $localAuthMode = "NTLM" 
-                } 
-                else 
-                { 
-                    $localAuthMode = "Kerberos" 
-                }
-                $authenticationProvider = "Windows Authentication"
-            }
-            else 
-            {
-                $localAuthMode = "Claims"
-                $authenticationProvider = $authProvider.DisplayName
-            }
+            $classicAuth = $true
         }
 
         return @{
@@ -125,8 +96,7 @@ function Get-TargetResource
             HostHeader = (New-Object -TypeName System.Uri $wa.Url).Host
             Path = $wa.IisSettings[0].Path
             Port = (New-Object -TypeName System.Uri $wa.Url).Port
-            AuthenticationMethod = $localAuthMode
-            AuthenticationProvider = $authenticationProvider
+            UseClassic = $classicAuth    
             UseSSL = (New-Object -TypeName System.Uri $wa.Url).Scheme -eq "https"
             InstallAccount = $params.InstallAccount
             Ensure = "Present"
@@ -141,92 +111,73 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $ApplicationPoolAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
+        [Parameter()]
+        [System.Boolean] 
+        $UseClassic = $false,
 
-        [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [parameter(Mandatory = $false)]
-        [System.String] 
-        $AuthenticationProvider,
-
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting web application '$Name' config"
     
+    $PSBoundParameters.UseClassic = $UseClassic
+
     if ($Ensure -eq "Present")
     {
-        if ($PSBoundParameters.ContainsKey("AuthenticationMethod") -eq $false)
-        {
-            throw [Exception] ("When Ensure is Present, the AuthenticationMethod " + `
-                               "parameter is required.")
-        }
-
-        if ($AuthenticationMethod -eq "Claims" -and [string]::IsNullOrEmpty($AuthenticationProvider))
-        {
-            throw [Exception] ("When configuring SPWebApplication to use Claims the " + `
-                               "AuthenticationProvider value must be specified.")
-        }
-
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
-            if ($null -eq $wa) 
+            if ($null -eq $wa)
             {
                 $newWebAppParams = @{
                     Name = $params.Name
@@ -236,10 +187,10 @@ function Set-TargetResource
 
                 # Get a reference to the Administration WebService
                 $admService = Get-SPDSCContentService
-                $appPools = $admService.ApplicationPools | Where-Object -FilterScript { 
+                $appPools = $admService.ApplicationPools | Where-Object -FilterScript {
                     $_.Name -eq $params.ApplicationPool 
                 }
-                if ($null -eq $appPools) 
+                if ($null -eq $appPools)
                 {
                     # Application pool does not exist, create a new one.
                     # Test if the specified managed account exists. If so, add 
@@ -251,7 +202,7 @@ function Set-TargetResource
                     }
                     catch 
                     {
-                        if ($_.Exception.Message -like "*No matching accounts were found*") 
+                        if ($_.Exception.Message -like "*No matching accounts were found*")
                         {
                             throw ("The specified managed account was not found. Please make " + `
                                    "sure the managed account exists before continuing.")
@@ -266,60 +217,47 @@ function Set-TargetResource
                     }
                 }
                 
-                if ($params.ContainsKey("AuthenticationMethod") -eq $true) 
+                if ($params.UseClassic -eq $false)
                 {
-                    if ($params.AuthenticationMethod -ne "Classic")
-                    {
-                        if ($params.AuthenticationMethod -eq "Claims")
-                        {
-                            $ap = Get-SPTrustedIdentityTokenIssuer -Identity $params.AuthenticationProvider
-                        }
-                        else 
-                        {
-                            $disableKerberos = ($params.AuthenticationMethod -eq "NTLM")
-                            $ap = New-SPAuthenticationProvider -UseWindowsIntegratedAuthentication `
-                                                                -DisableKerberos:$disableKerberos
-                        }
-                        
-                        $newWebAppParams.Add("AuthenticationProvider", $ap)
-                    }
+                    $ap = New-SPAuthenticationProvider
+                    $newWebAppParams.Add("AuthenticationProvider", $ap)
                 }
                 
-                if ($params.ContainsKey("AllowAnonymous") -eq $true) 
+                if ($params.ContainsKey("AllowAnonymous") -eq $true)
                 {
-                    $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous) 
+                    $newWebAppParams.Add("AllowAnonymousAccess", $params.AllowAnonymous)
                 }
-                if ($params.ContainsKey("DatabaseName") -eq $true) 
-                { 
-                    $newWebAppParams.Add("DatabaseName", $params.DatabaseName) 
+                if ($params.ContainsKey("DatabaseName") -eq $true)
+                {
+                    $newWebAppParams.Add("DatabaseName", $params.DatabaseName)
                 }
-                if ($params.ContainsKey("DatabaseServer") -eq $true) 
-                { 
-                    $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer) 
+                if ($params.ContainsKey("DatabaseServer") -eq $true)
+                {
+                    $newWebAppParams.Add("DatabaseServer", $params.DatabaseServer)
                 }
-                if ($params.ContainsKey("HostHeader") -eq $true) 
-                { 
-                    $newWebAppParams.Add("HostHeader", $params.HostHeader) 
+                if ($params.ContainsKey("HostHeader") -eq $true)
+                {
+                    $newWebAppParams.Add("HostHeader", $params.HostHeader)
                 }
-                if ($params.ContainsKey("Path") -eq $true) 
-                { 
-                    $newWebAppParams.Add("Path", $params.Path) 
+                if ($params.ContainsKey("Path") -eq $true)
+                {
+                    $newWebAppParams.Add("Path", $params.Path)
                 }
-                if ($params.ContainsKey("Port") -eq $true) 
-                { 
-                    $newWebAppParams.Add("Port", $params.Port) 
+                if ($params.ContainsKey("Port") -eq $true)
+                {
+                    $newWebAppParams.Add("Port", $params.Port)
                 } 
-                if ($params.ContainsKey("UseSSL") -eq $true) 
-                { 
-                    $newWebAppParams.Add("SecureSocketsLayer", $params.UseSSL) 
-                } 
-            
+                if ((New-Object -TypeName System.Uri $params.Url).Scheme -eq "https")
+                {
+                    $newWebAppParams.Add("SecureSocketsLayer", $true)
+                }
+
                 New-SPWebApplication @newWebAppParams | Out-Null
             }
         }
     }
     
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -327,7 +265,7 @@ function Set-TargetResource
             $params = $args[0]
 
             $wa = Get-SPWebApplication -Identity $params.Name -ErrorAction SilentlyContinue
-            if ($null -ne $wa) 
+            if ($null -ne $wa)
             {
                 $wa | Remove-SPWebApplication -Confirm:$false -DeleteIISSite
             }
@@ -341,65 +279,56 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $ApplicationPoolAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AllowAnonymous,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $HostHeader,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Path,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $Port,
 
-        [parameter(Mandatory = $false)]
-        [System.Boolean]
-        $UseSSL,
+        [Parameter()]
+        [System.Boolean] 
+        $UseClassic = $false,
 
-        [parameter(Mandatory = $false)]
-        [ValidateSet("NTLM","Kerberos","Claims","Classic")]
-        [System.String] 
-        $AuthenticationMethod,
-
-        [parameter(Mandatory = $false)]
-        [System.String] 
-        $AuthenticationProvider,
-
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -407,13 +336,6 @@ function Test-TargetResource
     Write-Verbose -Message "Testing for web application '$Name' config"
 
     $PSBoundParameters.Ensure = $Ensure
-
-    if ($Ensure -eq "Present" -and
-        $PSBoundParameters.ContainsKey("AuthenticationMethod") -eq $false)
-    {
-        throw [Exception] ("When Ensure is Present, the AuthenticationMethod " + `
-                            "parameter is required.")
-    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
