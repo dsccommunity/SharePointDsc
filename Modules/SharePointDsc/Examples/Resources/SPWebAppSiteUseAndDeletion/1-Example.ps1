@@ -1,9 +1,9 @@
 <#
 .EXAMPLE
-    This example shows how to apply site use and deletion settings to the specified web applicaiton
+    This example shows how to apply site use and deletion settings to the specified web application
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
