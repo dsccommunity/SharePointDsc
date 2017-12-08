@@ -285,7 +285,15 @@ function Set-TargetResource
                                     -ScriptBlock {
                     $params = $args[0]
 
+                    try
                     {
+                        $spFarm = Get-SPFarm
+                    }
+                    catch
+                    {
+                        throw ("No local SharePoint farm was detected. SharePoint Designer " + `
+                               "settings will not be applied")
+                        return
                     }
 
                     Write-Verbose -Message "Start update SPD site collection settings"

@@ -41,9 +41,7 @@
 * Fixed an issue where the instance name wasn't detected correctly
   * SPAppManagementServiceApp
   * SPBCSServiceApp
-  * SPCreateFarm
   * SPFarm
-  * SPJoinFarm
   * SPMachineTranslationServiceApp
   * SPManagedMetaDataServiceApp
   * SPPerformancePointServiceApp
