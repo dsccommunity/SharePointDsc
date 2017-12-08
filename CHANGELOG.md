@@ -3,7 +3,7 @@
 ## 2.0
 
 * Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings,
-  SPLogLevel
+  SPLogLevel, SPWorkflowService
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
@@ -57,7 +57,6 @@
 * Fixed SPSearchIndexPartition to return the RootFolder parameter
 * Fixed SPSecureStoreServiceApp to return the AuditEnabled parameter
 * Fixed several PSScriptAnalyzer warnings
-* Added a new SPWorkflowService Resource
 
 The following changes will break 1.x configurations that use these resources:
 

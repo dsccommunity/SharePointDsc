@@ -33,12 +33,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName Get-SPSite -MockWith {return @($null)}
 
             Mock -CommandName Get-SPWorkflowServiceApplicationProxy -MockWith{
-                return @(@{
-                } | Add-Member -MemberType ScriptMethod `
-                                         -Name GetHostname `
-                                         -Value {
-                                            return $null
-                                        } -PassThru)
+                return $null
             }
 
             It "return error that invalid the specified site collection doesn't exist" {
@@ -84,10 +79,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "properly creates the workflow service proxy" {
                 Set-TargetResource @testParams
+                Assert-MockCalled Register-SPWorkflowService
             }
 
             It "returns the workflow service instance" {
-                Get-TargetResource @testParams
+                (Get-TargetResource @testParams).WorkflowHostUri | Should Be "http://workflow.sharepoint.com"
+                Assert-MockCalled Get-SPWorkflowServiceApplicationProxy
             }
 
             It "return true from the test method"{

@@ -15,10 +15,10 @@
         node localhost {
             SPWorkflowService WorkflowService
             {
-                WorkflowHostUri                         = "http://workflow.sharepoint.contoso.com"
-                SPSiteUrl                               = "http://sites.sharepoint.com"
-                AllowOAuthHttp                          = $true
-                PsDscRunAsCredential                    = $SetupAccount
+                WorkflowHostUri      = "http://workflow.sharepoint.contoso.com"
+                SPSiteUrl            = "http://sites.sharepoint.com"
+                AllowOAuthHttp       = $true
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

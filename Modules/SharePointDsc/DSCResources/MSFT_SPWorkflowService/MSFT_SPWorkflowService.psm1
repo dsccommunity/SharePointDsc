@@ -88,7 +88,9 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        Register-SPWorkflowService -WorkflowHostUri $params.WorkflowHostUri -SPSite $params.SPSiteUrl -AllowOAuthHttp:$params.AllowOAuthHttp -Force
+        Register-SPWorkflowService -WorkflowHostUri $params.WorkflowHostUri `
+            -SPSite $params.SPSiteUrl `
+            -AllowOAuthHttp:$params.AllowOAuthHttp -Force
     }
 }
 
