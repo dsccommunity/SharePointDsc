@@ -79,7 +79,7 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
 
-        $site = Get-SPSite $SPSiteUrl
+        $site = Get-SPSite $params.SPSiteUrl
 
         if ($null -eq $site)
         {
@@ -88,7 +88,7 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        Register-SPWorkflowService -WorkflowHostUri $WorkflowHostUri -SPSite $SPSiteUrl -AllowOAuthHttp:$AllowOAuthHttp
+        Register-SPWorkflowService -WorkflowHostUri $params.WorkflowHostUri -SPSite $params.SPSiteUrl -AllowOAuthHttp:$params.AllowOAuthHttp -Force
     }
 }
 
