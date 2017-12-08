@@ -94,7 +94,7 @@ function Set-TargetResource
 
         Write-Verbose -Message "Processing changes"
 
-        Register-SPWorkflowService -WorkflowServiceUri $WorkflowServiceUri -SPSite $SPSiteUrl -AllowOAuthHtpp:$AllowOAuthHttp
+        Register-SPWorkflowService -WorkflowHostUri $WorkflowHostUri -SPSite $SPSiteUrl -AllowOAuthHttp:$AllowOAuthHttp
     }
 }
 
@@ -125,7 +125,7 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues.WorkflowServiceUri)
+    if ($null -eq $CurrentValues.WorkflowHostUri)
     {
         return $false
     }

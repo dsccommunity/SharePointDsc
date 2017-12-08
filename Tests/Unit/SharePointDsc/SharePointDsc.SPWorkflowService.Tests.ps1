@@ -25,7 +25,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         # Test contexts
         Context -Name "Specified Site Collection does not exist" -Fixture {
             $testParams = @{
-                WorkflowServiceUri = "http://workflow.sharepoint.com"
+                WorkflowHostUri = "http://workflow.sharepoint.com"
                 SPSiteUrl = "http://sites.sharepoint.com"
                 AllowOAuthHttp = $true
             }
@@ -39,7 +39,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
         Context -Name "both the specified Site Collection and Workflow Service exist and are accessible" -Fixture {
             $testParams = @{
-                WorkflowServiceUri = "http://workflow.sharepoint.com"
+                WorkflowHostUri = "http://workflow.sharepoint.com"
                 SPSiteUrl = "http://sites.sharepoint.com"
                 AllowOAuthHttp = $true
             }
