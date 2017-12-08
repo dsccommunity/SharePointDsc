@@ -28,26 +28,20 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
-        $returnvalNull = @{
+        $returnval = @{
             WorkflowHostUri = $null
             SPSiteUrl = $null
             AllowOAuthHttp = $null
         }
-        $workflowProxy = Get-SPWorkflowServiceProxy
+        $workflowProxy = Get-SPWorkflowServiceApplicationProxy
 
-        if($null -eq $workflowProxy)
+        if($null -ne $workflowProxy)
         {
-            return $returnValNull
-        }
-        $returnval = @{
-            WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl)
-            SPSiteUrl = $SPSiteUrl
-            AllowOAuthHttp = $AllowOAuthHttp
-        }
-
-        if ($null -eq $wa)
-        {
-            return $returnvalNull
+            $returnval = @{
+                WorkflowHostUri = $workflowProxy.GetHostname($SPSiteUrl)
+                SPSiteUrl = $params.SPSiteUrl
+                AllowOAuthHttp = $params.AllowOAuthHttp
+            }
         }
 
         return $returnval

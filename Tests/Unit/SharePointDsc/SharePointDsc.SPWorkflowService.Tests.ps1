@@ -32,8 +32,25 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPSite -MockWith {return @($null)}
 
+            Mock -CommandName Get-SPWorkflowServiceApplicationProxy -MockWith{
+                return @(@{
+                } | Add-Member -MemberType ScriptMethod `
+                                         -Name GetHostname `
+                                         -Value {
+                                            return $null
+                                        } -PassThru)
+            }
+
             It "return error that invalid the specified site collection doesn't exist" {
                 { Set-TargetResource @testParams } | Should Throw "Specified site collection could not be found."
+            }
+
+            It "return empty workflow service instance"{
+                (Get-TargetResource @testParams).WorkflowHostUri  | Should Be $null
+            }
+
+            It "return false from the test method"{
+                Test-TargetResource @testParams | Should Be $false
             }
         }
 
@@ -55,8 +72,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 })
             }
 
+            Mock -CommandName Get-SPWorkflowServiceApplicationProxy -MockWith{
+                return @(@{
+                    Value = $true
+                } | Add-Member -MemberType ScriptMethod `
+                                         -Name GetHostname `
+                                         -Value {
+                                            return "http://workflow.sharepoint.com"
+                                        } -PassThru)
+            }
+
             It "properly creates the workflow service proxy" {
                 Set-TargetResource @testParams
+            }
+
+            It "returns the workflow service instance" {
+                Get-TargetResource @testParams
+            }
+
+            It "return true from the test method"{
+                Test-TargetResource @testParams |  Should Be $true
             }
         }
     }
