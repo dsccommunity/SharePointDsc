@@ -3,7 +3,7 @@
     This example registers the workflow service over http.
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -15,7 +15,7 @@
         node localhost {
             SPWorkflowService WorkflowService
             {
-                WorkflowServiceUri                      = "http://workflow.sharepoint.contoso.com"
+                WorkflowHostUri                      = "http://workflow.sharepoint.contoso.com"
                 SPSiteUrl                               = "http://sites.sharepoint.com"
                 SuiteNavBrandingLogoTitle               = "This is my logo"
                 AllowOAuthHttp                          = $true
