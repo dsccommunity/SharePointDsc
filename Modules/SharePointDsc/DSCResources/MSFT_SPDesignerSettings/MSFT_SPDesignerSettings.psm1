@@ -4,62 +4,62 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("WebApplication","SiteCollection")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("WebApplication","SiteCollection")]
+        [System.String]
         $SettingsScope,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSharePointDesigner,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowDetachPagesFromDefinition,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowCustomiseMasterPage,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowManageSiteURLStructure,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowCreateDeclarativeWorkflow,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSavePublishDeclarativeWorkflow,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSaveDeclarativeWorkflowAsTemplate,
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting SharePoint Designer configuration settings"
 
-    switch ($SettingsScope) 
+    switch ($SettingsScope)
     {
         "WebApplication" {
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                           -Arguments $PSBoundParameters `
                                           -ScriptBlock {
                 $params = $args[0]
-                try 
+                try
                 {
                     $spFarm = Get-SPFarm
-                } 
-                catch 
+                }
+                catch
                 {
                     Write-Verbose -Message ("No local SharePoint farm was detected. " + `
                                             "SharePoint Designer settings will not be applied")
@@ -68,19 +68,19 @@ function Get-TargetResource
 
                 # Check if web application exists
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript {
-                    ($_.Url).StartsWith($params.Url) 
+                    ($_.Url).StartsWith($params.Url, "CurrentCultureIgnoreCase")
                 }
-                if ($null -eq $webapp) 
+                if ($null -eq $webapp)
                 {
                     Write-Verbose -Message ("Web application not found. SharePoint Designer " + `
                                             "settings will not be applied")
                     return $null
-                } 
-                else 
+                }
+                else
                 {
                     # Get SPD settings for the web application
                     $spdSettings = Get-SPDesignerSettings $params.Url
-        
+
                     return @{
                         # Set the SPD settings
                         Url = $params.Url
@@ -101,18 +101,18 @@ function Get-TargetResource
             }
         }
         "SiteCollection" {
-            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true) 
+            if ((Test-SPDSCRunAsCredential -Credential $InstallAccount) -eq $true)
             {
                 $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                               -Arguments $PSBoundParameters `
                                               -ScriptBlock {
                     $params = $args[0]
-        
-                    try 
+
+                    try
                     {
                         $spFarm = Get-SPFarm
-                    } 
-                    catch 
+                    }
+                    catch
                     {
                         Write-Verbose -Message ("No local SharePoint farm was detected. " + `
                                                 "SharePoint Designer settings will not be applied")
@@ -121,13 +121,13 @@ function Get-TargetResource
 
                     # Check if site collections exists
                     $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
-                    if ($null -eq $site) 
+                    if ($null -eq $site)
                     {
                         Write-Verbose -Message ("Site collection not found. SharePoint " + `
                                                 "Designer settings will not be applied")
                         return $null
-                    } 
-                    else 
+                    }
+                    else
                     {
                         return @{
                             # Set the SPD settings
@@ -146,8 +146,8 @@ function Get-TargetResource
                         }
                     }
                 }
-            } 
-            else 
+            }
+            else
             {
                 throw ("A known issue exists that prevents these settings from being managed " + `
                        "when InstallAccount is used instead of PsDscRunAsAccount. See " + `
@@ -164,51 +164,51 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("WebApplication","SiteCollection")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("WebApplication","SiteCollection")]
+        [System.String]
         $SettingsScope,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSharePointDesigner,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowDetachPagesFromDefinition,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowCustomiseMasterPage,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowManageSiteURLStructure,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowCreateDeclarativeWorkflow,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSavePublishDeclarativeWorkflow,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSaveDeclarativeWorkflowAsTemplate,
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Setting SharePoint Designer configuration settings"
 
-    switch ($SettingsScope) 
+    switch ($SettingsScope)
     {
         "WebApplication" {
             Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -216,62 +216,62 @@ function Set-TargetResource
                                 -ScriptBlock {
                 $params = $args[0]
 
-                try 
+                try
                 {
                     $spFarm = Get-SPFarm
-                } 
-                catch 
+                }
+                catch
                 {
                     throw ("No local SharePoint farm was detected. SharePoint " + `
                            "Designer settings will not be applied")
                     return
                 }
-        
+
                 Write-Verbose -Message "Start update SPD web application settings"
 
                 # Check if web application exists
                 $webapp = Get-SPWebApplication | Where-Object -FilterScript {
-                    ($_.Url).StartsWith($params.Url) 
+                    ($_.Url).StartsWith($params.Url, "CurrentCultureIgnoreCase")
                 }
                 if ($null -eq $webapp)
                 {
                     throw ("Web application not found. SharePoint Designer settings " + `
                            "will not be applied")
                     return
-                } 
+                }
                 else
                 {
                     # Set the SharePoint Designer settings
-                    if ($params.ContainsKey("AllowSharePointDesigner")) 
+                    if ($params.ContainsKey("AllowSharePointDesigner"))
                     {
-                        $webapp.AllowDesigner = $params.AllowSharePointDesigner 
+                        $webapp.AllowDesigner = $params.AllowSharePointDesigner
                     }
-                    if ($params.ContainsKey("AllowDetachPagesFromDefinition")) 
+                    if ($params.ContainsKey("AllowDetachPagesFromDefinition"))
                     {
-                        $webapp.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition 
+                        $webapp.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition
                     }
-                    if ($params.ContainsKey("AllowCustomiseMasterPage")) 
+                    if ($params.ContainsKey("AllowCustomiseMasterPage"))
                     {
-                        $webapp.AllowMasterPageEditing = $params.AllowCustomiseMasterPage 
+                        $webapp.AllowMasterPageEditing = $params.AllowCustomiseMasterPage
                     }
-                    if ($params.ContainsKey("AllowManageSiteURLStructure")) 
+                    if ($params.ContainsKey("AllowManageSiteURLStructure"))
                     {
-                        $webapp.ShowURLStructure = $params.AllowManageSiteURLStructure 
+                        $webapp.ShowURLStructure = $params.AllowManageSiteURLStructure
                     }
-                    if ($params.ContainsKey("AllowCreateDeclarativeWorkflow")) 
+                    if ($params.ContainsKey("AllowCreateDeclarativeWorkflow"))
                     {
                         $webapp.AllowCreateDeclarativeWorkflow = `
-                            $params.AllowCreateDeclarativeWorkflow 
+                            $params.AllowCreateDeclarativeWorkflow
                     }
-                    if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow")) 
+                    if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow"))
                     {
                         $webapp.AllowSavePublishDeclarativeWorkflow = `
-                            $params.AllowSavePublishDeclarativeWorkflow 
+                            $params.AllowSavePublishDeclarativeWorkflow
                     }
-                    if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate")) 
+                    if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate"))
                     {
                         $webapp.AllowSaveDeclarativeWorkflowAsTemplate = `
-                            $params.AllowSaveDeclarativeWorkflowAsTemplate 
+                            $params.AllowSaveDeclarativeWorkflowAsTemplate
                     }
                     $webapp.Update()
                 }
@@ -285,65 +285,65 @@ function Set-TargetResource
                                     -ScriptBlock {
                     $params = $args[0]
 
-                    try 
+                    try
                     {
                         $spFarm = Get-SPFarm
-                    } 
-                    catch 
+                    }
+                    catch
                     {
                         throw ("No local SharePoint farm was detected. SharePoint Designer " + `
                                "settings will not be applied")
                         return
                     }
-        
+
                     Write-Verbose -Message "Start update SPD site collection settings"
 
                     # Check if site collection exists
                     $site = Get-SPSite -Identity $params.Url -ErrorAction SilentlyContinue
-                    if ($null -eq $site) 
+                    if ($null -eq $site)
                     {
                         throw ("Site collection not found. SharePoint Designer settings " + `
                                "will not be applied")
                         return $null
-                    } 
-                    else 
+                    }
+                    else
                     {
                         # Set the SharePoint Designer settings
-                        if ($params.ContainsKey("AllowSharePointDesigner")) 
+                        if ($params.ContainsKey("AllowSharePointDesigner"))
                         {
-                            $site.AllowDesigner = $params.AllowSharePointDesigner 
+                            $site.AllowDesigner = $params.AllowSharePointDesigner
                         }
-                        if ($params.ContainsKey("AllowDetachPagesFromDefinition")) 
+                        if ($params.ContainsKey("AllowDetachPagesFromDefinition"))
                         {
-                            $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition 
+                            $site.AllowRevertFromTemplate = $params.AllowDetachPagesFromDefinition
                         }
-                        if ($params.ContainsKey("AllowCustomiseMasterPage")) 
+                        if ($params.ContainsKey("AllowCustomiseMasterPage"))
                         {
-                            $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage 
+                            $site.AllowMasterPageEditing = $params.AllowCustomiseMasterPage
                         }
-                        if ($params.ContainsKey("AllowManageSiteURLStructure")) 
+                        if ($params.ContainsKey("AllowManageSiteURLStructure"))
                         {
-                            $site.ShowURLStructure = $params.AllowManageSiteURLStructure 
+                            $site.ShowURLStructure = $params.AllowManageSiteURLStructure
                         }
-                        if ($params.ContainsKey("AllowCreateDeclarativeWorkflow")) 
+                        if ($params.ContainsKey("AllowCreateDeclarativeWorkflow"))
                         {
                             $site.AllowCreateDeclarativeWorkflow = `
-                                $params.AllowCreateDeclarativeWorkflow 
+                                $params.AllowCreateDeclarativeWorkflow
                         }
-                        if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow")) 
+                        if ($params.ContainsKey("AllowSavePublishDeclarativeWorkflow"))
                         {
                             $site.AllowSavePublishDeclarativeWorkflow = `
-                                $params.AllowSavePublishDeclarativeWorkflow 
+                                $params.AllowSavePublishDeclarativeWorkflow
                         }
-                        if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate")) 
+                        if ($params.ContainsKey("AllowSaveDeclarativeWorkflowAsTemplate"))
                         {
                             $site.AllowSaveDeclarativeWorkflowAsTemplate = `
-                            $params.AllowSaveDeclarativeWorkflowAsTemplate 
+                            $params.AllowSaveDeclarativeWorkflowAsTemplate
                         }
                     }
                 }
-            } 
-            else 
+            }
+            else
             {
                 throw ("A known issue exists that prevents these settings from being " + `
                        "managed when InstallAccount is used instead of PsDscRunAsAccount. " + `
@@ -360,45 +360,45 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("WebApplication","SiteCollection")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("WebApplication","SiteCollection")]
+        [System.String]
         $SettingsScope,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSharePointDesigner,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowDetachPagesFromDefinition,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowCustomiseMasterPage,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowManageSiteURLStructure,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowCreateDeclarativeWorkflow,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSavePublishDeclarativeWorkflow,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $AllowSaveDeclarativeWorkflowAsTemplate,
-        
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 

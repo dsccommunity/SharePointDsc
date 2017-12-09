@@ -41,9 +41,7 @@
 * Fixed an issue where the instance name wasn't detected correctly
   * SPAppManagementServiceApp
   * SPBCSServiceApp
-  * SPCreateFarm
   * SPFarm
-  * SPJoinFarm
   * SPMachineTranslationServiceApp
   * SPManagedMetaDataServiceApp
   * SPPerformancePointServiceApp
@@ -57,6 +55,9 @@
 * Fixed SPSearchIndexPartition to return the RootFolder parameter
 * Fixed SPSecureStoreServiceApp to return the AuditEnabled parameter
 * Fixed several PSScriptAnalyzer warnings
+* Fixed SPDesignerSettings which did not accept URL with capitals correctly
+* Fixed SPSearchTopology to only return first index partition to prevent
+  conflicts with SPSearchIndexPartition
 
 The following changes will break 1.x configurations that use these resources:
 
