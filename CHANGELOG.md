@@ -3,7 +3,7 @@
 ## 2.0
 
 * Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings,
-  SPLogLevel
+  SPLogLevel, SPWorkflowService
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
