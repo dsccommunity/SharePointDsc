@@ -20,6 +20,7 @@
 * Added VSCode workspace settings to meet coding guidelines
 * Added custom Proxy Name support to SPBCSServiceApp, SPMachineTranslationServiceApp,
   SPStateServiceApp
+* Updated SPTrustedRootAuthority resource to enable using private key certificates.
 * Update SPManagedMetadataServiceApp to allow the configuration of the default
   and working language
 * Update SPWeb to allow the management of the access requests settings
