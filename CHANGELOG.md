@@ -58,6 +58,8 @@
 * Fixed SPDesignerSettings which did not accept URL with capitals correctly
 * Fixed SPSearchTopology to only return first index partition to prevent
   conflicts with SPSearchIndexPartition
+* Fixed SPDistributedCacheService where reprovisioning the Distributed Cache
+  did not work
 
 The following changes will break 1.x configurations that use these resources:
 

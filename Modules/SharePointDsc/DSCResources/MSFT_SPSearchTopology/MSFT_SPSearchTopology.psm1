@@ -128,7 +128,7 @@ function Get-TargetResource
 
         $IndexComponents = @()
         $IndexComponents += ($allComponents | Where-Object -FilterScript {
-                                ($_.GetType().Name -eq "IndexComponent") -and
+                                ($_.GetType().Name -eq "IndexComponent") -and `
                                 $_.IndexPartitionOrdinal -eq 0
                             }).ServerId | ForEach-Object -Process {
                                 $serverId = $_
