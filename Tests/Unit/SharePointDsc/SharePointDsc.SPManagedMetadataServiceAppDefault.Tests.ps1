@@ -73,7 +73,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             )
         }
 
-        Context -Name "Wehn no service application proxy or managed metadata service application proxy exist in the farm" -Fixture {
+        Context -Name "When no service application proxy or managed metadata service application proxy exist in the farm" -Fixture {
             $testParams = @{
                 IsSingleInstance               = "Yes"
                 DefaultSiteCollectionProxyName = "DefaultSiteCollectionProxyName"
@@ -253,6 +253,5 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
     }
 }
-
 
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -78,7 +78,6 @@ function Get-TargetResource
                     $defaultKeywordProxy = $null
                 }
             }
-
         }
 
         return @{
@@ -150,7 +149,6 @@ function Set-TargetResource
             $serviceAppProxy.Update()
         }
     }
-
 }
 
 function Test-TargetResource
