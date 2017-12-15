@@ -34,53 +34,57 @@ function Get-TargetResource
 
         if ($null -eq $serviceAppProxies)
         {
-            return @{
-                IsSingleInstance               = $params.IsSingleInstance
-                DefaultSiteCollectionProxyName = ""
-                DefaultKeywordProxyName        = ""
-                InstallAccount                 = $params.InstallAccount
-            }
+            throw "There are no Managed Metadata Service Application Proxy available in the farm"
         }
-        else
+
+        $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Managed Metadata Service Connection"
+        }
+
+        if ($null -eq $serviceAppProxies)
         {
-            $serviceAppProxies | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Managed Metadata Service Connection"
-            }
+            throw "There are no Managed Metadata Service Application Proxy available in the farm"
+        }
 
-            $defaultSiteCollectionProxy = ""
-            foreach($serviceAppProxy in $serviceAppProxies)
+        $defaultSiteCollectionProxyIsSet = $false
+        $defaultKeywordProxyIsSet = $false
+
+        $defaultSiteCollectionProxy = $null
+        $defaultKeywordProxy = $null
+
+        foreach ($serviceAppProxy in $serviceAppProxies)
+        {
+            if ($serviceAppProxy.Properties["IsDefaultSiteCollectionTaxonomy"] -eq $true)
             {
-                if($serviceAppProxy.Properties["IsDefaultKeywordTaxonomy"] -eq $true)
+                if ($defaultSiteCollectionProxyIsSet -eq $false)
                 {
-                    if($defaultSiteCollectionProxy -eq "")
-                    {
-                        $defaultSiteCollectionProxy = $serviceAppProxy.Name
-                    }
-                    else
-                    {
-                        $defaultSiteCollectionProxy = $null
-                    }
+                    $defaultSiteCollectionProxy = $serviceAppProxy.Name
+                    $defaultSiteCollectionProxyIsSet = $true
                 }
-
-                $defaultKeywordProxy = ""
-                if($serviceAppProxy.Properties["IsDefaultSiteCollectionTaxonomy"] -eq $true)
+                else
                 {
-                    if($defaultKeywordProxy -eq "")
-                    {
-                        $defaultKeywordProxy = $serviceAppProxy.Name
-                    }
-                    else
-                    {
-                        $defaultKeywordProxy = $null
-                    }
+                    $defaultSiteCollectionProxy = $null
                 }
             }
+            if ($serviceAppProxy.Properties["IsDefaultKeywordTaxonomy"] -eq $true)
+            {
+                if ($defaultKeywordProxyIsSet -eq $false)
+                {
+                    $defaultKeywordProxy = $serviceAppProxy.Name
+                    $defaultKeywordProxyIsSet = $true
+                }
+                else
+                {
+                    $defaultKeywordProxy = $null
+                }
+            }
+
         }
 
         return @{
             IsSingleInstance               = $params.IsSingleInstance
-            DefaultSiteCollectionProxyName = ""
-            DefaultKeywordProxyName        = ""
+            DefaultSiteCollectionProxyName = $defaultSiteCollectionProxy
+            DefaultKeywordProxyName        = $defaultKeywordProxy
             InstallAccount                 = $params.InstallAccount
         }
     }
@@ -115,33 +119,37 @@ function Set-TargetResource
     $result = Get-TargetResource @PSBoundParameters
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
-    -Arguments $PSBoundParameters `
-    -ScriptBlock {
+        -Arguments $PSBoundParameters `
+        -ScriptBlock {
 
-    $params = $args[0]
+        $params = $args[0]
 
-    $serviceAppProxies | Where-Object -FilterScript {
-        $_.GetType().FullName -eq "Managed Metadata Service Connection"
-    }
+        $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
 
-    foreach($serviceAppProxy in $serviceAppProxies)
-    {
-        $proxyName = $serviceAppProxy.Name
-
-        $serviceAppProxy.Properties["IsDefaultKeywordTaxonomy"] = $false
-        $serviceAppProxy.Properties["IsDefaultSiteCollectionTaxonomy"] = $false
-
-        if($proxyName -eq $params.DefaultKeywordProxyName)
-        {
-            $serviceAppProxy.Properties["IsDefaultKeywordTaxonomy"] = $true
+        $serviceAppProxies = $serviceAppProxies | Where-Object -FilterScript {
+            $_.GetType().FullName -eq "Managed Metadata Service Connection"
         }
 
-        if($proxyName -eq $params.DefaultSiteCollectionProxyName)
+        foreach ($serviceAppProxy in $serviceAppProxies)
         {
-            $serviceAppProxy.Properties["IsDefaultSiteCollectionTaxonomy"] = $true
+            $proxyName = $serviceAppProxy.Name
+
+            $serviceAppProxy.Properties["IsDefaultKeywordTaxonomy"] = $false
+            $serviceAppProxy.Properties["IsDefaultSiteCollectionTaxonomy"] = $false
+
+            if ($proxyName -eq $params.DefaultKeywordProxyName)
+            {
+                $serviceAppProxy.Properties["IsDefaultKeywordTaxonomy"] = $true
+            }
+
+            if ($proxyName -eq $params.DefaultSiteCollectionProxyName)
+            {
+                $serviceAppProxy.Properties["IsDefaultSiteCollectionTaxonomy"] = $true
+            }
+
+            $serviceAppProxy.Update()
         }
     }
-}
 
 }
 
