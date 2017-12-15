@@ -128,7 +128,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             15 {
                 Context -Name "When PSDSCRunAsCredential is not the Farm Account" -Fixture {
                     $testParams = @{
-                        UserProfileServiceAppName = "User Profile Service Service App"
+                        UserProfileServiceAppName = "User Profile Sync Service App"
                         FarmAccount = $mockCredential
                         Ensure = "Present"
                     }
@@ -215,7 +215,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TypeName = "User Profile Synchronization Service"
                         }
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
-                            return @{ Name = "UserProfileServiceInstance" }
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
                         if ($Global:SPDSCUPACheck -eq $false)
                         {
@@ -302,7 +302,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TypeName = "User Profile Synchronization Service"
                         }
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
-                            return @{ Name = "UserProfileServiceInstance" }
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
@@ -332,7 +332,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TypeName = "User Profile Synchronization Service"
                         }
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
-                            return @{ Name = "UserProfileServiceInstance" }
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
                         if ($Global:SPDSCUPACheck -eq $false)
                         {
@@ -380,7 +380,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TypeName = "User Profile Synchronization Service"
                         }
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
-                            return @{ Name = "UserProfileServiceInstance" }
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid [Guid]::Empty -PassThru
@@ -411,7 +411,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TypeName = "User Profile Synchronization Service"
                         }
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
-                            return @{ Name = "UserProfileServiceInstance" }
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Disabled" -PassThru
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
@@ -451,7 +451,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             TypeName = "User Profile Synchronization Service"
                         }
                         $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
-                            return @{ Name = "UserProfileServiceInstance" }
+                            return @{ Name = "ProfileSynchronizationServiceInstance" }
                         } -PassThru -Force
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty Status "Online" -PassThru
                         $spSvcInstance = $spSvcInstance | Add-Member NoteProperty UserProfileApplicationGuid ([Guid]::NewGuid()) -PassThru
