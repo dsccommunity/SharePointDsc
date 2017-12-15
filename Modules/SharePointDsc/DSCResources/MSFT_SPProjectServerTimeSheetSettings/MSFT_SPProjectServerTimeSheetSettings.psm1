@@ -110,7 +110,11 @@ function Get-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-        $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
+        $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+        $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+        $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                         -EndpointName Admin `
+                                                         -UseKerberos:$useKerberos
 
         $script:currentSettings = $null
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
@@ -346,7 +350,11 @@ function Set-TargetResource
 
         $params = $args[0]
 
-        $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Admin
+        $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+        $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+        $adminService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                         -EndpointName Admin `
+                                                         -UseKerberos:$useKerberos
 
         Use-SPDscProjectServerWebService -Service $adminService -ScriptBlock {
             $settings = $adminService.ReadTimeSheetSettings()
