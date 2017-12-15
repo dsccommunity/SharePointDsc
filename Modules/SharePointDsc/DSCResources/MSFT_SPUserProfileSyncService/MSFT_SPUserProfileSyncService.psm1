@@ -88,7 +88,7 @@ function Get-TargetResource
         }
 
         $syncService = $services | Where-Object -FilterScript {
-            $_.TypeName -eq "User Profile Synchronization Service"
+            $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
         }
 
         if ($null -eq $syncService)
@@ -98,7 +98,7 @@ function Get-TargetResource
             $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
             $syncService = $services | Where-Object -FilterScript {
-                $_.TypeName -eq "User Profile Synchronization Service"
+                $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }
         }
 
@@ -250,14 +250,14 @@ function Set-TargetResource
             $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
             $syncService = $services | Where-Object -FilterScript {
-                $_.TypeName -eq "User Profile Synchronization Service"
+                $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
             }
             if ($null -eq $syncService)
             {
                 $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                 $currentServer = "$currentServer.$domain"
                 $syncService = $services | Where-Object -FilterScript {
-                    $_.TypeName -eq "User Profile Synchronization Service"
+                    $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
                 }
             }
             if ($null -eq $syncService)
@@ -300,19 +300,16 @@ function Set-TargetResource
                 {
                     Start-Sleep -Seconds 60
                 }
-                else
-                {
-                    $isInDesiredState = $true
-                }
+
                 # Get the current status of the Sync service
                 Write-Verbose ("$([DateTime]::Now.ToShortTimeString()) - Waiting for user profile " + `
                             "sync service to become '$desiredState' (waited $count of " + `
                             "$maxCount minutes)")
 
-		$services = Get-SPServiceInstance -Server $currentServer `
+		        $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
                 $syncService = $services | Where-Object -FilterScript {
-                    $_.TypeName -eq "User Profile Synchronization Service"
+                    $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
                 }
                 $count++
             }
@@ -326,7 +323,7 @@ function Set-TargetResource
             Remove-SPDSCUserToLocalAdmin -UserName $farmAccountName
         }
     }
-    if(!$isInDesiredState)
+    if($syncService.Status -ne $desiredState)
     {
         throw "An error occured. We couldn't properly set the User Profile Sync Service on the server."
     }
@@ -441,4 +438,3 @@ function Test-SPDscUserProfileDBReadOnly()
 }
 
 Export-ModuleMember -Function *-TargetResource
-
