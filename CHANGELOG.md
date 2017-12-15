@@ -3,7 +3,7 @@
 ## 2.0
 
 * Added resource: SPMinRoleCompliance, SPWebAppSuiteBar, SPWebAppPeoplePickerSettings,
-  SPLogLevel, SPWorkflowService
+  SPLogLevel, SPWorkflowService, SPManagedMetadataAppDefault
 * Added support for Project Server 2016 with the following new resources:
   SPProjectServerLicense, SPProjectServerAdditionalSettings,
   SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
@@ -78,6 +78,9 @@ The following changes will break 1.x configurations that use these resources:
 * Changed implementation of the Web Application authentication configuration.
   A new resource (SPWebAppAuthentication) has been added and existing properties
   have been removed from SPWebApplication and SPWebApplicationExtension
+* Changed implementation of SPManagedMetadataServiceApp resource. This resource
+  will not set any defaults for the keyword and site collection term store. The
+  new resource SPManagedMetadataServiceAppDefault has to be used for this setting.
 
 ## 1.9
 
