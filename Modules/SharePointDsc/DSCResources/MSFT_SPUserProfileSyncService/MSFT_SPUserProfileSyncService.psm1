@@ -306,7 +306,7 @@ function Set-TargetResource
                             "sync service to become '$desiredState' (waited $count of " + `
                             "$maxCount minutes)")
 
-		        $services = Get-SPServiceInstance -Server $currentServer `
+                $services = Get-SPServiceInstance -Server $currentServer `
                                                   -ErrorAction SilentlyContinue
                 $syncService = $services | Where-Object -FilterScript {
                     $_.GetType().Name -eq "ProfileSynchronizationServiceInstance"
