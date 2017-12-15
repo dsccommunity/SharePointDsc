@@ -21,7 +21,7 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
- 
+
     Write-Verbose "Getting Trusted Root Authority with name '$Name'"
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -31,7 +31,7 @@ function Get-TargetResource
         $rootCert = Get-SPTrustedRootAuthority -Identity $params.Name -ErrorAction SilentlyContinue
 
         $ensure = "Absent"
-        
+
         if($null -eq $rootCert)
         {
             return @{
@@ -39,11 +39,11 @@ function Get-TargetResource
                 CertificateThumbprint = [string]::Empty
                 Ensure = $ensure
             }
-        }    
-        else 
+        }
+        else
         {
             $ensure = "Present"
-            
+
             return @{
                 Name = $params.Name
                 CertificateThumbprint = $rootCert.Certificate.Thumbprint
@@ -81,7 +81,7 @@ function Set-TargetResource
     Write-Verbose -Message "Setting SPTrustedRootAuthority '$Name'"
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Present") 
+    if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating SPTrustedRootAuthority '$Name'"
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -90,32 +90,48 @@ function Set-TargetResource
             $params = $args[0]
             $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
                              -ErrorAction SilentlyContinue
-            
-            if($null -eq $cert)
+
+            if ($null -eq $cert)
             {
                 throw "Certificate not found in the local Certificate Store"
+            }
+
+            if ($cert.HasPrivateKey)
+            {
+                $pubKeyBytes = $cert.Export("cert")
+                $cert2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+                $cert2.Import($pubKeyBytes)
+                $cert = $cert2
             }
 
             Set-SPTrustedRootAuthority -Identity $params.Name -Certificate $cert
         }
     }
-    if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent") 
+    if ($Ensure -eq "Present" -and $CurrentValues.Ensure -eq "Absent")
     {
         Write-Verbose -Message "Adding SPTrustedRootAuthority '$Name'"
         $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                       -Arguments $PSBoundParameters `
                                       -ScriptBlock {
             $params = $args[0]
-            
+
             $cert = Get-Item -Path "CERT:\LocalMachine\My\$($params.CertificateThumbprint)" `
                              -ErrorAction SilentlyContinue
-            
+
             if($null -eq $cert)
             {
                 throw "Certificate not found in the local Certificate Store"
-            } 
-            
-            New-SPTrustedRootAuthority -Name $params.Name -Certificate $cert 
+            }
+
+            if($cert.HasPrivateKey)
+            {
+                $pubKeyBytes = $cert.Export("cert")
+                $cert2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+                $cert2.Import($pubKeyBytes)
+                $cert = $cert2
+            }
+
+            New-SPTrustedRootAuthority -Name $params.Name -Certificate $cert
         }
     }
     if ($Ensure -eq "Absent")
@@ -164,7 +180,7 @@ function Test-TargetResource
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("Name","CertificateThumbprint","Ensure")
     }
-    else 
+    else
     {
          return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
