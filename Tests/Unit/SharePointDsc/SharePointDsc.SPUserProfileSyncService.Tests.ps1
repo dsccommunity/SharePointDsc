@@ -482,6 +482,54 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Assert-MockCalled Stop-SPServiceInstance
                     }
                 }
+                Context -Name "User profile sync service is not found" -Fixture {
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        RunOnlyWhenWriteable = $true
+                        InstallAccount = $mockCredential
+                    }
+
+                    Mock -CommandName Get-SPServiceInstance -MockWith {
+                        $spSvcInstance = [pscustomobject]@{
+                            ID = [Guid]::Parse("21946987-5163-418f-b781-2beb83aa191f")
+                        }
+                        $spSvcInstance = $spSvcInstance | Add-Member ScriptMethod GetType {
+                            return @{ Name = "FakeServiceInstance" }
+                        } -PassThru -Force
+                        return $spSvcInstance
+                    }
+
+                    It "Should return present from the get method" {
+                        (Get-TargetResource @testParams).Ensure | Should Be "Absent"
+                    }
+
+                    It "Should throw an error from the set method" {
+                        { Set-TargetResource @testParams } | Should throw
+                    }
+                }
+                Context -Name "Can't get the Farm Account" -Fixture{
+                    $testParams = @{
+                        UserProfileServiceAppName = "User Profile Service Service App"
+                        FarmAccount = $mockCredential
+                        Ensure = "Present"
+                        RunOnlyWhenWriteable = $true
+                        InstallAccount = $mockCredential
+                    }
+
+                    Mock -CommandName Get-SPDSCFarmAccountName -MockWith{
+                        return $null
+                    }
+
+                    It "Should throw an error from the get method" {
+                        { (Get-TargetResource @testParams).Ensure } | Should throw "Unable to retrieve the Farm Account. Check if the farm exists."
+                    }
+
+                    It "Should throw an error from the set method" {
+                        { Set-TargetResource @testParams } | Should throw "Unable to retrieve the Farm Account. Check if the farm exists."
+                    }
+                }
             }
             16 {
                 Context -Name "All methods throw exceptions as user profile sync doesn't exist in 2016" -Fixture {
