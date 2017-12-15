@@ -272,7 +272,7 @@ function Set-TargetResource
                                                         -ErrorAction SilentlyContinue
                 if ($null -eq $ups)
                 {
-                    throw [Exception] ("No user profile service Service Application was found " + `
+                    throw [Exception] ("No User Profile Service Application was found " + `
                                        "named $($params.UserProfileServiceAppName)")
                 }
 
