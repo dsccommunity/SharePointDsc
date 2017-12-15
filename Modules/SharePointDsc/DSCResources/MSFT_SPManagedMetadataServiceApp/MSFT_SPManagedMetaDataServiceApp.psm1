@@ -281,7 +281,7 @@ function Set-TargetResource
             -Arguments ($PSBoundParameters, $pName) `
             -ScriptBlock {
             $params = $args[0]
-            $pName = $args[1]
+            $pName = $args[1    ]
 
             $newParams = @{
                 Name            = $params.Name
@@ -301,9 +301,7 @@ function Set-TargetResource
                 New-SPMetadataServiceApplicationProxy -Name $pName `
                     -ServiceApplication $app `
                     -DefaultProxyGroup `
-                    -ContentTypePushdownEnabled `
-                    -DefaultKeywordTaxonomy `
-                    -DefaultSiteCollectionTaxonomy
+                    -ContentTypePushdownEnabled
             }
         }
         $result = Get-TargetResource @PSBoundParameters
