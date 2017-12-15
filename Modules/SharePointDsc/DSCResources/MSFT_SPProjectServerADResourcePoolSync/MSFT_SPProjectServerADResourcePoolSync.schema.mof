@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPProjectServerADResourcePoolSync")]
 class MSFT_SPProjectServerADResourcePoolSync : OMI_BaseResource
 {
-    [Key, Description("The URL of the Project site to set permissions for")] string Url;
+    [Key, Description("The default zone URL of the Project site to set permissions for")] string Url;
     [Write, Description("The names of groups in the current domain to sync resources from")] string GroupNames[];
     [Write, Description("Should the resource sync process be present or absent for this site?"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("Should inactive users found in sync be automatically reactiviated?")] boolean AutoReactivateUsers;

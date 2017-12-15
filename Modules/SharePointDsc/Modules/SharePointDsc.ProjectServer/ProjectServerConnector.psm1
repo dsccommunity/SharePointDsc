@@ -72,7 +72,11 @@ function Get-SPDscProjectServerResourceId
         $PwaUrl
     )
 
-    $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl -EndpointName Resource
+    $webAppUrl = (Get-SPSite -Identity $PwaUrl).WebApplication.Url
+    $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+    $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl `
+                                                        -EndpointName Resource `
+                                                        -UseKerberos:$useKerberos
 
     $script:SPDscReturnVal = $null
     Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -143,7 +147,11 @@ function Get-SPDscProjectServerResourceName
         $PwaUrl
     )
 
-    $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl -EndpointName Resource
+    $webAppUrl = (Get-SPSite -Identity $PwaUrl).WebApplication.Url
+    $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+    $resourceService = New-SPDscProjectServerWebService -PwaUrl $PwaUrl `
+                                                        -EndpointName Resource `
+                                                        -UseKerberos:$useKerberos
 
     $script:SPDscReturnVal = ""
     Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -166,10 +174,12 @@ function New-SPDscProjectServerWebService
                      "Driver", "Events", "LookupTable", "Notifications", "ObjectLinkProvider", 
                      "PortfolioAnalyses", "Project", "QueueSystem", "ResourcePlan", "Resource", 
                      "Security", "Statusing", "TimeSheet", "Workflow", "WssInterop")] 
-        $EndpointName
-    )
+        $EndpointName,
 
-    $authMode = Get-SPAuthenticationProvider -WebApplication ((Get-SPSite $PwaUrl).WebApplication.Url) -Zone Default
+        [Parameter()]
+        [Switch]
+        $UseKerberos
+    )
 
     [System.Reflection.Assembly]::LoadWithPartialName("System.ServiceModel") | Out-Null
     $psDllPath = Join-Path -Path $PSScriptRoot -ChildPath "ProjectServerServices.dll"
@@ -196,7 +206,7 @@ function New-SPDscProjectServerWebService
     $binding.ReaderQuotas.MaxNameTableCharCount = $maxSize
     $binding.MessageEncoding = [System.ServiceModel.WSMessageEncoding]::Text
 
-    if ($authMode.DisableKerberos -eq $true) 
+    if ($UseKerberos.IsPresent -eq $false) 
     { 
         $binding.Security.Transport.ClientCredentialType = [System.ServiceModel.HttpClientCredentialType]::Ntlm 
     } 

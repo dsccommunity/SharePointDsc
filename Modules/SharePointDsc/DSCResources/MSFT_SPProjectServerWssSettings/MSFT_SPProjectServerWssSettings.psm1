@@ -35,7 +35,11 @@ function Get-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-        $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName WssInterop
+        $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+        $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+        $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                       -EndpointName WssInterop `
+                                                       -UseKerberos:$useKerberos
 
         $script:currentValue = $null
         Use-SPDscProjectServerWebService -Service $wssService -ScriptBlock {
@@ -103,7 +107,11 @@ function Set-TargetResource
         $modulePath = "..\..\Modules\SharePointDsc.ProjectServer\ProjectServerConnector.psm1"
         Import-Module -Name (Join-Path -Path $scriptRoot -ChildPath $modulePath -Resolve)
 
-        $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName WssInterop
+        $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+        $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+        $wssService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                       -EndpointName WssInterop `
+                                                       -UseKerberos:$useKerberos
 
         Use-SPDscProjectServerWebService -Service $wssService -ScriptBlock {
             $settings = $wssService.ReadWssSettings()
