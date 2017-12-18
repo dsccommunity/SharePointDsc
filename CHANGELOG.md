@@ -118,7 +118,7 @@ The following changes will break 1.x configurations that use these resources:
 * SPManagedMetadataServiceApp
   * Changed implementation of resource. This resource will not set any defaults
     for the keyword and site collection term store. The new resource
-	SPManagedMetadataServiceAppDefault has to be used for this setting.
+    SPManagedMetadataServiceAppDefault has to be used for this setting.
 * SPShellAdmin
   * Updated so it also works for non-content databases
 * SPTimerJobState
