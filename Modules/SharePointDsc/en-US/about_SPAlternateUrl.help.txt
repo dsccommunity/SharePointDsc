@@ -11,9 +11,9 @@
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the setting is configured.
     
-.PARAMETER WebAppUrl
+.PARAMETER WebAppName
     Key - String
-    The URL of the web application to apply the alternate URL to
+    The name of the web application to apply the alternate URL to
 
 .PARAMETER Zone
     Key - String
@@ -21,8 +21,12 @@
     The Zone to use for the alternate URL
 
 .PARAMETER Url
-    Write - String
+    Key - String
     The new alternate URL
+
+.PARAMETER Internal
+    Write - Boolean
+    Specifies if the URL has to be configured as internal
 
 .PARAMETER Ensure
     Write - string
@@ -50,9 +54,11 @@
         node localhost {
             SPAlternateUrl CentralAdminAAM
             {
-                WebAppUrl            = "http://sharepoint1:9999"
+                WebAppName           = "SharePoint - www.domain.com80"
                 Zone                 = "Intranet"
                 Url                  = "https://admin.sharepoint.contoso.com"
+                Internal             = $false
+                Ensure               = "Present"
                 PsDscRunAsCredential = $SetupAccount
             }
         }
@@ -76,8 +82,10 @@
         node localhost {
             SPAlternateUrl CentralAdminAAM
             {
-                WebAppUrl            = "http://sharepoint1:9999"
+                WebAppName           = "SharePoint - www.domain.com80"
                 Zone                 = "Intranet"
+                Url                  = "http://www.externaldomain.com"
+                Internal             = $false
                 Ensure               = "Absent"
                 PsDscRunAsCredential = $SetupAccount
             }

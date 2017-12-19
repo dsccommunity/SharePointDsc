@@ -46,13 +46,13 @@
     Write - String
     List of all accounts that are not allowed to have Shell Admin permissions
 
-.PARAMETER ContentDatabases
+.PARAMETER Databases
     Write - String
-    Shell Admin configuration of Content Databases
+    Shell Admin configuration of Databases
 
-.PARAMETER AllContentDatabases
+.PARAMETER AllDatabases
     Write - Boolean
-    Specify if all content databases must get the same config as the general config
+    Specify if all databases must get the same config as the general config
 
 .PARAMETER InstallAccount
     Write - String
@@ -76,9 +76,9 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name                = "Shell Admins"
-                Members             = "CONTOSO\user1", "CONTOSO\user2"
-                AllContentDatabases = $true
+                Name         = "Shell Admins"
+                Members      = "CONTOSO\user1", "CONTOSO\user2"
+                AllDatabases = $true
             }
         }
     }
@@ -101,14 +101,14 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name                = "Shell Admins"
-                Members             = "CONTOSO\user1", "CONTOSO\user2"
-                ContentDatabases    = @(
-                    @(MSFT_SPContentDatabasePermissions {
+                Name         = "Shell Admins"
+                Members      = "CONTOSO\user1", "CONTOSO\user2"
+                Databases    = @(
+                    @(MSFT_SPDatabasePermissions {
                         Name = "SharePoint_Content_1"
                         Members = "CONTOSO\user2", "CONTOSO\user3"
                     })
-                    @(MSFT_SPContentDatabasePermissions {
+                    @(MSFT_SPDatabasePermissions {
                         Name = "SharePoint_Content_2"
                         Members = "CONTOSO\user3", "CONTOSO\user4"
                     })

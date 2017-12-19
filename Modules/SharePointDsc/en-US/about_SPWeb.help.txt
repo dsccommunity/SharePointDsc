@@ -50,6 +50,10 @@
     Write - Boolean
     True if the web should be added to the top nav bar of the parent web, otherwise false.
 
+.PARAMETER RequestAccessEmail
+    Write - string
+    The e-mail address to which requests for access are sent. Set to emtpy string to disable access requests.
+
 .PARAMETER InstallAccount
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
@@ -78,6 +82,69 @@
                 Template                 = "STS#0"
                 Language                 = 1033
                 AddToTopNav              = $true
+                PsDscRunAsCredential     = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example deploys a subsite in a specific location and enables
+    access requests for this web
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWeb TeamSite
+            {
+                Url                      = "http://sharepoint.contoso.com/sites/site/subweb"
+                Name                     = "Team Sites"
+                Ensure                   = "Present"
+                Description              = "A place to share documents with your team."
+                Template                 = "STS#0"
+                Language                 = 1033
+                AddToTopNav              = $true
+                UniquePermissions        = $true
+                RequestAccessEmail       = "sample@contoso.com"
+                PsDscRunAsCredential     = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example deploys a subsite in a specific location and disables
+    access requests for this web
+
+
+    Configuration Example 
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPWeb TeamSite
+            {
+                Url                      = "http://sharepoint.contoso.com/sites/site/subweb"
+                Name                     = "Team Sites"
+                Ensure                   = "Present"
+                Description              = "A place to share documents with your team."
+                Template                 = "STS#0"
+                Language                 = 1033
+                AddToTopNav              = $true
+                RequestAccessEmail       = ""
                 PsDscRunAsCredential     = $SetupAccount
             }
         }

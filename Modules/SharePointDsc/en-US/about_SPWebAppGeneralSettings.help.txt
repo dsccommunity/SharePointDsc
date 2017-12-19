@@ -90,6 +90,10 @@
     Write - boolean
     Is Skype for Business presence enabled for this web app
 
+.PARAMETER DefaultQuotaTemplate
+    Write - string
+    What is the default quota template for this web app
+
 .PARAMETER InstallAccount
     Write - string
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5

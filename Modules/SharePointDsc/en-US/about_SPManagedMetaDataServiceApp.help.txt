@@ -8,9 +8,15 @@
     back to this pool if it is changed after its initial provisioning. The
     database server and database name properties are only used during
     provisioning, and will not be altered as part of the ongoing operation of the
+    set method.
     
     The default value for the Ensure parameter is Present. When not specifying this
     parameter, the service application is provisioned.
+    
+    The content type hub url will be set or reset.
+    
+    The language settings (default and working) are only changed if they are part of
+    the bound parameters. Otherwise they will not be altered.
     
 .PARAMETER Name
     Key - string
@@ -45,6 +51,14 @@
     Write - string
     The URL of the content type hub for this app (only set when the app is provisioned)
 
+.PARAMETER DefaultLanguage
+    Write - UInt32
+    The LCID of the default language (only set when the app is provisioned)
+
+.PARAMETER Languages
+    Write - UInt32
+    The LCIDs of the working languages (only set when the app is provisioned)
+
 .PARAMETER InstallAccount
     Write - String
     POWERSHELL 4 ONLY: The account to run this resource as, use PsDscRunAsCredential if using PowerShell 5
@@ -65,7 +79,7 @@
 
         node localhost {
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-            {  
+            {
                 Name              = "Managed Metadata Service Application"
                 InstallAccount    = $SetupAccount
                 ApplicationPool   = "SharePoint Service Applications"
@@ -95,7 +109,7 @@
 
         node localhost {
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-            {  
+            {
                 Name              = "Managed Metadata Service Application"
                 InstallAccount    = $SetupAccount
                 ApplicationPool   = "none"
@@ -110,7 +124,7 @@
     and also include a specific list of users to be the term store administrators.
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -121,7 +135,7 @@
 
         node localhost {
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-            {  
+            {
                 Name                    = "Managed Metadata Service Application"
                 InstallAccount          = $SetupAccount
                 ApplicationPool         = "SharePoint Service Applications"
@@ -134,5 +148,66 @@
             }
         }
     }
+
+
+.EXAMPLE
+    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
+    and also include a specific list of users to be the term store administrators.
+
+
+    Configuration Example
+    {
+        param(
+            [Parameter(Mandatory = $true)]
+            [PSCredential]
+            $SetupAccount
+        )
+        Import-DscResource -ModuleName SharePointDsc
+
+        node localhost {
+            SPManagedMetaDataServiceApp ManagedMetadataServiceApp
+            {
+                Name                    = "Managed Metadata Service Application"
+                ApplicationPool         = "SharePoint Service Applications"
+                DatabaseServer          = "SQL.contoso.local"
+                DatabaseName            = "SP_ManagedMetadata"
+                TermStoreAdministrators = @(
+                    "CONTOSO\user1",
+                    "CONTOSO\user2"
+                )
+                DefaultLanguage      = 1033
+                Languages            = @(1031, 1033)
+                PsDscRunAsCredential = $SetupAccount
+            }
+        }
+    }
+
+
+.EXAMPLE
+    This example shows how to deploy the Managed Metadata service app to the local SharePoint farm
+    and also include a specific list of users to be the term store administrators.
+
+
+Configuration Example
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCredential]
+        $SetupAccount
+    )
+    Import-DscResource -ModuleName SharePointDsc
+
+    node localhost {
+        SPManagedMetaDataServiceApp ManagedMetadataServiceApp
+        {
+            Name                 = "Managed Metadata Service Application"
+            PSDscRunAsCredential = $SetupAccount
+            ApplicationPool      = "SharePoint Service Applications"
+            DatabaseServer       = "SQL.contoso.local"
+            DatabaseName         = "SP_ManagedMetadata"
+            ContentTypeHubUrl    = "http://contoso.sharepoint.com/sites/ct"
+        }
+    }
+}
 
 

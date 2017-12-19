@@ -31,15 +31,6 @@
     Write - boolean
     Should anonymous access be enabled for this web app extension
 
-.PARAMETER AuthenticationMethod
-    Write - string
-    Allowed values: NTLM, Kerberos, Claims
-    What authentication mode should be used for the web app extension
-
-.PARAMETER AuthenticationProvider
-    Write - string
-    What authentication provider should be used for the web app. This value is required when AuthenticationMethod is set to Claims
-
 .PARAMETER HostHeader
     Write - string
     The host header to use for the web app extension
@@ -70,7 +61,7 @@
     This example shows how to create a new web application extension in the local farm
 
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -85,7 +76,6 @@
                 WebAppUrl              = "http://example.contoso.local"
                 Name                   = "Contoso Intranet Zone"
                 AllowAnonymous         = $false
-                AuthenticationMethod   = "NTLM"
                 Url                    = "http://intranet.contoso.local"
                 Zone                   = "Intranet"
                 HostHeader             = "intranet.contoso.local"

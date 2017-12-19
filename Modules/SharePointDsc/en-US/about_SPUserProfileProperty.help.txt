@@ -38,7 +38,7 @@
 
 .PARAMETER Type
     Write - string
-    Allowed values: BigInteger, Binary, Boolean, Date, DateNoYear, DateTime, Email, Float, Guid, HTML, Integer, Person, String, StringMultiValue, TimeZone, URL
+    Allowed values: Big Integer, Binary, Boolean, Date, DateNoYear, Date Time, Email, Float, HTML, Integer, Person, String (Single Value), String (Multi Value), TimeZone, Unique Identifier, URL
     The type of the property
 
 .PARAMETER Description
