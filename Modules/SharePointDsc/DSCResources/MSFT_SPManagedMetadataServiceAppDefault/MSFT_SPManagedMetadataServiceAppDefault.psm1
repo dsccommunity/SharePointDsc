@@ -4,7 +4,7 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
@@ -95,7 +95,7 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,
@@ -157,7 +157,7 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Yes')]
         [String]
         $IsSingleInstance,

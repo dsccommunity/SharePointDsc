@@ -111,7 +111,6 @@ function Set-TargetResource
             }
         }
     }
-    return $result
 }
 
 function Test-TargetResource
