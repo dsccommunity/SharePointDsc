@@ -19,6 +19,10 @@
     Key - string
     The name of the BCS service app
 
+.PARAMETER ProxyName
+    Write - string
+    The name of the BCS service application proxy
+
 .PARAMETER ApplicationPool
     Required - String
     The application pool it should run in

@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.9.0.0'
+ModuleVersion = '2.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = '6c1176a0-4fac-4134-8ca2-3fa8a21a7b90'
@@ -87,7 +87,9 @@ CmdletsToExport = @("Invoke-SPDSCCommand",
                     "Get-SPDSCRegistryKey",
                     "Resolve-SPDscSecurityIdentifier",
                     "Get-SPDscFarmProductsInfo",
-                    "Get-SPDscFarmVersionInfo")
+                    "Get-SPDscFarmVersionInfo",
+                    "Convert-SPDscADGroupIDToName",
+                    "Convert-SPDscADGroupNameToID")
 
 # Variables to export from this module
 #VariablesToExport = '*'
@@ -126,7 +128,145 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = "
-* New resource: SPServiceIdentity
+        * General
+        * Added VSCode workspace settings to meet coding guidelines
+        * Corrected comment in CodeCov.yml
+        * Fixed several PSScriptAnalyzer warnings
+      * SPAppManagementServiceApp
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPBCSServiceApp
+        * Added custom Proxy Name support
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPBlobCacheSettings
+        * Update to set non-default or missing blob cache properties
+      * SPContentDatabase
+        * Fixed localized issue
+      * SPDesignerSettings
+        * Fixed issue where URL with capitals were not accepted correctly
+      * SPDistributedCacheService
+        * Fixed issue where reprovisioning the Distributed Cache
+          did not work
+      * SPFarm
+        * Implemented ToDo to return Central Admin Auth mode
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPInstall
+        * Updated to document the requirements for an English ISO
+      * SPInstallPrereqs
+        * Updated to document which parameter is required for which
+          version of SharePoint
+        * Added SharePoint 2016 example
+      * SPLogLevel
+        * New resource
+      * SPMachineTranslationServiceApp
+        * Added custom Proxy Name support
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPManagedMetadataAppDefault
+        * New resource
+      * SPManagedMetadataServiceApp
+        * Update to allow the configuration of the default and
+          working language
+        * Fixed issue where the termstore could not be retrieved if the
+          MMS service instance was stopped
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPMinRoleCompliance
+        * New resource
+      * SPPerformancePointServiceApp
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPProjectServer
+        * New resources to add Project Server 2016 support:
+        SPProjectServerLicense, SPProjectServerAdditionalSettings,
+        SPProjectServerADResourcePoolSync, SPProjectServerGlobalPermissions,
+        SPProjectServerGroup, SPProjectServerTimeSheetSettings,
+        SPProjectServerUserSyncSettings, SPProjectServerWssSettings
+      * SPSearchContentSource
+        * Fixed examples
+      * SPSearchIndexPartition
+        * Fixed to return the RootFolder parameter
+      * SPSearchServiceApp
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPSearchTopology
+        * Updated to better document how the resource works
+        * Fixed issue to only return first index partition to prevent
+          conflicts with SPSearchIndexPartition
+      * SPSecureStoreServiceApp
+        * Fixed issue with not returning AuditEnabled parameter in Get method
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPServiceAppSecurity
+        * Fixed issue with NullException when no accounts are configured
+          in SharePoint
+      * SPStateServiceApp
+        * Added custom Proxy Name support
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPSubscriptionSettings
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPTrustedRootAuthority
+        * Updated to enable using private key certificates.
+      * SPUsageApplication
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPUserProfileProperty
+        * Fixed two NullException issues
+      * SPUserProfileServiceApp
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPUserProfileSynConnection
+        * Fix an issue with ADImportConnection
+      * SPWeb
+        * Update to allow the management of the access requests settings
+      * SPWebAppGeneralSettings
+        * Added DefaultQuotaTemplate parameter
+      * SPWebApplicationExtension
+        * Update to fix how property AllowAnonymous is returned in the
+          hashtable
+      * SPWebAppPeoplePickerSettings
+        * New resource
+      * SPWebAppPolicy
+        * Fixed issue where the SPWebPolicyPermissions couldn't be used
+          twice with the exact same values
+      * SPWebAppSuiteBar
+        * New resource
+      * SPWebApplication.Throttling
+        * Fixed issue with where the RequestThrottling parameter was
+          not applied
+      * SPWordAutomationServiceApp
+        * Fixed an issue where the instance name wasn't detected correctly
+      * SPWorkflowService
+        * New resource
+
+      The following changes will break 1.x configurations that use these resources:
+
+      * SPAlternateUrl
+        * Added the Internal parameter, which implied a change to the key parameters
+      * SPCreateFarm
+        * Removed resource, please update your configurations to use SPFarm.
+          See http://aka.ms/SPDsc-SPFarm for details.
+      * SPJoinFarm
+        * Removed resource, please update your configurations to use SPFarm.
+          See http://aka.ms/SPDsc-SPFarm for details.
+      * SPManagedMetadataServiceApp
+        * Changed implementation of resource. This resource will not set any defaults
+          for the keyword and site collection term store. The new resource
+          SPManagedMetadataServiceAppDefault has to be used for this setting.
+      * SPShellAdmin
+        * Updated so it also works for non-content databases
+      * SPTimerJobState
+        * Updated to make the WebAppUrl parameter a key parameter.
+          The resource can now be used to configure the same job for multiple
+          web applications. Also changed the Name parameter to TypeName, due to
+          a limitation with the SPTimerJob cmdlets
+      * SPUserProfileProperty
+        * Fixed an issue where string properties were not created properly
+      * SPUSerProfileServiceApp
+        * Updated to remove the requirement for CredSSP
+      * SPUserProfileSyncService
+        * Updated to remove the requirement for CredSSP
+      * SPWebAppAuthentication
+        * New resource
+      * SPWebApplication
+        * Changed implementation of the Web Application authentication configuration.
+          A new resource has been added and existing properties have been removed
+      * SPWebApplicationExtension
+        * Updated so it infers the UseSSL value from the URL
+        * Changed implementation of the Web Application authentication configuration.
+          A new resource has been added and existing properties have been removed
 "
 
     } # End of PSData hashtable

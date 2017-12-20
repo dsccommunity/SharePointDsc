@@ -14,6 +14,10 @@
     Key - string
     The name of the state service app
 
+.PARAMETER ProxyName
+    Write - string
+    The proxy name, if not specified will be /Name of service app/ Proxy
+
 .PARAMETER DatabaseCredentials
     Write - String
     The database credentials for accessing the database

@@ -18,7 +18,7 @@
 
         node localhost {
             SPManagedMetaDataServiceApp ManagedMetadataServiceApp
-            {  
+            {
                 Name              = "Managed Metadata Service Application"
                 InstallAccount    = $SetupAccount
                 ApplicationPool   = "none"

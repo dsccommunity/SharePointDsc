@@ -3,7 +3,7 @@
     This example shows how to create a new web application in the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -19,7 +19,6 @@
                 ApplicationPool        = "SharePoint Sites"
                 ApplicationPoolAccount = "CONTOSO\svcSPWebApp"
                 AllowAnonymous         = $false
-                AuthenticationMethod   = "NTLM"
                 DatabaseName           = "SP_Content_01"
                 DatabaseServer         = "SQL.contoso.local\SQLINSTANCE"
                 Url                    = "http://example.contoso.local"

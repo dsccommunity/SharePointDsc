@@ -3,7 +3,7 @@
     This example shows how to create a new web application extension in the local farm
 #>
 
-    Configuration Example 
+    Configuration Example
     {
         param(
             [Parameter(Mandatory = $true)]
@@ -18,7 +18,6 @@
                 WebAppUrl              = "http://example.contoso.local"
                 Name                   = "Contoso Intranet Zone"
                 AllowAnonymous         = $false
-                AuthenticationMethod   = "NTLM"
                 Url                    = "http://intranet.contoso.local"
                 Zone                   = "Intranet"
                 HostHeader             = "intranet.contoso.local"

@@ -4,25 +4,25 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
@@ -30,17 +30,17 @@ function Get-TargetResource
 
     $x86Path = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX86 = Get-ItemProperty -Path $x86Path | Select-Object -Property DisplayName
-    
+
     $x64Path = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
     $installedItemsX64 = Get-ItemProperty -Path $x64Path | Select-Object -Property DisplayName
 
-    $installedItems = $installedItemsX86 + $installedItemsX64 
-    $installedItems = $installedItems | Select-Object -Property DisplayName -Unique    
-    $spInstall = $installedItems | Where-Object -FilterScript { 
-        $_ -match "Microsoft SharePoint Server (2013|2016)" 
+    $installedItems = $installedItemsX86 + $installedItemsX64
+    $installedItems = $installedItems | Select-Object -Property DisplayName -Unique
+    $spInstall = $installedItems | Where-Object -FilterScript {
+        $_ -match "Microsoft SharePoint Server (2013|2016)"
     }
 
-    if ($spInstall) 
+    if ($spInstall)
     {
         return @{
             BinaryDir = $BinaryDir
@@ -49,8 +49,8 @@ function Get-TargetResource
             DataPath = $DataPath
             Ensure = "Present"
         }
-    } 
-    else 
+    }
+    else
     {
         return @{
             BinaryDir = $BinaryDir
@@ -70,40 +70,40 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
     Write-Verbose -Message "Setting install status of SharePoint"
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")
         return
     }
-    
+
     $InstallerPath = Join-Path $BinaryDir "setup.exe"
     $majorVersion = (Get-SPDSCAssemblyVersion -PathToAssembly $InstallerPath)
-    if ($majorVersion -eq 15) 
+    if ($majorVersion -eq 15)
     {
         $svrsetupDll = Join-Path -Path $BinaryDir -ChildPath "updates\svrsetup.dll"
         $checkDotNet = $true
@@ -134,7 +134,7 @@ function Set-TargetResource
                 }
             }
 
-            if ($dotNet46Installed -eq $true) 
+            if ($dotNet46Installed -eq $true)
             {
                 throw [Exception] ("A known issue prevents installation of SharePoint 2013 on " + `
                                    "servers that have .NET 4.6 already installed. See details " + `
@@ -146,7 +146,7 @@ function Set-TargetResource
 
     Write-Verbose -Message "Writing install config file"
 
-    $configPath = "$env:temp\SPInstallConfig.xml" 
+    $configPath = "$env:temp\SPInstallConfig.xml"
 
     $configData = "<Configuration>
     <Package Id=`"sts`">
@@ -162,12 +162,12 @@ function Set-TargetResource
     <Display Level=`"none`" CompletionNotice=`"no`" />
 "
 
-    if ($PSBoundParameters.ContainsKey("InstallPath") -eq $true) 
+    if ($PSBoundParameters.ContainsKey("InstallPath") -eq $true)
     {
         $configData += "    <INSTALLLOCATION Value=`"$InstallPath`" />
 "
     }
-    if ($PSBoundParameters.ContainsKey("DataPath") -eq $true) 
+    if ($PSBoundParameters.ContainsKey("DataPath") -eq $true)
     {
         $configData += "    <DATADIR Value=`"$DataPath`"/>
 "
@@ -181,17 +181,17 @@ function Set-TargetResource
     $configData | Out-File -FilePath $configPath
 
     Write-Verbose -Message "Beginning installation of SharePoint"
-    
+
     $setupExe = Join-Path -Path $BinaryDir -ChildPath "setup.exe"
-    
+
     $setup = Start-Process -FilePath $setupExe `
                            -ArgumentList "/config `"$configPath`"" `
                            -Wait `
                            -PassThru
 
-    switch ($setup.ExitCode) 
+    switch ($setup.ExitCode)
     {
-        0 {  
+        0 {
             Write-Verbose -Message "SharePoint binary installation complete"
             $global:DSCMachineStatus = 1
         }
@@ -204,13 +204,16 @@ function Set-TargetResource
             if (    ($null -ne (Get-Item $pr1 -ErrorAction SilentlyContinue)) `
                 -or ($null -ne (Get-Item $pr2 -ErrorAction SilentlyContinue)) `
                 -or ((Get-Item $pr3 | Get-ItemProperty).PendingFileRenameOperations.count -gt 0) `
-                ) {
-                    
+                )
+            {
+
                 Write-Verbose -Message ("SPInstall has detected the server has pending " + `
                                         "a reboot. Flagging to the DSC engine that the " + `
                                         "server should reboot before continuing.")
                 $global:DSCMachineStatus = 1
-            } else {
+            }
+            else
+            {
                 throw ("SharePoint installation has failed due to an issue with prerequisites " + `
                        "not being installed correctly. Please review the setup logs.")
             }
@@ -228,25 +231,25 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
-        [System.String] 
+        [Parameter()]
+        [System.String]
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present"
     )
 
@@ -254,7 +257,7 @@ function Test-TargetResource
 
     $PSBoundParameters.Ensure = $Ensure
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         throw [Exception] ("SharePointDsc does not support uninstalling SharePoint or " + `
                            "its prerequisites. Please remove this manually.")

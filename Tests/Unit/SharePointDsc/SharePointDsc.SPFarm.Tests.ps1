@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -333,6 +333,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { 
                 return "Connection string example" 
             }
+
             Mock -CommandName "Get-SPFarm" -MockWith { 
                 return @{
                     Name = $testParams.FarmConfigDatabaseName
@@ -353,9 +354,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 return @(@{ 
                     Name = $testParams.FarmConfigDatabaseName
                     Type = "Configuration Database"
-                    Server = @{ 
-                        Name = $testParams.DatabaseServer 
-                    }
+                    NormalizedDataSource = $testParams.DatabaseServer
                 })
             }
             Mock -CommandName "Get-SPWebApplication" -MockWith {
@@ -363,6 +362,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     IsAdministrationWebApplication = $true
                     ContentDatabases = @(@{ 
                         Name = $testParams.AdminContentDatabaseName 
+                    })
+                    IISSettings = @(@{ 
+                        DisableKerberos = $true 
                     })
                     Url = "http://localhost:9999"
                 }
@@ -374,7 +376,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should be $true
-            }
+            }            
         }
 
         Context -Name "Absent is specified for the ensure property" -Fixture {
@@ -429,6 +431,73 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     { Set-TargetResource @testParams } | Should Throw
                 }
             }
+
+            Context -Name "no serverrole is specified and get-targetresource needs to return null" -Fixture {
+                $testParams = @{
+                    Ensure = "Present"
+                    FarmConfigDatabaseName = "SP_Config"
+                    DatabaseServer = "sql.contoso.com"
+                    FarmAccount = $mockFarmAccount
+                    Passphrase = $mockPassphrase
+                    AdminContentDatabaseName = "SP_AdminContent"
+                    RunCentralAdmin = $true
+                }
+
+                Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { 
+                    return "Connection string example" 
+                }
+
+                Mock -CommandName "Get-SPFarm" -MockWith { 
+                    return @{
+                        Name = $testParams.FarmConfigDatabaseName
+                        DatabaseServer = @{
+                            Name = $testParams.DatabaseServer
+                        }
+                        AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                    } 
+                }
+                Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                    return @{
+                        Locked = $false
+                        ValidPermissions = $true
+                        DatabaseExists = $true
+                    }
+                }
+                Mock -CommandName "Get-SPDatabase" -MockWith { 
+                    return @(@{ 
+                        Name = $testParams.FarmConfigDatabaseName
+                        Type = "Configuration Database"
+                        Server = @{ 
+                            Name = $testParams.DatabaseServer 
+                        }
+                    })
+                }
+                Mock -CommandName "Get-SPWebApplication" -MockWith {
+                    return @{
+                        IsAdministrationWebApplication = $true
+                        ContentDatabases = @(@{ 
+                            Name = $testParams.AdminContentDatabaseName 
+                        })
+                        IISSettings = @(@{ 
+                            DisableKerberos = $true 
+                        })
+                        Url = "http://localhost:9999"
+                    }
+                }
+
+                Mock -CommandName Get-SPServer -MockWith{
+                    return @{
+                        Name = "spwfe"
+                        Role = "WebFrontEnd"
+                    }
+                }
+
+                Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 15 } }
+
+                It "Should return WebFrontEnd from the get method"{
+                    (Get-TargetResource @testParams).ServerRole | Should Be $null
+                }
+            }
         }
 
         if ($Global:SPDscHelper.CurrentStubBuildNumber.Major -eq 16)
@@ -445,7 +514,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     CentralAdministrationPort = 1234
                     ServerRole = "ApplicationWithSearch"
                     RunCentralAdmin = $false
-                }
+                }                
 
                 Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith {
                     return @{
@@ -513,6 +582,71 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 It "Should throw if an invalid server role is used in the set method" {
                     { Set-TargetResource @testParams } | Should Not Throw
                 }
+            }
+        }
+
+        Context -Name "no serverrole is specified but get-targetresource needs to identify and return it" -Fixture {
+            $testParams = @{
+                Ensure = "Present"
+                FarmConfigDatabaseName = "SP_Config"
+                DatabaseServer = "sql.contoso.com"
+                FarmAccount = $mockFarmAccount
+                Passphrase = $mockPassphrase
+                AdminContentDatabaseName = "SP_AdminContent"
+                RunCentralAdmin = $true
+            }
+            Mock -CommandName "Get-SPDSCRegistryKey" -MockWith { 
+                return "Connection string example" 
+            }
+
+            Mock -CommandName "Get-SPFarm" -MockWith { 
+                return @{
+                    Name = $testParams.FarmConfigDatabaseName
+                    DatabaseServer = @{
+                        Name = $testParams.DatabaseServer
+                    }
+                    AdminContentDatabaseName = $testParams.AdminContentDatabaseName
+                } 
+            }
+            Mock -CommandName "Get-SPDSCConfigDBStatus" -MockWith {
+                return @{
+                    Locked = $false
+                    ValidPermissions = $true
+                    DatabaseExists = $true
+                }
+            }
+            Mock -CommandName "Get-SPDatabase" -MockWith { 
+                return @(@{ 
+                    Name = $testParams.FarmConfigDatabaseName
+                    Type = "Configuration Database"
+                    Server = @{ 
+                        Name = $testParams.DatabaseServer 
+                    }
+                })
+            }
+            Mock -CommandName "Get-SPWebApplication" -MockWith {
+                return @{
+                    IsAdministrationWebApplication = $true
+                    ContentDatabases = @(@{ 
+                        Name = $testParams.AdminContentDatabaseName 
+                    })
+                    IISSettings = @(@{ 
+                        DisableKerberos = $true 
+                    })
+                    Url = "http://localhost:9999"
+                }
+            }
+            Mock -CommandName Get-SPServer -MockWith{
+                return @{
+                    Name = "spwfe"
+                    Role = "WebFrontEnd"
+                }
+            }
+
+            Mock -CommandName Get-SPDSCInstalledProductVersion -MockWith { return @{ FileMajorPart = 16 } }
+
+            It "Should return WebFrontEnd from the get method"{
+                (Get-TargetResource @testParams).ServerRole | Should Be "WebFrontEnd"
             }
         }
 

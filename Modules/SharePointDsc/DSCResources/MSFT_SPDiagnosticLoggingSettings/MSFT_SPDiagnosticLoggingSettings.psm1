@@ -4,79 +4,79 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $LogPath,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.UInt32]  
         $LogSpaceInGB,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AppAnalyticsAutomaticUploadEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $CustomerExperienceImprovementProgramEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $DaysToKeepLogs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $DownloadErrorReportingUpdatesEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ErrorReportingAutomaticUploadEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ErrorReportingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventLogFloodProtectionEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionNotifyInterval,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionQuietPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionTriggerPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $LogCutInterval,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $LogMaxDiskSpaceUsageEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ScriptErrorReportingDelay,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScriptErrorReportingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScriptErrorReportingRequireAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -89,7 +89,8 @@ function Get-TargetResource
         $params = $args[0]
         
         $dc = Get-SPDiagnosticConfig -ErrorAction SilentlyContinue
-        if ($null -eq $dc) { 
+        if ($null -eq $dc)
+        {
             return $null 
         }
         
@@ -125,79 +126,79 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $LogPath,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.UInt32]  
         $LogSpaceInGB,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AppAnalyticsAutomaticUploadEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $CustomerExperienceImprovementProgramEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $DaysToKeepLogs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $DownloadErrorReportingUpdatesEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ErrorReportingAutomaticUploadEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ErrorReportingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventLogFloodProtectionEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionNotifyInterval,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionQuietPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionTriggerPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $LogCutInterval,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $LogMaxDiskSpaceUsageEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ScriptErrorReportingDelay,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScriptErrorReportingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScriptErrorReportingRequireAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -209,8 +210,8 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
         
-        if ($params.ContainsKey("InstallAccount")) 
-        { 
+        if ($params.ContainsKey("InstallAccount"))
+        {
             $params.Remove("InstallAccount") | Out-Null 
         } 
         $params = $params | Rename-SPDSCParamValue -oldName "LogPath" `
@@ -228,79 +229,79 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $LogPath,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.UInt32]  
         $LogSpaceInGB,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $AppAnalyticsAutomaticUploadEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $CustomerExperienceImprovementProgramEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $DaysToKeepLogs,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $DownloadErrorReportingUpdatesEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ErrorReportingAutomaticUploadEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ErrorReportingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $EventLogFloodProtectionEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionNotifyInterval,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionQuietPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionThreshold,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $EventLogFloodProtectionTriggerPeriod,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $LogCutInterval,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $LogMaxDiskSpaceUsageEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $ScriptErrorReportingDelay,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScriptErrorReportingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $ScriptErrorReportingRequireAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -309,8 +310,8 @@ function Test-TargetResource
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $CurrentValues) 
-    { 
+    if ($null -eq $CurrentValues)
+    {
         return $false 
     }
 

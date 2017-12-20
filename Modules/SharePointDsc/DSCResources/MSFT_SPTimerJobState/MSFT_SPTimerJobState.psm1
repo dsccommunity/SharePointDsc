@@ -4,28 +4,34 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Name,
+        $TypeName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $WebApplication,
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Schedule,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Getting timer job settings for job '$Name'"
+    Write-Verbose -Message "Getting timer job settings for job '$TypeName'"
+
+    if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+    {
+        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+               "health analyzer timer jobs.")
+    }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
@@ -38,55 +44,58 @@ function Get-TargetResource
         } 
         catch 
         {
-            Write-Verbose -Message ("No local SharePoint farm was detected. Timer job " + `
-                                    "settings will not be applied")
-            return $null
+            throw ("No local SharePoint farm was detected. Timer job " + `
+                   "settings will not be applied")
         }
 
-        # Get a reference to the timer job
-        if ($params.ContainsKey("WebApplication")) 
-        {
-            $timerjob = Get-SPTimerJob -Identity $params.Name `
-                                       -WebApplication $params.WebApplication
-        } 
-        else 
-        {
-            $timerjob = Get-SPTimerJob $params.Name
+        $returnval = @{
+            TypeName = $params.TypeName
         }
 
-        # Check if timer job if found
-        if ($null -eq $timerjob) 
-        { 
-            return $null 
-        }
-        
-        $schedule = $null
-        if ($null -ne $timerjob.Schedule) 
+        if ($params.WebAppUrl -ne "N/A")
         {
-            $schedule = $timerjob.Schedule.ToString()
-        }
-        
-        if ($null -eq $timerjob.WebApplication) 
-        {
-            # Timer job is not associated to web application
-            return @{
-                Name = $params.Name
-                Enabled = -not $timerjob.IsDisabled
-                Schedule = $schedule
-                InstallAccount = $params.InstallAccount
+            $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+            if ($null -eq $wa)
+            {
+                throw ("Specified web application not found!")
+            }
+    
+            $timerjob = Get-SPTimerJob -Type $params.TypeName `
+                                        -WebApplication $params.WebAppUrl
+            
+            if ($timerjob.Count -eq 0)
+            {
+                throw ("No timer jobs found. Please check the input values")
+            }
+
+            $returnval.WebAppUrl = $params.WebAppUrl
+            $returnval.Enabled   = -not $timerjob.IsDisabled
+            $returnval.Schedule  = $null
+            if ($null -ne $timerjob.Schedule) 
+            {
+                $returnval.Schedule = $timerjob.Schedule.ToString()
             }
         } 
         else 
         {
-            # Timer job is associated to web application
-            return @{
-                Name = $params.Name
-                WebApplication = $timerjob.WebApplication.Url
-                Enabled = -not $timerjob.IsDisabled
-                Schedule = $schedule
-                InstallAccount = $params.InstallAccount
+            $timerjob = Get-SPTimerJob -Type $params.TypeName
+            if ($timerjob.Count -eq 1)
+            {
+                $returnval.WebAppUrl = "N/A"
+                $returnval.Enabled   = -not $timerjob.IsDisabled
+                $returnval.Schedule  = $null
+                if ($null -ne $timerjob.Schedule) 
+                {
+                    $returnval.Schedule = $timerjob.Schedule.ToString()
+                }
+            }
+            else
+            {
+                throw ("$($timerjob.Count) timer jobs found. Check input " + `
+                       "values or use the WebAppUrl parameter.")
             }
         }
+        return $returnval
     }
     return $result
 }
@@ -96,35 +105,40 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Name,
+        $TypeName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $WebApplication,
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Schedule,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Setting timer job settings for job '$Name'"
+    Write-Verbose -Message "Setting timer job settings for job '$TypeName'"
+
+    if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+    {
+        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+               "health analyzer timer jobs.")
+    }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
-
         $params = $args[0]
-
+        
         try 
         {
             $spFarm = Get-SPFarm
@@ -132,85 +146,159 @@ function Set-TargetResource
         catch 
         {
             throw "No local SharePoint farm was detected. Timer job settings will not be applied"
-            return
+            return $null
         }
         
         Write-Verbose -Message "Start update"
 
-        #find Timer Job
-        if ($params.ContainsKey("WebApplication") -eq $true) 
+        if ($params.WebAppUrl -ne "N/A")
         {
-            $job = Get-SPTimerJob $params.Name -WebApplication $params.WebApplication
-        } 
-        else 
-        {
-            $job = Get-SPTimerJob $params.Name
-        }
-
-        if ($job.GetType().IsArray -eq $false) 
-        {
-            # Set the timer job settings
-            if ($params.ContainsKey("Enabled") -eq $true) 
-            { 
-                # Enable/Disable timer job
-                if ($params.Enabled) 
-                {
-                    Write-Verbose -Message "Enable timer job $($params.Name)"
-                    try 
-                    {
-                        Enable-SPTimerJob $job
-                    }
-                    catch 
-                    {
-                        throw ("Error occurred while enabling job. Timer job settings will " + `
-                               "not be applied. Error details: $($_.Exception.Message)")
-                        return
-                    }
-                } 
-                else 
-                {
-                    Write-Verbose -Message "Disable timer job $($params.Name)"
-                    try 
-                    {
-                        Disable-SPTimerJob $job
-                    } 
-                    catch 
-                    {
-                        throw ("Error occurred while disabling job. Timer job settings will " + `
-                               "not be applied. Error details: $($_.Exception.Message)")
-                        return
-                    }
-                }
-            }
-
-            if ($params.ContainsKey("Schedule") -eq $true) 
+            $wa = Get-SPWebApplication -Identity $params.WebAppUrl -ErrorAction SilentlyContinue
+            if ($null -eq $wa)
             {
-                # Set timer job schedule
-                Write-Verbose -Message "Set timer job $($params.Name) schedule"
-                try 
+                throw "Specified web application not found!"
+            }
+
+            $timerjob = Get-SPTimerJob -Type $params.TypeName `
+                                        -WebApplication $webapp
+            
+            if ($timerjob.Count -eq 0)
+            {
+                throw ("No timer jobs found. Please check the input values")
+            }
+            
+            if ($params.ContainsKey("Schedule") -eq $true)
+            {
+                if ($params.Schedule -ne $timerjob.Schedule.ToString())
                 {
-                    Set-SPTimerJob $job -Schedule $params.Schedule -ErrorAction Stop
-                } 
-                catch 
-                {
-                    if ($_.Exception.Message -like "*The time given was not given in the proper format*") 
+                    try 
                     {
-                        throw "Incorrect schedule format used. New schedule will not be applied."
-                        return
+                        Set-SPTimerJob -Identity $timerjob `
+                                       -Schedule $params.Schedule `
+                                       -ErrorAction Stop
                     } 
-                    else 
+                    catch 
                     {
-                        throw ("Error occurred. Timer job settings will not be applied. Error " + `
-                               "details: $($_.Exception.Message)")
-                        return
+                        if ($_.Exception.Message -like `
+                            "*The time given was not given in the proper format*") 
+                        {
+                            throw ("Incorrect schedule format used. New schedule will " + `
+                                    "not be applied.")
+                        } 
+                        else 
+                        {
+                            throw ("Error occurred. Timer job settings will not be applied. " + `
+                                    "Error details: $($_.Exception.Message)")
+                        }
                     }
                 }
             }
-        } 
+
+            if ($params.ContainsKey("Enabled") -eq $true) 
+            {
+                if ($params.Enabled -ne (-not $timerjob.IsDisabled))
+                {
+                    if ($params.Enabled)
+                    {
+                        Write-Verbose -Message "Enable timer job $($params.TypeName)"
+                        try 
+                        {
+                            Enable-SPTimerJob -Identity $timerjob
+                        }
+                        catch 
+                        {
+                            throw ("Error occurred while enabling job. Timer job settings will " + `
+                                    "not be applied. Error details: $($_.Exception.Message)")
+                            return
+                        }
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "Disable timer job $($params.Name)"
+                        try 
+                        {
+                            Disable-SPTimerJob -Identity $timerjob
+                        } 
+                        catch 
+                        {
+                            throw ("Error occurred while disabling job. Timer job settings will " + `
+                                    "not be applied. Error details: $($_.Exception.Message)")
+                            return
+                        }        
+                    } 
+                }
+            }
+        }
         else 
         {
-            throw "Could not find specified job. Total jobs found: $($job.Count)"
-            return
+            $timerjob = Get-SPTimerJob -Type $params.TypeName
+            if ($timerjob.Count -eq 1)
+            {
+                if ($params.ContainsKey("Schedule") -eq $true)
+                {
+                    if ($params.Schedule -ne $timerjob.Schedule.ToString())
+                    {
+                        try 
+                        {
+                            Set-SPTimerJob -Identity $timerjob `
+                                           -Schedule $params.Schedule `
+                                           -ErrorAction Stop
+                        } 
+                        catch 
+                        {
+                            if ($_.Exception.Message -like `
+                                "*The time given was not given in the proper format*") 
+                            {
+                                throw ("Incorrect schedule format used. New schedule will " + `
+                                        "not be applied.")
+                            } 
+                            else 
+                            {
+                                throw ("Error occurred. Timer job settings will not be applied. " + `
+                                        "Error details: $($_.Exception.Message)")
+                            }
+                        }
+                    }
+                }
+
+                if ($params.ContainsKey("Enabled") -eq $true) 
+                {
+                    if ($params.Enabled -ne -not $timerjob.IsDisabled)
+                    {
+                        if ($params.Enabled)
+                        {
+                            Write-Verbose -Message "Enable timer job $($params.TypeName)"
+                            try 
+                            {
+                                Enable-SPTimerJob -Identity $timerjob
+                            }
+                            catch 
+                            {
+                                throw ("Error occurred while enabling job. Timer job settings will " + `
+                                        "not be applied. Error details: $($_.Exception.Message)")
+                            }
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "Disable timer job $($params.Name)"
+                            try 
+                            {
+                                Disable-SPTimerJob -Identity $timerjob
+                            } 
+                            catch 
+                            {
+                                throw ("Error occurred while disabling job. Timer job settings will " + `
+                                        "not be applied. Error details: $($_.Exception.Message)")
+                            }        
+                        } 
+                    }
+                }
+            }
+            else
+            {
+                throw ("$($timerjob.Count) timer jobs found. Check input " + `
+                        "values or use the WebAppUrl parameter.")
+            }
         }
     }
 }
@@ -221,33 +309,39 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $Name,
+        $TypeName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [System.String]
-        $WebApplication,
+        $WebAppUrl,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Boolean]
         $Enabled,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Schedule,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
-    Write-Verbose -Message "Testing timer job settings for job '$Name'"
+    Write-Verbose -Message "Testing timer job settings for job '$TypeName'"
+
+    if ($TypeName -eq "Microsoft.SharePoint.Administration.Health.SPHealthAnalyzerJobDefinition")
+    {
+        throw ("You cannot use SPTimerJobState to change the schedule of " + `
+               "health analyzer timer jobs.")
+    }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 

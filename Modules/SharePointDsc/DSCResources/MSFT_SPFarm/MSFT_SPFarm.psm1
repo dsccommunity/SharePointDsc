@@ -4,49 +4,49 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Boolean]
         $RunCentralAdmin,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -127,15 +127,15 @@ function Get-TargetResource
             }
             
             if ($null -eq $spFarm) 
-            { 
+            {
                 return $null 
             }
 
-            $configDb = Get-SPDatabase | Where-Object -FilterScript { 
+            $configDb = Get-SPDatabase | Where-Object -FilterScript {
                 $_.Name -eq $spFarm.Name -and $_.Type -eq "Configuration Database" 
             }
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                 $_.IsAdministrationWebApplication -eq $true 
             }
 
@@ -149,7 +149,7 @@ function Get-TargetResource
             }
 
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                                     $_.IsAdministrationWebApplication -eq $true 
                                 }
 
@@ -163,16 +163,38 @@ function Get-TargetResource
                 $centralAdminProvisioned = $true
             }
 
+            if ($centralAdminSite.IisSettings[0].DisableKerberos -eq $false)
+            {
+                $centralAdminAuth = "Kerberos"
+            }
+            else
+            {
+                $centralAdminAuth = "NTLM"
+            }
+
             $returnValue = @{
                 FarmConfigDatabaseName = $spFarm.Name
-                DatabaseServer = $configDb.Server.Name
+                DatabaseServer = $configDb.NormalizedDataSource
                 FarmAccount = $farmAccount # Need to return this as a credential to match the type expected
                 InstallAccount = $null
                 Passphrase = $null 
                 AdminContentDatabaseName = $centralAdminSite.ContentDatabases[0].Name
                 RunCentralAdmin = $centralAdminProvisioned
                 CentralAdministrationPort = (New-Object -TypeName System.Uri $centralAdminSite.Url).Port
-                CentralAdministrationAuth = $params.CentralAdministrationAuth #TODO: Need to return this as the current value
+                CentralAdministrationAuth = $centralAdminAuth
+            }
+            $installedVersion = Get-SPDSCInstalledProductVersion
+            if($installedVersion.FileMajorPart -eq 16)
+            {
+                $server = Get-SPServer -Identity $env:COMPUTERNAME
+                if($null -ne $server -and $null -ne $server.Role)
+                {
+                    $returnValue.Add("ServerRole", $server.Role)
+                }
+            }
+            elseif($installedVersion.FileMajorPart -eq 15)
+            {
+                $returnValue.Add("ServerRole", $null)
             }
             return $returnValue
         }   
@@ -230,49 +252,49 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Boolean]
         $RunCentralAdmin,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",
@@ -305,11 +327,11 @@ function Set-TargetResource
 
     # Set default values to ensure they are passed to Invoke-SPDSCCommand
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationPort")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationPort", 9999) 
     }
     if (-not $PSBoundParameters.ContainsKey("CentralAdministrationAuth")) 
-    { 
+    {
         $PSBoundParameters.Add("CentralAdministrationAuth", "NTLM") 
     }
     
@@ -347,16 +369,20 @@ function Set-TargetResource
             SkipRegisterAsDistributedCacheHost = $true
         }
 
-        switch((Get-SPDSCInstalledProductVersion).FileMajorPart) {
+        switch((Get-SPDSCInstalledProductVersion).FileMajorPart)
+        {
             15 {
                 Write-Verbose -Message "Detected Version: SharePoint 2013"
             }
             16 {
-                if ($params.ContainsKey("ServerRole") -eq $true) {
+                if ($params.ContainsKey("ServerRole") -eq $true)
+                {
                     Write-Verbose -Message ("Detected Version: SharePoint 2016 - " + `
                                             "configuring server as $($params.ServerRole)")
                     $executeArgs.Add("LocalServerRole", $params.ServerRole)
-                } else {
+                }
+                else
+                {
                     Write-Verbose -Message ("Detected Version: SharePoint 2016 - no server " + `
                                             "role provided, configuring server without a " + `
                                             "specific role")
@@ -398,7 +424,7 @@ function Set-TargetResource
 
         $farmAction = ""
         if ($createFarm -eq $false)
-        {            
+        {
             # The database exists, so attempt to join the farm to the server
             
 
@@ -476,7 +502,7 @@ function Set-TargetResource
         if ($params.RunCentralAdmin -eq $true)
         {
             $centralAdminSite = Get-SPWebApplication -IncludeCentralAdministration `
-                                | Where-Object -FilterScript { 
+                                | Where-Object -FilterScript {
                                     $_.IsAdministrationWebApplication -eq $true 
                                 }
 
@@ -499,7 +525,7 @@ function Set-TargetResource
                                             $_.TypeName -eq "Central Administration"
                                         }
                 if ($null -eq $serviceInstance) 
-                { 
+                {
                     $domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
                     $fqdn = "$($env:COMPUTERNAME).$domain"
                     $serviceInstance = Get-SPServiceInstance -Server $fqdn `
@@ -508,7 +534,7 @@ function Set-TargetResource
                                         }
                 }
                 if ($null -eq $serviceInstance) 
-                { 
+                {
                     throw [Exception] "Unable to locate Central Admin service instance on this server"
                 }
                 Start-SPServiceInstance -Identity $serviceInstance 
@@ -541,49 +567,49 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure,
         
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FarmConfigDatabaseName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $FarmAccount,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Management.Automation.PSCredential] 
         $Passphrase,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $AdminContentDatabaseName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Boolean]
         $RunCentralAdmin,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32] 
         $CentralAdministrationPort,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("NTLM","Kerberos")]
         $CentralAdministrationAuth,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         [ValidateSet("Application",
                      "ApplicationWithSearch",

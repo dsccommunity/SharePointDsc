@@ -4,20 +4,20 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         [ValidateSet("Present","Absent")] 
         $Ensure,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseADRMS,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $RMSserver,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -37,7 +37,7 @@ function Get-TargetResource
         {
             Write-Verbose -Message ("No local SharePoint farm was detected. IRM settings " + `
                                     "will not be applied")
-            return @{ 
+            return @{
                     Ensure = "Absent" 
                     UseADRMS =  $UseADRMS
                     RMSserver = $RMSserver 
@@ -48,11 +48,11 @@ function Get-TargetResource
         $admService = Get-SPDSCContentService
         
         if ($admService.IrmSettings.IrmRMSEnabled)
-        { 
+        {
             $Ensure = "Present" 
         }
         else
-        { 
+        {
             $Ensure = "Absent"
         }
         
@@ -70,20 +70,20 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         [ValidateSet("Present","Absent")] 
         $Ensure,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseADRMS,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $RMSserver,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -113,7 +113,7 @@ function Set-TargetResource
         }
         
         if ($params.UseADRMS -ne $true) 
-        { 
+        {
             $params.UseADRMS = $false 
         }
         
@@ -139,20 +139,20 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         [ValidateSet("Present","Absent")] 
         $Ensure,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $UseADRMS,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $RMSserver,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -162,12 +162,12 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
 
     if ($UseADRMS -ne $true) 
-    { 
+    {
         $PSBoundParameters.UseADRMS = $false 
     }
 

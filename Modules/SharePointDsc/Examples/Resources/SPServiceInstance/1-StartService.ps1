@@ -15,7 +15,7 @@
 
         node localhost {
             SPServiceInstance ManagedMetadataServiceInstance
-            {  
+            {
                 Name           = "Managed Metadata Web Service"
                 Ensure         = "Present"
                 InstallAccount = $SetupAccount
