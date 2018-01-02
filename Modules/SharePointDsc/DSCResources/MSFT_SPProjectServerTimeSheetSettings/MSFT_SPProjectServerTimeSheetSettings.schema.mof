@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPProjectServerTimeSheetSettings")]
 class MSFT_SPProjectServerTimeSheetSettings : OMI_BaseResource
 {
-    [Key, Description("The URL of the Project site to set timesheet settings for")] string Url;
+    [Key, Description("The default zone URL of the Project site to set timesheet settings for")] string Url;
     [Write, Description("Should timesheets allow tracking of overtime and non-billable work types")] boolean EnableOvertimeAndNonBillableTracking;
     [Write, Description("What is the default mode for timesheets to be created in"), ValueMap{"CurrentTaskAssignments","CurrentProjects","NoPrepopulation"}, Values{"CurrentTaskAssignments","CurrentProjects","NoPrepopulation"}] string DefaultTimesheetCreationMode;
     [Write, Description("What is the default tracking unit for timesheets"), ValueMap{"Days","Weeks"}, Values{"Days","Weeks"}] string DefaultTrackingUnit;

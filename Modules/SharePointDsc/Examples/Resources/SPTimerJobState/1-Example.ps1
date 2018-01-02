@@ -13,13 +13,13 @@
         Import-DscResource -ModuleName SharePointDsc
 
         node localhost {
-            SPTimerJobState DisableTimerJob_DeadSiteDelete
+            SPTimerJobState DisableTimerJob_AppServerJob
             {
-                Name                    = "job-dead-site-delete"
-                WebApplication          = "http://sites.sharepoint.contoso.com"
-                Enabled                 = $false
-                Schedule                ="weekly at sat 5:00"
-                PsDscRunAsCredential    = $SetupAccount
+                TypeName             = "Microsoft.Office.Server.Administration.ApplicationServerJob"
+                WebAppUrl            = "http://sites.sharepoint.contoso.com"
+                Enabled              = $false
+                Schedule             ="weekly at sat 5:00"
+                PsDscRunAsCredential = $SetupAccount
             }
         }
     }

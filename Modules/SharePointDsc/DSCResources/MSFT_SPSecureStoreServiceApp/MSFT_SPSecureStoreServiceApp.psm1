@@ -4,61 +4,61 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $AuditingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AuditlogMaxSize,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $FailoverDatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $PartitionMode,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Sharing,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Windows", "SQL")]   
         [System.String] 
         $DatabaseAuthenticationType,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -79,15 +79,15 @@ function Get-TargetResource
 
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn 
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn 
         } 
         else 
@@ -95,11 +95,11 @@ function Get-TargetResource
             $serviceAppProxies = Get-SPServiceApplicationProxy -ErrorAction SilentlyContinue
             if ($null -ne $serviceAppProxies)
             {
-                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript { 
+                $serviceAppProxy = $serviceAppProxies | Where-Object -FilterScript {
                     $serviceApp.IsConnected($_)
                 }
                 if ($null -ne $serviceAppProxy) 
-                { 
+                {
                     $proxyName = $serviceAppProxy.Name
                 }
             }
@@ -114,16 +114,23 @@ function Get-TargetResource
             }
 
             $db = $dbProp.GetValue($serviceApp)
+
+            $auditProp = $propData | Where-Object -FilterScript {
+                $_.Name -eq "AuditEnabled"
+            }
             
+            $auditEnabled = $auditProp.GetValue($serviceApp)
+
             return  @{
-                Name = $serviceApp.DisplayName
-                ProxyName       = $proxyName
-                ApplicationPool = $serviceApp.ApplicationPool.Name
-                DatabaseName = $db.Name
-                DatabaseServer = $db.Server.Name
+                Name                   = $serviceApp.DisplayName
+                ProxyName              = $proxyName
+                AuditEnabled           = $auditEnabled
+                ApplicationPool        = $serviceApp.ApplicationPool.Name
+                DatabaseName           = $db.Name
+                DatabaseServer         = $db.NormalizedDataSource
                 FailoverDatabaseServer = $db.FailoverServer
-                InstallAccount = $params.InstallAccount
-                Ensure = "Present"
+                InstallAccount         = $params.InstallAccount
+                Ensure                 = "Present"
             }
         }
     }
@@ -135,61 +142,61 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $AuditingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AuditlogMaxSize,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $FailoverDatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $PartitionMode,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Sharing,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Windows", "SQL")]   
         [System.String] 
         $DatabaseAuthenticationType,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -210,7 +217,7 @@ function Set-TargetResource
     }
 
     if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
-    { 
+    {
         Write-Verbose -Message "Creating Secure Store Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $params `
@@ -218,11 +225,11 @@ function Set-TargetResource
             $params = $args[0]
             
             if ($params.ContainsKey("Ensure")) 
-            { 
+            {
                 $params.Remove("Ensure") | Out-Null 
             }
             if ($params.ContainsKey("InstallAccount")) 
-            { 
+            {
                 $params.Remove("InstallAccount") | Out-Null 
             }
 
@@ -237,7 +244,7 @@ function Set-TargetResource
             }
 
             if ($params.ContainsKey("ProxyName")) 
-            { 
+            {
                 $pName = $params.ProxyName
                 $params.Remove("ProxyName") | Out-Null 
             }
@@ -275,7 +282,7 @@ function Set-TargetResource
                                 -ScriptBlock {
                 $params = $args[0]
 
-                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+                $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
                 }
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool 
@@ -293,7 +300,7 @@ function Set-TargetResource
                             -ScriptBlock {
             $params = $args[0]
             
-            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript { 
+            $serviceApp =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.SecureStoreService.Server.SecureStoreServiceApplication" 
             }
 
@@ -318,61 +325,61 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ProxyName,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $ApplicationPool,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $AuditingEnabled,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $AuditlogMaxSize,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseName,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $FailoverDatabaseServer,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $PartitionMode,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean] 
         $Sharing,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Windows", "SQL")]   
         [System.String] 
         $DatabaseAuthenticationType,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $DatabaseCredentials,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

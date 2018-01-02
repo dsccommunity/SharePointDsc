@@ -3,8 +3,8 @@ function Add-SPDSCUserToLocalAdmin
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)] 
-        [string] 
+        [Parameter(Mandatory = $true,Position=1)]
+        [string]
         $UserName
     )
 
@@ -30,10 +30,10 @@ function Convert-SPDscADGroupIDToName
 
     $bytes = $GroupId.ToByteArray()
     $queryGuid = ""
-    $bytes | ForEach-Object -Process { 
-        $queryGuid += "\" + $_.ToString("x2") 
+    $bytes | ForEach-Object -Process {
+        $queryGuid += "\" + $_.ToString("x2")
     }
-    
+
     $domain = New-Object -TypeName "System.DirectoryServices.DirectoryEntry"
     $search = New-Object -TypeName "System.DirectoryServices.DirectorySearcher"
     $search.SearchRoot = $domain
@@ -41,7 +41,7 @@ function Convert-SPDscADGroupIDToName
     $search.Filter = "(&(objectGuid=$queryGuid))"
     $search.SearchScope = "Subtree"
     $search.PropertiesToLoad.Add("name") | Out-Null
-    $result = $search.FindOne() 
+    $result = $search.FindOne()
 
     if ($null -ne $result)
     {
@@ -50,7 +50,7 @@ function Convert-SPDscADGroupIDToName
 
         return $sid.Translate([System.Security.Principal.NTAccount]).ToString()
     }
-    else 
+    else
     {
         throw "Unable to locate group with id $GroupId"
     }
@@ -85,18 +85,29 @@ function Get-SPDSCAssemblyVersion
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true,Position=1)]
         [string]
         $PathToAssembly
     )
     return (Get-Command $PathToAssembly).FileVersionInfo.FileMajorPart
 }
 
+
+function Get-SPDSCFarmAccountName
+{
+    [CmdletBinding()]
+    param
+    ()
+    $spFarm = Get-SPFarm
+    return $spFarm.DefaultServiceAccount.Name
+}
+
+
 function Get-SPDscFarmVersionInfo
 {
     param
     (
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $ProductToCheck
     )
@@ -113,10 +124,10 @@ function Get-SPDscFarmVersionInfo
 
     if ($ProductToCheck)
     {
-        $products = $products | Where-Object -FilterScript { 
-            $_ -eq $ProductToCheck 
+        $products = $products | Where-Object -FilterScript {
+            $_ -eq $ProductToCheck
         }
-        
+
         if ($null -eq $products)
         {
             throw "Product not found: $ProductToCheck"
@@ -186,12 +197,12 @@ function Get-SPDscRegProductsInfo
 {
     $registryLocation = Get-ChildItem -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
     $sharePointPrograms = $registryLocation | Where-Object -FilterScript {
-         $_.PsPath -like "*\Office*" 
-    } | ForEach-Object -Process { 
-        Get-ItemProperty -Path $_.PsPath 
+         $_.PsPath -like "*\Office*"
+    } | ForEach-Object -Process {
+        Get-ItemProperty -Path $_.PsPath
     }
-    
-    return $sharePointPrograms.DisplayName 
+
+    return $sharePointPrograms.DisplayName
 }
 
 function Get-SPDSCRegistryKey
@@ -199,11 +210,11 @@ function Get-SPDSCRegistryKey
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Key,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Value
     )
@@ -216,35 +227,35 @@ function Get-SPDSCRegistryKey
     else
     {
         throw "Specified registry key $Key could not be found."
-    }    
+    }
 }
 
-function Get-SPDSCServiceContext 
+function Get-SPDSCServiceContext
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]
+        [Parameter(Mandatory = $true,Position=1)]
         $ProxyGroup
     )
     Write-Verbose -Message "Getting SPContext for Proxy group $($proxyGroup)"
     return [Microsoft.SharePoint.SPServiceContext]::GetContext($proxyGroup,[Microsoft.SharePoint.SPSiteSubscriptionIdentifier]::Default)
 }
 
-function Get-SPDSCContentService 
+function Get-SPDSCContentService
 {
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.SharePoint.Administration.SPWebService]::ContentService
 }
 
-function Get-SPDSCUserProfileSubTypeManager 
+function Get-SPDSCUserProfileSubTypeManager
 {
     [CmdletBinding()]
     param
     (
         $Context
     )
-    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null    
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint") | Out-Null
     return [Microsoft.Office.Server.UserProfiles.ProfileSubtypeManager]::Get($Context)
 }
 
@@ -255,20 +266,20 @@ function Get-SPDSCInstalledProductVersion
     return (Get-Command $fullPath).FileVersionInfo
 }
 
-function Invoke-SPDSCCommand 
+function Invoke-SPDSCCommand
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $Credential,
-        
-        [parameter(Mandatory = $false)] 
+
+        [Parameter()]
         [Object[]]
         $Arguments,
-        
-        [parameter(Mandatory = $true)]
+
+        [Parameter(Mandatory = $true)]
         [ScriptBlock]
         $ScriptBlock
     )
@@ -276,55 +287,55 @@ function Invoke-SPDSCCommand
     $VerbosePreference = 'Continue'
 
     $baseScript = @"
-        if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue)) 
+        if (`$null -eq (Get-PSSnapin -Name Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue))
         {
             Add-PSSnapin Microsoft.SharePoint.PowerShell
-        } 
+        }
 
 "@
 
     $invokeArgs = @{
         ScriptBlock = [ScriptBlock]::Create($baseScript + $ScriptBlock.ToString())
     }
-    if ($null -ne $Arguments) 
+    if ($null -ne $Arguments)
     {
         $invokeArgs.Add("ArgumentList", $Arguments)
     }
 
-    if ($null -eq $Credential) 
+    if ($null -eq $Credential)
     {
-        if ($Env:USERNAME.Contains("$")) 
+        if ($Env:USERNAME.Contains("$"))
         {
             throw [Exception] ("You need to specify a value for either InstallAccount " + `
                                "or PsDscRunAsCredential.")
             return
         }
-        Write-Verbose -Message "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)" 
+        Write-Verbose -Message "Executing as the local run as user $($Env:USERDOMAIN)\$($Env:USERNAME)"
 
-        try 
+        try
         {
             $result = Invoke-Command @invokeArgs -Verbose
-        } 
-        catch 
+        }
+        catch
         {
-            if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action")) 
+            if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action"))
             {
                 Write-Verbose -Message ("Detected an update conflict, restarting server to " + `
                                         "allow DSC to resume and retry")
                 $global:DSCMachineStatus = 1
-            } 
-            else 
+            }
+            else
             {
                 throw $_
             }
         }
         return $result
-    } 
-    else 
+    }
+    else
     {
-        if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME) 
-        { 
-            if (-not $Env:USERNAME.Contains("$")) 
+        if ($Credential.UserName.Split("\")[1] -eq $Env:USERNAME)
+        {
+            if (-not $Env:USERNAME.Contains("$"))
             {
                 throw [Exception] ("Unable to use both InstallAccount and " + `
                                    "PsDscRunAsCredential in a single resource. Remove one " + `
@@ -345,54 +356,54 @@ function Invoke-SPDSCCommand
                                  -SessionOption (New-PSSessionOption -OperationTimeout 0 `
                                                                      -IdleTimeout 60000) `
                                  -ErrorAction Continue
-        
-        if ($session) 
-        { 
-            $invokeArgs.Add("Session", $session) 
+
+        if ($session)
+        {
+            $invokeArgs.Add("Session", $session)
         }
 
-        try 
+        try
         {
             $result = Invoke-Command @invokeArgs -Verbose
-        } 
-        catch 
+        }
+        catch
         {
-            if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action")) 
+            if ($_.Exception.Message.Contains("An update conflict has occurred, and you must re-try this action"))
             {
                 Write-Verbose -Message ("Detected an update conflict, restarting server to " + `
                                         "allow DSC to resume and retry")
                 $global:DSCMachineStatus = 1
-            } 
-            else 
+            }
+            else
             {
                 throw $_
             }
         }
 
-        if ($session) 
-        { 
-            Remove-PSSession -Session $session 
-        } 
+        if ($session)
+        {
+            Remove-PSSession -Session $session
+        }
         return $result
     }
 }
 
-function Rename-SPDSCParamValue 
+function Rename-SPDSCParamValue
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)] 
+        [Parameter(Mandatory = $true,Position=1,ValueFromPipeline=$true)]
         $Params,
-        
-        [parameter(Mandatory = $true,Position=2)] 
+
+        [Parameter(Mandatory = $true,Position=2)]
         $OldName,
-        
-        [parameter(Mandatory = $true,Position=3)] 
+
+        [Parameter(Mandatory = $true,Position=3)]
         $NewName
     )
 
-    if ($Params.ContainsKey($OldName)) 
+    if ($Params.ContainsKey($OldName))
     {
         $Params.Add($NewName, $Params.$OldName)
         $Params.Remove($OldName) | Out-Null
@@ -400,17 +411,17 @@ function Rename-SPDSCParamValue
     return $Params
 }
 
-function Remove-SPDSCUserToLocalAdmin 
+function Remove-SPDSCUserToLocalAdmin
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)] 
-        [string] 
+        [Parameter(Mandatory = $true,Position=1)]
+        [string]
         $UserName
     )
 
-    if ($UserName.Contains("\") -eq $false) 
+    if ($UserName.Contains("\") -eq $false)
     {
         throw [Exception] "Usernames should be formatted as domain\username"
     }
@@ -422,7 +433,7 @@ function Remove-SPDSCUserToLocalAdmin
     ([ADSI]"WinNT://$($env:computername)/Administrators,group").Remove("WinNT://$domainName/$accountName") | Out-Null
 }
 
-function Resolve-SPDscSecurityIdentifier 
+function Resolve-SPDscSecurityIdentifier
 {
     [CmdletBinding()]
     param
@@ -442,18 +453,18 @@ function Test-SPDSCObjectHasProperty
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true,Position=1)]  
-        [Object] 
+        [Parameter(Mandatory = $true,Position=1)]
+        [Object]
         $Object,
 
-        [parameter(Mandatory = $true,Position=2)]
+        [Parameter(Mandatory = $true,Position=2)]
         [String]
         $PropertyName
     )
 
-    if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true) 
+    if (([bool]($Object.PSobject.Properties.name -contains $PropertyName)) -eq $true)
     {
-        if ($null -ne $Object.$PropertyName) 
+        if ($null -ne $Object.$PropertyName)
         {
             return $true
         }
@@ -467,79 +478,79 @@ function Test-SPDSCRunAsCredential
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $false)] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $Credential
     )
 
-    # If no specific credential is passed and it's not the machine account, it must be 
+    # If no specific credential is passed and it's not the machine account, it must be
     # PsDscRunAsCredential
-    if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false)) 
-    { 
-        return $true 
+    if (($null -eq $Credential) -and ($Env:USERNAME.Contains("$") -eq $false))
+    {
+        return $true
     }
     # return false for all other scenarios
     return $false
 }
 
-function Test-SPDSCRunningAsFarmAccount 
+function Test-SPDSCRunningAsFarmAccount
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param ( 
-        [parameter(Mandatory = $false)] 
-        [pscredential] 
+    param (
+        [Parameter()]
+        [pscredential]
         $InstallAccount
     )
 
-    if ($null -eq $InstallAccount) 
+    if ($null -eq $InstallAccount)
     {
-        if ($Env:USERNAME.Contains("$")) 
+        if ($Env:USERNAME.Contains("$"))
         {
             throw [Exception] "You need to specify a value for either InstallAccount or PsDscRunAsCredential."
             return
         }
         $Username = "$($Env:USERDOMAIN)\$($Env:USERNAME)"
-    } 
-    else 
+    }
+    else
     {
         $Username = $InstallAccount.UserName
     }
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -ScriptBlock {
-        try 
+        try
         {
             $spFarm = Get-SPFarm
-        } 
-        catch 
+        }
+        catch
         {
             Write-Verbose -Message "Unable to detect local farm."
             return $null
         }
         return $spFarm.DefaultServiceAccount.Name
     }
-    
-    if ($Username -eq $result) 
+
+    if ($Username -eq $result)
     {
         return $true
     }
     return $false
 }
 
-function Test-SPDscParameterState 
+function Test-SPDscParameterState
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true, Position=1)]  
+        [Parameter(Mandatory = $true, Position=1)]
         [HashTable]
         $CurrentValues,
-        
-        [parameter(Mandatory = $true, Position=2)]  
+
+        [Parameter(Mandatory = $true, Position=2)]
         [Object]
         $DesiredValues,
 
-        [parameter(Mandatory = $false, Position=3)] 
+        [Parameter(, Position=3)]
         [Array]
         $ValuesToCheck
     )
@@ -548,52 +559,52 @@ function Test-SPDscParameterState
 
     if (($DesiredValues.GetType().Name -ne "HashTable") `
         -and ($DesiredValues.GetType().Name -ne "CimInstance") `
-        -and ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary")) 
+        -and ($DesiredValues.GetType().Name -ne "PSBoundParametersDictionary"))
     {
         throw ("Property 'DesiredValues' in Test-SPDscParameterState must be either a " + `
                "Hashtable or CimInstance. Type detected was $($DesiredValues.GetType().Name)")
     }
 
-    if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck)) 
+    if (($DesiredValues.GetType().Name -eq "CimInstance") -and ($null -eq $ValuesToCheck))
     {
         throw ("If 'DesiredValues' is a CimInstance then property 'ValuesToCheck' must contain " + `
                "a value")
     }
 
-    if (($null -eq $ValuesToCheck) -or ($ValuesToCheck.Count -lt 1)) 
+    if (($null -eq $ValuesToCheck) -or ($ValuesToCheck.Count -lt 1))
     {
         $KeyList = $DesiredValues.Keys
-    } 
-    else 
+    }
+    else
     {
         $KeyList = $ValuesToCheck
     }
 
     $KeyList | ForEach-Object -Process {
-        if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount")) 
+        if (($_ -ne "Verbose") -and ($_ -ne "InstallAccount"))
         {
             if (($CurrentValues.ContainsKey($_) -eq $false) `
             -or ($CurrentValues.$_ -ne $DesiredValues.$_) `
-            -or (($DesiredValues.ContainsKey($_) -eq $true) -and ($null -ne $DesiredValues.$_ -and $DesiredValues.$_.GetType().IsArray)))  
+            -or (($DesiredValues.ContainsKey($_) -eq $true) -and ($null -ne $DesiredValues.$_ -and $DesiredValues.$_.GetType().IsArray)))
             {
                 if ($DesiredValues.GetType().Name -eq "HashTable" -or `
-                    $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary") 
+                    $DesiredValues.GetType().Name -eq "PSBoundParametersDictionary")
                 {
                     $CheckDesiredValue = $DesiredValues.ContainsKey($_)
-                } 
-                else 
+                }
+                else
                 {
                     $CheckDesiredValue = Test-SPDSCObjectHasProperty -Object $DesiredValues -PropertyName $_
                 }
 
-                if ($CheckDesiredValue) 
+                if ($CheckDesiredValue)
                 {
                     $desiredType = $DesiredValues.$_.GetType()
                     $fieldName = $_
-                    if ($desiredType.IsArray -eq $true) 
+                    if ($desiredType.IsArray -eq $true)
                     {
                         if (($CurrentValues.ContainsKey($fieldName) -eq $false) `
-                        -or ($null -eq $CurrentValues.$fieldName)) 
+                        -or ($null -eq $CurrentValues.$fieldName))
                         {
                             Write-Verbose -Message ("Expected to find an array value for " + `
                                                     "property $fieldName in the current " + `
@@ -601,12 +612,12 @@ function Test-SPDscParameterState
                                                     "was null. This has caused the test method " + `
                                                     "to return false.")
                             $returnValue = $false
-                        } 
-                        else 
+                        }
+                        else
                         {
                             $arrayCompare = Compare-Object -ReferenceObject $CurrentValues.$fieldName `
                                                            -DifferenceObject $DesiredValues.$fieldName
-                            if ($null -ne $arrayCompare) 
+                            if ($null -ne $arrayCompare)
                             {
                                 Write-Verbose -Message ("Found an array for property $fieldName " + `
                                                         "in the current values, but this array " + `
@@ -618,16 +629,16 @@ function Test-SPDscParameterState
                                 $returnValue = $false
                             }
                         }
-                    } 
-                    else 
+                    }
+                    else
                     {
-                        switch ($desiredType.Name) 
+                        switch ($desiredType.Name)
                         {
                             "String" {
                                 if ([string]::IsNullOrEmpty($CurrentValues.$fieldName) `
-                                -and [string]::IsNullOrEmpty($DesiredValues.$fieldName)) 
-                                {} 
-                                else 
+                                -and [string]::IsNullOrEmpty($DesiredValues.$fieldName))
+                                {}
+                                else
                                 {
                                     Write-Verbose -Message ("String value for property " + `
                                                             "$fieldName does not match. " + `
@@ -640,9 +651,9 @@ function Test-SPDscParameterState
                             }
                             "Int32" {
                                 if (($DesiredValues.$fieldName -eq 0) `
-                                -and ($null -eq $CurrentValues.$fieldName)) 
-                                {} 
-                                else 
+                                -and ($null -eq $CurrentValues.$fieldName))
+                                {}
+                                else
                                 {
                                     Write-Verbose -Message ("Int32 value for property " + `
                                                             "$fieldName does not match. " + `
@@ -655,9 +666,9 @@ function Test-SPDscParameterState
                             }
                             "Int16" {
                                 if (($DesiredValues.$fieldName -eq 0) `
-                                -and ($null -eq $CurrentValues.$fieldName)) 
-                                {} 
-                                else 
+                                -and ($null -eq $CurrentValues.$fieldName))
+                                {}
+                                else
                                 {
                                     Write-Verbose -Message ("Int16 value for property " + `
                                                             "$fieldName does not match. " + `
@@ -682,9 +693,9 @@ function Test-SPDscParameterState
                             }
                             "Single" {
                                 if (($DesiredValues.$fieldName -eq 0) `
-                                -and ($null -eq $CurrentValues.$fieldName)) 
-                                {} 
-                                else 
+                                -and ($null -eq $CurrentValues.$fieldName))
+                                {}
+                                else
                                 {
                                     Write-Verbose -Message ("Single value for property " + `
                                                             "$fieldName does not match. " + `
@@ -704,24 +715,24 @@ function Test-SPDscParameterState
                             }
                         }
                     }
-                }            
+                }
             }
-        } 
+        }
     }
     return $returnValue
 }
 
-function Test-SPDSCUserIsLocalAdmin 
+function Test-SPDSCUserIsLocalAdmin
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true,Position=1)] 
-        [string] 
+        [Parameter(Mandatory = $true,Position=1)]
+        [string]
         $UserName
     )
 
-    if ($UserName.Contains("\") -eq $false) 
+    if ($UserName.Contains("\") -eq $false)
     {
         throw [Exception] "Usernames should be formatted as domain\username"
     }
@@ -732,21 +743,21 @@ function Test-SPDSCUserIsLocalAdmin
     return ([ADSI]"WinNT://$($env:computername)/Administrators,group").PSBase.Invoke("Members") | `
         ForEach-Object -Process {
             $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
-        } | Where-Object -FilterScript { 
-            $_ -eq $accountName 
+        } | Where-Object -FilterScript {
+            $_ -eq $accountName
         }
 }
 
-function Test-SPDSCIsADUser 
+function Test-SPDSCIsADUser
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
     param (
-        [string] 
+        [string]
         $IdentityName
     )
 
-    if ($IdentityName -like "*\*") 
+    if ($IdentityName -like "*\*")
     {
         $IdentityName = $IdentityName.Substring($IdentityName.IndexOf('\') + 1)
     }
@@ -759,69 +770,69 @@ function Test-SPDSCIsADUser
     $searcher.PropertiesToLoad.Add("name") | Out-Null
     $result = $searcher.FindOne()
 
-    if ($null -eq $result) 
+    if ($null -eq $result)
     {
         throw "Unable to locate identity '$IdentityName' in the current domain."
     }
 
-    if ($result[0].Properties.objectclass -contains "user") 
+    if ($result[0].Properties.objectclass -contains "user")
     {
         return $true
-    } 
-    else 
+    }
+    else
     {
         return $false
     }
 }
 
-function Set-SPDscObjectPropertyIfValuePresent 
+function Set-SPDscObjectPropertyIfValuePresent
 {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
-        [object] 
+        [Parameter(Mandatory = $true)]
+        [object]
         $ObjectToSet,
 
-        [parameter(Mandatory = $true)] 
-        [string] 
+        [Parameter(Mandatory = $true)]
+        [string]
         $PropertyToSet,
 
-        [parameter(Mandatory = $true)] 
-        [object] 
+        [Parameter(Mandatory = $true)]
+        [object]
         $ParamsValue,
 
-        [parameter(Mandatory = $true)] 
-        [string] 
+        [Parameter(Mandatory = $true)]
+        [string]
         $ParamKey
     )
-    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey") 
+    if ($ParamsValue.PSobject.Methods.name -contains "ContainsKey")
     {
-        if ($ParamsValue.ContainsKey($ParamKey) -eq $true) 
+        if ($ParamsValue.ContainsKey($ParamKey) -eq $true)
         {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
-    } 
-    else 
+    }
+    else
     {
         if (((Test-SPDSCObjectHasProperty $ParamsValue $ParamKey) -eq $true) `
-          -and ($null -ne $ParamsValue.$ParamKey)) 
+          -and ($null -ne $ParamsValue.$ParamKey))
         {
             $ObjectToSet.$PropertyToSet = $ParamsValue.$ParamKey
         }
     }
 }
 
-function Remove-SPDSCGenericObject 
+function Remove-SPDSCGenericObject
 {
     [CmdletBinding()]
     param (
-        [parameter(Mandatory = $true)] 
-        [Object] 
+        [Parameter(Mandatory = $true)]
+        [Object]
         $SourceCollection,
 
-        [parameter(Mandatory = $true)] 
-        [Object] 
+        [Parameter(Mandatory = $true)]
+        [Object]
         $Target
     )
     $SourceCollection.Remove($Target)

@@ -8,11 +8,7 @@
         param(
             [Parameter(Mandatory = $true)]
             [PSCredential]
-            $SetupAccount,
-
-            [Parameter(Mandatory = $true)]
-            [PSCredential]
-            $FarmAccount
+            $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
 
@@ -29,7 +25,6 @@
                 SyncDBName           = "SP_ProfileSync"
                 SyncDBServer         = "SQL.contoso.local\SQLINSTANCE"
                 EnableNetBIOS        = $false
-                FarmAccount          = $FarmAccount
                 PsDscRunAsCredential = $SetupAccount
             }
         }

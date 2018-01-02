@@ -14,7 +14,7 @@
 
         node localhost {
             SPPowerPointAutomationServiceApp PowerPointAutomation 
-            { 
+            {
                 Name = "PowerPoint Automation Service Application" 
                 ProxyName = "PowerPoint Automation Service Application Proxy"
                 CacheExpirationPeriodInSeconds = 600

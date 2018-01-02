@@ -4,26 +4,26 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $MailAddress,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -37,7 +37,7 @@ function Get-TargetResource
         
         $farm = Get-SPFarm
         if ($null -eq $farm ) 
-        { 
+        {
             return $null 
         }
         return @{
@@ -55,26 +55,26 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $MailAddress,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -88,7 +88,7 @@ function Set-TargetResource
         $farm = Get-SPFarm -ErrorAction Continue 
 
         if ($null -eq $farm ) 
-        { 
+        {
             return $null 
         }
         
@@ -115,26 +115,26 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]
         $MailAddress,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,356)]
         [System.UInt32]
         $DaysBeforeExpiry,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateRange(0,36000)]
         [System.UInt32]
         $PasswordChangeWaitTimeSeconds,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateRange(0,99)]
         [System.UInt32]
         $NumberOfRetries,
         
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

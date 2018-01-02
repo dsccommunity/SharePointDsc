@@ -62,7 +62,7 @@ function Mount-SPDscContentDatabase()
         switch ($params.Enabled)
         {
             $true
-            { 
+            {
                 $cdb.Status = [Microsoft.SharePoint.Administration.SPObjectStatus]::Online
             }
             $false

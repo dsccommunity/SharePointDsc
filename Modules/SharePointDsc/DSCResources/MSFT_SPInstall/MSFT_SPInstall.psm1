@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -36,7 +36,7 @@ function Get-TargetResource
 
     $installedItems = $installedItemsX86 + $installedItemsX64 
     $installedItems = $installedItems | Select-Object -Property DisplayName -Unique    
-    $spInstall = $installedItems | Where-Object -FilterScript { 
+    $spInstall = $installedItems | Where-Object -FilterScript {
         $_ -match "Microsoft SharePoint Server (2013|2016)" 
     }
 
@@ -70,23 +70,23 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -191,7 +191,7 @@ function Set-TargetResource
 
     switch ($setup.ExitCode) 
     {
-        0 {  
+        0 {
             Write-Verbose -Message "SharePoint binary installation complete"
             $global:DSCMachineStatus = 1
         }
@@ -228,23 +228,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $BinaryDir,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ProductKey,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $InstallPath,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $DataPath,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"

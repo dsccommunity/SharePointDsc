@@ -4,29 +4,29 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Farm","WebApplication","Site","Web")] 
         [System.String] 
         $FeatureScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Version
     )
@@ -38,7 +38,7 @@ function Get-TargetResource
                                   -ScriptBlock {
         $params = $args[0]
 
-        $checkParams = @{ 
+        $checkParams = @{
             Identity = $params.Name 
         }
         if ($params.FeatureScope -eq "Farm") 
@@ -52,11 +52,11 @@ function Get-TargetResource
         $featureAtScope = Get-SPFeature @checkParams -ErrorAction SilentlyContinue
         $enabled = ($null -ne $featureAtScope)
         if ($enabled -eq $true) 
-        { 
+        {
             $currentState = "Present" 
         } 
         else 
-        { 
+        {
             $currentState = "Absent" 
         }
 
@@ -78,29 +78,29 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Farm","WebApplication","Site","Web")] 
         [System.String] 
         $FeatureScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Version
     )
@@ -120,7 +120,7 @@ function Set-TargetResource
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
 
-            $runParams = @{ 
+            $runParams = @{
                 Identity = $params.Name 
             }
 
@@ -130,7 +130,7 @@ function Set-TargetResource
             }
             
             if ($currentValues.Ensure -eq "Present")
-            {        
+            {
                 # Disable the feature first if it already exists.
                 $runParams.Add("Confirm", $false)    
                 Write-Verbose -Message ("Disable Feature '$($params.Name)' because it is " + `
@@ -152,7 +152,7 @@ function Set-TargetResource
             $params = $args[0]
             $currentValues = $params["CurrentValues"]
 
-            $runParams = @{ 
+            $runParams = @{
                 Identity = $params.Name 
             }
 
@@ -176,29 +176,29 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Url,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [ValidateSet("Farm","WebApplication","Site","Web")] 
         [System.String] 
         $FeatureScope,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $Version
     )

@@ -16,14 +16,14 @@
         node localhost {
             SPShellAdmins ShellAdmins
             {
-                Name                = "Shell Admins"
-                Members             = "CONTOSO\user1", "CONTOSO\user2"
-                ContentDatabases    = @(
-                    @(MSFT_SPContentDatabasePermissions {
+                Name         = "Shell Admins"
+                Members      = "CONTOSO\user1", "CONTOSO\user2"
+                Databases    = @(
+                    @(MSFT_SPDatabasePermissions {
                         Name = "SharePoint_Content_1"
                         Members = "CONTOSO\user2", "CONTOSO\user3"
                     })
-                    @(MSFT_SPContentDatabasePermissions {
+                    @(MSFT_SPDatabasePermissions {
                         Name = "SharePoint_Content_2"
                         Members = "CONTOSO\user3", "CONTOSO\user4"
                     })

@@ -21,7 +21,6 @@
                 Addresses            = @("http://www.contoso.com")
                 CrawlSetting         = "Custom"
                 LimitPageDepth       = 5
-                LimitServerHops      = 0
                 IncrementalSchedule  = MSFT_SPSearchCrawlSchedule{
                                         ScheduleType = "Daily"
                                         StartHour = "0"

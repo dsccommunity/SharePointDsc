@@ -14,7 +14,7 @@
 
         node localhost {
             SPWordAutomationServiceApp WordAutomation 
-            { 
+            {
                 Name = "Word Automation Service Application" 
                 Ensure = "Absent"
                 PsDscRunAsCredential = $SetupAccount 

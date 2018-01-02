@@ -41,6 +41,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
                 Mock -CommandName "Import-Module" -MockWith {}
 
+                Mock -CommandName Get-SPSite -MockWith {
+                    return @{
+                        WebApplication = @{
+                            Url = "http://server"
+                        }
+                    }
+                }
+        
+                Mock -CommandName Get-SPAuthenticationProvider -MockWith {
+                    return @{
+                        DisableKerberos = $true
+                    }
+                }
+
                 try 
                 {
                     [SPDscTests.DummyWebService] | Out-Null

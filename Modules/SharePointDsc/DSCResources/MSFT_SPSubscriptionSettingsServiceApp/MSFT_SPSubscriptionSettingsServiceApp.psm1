@@ -4,28 +4,28 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -46,15 +46,15 @@ function Get-TargetResource
         }
 
         if ($null -eq $serviceApps) 
-        { 
+        {
             return $nullReturn
         }
-        $serviceApp = $serviceApps | Where-Object -FilterScript { 
+        $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication"
         }
 
         if ($null -eq $serviceApp) 
-        { 
+        {
             return $nullReturn
         } 
         else 
@@ -74,7 +74,7 @@ function Get-TargetResource
                 Name = $serviceApp.DisplayName
                 ApplicationPool = $serviceApp.ApplicationPool.Name
                 DatabaseName = $db.Name
-                DatabaseServer = $db.Server.Name
+                DatabaseServer = $db.NormalizedDataSource
                 InstallAccount = $params.InstallAccount
                 Ensure = "Present"
             }
@@ -88,28 +88,28 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -131,11 +131,11 @@ function Set-TargetResource
                 ApplicationPool = $params.ApplicationPool
             }
             if ($params.ContainsKey("DatabaseName") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseName", $params.DatabaseName) 
             }
             if ($params.ContainsKey("DatabaseServer") -eq $true) 
-            { 
+            {
                 $newParams.Add("DatabaseServer", $params.DatabaseServer) 
             }
             $serviceApp = New-SPSubscriptionSettingsServiceApplication @newParams
@@ -154,7 +154,7 @@ function Set-TargetResource
                 $params = $args[0]
                 $appPool = Get-SPServiceApplicationPool -Identity $params.ApplicationPool
                 $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication" 
                     } 
                 $service.ApplicationPool = $appPool
@@ -171,7 +171,7 @@ function Set-TargetResource
             $params = $args[0]
             
             $service = Get-SPServiceApplication -Name $params.Name `
-                    | Where-Object -FilterScript { 
+                    | Where-Object -FilterScript {
                         $_.GetType().FullName -eq "Microsoft.SharePoint.SPSubscriptionSettingsServiceApplication" 
                     }
             Remove-SPServiceApplication $service -Confirm:$false
@@ -185,28 +185,28 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ApplicationPool,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseName,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String] 
         $DatabaseServer,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

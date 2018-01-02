@@ -8,16 +8,16 @@ function Get-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Value,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = 'Present',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -46,7 +46,7 @@ function Get-TargetResource()
         if ($null -ne $spFarm)
         {
             if ($spFarm.Properties)
-            {            
+            {
                 if ($spFarm.Properties.Contains($params.Key) -eq $true)
                 {
                     $localEnsure = "Present"
@@ -83,16 +83,16 @@ function Set-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Value,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = 'Present',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -147,16 +147,16 @@ function Test-TargetResource()
         [System.String]
         $Key,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $Value,
 
-        [Parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = 'Present',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

@@ -57,83 +57,83 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $InstallerPath,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $OnlineMode,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SXSpath,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $SQLNCli,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $PowerShell,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $NETFX,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $Sync,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $AppFabric,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX11,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSIPCClient,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB2671763,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices56,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT11,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT14,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB3092423,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ODBC,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DotNetFx,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -332,83 +332,83 @@ function Set-TargetResource
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $InstallerPath,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $OnlineMode,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SXSpath,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $SQLNCli,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $PowerShell,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $NETFX,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $Sync,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $AppFabric,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX11,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSIPCClient,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB2671763,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices56,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT11,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT14,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB3092423,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ODBC,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DotNetFx,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -497,7 +497,8 @@ function Set-TargetResource
     
     # SXSstore for feature install specified, we will manually install features from the 
     # store, rather then relying on the prereq installer to download them
-    if ($SXSpath) { 
+    if ($SXSpath)
+    {
         Write-Verbose -Message "Getting installed windows features"
         foreach ($feature in $WindowsFeatures) 
         {
@@ -510,7 +511,7 @@ function Set-TargetResource
                     $global:DSCMachineStatus = 1
                 }
                 if ($installResult.Success -ne $true) 
-                { 
+                {
                     throw "Error installing $($feature.name)"
                 }
             }
@@ -609,83 +610,83 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String]  
         $InstallerPath,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.Boolean] 
         $OnlineMode,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String] 
         $SXSpath,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $SQLNCli,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $PowerShell,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $NETFX,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $Sync,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $AppFabric,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $IDFX11,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSIPCClient,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB2671763,        
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $WCFDataServices56,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT11,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $MSVCRT14,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $KB3092423,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $ODBC,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String]  
         $DotNetFx,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [ValidateSet("Present","Absent")] 
         [System.String] 
         $Ensure = "Present"
@@ -712,7 +713,7 @@ function Test-SPDscPrereqInstallStatus
 {
     param
     (
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Object]
         $InstalledItems,
 
@@ -721,7 +722,8 @@ function Test-SPDscPrereqInstallStatus
         $PrereqsToCheck
     )
 
-    if ($null -eq $InstalledItems) {
+    if ($null -eq $InstalledItems)
+    {
         return $false
     }
 
@@ -742,7 +744,7 @@ function Test-SPDscPrereqInstallStatus
                 }
             }
             "Match" 
-            { 
+            {
                 if ($null -eq ($InstalledItems | Where-Object -FilterScript {
                     $null -ne $_.DisplayName -and $_.DisplayName.Trim() -match $itemToCheck.SearchValue
                 })) 
@@ -753,7 +755,7 @@ function Test-SPDscPrereqInstallStatus
                 }
             }
             "Like" 
-            { 
+            {
                 if ($null -eq ($InstalledItems | Where-Object -FilterScript {
                     $null -ne $_.DisplayName -and $_.DisplayName.Trim() -like $itemToCheck.SearchValue
                 })) 
@@ -764,7 +766,7 @@ function Test-SPDscPrereqInstallStatus
                 }
             }
             Default 
-            { 
+            {
                 throw ("Unable to search for a prereq with mode '$($itemToCheck.SearchType)'. " + `
                        "please use either 'Equals', 'Like' or 'Match'")
             }

@@ -60,7 +60,11 @@ function Get-TargetResource
         switch($params.EntityType)
         {
             "User" {
-                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Resource
+                $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+                $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                                    -EndpointName Resource `
+                                                                    -UseKerberos:$useKerberos
                 
                 $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
                 Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -68,7 +72,11 @@ function Get-TargetResource
                 }
             }
             "Group" {
-                $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+                $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+                $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+                $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                                    -EndpointName Security `
+                                                                    -UseKerberos:$useKerberos
 
                 Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
                     $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {
@@ -194,7 +202,11 @@ function Set-TargetResource
         switch($params.EntityType)
         {
             "User" {
-                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Resource
+                $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+                $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+                $resourceService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                                    -EndpointName Resource `
+                                                                    -UseKerberos:$useKerberos
                 
                 $userId = Get-SPDscProjectServerResourceId -PwaUrl $params.Url -ResourceName $params.EntityName
                 Use-SPDscProjectServerWebService -Service $resourceService -ScriptBlock {
@@ -236,7 +248,11 @@ function Set-TargetResource
                 }
             }
             "Group" {
-                $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url -EndpointName Security
+                $webAppUrl = (Get-SPSite -Identity $params.Url).WebApplication.Url
+                $useKerberos = -not (Get-SPAuthenticationProvider -WebApplication $webAppUrl -Zone Default).DisableKerberos
+                $securityService = New-SPDscProjectServerWebService -PwaUrl $params.Url `
+                                                                    -EndpointName Security `
+                                                                    -UseKerberos:$useKerberos
 
                 Use-SPDscProjectServerWebService -Service $securityService -ScriptBlock {
                     $groupInfo  = $securityService.ReadGroupList().SecurityGroups | Where-Object -FilterScript {

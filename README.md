@@ -10,6 +10,9 @@ DSC resources that can be used to deploy and manage a SharePoint farm.
 Please leave comments, feature requests, and bug reports in the issues tab for
 this module.
 
+Information about this module, new releases and tips/tricks will be shared on the
+[SharePointDsc blog](https://techcommunity.microsoft.com/t5/SharePointDsc/bg-p/SharePointDsc).
+
 If you would like to modify SharePointDsc module, please feel free. Please
 refer to the [Contribution Guidelines](https://github.com/PowerShell/SharePointDsc/wiki/Contributing%20to%20SharePointDSC)
 for information about style guides, testing and patterns for contributing

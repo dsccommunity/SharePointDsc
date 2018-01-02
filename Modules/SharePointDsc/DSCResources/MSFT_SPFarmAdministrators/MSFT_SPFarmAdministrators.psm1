@@ -4,23 +4,23 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Members,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -45,7 +45,7 @@ function Get-TargetResource
         $params = $args[0]
 
         $webApps = Get-SPwebapplication -IncludeCentralAdministration
-        $caWebapp = $webApps | Where-Object -FilterScript { 
+        $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication 
         }
         
@@ -74,23 +74,23 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Members,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -110,14 +110,16 @@ function Set-TargetResource
     }
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if ($null -eq $CurrentValues) { 
+    if ($null -eq $CurrentValues)
+    {
         throw "Unable to locate central administration website"
     }
 
     $changeUsers = @{}
     $runChange = $false
     
-    if ($Members) {
+    if ($Members)
+    {
         Write-Verbose "Processing Members parameter"
 
         $differences = Compare-Object -ReferenceObject $CurrentValues.Members `
@@ -151,14 +153,14 @@ function Set-TargetResource
             }
 
             if($addUsers.count -gt 0) 
-            { 
+            {
                 Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
                 $changeUsers.Add = $addUsers
                 $runChange = $true
             }
 
             if($removeUsers.count -gt 0) 
-            { 
+            {
                 Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
                 $changeUsers.Remove = $removeUsers
                 $runChange = $true
@@ -185,7 +187,7 @@ function Set-TargetResource
         }
 
         if($addUsers.count -gt 0) 
-        { 
+        {
             Write-Verbose "Adding $($addUsers.Count) users to the Farm Administrators group"
             $changeUsers.Add = $addUsers
             $runChange = $true
@@ -211,7 +213,7 @@ function Set-TargetResource
         }
 
         if($removeUsers.count -gt 0) 
-        { 
+        {
             Write-Verbose "Removing $($removeUsers.Count) users from the Farm Administrators group"
             $changeUsers.Remove = $removeUsers
             $runChange = $true
@@ -232,23 +234,23 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [System.String] 
         $Name,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $Members,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToInclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.String[]] 
         $MembersToExclude,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -270,7 +272,7 @@ function Test-TargetResource
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $CurrentValues) 
-    { 
+    {
         return $false 
     }
     
@@ -333,6 +335,7 @@ function Test-TargetResource
 function Merge-SPDscFarmAdminList 
 {
     param (
+        [Parameter()] 
         [Hashtable] 
         $changeUsers
     )
@@ -341,10 +344,11 @@ function Merge-SPDscFarmAdminList
         $changeUsers = $args[0]
 
         $webApps = Get-SPwebapplication -IncludeCentralAdministration
-        $caWebapp = $webApps | Where-Object -FilterScript { 
+        $caWebapp = $webApps | Where-Object -FilterScript {
             $_.IsAdministrationWebApplication 
         }
-        if ($null -eq $caWebapp) {
+        if ($null -eq $caWebapp)
+        {
             throw "Unable to locate central administration website"
         }
         $caWeb = Get-SPweb($caWebapp.Url)

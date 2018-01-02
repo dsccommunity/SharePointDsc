@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -33,7 +33,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Present"              
             }
 
@@ -56,7 +55,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Present"              
             }
            
@@ -73,31 +71,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "Ensure=Present and the parameter AuthenticationMethod is not specified" -Fixture {
-            $testParams = @{
-                Name = "SharePoint Sites"
-                ApplicationPool = "SharePoint Web Apps"
-                ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
-                Ensure = "Present"              
-            }
-
-            It "throws exception in the set method" {
-                { Set-TargetResource @testParams } | Should Throw "When Ensure is Present, the AuthenticationMethod parameter is required."
-            }
-
-            It "throws exception in the test method" {
-                { Test-TargetResource @testParams } | Should Throw "When Ensure is Present, the AuthenticationMethod parameter is required."
-            }
-        }
-
         Context -Name "The web application that uses NTLM doesn't exist but should" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Present"
             }
 
@@ -118,7 +97,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
-                Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
 
             $testParams.Add("AllowAnonymous", $true)
@@ -126,7 +104,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParams
 
                 Assert-MockCalled New-SPWebApplication
-                Assert-MockCalled New-SPAuthenticationProvider -ParameterFilter { $DisableKerberos -eq $true }
             }
         }
 
@@ -136,7 +113,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Kerberos"
                 Ensure = "Present"
             }
 
@@ -167,7 +143,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Classic"
+                UseClassic = $true
                 Ensure = "Present"
             }
 
@@ -210,7 +186,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Present"
             }
 
@@ -256,7 +231,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Kerberos"
                 Ensure = "Present"
             }
 
@@ -300,7 +274,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Absent"
             }
 
@@ -350,7 +323,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Absent"
             }
 
@@ -372,8 +344,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Claims"
-                AuthenticationProvider = "TestProvider"
                 Ensure = "Present"
             }
 
@@ -393,7 +363,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
-                USeClaimsAuthentication = $true
+                UseClaimsAuthentication = $true
                 ContentDatabases = @(
                     @{
                         Name = "SP_Content_01"
@@ -422,8 +392,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Claims"
-                AuthenticationProvider = "TestProvider"
                 Ensure = "Absent"
             }
 
@@ -443,7 +411,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Name = $testParams.ApplicationPool
                     Username = $testParams.ApplicationPoolAccount
                 }
-                USeClaimsAuthentication = $true
+                UseClaimsAuthentication = $true
                 ContentDatabases = @(
                     @{
                         Name = "SP_Content_01"
@@ -467,21 +435,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         }
 
         Context -Name "The web application doesn't exist and should that uses Claims" -Fixture {
-            
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Claims"
-                AuthenticationProvider = "TestProvider"
                 Ensure = "Present"
                 DatabaseServer = "sql.domain.local"
                 DatabaseName = "SP_Content_01"
                 HostHeader = "sites.sharepoint.com"
                 Path = "C:\inetpub\wwwroot\something"
                 Port = 80
-                UseSSL = $true
             }
   
             Mock -CommandName Get-SPTrustedIdentityTokenIssuer -MockWith {
@@ -565,8 +529,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Claims"
-                AuthenticationProvider = "TestProvider"
                 Ensure = "Absent"
             }
 
@@ -600,8 +562,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
-                AuthenticationProvider = "Windows Authentication"
                 Ensure = "Present"
             }
 
@@ -632,8 +592,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Kerberos"
-                AuthenticationProvider = "Windows Authentication"
                 Ensure = "Present"
             }
 
@@ -676,73 +634,18 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
         }
 
-        Context -Name "The web application authentication method is claims with no authentication provider" -Fixture {
-            
+        Context -Name "The web application does not exist and should that uses NTLM" -Fixture {
             $testParams = @{
                 Name = "SharePoint Sites"
                 ApplicationPool = "SharePoint Web Apps"
                 ApplicationPoolAccount = "DEMO\ServiceAccount"
                 Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "Claims"
-                Ensure = "Present"
-            }
-
-             Mock -CommandName Get-SPAuthenticationProvider -MockWith { 
-                return @{ 
-                    DisplayName = "TestProvider"
-                    LoginProviderName = "TestProvider"
-                    ClaimProviderName = "TestClaimProvider"
-                    AuthenticationRedirectUrl = "/_trust/default.aspx?trust=TestProvider"
-                } 
-                
-            }
-            
-            Mock -CommandName Get-SPWebApplication -MockWith { return @(@{
-                DisplayName = $testParams.Name
-                ApplicationPool = @{ 
-                    Name = $testParams.ApplicationPool
-                    Username = $testParams.ApplicationPoolAccount
-                }
-                USeClaimsAuthentication = $true
-                ContentDatabases = @(
-                    @{
-                        Name = "SP_Content_01"
-                        Server = "sql.domain.local"
-                    }
-                )
-                IisSettings = @( 
-                    @{ Path = "C:\inetpub\wwwroot\something" }
-                )
-                Url = $testParams.Url
-                }
-            )}
-            
-            It "Should return present from the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present"
-            }    
-            It "Should return exception from the set method" {
-                {Set-TargetResource @testParams} | Should Throw "When configuring SPWebApplication to use Claims the AuthenticationProvider value must be specified."
-            }
-
-            It "Should return true from the test method" {
-                Test-TargetResource @testParams | Should Be $true
-            }
-        }
-
-        Context -Name "The web appliation does not exist and should that uses NTLM" -Fixture {
-            $testParams = @{
-                Name = "SharePoint Sites"
-                ApplicationPool = "SharePoint Web Apps"
-                ApplicationPoolAccount = "DEMO\ServiceAccount"
-                Url = "http://sites.sharepoint.com"
-                AuthenticationMethod = "NTLM"
                 Ensure = "Present"
                 DatabaseServer = "sql.domain.local"
                 DatabaseName = "SP_Content_01"
                 HostHeader = "sites.sharepoint.com"
                 Path = "C:\inetpub\wwwroot\something"
                 Port = 80
-                UseSSL = $true
             }
 
             

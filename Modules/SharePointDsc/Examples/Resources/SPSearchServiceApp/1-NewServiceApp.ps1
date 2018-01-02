@@ -14,7 +14,7 @@
 
         node localhost {
             SPSearchServiceApp SearchServiceApp
-            {  
+            {
                 Name                  = "Search Service Application"
                 DatabaseName          = "SP_Search"
                 ApplicationPool       = "SharePoint Service Applications"

@@ -4,26 +4,30 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
+        [Parameter()]
         [ValidateSet("Authoratative","Demoted")]
         [System.String]
         $Action,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -55,7 +59,6 @@ function Get-TargetResource
 
         if($params.Action -eq "Authoratative")
         {
-            
             $queryAuthority = Get-SPEnterpriseSearchQueryAuthority -Identity $params.Path `
                                                                    -Owner $searchOwner `
                                                                    -SearchApplication $serviceApp `
@@ -110,26 +113,30 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
+        [Parameter()]
         [ValidateSet("Authoratative","Demoted")]
         [System.String]
         $Action,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -231,26 +238,30 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Path,
         
+        [Parameter()]
         [ValidateRange(0.0, 2.0)]
         [System.Single]
         $Level,
 
+        [Parameter()]
         [ValidateSet("Authoratative","Demoted")]
         [System.String]
         $Action,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -260,11 +271,10 @@ function Test-TargetResource
     $PSBoundParameters.Ensure = $Ensure
 
     $CurrentValues = Get-TargetResource @PSBoundParameters
-    if($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
-        if($Action -eq "Authoratative")
+        if ($Action -eq "Authoratative")
         {
-       
             return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
                                         -ValuesToCheck @("ServiceAppName",
