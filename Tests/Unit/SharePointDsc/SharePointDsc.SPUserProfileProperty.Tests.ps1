@@ -125,7 +125,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $Global:SPUPCoreAddCalled = $true
                         } -PassThru -Force
 
-       # $coreProperties.Add($coreProperty)
         $typePropertyUpdate = @{
                             IsVisibleOnViewer=$true
                             IsVisibleOnEditor=$true
@@ -134,7 +133,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $Global:SPUPPropertyCommitCalled = $true
                         } -PassThru
 
-        #$typeProperties.Add($typeProperty)
        $subTypePropertyUpdate = @{
                             Name= "WorkEmailUpdate"
                             DisplayName="WorkEmailUpdate"
