@@ -116,6 +116,7 @@ function Set-TargetResource
     Invoke-SPDSCCommand -Credential $InstallAccount `
                         -Arguments $PSBoundParameters `
                         -ScriptBlock {
+        $params = $args[0]
         $config = Get-SPSecurityTokenServiceConfig
         $config.Name = $params.Name
         $config.NameIdentifier = $params.NameIdentifier
