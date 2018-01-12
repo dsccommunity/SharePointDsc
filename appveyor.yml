@@ -1,17 +1,17 @@
-version: 1.8.0.{build}
+version: 2.0.0.{build}
 image: WMF 5
 
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
 
-    - npm --silent install  
+    - npm --silent install
 
     - ps: |
         $moduleName = 'SharePointDsc'
         $mainModuleFolder = "Modules\$moduleName"
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
-        
+
 build: off
 
 test_script:

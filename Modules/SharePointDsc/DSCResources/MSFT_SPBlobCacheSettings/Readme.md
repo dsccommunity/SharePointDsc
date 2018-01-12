@@ -9,8 +9,7 @@ file directly and is NOT using the SPWebConfigModifications class. In order
 to configure all WFE servers in the farm, you have to apply this resource
 to all servers.
 
-Note:
-
+NOTE:
 - In order to prevent inconsistancy between different web front end servers,
   make sure you configure this setting on all servers equally.
 - If the specified folder does not exist, the resource will create the folder.
