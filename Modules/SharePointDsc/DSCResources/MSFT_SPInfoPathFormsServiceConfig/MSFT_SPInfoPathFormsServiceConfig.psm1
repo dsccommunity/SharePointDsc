@@ -291,7 +291,20 @@ function Test-TargetResource
 
     return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                     -DesiredValues $PSBoundParameters `
-                                    -ValuesToCheck @("Ensure")
+                                    -ValuesToCheck @("Ensure",
+                                                     "AllowUserFormBrowserEnabling",
+                                                     "AllowUserFormBrowserRendering",
+                                                     "MaxDataConnectionTimeout",
+                                                     "DefaultDataConnectionTimeout",
+                                                     "MaxDataConnectionResponseSize",
+                                                     "RequireSslForDataConnections",
+                                                     "AllowEmbeddedSqlForDataConnections",
+                                                     "AllowUdcAuthenticationForDataConnections",
+                                                     "AllowUserFormCrossDomainDataConnections",
+                                                     "MaxPostbacksPerSession",
+                                                     "MaxUserActionsPerPostback",
+                                                     "ActiveSessionsTimeout",
+                                                     "MaxSizeOfUserFormState")
 }
 
 Export-ModuleMember -Function *-TargetResource

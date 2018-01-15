@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("SPSecurityTokenServiceConfig")]
-class MSFT_SPSecurityTokenServiceConfig : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("SPInfoPathFormsServiceConfig")]
+class MSFT_SPInfoPathFormsServiceConfig : OMI_BaseResource
 {
     [Key, Description("Present ensures the settings are applied"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
     [Write, Description("True sets the InfoPath Forms Service to allow users to browse forms")] Boolean AllowUserFormBrowserEnabling;
