@@ -1,5 +1,11 @@
 # Change log for SharePointDsc
 
+## 2.1
+
+* Added the SPSecurityTokenServiceConfig resource
+* Fixed issues with the UserProfile Sync connection and Property
+  resource
+
 ## 2.0
 
 * General
