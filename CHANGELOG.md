@@ -2,6 +2,7 @@
 
 ## 2.1
 
+* Added the SPInfoPathFormsServiceConfig resource
 * Added the SPSecurityTokenServiceConfig resource
 * Fixed issues with the UserProfile Sync connection and Property
   resource
