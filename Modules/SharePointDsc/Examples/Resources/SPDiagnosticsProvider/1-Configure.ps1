@@ -19,8 +19,8 @@
                 Name                 = "job-diagnostics-blocking-query-provider"
                 MaxTotalSizeInBytes  = 10000000000000
                 Retention            = 14
-		Enabled              = $true
-		PSDscRunAsCredential = $FarmAccount
+                Enabled              = $true
+                PSDscRunAsCredential = $FarmAccount
             }
         }
     }
