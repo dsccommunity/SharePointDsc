@@ -6,7 +6,7 @@ class MSFT_SPInfoPathFormsServiceConfig : OMI_BaseResource
     [Write, Description("True sets the InfoPath Forms Service to render forms in the browser")] Boolean AllowUserFormBrowserRendering;
     [Write, Description("Sets the maximum connection timeout in milliseconds")] Uint32 MaxDataConnectionTimeout;
     [Write, Description("Sets the default connection timeout in milliseconds")] Uint32 DefaultDataConnectionTimeout;
-    [Write, Description(Sets the maximum response size in kb for the user response")] Uint32 MaxDataConnectionResponseSize;
+    [Write, Description("Sets the maximum response size in kb for the user response")] Uint32 MaxDataConnectionResponseSize;
     [Write, Description("True sets the InfoPath Forms Service to require SSL for its connections")] Boolean RequireSslForDataConnections;
     [Write, Description("True sets the InfoPath Forms Service to allow embedded SQL sonnections in Forms")] Boolean AllowEmbeddedSqlForDataConnections;
     [Write, Description("True sets the InfoPath Forms Service to allow User Defined connections")] Boolean AllowUdcAuthenticationForDataConnections;
