@@ -2,7 +2,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -33,23 +33,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            UserProfileService = "User Profile Service Application"
            DisplayName = "WorkEmailNew"
            Type = "String (Single Value)"
-           Description = "" 
+           Description = ""
            PolicySetting = "Mandatory"
            PrivacySetting = "Public"
            MappingConnectionName = "contoso"
            MappingPropertyName = "department"
            MappingDirection = "Import"
            Length = 30
-           DisplayOrder = 5496 
+           DisplayOrder = 5496
            IsEventLog =$false
            IsVisibleOnEditor=$true
            IsVisibleOnViewer = $true
            IsUserEditable = $true
            IsAlias = $false
-           IsSearchable = $false 
+           IsSearchable = $false
            TermStore = "Managed Metadata service"
            TermGroup = "People"
-           TermSet = "Department" 
+           TermSet = "Department"
            UserOverridePrivacy = $false
         }
 
@@ -71,26 +71,26 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
            IsVisibleOnEditor=$True
            IsVisibleOnViewer = $true
            IsUserEditable = $true
-           IsAlias = $true 
-           IsSearchable = $true 
+           IsAlias = $true
+           IsSearchable = $true
            TermStore = "Managed Metadata service"
            TermGroup = "People"
-           TermSet = "Location" 
+           TermSet = "Location"
            UserOverridePrivacy = $false
         }
-        
+
         try { [Microsoft.Office.Server.UserProfiles] }
         catch {
             Add-Type @"
                 namespace Microsoft.Office.Server.UserProfiles {
                 public enum ConnectionType { ActiveDirectory, BusinessDataCatalog };
                 public enum ProfileType { User};
-                }        
+                }
 "@ -ErrorAction SilentlyContinue
-        }   
-        
-        $corePropertyUpdate = @{ 
-                            DisplayName = "WorkEmailUpdate" 
+        }
+
+        $corePropertyUpdate = @{
+                            DisplayName = "WorkEmailUpdate"
                             Name = "WorkEmailUpdate"
                             IsMultiValued=$false
                             Type = "String (Single Value)"
@@ -123,18 +123,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $Global:SPUPCoreRemovePropertyByNameCalled = $true
                         } -PassThru | Add-Member ScriptMethod Add {
                             $Global:SPUPCoreAddCalled = $true
-                        } -PassThru -Force 
-                        
-       # $coreProperties.Add($coreProperty)
+                        } -PassThru -Force
+
         $typePropertyUpdate = @{
                             IsVisibleOnViewer=$true
                             IsVisibleOnEditor=$true
                             IsEventLog=$true
                         }| Add-Member ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
-                        } -PassThru 
-        
-        #$typeProperties.Add($typeProperty)
+                        } -PassThru
+
        $subTypePropertyUpdate = @{
                             Name= "WorkEmailUpdate"
                             DisplayName="WorkEmailUpdate"
@@ -149,10 +147,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             UserOverridePrivacy=$false;
                         }| Add-Member ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
-                        } -PassThru 
+                        } -PassThru
 
 
-        $coreProperty = @{ 
+        $coreProperty = @{
                             DisplayName = $testParamsNewProperty.DisplayName
                             Name = $testParamsNewProperty.Name
                             IsMultiValued=$testParamsNewProperty.Type -eq "String (Multi Value)"
@@ -174,13 +172,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             IsEventLog=$testParamsNewProperty.IsEventLog
                         }| Add-Member ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
-                        } -PassThru 
+                        } -PassThru
 
         $subTypeProperty = @{
                             Name= $testParamsNewProperty.Name
                             DisplayName= $testParamsNewProperty.DisplayName
                             Description = $testParamsNewProperty.Description
-                            PrivacyPolicy = $testParamsNewProperty.PolicySetting 
+                            PrivacyPolicy = $testParamsNewProperty.PolicySetting
                             DefaultPrivacy = $testParamsNewProperty.PrivateSetting
                             DisplayOrder =$testParamsNewProperty.DisplayOrder
                             IsUserEditable= $testParamsNewProperty.IsUserEditable
@@ -190,7 +188,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             AllowPolicyOverride=$true;
                         }| Add-Member ScriptMethod Commit {
                             $Global:SPUPPropertyCommitCalled = $true
-                        } -PassThru 
+                        } -PassThru
         $userProfileSubTypePropertiesNoProperty = @{} | Add-Member ScriptMethod Create {
                             $Global:SPUPSubTypeCreateCalled = $true
                         } -PassThru  | Add-Member ScriptMethod GetPropertyByName {
@@ -202,7 +200,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return $result
                         } -PassThru| Add-Member ScriptMethod Add {
                             $Global:SPUPSubTypeAddCalled = $true
-                        } -PassThru -Force 
+                        } -PassThru -Force
 
         $userProfileSubTypePropertiesUpdateProperty = @{"WorkEmailUpdate" = $subTypePropertyUpdate } | Add-Member ScriptMethod Create {
                             $Global:SPUPSubTypeCreateCalled = $true
@@ -219,11 +217,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             return @{
                             Properties = $userProfileSubTypePropertiesNoProperty
                             }
-                        } -PassThru 
+                        } -PassThru
 
         return $result
         }
-        
+
 
         Mock -CommandName Get-SPWebApplication -MockWith {
             return @(
@@ -231,51 +229,51 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         IsAdministrationWebApplication=$true
                         Url ="caURL"
                      })
-        }  
+        }
         #IncludeCentralAdministration
         $TermSets =@{Department = @{Name="Department"
                                 }
                     Location = @{Name="Location"
-                                }                                
-                                } 
-                             
+                                }
+                                }
+
         $TermGroups = @{People = @{Name="People"
-                                TermSets = $TermSets 
+                                TermSets = $TermSets
                                 }}
 
         $TermStoresList = @{"Managed Metadata service" = @{Name="Managed Metadata service"
-                                Groups = $TermGroups 
-                                }}    
+                                Groups = $TermGroups
+                                }}
 
 
         Mock -CommandName New-Object -MockWith {
             return (@{
                 TermStores = $TermStoresList
             })
-        } -ParameterFilter { $TypeName -eq "Microsoft.SharePoint.Taxonomy.TaxonomySession" } 
+        } -ParameterFilter { $TypeName -eq "Microsoft.SharePoint.Taxonomy.TaxonomySession" }
 
         Mock -CommandName New-Object -MockWith {
             return (@{
                 Properties = @{} | Add-Member ScriptMethod SetDisplayOrderByPropertyName {
                 $Global:UpsSetDisplayOrderByPropertyNameCalled=$true;
-                return $false; 
+                return $false;
             } -PassThru | Add-Member ScriptMethod CommitDisplayOrder {
                 $Global:UpsSetDisplayOrderByPropertyNameCalled=$true;
-                return $false; 
+                return $false;
             } -PassThru    })
-        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" } 
-        Mock Invoke-SPDSCCommand { 
+        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileManager" }
+        Mock Invoke-SPDSCCommand {
             return Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $Arguments -NoNewScope
         }
-  
-        
+
+
         $propertyMappingItem =  @{
                                     DataSourcePropertyName="mail"
                                     IsImport=$true
                                     IsExport=$false
                                     } | Add-Member ScriptMethod Delete {
                                         $Global:UpsMappingDeleteCalled=$true;
-                                        return $true; 
+                                        return $true;
                                         } -PassThru
 
         $propertyMapping = @{}| Add-Member ScriptMethod Item {
@@ -285,13 +283,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                     return $propertyMappingItem}
                                     } -PassThru -force | Add-Member ScriptMethod AddNewExportMapping {
                                         $Global:UpsMappingAddNewExportCalled=$true;
-                                        return $true; 
+                                        return $true;
                                         } -PassThru | Add-Member ScriptMethod AddNewMapping {
                                         $Global:UpsMappingAddNewMappingCalled=$true;
-                                        return $true; 
-                                        } -PassThru 
-        $connection = @{ 
-            DisplayName = "Contoso" 
+                                        return $true;
+                                        } -PassThru
+        $connection = @{
+            DisplayName = "Contoso"
             Server = "contoso.com"
             AccountDomain = "Contoso"
             AccountUsername = "TestAccount"
@@ -305,7 +303,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                             $Global:SPUPSSyncConnectionAddPropertyMappingCalled = $true
                         } -PassThru
 
-        
+
         $ConnnectionManager = @($connection) | Add-Member ScriptMethod  AddActiveDirectoryConnection{ `
                                                 param([Microsoft.Office.Server.UserProfiles.ConnectionType] $connectionType,  `
                                                 $name, `
@@ -316,54 +314,63 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                                 $namingContext, `
                                                 $p1, $p2 `
                                             )
-        
+
         $Global:SPUPSAddActiveDirectoryConnectionCalled =$true
         } -PassThru
-        
-        
+
+
         Mock -CommandName New-Object -MockWith {
             $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
                 $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
 
-                return ($coreProperties); 
+                return ($coreProperties);
             } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
                 $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
-                return $userProfileSubTypePropertiesUpdateProperty; 
-            } -PassThru     
+                return $userProfileSubTypePropertiesUpdateProperty;
+            } -PassThru
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager
-            ConnectionManager = $ConnnectionManager  
+            ConnectionManager = $ConnnectionManager
             } | Add-Member ScriptMethod IsSynchronizationRunning {
                 $Global:UpsSyncIsSynchronizationRunning=$true;
-                return $false; 
+                return $false;
             } -PassThru   )
-        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
-        
+        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
+
         $userProfileServiceValidConnection =  @{
             Name = "User Profile Service Application"
             TypeName = "User Profile Service Application"
             ApplicationPool = "SharePoint Service Applications"
-            FarmAccount = $farmAccount 
+            FarmAccount = $farmAccount
             ServiceApplicationProxyGroup = "Proxy Group"
-            ConnectionManager=  @($connection) 
+            ConnectionManager=  @($connection)
+        }
+
+        Context -Name "Non-Existing User Profile Service Application" {
+            Mock -CommandName Get-SPServiceApplication { return $null }
+            It "Should return Ensure = Absent" {
+                $Global:SPUPGetProfileSubtypeCalled = $false
+                $Global:SPUPGetPropertyByNameCalled = $false
+                $Global:SPUPSMappingItemCalled = $false
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+            }
         }
 
         Mock -CommandName Get-SPServiceApplication { return $userProfileServiceValidConnection }
 
-        
         Context -Name "When property doesn't exist" {
-            
+
             It "Should return null from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
@@ -372,11 +379,11 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "creates a new user profile property in the set method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
-                
+
                 $Global:SPUPSMappingItemCalled = $false
                 Set-TargetResource @testParamsNewProperty
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
-                
+
                 $Global:SPUPSMappingItemCalled | Should be $true
 
             }
@@ -388,31 +395,31 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
                 $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
 
-                return ($coreProperties); 
+                return ($coreProperties);
             } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
                 $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
-                return $userProfileSubTypePropertiesUpdateProperty; 
-            } -PassThru     
+                return $userProfileSubTypePropertiesUpdateProperty;
+            } -PassThru
             return (@{
             ProfilePropertyManager = $ProfilePropertyManager
-            ConnectionManager = $()  
+            ConnectionManager = $()
             } | Add-Member ScriptMethod IsSynchronizationRunning {
                 $Global:UpsSyncIsSynchronizationRunning=$true;
-                return $false; 
+                return $false;
             } -PassThru   )
-        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" } 
+        } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
 
             It "Should return null from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
@@ -431,14 +438,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
 
             }
-
-
-
-
         }
 
         Context -Name "When property doesn't exist, term set doesn't exist" {
-            $termSet = $testParamsNewProperty.TermSet 
+            $termSet = $testParamsNewProperty.TermSet
             $testParamsNewProperty.TermSet = "Invalid"
 
             It "Should return null from the Get method" {
@@ -446,12 +449,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
@@ -469,7 +472,61 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             }
             $testParamsNewProperty.TermSet = $termSet
+        }
 
+        Context -Name "When required values are not all passed" {
+            $testParamsNewProperty.TermGroup = $null
+            It "Should throw error from Set method" {
+                { Set-TargetResource @testParamsNewProperty } | Should throw "Term Group  not found"
+            }
+        }
+
+        Context -Name "When ConfigurationManager is null" {
+            Mock -CommandName New-Object -MockWith {
+                $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
+                    $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
+
+                    return ($coreProperties);
+                } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
+                    $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
+                    return $userProfileSubTypePropertiesUpdateProperty;
+                } -PassThru
+                return (@{
+                ProfilePropertyManager = $ProfilePropertyManager
+                ConnectionManager = $null
+                } | Add-Member ScriptMethod IsSynchronizationRunning {
+                    $Global:UpsSyncIsSynchronizationRunning=$true;
+                    return $false;
+                } -PassThru   )
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
+
+            It "Should return Ensure = Absent from the Get method"{
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+            }
+        }
+
+        Context -Name "When Sync Connection is set to Export" {
+            Mock -CommandName New-Object -MockWith {
+                $ProfilePropertyManager = @{"Contoso"  = $connection} | Add-Member ScriptMethod GetCoreProperties {
+                    $Global:UpsConfigManagerGetCorePropertiesCalled=$true;
+
+                    return ($coreProperties);
+                } -PassThru | Add-Member ScriptMethod GetProfileTypeProperties {
+                    $Global:UpsConfigManagerGetProfileTypePropertiesCalled=$true;
+                    return $userProfileSubTypePropertiesUpdateProperty;
+                } -PassThru
+                return (@{
+                ProfilePropertyManager = $ProfilePropertyManager
+                ConnectionManager = $null
+                } | Add-Member ScriptMethod IsSynchronizationRunning {
+                    $Global:UpsSyncIsSynchronizationRunning=$true;
+                    return $false;
+                } -PassThru   )
+            } -ParameterFilter { $TypeName -eq "Microsoft.Office.Server.UserProfiles.UserProfileConfigManager" }
+
+            It "Should return Ensure = Absent from the Get method"{
+                (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
+            }
         }
 
         Context -Name "When property doesn't exist, term group doesn't exist" {
@@ -481,12 +538,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
@@ -504,7 +561,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             }
             $testParamsNewProperty.TermGroup = $termGroup
-
         }
 
         Context -Name "When property doesn't exist, term store doesn't exist" {
@@ -516,12 +572,12 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Absent"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsNewProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsNewProperty | Should Be $false
@@ -539,10 +595,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             }
             $testParamsNewProperty.TermStore = $termStore
-
-
         }
-
 
         Context -Name "When property exists and all properties match" {
             Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
@@ -551,22 +604,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
-                            } -PassThru 
+                            } -PassThru
 
             return $result
             }
-                    
+
             It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $true
@@ -579,10 +632,17 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Set-TargetResource @testParamsUpdateProperty
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $true
-
             }
 
+            It "Should throw an error if the MappingDirection is set to Export" {
+                $testParamsExport = $testParamsUpdateProperty
+                $connection.Type = "ActiveDirectoryImport"
+                $testParamsExport.MappingDirection = "Export"
+                $propertyMappingItem.IsImport = $true
 
+                { Set-TargetResource @testParamsExport } | Should throw "not implemented"
+                $connection.Type = "ActiveDirectory"
+            }
         }
 
         Context -Name "When property exists and type is different - throws exception" {
@@ -594,22 +654,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
-                            } -PassThru 
+                            } -PassThru
 
             return $result
             }
-                    
+
             It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
@@ -628,11 +688,10 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $false
             }
             $testParamsUpdateProperty.Type = $currentType
-
         }
 
         Context -Name "When property exists and mapping exists, mapping config does not match" {
-            
+
             $propertyMappingItem.DataSourcePropertyName = "property"
 
             Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
@@ -641,22 +700,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
-                            } -PassThru 
+                            } -PassThru
 
             return $result
             }
-                    
+
             It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
@@ -675,7 +734,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
         }
-        Context -Name "When property exists and mapping does not " {
+        Context -Name "When property exists and mapping does not exist" {
            $propertyMappingItem=$null
                        Mock -CommandName Get-SPDSCUserProfileSubTypeManager -MockWith {
             $result = @{}| Add-Member ScriptMethod GetProfileSubtype {
@@ -683,22 +742,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
-                            } -PassThru 
+                            } -PassThru
 
             return $result
             }
-                    
+
             It "Should return valid value from the Get method" {
                 $Global:SPUPGetProfileSubtypeCalled = $false
                 $Global:SPUPGetPropertyByNameCalled = $false
                 $Global:SPUPSMappingItemCalled = $false
                 (Get-TargetResource @testParamsNewProperty).Ensure | Should Be "Present"
-                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService } 
+                Assert-MockCalled Get-SPServiceApplication -ParameterFilter { $Name -eq $testParamsUpdateProperty.UserProfileService }
                 $Global:SPUPGetProfileSubtypeCalled | Should be $true
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $true
             }
-            
+
             It "Should return false when the Test method is called" {
                 $Global:SPUPGetPropertyByNameCalled = $false
                 Test-TargetResource @testParamsUpdateProperty | Should Be $false
@@ -725,7 +784,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                                 return @{
                                 Properties = $userProfileSubTypePropertiesUpdateProperty
                                 }
-                            } -PassThru 
+                            } -PassThru
 
             return $result
             }
@@ -742,7 +801,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 $Global:SPUPGetPropertyByNameCalled | Should be $true
                 $Global:SPUPSMappingItemCalled | Should be $false
                 $Global:SPUPCoreRemovePropertyByNameCalled | Should be $true
-            }           
+            }
         }
     }
 }

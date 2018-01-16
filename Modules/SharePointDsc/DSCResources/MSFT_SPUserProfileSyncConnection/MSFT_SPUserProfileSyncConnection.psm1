@@ -324,9 +324,12 @@ function Set-TargetResource
                }
                16
                {
-                   Add-SPProfileSyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
-                       -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionUseSSL $params.UseSSL `
-                       -ConnectionSynchronizationOU $params.IncludedOUs.ToString()
+                    foreach($ou in $params.IncludedOUs)
+                    {
+                        Add-SPProfileSyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
+                            -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionUseSSL $params.UseSSL `
+                            -ConnectionSynchronizationOU $ou
+                    }
                }
             }
         }
