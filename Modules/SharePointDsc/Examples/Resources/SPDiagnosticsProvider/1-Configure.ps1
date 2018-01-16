@@ -8,7 +8,7 @@
         param(
             [Parameter(Mandatory = $true)]
             [PSCredential]
-            $FarmAccount
+            $SetupAccount
         )
         Import-DscResource -ModuleName SharePointDsc
 
@@ -20,7 +20,7 @@
                 MaxTotalSizeInBytes  = 10000000000000
                 Retention            = 14
                 Enabled              = $true
-                PSDscRunAsCredential = $FarmAccount
+                PSDscRunAsCredential = $SetupAccount
             }
         }
     }
