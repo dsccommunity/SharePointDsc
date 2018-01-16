@@ -13,7 +13,7 @@ function Get-TargetResource
         $Retention = 14,
 
         [Parameter()]
-        [System.Int64]
+        [System.UInt64]
         $MaxTotalSizeInBytes,
 
         [Parameter()]
@@ -77,7 +77,7 @@ function Set-TargetResource
         $Retention = 14,
 
         [Parameter()]
-        [System.Int64]
+        [System.UInt64]
         $MaxTotalSizeInBytes,
 
         [Parameter()]
@@ -134,7 +134,7 @@ function Test-TargetResource
         $Retention = 14,
 
         [Parameter()]
-        [System.Int64]
+        [System.UInt64]
         $MaxTotalSizeInBytes,
 
         [Parameter()]
