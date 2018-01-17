@@ -1,6 +1,7 @@
 <#
 .EXAMPLE
-    This example shows how to deploy Access Services 2010 to the local SharePoint farm.
+    This example shows how to configure the InfoPath Forms Service
+    in the local SharePoint farm.
 #>
 
     Configuration Example
