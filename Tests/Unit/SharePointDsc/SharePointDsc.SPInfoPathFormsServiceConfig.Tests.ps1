@@ -84,8 +84,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return false when the Test method is called" {
-                { Set-TargetResource @testParams } | Should throw "This ressource cannot undo InfoPath Forms Service Configuration changes. " `
-                "Please set Ensure to Present or ommit the resource"
+                { Set-TargetResource @testParams } | Should throw "This resource cannot undo InfoPath Forms Service Configuration changes. " `
+                "Please set Ensure to Present or omit the resource"
             }
         }
 

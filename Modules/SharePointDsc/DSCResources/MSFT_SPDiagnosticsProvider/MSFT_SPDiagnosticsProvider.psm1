@@ -122,7 +122,7 @@ function Set-TargetResource
             $diagnosticProvider.MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
         }
 
-        if($params.ContainsKey("Enabled")
+        if($params.ContainsKey("Enabled"))
         {
             $diagnosticProvider.Enabled = $params.Enabled
         }

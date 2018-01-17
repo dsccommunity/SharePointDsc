@@ -85,7 +85,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should properly configure the provider" {
-                { Set-TargetResource @testParams } | Should throw "This ressource cannot remove Diagnostics Provider. Please use ensure equals Present."
+                { Set-TargetResource @testParams } | Should throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
             }
         }
     }

@@ -59,8 +59,8 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             It "Should throw an error when trying to set to Absent" {
                 $params.Ensure = "Absent"
-                { Set-TargetResource @params } | Should throw "This ressource cannot undo Security " `
-                "Token Service Configuration changes. Please set Ensure to Present or ommit the resource"
+                { Set-TargetResource @params } | Should throw "This resource cannot undo Security " `
+                "Token Service Configuration changes. Please set Ensure to Present or omit the resource"
             }
         }
     }
