@@ -188,8 +188,8 @@ function Set-TargetResource
 
     if($Ensure -eq "Absent")
     {
-        throw "This ressource cannot undo InfoPath Forms Service Configuration changes. `
-        Please set Ensure to Present or ommit the resource"
+        throw "This resource cannot undo InfoPath Forms Service Configuration changes. `
+        Please set Ensure to Present or omit the resource"
     }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -197,19 +197,71 @@ function Set-TargetResource
                         -ScriptBlock {
         $params = $args[0]
         $config = Get-SPInfoPathFormsService
-        $config.AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
-        $config.AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
-        $config.MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
-        $config.DefaultDataConnectionTimeout = $params.DefaultDataConnectionTimeout
-        $config.MaxDataConnectionResponseSize = $params.MaxDataConnectionResponseSize
-        $config.RequireSslForDataConnections = $params.RequireSslForDataConnections
-        $config.AllowEmbeddedSqlForDataConnections = $params.AllowEmbeddedSqlForDataConnections
-        $config.AllowUdcAuthenticationForDataConnections = $params.AllowUdcAuthenticationForDataConnections
-        $config.AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
-        $config.MaxPostbacksPerSession = $params.MaxPostbacksPerSession
-        $config.MaxUserActionsPerPostback = $params.MaxUserActionsPerPostback
-        $config.ActiveSessionsTimeout = $params.ActiveSessionsTimeout
-        $config.MaxSizeOfUserFormState = ($config.MaxSizeOfUserFormState * 1024)
+
+        if($params.ContainsKey("AllowUserFormBrowserEnabling"))
+        {
+            $config.AllowUserFormBrowserEnabling = $params.AllowUserFormBrowserEnabling
+        }
+
+        if($params.ContainsKey("AllowUserFormBrowserRendering"))
+        {
+            $config.AllowUserFormBrowserRendering = $params.AllowUserFormBrowserRendering
+        }
+
+        if($params.ContainsKey("MaxDataConnectionTimeout"))
+        {
+            $config.MaxDataConnectionTimeout = $params.MaxDataConnectionTimeout
+        }
+
+        if($params.ContainsKey("DefaultDataConnectionTimeout"))
+        {
+            $config.DefaultDataConnectionTimeout = $params.DefaultDataConnectionTimeout
+        }
+
+        if($params.ContainsKey("MaxDataConnectionResponseSize"))
+        {
+            $config.MaxDataConnectionResponseSize = $params.MaxDataConnectionResponseSize
+        }
+
+        if($params.ContainsKey("RequireSslForDataConnections"))
+        {
+            $config.RequireSslForDataConnections = $params.RequireSslForDataConnections
+        }
+
+        if($params.ContainsKey("AllowEmbeddedSqlForDataConnections"))
+        {
+            $config.AllowEmbeddedSqlForDataConnections = $params.AllowEmbeddedSqlForDataConnections
+        }
+
+        if($params.ContainsKey("AllowUdcAuthenticationForDataConnections"))
+        {
+            $config.AllowUdcAuthenticationForDataConnections = $params.AllowUdcAuthenticationForDataConnections
+        }
+
+        if($params.ContainsKey("AllowUserFormCrossDomainDataConnections"))
+        {
+            $config.AllowUserFormCrossDomainDataConnections = $params.AllowUserFormCrossDomainDataConnections
+        }
+
+        if($params.ContainsKey("MaxPostbacksPerSession"))
+        {
+            $config.MaxPostbacksPerSession = $params.MaxPostbacksPerSession
+        }
+
+        if($params.ContainsKey("MaxUserActionsPerPostback"))
+        {
+            $config.MaxUserActionsPerPostback = $params.MaxUserActionsPerPostback
+        }
+
+        if($params.ContainsKey("ActiveSessionsTimeout"))
+        {
+            $config.ActiveSessionsTimeout = $params.ActiveSessionsTimeout
+        }
+
+        if($params.ContainsKey("MaxSizeOfUserFormState"))
+        {
+            $config.MaxSizeOfUserFormState = ($config.MaxSizeOfUserFormState * 1024)
+        }
 
         $config.Update()
     }

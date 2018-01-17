@@ -108,8 +108,8 @@ function Set-TargetResource
 
     if($Ensure -eq "Absent")
     {
-        throw "This ressource cannot undo Security Token Service Configuration changes. `
-        Please set Ensure to Present or ommit the resource"
+        throw "This resource cannot undo Security Token Service Configuration changes. `
+        Please set Ensure to Present or omit the resource"
     }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -118,10 +118,26 @@ function Set-TargetResource
         $params = $args[0]
         $config = Get-SPSecurityTokenServiceConfig
         $config.Name = $params.Name
-        $config.NameIdentifier = $params.NameIdentifier
-        $config.UseSessionCookies = $params.UseSessionCookies
-        $config.AllowOAuthOverHttp = $params.AllowOAuthOverHttp
-        $config.AllowMetadataOverHttp = $params.AllowMetadataOverHttp
+
+        if($params.ContainsKey("NameIdentifier"))
+        {
+            $config.NameIdentifier = $params.NameIdentifier
+        }
+
+        if($params.ContainsKey("UseSessionCookies"))
+        {
+            $config.UseSessionCookies = $params.UseSessionCookies
+        }
+
+        if($params.ContainsKey("AllowOAuthOverHttp"))
+        {
+            $config.AllowOAuthOverHttp = $params.AllowOAuthOverHttp
+        }
+
+        if($params.ContainsKey("AllowMetadataOverHttp"))
+        {
+            $config.AllowMetadataOverHttp = $params.AllowMetadataOverHttp
+        }
 
         $config.Update()
     }

@@ -1,6 +1,6 @@
 # Change log for SharePointDsc
 
-## 2.1
+## Unreleased
 
 * Added the SPDiagnosticsProvider resource
 * Added the SPInfoPathFormsServiceConfig resource

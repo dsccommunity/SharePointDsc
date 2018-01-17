@@ -330,6 +330,12 @@ function Set-TargetResource
                             -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionUseSSL $params.UseSSL `
                             -ConnectionSynchronizationOU $ou
                     }
+
+                    foreach($ou in $params.ExcludedOUs)
+                    {
+                        Remove-SPProfilesyncConnection -ProfileServiceApplication $ups -ConnectionForestName $params.Forest -ConnectionDomain $userDomain `
+                            -ConnectionUserName $userName -ConnectionPassword $params.ConnectionCredentials.Password -ConnectionSynchronizationOU $ou
+                    }
                }
             }
         }

@@ -98,7 +98,7 @@ function Set-TargetResource
 
     if($Ensure -eq "Absent")
     {
-        throw "This ressource cannot remove Diagnostics Provider. Please use ensure equals Present."
+        throw "This resource cannot remove Diagnostics Provider. Please use ensure equals Present."
     }
 
     Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -111,9 +111,21 @@ function Set-TargetResource
         {
             throw "The specified Diagnostic Provider {" + $params.Name + "} could not be found."
         }
-        $diagnosticProvider.Retention = $params.Retention
-        $diagnosticProvider.MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
-        $diagnosticProvider.Enabled = $params.Enabled
+
+        if($params.ContainsKey("Retention"))
+        {
+            $diagnosticProvider.Retention = $params.Retention
+        }
+
+        if($params.ContainsKey("MaxTotalSizeInBytes"))
+        {
+            $diagnosticProvider.MaxTotalSizeInBytes = $params.MaxTotalSizeInBytes
+        }
+
+        if($params.ContainsKey("Enabled")
+        {
+            $diagnosticProvider.Enabled = $params.Enabled
+        }
 
         $diagnosticProvider.Update()
     }
