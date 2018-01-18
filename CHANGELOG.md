@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+* SPDiagnosticsProvider
+  * Added the resource
 * SPFarm
   * Corrected issue where ServerRole parameter is returned in SP2013
+* SPInfoPathFormsServiceConfig
+  * Added the resource
 * SPSearchAutoritativePage
   * Added missing readme.md
 * SPSearchCrawlerImpactRule
@@ -11,6 +15,12 @@
   * Added missing readme.md
 * SPSearchCrawlMapping
   * Added missing readme.md
+* SPSecurityTokenServiceConfig
+  * Added the resource
+* SPUserProfileProperty
+  * Fixed issues with the User Profile properties for 2016
+* SPUserProfileSyncConnection
+  * Fixed issues with the User Profile Sync connection for 2016
 * SPUserProfileSyncService
   * Added returning the FarmAccount to the Get method
 * SPWebAppAuthentication
