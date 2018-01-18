@@ -1,5 +1,18 @@
 # Change log for SharePointDsc
 
+## Unreleased
+
+* SPDiagnosticsProvider
+  * Added the resource
+* SPInfoPathFormsServiceConfig
+  * Added the resource
+* SPSecurityTokenServiceConfig
+  * Added the resource
+* SPUserProfileSyncConnection
+  * Fixed issues with the User Profile Sync connection for 2016
+* SPUserProfileProperty
+  * Fixed issues with the User Profile properties for 2016
+
 ## 2.0
 
 * General
