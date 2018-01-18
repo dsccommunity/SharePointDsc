@@ -10,7 +10,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $Retention = 14,
+        $Retention,
 
         [Parameter()]
         [System.UInt64]
@@ -74,7 +74,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $Retention = 14,
+        $Retention,
 
         [Parameter()]
         [System.UInt64]
@@ -143,7 +143,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt16]
-        $Retention = 14,
+        $Retention,
 
         [Parameter()]
         [System.UInt64]

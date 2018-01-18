@@ -7,59 +7,59 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure = "Present",
+        $Ensure,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormBrowserEnabling = $true,
+        $AllowUserFormBrowserEnabling,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormBrowserRendering = $true,
+        $AllowUserFormBrowserRendering,
 
         [Parameter()]
         [System.UInt32]
-        $MaxDataConnectionTimeout = 20000,
+        $MaxDataConnectionTimeout,
 
         [Parameter()]
         [System.UInt32]
-        $DefaultDataConnectionTimeout = 10000,
+        $DefaultDataConnectionTimeout,
 
         [Parameter()]
         [System.UInt32]
-        $MaxDataConnectionResponseSize = 1500,
+        $MaxDataConnectionResponseSize,
 
         [Parameter()]
         [System.Boolean]
-        $RequireSslForDataConnections = $true,
+        $RequireSslForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowEmbeddedSqlForDataConnections = $false,
+        $AllowEmbeddedSqlForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUdcAuthenticationForDataConnections = $false,
+        $AllowUdcAuthenticationForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormCrossDomainDataConnections = $false,
+        $AllowUserFormCrossDomainDataConnections,
 
         [Parameter()]
         [System.UInt16]
-        $MaxPostbacksPerSession = 75,
+        $MaxPostbacksPerSession,
 
         [Parameter()]
         [System.UInt16]
-        $MaxUserActionsPerPostback = 200,
+        $MaxUserActionsPerPostback,
 
         [Parameter()]
         [System.UInt16]
-        $ActiveSessionsTimeout = 1440,
+        $ActiveSessionsTimeout,
 
         [Parameter()]
         [System.UInt16]
-        $MaxSizeOfUserFormState = 4096,
+        $MaxSizeOfUserFormState,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -125,59 +125,59 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure = "Present",
+        $Ensure,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormBrowserEnabling = $true,
+        $AllowUserFormBrowserEnabling,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormBrowserRendering = $true,
+        $AllowUserFormBrowserRendering,
 
         [Parameter()]
         [System.UInt32]
-        $MaxDataConnectionTimeout = 20000,
+        $MaxDataConnectionTimeout,
 
         [Parameter()]
         [System.UInt32]
-        $DefaultDataConnectionTimeout = 10000,
+        $DefaultDataConnectionTimeout,
 
         [Parameter()]
         [System.UInt32]
-        $MaxDataConnectionResponseSize = 1500,
+        $MaxDataConnectionResponseSize,
 
         [Parameter()]
         [System.Boolean]
-        $RequireSslForDataConnections = $true,
+        $RequireSslForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowEmbeddedSqlForDataConnections = $false,
+        $AllowEmbeddedSqlForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUdcAuthenticationForDataConnections = $false,
+        $AllowUdcAuthenticationForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormCrossDomainDataConnections = $false,
+        $AllowUserFormCrossDomainDataConnections,
 
         [Parameter()]
         [System.UInt16]
-        $MaxPostbacksPerSession = 75,
+        $MaxPostbacksPerSession,
 
         [Parameter()]
         [System.UInt16]
-        $MaxUserActionsPerPostback = 200,
+        $MaxUserActionsPerPostback,
 
         [Parameter()]
         [System.UInt16]
-        $ActiveSessionsTimeout = 1440,
+        $ActiveSessionsTimeout,
 
         [Parameter()]
         [System.UInt16]
-        $MaxSizeOfUserFormState = 4096,
+        $MaxSizeOfUserFormState,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -276,59 +276,59 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateSet("Present","Absent")]
         [System.String]
-        $Ensure = "Present",
+        $Ensure,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormBrowserEnabling = $true,
+        $AllowUserFormBrowserEnabling,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormBrowserRendering = $true,
+        $AllowUserFormBrowserRendering,
 
         [Parameter()]
         [System.UInt32]
-        $MaxDataConnectionTimeout = 20000,
+        $MaxDataConnectionTimeout,
 
         [Parameter()]
         [System.UInt32]
-        $DefaultDataConnectionTimeout = 10000,
+        $DefaultDataConnectionTimeout,
 
         [Parameter()]
         [System.UInt32]
-        $MaxDataConnectionResponseSize = 1500,
+        $MaxDataConnectionResponseSize,
 
         [Parameter()]
         [System.Boolean]
-        $RequireSslForDataConnections = $true,
+        $RequireSslForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowEmbeddedSqlForDataConnections = $false,
+        $AllowEmbeddedSqlForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUdcAuthenticationForDataConnections = $false,
+        $AllowUdcAuthenticationForDataConnections,
 
         [Parameter()]
         [System.Boolean]
-        $AllowUserFormCrossDomainDataConnections = $false,
+        $AllowUserFormCrossDomainDataConnections,
 
         [Parameter()]
         [System.UInt16]
-        $MaxPostbacksPerSession = 75,
+        $MaxPostbacksPerSession,
 
         [Parameter()]
         [System.UInt16]
-        $MaxUserActionsPerPostback = 200,
+        $MaxUserActionsPerPostback,
 
         [Parameter()]
         [System.UInt16]
-        $ActiveSessionsTimeout = 1440,
+        $ActiveSessionsTimeout,
 
         [Parameter()]
         [System.UInt16]
-        $MaxSizeOfUserFormState = 4096,
+        $MaxSizeOfUserFormState,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
