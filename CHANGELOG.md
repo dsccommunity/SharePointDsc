@@ -3,21 +3,21 @@
 ## Unreleased
 
 * SPFarm
-  * Corrected issue where ServerRole parameter is returned in SP2013 (issue 705)
+  * Corrected issue where ServerRole parameter is returned in SP2013
 * SPSearchAutoritativePage
   * Added missing readme.md
 * SPSearchCrawlerImpactRule
-  * Fixed issue where an error was thrown when retrieving Crawl Impact rules (issue 657)
+  * Fixed issue where an error was thrown when retrieving Crawl Impact rules
   * Added missing readme.md
 * SPSearchCrawlMapping
   * Added missing readme.md
 * SPUserProfileSyncService
-  * Added returning the FarmAccount to the Get method (issue 706)
+  * Added returning the FarmAccount to the Get method
 * SPWebAppAuthentication
-  * Corrected issue where NTLM wasn't accepted properly (issue 707)
+  * Corrected issue where parameter validation wasn't performed correctly
 * SPWorkManagementServiceApp
   * Added check for SharePoint 2016, since this functionality has been
-    removed in SharePoint 2016 (issue 719)
+    removed in SharePoint 2016
 
 ## 2.0
 
