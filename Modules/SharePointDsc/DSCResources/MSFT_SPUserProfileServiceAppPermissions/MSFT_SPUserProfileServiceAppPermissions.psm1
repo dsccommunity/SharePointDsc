@@ -86,15 +86,15 @@ function Get-TargetResource
             }
         }
 
-        if ($createPersonalSite)
+        if (!$createPersonalSite)
         {
             $createPersonalSite += "None"
         }
-        if ($followAndEditProfile)
+        if (!$followAndEditProfile)
         {
             $followAndEditProfile += "None"
         }
-        if ($useTagsAndNotes)
+        if (!$useTagsAndNotes)
         {
             $useTagsAndNotes += "None"
         }
