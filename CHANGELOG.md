@@ -12,6 +12,8 @@
   * Fixed issues with the User Profile Sync connection for 2016
 * SPUserProfileProperty
   * Fixed issues with the User Profile properties for 2016
+* SPUserProfileServiceAppPermissions
+  * Removed the mandatory requirement from secondary parameters
 
 ## 2.0
 
