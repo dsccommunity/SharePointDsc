@@ -5,7 +5,8 @@ resource pool sync for Project Server, for a specific PWA instance.
 You can control which AD groups should be imported from and control
 settings about reactivitating users.
 
-Note: The schedule for this import is controlled via a standard
+NOTE:
+The schedule for this import is controlled via a standard
 SharePoint server timer job, and as such it can be controlled with
 the SPTimerJobState resource. Below is an example of how to set
 this resource to run the AD import job daily. The name of the job

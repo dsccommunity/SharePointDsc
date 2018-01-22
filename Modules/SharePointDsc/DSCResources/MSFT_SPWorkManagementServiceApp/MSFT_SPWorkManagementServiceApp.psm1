@@ -7,35 +7,35 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.String]
         $ProxyName,
-        
+
         [Parameter()]
         [System.String]
         $ApplicationPool,
-        
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
-        
+        $MinimumTimeBetweenEwsSyncSubscriptionSearches,
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenProviderRefreshes, 
-        
+        $MinimumTimeBetweenProviderRefreshes,
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenSearchQueries, 
-        
+        $MinimumTimeBetweenSearchQueries,
+
         [Parameter()]
         [System.UInt32]
-        $NumberOfSubscriptionSyncsPerEwsSyncRun, 
-        
+        $NumberOfSubscriptionSyncsPerEwsSyncRun,
+
         [Parameter()]
         [System.UInt32]
-        $NumberOfUsersEwsSyncWillProcessAtOnce, 
-        
+        $NumberOfUsersEwsSyncWillProcessAtOnce,
+
         [Parameter()]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
@@ -44,7 +44,7 @@ function Get-TargetResource
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -52,22 +52,30 @@ function Get-TargetResource
 
     Write-Verbose -Message "Getting Work management service app '$Name'"
 
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($installedVersion.FileMajorPart -eq 16)
+    {
+        throw [Exception] ("Work Management Service Application is no longer available " + `
+                           "in SharePoint 2016: " + `
+                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+    }
+
     $result = Invoke-SPDSCCommand -Credential $InstallAccount `
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $serviceApps = Get-SPServiceApplication -Name $params.Name -ErrorAction SilentlyContinue
 
         $nullReturn = @{
             Name            = $params.Name
             Ensure          = "Absent"
             ApplicationPool = $params.ApplicationPool
-        } 
+        }
 
         if ($null -eq $serviceApps)
         {
-            return $nullReturn 
+            return $nullReturn
         }
         $serviceApp = $serviceApps | Where-Object -FilterScript {
             $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
@@ -95,9 +103,9 @@ function Get-TargetResource
                 Name                                          = $serviceApp.DisplayName
                 ProxyName                                     = $proxyName
                 ApplicationPool                               = $serviceApp.ApplicationPool.Name
-                MinimumTimeBetweenEwsSyncSubscriptionSearches = $serviceApp.AdminSettings.MinimumTimeBetweenEwsSyncSubscriptionSearches.TotalMinutes 
-                MinimumTimeBetweenProviderRefreshes           = $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
-                MinimumTimeBetweenSearchQueries               = $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes 
+                MinimumTimeBetweenEwsSyncSubscriptionSearches = $serviceApp.AdminSettings.MinimumTimeBetweenEwsSyncSubscriptionSearches.TotalMinutes
+                MinimumTimeBetweenProviderRefreshes           = $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes
+                MinimumTimeBetweenSearchQueries               = $serviceApp.AdminSettings.MinimumTimeBetweenProviderRefreshes.TotalMinutes
                 NumberOfSubscriptionSyncsPerEwsSyncRun        = $serviceApp.AdminSettings.NumberOfSubscriptionSyncsPerEwsSyncRun
                 NumberOfUsersEwsSyncWillProcessAtOnce         = $serviceApp.AdminSettings.NumberOfUsersEwsSyncWillProcessAtOnce
                 NumberOfUsersPerEwsSyncBatch                  = $serviceApp.AdminSettings.NumberOfUsersPerEwsSyncBatch
@@ -116,35 +124,35 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.String]
         $ProxyName,
-        
+
         [Parameter()]
         [System.String]
         $ApplicationPool,
-        
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
-        
+        $MinimumTimeBetweenEwsSyncSubscriptionSearches,
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenProviderRefreshes, 
-        
+        $MinimumTimeBetweenProviderRefreshes,
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenSearchQueries, 
-        
+        $MinimumTimeBetweenSearchQueries,
+
         [Parameter()]
         [System.UInt32]
-        $NumberOfSubscriptionSyncsPerEwsSyncRun, 
-        
+        $NumberOfSubscriptionSyncsPerEwsSyncRun,
+
         [Parameter()]
         [System.UInt32]
-        $NumberOfUsersEwsSyncWillProcessAtOnce, 
-        
+        $NumberOfUsersEwsSyncWillProcessAtOnce,
+
         [Parameter()]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
@@ -153,7 +161,7 @@ function Set-TargetResource
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
@@ -162,6 +170,14 @@ function Set-TargetResource
     Write-Verbose -Message "Setting Work management service app '$Name'"
     $PSBoundParameters.Ensure = $Ensure
 
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($installedVersion.FileMajorPart -eq 16)
+    {
+        throw [Exception] ("Work Management Service Application is no longer available " + `
+                           "in SharePoint 2016: " + `
+                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+    }
+
     if ($Ensure -ne "Absent" -and $PSBoundParameters.ContainsKey("ApplicationPool") -eq $false)
     {
         throw "Parameter ApplicationPool is required unless service is being removed(Ensure='Absent')"
@@ -169,7 +185,7 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating work management Service Application $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -178,23 +194,23 @@ function Set-TargetResource
             $params = $args[0]
             if ($params.ContainsKey("Ensure"))
             {
-                $params.Remove("Ensure") | Out-Null 
+                $params.Remove("Ensure") | Out-Null
             }
             if ($params.ContainsKey("InstallAccount"))
             {
-                $params.Remove("InstallAccount") | Out-Null 
+                $params.Remove("InstallAccount") | Out-Null
             }
             if ($params.ContainsKey("ProxyName"))
             {
                 $pName = $params.ProxyName
-                $params.Remove("ProxyName") | Out-Null 
+                $params.Remove("ProxyName") | Out-Null
             }
             if ($null -eq $pName)
             {
                 $pName = "$($params.Name) Proxy"
             }
 
-            $app = New-SPWorkManagementServiceApplication @params 
+            $app = New-SPWorkManagementServiceApplication @params
             if ($null -ne $app)
             {
                 New-SPWorkManagementServiceApplicationProxy -Name $pName `
@@ -205,17 +221,17 @@ function Set-TargetResource
         }
     }
 
-    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         if ([string]::IsNullOrEmpty($ApplicationPool) -eq $false `
-            -and $ApplicationPool -ne $result.ApplicationPool) 
+            -and $ApplicationPool -ne $result.ApplicationPool)
         {
             Write-Verbose -Message "Updating Application Pool of Work Management Service Application $Name"
             Invoke-SPDSCCommand -Credential $InstallAccount `
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
                 $params = $args[0]
-                
+
                 $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                     $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
                 }
@@ -229,41 +245,41 @@ function Set-TargetResource
                                 -Arguments $PSBoundParameters `
                                 -ScriptBlock {
             $params = $args[0]
-            
+
             $setParams = @{}
             if ($params.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
             {
-                $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches", 
-                $params.MinimumTimeBetweenEwsSyncSubscriptionSearches) 
+                $setParams.Add("MinimumTimeBetweenEwsSyncSubscriptionSearches",
+                $params.MinimumTimeBetweenEwsSyncSubscriptionSearches)
             }
             if ($params.ContainsKey("MinimumTimeBetweenProviderRefreshes"))
             {
-                $setParams.Add("MinimumTimeBetweenProviderRefreshes", 
-                $params.MinimumTimeBetweenProviderRefreshes) 
+                $setParams.Add("MinimumTimeBetweenProviderRefreshes",
+                $params.MinimumTimeBetweenProviderRefreshes)
             }
             if ($params.ContainsKey("MinimumTimeBetweenSearchQueries"))
             {
-                $setParams.Add("MinimumTimeBetweenSearchQueries", 
-                $params.MinimumTimeBetweenSearchQueries) 
+                $setParams.Add("MinimumTimeBetweenSearchQueries",
+                $params.MinimumTimeBetweenSearchQueries)
             }
             if ($params.ContainsKey("NumberOfSubscriptionSyncsPerEwsSyncRun"))
             {
-                $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun", 
-                $params.NumberOfSubscriptionSyncsPerEwsSyncRun) 
+                $setParams.Add("NumberOfSubscriptionSyncsPerEwsSyncRun",
+                $params.NumberOfSubscriptionSyncsPerEwsSyncRun)
             }
             if ($params.ContainsKey("NumberOfUsersEwsSyncWillProcessAtOnce"))
             {
-                $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce", 
-                $params.NumberOfUsersEwsSyncWillProcessAtOnce) 
+                $setParams.Add("NumberOfUsersEwsSyncWillProcessAtOnce",
+                $params.NumberOfUsersEwsSyncWillProcessAtOnce)
             }
             if ($params.ContainsKey("NumberOfUsersPerEwsSyncBatch"))
             {
-                $setParams.Add("NumberOfUsersPerEwsSyncBatch", 
-                $params.NumberOfUsersPerEwsSyncBatch) 
+                $setParams.Add("NumberOfUsersPerEwsSyncBatch",
+                $params.NumberOfUsersPerEwsSyncBatch)
             }
 
-            $setParams.Add("Name", $params.Name) 
-            $setParams.Add("ApplicationPool", $params.ApplicationPool) 
+            $setParams.Add("Name", $params.Name)
+            $setParams.Add("ApplicationPool", $params.ApplicationPool)
 
             if ($setParams.ContainsKey("MinimumTimeBetweenEwsSyncSubscriptionSearches"))
             {
@@ -279,14 +295,14 @@ function Set-TargetResource
             }
             $setParams.Add("Confirm", $false)
             $appService =  Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
-                $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication" 
+                $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
             }
 
             $appService | Set-SPWorkManagementServiceApplication @setPArams | Out-Null
         }
     }
 
-    if ($Ensure -eq "Absent") 
+    if ($Ensure -eq "Absent")
     {
         # The service app should not exit
         Write-Verbose -Message "Removing Work Management Service Application $Name"
@@ -294,7 +310,7 @@ function Set-TargetResource
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
-            
+
             $serviceApp = Get-SPServiceApplication -Name $params.Name | Where-Object -FilterScript {
                 $_.GetType().FullName -eq "Microsoft.Office.Server.WorkManagement.WorkManagementServiceApplication"
             }
@@ -322,35 +338,35 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.String]
         $ProxyName,
-        
+
         [Parameter()]
         [System.String]
         $ApplicationPool,
-        
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenEwsSyncSubscriptionSearches, 
-        
+        $MinimumTimeBetweenEwsSyncSubscriptionSearches,
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenProviderRefreshes, 
-        
+        $MinimumTimeBetweenProviderRefreshes,
+
         [Parameter()]
         [System.UInt32]
-        $MinimumTimeBetweenSearchQueries, 
-        
+        $MinimumTimeBetweenSearchQueries,
+
         [Parameter()]
         [System.UInt32]
-        $NumberOfSubscriptionSyncsPerEwsSyncRun, 
-        
+        $NumberOfSubscriptionSyncsPerEwsSyncRun,
+
         [Parameter()]
         [System.UInt32]
-        $NumberOfUsersEwsSyncWillProcessAtOnce, 
-        
+        $NumberOfUsersEwsSyncWillProcessAtOnce,
+
         [Parameter()]
         [System.UInt32]
         $NumberOfUsersPerEwsSyncBatch,
@@ -359,13 +375,21 @@ function Test-TargetResource
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
-    
+
     Write-Verbose -Message "Testing Work management service app '$Name'"
+
+    $installedVersion = Get-SPDSCInstalledProductVersion
+    if ($installedVersion.FileMajorPart -eq 16)
+    {
+        throw [Exception] ("Work Management Service Application is no longer available " + `
+                           "in SharePoint 2016: " + `
+                           "https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx")
+    }
 
     $PSBoundParameters.Ensure = $Ensure
 

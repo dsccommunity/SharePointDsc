@@ -19,19 +19,19 @@ function Get-TargetResource
         [Parameter()]
         [System.UInt32]
         $WaitTime = 0,
-        
+
         [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
     Write-Verbose -Message "Getting Crawler Impact Rule Setting for '$Name'"
-    
+
     if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
@@ -41,9 +41,9 @@ function Get-TargetResource
                                   -Arguments $PSBoundParameters `
                                   -ScriptBlock {
         $params = $args[0]
-        
+
         $nullReturn = @{
-            
+
             ServiceAppName = $params.ServiceAppName
             Name = $params.Name
             RequestLimit = $null
@@ -59,14 +59,14 @@ function Get-TargetResource
             $nullReturn.ServiceAppName = $null
             return $nullReturn
         }
-        else 
+        else
         {
-            $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -Identity $params.Name -SearchService $serviceApp
+            $crawlerImpactRule = Get-SPEnterpriseSearchSiteHitRule -Identity $params.Name -SearchService $params.ServiceAppName
             if($null -eq $crawlerImpactRule)
             {
                 return $nullReturn
             }
-            else 
+            else
             {
                 if($crawlerImpactRule.Behavior -eq "0")
                 {
@@ -79,7 +79,7 @@ function Get-TargetResource
                         InstallAccount = $params.InstallAccount
                     }
                 }
-                else 
+                else
                 {
                     return @{
                         ServiceAppName = $params.ServiceAppName
@@ -95,7 +95,7 @@ function Get-TargetResource
 
 
     }
-    
+
     return $result
 }
 
@@ -140,7 +140,7 @@ function Set-TargetResource
 
     $result = Get-TargetResource @PSBoundParameters
 
-    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Absent" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Creating Crawler Impact Rule $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -154,7 +154,7 @@ function Set-TargetResource
                 $behavior = "1"
                 $hitRate = $params.WaitTime
             }
-            else 
+            else
             {
                 $behavior = "0"
                 $hitRate = $params.RequestLimit
@@ -171,7 +171,7 @@ function Set-TargetResource
                                               -SearchService $serviceApp
         }
     }
-    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present") 
+    if ($result.Ensure -eq "Present" -and $Ensure -eq "Present")
     {
         Write-Verbose -Message "Updating Crawler Impact Rule $Name"
         Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -185,7 +185,7 @@ function Set-TargetResource
                 $behavior = "1"
                 $hitRate = $params.WaitTime
             }
-            else 
+            else
             {
                 $behavior = "0"
                 $hitRate = $params.RequestLimit
@@ -237,30 +237,30 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $ServiceAppName,
-       
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
-        
+
         [Parameter()]
         [System.UInt32]
         $RequestLimit = 0,
-        
+
         [Parameter()]
         [System.UInt32]
         $WaitTime = 0,
-        
+
         [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = "Present",
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
     Write-Verbose -Message "Testing Crawler Impact Rule Setting for '$Name'"
-    
+
     if(($RequestLimit -gt 0) -and ($WaitTime -gt 0))
     {
         throw "Only one Crawler Impact Rule HitRate argument (RequestLimit, WaitTime) can be specified"
@@ -271,7 +271,7 @@ function Test-TargetResource
     {
         $behavior = "RequestLimit"
     }
-    else 
+    else
     {
         $behavior = "WaitTime"
     }
@@ -282,18 +282,18 @@ function Test-TargetResource
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName", 
-                                                         "Name", 
+                                        -ValuesToCheck @("ServiceAppName",
+                                                         "Name",
                                                          $behavior)
     }
-    else 
+    else
     {
         return Test-SPDscParameterState -CurrentValues $CurrentValues `
                                         -DesiredValues $PSBoundParameters `
-                                        -ValuesToCheck @("ServiceAppName", 
-                                                         "Name", 
+                                        -ValuesToCheck @("ServiceAppName",
+                                                         "Name",
                                                          "Ensure")
-    }    
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource

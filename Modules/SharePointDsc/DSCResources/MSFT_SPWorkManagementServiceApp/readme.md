@@ -15,3 +15,9 @@ Remarks
 
 The default value for the Ensure parameter is Present. When not specifying this
 parameter, the service application is provisioned.
+
+NOTE:
+You cannot use this resource with SharePoint 2016, since the Work
+Management functionality has been removed in SharePoint 2016.
+More information:
+https://technet.microsoft.com/en-us/library/mt346112(v=office.16).aspx

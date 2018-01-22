@@ -578,7 +578,7 @@ function Test-Parameter()
         $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
             $_.Name -eq "AuthenticationProvider"
         }
-        if ($null -ne $prop)
+        if ($null -ne $prop.Value)
         {
             $authProviderUsed = $true
         }
@@ -587,7 +587,7 @@ function Test-Parameter()
         $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
             $_.Name -eq "MembershipProvider"
         }
-        if ($null -ne $prop)
+        if ($null -ne $prop.Value)
         {
             $membProviderUsed = $true
         }
@@ -596,7 +596,7 @@ function Test-Parameter()
         $prop = $zoneConfig.CimInstanceProperties | Where-Object -FilterScript {
             $_.Name -eq "RoleProvider"
         }
-        if ($null -ne $prop)
+        if ($null -ne $prop.Value)
         {
             $roleProviderUsed = $true
         }
