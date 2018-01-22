@@ -17,6 +17,9 @@
   * Added missing readme.md
 * SPSecurityTokenServiceConfig
   * Added the resource
+* SPUserProfileSyncConnection
+  * Fixed issues with the User Profile Sync connection for SharePoint
+    2016
 * SPUserProfileProperty
   * Fixed issues with the User Profile properties for 2016
 * SPUserProfileSyncConnection
@@ -28,6 +31,8 @@
 * SPWorkManagementServiceApp
   * Added check for SharePoint 2016, since this functionality has been
     removed in SharePoint 2016
+* SPUserProfileServiceAppPermissions
+  * Removed the mandatory requirement from secondary parameters
 
 ## 2.0
 
