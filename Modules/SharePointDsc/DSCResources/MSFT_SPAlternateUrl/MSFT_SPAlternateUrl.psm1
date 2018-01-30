@@ -164,17 +164,40 @@ function Set-TargetResource
                     # URL not configured on WebApp
                    if ($null -eq $urlAam)
                     {
-                        # urlAAM not found, so it is safe to create AAM on specified zone
-                        $cmdParams = @{
-                            WebApplication = $webapp
-                            Url = $params.Url
-                            Zone = $params.Zone
-                        }
-                        if (($params.ContainsKey("Internal") -eq $true))
+                        # urlAAM not found, so it is safe to create AAM on specified zone (or modify existing if CA)
+                        # If this is Central Admin, we want to update the existing Default AAM instead of adding a new one
+                        if ($webapp.IsAdministrationWebApplication -and $params.Zone -eq "Default" -and !$webAppAams.GetType().IsArray)
                         {
-                            $cmdParams.Add("Internal", $params.Internal)
+                            # web app is Central Administration
+                            # assumptions we have to make to proceed without introducing breaking changes:
+                            # 1. CA only has 1 AAM (done in if condition above)
+
+
+                            # sanity checks before updating AAM:
+                            # 1. We are editing the Default Zone AAM (done in if condition above)
+                            # 2. Internal URL == Public URL (does this matter? we could still set both to the new URL)
+                            if ($webAppAams.IncomingUrl -eq $webAppAams.PublicUrl)
+                            {
+                                Set-SPAlternateURL -Identity $webAppAams.IncomingUrl -Url $params.Url | Out-Null
+                            }
+                            else
+                            {
+                                throw("Central Administration's existing AAM has different values for Internal and Public URL's")
+                            }
                         }
-                        New-SPAlternateURL @cmdParams | Out-Null
+                        else
+                        {
+                            $cmdParams = @{
+                                WebApplication = $webapp
+                                Url = $params.Url
+                                Zone = $params.Zone
+                            }
+                            if (($params.ContainsKey("Internal") -eq $true))
+                            {
+                                $cmdParams.Add("Internal", $params.Internal)
+                            }
+                            New-SPAlternateURL @cmdParams | Out-Null
+                        }
                     }
                     else
                     {
