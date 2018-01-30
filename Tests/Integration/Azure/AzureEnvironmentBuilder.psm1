@@ -5,7 +5,7 @@ for SharePointDsc or to run integration tests against
 
 .DESCRIPTION
 The New-SPDscAzureLab cmdlet will deploy a new resource group in to your current Azure subscription
-that will contain storage, network and virtual machines that are configured to be able to begin 
+that will contain storage, network and virtual machines that are configured to be able to begin
 development. Appropriate development tools are also installed on the SharePoint server.
 
 .PARAMETER ResourceGroupName
@@ -21,7 +21,7 @@ This is the name of the storage account that will be created for the deployment.
 contain VHD images, scripts and DSC configurations
 
 .PARAMETER SoftwareStorageAccountName
-This is the name of a storage account that will contain the binaries for SharePoint Server 
+This is the name of a storage account that will contain the binaries for SharePoint Server
 (either 2013 or 2016).
 
 .PARAMETER SoftwareStorageAccountContainer
@@ -34,7 +34,7 @@ A valid product key for the version of SharePoint you wish to install
 
 .PARAMETER PublicDNSLabel
 The name of the public DNS label to assign to the public IP address of the SharePoint server.
-This will automatically be suffixed with the Azure location name and azure DNS suffix 
+This will automatically be suffixed with the Azure location name and azure DNS suffix
 
 .PARAMETER AdminCredential
 The username and password to use as the local administrator on all machines. The password
@@ -61,7 +61,7 @@ function New-SPDscAzureLab
         [Parameter(Mandatory = $true)]
         [string]
         $ResourceGroupName,
-        
+
         [Parameter(Mandatory = $true)]
         [string]
         $Location,
@@ -89,7 +89,11 @@ function New-SPDscAzureLab
         [Parameter(Mandatory = $true)]
         [PSCredential]
         $AdminCredential
-    )   
+    )
+
+    # Get the Azure environment
+    $azureEnvironment = ( Get-AzureRmSubscription | Select-Object -ExpandProperty ExtendedProperties ).Environment |
+        Select-Object -Unique
 
     # Create the RG and storage account
     New-AzureRmResourceGroup -Name $ResourceGroupName -Location $Location
@@ -133,6 +137,7 @@ function New-SPDscAzureLab
 
 
     $parameters = @{}
+    $parameters.Add("azureEnvironment", $azureEnvironment)
     $parameters.Add("storageAccountName", $StorageAccountName)
     $parameters.Add("storageAccountKey", $mainKeys[0].Value)
     $parameters.Add("softwareStorageAccount", $SoftwareStorageAccountName)

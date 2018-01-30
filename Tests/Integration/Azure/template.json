@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "azureEnvironment": {
+            "type": "string",
+            "metadata": {
+                "description": "The Azure environment"
+            }
+        },
         "storageAccountName": {
             "type": "string",
             "metadata": {
@@ -76,7 +82,7 @@
         "spVmName": "[concat(resourceGroup().Name, '-sp')]",
         "spDisk1Name": "[concat(resourceGroup().Name, '-sp-disk-c')]"
     },
-    "resources": [ 
+    "resources": [
         {
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/virtualNetworks",
@@ -160,7 +166,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/vhds/', variables('dcDisk1Name'),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'vhds/', variables('dcDisk1Name'),'.vhd')]"
                         }
                     }
                 },
@@ -188,7 +194,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "configuration": {
-                        "url": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/windows-powershell-dsc/DomainController.ps1.zip')]",
+                        "url": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'windows-powershell-dsc/DomainController.ps1.zip')]",
                         "script": "DomainController.ps1",
                         "function": "DomainController"
                     },
@@ -269,7 +275,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/vhds/', variables('sqlDisk1Name'),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'vhds/', variables('sqlDisk1Name'),'.vhd')]"
                         }
                     }
                 },
@@ -298,7 +304,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "configuration": {
-                        "url": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/windows-powershell-dsc/SQLServer.ps1.zip')]",
+                        "url": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'windows-powershell-dsc/SQLServer.ps1.zip')]",
                         "script": "SQLServer.ps1",
                         "function": "SQLServer"
                     },
@@ -391,7 +397,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/vhds/', variables('spDisk1Name'),'.vhd')]"
+                            "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'vhds/', variables('spDisk1Name'),'.vhd')]"
                         }
                     }
                 },
@@ -420,7 +426,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "configuration": {
-                        "url": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/windows-powershell-dsc/SharePointPrep.ps1.zip')]",
+                        "url": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'windows-powershell-dsc/SharePointPrep.ps1.zip')]",
                         "script": "SharePointPrep.ps1",
                         "function": "SharePointPrep"
                     },
@@ -437,6 +443,7 @@
                             "UserName": "DEMO\\svcSPSetup",
                             "Password": "[parameters('adminPassword')]"
                         },
+                        "AzureEnvironment": "[parameters('azureEnvironment')]",
                         "SoftwareStorageKey": "[parameters('softwareStorageKey')]",
                         "SoftwareStorageAccount": "[parameters('softwareStorageAccount')]",
                         "SPProductKey": "[parameters('spProductKey')]",
@@ -460,7 +467,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/scripts/DevSetup.ps1')]"
+                       "[concat(reference(concat('Microsoft.Storage/storageAccounts/',parameters('storageAccountName')), '2017-10-01').primaryEndpoints.blob,'scripts/DevSetup.ps1')]"
                     ]
                 },
                 "protectedSettings": {
