@@ -171,8 +171,7 @@ function Set-TargetResource
                             # web app is Central Administration
                             # assumptions we have to make to proceed without introducing breaking changes:
                             # 1. CA only has 1 AAM (done in if condition above)
-
-
+                            #
                             # sanity checks before updating AAM:
                             # 1. We are editing the Default Zone AAM (done in if condition above)
                             # 2. Internal URL == Public URL (does this matter? we could still set both to the new URL)
