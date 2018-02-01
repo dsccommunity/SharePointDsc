@@ -6,6 +6,8 @@
   * Added the resource
 * SPInfoPathFormsServiceConfig
   * Added the resource
+* SPSecureStoreServiceApp
+  * Fixed issue in Get-TargetResource to return AuditingEnabled property
 * SPSecurityTokenServiceConfig
   * Added the resource
 * SPUserProfileSyncConnection
