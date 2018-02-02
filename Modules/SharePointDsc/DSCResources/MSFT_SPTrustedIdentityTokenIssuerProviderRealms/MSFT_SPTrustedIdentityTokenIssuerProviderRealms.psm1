@@ -4,20 +4,20 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $IssuerName,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ProviderRealms,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
@@ -29,13 +29,9 @@ function Get-TargetResource
                                   -ScriptBlock     {
         $params = $args[0]
         
-        $paramRealms = $params.ProviderRealms | % { "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
-        #$paramRealms =@{}
-        #foreach($cKey in $params.ProviderRealms)
-        #{
-        #    $url= New-Object System.Uri($cKey.RealmUrl)
-        #}
-       
+        $paramRealms = $params.ProviderRealms | ForEach-Object {
+                        "$([System.Uri]$_.RealmUrl)=$($_.RealmUrn)" }
+
         $spTrust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                                     -ErrorAction SilentlyContinue
         
@@ -44,9 +40,13 @@ function Get-TargetResource
             throw "SPTrustedIdentityTokenIssuer '$($params.IssuerName)' not found"
         }
 
-        $currentRealms =$spTrust.ProviderRealms.GetEnumerator() | %{ "$($_.Key)=$($_.Value)" }
+        $currentRealms =$spTrust.ProviderRealms.GetEnumerator() | ForEach-Object { 
+                        "$($_.Key)=$($_.Value)" 
+        }
 
-        $diffObjects = $paramRealms | ?{$currentRealms -contains $_}
+        $diffObjects = $paramRealms | Where-Object {
+                        $currentRealms -contains $_
+        }
 
         if($params.Ensure -eq "Present")
         {
@@ -73,32 +73,30 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $IssuerName,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ProviderRealms,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )
     
     $CurrentValues = Get-TargetResource @PSBoundParameters
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         if ($CurrentValues.Ensure -eq "Absent")
         {
-            
-
             Write-Verbose -Message "Setting SPTrustedIdentityTokenIssuer provider realms"
 
             $result = Invoke-SPDSCCommand -Credential $InstallAccount `
@@ -178,20 +176,20 @@ function Test-TargetResource
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [string]
         $IssuerName,
         
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $ProviderRealms,
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]
         $Ensure = "Present",
 
-        [parameter(Mandatory = $false)]
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         $InstallAccount
     )

@@ -60,10 +60,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     $url = New-Object System.Uri($realm.RealmUrl)
                     $realmsDict[$url.ToString()] = $realm.RealmUrn
                 }
-                
-                $param = @{ }
-                $param.ProviderRealms = $realmsDict
-                $realmRet = New-Object –TypeName PSObject –Prop $param
+                $realmRet = [pscustomobject]@{
+                     ProviderRealms = $realmsDict
+                }
                 return $realmRet
             }
 
@@ -106,15 +105,6 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             $realmRet = [pscustomobject]@{
                 ProviderRealms = $realmsDict
             }
-            $realmRet.ProviderRealms | Add-Member -Name Remove -MemberType ScriptMethod -Value {
-                [cmdletbinding()]
-                param (
-                    [Parameter(Mandatory = $true)]
-                    $unexpandedValue
-                )
-                process { }
-            } -Force
-
             $realmRet | Add-Member -Name Update -MemberType ScriptMethod -Value {
                 ++$Global:SPTrustedIdentityTokenIssuerUpdateCalledCount
             } -PassThru
