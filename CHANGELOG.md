@@ -1,7 +1,8 @@
 # Change log for SharePointDsc
 
 ## Unreleased
-
+* SPTrustedIdentityTokenIssuerProviderRealms
+  * Added the resource
 * SPDiagnosticsProvider
   * Added the resource
 * SPFarm

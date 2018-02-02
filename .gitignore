@@ -9,3 +9,4 @@ Modules/SharePointDsc/DscResource.Tests/*
 node_modules
 node_modules/*
 markdownissues.txt
+/package-lock.json
