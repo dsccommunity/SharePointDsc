@@ -4,16 +4,37 @@
 
 * SPDiagnosticsProvider
   * Added the resource
+* SPFarm
+  * Corrected issue where ServerRole parameter is returned in SP2013
 * SPInfoPathFormsServiceConfig
   * Added the resource
 * SPSecureStoreServiceApp
   * Fixed issue in Get-TargetResource to return AuditingEnabled property
+* SPSearchAutoritativePage
+  * Added missing readme.md
+* SPSearchCrawlerImpactRule
+  * Fixed issue where an error was thrown when retrieving Crawl Impact rules
+  * Added missing readme.md
+* SPSearchCrawlMapping
+  * Added missing readme.md
 * SPSecurityTokenServiceConfig
   * Added the resource
 * SPUserProfileSyncConnection
-  * Fixed issues with the User Profile Sync connection for 2016
+  * Fixed issues with the User Profile Sync connection for SharePoint
+    2016
 * SPUserProfileProperty
   * Fixed issues with the User Profile properties for 2016
+* SPUserProfileSyncConnection
+  * Fixed issues with the User Profile Sync connection for 2016
+* SPUserProfileSyncService
+  * Added returning the FarmAccount to the Get method
+* SPWebAppAuthentication
+  * Corrected issue where parameter validation wasn't performed correctly
+* SPWorkManagementServiceApp
+  * Added check for SharePoint 2016, since this functionality has been
+    removed in SharePoint 2016
+* SPUserProfileServiceAppPermissions
+  * Removed the mandatory requirement from secondary parameters
 
 ## 2.0
 
