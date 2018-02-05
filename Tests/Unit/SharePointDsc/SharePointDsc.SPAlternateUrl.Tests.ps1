@@ -45,7 +45,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @()
@@ -77,7 +77,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -114,7 +114,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPAlternateUrl -MockWith {
                 return @()
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -163,7 +163,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -201,7 +201,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPAlternateUrl -MockWith {
                 return @()
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -249,7 +249,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Internet"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -302,7 +302,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -345,7 +345,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -448,7 +448,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -492,7 +492,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
