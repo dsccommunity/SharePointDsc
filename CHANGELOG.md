@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* General
+  * Updated the integration tests for building the Azure environment to work in
+  any Azure environment.
 * SPDiagnosticsProvider
   * Added the resource
 * SPFarm
