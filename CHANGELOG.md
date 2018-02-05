@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* General
+  * Updated the integration tests for building the Azure environment to work in
+  any Azure environment.
 * SPAlternateURL
   * Added the ability to manage the Central Administration AAMs
 * SPDiagnosticsProvider
@@ -19,6 +22,8 @@
   * Added missing readme.md
 * SPSearchCrawlMapping
   * Added missing readme.md
+* SPSecureStoreServiceApp
+  * Fixed issue in Get-TargetResource to return AuditingEnabled property
 * SPSecurityTokenServiceConfig
   * Added the resource
 * SPServiceIdentity
