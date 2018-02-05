@@ -5,29 +5,29 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $WebAppName,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")]
+        [System.String]
         $Zone,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $Internal = $false,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
     )
 
@@ -41,7 +41,7 @@ function Get-TargetResource
         $aam = Get-SPAlternateURL -Identity $params.Url `
                                   -ErrorAction SilentlyContinue
 
-        if ($null -eq $aam) 
+        if ($null -eq $aam)
         {
             return @{
                 WebAppName = $params.WebAppName
@@ -60,7 +60,7 @@ function Get-TargetResource
         $wa = Get-SPWebApplication -Identity $aam.PublicUrl
 
         return @{
-            WebAppName = $wa.Name
+            WebAppName = $wa.DisplayName
             Zone = $aam.Zone
             Url = $aam.IncomingUrl
             Internal = $internal
@@ -77,43 +77,45 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $WebAppName,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")]
+        [System.String]
         $Zone,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $Internal = $false,
-        
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
 
     )
 
     Write-Verbose -Message "Setting Alternate URL for $Zone in $WebAppName"
 
-    if ($Ensure -eq "Present") 
+    if ($Ensure -eq "Present")
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
                             -ScriptBlock {
             $params = $args[0]
 
-            $webapp = Get-SPWebApplication $params.WebAppName
+            $webapp = Get-SPWebApplication -IncludeCentralAdministration | Where-Object -FilterScript {
+                $_.DisplayName -eq $params.WebAppName
+            }
 
             if ($null -eq $webapp)
             {
@@ -123,22 +125,22 @@ function Set-TargetResource
             $urlAam = Get-SPAlternateURL -Identity $params.Url `
                                          -ErrorAction SilentlyContinue
 
-            $webAppAams = Get-SPAlternateURL -WebApplication $params.WebAppName `
+            $webAppAams = Get-SPAlternateURL -WebApplication $webapp `
                                              -Zone $params.Zone `
                                              -ErrorAction SilentlyContinue
 
-            if ($null -eq $webAppAams) 
+            if ($null -eq $webAppAams)
             {
                 # No AAM found on specified WebApp in specified Zone
                 if ($null -eq $urlAam)
                 {
                     # urlAAM not found, so it is safe to create AAM on specified zone
                     $cmdParams = @{
-                        WebApplication = $params.WebAppName
+                        WebApplication = $webapp
                         Url = $params.Url
                         Zone = $params.Zone
                     }
-                    if (($params.ContainsKey("Internal") -eq $true))
+                    if ($params.ContainsKey("Internal") -eq $true)
                     {
                         $cmdParams.Add("Internal", $params.Internal)
                     }
@@ -149,12 +151,12 @@ function Set-TargetResource
                     throw ("Specified URL found on different WebApp/Zone: WebApp " + `
                            "$($urlAam.PublicUrl) in zone $($urlAam.Zone)")
                 }
-            } 
-            else 
+            }
+            else
             {
                 # WebApp has one or more AAMs, check for URL
                 $aamForUrl = $webAppAams | Where-Object -FilterScript {
-                                                $_.IncomingUrl -eq $params.Url
+                                               $_.IncomingUrl -eq $params.Url
                                            }
 
                 if ($null -eq $aamForUrl)
@@ -164,7 +166,7 @@ function Set-TargetResource
                     {
                         # urlAAM not found, so it is safe to create AAM on specified zone
                         $cmdParams = @{
-                            WebApplication = $params.WebAppName
+                            WebApplication = $webapp
                             Url = $params.Url
                             Zone = $params.Zone
                         }
@@ -202,8 +204,8 @@ function Set-TargetResource
                  }
             }
         }
-    } 
-    else 
+    }
+    else
     {
         Invoke-SPDSCCommand -Credential $InstallAccount `
                             -Arguments $PSBoundParameters `
@@ -214,7 +216,7 @@ function Set-TargetResource
 
             Remove-SPAlternateURL -Identity $aam -Confirm:$false
         }
-    }    
+    }
 }
 
 function Test-TargetResource
@@ -224,35 +226,35 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $WebAppName,
 
-        [Parameter(Mandatory = $true)]  
-        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Default","Intranet","Extranet","Custom","Internet")]
+        [System.String]
         $Zone,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Url,
 
-        [Parameter()] 
-        [System.Boolean] 
+        [Parameter()]
+        [System.Boolean]
         $Internal = $false,
 
-        [Parameter()] 
-        [ValidateSet("Present","Absent")] 
-        [System.String] 
+        [Parameter()]
+        [ValidateSet("Present","Absent")]
+        [System.String]
         $Ensure = "Present",
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount
 
     )
 
     Write-Verbose -Message "Testing Alternate URL for $Zone in $WebAppName"
-    
+
     $PSBoundParameters.Ensure = $Ensure
     $PSBoundParameters.Internal = $Internal
 
@@ -266,7 +268,7 @@ function Test-TargetResource
                                                          "Ensure", `
                                                          "Internal")
     }
-    else 
+    else
     {
         return Test-SPDscParameterState -CurrentValues (Get-TargetResource @PSBoundParameters) `
                                         -DesiredValues $PSBoundParameters `
