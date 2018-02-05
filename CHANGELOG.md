@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* General
+  * Updated the integration tests for building the Azure environment to work in
+  any Azure environment.
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Added the resource
 * SPDiagnosticsProvider
@@ -10,6 +13,8 @@
   * Corrected issue where ServerRole parameter is returned in SP2013
 * SPInfoPathFormsServiceConfig
   * Added the resource
+* SPSecureStoreServiceApp
+  * Fixed issue in Get-TargetResource to return AuditingEnabled property
 * SPSearchAutoritativePage
   * Added missing readme.md
 * SPSearchCrawlerImpactRule

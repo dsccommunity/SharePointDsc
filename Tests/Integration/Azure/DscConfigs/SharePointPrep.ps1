@@ -1,20 +1,25 @@
 Configuration SharePointPrep
 {
     param(
-        [Parameter(Mandatory=$true)] 
-		[ValidateNotNullorEmpty()] 
-		[PSCredential] 
+        [Parameter(Mandatory=$true)]
+		[ValidateNotNullorEmpty()]
+		[PSCredential]
 		$DomainAdminCredential,
 
-        [Parameter(Mandatory=$true)] 
-		[ValidateNotNullorEmpty()] 
-		[PSCredential] 
+        [Parameter(Mandatory=$true)]
+		[ValidateNotNullorEmpty()]
+		[PSCredential]
 		$SPSetupCredential,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [string]
         $SPProductKey,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $AzureEnvironment,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
@@ -39,7 +44,7 @@ Configuration SharePointPrep
 
     node localhost
     {
-        Registry DisableIPv6 
+        Registry DisableIPv6
         {
             Key       = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
             ValueName = "DisabledComponents"
@@ -80,14 +85,15 @@ Configuration SharePointPrep
                     }
                 }
                 Import-Module -Name Azure.Storage
-                $context = New-AzureStorageContext -StorageAccountName $using:SoftwareStorageAccount `
+                $context = New-AzureStorageContext -Environment $using:AzureEnvironment `
+                                                   -StorageAccountName $using:SoftwareStorageAccount `
                                                    -StorageAccountKey $using:SoftwareStorageKey
 
                 $blobs = Get-AzureStorageBlob -Container $using:SoftwareStorageContainer `
                                               -Context $context
 
                 New-Item -Path C:\Binaries\SharePoint -ItemType Directory
-                
+
                 $blobs | ForEach-Object -Process {
                     Get-AzureStorageBlobContent -Blob $_.Name `
                                                 -Container $using:SoftwareStorageContainer `
@@ -101,11 +107,11 @@ Configuration SharePointPrep
             Ensure        = "Present"
             OnlineMode    = $true
             InstallerPath = "C:\Binaries\SharePoint\prerequisiteinstaller.exe"
-            DependsOn     = @("[Script]DownloadBinaries", "[Group]LocalAdministrators") 
+            DependsOn     = @("[Script]DownloadBinaries", "[Group]LocalAdministrators")
         }
 
-        xWebAppPool RemoveDotNet2Pool         { Name      = ".NET v2.0"            
-                                                Ensure    = "Absent" 
+        xWebAppPool RemoveDotNet2Pool         { Name      = ".NET v2.0"
+                                                Ensure    = "Absent"
                                                 DependsOn = "[SPInstallPrereqs]InstallPrereqs" }
         xWebAppPool RemoveDotNet2ClassicPool  { Name      = ".NET v2.0 Classic"
                                                 Ensure    = "Absent"
@@ -127,7 +133,7 @@ Configuration SharePointPrep
                                                 PhysicalPath = "C:\inetpub\wwwroot"
                                                 DependsOn    = "[SPInstallPrereqs]InstallPrereqs" }
 
-        SPInstall InstallSharePoint 
+        SPInstall InstallSharePoint
         {
             Ensure      = "Present"
             BinaryDir   = "C:\Binaries\SharePoint"
