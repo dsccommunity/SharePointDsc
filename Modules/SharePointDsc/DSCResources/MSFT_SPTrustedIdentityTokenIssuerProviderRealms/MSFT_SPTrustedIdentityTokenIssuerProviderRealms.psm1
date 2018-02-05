@@ -103,7 +103,7 @@ function Set-TargetResource
                 $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                                     -ErrorAction SilentlyContinue
 
-                if($params.ProviderRealms -eq $null)
+                if($null -eq $params.ProviderRealms)
                 {
                        throw "ProviderRealms parameter is null. Check parametercnofiguration"
                 }
@@ -144,7 +144,7 @@ function Set-TargetResource
             $update = $false
             $trust = Get-SPTrustedIdentityTokenIssuer -Identity $params.IssuerName `
                                                     -ErrorAction SilentlyContinue
-                if($params.ProviderRealms -eq $null)
+                if($null -eq $params.ProviderRealms)
                 {
                        throw "ProviderRealms parameter is null. Check parametercnofiguration"
                 }

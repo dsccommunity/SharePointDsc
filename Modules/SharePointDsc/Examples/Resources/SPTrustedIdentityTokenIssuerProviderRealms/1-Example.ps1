@@ -1,3 +1,8 @@
+<#
+.EXAMPLE
+    This example adds provider realms to existing trusted token issuer.
+#>
+
     Configuration Example 
     {
         param(
