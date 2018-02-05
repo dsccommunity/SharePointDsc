@@ -2,12 +2,16 @@
 
 ## Unreleased
 
+* SPAlternateURL
+  * Added the ability to manage the Central Administration AAMs
 * SPDiagnosticsProvider
   * Added the resource
 * SPFarm
   * Corrected issue where ServerRole parameter is returned in SP2013
 * SPInfoPathFormsServiceConfig
   * Added the resource
+* SPInstallPrereqs
+  * Fixed two typos in to be installed Windows features for SharePoint 2016
 * SPSearchAutoritativePage
   * Added missing readme.md
 * SPSearchCrawlerImpactRule
@@ -34,6 +38,8 @@
   * Added returning the FarmAccount to the Get method
 * SPWebAppAuthentication
   * Corrected issue where parameter validation wasn't performed correctly
+* SPWebApplicationExtension
+  * Fixed issue with test always failing when Ensure was set to Absent
 * SPWorkManagementServiceApp
   * Added check for SharePoint 2016, since this functionality has been
     removed in SharePoint 2016
