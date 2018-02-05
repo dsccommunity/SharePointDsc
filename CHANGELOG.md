@@ -3,8 +3,9 @@
 ## Unreleased
 
 * General
-  * Updated the integration tests for building the Azure environment to work in
-  any Azure environment.
+  * Updated the integration tests for building the Azure environment
+    * Works in any Azure environment.
+    * Updated the SqlServer configuration to use SqlServerDsc version 10.0.0.0.
 * SPAlternateURL
   * Added the ability to manage the Central Administration AAMs
 * SPDiagnosticsProvider
