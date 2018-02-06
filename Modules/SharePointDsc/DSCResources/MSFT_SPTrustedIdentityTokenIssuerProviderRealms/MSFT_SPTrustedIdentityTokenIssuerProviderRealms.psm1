@@ -44,7 +44,7 @@ function Get-TargetResource
                         "$($_.Key)=$($_.Value)" 
         }
 
-        $diffObjects = $paramRealms | Where-Object {
+        $diffObjects = $paramRealms | Select-Object -Unique | Where-Object {
                         $currentRealms -contains $_
         }
 
@@ -163,10 +163,6 @@ function Set-TargetResource
                 if($update -eq $true)
                 {
                    $trust.Update()
-                }
-                else
-                {
-                    throw "Provider realm '$($cKey.RealmUrl)' does not exist."
                 }
         }
     }
