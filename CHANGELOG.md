@@ -3,8 +3,11 @@
 ## Unreleased
 
 * General
-  * Updated the integration tests for building the Azure environment to work in
-  any Azure environment.
+  * Updated the integration tests for building the Azure environment
+    * Works in any Azure environment.
+    * Updated the SqlServer configuration to use SqlServerDsc version 10.0.0.0.
+* SPAlternateURL
+  * Added the ability to manage the Central Administration AAMs
 * SPTrustedIdentityTokenIssuerProviderRealms
   * Added the resource
 * SPDiagnosticsProvider
@@ -13,8 +16,8 @@
   * Corrected issue where ServerRole parameter is returned in SP2013
 * SPInfoPathFormsServiceConfig
   * Added the resource
-* SPSecureStoreServiceApp
-  * Fixed issue in Get-TargetResource to return AuditingEnabled property
+* SPInstallPrereqs
+  * Fixed two typos in to be installed Windows features for SharePoint 2016
 * SPSearchAutoritativePage
   * Added missing readme.md
 * SPSearchCrawlerImpactRule
@@ -22,24 +25,32 @@
   * Added missing readme.md
 * SPSearchCrawlMapping
   * Added missing readme.md
+* SPSecureStoreServiceApp
+  * Fixed issue in Get-TargetResource to return AuditingEnabled property
 * SPSecurityTokenServiceConfig
   * Added the resource
+* SPServiceIdentity
+  * Fixed issue with correctly retrieving the process identity for the
+    Search instance
+  * Added support for LocalSystem, LocalService and NetworkService
 * SPUserProfileSyncConnection
   * Fixed issues with the User Profile Sync connection for SharePoint
     2016
 * SPUserProfileProperty
   * Fixed issues with the User Profile properties for 2016
+* SPUserProfileServiceAppPermissions
+  * Removed the mandatory requirement from secondary parameters
 * SPUserProfileSyncConnection
   * Fixed issues with the User Profile Sync connection for 2016
 * SPUserProfileSyncService
   * Added returning the FarmAccount to the Get method
 * SPWebAppAuthentication
   * Corrected issue where parameter validation wasn't performed correctly
+* SPWebApplicationExtension
+  * Fixed issue with test always failing when Ensure was set to Absent
 * SPWorkManagementServiceApp
   * Added check for SharePoint 2016, since this functionality has been
     removed in SharePoint 2016
-* SPUserProfileServiceAppPermissions
-  * Removed the mandatory requirement from secondary parameters
 
 ## 2.0
 
