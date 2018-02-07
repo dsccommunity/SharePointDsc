@@ -3,15 +3,15 @@ function Invoke-TestHarness
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $TestResultsFile,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [System.String]
         $DscTestsPath,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [Switch]
         $IgnoreCodeCoverage
     )
@@ -31,7 +31,7 @@ function Invoke-TestHarness
         }
     }
 
-    $testResultSettings = @{ }
+    $testResultSettings = @{}
     if ([String]::IsNullOrEmpty($TestResultsFile) -eq $false) 
     {
         $testResultSettings.Add('OutputFormat', 'NUnitXml' )
@@ -55,7 +55,7 @@ function Invoke-TestHarness
                               -ChildPath "\Tests\Unit\Stubs\SharePoint\$_\Microsoft.SharePoint.PowerShell.psm1"
         $testsToRun += @(@{
             'Path' = (Join-Path -Path $repoDir -ChildPath "\Tests\Unit")
-            'Parameters' = @{ 
+            'Parameters' = @{
                 'SharePointCmdletModule' = $stubPath
             }
         })
@@ -68,7 +68,21 @@ function Invoke-TestHarness
     # DSC Common Tests
     if ($PSBoundParameters.ContainsKey('DscTestsPath') -eq $true)
     {
-        $testsToRun += @( $DscTestsPath )
+        $getChildItemParameters = @{
+            Path = $DscTestsPath
+            Recurse = $true
+            Filter = '*.Tests.ps1'
+        }
+
+        # Get all tests '*.Tests.ps1'.
+        $commonTestFiles = Get-ChildItem @getChildItemParameters
+
+        # Remove DscResource.Tests unit and integration tests.
+        $commonTestFiles = $commonTestFiles | Where-Object -FilterScript {
+            $_.FullName -notmatch 'DSCResource.Tests\\Tests'
+        }
+
+        $testsToRun += @( $commonTestFiles.FullName )
     }
 
     if ($IgnoreCodeCoverage.IsPresent -eq $false)

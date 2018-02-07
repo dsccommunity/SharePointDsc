@@ -4,35 +4,35 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $SMTPServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FromAddress,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ReplyToAddress,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $CharacterSet,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]  
         $UseTLS,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $SMTPPort,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -61,7 +61,7 @@ function Get-TargetResource
                                        -ErrorAction SilentlyContinue
 
         if ($null -eq $webApp) 
-        { 
+        {
             return $null
         }
         
@@ -89,35 +89,35 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $SMTPServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FromAddress,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ReplyToAddress,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $CharacterSet,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]  
         $UseTLS,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $SMTPPort,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )
@@ -200,35 +200,35 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $WebAppUrl,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $SMTPServer,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $FromAddress,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $ReplyToAddress,
 
-        [parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]  
         [System.String] 
         $CharacterSet,
 
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Boolean]  
         $UseTLS,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.UInt32]  
         $SMTPPort,
         
-        [parameter(Mandatory = $false)] 
+        [Parameter()] 
         [System.Management.Automation.PSCredential] 
         $InstallAccount
     )

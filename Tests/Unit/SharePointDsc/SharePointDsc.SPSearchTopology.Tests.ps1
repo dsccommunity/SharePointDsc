@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [string] 
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
@@ -315,12 +315,20 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                     Server = @{
                         Address = $env:COMPUTERNAME
                     }
+                    Components = @{
+                        IndexLocation = "D:\Index"
+                    }
                     Status = "Online"
+
                 }
             }
 
             It "Should return true from the test method" {
                 Test-TargetResource @testParams | Should Be $true
+            }
+
+            It "Should return the FirstIndexPartition location" {
+                (Get-TargetResource @testParams).FirstPartitionDirectory | Should Be "D:\Index"
             }
         }
 

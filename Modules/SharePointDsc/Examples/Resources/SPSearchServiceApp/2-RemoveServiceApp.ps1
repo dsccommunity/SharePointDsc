@@ -15,7 +15,7 @@
 
         node localhost {
             SPSearchServiceApp SearchServiceApp
-            {  
+            {
                 Name                  = "Search Service Application"
                 Ensure                = "Absent"
                 ApplicationPool       = "n/a"

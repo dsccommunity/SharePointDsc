@@ -1,6 +1,6 @@
 [ClassVersion("1.0.0.0"), FriendlyName("SPUserProfileSyncConnection")]
 class MSFT_SPUserProfileSyncConnection : OMI_BaseResource
-{   
+{
     [Key, Description("The name of the connection")] string Name;
     [Required, Description("The name of the AD forest to read from")] string Forest;
     [Required, Description("The name of the user profile service that this connection is attached to")] string UserProfileService;

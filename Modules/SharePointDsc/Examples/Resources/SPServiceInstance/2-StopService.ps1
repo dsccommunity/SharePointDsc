@@ -15,7 +15,7 @@
 
         node localhost {
             SPServiceInstance StopBCSServiceInstance
-            {  
+            {
                 Name           = "Business Data Connectivity Service"
                 Ensure         = "Absent"
                 InstallAccount = $SetupAccount
