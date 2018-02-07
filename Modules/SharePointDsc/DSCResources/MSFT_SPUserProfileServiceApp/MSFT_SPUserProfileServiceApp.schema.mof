@@ -4,6 +4,7 @@ class MSFT_SPUserProfileServiceApp : OMI_BaseResource
     [Key, Description("The name of the user profile service")] string Name;
     [Write, Description("The proxy name, if not specified will be /Name of service app/ Proxy")] string ProxyName;
     [Required, Description("The name of the application pool to run the service app in")] string ApplicationPool;
+    [Write, Description("The farm account, which is needed to provision the service app"), EmbeddedInstance("MSFT_Credential")] String FarmAccount;
     [Write, Description("The URL of the my site host collection")] string MySiteHostLocation;
     [Write, Description("The name of the profile database")] string ProfileDBName;
     [Write, Description("The name of the server to host the profile database")] string ProfileDBServer;
