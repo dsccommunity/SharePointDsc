@@ -8,6 +8,8 @@ _Please provide the following information regarding your issue (place N/A if cer
 
 **Version of the Operating System and PowerShell the DSC Target Node is running:**
 
+**Version of SharePoint that is used (e.g. SharePoint 2016):**
+
 **Version of the DSC module you're using:**
 
 

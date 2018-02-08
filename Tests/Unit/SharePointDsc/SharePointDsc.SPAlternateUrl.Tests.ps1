@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param(
     [Parameter()]
-    [string] 
+    [string]
     $SharePointCmdletModule = (Join-Path -Path $PSScriptRoot `
                                          -ChildPath "..\Stubs\SharePoint\15.0.4805.1000\Microsoft.SharePoint.PowerShell.psm1" `
                                          -Resolve)
@@ -22,7 +22,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
         Mock -CommandName New-SPAlternateURL {}
         Mock -CommandName Set-SPAlternateURL {}
         Mock -CommandName Remove-SPAlternateURL {}
-        
+
         # Test contexts
         Context -Name "Specified web application does not exist" -Fixture {
             $testParams = @{
@@ -45,13 +45,13 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @()
             }
 
-            It "Should call the new function in the set method" {
+            It "Should throw exception in the set method" {
                 { Set-TargetResource @testParams } | Should Throw "Web application was not found. Please check WebAppName parameter!"
             }
         }
@@ -77,16 +77,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Absent in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return false from the test method" {
@@ -114,16 +114,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
 
             Mock -CommandName Get-SPAlternateUrl -MockWith {
                 return @()
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Absent in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return false from the test method" {
@@ -135,7 +135,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled New-SPAlternateURL
             }
         }
-        
+
         Context -Name "The internal alternate URL exists for the specified zone and web app, and should be" -Fixture {
             $testParams = @{
                 WebAppName = "SharePoint - www.domain.com80"
@@ -151,7 +151,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         PublicUrl = "http://www.domain.com"
                         IncomingUrl = "http://something.contoso.local"
                         Zone = "Internet"
-                    }                    
+                    }
                 )
             } -ParameterFilter { $Identity -eq $testParams.Url }
 
@@ -163,16 +163,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false from the test method" {
@@ -195,22 +195,22 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         PublicUrl = "http://www.otherdomain.com"
                         IncomingUrl = "http://something.contoso.local"
                         Zone = "Default"
-                    }                    
+                    }
                 )
             } -ParameterFilter { $Identity -eq $testParams.Url }
 
             Mock -CommandName Get-SPAlternateUrl -MockWith {
                 return @()
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false from the test method" {
@@ -237,7 +237,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         PublicUrl = "http://www.otherdomain.com"
                         IncomingUrl = "http://something.contoso.local"
                         Zone = "Default"
-                    }                    
+                    }
                 )
             } -ParameterFilter { $Identity -eq $testParams.Url }
 
@@ -249,16 +249,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Internet"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false from the test method" {
@@ -300,9 +300,9 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         PublicUrl = "http://www.domain.com"
                         IncomingUrl = "http://something.contoso.local"
                         Zone = "Default"
-                    }                    
+                    }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
@@ -311,7 +311,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false from the test method" {
@@ -345,16 +345,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Absent in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Absent" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Absent"
             }
 
             It "Should return false from the test method" {
@@ -382,7 +382,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         PublicUrl = "http://www.domain.com"
                         IncomingUrl = "http://www.newdomain.com"
                         Zone = "Default"
-                    }                    
+                    }
                 )
             } -ParameterFilter { $Identity -eq $testParams.Url }
 
@@ -399,16 +399,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false from the test method" {
@@ -448,23 +448,23 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return true from the test method" {
                 Test-targetResource @testParams | Should Be $true
             }
         }
-        
+
         Context -Name "A URL exists for the specified zone and web app, and it should not" -Fixture {
             $testParams = @{
                 WebAppName = "SharePoint - www.domain.com80"
@@ -492,16 +492,16 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                         Zone = "Default"
                     }
                 )
-            } -ParameterFilter { $WebApplication -eq $testParams.WebAppName }
+            } -ParameterFilter { $WebApplication.DisplayName -eq $testParams.WebAppName }
 
             Mock -CommandName Get-SPWebApplication -MockWith {
                 return @{
-                    Name = $testParams.WebAppName
+                    DisplayName = $testParams.WebAppName
                 }
             }
 
             It "Should return Ensure=Present in the get method" {
-                (Get-TargetResource @testParams).Ensure | Should Be "Present" 
+                (Get-TargetResource @testParams).Ensure | Should Be "Present"
             }
 
             It "Should return false from the test method" {
@@ -513,7 +513,7 @@ Describe -Name $Global:SPDscHelper.DescribeHeader -Fixture {
                 Assert-MockCalled Remove-SPAlternateURL
             }
         }
-    }    
+    }
 }
 
 Invoke-Command -ScriptBlock $Global:SPDscHelper.CleanupScript -NoNewScope

@@ -14,15 +14,15 @@
     The name of the proxy that is attached to the user profile service you wish to set permissions for
 
 .PARAMETER CreatePersonalSite
-    Required - string
+    Write - string
     A list of user principals that will have the Create personal site permission
 
 .PARAMETER FollowAndEditProfile
-    Required - string
+    Write - string
     A list of user principals that will have the Follow users and edit profile permission
 
 .PARAMETER UseTagsAndNotes
-    Required - string
+    Write - string
     A list of user principals that will have the Use tags and notes permission
 
 .PARAMETER InstallAccount

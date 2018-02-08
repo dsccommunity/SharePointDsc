@@ -4,6 +4,7 @@
 # Description
     
     This resource is used to specify a managed account to be used to run a service instance.
+    You can also specify LocalService, LocalSystem or NetworkService as ManagedAccount.
     The name is the typename of the service as shown in the Central Admin website.
     This resource only needs to be run on one server in the farm, as the process identity
     update method will apply the settings to all instances of the service.
@@ -14,7 +15,7 @@
 
 .PARAMETER ManagedAccount
     Required - string
-    The user name of a managed account that will be used to run the service
+    The user name of a managed account, LocalService, LocalSystem or NetworkService that will be used to run the service
 
 .PARAMETER InstallAccount
     Write - String

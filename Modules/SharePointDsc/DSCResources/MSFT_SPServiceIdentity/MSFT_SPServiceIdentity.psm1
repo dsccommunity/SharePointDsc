@@ -4,16 +4,16 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
         [Parameter()]
-        [System.Management.Automation.PSCredential] 
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ManagedAccount
     )
 
@@ -21,26 +21,40 @@ function Get-TargetResource
 
     $result = Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
-        $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object { $_.TypeName -eq $params.Name }
-        
-        if ($null -eq $serviceInstance.service.processidentity) 
+        if ($params.Name -eq "SharePoint Server Search")
         {
-            Write-Verbose "WARNING: Service $($params.name) does not support setting the process identity"
+            $processIdentity = (Get-SPEnterpriseSearchService).get_ProcessIdentity()
         }
-        
-        $ManagedAccount = $serviceInstance.service.processidentity.username
-        
+        else
+        {
+            $serviceInstance = Get-SPServiceInstance -Server $env:computername | Where-Object {
+                                    $_.TypeName -eq $params.Name
+                               }
+
+            if ($null -eq $serviceInstance.service.processidentity)
+            {
+                Write-Verbose "WARNING: Service $($params.name) does not support setting the process identity"
+            }
+
+            $processIdentity = $serviceInstance.Service.ProcessIdentity
+        }
+
+        switch ($processIdentity.CurrentIdentityType)
+        {
+            "LocalSystem" { $ManagedAccount = "LocalSystem" }
+            "NetworkService" { $ManagedAccount = "NetworkService" }
+            "LocalService" { $ManagedAccount = "LocalService" }
+            Default { $ManagedAccount = $processIdentity.Username }
+        }
+
         return @{
             Name = $params.Name
             ManagedAccount = $ManagedAccount
-        }     
-        
+        }
     }
-    
+
     return $result
-    
 }
 
 function Set-TargetResource
@@ -48,16 +62,16 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]  
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ManagedAccount
     )
 
@@ -65,34 +79,52 @@ function Set-TargetResource
 
     Invoke-SPDSCCommand -Credential $InstallAccount -Arguments $PSBoundParameters -ScriptBlock {
         $params = $args[0]
-        
 
-        $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME| Where-Object { $_.TypeName -eq $params.Name }
-        $managedAccount = Get-SPManagedAccount $params.ManagedAccount
-        if ($null -eq $serviceInstance) 
+        if ($params.Name -eq "SharePoint Server Search")
         {
-            throw [System.Exception] "Unable to locate service $($params.Name)"
+            $processIdentity = (Get-SPEnterpriseSearchService).get_ProcessIdentity()
         }
-        if ($null -eq $managedAccount) 
+        else
         {
-            throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"
+            $serviceInstance = Get-SPServiceInstance -Server $env:COMPUTERNAME | Where-Object {
+                                    $_.TypeName -eq $params.Name
+                               }
+            if ($null -eq $serviceInstance)
+            {
+                throw [System.Exception] "Unable to locate service $($params.Name)"
+            }
+
+            if ($null -eq $serviceInstance.service.processidentity)
+            {
+                throw [System.Exception] "Service $($params.name) does not support setting the process identity"
+            }
+
+            $processIdentity = $serviceInstance.Service.ProcessIdentity
         }
-        
-       if ($null -eq $serviceInstance.service.processidentity) 
-       {
-           throw [System.Exception] "Service $($params.name) does not support setting the process identity"
-       }
-       
-       $serviceInstance.service.processIdentity.CurrentIdentityType = [Microsoft.SharePoint.Administration.IdentityType]::SpecificUser 
-       $serviceInstance.service.processIdentity.ManagedAccount = $managedAccount
-       $serviceInstance.service.processIdentity.update()
-       $serviceInstance.service.processIdentity.deploy() 
-        
- }
-    
-    
+
+        if ($params.ManagedAccount -eq "LocalSystem" -or `
+            $params.ManagedAccount -eq "LocalService" -or `
+            $params.ManagedAccount -eq "NetworkService")
+        {
+            $processIdentity.CurrentIdentityType = $params.ManagedAccount
+        }
+        else
+        {
+            $managedAccount = Get-SPManagedAccount -Identity $params.ManagedAccount `
+                                                   -ErrorAction SilentlyContinue
+            if ($null -eq $managedAccount)
+            {
+                throw [System.Exception] "Unable to locate Managed Account $($params.ManagedAccount)"
+            }
+
+            $processIdentity.CurrentIdentityType = [Microsoft.SharePoint.Administration.IdentityType]::SpecificUser
+            $processIdentity.ManagedAccount = $managedAccount
+        }
+
+        $processIdentity.Update()
+        $processIdentity.Deploy()
+    }
 }
-
 
 function Test-TargetResource
 {
@@ -100,23 +132,22 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]  
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [Parameter()] 
-        [System.Management.Automation.PSCredential] 
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         $InstallAccount,
 
-        [Parameter(Mandatory = $true)] 
-        [System.String] 
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $ManagedAccount
     )
 
-  $CurrentValues = Get-TargetResource @PSBoundParameters
-  Write-Verbose -Message "Testing service instance '$Name' Process Identity"
-  
-  return ($CurrentValues.ManagedAccount -eq $ManagedAccount)
-  
-    
+    Write-Verbose -Message "Testing service instance '$Name' Process Identity"
+
+    $CurrentValues = Get-TargetResource @PSBoundParameters
+
+    return ($CurrentValues.ManagedAccount -eq $ManagedAccount)
 }
